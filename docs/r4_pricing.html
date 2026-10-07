@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R4 Pulse — Pricing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Narrow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#F2F3EF; --surface:#FCFCFB; --line:#DEE0D9; --line2:#EBECE6;
+  --ink:#16181C; --ink2:#4A4F57; --ink3:#878D93;
+  --good:#107A51; --warn:#C07A1E; --bad:#B3261E;
+  --goodbg:#E7F2EC; --warnbg:#FAF1E2; --badbg:#FBE9E7;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ground);color:var(--ink);font-family:'Archivo',system-ui,sans-serif;
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.lab{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--ink3);font-weight:600}
+button,select,input{font-family:inherit;font-size:inherit;color:inherit}
+
+header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
+.hin{max-width:1280px;margin:0 auto;padding:0 28px;display:flex;align-items:center;gap:36px}
+.brand{display:flex;align-items:baseline;gap:9px;padding:15px 0}
+.brand b{font-size:15px;letter-spacing:.055em}
+.brand span{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.17em;
+  text-transform:uppercase;color:var(--ink3)}
+nav{display:flex;gap:2px;margin-left:auto}
+nav button{background:none;border:0;padding:17px 15px 15px;cursor:pointer;font-size:13.5px;
+  color:var(--ink3);border-bottom:2px solid transparent}
+nav button:hover{color:var(--ink2)}
+nav button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+main{max-width:1280px;margin:0 auto;padding:26px 28px 80px}
+.stub{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:38px 36px;
+  max-width:640px;margin:36px auto}
+.stub h2{font-size:21px;margin-bottom:7px;letter-spacing:-.01em}
+.stub .lab{margin-bottom:16px;display:block}
+.stub p{color:var(--ink2);margin-bottom:13px}
+.stub li{color:var(--ink2);margin:6px 0 6px 18px;font-size:13.5px}
+
+.wrap{display:grid;grid-template-columns:286px 1fr;gap:20px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:4px}
+
+.rail{position:sticky;top:76px;padding:18px}
+.rail h3{font-size:12.5px;letter-spacing:.02em;margin-bottom:14px;padding-bottom:9px;
+  border-bottom:1px solid var(--line2)}
+.f{margin-bottom:13px}
+.f label{display:block;font-family:'Archivo Narrow';font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink3);font-weight:600;margin-bottom:4px}
+.f select,.f input{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:3px;
+  background:#fff;font-size:13.5px}
+.f input:disabled{background:#F4F5F1;color:var(--ink3)}
+.f select:focus,.f input:focus{outline:2px solid #B8C4BC;outline-offset:-1px;border-color:#9BAFA2}
+.f .hint{font-size:11px;color:var(--ink3);margin-top:3px;line-height:1.35}
+.price-f input{font-size:20px;font-weight:600;padding:9px;letter-spacing:-.01em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.swatch{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);margin-top:4px}
+
+.verdict{padding:19px 22px;border-radius:4px;border:1px solid;margin-bottom:18px;
+  display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+.v-good{background:var(--goodbg);border-color:#BBDCCB}
+.v-warn{background:var(--warnbg);border-color:#EBD6AE}
+.v-bad{background:var(--badbg);border-color:#F0C4BF}
+.vicon{width:30px;height:30px;border-radius:50%;flex:0 0 30px;display:flex;align-items:center;
+  justify-content:center;color:#fff;font-weight:700;font-size:15px}
+.v-good .vicon{background:var(--good)} .v-warn .vicon{background:var(--warn)}
+.v-bad .vicon{background:var(--bad)}
+.vtxt{flex:1;min-width:270px}
+.vtxt b{font-size:17px;display:block;letter-spacing:-.015em;margin-bottom:2px}
+.vtxt span{color:var(--ink2);font-size:13px}
+.vnum{text-align:right}
+.vnum .n{font-size:27px;font-weight:700;letter-spacing:-.025em;line-height:1}
+.vnum .u{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink3);font-weight:600;margin-top:4px}
+
+.card{padding:20px 22px;margin-bottom:18px}
+.chead{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:4px}
+.chead h3{font-size:15px;letter-spacing:-.01em}
+.sub{color:var(--ink2);font-size:13px;margin-bottom:16px;max-width:78ch}
+.src{font-family:'Archivo Narrow';font-size:11px;color:var(--ink3);margin-top:13px;
+  padding-top:10px;border-top:1px solid var(--line2)}
+
+.dist{position:relative}
+.dist svg{display:block;width:100%;height:auto;overflow:visible}
+.dot{cursor:pointer}
+.tip{position:absolute;background:#16181C;color:#fff;padding:7px 10px;border-radius:3px;
+  font-size:12px;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap;z-index:20;
+  transform:translate(-50%,-100%)}
+.tip b{display:block;font-size:12.5px;font-weight:600}
+.tip i{font-style:normal;color:#AEB4BB;font-size:11px}
+.tip.on{opacity:1}
+.key{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:11.5px;color:var(--ink2)}
+.key i{font-style:normal;display:inline-flex;align-items:center;gap:5px}
+.key b{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-family:'Archivo Narrow';font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink3);font-weight:600;padding:0 0 7px;
+  border-bottom:1px solid var(--line)}
+th.r,td.r{text-align:right}
+td{padding:9px 0;border-bottom:1px solid var(--line2);vertical-align:top;font-size:13.5px}
+td .why{display:block;color:var(--ink3);font-size:11.5px;line-height:1.45;margin-top:2px;max-width:64ch}
+.tot td{font-weight:700;border-top:1px solid var(--line);border-bottom:0;padding-top:11px}
+.num{font-variant-numeric:tabular-nums}
+
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line2);
+  border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+.cell{background:var(--surface);padding:15px 17px}
+.cell.hl{background:#F7F9F7}
+.cell .k{font-family:'Archivo Narrow';font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink3);font-weight:600;margin-bottom:6px}
+.cell .v{font-size:22px;font-weight:700;letter-spacing:-.025em;line-height:1.1}
+.cell .d{font-size:11.5px;color:var(--ink3);margin-top:4px;line-height:1.4}
+.pos{color:var(--good)} .neg{color:var(--bad)} .amb{color:var(--warn)}
+
+.assume{display:flex;align-items:center;gap:13px;font-size:12.5px;color:var(--ink2);
+  background:#F7F8F4;border:1px solid var(--line2);border-radius:3px;padding:10px 13px;margin-top:14px}
+.assume input[type=range]{flex:1;max-width:170px;accent-color:#4A4F57}
+.assume b{font-variant-numeric:tabular-nums;color:var(--ink)}
+
+@media(max-width:1000px){.wrap{grid-template-columns:1fr}.rail{position:static}
+  .grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-palette="#107A51,#C07A1E,#B3261E">
+
+<header><div class="hin">
+  <div class="brand"><b>R4 PULSE</b><span id="bcrumb">Pricing</span></div>
+  <nav>
+    <button class="on" data-tab="price">Pricing</button>
+    <button data-tab="margin">Gross margin</button>
+    <button data-tab="trend">Trends</button>
+    <button data-tab="act">Activity</button>
+  </nav>
+</div></header>
+
+<main>
+
+<section id="t-price">
+<div class="wrap">
+
+  <div class="panel rail">
+    <h3>Price a job</h3>
+
+    <div class="f"><label>Service</label><select id="svc"></select></div>
+
+    <div class="f"><label>Customer</label><select id="cust"></select>
+      <div class="hint" id="custHint"></div></div>
+
+    <div class="f"><label id="volLab">Units a year</label>
+      <input id="vol" type="number" min="1" step="1"></div>
+
+    <div class="two">
+      <div class="f"><label>Visits a year</label><input id="vis" type="number" min="0" step="1">
+        <div class="hint" id="visHint"></div></div>
+      <div class="f"><label>Miles from yard</label>
+        <input id="mi" type="number" min="0" step="0.1" value="11.4"></div>
+    </div>
+
+    <div class="f price-f" style="margin-top:17px;padding-top:15px;border-top:1px solid var(--line2)">
+      <label>Your price per unit</label>
+      <input id="px" type="number" min="0" step="0.01">
+      <div class="swatch"><span id="pxDot" style="width:9px;height:9px;border-radius:50%;
+        background:var(--ink);display:inline-block"></span><span id="pxNote"></span></div>
+    </div>
+
+    <div class="f"><label>Compare against</label>
+      <select id="cmp">
+        <option value="median">The median of this service</option>
+        <option value="list">The 2025 list price</option>
+        <option value="p75">The upper quartile</option>
+      </select></div>
+  </div>
+
+  <div>
+    <div class="verdict" id="verdict">
+      <div class="vicon" id="vIcon">!</div>
+      <div class="vtxt"><b id="vHead"></b><span id="vSub"></span></div>
+      <div class="vnum"><div class="n num" id="vGM"></div><div class="u">gross margin</div></div>
+      <div class="vnum"><div class="n num" id="vYr"></div><div class="u">a year, gross</div></div>
+    </div>
+
+    <div class="panel card">
+      <div class="chead"><h3 id="dTitle"></h3><span class="lab" id="dCount"></span></div>
+      <p class="sub" id="dSub"></p>
+      <div class="dist"><div id="chart"></div><div class="tip" id="tip"></div></div>
+      <div class="key">
+        <i><b style="background:var(--bad)"></b>below cost to serve</i>
+        <i><b style="background:var(--warn)"></b>above cost, below median</i>
+        <i><b style="background:var(--good)"></b>above median</i>
+        <i><b style="background:var(--ink);border-radius:1px;width:3px;height:11px"></b>your price</i>
+      </div>
+      <div class="src" id="dSrc"></div>
+    </div>
+
+    <div class="panel card">
+      <div class="chead"><h3>What it costs R4 to serve</h3>
+        <span class="lab">At this volume</span></div>
+      <p class="sub">Every line resolves to a rate with a stated derivation. Nothing here is a
+        percentage of revenue — it is built from payroll, vehicles and facilities in the general
+        ledger, divided by the volume that consumed them.</p>
+      <table><thead><tr><th>Cost line</th><th class="r">Per unit</th><th class="r">A year</th></tr></thead>
+        <tbody id="costRows"></tbody></table>
+      <div class="assume">
+        <span>A route day splits <b id="splitL">40%</b> travel and <b id="splitR">60%</b> on site.
+          This is the one input that is not in the data.</span>
+        <input id="split" type="range" min="20" max="70" step="5" value="40"
+          aria-label="Travel share of a route day">
+      </div>
+      <div class="src">GL pools to 31 August 2026 against twelve months of volume · driver payroll
+        from GL 7335700, not the ADP summary · bin weights are defaulted to capacity, not weighed</div>
+    </div>
+
+    <div class="panel card">
+      <div class="chead"><h3>What the decision is worth</h3>
+        <span class="lab">A year · this customer · this service</span></div>
+      <p class="sub" id="oSub"></p>
+      <div class="grid3">
+        <div class="cell"><div class="k">At your price</div>
+          <div class="v num" id="o1"></div><div class="d" id="o1d"></div></div>
+        <div class="cell hl"><div class="k" id="o2k"></div>
+          <div class="v num" id="o2"></div><div class="d" id="o2d"></div></div>
+        <div class="cell"><div class="k">Break-even price</div>
+          <div class="v num" id="o3"></div><div class="d" id="o3d"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="t-margin" hidden><div class="stub">
+  <span class="lab">Tab two</span>
+  <h2>Gross margin</h2>
+  <p>Not built yet. The shape it takes:</p>
+  <ul>
+    <li>Every customer ranked by gross margin — revenue against cost to serve, the same model the
+      Pricing tab uses, so the two can never disagree</li>
+    <li>The accounts below cost, how far below, and what price would fix each one</li>
+    <li>Margin by service family — storage, bins, ITAD, movement, labour</li>
+    <li>Drill from a customer to the invoice lines behind its revenue and the visits behind its cost</li>
+  </ul>
+</div></section>
+
+<section id="t-trend" hidden><div class="stub">
+  <span class="lab">Tab three</span>
+  <h2>Trends</h2>
+  <p>Not built yet. The shape it takes:</p>
+  <ul>
+    <li>Revenue by month across 24 months, storage against service</li>
+    <li>Customer movers — who is up and who is down against their own six-month average</li>
+    <li>Rate movement — which accounts took an increase this year and which did not</li>
+    <li>An alert when an account falls for two months running</li>
+  </ul>
+  <p style="margin-top:15px;font-size:13px">This is the tab that would have caught the City of
+    Chicago decline a year before anybody noticed it.</p>
+</div></section>
+
+<section id="t-act" hidden><div class="stub">
+  <span class="lab">Tab four</span>
+  <h2>Activity</h2>
+  <p>Not built yet. The shape it takes:</p>
+  <ul>
+    <li>Yesterday — bins, shreds, pounds, routes run — against the same day last week</li>
+    <li>Month to date against the same point last month, and where the month lands</li>
+    <li>Storage is contractual and known on day one; service is modelled from live orders</li>
+    <li>What is booked for tomorrow, and whether the week is balanced</li>
+  </ul>
+</div></section>
+
+</main>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   R4 PULSE — PRICING
+   Prototype. Rates and percentile summaries are a fixture snapshot
+   of the Postgres warehouse; the live tool queries them per request.
+   ══════════════════════════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+const m0=n=>(n<0?'−$':'$')+Math.abs(Math.round(n)).toLocaleString();
+const m2=n=>(n<0?'−$':'$')+Math.abs(n).toFixed(2);
+const m3=n=>(n<0?'−$':'$')+Math.abs(n).toFixed(3);
+const mA=n=>Math.abs(n)<1?m3(n):Math.abs(n)<100?m2(n):m0(n);
+const pc=n=>(n<0?'−':'')+Math.abs(n*100).toFixed(0)+'%';
+const plural=u=>u.endsWith('y')?u.slice(0,-1)+'ies':u+'s';
+
+/* ── the cost model: one source of truth, GL-corrected ───────── */
+const RATES={
+  facilities:{v:0.124,d:'GL facilities $1,777,802 across four sites ÷ 1.2m boxes ÷ 12'},
+  handling:{v:6.13,d:'warehouse payroll plus newly allocated supervision and supplies ÷ 135,000 movements a year'},
+  shredPlant:{v:0.34,d:'the shred share of warehouse payroll and plant ÷ about 1.5m lb processed'},
+  routeDay:{v:680,d:'driver payroll $510,098 from GL 7335700 plus vehicles $445,508 ÷ 1,134 route days'},
+  driverHr:{v:32.49,d:'ADP payroll, drivers, loaded with employer liability'},
+  centreHr:{v:25.05,d:'ADP payroll, Service Centre, loaded'},
+  visitsDay:{v:5.4},unitsVisit:{v:6.5},avgMiles:{v:11.4},
+  lbPerBin:{v:24,d:'Ingalls 167,640 lb ÷ 6,886 services'},
+  lbPerItad:{v:1.5,d:'media destruction is not weighed, so the paper rate stands in'}
+};
+let SPLIT=0.40;
+const UPV={bin:6.5,movement:6.5,itad:4000,handling:0,storage:0,labour:0};
+const travelPV=mi=>(RATES.routeDay.v*SPLIT/RATES.visitsDay.v)*((mi||RATES.avgMiles.v)/RATES.avgMiles.v);
+const onsitePV=()=>(RATES.routeDay.v*(1-SPLIT))/RATES.visitsDay.v;
+
+function costToServe(fam,units,o){
+  o=Object.assign({miles:RATES.avgMiles.v,visits:null,isCentre:false},o||{});
+  const upv=UPV[fam]||0;
+  const visits=(o.visits!=null&&o.visits>0)?o.visits:(upv>0?Math.max(1,Math.ceil(units/upv)):0);
+  const L=[];let T=0;
+  const add=(n,v,w)=>{L.push([n,v,w]);T+=v};
+  if(fam==='storage')
+    add('Warehouse space',units*RATES.facilities.v*12,
+      units.toLocaleString()+' boxes at '+m3(RATES.facilities.v)+' a month. '+RATES.facilities.d+'.');
+  if(fam==='movement'||fam==='bin'||fam==='itad'){
+    add(fam==='itad'?'Truck time':'Travel to site',visits*travelPV(o.miles),
+      visits+' visits at '+m2(travelPV(o.miles))+'. A '+m0(RATES.routeDay.v)+' route day is '+
+      Math.round(SPLIT*100)+'% travel, spread across '+RATES.visitsDay.v+' visits, scaled for '+o.miles+' miles.');
+    add('Time on site',visits*onsitePV(),
+      visits+' visits at '+m2(onsitePV())+' — the other '+Math.round((1-SPLIT)*100)+
+      '% of the route day, covering about '+Math.round(units/Math.max(visits,1))+' units each.');
+  }
+  if(fam==='movement')
+    add('Box handling',units*RATES.handling.v,
+      units.toLocaleString()+' movements at '+m2(RATES.handling.v)+'. '+RATES.handling.d+'.');
+  if(fam==='handling')
+    add('Warehouse handling',units*RATES.handling.v,
+      units.toLocaleString()+' movements at '+m2(RATES.handling.v)+
+      '. Pulls and refiles are warehouse work, so they carry no route time at all.');
+  if(fam==='bin')
+    add('Shred plant',units*RATES.lbPerBin.v*RATES.shredPlant.v,
+      units.toLocaleString()+' bins at roughly '+RATES.lbPerBin.v+' lb, '+m2(RATES.shredPlant.v)+
+      ' a pound. '+RATES.lbPerBin.d+' — executive bins are defaulted to capacity, not weighed.');
+  if(fam==='itad')
+    add('Plant throughput',units*RATES.lbPerItad.v*RATES.shredPlant.v,
+      units.toLocaleString()+' units at about '+RATES.lbPerItad.v+' lb, '+m2(RATES.shredPlant.v)+
+      ' a pound. '+RATES.lbPerItad.d+'.');
+  if(fam==='labour'){
+    const h=o.isCentre?RATES.centreHr:RATES.driverHr;
+    add(o.isCentre?'Service Centre time':'Driver time',units*h.v,
+      units.toLocaleString()+' hours at '+m2(h.v)+'. '+h.d+'.');
+  }
+  return {lines:L,total:T,visits:visits};
+}
+
+/* ── services: percentile summary from priced_lines ──────────── */
+const SVC=[
+ {id:'bin95',n:'95-gallon bin rotation',fam:'bin',unit:'bin service',N:371,list:45.00,
+  p:[7.00,14.50,19.00,22.00,28.00,41.00,190.61],
+  note:'A 27× spread across 371 accounts for identical work.'},
+ {id:'binex',n:'Executive bin rotation',fam:'bin',unit:'bin service',N:155,list:45.00,
+  p:[3.50,11.00,15.50,18.00,24.00,37.50,126.50],
+  note:'A 36× spread, and the cheapest accounts are not the smallest ones.'},
+ {id:'del',n:'Delivery',fam:'movement',unit:'delivery',N:289,list:35.00,
+  p:[9.50,11.50,11.50,12.10,14.00,22.00,48.00],
+  note:'The worst-priced line in the book — a $12.10 median against a $35.00 list.'},
+ {id:'ret',n:'Retrieval and carton process',fam:'handling',unit:'carton',N:318,list:2.50,
+  p:[0.95,1.45,1.70,2.05,2.60,3.40,6.75],
+  note:'Warehouse work only. It carries no route time, which is why the cost floor is low.'},
+ {id:'sto',n:'Carton storage',fam:'storage',unit:'box a month',N:422,list:0.600,
+  p:[0.121,0.137,0.185,0.246,0.330,0.434,0.950],
+  note:'The largest pricing gap in the business, and the best margin once it is closed.'},
+ {id:'itad',n:'Certified media destruction',fam:'itad',unit:'unit',N:47,list:8.00,
+  p:[1.80,2.63,3.90,5.20,6.80,8.00,12.50],
+  note:'Citadel pays $8.00 and Grosvenor $2.63 for the same work.'},
+ {id:'lab',n:'Labour and data entry',fam:'labour',unit:'hour',N:36,list:75.00,
+  p:[28.00,38.00,43.48,55.00,68.00,78.00,95.00],
+  note:'2FM sits at $43.48 against a $55.00 median.'}
+];
+const CUST={
+ bin95:[['Ingalls Memorial',3.26],['Northwestern',22.00],['Rush',26.50],['Loyola',19.00],
+        ['Advocate',31.00],['Sinai Health',14.00]],
+ binex:[['City of Chicago 2FM',8.50],['Latham & Watkins',24.00],['K&L Gates',21.00],
+        ['Chapman & Cutler',37.50],['Jenner & Block',18.00],['Larabida',1.65]],
+ del:[['City of Chicago Admin',14.00],['2FM',11.50],['Latham & Watkins',11.50],
+      ['Grosvenor',22.00],['SG Americas',12.10],['Northwestern',18.00]],
+ ret:[['City of Chicago Admin',1.70],['2FM',1.45],['Chapman & Cutler',2.60],['Rush',2.05]],
+ sto:[['City of Chicago 2FM',0.137],['Airfield Operations',0.121],['Administration',0.127],
+      ['Latham & Watkins',0.191],['K&L Gates',0.228],['Chapman & Cutler',0.434]],
+ itad:[['Citadel',8.00],['Grosvenor',2.63],['SG Americas',5.20]],
+ lab:[['City of Chicago 2FM',43.48],['Northwestern',68.00]]
+};
+/* opening volumes: the real shape of a representative account.
+   A zero visit count means "model it" — units ÷ the observed services per visit. */
+const DEF={bin95:[6886,62],binex:[1444,48],del:[840,0],ret:[2400,0],
+           sto:[227915,0],itad:[29000,12],lab:[1200,0]};
+
+/* deterministic population drawn through the percentile summary */
+function population(s){
+  const q=[0,.10,.25,.50,.75,.90,1],out=[];
+  let sd=s.id.split('').reduce((a,c)=>a+c.charCodeAt(0),7)*7919;
+  const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff};
+  for(let i=0;i<s.N;i++){
+    const t=Math.min(.999,Math.max(.001,(i+.5)/s.N+(rnd()-.5)*.012));
+    let k=0;while(k<q.length-2&&t>q[k+1])k++;
+    out.push(s.p[k]+(t-q[k])/(q[k+1]-q[k])*(s.p[k+1]-s.p[k]));
+  }
+  return out;
+}
+
+let S={svc:'bin95',cust:'Ingalls Memorial',vol:6886,vis:62,mi:11.4,px:3.26,cmp:'median'};
+const svcOf=()=>SVC.find(x=>x.id===S.svc);
+
+/* ── the distribution strip ──────────────────────────────────── */
+function chart(unitCost){
+  const s=svcOf(),pop=population(s),W=900,H=236,L=18,R=18,TOP=62,BOT=56,iw=W-L-R;
+  const lo=Math.min(s.p[0],unitCost,S.px)*0.9;
+  const hi=Math.max(Math.min(s.p[5]*1.2,s.p[6]),S.px*1.08,s.list*1.05,unitCost*1.1);
+  const x=v=>L+Math.max(0,Math.min(1,(v-lo)/(hi-lo)))*iw;
+  const band=(TOP+H-BOT)/2;
+  const col=v=>v<unitCost?'#B3261E':v<s.p[3]?'#C07A1E':'#107A51';
+  let sd=991;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff};
+  let g='';
+
+  g+='<rect x="'+L+'" y="'+(TOP-8)+'" width="'+Math.max(0,x(unitCost)-L)+'" height="'+
+     (H-BOT-TOP+16)+'" fill="#B3261E" opacity=".06"/>';
+
+  let over=0;
+  pop.forEach(v=>{
+    if(v>hi){over++;return}
+    g+='<circle class="dot" cx="'+x(v).toFixed(1)+'" cy="'+(band+(rnd()-.5)*48).toFixed(1)+
+       '" r="4" fill="'+col(v)+'" opacity=".32" stroke="#FCFCFB" stroke-width="1.4" data-v="'+
+       v.toFixed(3)+'"/>';
+  });
+  if(over){
+    g+='<text x="'+(W-R)+'" y="'+(band-32)+'" text-anchor="end" font-size="11" '+
+       'font-family="Archivo Narrow" fill="#878D93">'+over+' account'+(over>1?'s':'')+
+       ' above '+mA(hi)+' →</text>';
+  }
+
+  /* Named accounts. Labels are packed into four lanes — two above the swarm, two
+     below — so that close rates (2FM at $0.137 and Administration at $0.127) do
+     not print on top of each other. */
+  const lanes=[[],[],[],[]], laneY=[TOP+6,TOP+21,H-BOT-19,H-BOT-4];
+  [...(CUST[s.id]||[])].sort((a,b)=>a[1]-b[1]).forEach(c=>{
+    const cx=x(c[1]), half=c[0].length*3.2+5;
+    const anc=cx-half<L?'start':cx+half>W-R?'end':'middle';
+    const tx=anc==='start'?L:anc==='end'?W-R:cx;
+    const x0=anc==='start'?L:anc==='end'?W-R-half*2:cx-half;
+    const x1=x0+half*2;
+    let ln=lanes.findIndex(l=>l.every(r=>x1<r[0]-6||x0>r[1]+6));
+    if(ln<0) ln=0;
+    lanes[ln].push([x0,x1]);
+    const cy=laneY[ln], up=ln<2;
+    g+='<line x1="'+cx+'" y1="'+(up?cy+4:cy-10)+'" x2="'+cx+'" y2="'+band+
+       '" stroke="#AAB0B6" stroke-width="1" stroke-dasharray="2 2.5"/>';
+    g+='<circle class="dot" cx="'+cx+'" cy="'+band+'" r="5.5" fill="'+col(c[1])+
+       '" stroke="#FCFCFB" stroke-width="2" data-v="'+c[1]+'" data-n="'+c[0]+'"/>';
+    g+='<text x="'+tx+'" y="'+cy+'" text-anchor="'+anc+'" font-size="11" '+
+       'font-family="Archivo Narrow" fill="#4A4F57">'+c[0]+'</text>';
+  });
+
+  const ref=(v,lab,c)=>{
+    if(v<lo||v>hi)return '';
+    return '<line x1="'+x(v)+'" y1="'+(TOP-16)+'" x2="'+x(v)+'" y2="'+(H-BOT+6)+'" stroke="'+c+
+      '" stroke-width="1.5"/><text x="'+x(v)+'" y="'+(TOP-22)+'" text-anchor="middle" font-size="11" '+
+      'font-weight="600" font-family="Archivo Narrow" fill="'+c+'">'+lab+'</text>';
+  };
+  g+=ref(unitCost,'Cost '+mA(unitCost),'#B3261E');
+  g+=ref(s.p[3],'Median '+mA(s.p[3]),'#4A4F57');
+  g+=ref(s.list,'List '+mA(s.list),'#107A51');
+
+  if(S.px>=lo&&S.px<=hi){
+    const px=x(S.px),lbl=mA(S.px),w=Math.max(66,lbl.length*8+26);
+    g+='<line x1="'+px+'" y1="'+(TOP-34)+'" x2="'+px+'" y2="'+(H-BOT+12)+'" stroke="#16181C" stroke-width="2.5"/>';
+    g+='<polygon points="'+(px-6)+','+(H-BOT+12)+' '+(px+6)+','+(H-BOT+12)+' '+px+','+(H-BOT+20)+'" fill="#16181C"/>';
+    g+='<rect x="'+(px-w/2)+'" y="'+(H-BOT+22)+'" width="'+w+'" height="21" rx="3" fill="#16181C"/>';
+    g+='<text x="'+px+'" y="'+(H-BOT+36.5)+'" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">'+lbl+'</text>';
+  }
+
+  /* axis ticks sit inside the range, so they never collide with the edge labels
+     or with the price badge hanging below the marker */
+  g+='<line x1="'+L+'" y1="'+(H-BOT+6)+'" x2="'+(W-R)+'" y2="'+(H-BOT+6)+'" stroke="#DEE0D9"/>';
+  [.2,.5,.8].forEach(f=>{
+    const v=lo+(hi-lo)*f, tx=x(v);
+    if(S.px>=lo&&S.px<=hi&&Math.abs(tx-x(S.px))<52) return;   // the badge owns that space
+    g+='<line x1="'+tx+'" y1="'+(H-BOT+6)+'" x2="'+tx+'" y2="'+(H-BOT+10)+'" stroke="#DEE0D9"/>';
+    g+='<text x="'+tx+'" y="'+(H-BOT+21)+'" text-anchor="middle" font-size="10.5" '+
+       'font-family="Archivo Narrow" fill="#878D93">'+mA(v)+'</text>';
+  });
+
+  $('chart').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Price distribution across '+
+    s.N+' accounts for '+s.n+', with cost to serve, median, list price and your price marked">'+g+'</svg>';
+
+  const tip=$('tip'),host=$('chart');
+  host.querySelectorAll('.dot').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{
+      const r=el.getBoundingClientRect(),h=host.getBoundingClientRect(),v=+el.dataset.v,n=el.dataset.n;
+      tip.innerHTML='<b>'+(n||'An account on this service')+'</b><i>'+mA(v)+' a '+s.unit+' · '+
+        (v<unitCost?'below cost to serve':v<s.p[3]?'above cost, below median':'above median')+'</i>';
+      tip.style.left=(r.left-h.left+r.width/2)+'px';
+      tip.style.top=(r.top-h.top-6)+'px';
+      tip.classList.add('on');
+    });
+    el.addEventListener('mouseleave',()=>tip.classList.remove('on'));
+  });
+}
+
+/* ── render ──────────────────────────────────────────────────── */
+function render(){
+  const s=svcOf(),mult=s.fam==='storage'?12:1;
+  const C=costToServe(s.fam,S.vol,{miles:S.mi,visits:S.vis});
+  const unitCost=C.total/Math.max(S.vol,1)/mult;
+  const revYr=S.px*S.vol*mult, gmYr=revYr-C.total, gmPc=revYr>0?gmYr/revYr:0;
+  const below=population(s).filter(p=>p<S.px).length;
+  const cheaper=Math.round((s.N-below)/s.N*100);
+
+  const v=$('verdict');
+  v.className='verdict '+(S.px<unitCost?'v-bad':S.px<s.p[3]?'v-warn':'v-good');
+  $('vIcon').textContent=S.px<unitCost?'✕':S.px<s.p[3]?'!':'✓';
+  $('vHead').textContent=S.px<unitCost
+    ? mA(S.px)+' is below what this costs to serve'
+    : S.px<s.p[3] ? mA(S.px)+' earns, but sits below the median'
+    : mA(S.px)+' is a sound price';
+  $('vSub').textContent=S.px<unitCost
+    ? 'Cost to serve is '+mA(unitCost)+' a '+s.unit+'. Every one loses '+mA(unitCost-S.px)+
+      ', and the volume makes it worse, not better.'
+    : 'Cheaper than '+cheaper+'% of the '+s.N+' accounts on this service. Cost to serve is '+mA(unitCost)+'.';
+  $('vGM').textContent=pc(gmPc);
+  $('vGM').className='n num '+(gmPc<0?'neg':gmPc<.3?'amb':'pos');
+  $('vYr').textContent=m0(gmYr);
+  $('vYr').className='n num '+(gmYr<0?'neg':'');
+  $('pxNote').textContent=S.px<unitCost?'below cost to serve':S.px<s.p[3]?'below the median':'above the median';
+  $('pxDot').style.background=S.px<unitCost?'var(--bad)':S.px<s.p[3]?'var(--warn)':'var(--good)';
+
+  $('dTitle').textContent='What the book pays for '+s.n.toLowerCase();
+  $('dCount').textContent=s.N+' accounts';
+  $('dSub').textContent=s.note+' Each dot is one account’s invoiced rate; the named ones are labelled. '+
+    'The shaded band on the left is everything below R4’s cost to serve.';
+  $('dSrc').textContent='priced_lines — modal invoiced rate by customer and service, thirteen months to '+
+    'September 2026 · percentile summary · list price from the 2025 sheet';
+  chart(unitCost);
+
+  $('costRows').innerHTML=C.lines.map(l=>
+    '<tr><td>'+l[0]+'<span class="why">'+l[2]+'</span></td><td class="r num">'+
+    mA(l[1]/Math.max(S.vol,1)/mult)+'</td><td class="r num">'+m0(l[1])+'</td></tr>').join('')+
+    '<tr class="tot"><td>Total cost to serve</td><td class="r num">'+mA(unitCost)+
+    '</td><td class="r num">'+m0(C.total)+'</td></tr>';
+
+  const cmpV=S.cmp==='list'?s.list:S.cmp==='p75'?s.p[4]:s.p[3];
+  const cmpN=S.cmp==='list'?'At the 2025 list price':S.cmp==='p75'?'At the upper quartile':'At the median';
+  const cmpYr=cmpV*S.vol*mult-C.total;
+  $('o2k').textContent=cmpN;
+  $('o1').textContent=m0(gmYr);$('o1').className='v num '+(gmYr<0?'neg':'');
+  $('o1d').textContent=mA(S.px)+' a '+s.unit+' · '+pc(gmPc)+' margin';
+  $('o2').textContent=m0(cmpYr);$('o2').className='v num '+(cmpYr<0?'neg':'pos');
+  const delta=cmpYr-gmYr;
+  $('o2d').textContent=mA(cmpV)+' a '+s.unit+' · '+
+    (Math.abs(delta)<1?'the same as your price'
+     : m0(Math.abs(delta))+(delta>0?' better than your price':' worse than your price'));
+  $('o3').textContent=mA(unitCost);
+  $('o3d').textContent='the price at which this stops costing R4 money';
+  $('oSub').textContent=(s.fam==='storage'
+      ? S.vol.toLocaleString()+' boxes on the rack, billed every month'
+      : S.vol.toLocaleString()+' '+plural(s.unit)+' a year'+
+        (C.visits?' across '+C.visits+' site visits':', all of it warehouse work with no route time'))+
+    '. Gross margin is revenue less cost to serve; it carries no sales, admin or management overhead.';
+}
+
+/* ── wiring ──────────────────────────────────────────────────── */
+$('svc').innerHTML=SVC.map(s=>'<option value="'+s.id+'">'+s.n+'</option>').join('');
+function fillCust(){
+  const s=svcOf();
+  $('cust').innerHTML='<option value="__new">New customer / fresh quote</option>'+
+    (CUST[s.id]||[]).map(c=>'<option value="'+c[0]+'">'+c[0]+' — '+mA(c[1])+'</option>').join('');
+  $('cust').value=S.cust;
+  const c=(CUST[s.id]||[]).find(c=>c[0]===S.cust);
+  $('custHint').textContent=c?'Pays '+mA(c[1])+' today.':'Pricing from scratch.';
+}
+function applyDefaults(){
+  const s=svcOf(),d=DEF[s.id];
+  S.vol=d[0];S.vis=d[1];S.px=s.p[3];
+  $('vol').value=S.vol;$('vis').value=S.vis;$('px').value=S.px;
+  $('volLab').textContent=s.fam==='storage'?'Boxes stored':'Units a year';
+  const routed=UPV[s.fam]>0;
+  $('vis').disabled=!routed;
+  $('visHint').textContent=routed?'leave blank to model it':'not route work';
+}
+$('svc').onchange=e=>{S.svc=e.target.value;S.cust='__new';applyDefaults();fillCust();render()};
+$('cust').onchange=e=>{
+  S.cust=e.target.value;
+  const c=(CUST[svcOf().id]||[]).find(c=>c[0]===S.cust);
+  if(c){S.px=c[1];$('px').value=c[1]}
+  fillCust();render();
+};
+$('vol').oninput=e=>{S.vol=Math.max(1,+e.target.value||1);render()};
+$('vis').oninput=e=>{S.vis=Math.max(0,+e.target.value||0);render()};
+$('mi').oninput=e=>{S.mi=Math.max(0.1,+e.target.value||0.1);render()};
+$('px').oninput=e=>{S.px=Math.max(0,+e.target.value||0);render()};
+$('cmp').onchange=e=>{S.cmp=e.target.value;render()};
+$('split').oninput=e=>{
+  SPLIT=+e.target.value/100;
+  $('splitL').textContent=Math.round(SPLIT*100)+'%';
+  $('splitR').textContent=Math.round((1-SPLIT)*100)+'%';
+  render();
+};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  ['price','margin','trend','act'].forEach(t=>{$('t-'+t).hidden=(t!==b.dataset.tab)});
+  $('bcrumb').textContent=b.textContent;
+});
+
+applyDefaults();
+S.cust='Ingalls Memorial';S.px=3.26;$('px').value='3.26';
+fillCust();render();
+</script>
+</body>
+</html>

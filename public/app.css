@@ -1,0 +1,20 @@
+/* Shell only. Screens bring their own layout; components read tokens.css. */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-body);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+.mast{background:var(--brand);color:#fff}
+.mast-in{max-width:1320px;margin:0 auto;padding:0 32px;display:flex;align-items:center;gap:28px;height:52px}
+.brand{display:flex;align-items:baseline;gap:14px;color:#fff;text-decoration:none}
+.brand b{font-size:15px;letter-spacing:.02em}
+.brand span{font-family:var(--f-narrow);font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+#nav{display:flex;gap:4px;margin-left:12px}
+#nav a{color:#fff;text-decoration:none;font-size:13px;padding:6px 10px;border-radius:var(--r-sm);opacity:.8}
+#nav a.on{opacity:1;font-weight:600;background:rgba(255,255,255,.12)}
+.mast-right{margin-left:auto;display:flex;align-items:center;gap:14px;font-family:var(--f-narrow);font-size:12px;opacity:.9}
+.mast-right button{background:none;border:1px solid rgba(255,255,255,.35);color:#fff;font:inherit;padding:3px 9px;border-radius:var(--r-sm);cursor:pointer}
+#main{max-width:1320px;margin:0 auto;padding:28px 32px 80px}
+.empty{margin:60px auto;max-width:520px;border:1.5px dashed var(--ink-5);border-radius:var(--r);padding:22px 24px;color:var(--ink-3)}
+.empty h2{font-family:var(--f-display);font-weight:400;font-size:24px;color:var(--ink);margin:0 0 8px}
+.empty code{font-family:var(--f-narrow)}
+@media(max-width:640px){.mast-in{padding:0 16px;gap:14px}.brand span{display:none}#main{padding:18px 16px 60px}}

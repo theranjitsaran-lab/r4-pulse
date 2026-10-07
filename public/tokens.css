@@ -1,0 +1,101 @@
+/* R4 Pulse — design tokens
+   Extracted from the committed design (Claude Design, 7 October 2026).
+   Components read these variables only. No hard-coded colours anywhere else. */
+
+:root {
+  /* ── ink ── */
+  --ink:        #171A15;   /* primary text, measured figures, chart lines */
+  --ink-2:      #33372F;   /* secondary headings */
+  --ink-3:      #5A5F55;   /* labels, captions, source lines */
+  --ink-4:      #8A8F84;   /* muted */
+  --ink-5:      #9A988D;   /* modelled-figure mark, dashed borders */
+
+  /* ── surfaces ── */
+  --ground:     #F4F4EF;   /* page */
+  --surface:    #FFFFFF;   /* raised card */
+  --well:       #FBFAF6;   /* inset: evidence, source lines */
+  --well-2:     #EEEEE8;
+  --tint-brand: #E9EFE4;   /* brand green at 10% — selected row, link hover */
+
+  /* ── rules ── */
+  --rule:       #ECECE6;   /* hairline between rows */
+  --rule-2:     #E4E4DE;
+  --rule-3:     #DCDCD4;
+  --rule-4:     #BDBDB5;   /* input borders */
+  --rule-ink:   #171A15;   /* section heads: 2px; table heads: 1.5px */
+
+  /* ── brand — masthead, links and the drill affordance ONLY ── */
+  --brand:      #2B4F1E;
+
+  /* ── status — exceptions only; the normal state is ink ── */
+  --warn:       #C07A1E;   /* below median; the thin day */
+  --bad:        #B3261E;   /* below cost; down */
+  --bad-bg:     #FBE9E7;
+  --warn-bg:    #FAF1E2;
+
+  /* ── type ── */
+  --f-display:  'Newsreader', Georgia, serif;          /* Pulse headline, verdict sentences, pull quotes */
+  --f-body:     'IBM Plex Sans', system-ui, sans-serif;
+  --f-narrow:   'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;  /* labels, figures, source lines */
+
+  --fs-source:  11px;
+  --fs-label:   12px;
+  --fs-body:    13px;
+  --fs-body-lg: 14px;
+  --fs-head:    15px;
+  --fs-num:     22px;
+  --fs-num-lg:  27px;
+  --fs-display: 46px;      /* desktop headline; 28px on a phone */
+
+  --track-label: .08em;    /* uppercase labels */
+  --track-tight: -.015em;  /* display */
+
+  /* ── shape ── */
+  --r-sm: 3px;
+  --r:    4px;
+  --r-lg: 6px;
+  --row-h: 28px;           /* Ledger register row height */
+
+  /* ── motion: almost none ── */
+  --t-fast: 120ms;
+  --t:      200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --t-fast: 0ms; --t: 0ms; }
+}
+
+/* ── the two registers ──
+   Briefing (Pulse): display serif headline, generous measure, charts support prose.
+   Ledger (Activity, Pricing, Calls, Margin): dense, tabular, hairline rules, narrow labels. */
+.register-briefing { --measure: 62ch; }
+.register-ledger   { --measure: none; font-size: var(--fs-body); }
+
+/* ── primitives every screen shares ── */
+.lab {
+  font-family: var(--f-narrow); font-size: 10px; font-weight: 600;
+  letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-3);
+}
+.num { font-variant-numeric: tabular-nums; }
+.src {
+  font-family: var(--f-narrow); font-size: var(--fs-source); color: var(--ink-3);
+  background: var(--well); padding: 8px 10px; border-radius: var(--r-sm);
+}
+/* a figure that is modelled rather than measured */
+.modelled { color: var(--ink-3); }
+.modelled::before { content: "◇ "; color: var(--ink-5); }
+/* an honest empty state */
+.pending {
+  border: 1.5px dashed var(--ink-5); border-radius: var(--r); padding: 8px 10px;
+  font-size: var(--fs-label); color: var(--ink-3);
+}
+.pending::before { content: "◇ "; }
+/* status, exceptions only */
+.is-bad  { color: var(--bad); }
+.is-warn { color: var(--warn); }
+/* section head: the label never shares a line with the rule */
+.sec {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-bottom: 10px; border-bottom: 2px solid var(--rule-ink); margin-bottom: 12px;
+}
+.sec > * { background: none; line-height: 1.2; }

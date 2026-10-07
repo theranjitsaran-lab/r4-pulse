@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R4 Pulse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/tokens.css">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<header class="mast">
+  <div class="mast-in">
+    <a class="brand" href="#pulse"><b>R4 Pulse</b><span>Reliable · Resourceful · Responsive · Reasonable</span></a>
+    <nav id="nav">
+      <a href="#pulse" data-screen="pulse">Pulse</a>
+      <a href="#activity" data-screen="activity">Activity</a>
+      <a href="#pricing" data-screen="pricing">Pricing</a>
+      <a href="#calls" data-screen="calls">Calls</a>
+    </nav>
+    <div class="mast-right"><span id="asof"></span><form method="post" action="/logout"><button>Sign out</button></form></div>
+  </div>
+</header>
+<main id="main"></main>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
