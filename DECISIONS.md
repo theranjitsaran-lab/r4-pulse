@@ -3,6 +3,25 @@
 Settled. Do not re-propose these unless Theran reopens them. Each line cost a round of iteration
 to reach. Newest section first.
 
+## Data basis — settled 8 October 2026, Prompt 3
+
+| | |
+|---|---|
+| **The posted series** | `invoices` only, month on `COALESCE(invdate, billdate)`. 23 months from November 2024; the October 2024 fragment (36 early invoices billed 1 November) is dropped. The database wins over the documents: August 2026 service is 364,052 and September 233,411 |
+| **Citadel** | `ser_tot` where `custno = '00870'` (level1 6714). Negative months are carried, never clipped. The smooth 168,900 → 233,100 series is withdrawn |
+| **Core** | $646,519: six-month average March–August 2026, invoice date, posted invoices only |
+| **The live run** | `v_current_run`, never the posted series. `run` = undated `invoices_current` rows; `pending` = dated rows printed but not yet in `invoices` |
+| **Customer key** | `level1` everywhere: one `custno` each in invoices, and the only key `priced_lines` and Veri-Shred carry |
+| **Modal rate** | Work-order month; zero-rate (flat-fee) lines counted but kept out of the mode; ties take the lower rate |
+| **Flag down two months** | Below the account's own trailing-six mean (six full prior months, gaps as $0) this month and last |
+| **Termination fees** | Permanent-withdrawal codes P1, P2, P3, P5, PC, pending Anne's confirmation |
+| **Revenue per stop** | Destruction revenue (servtype F and S, Citadel apart) by work month ÷ done stops (distinct `slocid` per route-day) |
+| **Rebuild** | `npm run kpi:rebuild` creates the six views in order, then the `kpi` tables, as one transaction |
+| **October range** | $598k–$699k, was $598k–$690k: storage $387,101 from `v_current_run` plus core service $211,133–$311,665, the last six posted months (Apr–Sep 2026) |
+| **City of Chicago down-since** | Below its own trailing-six mean every month since January 2026, flagged two-down since February 2026; was "every month since August 2025" |
+| **Service credit month** | November 2025 at −$60,759, the 23-month low; was "−$144k". The high is April 2026 at $781,944, was "$784k" |
+| **17 September 2026** | 283 booked, 200 done, 23 customers, 6 routes from `v_route_day`; was 272, 13 and 5. Angel ran 13 services across 6 customers, not one bin. Activity reproduces `v_route_day`, not the addendum |
+
 ## Design — settled 7 October 2026, in Claude Design
 
 | | |
@@ -62,9 +81,9 @@ route-hour, route-day margin, pounds per route-day. Stored in a `kpi` schema reb
 
 ## Numbers and basis
 
-- The decline is quoted on **six-month averages**: $781,590 early 2025 against $643,842 now, −18%. Never mix an average with a single month
+- The decline is quoted on **six-month averages**: $781,590 early 2025 (January–June) against $646,519 now (March–August 2026), −17%. Both on invoice date, posted invoices only, Citadel `custno 00870` held apart. Never mix an average with a single month
 - On that basis **service is about three-quarters of the fall**, storage a quarter
-- **October in-month range: $598k–$690k** — storage known at ~$388k, service modelled at $210k–$300k. Marked modelled, narrows through the month
+- **October in-month range: $598k–$699k** — storage $387,101 from the October run, core service modelled at $211k–$312k (the last six posted months). Marked modelled, narrows through the month
 - **Ingalls break-even is $9.29 a bin** under GL-corrected rates. $7.17 is the pre-GL figure and is wrong wherever it still appears
 - **City of Chicago 2FM to the $0.246 median = $24,843 a month** (227,915 × $0.109)
 - Every figure strip states its basis
@@ -78,7 +97,7 @@ route-hour, route-day margin, pounds per route-day. Stored in a `kpi` schema reb
 5. **Warehouse pulls carry handling only** — no route time
 6. **Temp labour is allocable**: Anchor and Banner to warehouse pools, Citadel's $167,068 direct
 7. **The GL covers 17.1 months and the volumes twelve.** Restate both over the twelve months to 31 August 2026
-8. **Citadel September ITAD exceeds total September service** — two bases; reconcile before charting
+8. **Citadel September ITAD did not exceed total September service.** The $233,100 was not a Citadel figure. Citadel September is $22,278 posted, against $233,411 total service (corrected 8 October 2026)
 
 ## Excluded from costing
 

@@ -64,7 +64,7 @@ Nothing else in the repo may contain a cost number.
 
 ---
 
-## Prompt 3 — SQL views and the kpi schema
+## Prompt 3 — SQL views and the kpi schema · DONE 8 Oct 2026 · 23 months, core $646,519, plus `v_current_run`
 
 ```
 Read CLAUDE.md data rules first. Then docs/R4_PULSE_DATA_ADDENDUM.md.
@@ -200,7 +200,7 @@ Write public/views/activity.js in the Ledger register from v_route_day. Yesterda
 route-day — driver, services, customers, postcodes, one sentence on what happened. The week: a
 grid of route-days, Mon–Fri across, routes down, each cell sized by services; click a cell for
 its stops in order with the invoiced value at each. Booked ahead: the same grid for the rest of
-the week. Thursday 17 September 2026 must reproduce the addendum exactly. Route-day margin is a
+the week. Thursday 17 September 2026 must reproduce v_route_day for 17 September 2026 exactly. Route-day margin is a
 pending state until pay rates are loaded.
 ```
 

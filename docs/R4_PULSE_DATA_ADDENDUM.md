@@ -4,36 +4,37 @@ The three things the logic pack did not carry. All real, from VCK billing and Ve
 
 ---
 
-## 1. The 24-month series — storage and service, as invoiced
+## 1. The 23-month series — storage, service and Citadel, as invoiced
 
-Monthly, October 2024 to September 2026. Storage is `Ret_Tot`, service is `Ser_Tot`, from the VCK customer invoice table. Service here is **all** service, including Citadel ITAD.
+Monthly, November 2024 to September 2026, from the database (`invoices`, posted runs only). Month is invoice date, `COALESCE(invdate, billdate)`. Storage is `ret_tot`, service is `ser_tot`. Service here is **all** service, including Citadel; Citadel is `ser_tot` where `custno = '00870'`. October 2024 is left out: the table begins with the 1 November 2024 run, and the 36 invoices dated October 2024 are a fragment, not a month.
 
-| Month | Storage | Service | Note |
-|---|---|---|---|
-| Oct 2024 | 420,091 | 280,174 | |
-| Nov 2024 | 417,009 | 390,304 | |
-| Dec 2024 | 404,628 | 267,272 | |
-| Jan 2025 | 447,293 | 260,102 | January rate round: storage peak |
-| Feb 2025 | 418,426 | 562,946 | |
-| Mar 2025 | 417,848 | 271,817 | |
-| Apr 2025 | 416,867 | 363,973 | |
-| May 2025 | 417,225 | 415,699 | |
-| Jun 2025 | 416,417 | 418,699 | |
-| **Jul 2025** | **383,486** | 421,518 | **The step: storage −$33k and never recovers. 2FM rate cut.** |
-| Aug 2025 | 385,625 | 570,041 | Badging scanning project ends this month |
-| Sep 2025 | 384,546 | 481,257 | |
-| Oct 2025 | 381,775 | 670,960 | |
-| Nov 2025 | 381,620 | −60,759 | **Credit run** — service net negative |
-| Dec 2025 | 380,010 | 374,819 | |
-| Jan 2026 | 421,243 | 571,903 | January rate round |
-| Feb 2026 | 404,162 | 391,660 | |
-| Mar 2026 | 393,011 | 292,520 | |
-| Apr 2026 | 383,634 | 781,944 | Service peak |
-| May 2026 | 383,250 | 428,450 | |
-| Jun 2026 | 381,077 | 658,757 | |
-| Jul 2026 | 380,879 | 313,977 | |
-| Aug 2026 | 387,477 | 347,992 | |
-| **Sep 2026** | **388,813** | **213,330** | Posted 1 October. Weakest service month in two years |
+| Month | Storage | Service | Citadel | Note |
+|---|---|---|---|---|
+| Nov 2024 | 417,009 | 390,304 | 62,457 | |
+| Dec 2024 | 404,628 | 267,272 | 9,340 | |
+| Jan 2025 | 447,293 | 260,102 | 0 | January rate round: storage peak |
+| Feb 2025 | 418,426 | 562,946 | 5,394 | |
+| Mar 2025 | 417,848 | 271,817 | 7,344 | |
+| Apr 2025 | 416,867 | 363,973 | 1,078 | |
+| May 2025 | 417,225 | 415,699 | 79,074 | |
+| Jun 2025 | 416,417 | 418,699 | 44,882 | |
+| **Jul 2025** | **383,486** | 421,518 | 51,088 | **The step: storage −$33k and never recovers. 2FM rate cut.** |
+| Aug 2025 | 385,625 | 570,041 | 10,743 | Badging scanning project ends this month |
+| Sep 2025 | 384,546 | 481,257 | 108,974 | |
+| Oct 2025 | 381,775 | 670,960 | 419,664 | |
+| Nov 2025 | 381,620 | −60,759 | −432,637 | **Credit run** — service net negative, Citadel the whole of it |
+| Dec 2025 | 380,010 | 374,819 | 66,064 | |
+| Jan 2026 | 421,243 | 571,903 | 199,505 | January rate round |
+| Feb 2026 | 404,162 | 391,660 | 91,691 | |
+| Mar 2026 | 393,011 | 292,520 | 76,714 | |
+| Apr 2026 | 383,634 | 781,944 | 470,279 | Service peak |
+| May 2026 | 383,250 | 428,450 | 138,816 | |
+| Jun 2026 | 381,077 | 658,757 | 423,394 | |
+| Jul 2026 | 380,879 | 313,977 | 71,147 | |
+| Aug 2026 | 387,477 | 364,052 | 89,565 | Includes 26 invoices dated 31 August ($16,060), billed in the 1 September run |
+| **Sep 2026** | **388,813** | **233,411** | **22,278** | Includes 34 invoices dated 22 and 24 September ($36,141), billed in the 1 October run. Weakest service month in two years, bar the November 2025 credit run |
+
+*Corrected 8 October 2026.* The first version of this table had August at 347,992 and September at 213,330: an earlier snapshot that put the 31 August batch in September and left out the late-September invoices. Neither invoice date nor bill date in the database reproduces them.
 
 How to read it on the chart:
 
@@ -43,89 +44,102 @@ How to read it on the chart:
 
 ### Core versus total
 
-Trisha's $1.0m target is **core**: storage plus service with Citadel held apart. Citadel's monthly ITAD revenue for the last ten months (December 2025 to September 2026):
+Trisha's $1.0m target is **core**: storage plus service with Citadel held apart. Citadel's monthly service is the column above. It is not a smooth ramp: it swings from −$432,637 (the November 2025 credit run) to $470,279 (April 2026), and the last twelve months sum to $1.64m. The ten-month Citadel series in the first version of this addendum (168,900 rising to 233,100) did not come from the database and is withdrawn; $233,100 is not a Citadel figure. Citadel's September is $22,278.
 
-168,900 · 172,000 · 181,000 · 195,000 · 204,000 · 212,000 · 219,000 · 226,000 · 230,000 · 233,100
-
-Core for a month = storage + service − Citadel. Over the six months to August 2026 that averages **$643,842**. For the chart, draw total service and mark Citadel as a lighter band within it, or draw core service with a note; either is honest, the first is more informative.
+Core for a month = storage + service − Citadel. Core is volatile month to month because Citadel's settlements land in lumps and its credits net against them; carry the negatives, never clip them. The six-month average is what smooths it for the headline: **$646,519**, March to August 2026, invoice date, posted invoices only. For the chart, draw total service and mark Citadel as a lighter band within it, or draw core service with a note; either is honest, the first is more informative. The band must be allowed to go below zero.
 
 ---
 
 ## 2. A real day — Thursday 17 September 2026
 
-Every figure below is from Veri-Shred service orders for that date. 272 services, 13 customers, 5 routes.
+Every figure below is from `v_route_day` and the Veri-Shred service orders behind it for that date: **283 services booked, 200 done, 23 customers, 6 routes.** "Done" is `billable = 'true'`, the completion flag (data rule 2); the other 83 were booked and not confirmed complete. *Rewritten from the database 8 October 2026; the first version (272 services, 13 customers, 5 routes, Angel with one bin) did not match it.*
 
 ### Routes
 
-| Route | Driver | Territory | Services | Customers | Postcodes | What happened |
+| Route | Driver | Services | Done | Customers | Postcodes | What happened |
 |---|---|---|---|---|---|---|
-| 1 | **Mark** | South suburbs | **138** | 5 | 60422 · 60477 · 60409 · 60473 · 60402 | Ingalls ×107, UChicago Medicine ×28, Berwyn Kia ×2, UChicago School ×1. Five adjacent postcodes — a dense day. |
-| 2 | **Jorge** | Downtown bins | **55** | 7 | 60607 · 60606 · 60660 · 60603 · 60622 | Walsh ×27, AHA ×16, National Futures ×6, Hoogendoorn ×3, plus three singles |
-| 3 | **FLT02** (floater) | One site | **43** | 1 | 60649 | Larabida Children's ×43 — a whole day on one site for an account paying $991 a year |
-| 4 | **Demond** | Bins | **35** | 3 | 60637 · 60609 | UChicago School ×18, Access Community ×12, Fireman's CU ×5 |
-| 5 | **Angel** | Suburbs | **1** | 1 | 60657 | Chicago Headache Center, one executive bin, Lakeview. **A single-stop day: a $680 route day for one bin.** Nothing else booked. Could have gone to Jorge, already downtown. |
-| | | **Total** | **272** | **13** | | |
+| MARK | MRS | **137** | 84 | 4 | 60409 · 60422 · 60448 · 60473 · 60477 | Ingalls ×107, UChicago Medicine ×28, UChicago School ×1, NEB Medical ×1. Five south-suburban postcodes, two hospitals 135 of the 137: a dense day. |
+| JORGE | JA | **51** | 44 | 8 | 60603 · 60606 · 60607 · 60654 · 60660 | Downtown bins. Walsh ×27, AHA ×10, National Futures ×6, Hoogendoorn ×3, Pearlman ×2, plus three singles |
+| FLT02 | JAD | **45** | 37 | 1 | 60649 | Larabida Children's ×45: a whole day on one site for an account that billed $1,264 in the last twelve months |
+| DEMOND | DH | **32** | 24 | 4 | 60607 · 60609 · 60622 · 60637 | UChicago School ×18, Access Community ×12, Belmont Bank ×1, Four Corners ×1 |
+| ANGEL | ANG | **13** | 9 | 6 | 60130 · 60402 · 60613 · 60618 · 60640 · 60657 | Six small accounts in six postcodes from Forest Park to Lakeview: Center on Halsted ×4, Avenue One ×3, Berwyn Kia ×2, Park Inc ×2 (neither done), Chicago Headache Center ×1, Fettes Love ×1. All booked the day before. The thinnest day: the most postcodes for the fewest services |
+| MOBILE | — | **5** | 2 | 1 | — | Chicago Fireman's Credit Union: shred truck, hourly ×4, electronic media ×1. No driver or postcode recorded |
+| | | **283** | **200** | **23** | | UChicago School appears on two routes; counted once in the total |
 
 ### Services by customer
 
-| Customer | Services | Bin mix | Route | Annual fee | Per service | Flag |
-|---|---|---|---|---|---|---|
-| Ingalls Hospital | 107 | B3 ×97, B6 ×10 | Mark | $22,455 | $3.26 | below cost — flat fee |
-| Larabida Children's Hospital | 43 | B3 ×21, B6 ×19, B2 ×3 | FLT02 | $991 | $1.65 | below cost — flat fee |
-| University of Chicago Medicine | 28 | B3 ×17, B6 ×9, B2 ×2 | Mark | $88,378 | $18.55 | flat fee |
-| Walsh Group | 27 | B3 ×26, B2 ×1 | Jorge | $125,219 | $119.94 | healthy |
-| University of Chicago School | 19 | B3 ×13, B6 ×6 | Demond / Mark | $13,944 | $4.23 | below cost — flat fee |
-| American Hospital Association | 16 | B3 ×10, B4 ×6 | Jorge | $26,257 | $76.33 | healthy |
-| Access Community Health Network | 12 | B6 ×8, B3 ×4 | Demond | $61,057 | $85.27 | healthy |
-| National Futures Association | 6 | B3 ×6 | Jorge | $23,526 | $98.43 | healthy |
-| Chicago Fireman's Assoc. Credit Union | 5 | S0 ×4, S4 ×1 | Demond | — | hourly | billable |
-| Hoogendoorn & Talbot | 3 | B2 ×2, B3 ×1 | Jorge | $22,402 | $43.99 | healthy |
-| Berwyn Kia / Meyer Imports | 2 | B4 ×2 | Mark | $3,803 | $40.87 | healthy |
-| Four Corners Taverns | 1 | B3 ×1 | Jorge | — | — | |
-| Belmont Bank Wicker Park | 1 | B3 ×1 | Jorge | — | — | |
-| Academy of General Dentistry | 1 | B3 ×1 | Jorge | — | — | |
-| Chicago Headache Center | 1 | B3 ×1 | Angel | $4,600 | $4.60 | one-stop day |
+LTM is the last twelve months of invoiced revenue (October 2025 to September 2026, `kpi.customer_monthly`), service and total.
 
-Four customers are 72% of the day: Ingalls 107, Larabida 43, UChicago Medicine 28, UChicago School 19 — 197 of 272 services, between them paying roughly $47,000 a year for around 9,000 services. Every one of today's 272 services is marked non-billable in the system, absorbed by flat-fee contracts.
+| Customer | Services | Done | Bin mix | Route | LTM service | LTM total |
+|---|---|---|---|---|---|---|
+| Ingalls Hospital | 107 | 60 | B3 ×97, B6 ×10 | Mark | $38,488 | $38,488 |
+| Larabida Children's Hospital | 45 | 37 | B3 ×21, B6 ×19, B2 ×5 | FLT02 | $1,264 | $1,264 |
+| University of Chicago Medicine | 28 | 22 | B3 ×17, B6 ×9, B2 ×2 | Mark | $151,613 | $151,613 |
+| Walsh Group | 27 | 24 | B3 ×26, B2 ×1 | Jorge | $142,371 | $171,000 |
+| University of Chicago School | 19 | 12 | B3 ×13, B6 ×6 | Demond / Mark | $17,936 | $17,936 |
+| Access Community Health Network | 12 | 11 | B6 ×8, B3 ×4 | Demond | $248,271 | $281,960 |
+| American Hospital Association | 10 | 10 | B3 ×10 | Jorge | $23,843 | $37,150 |
+| National Futures Association | 6 | 5 | B3 ×6 | Jorge | $32,030 | $37,357 |
+| Chicago Fireman's Assoc. Credit Union | 5 | 2 | S0 ×4, S4 ×1 | Mobile | $1,436 | $1,436 |
+| Center on Halsted | 4 | 4 | B2 ×4 | Angel | $340 | $340 |
+| Avenue One | 3 | 1 | B3 ×2, B4 ×1 | Angel | $1,198 | $1,198 |
+| Hoogendoorn & Talbot | 3 | 1 | B2 ×2, B3 ×1 | Jorge | $14,734 | $14,734 |
+| Berwyn Kia / Meyer Imports | 2 | 2 | B4 ×2 | Angel | $6,913 | $6,913 |
+| Park, Inc. | 2 | 0 | B2 ×2 | Angel | $0 | $0 |
+| Steven B Pearlman and Associates | 2 | 1 | B2 ×2 | Jorge | $989 | $3,389 |
+| Academy of General Dentistry | 1 | 1 | B3 ×1 | Jorge | $122 | $122 |
+| Belmont Bank Wicker Park | 1 | 1 | B3 ×1 | Demond | $769 | $769 |
+| Chicago Headache Center | 1 | 1 | B3 ×1 | Angel | $2,490 | $2,490 |
+| Clune Construction | 1 | 1 | B3 ×1 | Jorge | $956 | $10,475 |
+| Eckhardt Trading | 1 | 1 | B2 ×1 | Jorge | $866 | $866 |
+| Fettes Love and Sieben Plumbing | 1 | 1 | B2 ×1 | Angel | $187 | $187 |
+| Four Corners Taverns | 1 | 1 | B3 ×1 | Demond | $3,107 | $3,107 |
+| NEB Medical Services | 1 | 1 | B2 ×1 | Mark | $718 | $718 |
+
+Four customers are 70% of the day: Ingalls 107, Larabida 45, UChicago Medicine 28, UChicago School 19, 199 of 283 services. Between them they billed $209,301 in the last twelve months, nearly three-quarters of it UChicago Medicine. Cost-to-serve flags for these accounts come from `model/rates.js` on the Margin screen, not from this table.
 
 ### Bin mix
 
-| Code | Type | Capacity | Count today |
-|---|---|---|---|
-| B3 | Rotate executive | 80 lb | 201 |
-| B6 | Executive under-desk | 40 lb | 52 |
-| B2 | Rotate 95 gallon | 300 lb | 6 |
-| B4 | Rotate 65 gallon | 175 lb | 8 |
-| S0 | Mobile shred truck | hourly | 4 |
-| S4 | Electronic media | per unit | 1 |
+Capacity is the default weight each order carries for its bin type (`nbtweight`).
+
+| Code | Type | Capacity | Booked | Done |
+|---|---|---|---|---|
+| B3 | Rotate executive | 80 lb | 202 | 147 |
+| B6 | Executive under-desk | 40 lb | 52 | 40 |
+| B2 | Rotate 95 gallon | 300 lb | 21 | 9 |
+| B4 | Rotate 65 gallon | 175 lb | 3 | 2 |
+| S0 | Mobile shred truck | hourly | 4 | 1 |
+| S4 | Electronic media | per unit | 1 | 1 |
 
 ### The week around it
 
 | | Mon 14 | Tue 15 | Wed 16 | **Thu 17** | Fri 18 |
 |---|---|---|---|---|---|
-| Services | 152 | 265 | 189 | **272** | 111 |
+| Services booked | 184 | 209 | 216 | **283** | 117 |
+| Done | 125 | 108 | 160 | **200** | 44 |
+| Routes | 5 | 5 | 4 | **6** | 4 |
 
-Thursday was the peak. Friday is thin and single-stop days cluster there.
+Thursday was the peak. Friday is thin: 117 booked and only 44 confirmed done.
 
 ### What this day teaches the Activity screen
 
-- One row per route-day, driver named, with services, customers, postcodes, and what happened in a sentence. Mark's row and Angel's row should read as obviously different without colour doing the work.
-- The postcode list is the density signal. Five adjacent codes (Mark) against one code for one bin (Angel).
-- The flags on the customer table are the margin signal: three of the four biggest customers of the day are below cost.
-- Route-day margin becomes a number once pay rates are loaded; until then the sentence carries it ("a $680 route day for one bin").
+- One row per route-day, driver named, with services booked and done, customers, postcodes, and what happened in a sentence. Mark's row and Angel's row should read as obviously different without colour doing the work: 137 services in five adjacent postcodes against 13 in six scattered ones.
+- The postcode list is the density signal. Services per postcode is the comparison: Mark 27, FLT02 45, Angel 2.
+- Booked is not done. Over a quarter of Thursday’s bookings and almost two-thirds of Friday’s carry no completion flag; the screen shows both counts.
+- Route-day margin becomes a number once pay rates are loaded; until then it is a pending state and the sentence carries the day.
 
 ---
 
 ## 3. October's in-month range
 
-Use **$598k – $690k**, not $602k–$737k. The method:
+Use **$598k – $699k**. *Corrected 8 October 2026 from $598k–$690k: the top of the service range was understated.* The method:
 
-- Storage is known on the 1st: September billed $388,813, and October will be within a few hundred dollars of it.
-- Service is modelled from live orders. On a six-month view it has run $210k–$300k a month in core terms (excluding Citadel); September came in at $213k, the bottom of that range.
-- So October core = ~$388k + $210k–$300k = **$598k–$690k**, narrowing as orders are confirmed through the month.
+- Storage is known on the 1st. The October run (`v_current_run`, part `run`) carries **$387,101** of storage; September posted $388,813.
+- Service is modelled from the last six posted months of core service (service less Citadel, `kpi.monthly`): **$211,133** (September 2026) to **$311,665** (April 2026).
+- So October core = $387,101 + $211,133 to $311,665 = **$598,234 to $698,766**, narrowing as the run completes and posts.
 
-Mark it modelled. It gets replaced by the live figure once orders connect, but the range and the method are real.
+Mark it modelled. The run itself already carries $265,731 of service, $24,352 of it Citadel: **$241,379 core**, inside the range. Its 3,933 invoices are close to a full month (September posted 3,959), so if the run posts as it stands October core lands near $628k. The range stays the published figure until it posts.
 
 ---
 
-*Sources: VCK `A_CstInv` monthly totals (storage = Ret_Tot, service = Ser_Tot); Citadel ITAD from VCK invoices by customer; Thursday 17 September 2026 from Veri-Shred service orders by route, driver and postcode; weekday counts from 2026 service orders to date.*
+*Sources: VCK `A_CstInv` monthly totals (storage = Ret_Tot, service = Ser_Tot); Citadel from VCK invoices, `custno 00870`; Thursday 17 September 2026 and the week around it from `v_route_day` (Veri-Shred service orders); October range from `v_current_run` and `kpi.monthly`.*

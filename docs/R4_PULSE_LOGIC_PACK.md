@@ -10,16 +10,16 @@ All figures are real, from R4's VCK billing system, Veri-Shred operations system
 
 | Number | Value | Basis |
 |---|---|---|
-| Core revenue, monthly | **$643,842** | Storage plus service, six-month average to August 2026, Citadel ITAD held apart |
+| Core revenue, monthly | **$646,519** | Storage plus service, six-month average March to August 2026, invoice date, posted invoices only, Citadel (`custno 00870`) held apart |
 | Target | **$1,000,000 a month** | Trisha's stated goal for core storage and service |
-| Gap | **$356,158 a month** | Target less core |
+| Gap | **$353,481 a month** | Target less core |
 | Last twelve months revenue | $10.16m | Reconciles to the accounts within 0.4% |
 | Storage, LTM | $4.66m (46%) | Billed monthly in advance on the 1st; 422 customers; 1.2m boxes |
 | Service, LTM | $5.50m (54%) | Everything that needs a truck |
-| September 2026 billing | $602,218 | Storage $388,813 · Service $213,330 |
-| October in-month range | **$598k – $690k**, narrowing through the month | Storage known on the 1st at about $388k; service modelled from live orders at $210k–$300k on a six-month view |
-| September service vs August | **−39%** | August service was $347,992 — weakest service month in two years |
-| Early-2025 six-month average | $781,590 | The decline is −18% over eighteen months, three-quarters of it service |
+| September 2026 billing | $622,224 | Storage $388,813 · Service $233,411 (invoice date) |
+| October in-month range | **$598k – $699k**, narrowing through the month | Storage known from the October run at $387,101 (`v_current_run`); core service at the last six posted months' range, $211,133–$311,665 |
+| September service vs August | **−36%** | August service was $364,052 — September the weakest service month in two years, bar the November 2025 credit run |
+| Early-2025 six-month average | $781,590 | January–June 2025, same basis. The decline is −17% over eighteen months, three-quarters of it service |
 
 ---
 
@@ -28,7 +28,7 @@ All figures are real, from R4's VCK billing system, Veri-Shred operations system
 | | Storage | Service |
 |---|---|---|
 | Revenue, LTM | $4.66m | $5.50m |
-| Monthly range, 24 months | $380k – $447k | −$144k (credit month) to $784k |
+| Monthly range, 23 months | $380k – $447k | −$60,759 (November 2025 credit run) to $781,944 (April 2026) |
 | Customers | 422 | 219 active (up from 178 average in 2025, +23%) |
 | Growth, year on year | about −8% | customers up, revenue down |
 | Gross margin | about 62% (revenue less facilities pool) | not yet calculable — runs once the cost model is in the database. Empty state with that reason; expected well under 32% |
@@ -45,7 +45,7 @@ Use this for the six-level walkthrough. Every level has a real number.
 
 | Level | What it says | Number |
 |---|---|---|
-| 1 Company | Core revenue is short of target | $643,842 vs $1.0m |
+| 1 Company | Core revenue is short of target | $646,519 vs $1.0m |
 | 2 Half | Storage stepped down and stayed down | $417–447k through early 2025 → $381–387k from July 2025 |
 | 3 Family | Carton storage, not retrieval or handling | Storage line only |
 | 4 Customer | City of Chicago group has fallen 74% | $211,304 a month (Aug 2025) → $55,755 (Aug 2026), roughly $1.9m annualised |
@@ -147,14 +147,14 @@ At your price · at the comparison (median / list / upper quartile, user's choic
 | Fact | Value |
 |---|---|
 | Routes | Four daily: Mark (suburbs), Jorge (downtown), Demond (south), Angel (suburbs) — plus FLT02 and others |
-| A typical day | 272 services across 13 customers, 5 routes |
-| Weekday imbalance | Mon 152 · **Tue 265** · Wed 189 · **Thu 272** · **Fri 111** services a day — a 2.4× spread |
+| A typical day | Thursday 17 September 2026: 283 services booked, 200 done, 23 customers, 6 routes (`v_route_day`) |
+| Weekday imbalance | Week of 14 September 2026, booked: Mon 184 · Tue 209 · Wed 216 · **Thu 283** · **Fri 117** — a 2.4× spread; done: 125 · 108 · 160 · 200 · 44 |
 | Single-stop journeys | 1,145 trips in nine months carried one or two stops; ~$43k a year |
 | Scheduling | 97% of bin work booked as "Client Request Rotation" — reactive. Last schedule rule created May 2021 |
 | Bin fill | Measured bins emptied at 13–15% full |
 | Idle placements | 4,336 of 7,509 bin placements unserviced this year |
 | Route productivity | One route at 34 effort units a day vs 72–74 for peers |
-| Postcode concentration | Four customers are 72% of a day; Mark covers five south-suburb postcodes (60422, 60477, 60409, 60473, 60402) |
+| Postcode concentration | Four customers are 70% of 17 September; Mark covers five south-suburb postcodes (60409, 60422, 60448, 60473, 60477) |
 
 Route-day P&L per driver per day becomes computable once pay rates are loaded: invoiced value of the day's orders, less driver pay and $445,508 ÷ 1,134 of vehicle cost. The week grid is coloured by that margin.
 
@@ -172,7 +172,7 @@ Ten accounts a week, each put on the list by one of these signals:
 | Destruction with no storage | Citadel, $1.6m, 24% of revenue, nothing contractual | 1 critical |
 | Volume up 20% against own six-month run | from `kpi.customer_monthly` | varies weekly |
 | Boxes past retention review | 286,786 boxes across the book; destruction at $10 a box ≈ $2.87m one-off against ~$1.10m a year of storage forgone | by customer |
-| Account down two months running | City of Chicago group, every month since August 2025 | from `kpi.customer_monthly` |
+| Account down two months running | City of Chicago (level1 8153): below its own six-month mean every month since January 2026, flagged every month since February 2026 | from `kpi.customer_monthly` |
 
 Each card: the signal, the evidence in two lines with numbers, a suggested opening line, and three actions — call, email, not this week. Logging the outcome is the only input.
 

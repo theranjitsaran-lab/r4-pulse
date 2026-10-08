@@ -11,7 +11,8 @@ DigitalOcean Postgres database refreshed daily from two source systems: **VCK** 
 pricing, SQL Server) and **Veri-Shred** (operations, FoxPro).
 
 **The owner's target:** $1.0m a month in core storage and service revenue, Citadel ITAD held
-apart. Core is $643,842 on a six-month average. Every screen is organised around that gap.
+apart. Core is $646,519 on a six-month average (March to August 2026, invoice date, posted
+invoices only). Every screen is organised around that gap.
 
 **Three users, three rhythms.** Trisha Rooney (CEO, phone first, weekly). Mike Kelly (operations,
 desktop, 06:30 daily). Anne Sterne (billing and pricing, desktop, mid-task). Each screen is for one
@@ -101,10 +102,10 @@ If the model returns anything else, the model is wrong.
 4. **Storage bills in advance, service in arrears.** A billing month is this month's storage and last month's work.
 5. **Never divide twelve months of `ret_tot` by boxes.** Use a single recent month.
 6. **Executive bin weights (B3, B6) sit at capacity on every order** — a default, not a weigh. 95-gallon weights are real.
-7. **`invoices` holds posted months only.** The live month is `invoices_current` / `priced_lines_current`.
+7. **The live month is whatever `invoices_current` holds with no `invdate`.** When a run posts, its rows move to `invoices` with an `invdate`. The posted series reads `invoices` only. `invoices_current` is read only through `v_current_run`: the undated rows are the run, and the few dated rows (printed, not yet in `invoices`; 14 on 8 October 2026) are shown there as pending until they post. Work done is `priced_lines_current`, joined by `invoice_no`.
 8. **GPS, arrival times and service duration were never captured** — zero real values across 365,000 records. Build nothing that needs them.
 9. **The `units` field on retrieval, return and destruction-pull lines is the box barcode.** One row per box. That is the bottom of the drill path.
-10. **Citadel's September ITAD ($233,100 by customer) exceeds total September service ($213,330 in `invoices_current`).** The two series are on different bases. Reconcile before drawing the Citadel band for September; until then leave September out of the band and say so in the source line.
+10. **Citadel is `ser_tot` where `custno = '00870'`, on posted invoices.** September 2026 is $22,278 against $233,411 of total service. The $233,100 once quoted as Citadel's September was not a Citadel figure, and the smooth Citadel series in the first addendum (168,900 → 233,100) did not come from the database and is withdrawn. Citadel runs from −$432,637 (November 2025 credit run) to $470,279 (April 2026); carry negatives, never clip them.
 11. **Driver payroll is $510,098 from GL `7335700`**, not the $256,429 ADP figure. **`7400 Transportation` is air travel**, not vehicles.
 
 ## Writing rules
