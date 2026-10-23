@@ -1,0 +1,15 @@
+# Secrets: DATABASE_URL, SESSION_SECRET, AUTH_USERS live in .env or the environment, never in git
+.env
+.env.*
+!.env.example
+
+node_modules/
+
+# Client source files (P&L, exports) stay out of the repo
+data-received/
+*.xlsx
+*.xls
+*.csv
+
+.DS_Store
+Thumbs.db
