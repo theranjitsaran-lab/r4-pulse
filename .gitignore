@@ -2,3 +2,8 @@
 node_modules/
 fixtures/*.json
 !fixtures/README.md
+
+# Client source files (P&L, exports) stay out of the repo
+*.xlsx
+*.xls
+*.csv

@@ -10,7 +10,8 @@
     "start": "node server/index.js",
     "snapshot": "node server/snapshot.js",
     "kpi:rebuild": "node server/kpi_rebuild.js",
-    "test": "node --test model/*.test.js"
+    "test": "node --test model/*.test.js",
+    "test:offline": "cross-env DATABASE_URL= node --test model/*.test.js"
   },
   "engines": { "node": ">=20" },
   "dependencies": {

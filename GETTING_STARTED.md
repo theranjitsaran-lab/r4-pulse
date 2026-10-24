@@ -9,7 +9,7 @@ Three files sit alongside this one. Put all four in the repo before you start:
 - `DECISIONS.md` — what is already settled, so nothing gets relitigated
 - `PROMPTS.md` — the exact prompts to paste, in order
 
-You will also want `R4_PULSE_BUILD_SPEC.md`, `R4_GL_Allocation_Analysis.md` and
+You will also want `R4_PULSE_BUILD_SPEC.md`, `docs/R4_GL_Allocation_Analysis.md` and
 `r4_pulse_prototype.html` from earlier in the engagement.
 
 ---
