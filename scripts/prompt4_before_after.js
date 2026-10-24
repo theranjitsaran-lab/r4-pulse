@@ -30,7 +30,7 @@ const ACCOUNTS = [
   { label: 'City of Chicago 2FM', like: '%2fm%' },
   { label: 'UChicago Medicine', like: '%chicago medicine%' },
   { label: 'Chapman & Cutler', like: '%chapman%' },
-  { label: 'Walsh', like: '%walsh%' },
+  { label: 'Walsh', like: '%walsh group%' },
   { label: 'Citadel', level1: 6714 },
 ];
 
