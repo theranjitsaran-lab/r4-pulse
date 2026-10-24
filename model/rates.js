@@ -48,7 +48,13 @@ const MODEL = {
     route_days: 1322,     // route-days with a done service
     boxes:      1135790,  // mean monthly box count
     movements:  65065,    // retrieval, pull and return boxes 51,612 + delivery boxes 13,453
-    pounds:     1756127,  // recorded on done orders; 60% B3/B6 capacity defaults
+    // Plant pounds, all from VCK priced lines so each account's charge and the rate's total are
+    // the same pounds. S5 reconciles to Veri-Shred within 0.3% where both exist.
+    pounds_s3:      836376,   // S3 certified shredding, billed per lb
+    pounds_s5:      2132048,  // S5 weight recorded on bin, purge and shred-truck work
+    shred_boxes:    12453,    // R3 12,383 + R5 1 + SC 69 (a cubic foot counted as a box): no weight
+    lb_per_box:     28.4,     // S5 lb ÷ boxes on the 256 work orders carrying both
+    bins_unweighed: 114,      // bin services on the 16 accounts with no S5 weight
     visits:     4329,     // customer-days: date × route × customer with a done service
     services:   25102,    // done services; completion confirmed on 54% of services
   },
@@ -64,8 +70,10 @@ const FIXED = {
     d: 'ADP payroll, Service Centre, loaded. No hours volume in the database; not pool-derived' },
   avgMiles:   { v: 11.4,  u: 'miles from the yard', c: 'observed',
     d: 'volume-weighted mean distance to 150 postcode centroids' },
-  lbPerBin:   { v: 24,    u: 'lb per bin service', c: 'partial',
-    d: 'Ingalls 167,640 lb ÷ 6,886 services — executive consoles sit at capacity on every order, not weighed' },
+  // Used only where an account has no S5 weight of its own. S5 lb ÷ bin services on work orders
+  // carrying S5 and a single bin code, September 2025 to August 2026.
+  lbPerBin:   { v: { B2: 219.3, B3: 34.9, B4: 121.7, B6: 15.7, all: 74.5 }, u: 'lb per bin service', c: 'estimate',
+    d: 'S5 recorded weight ÷ bin services on single-code work orders, September 2025 to August 2026: 95-gallon (B2) 219.3 lb, 65-gallon (B4) 121.7, executive (B3) 34.9, under-desk (B6) 15.7; 74.5 across all four. Used only where an account has no S5 weight' },
   lbPerItad:  { v: 1.5,   u: 'lb per ITAD unit', c: 'estimate',
     d: 'a drive or media unit; media destruction is not weighed, so the paper rate stands in' },
 };
@@ -84,14 +92,18 @@ function derive(model) {
   const per = `annualised × 12 ÷ ${model.gl.months} from the GL ${model.gl.from} to ${model.gl.to}; volumes ${model.volumesPeriod}`;
 
   const fac = pool('facilities'), hnd = pool('handling'), shr = pool('shred_plant'), rd = pool('route_day');
+  const lbBoxes = v.shred_boxes * v.lb_per_box, lbBins = v.bins_unweighed * FIXED.lbPerBin.v.all;
+  const lb = v.pounds_s3 + v.pounds_s5 + lbBoxes + lbBins;
   for (const key of Object.keys(RATES)) delete RATES[key];
   Object.assign(RATES, {
     facilities: { v: fac / (v.boxes * 12), u: '$ per box per month', c: 'provisional', n: PROVISIONAL,
       d: `${parts('facilities')}: ${m0(fac)} a year ÷ (${n0(v.boxes)} boxes × 12 months) = ${m4(fac / (v.boxes * 12))}; ${per}` },
     handling:   { v: hnd / v.movements, u: '$ per box movement', c: 'provisional', n: PROVISIONAL,
       d: `${parts('handling')}: ${m0(hnd)} a year ÷ ${n0(v.movements)} box movements = ${m2(hnd / v.movements)}. Movements are retrieval, pull and return boxes plus delivery boxes, all handled in the warehouse; ${per}` },
-    shredPlant: { v: shr / v.pounds, u: '$ per lb', c: 'provisional', n: PROVISIONAL,
-      d: `${parts('shred_plant')}: ${m0(shr)} a year ÷ ${n0(v.pounds)} lb = ${m4(shr / v.pounds)}. The pounds are partial: 60% is B3/B6 capacity defaults, 696,887 lb actually weighed, and the cost side applies the same defaults; ${per}` },
+    shredPlant: { v: shr / lb, u: '$ per lb', c: 'provisional', n: PROVISIONAL,
+      d: `${parts('shred_plant')}: ${m0(shr)} a year ÷ ${n0(lb)} lb = ${m4(shr / lb)}. The pounds are S3 weighed shredding ${n0(v.pounds_s3)} + S5 recorded weight ${n0(v.pounds_s5)} + ${n0(v.shred_boxes)} unweighed shred boxes at ${v.lb_per_box} lb (${n0(lbBoxes)}) + ${n0(v.bins_unweighed)} unweighed bins at ${FIXED.lbPerBin.v.all} lb (${n0(lbBins)}). S5 agrees with Veri-Shred within 0.3% where both exist; 19% of it has no Veri-Shred weight (shred truck, one-offs). Shred-truck pounds count as plant pounds until confirmed otherwise; ${per}` },
+    lbPerBox:   { v: v.lb_per_box, u: 'lb per shred box', c: 'estimate',
+      d: `S5 recorded weight ÷ boxes on the 256 work orders carrying both S5 and R3/R4/R5 box counts (median 28.3), ${model.volumesPeriod}. Applied to shred boxes billed with no weight` },
     routeDay:   { v: rd / v.route_days, u: '$ per route day', c: 'provisional', n: PROVISIONAL,
       d: `${parts('route_day')}: ${m0(rd)} a year ÷ ${n0(v.route_days)} route days = ${m2(rd / v.route_days)}; ${per}` },
     visitsDay:  { v: v.visits / v.route_days, u: 'customer visits per route day', c: 'observed',
@@ -154,13 +166,17 @@ function onSitePerVisit() {
 /**
  * costToServe(family, units, opts)
  *   family  one of FAMILIES
- *   units   boxes (storage), movements (handling, movement), bin services, ITAD units, pounds (shred), hours
- *   opts    { visits, miles, isCentre }
+ *   units   boxes (storage), movements (handling, movement), bin services, ITAD units,
+ *           pounds or shred boxes (shred), hours
+ *   opts    { visits, miles, isCentre,
+ *             pounds   bin: the account's S5 recorded pounds; without it, bins × lb per bin
+ *             binCode  bin: B2, B3, B4 or B6 for the lb-per-bin estimate when there is no S5
+ *             unit     shred: 'box' for shred boxes billed with no weight (R3, R4, R5, SC) }
  * returns { lines: [[name, amount, derivation]], total, perUnit, visits }
  */
 function costToServe(family, units, opts) {
   if (!FAMILIES.includes(family)) throw new Error(`unknown family: ${family}`);
-  const o = Object.assign({ visits: null, miles: RATES.avgMiles.v, isCentre: false }, opts || {});
+  const o = Object.assign({ visits: null, miles: RATES.avgMiles.v, isCentre: false, pounds: null, binCode: null, unit: 'lb' }, opts || {});
   units = Math.max(0, Number(units) || 0);
   const upv = UNITS_PER_VISIT[family];
   const visits = (o.visits != null && o.visits > 0) ? Number(o.visits)
@@ -168,7 +184,8 @@ function costToServe(family, units, opts) {
 
   const lines = [];
   let total = 0;
-  const add = (name, amount, why) => { lines.push([name, amount, why]); total += amount; };
+  // a fourth element marks a line resting on an estimate, for the ◇ mark
+  const add = (name, amount, why, flag) => { lines.push(flag ? [name, amount, why, flag] : [name, amount, why]); total += amount; };
   const tpv = travelPerVisit(o.miles), opv = onSitePerVisit();
   const routeLines = (what) => {
     add(family === 'itad' ? 'Truck time' : 'Travel to site', visits * tpv,
@@ -193,8 +210,15 @@ function costToServe(family, units, opts) {
       break;
     case 'bin':
       routeLines('visits');
-      add('Shred plant', units * RATES.lbPerBin.v * RATES.shredPlant.v,
-        `${units.toLocaleString('en-US')} bins at roughly ${RATES.lbPerBin.v} lb, ${m2(RATES.shredPlant.v)} a pound. ${RATES.lbPerBin.d}.`);
+      if (o.pounds != null) {
+        add('Shred plant', o.pounds * RATES.shredPlant.v,
+          `${Number(o.pounds).toLocaleString('en-US')} lb recorded on S5 at ${m4(RATES.shredPlant.v)} a pound. ${RATES.shredPlant.d}.`);
+      } else {
+        const code = RATES.lbPerBin.v[o.binCode] ? o.binCode : 'all';
+        const lbs = RATES.lbPerBin.v[code];
+        add('Shred plant', units * lbs * RATES.shredPlant.v,
+          `${units.toLocaleString('en-US')} bins at an estimated ${lbs} lb${code === 'all' ? '' : ` (${code})`}, ${m4(RATES.shredPlant.v)} a pound. No S5 weight on this account: ${RATES.lbPerBin.d}.`, 'estimate');
+      }
       break;
     case 'itad':
       routeLines('collections');
@@ -202,8 +226,13 @@ function costToServe(family, units, opts) {
         `${units.toLocaleString('en-US')} units at about ${RATES.lbPerItad.v} lb, ${m2(RATES.shredPlant.v)} a pound. ${RATES.lbPerItad.d}.`);
       break;
     case 'shred':
-      add('Shred plant', units * RATES.shredPlant.v,
-        `${units.toLocaleString('en-US')} lb weighed at ${m4(RATES.shredPlant.v)} a pound. Paper shredded at the plant; the route that brought it carries its own cost.`);
+      if (o.unit === 'box') {
+        add('Shred plant', units * RATES.lbPerBox.v * RATES.shredPlant.v,
+          `${units.toLocaleString('en-US')} boxes at an estimated ${RATES.lbPerBox.v} lb, ${m4(RATES.shredPlant.v)} a pound. ${RATES.lbPerBox.d}.`, 'estimate');
+      } else {
+        add('Shred plant', units * RATES.shredPlant.v,
+          `${units.toLocaleString('en-US')} lb weighed at ${m4(RATES.shredPlant.v)} a pound. Paper shredded at the plant; the route that brought it carries its own cost.`);
+      }
       break;
     case 'labour': {
       const h = o.isCentre ? RATES.centreHr : RATES.driverHr;

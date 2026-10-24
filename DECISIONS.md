@@ -20,6 +20,8 @@ to reach. Newest section first.
 | **October range** | $598k–$699k, was $598k–$690k: storage $387,101 from `v_current_run` plus core service $211,133–$311,665, the last six posted months (Apr–Sep 2026) |
 | **City of Chicago down-since** | Below its own trailing-six mean every month since January 2026, flagged two-down since February 2026; was "every month since August 2025" |
 | **Service credit month** | November 2025 at −$60,759, the 23-month low; was "−$144k". The high is April 2026 at $781,944, was "$784k" |
+| **Shred plant pounds** | One source, VCK priced lines, for both the rate's total and each account's charge: S3 weighed shredding + S5 recorded weight + unweighed shred boxes (R3/R5/SC) at 28.4 lb + unweighed bins at lb per bin by size. 3,330,582 lb; shred plant $0.1406/lb, provisional. Chosen 24 October 2026 over Veri-Shred weights: S5 agrees with Veri-Shred within 0.3% where both exist, also covers the 19% Veri-Shred never weighs (shred truck, one-offs), and does not carry the B3/B6 capacity default |
+| **Lb per bin** | The flat 24 lb is withdrawn. Where an account has no S5: 95-gallon 219.3, 65-gallon 121.7, executive 34.9, under-desk 15.7, from S5 on single-code work orders. Flagged estimate |
 | **17 September 2026** | 283 booked, 200 done, 23 customers, 6 routes from `v_route_day`; was 272, 13 and 5. Angel ran 13 services across 6 customers, not one bin. Activity reproduces `v_route_day`, not the addendum |
 
 ## Design — settled 7 October 2026, in Claude Design
@@ -110,6 +112,7 @@ diagnostic narrative, never in the cost of service.
 - **Mike:** can Teletrac export mileage and stop duration? It would replace `SPLIT`
 - **Mike:** real travel / on-site split; rack capacity and square footage of the three centres
 - **Mike:** driver pay rates by person, with overtime — turns the route day into a real P&L per driver per day
+- **Mike:** does shred-truck (S0) paper come back through the plant, or is it finished on site? If on site, its S5 pounds leave the plant total — one row in `model.service_family`
 - **Anne:** are the sixteen never-raised accounts contractually fixed?
 - **Anne:** does a permanent-withdrawal or termination fee exist in the price sheet?
 - **Anne:** is shredded paper sold, and where does that revenue land in the GL?

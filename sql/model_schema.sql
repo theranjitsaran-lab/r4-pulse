@@ -150,8 +150,19 @@ INSERT INTO model.driver_volume (driver, value, period_from, period_to, source) 
      'storage_rate_hist: mean of the twelve monthly box counts'),
   ('movements',  65065,   '2025-09-01', '2026-08-31',
      'priced_lines + priced_lines_current units on codes model.service_family marks volume = movements: retrieval, pull and return boxes 51,612 (servtype R box codes 45,439 + T returns 6,173) and delivery boxes 13,453. Returns and delivery boxes are handled in the warehouse too'),
-  ('pounds',     1756127, '2025-09-01', '2026-08-31',
-     'vs_service_orders weight on done orders. Partial: 60% is B3/B6 capacity defaults; 696,887 lb actually weighed'),
+  -- Plant pounds: all from VCK priced lines, so the rate's total and each account's charge are the
+  -- same pounds. Reconciled 24 October 2026: S5 agrees with Veri-Shred weight within 0.3% on the
+  -- account-days where both exist; 19% of S5 has no Veri-Shred order (shred truck, one-offs).
+  ('pounds_s3',      836376,  '2025-09-01', '2026-08-31',
+     'priced_lines + priced_lines_current units, servcode S3 (certified shredding per lb)'),
+  ('pounds_s5',      2132048, '2025-09-01', '2026-08-31',
+     'priced_lines + priced_lines_current units, servcode S5 (weight recorded on bin, purge and shred-truck work). Shred-truck pounds count as plant pounds until Mike confirms whether that paper comes back through the plant'),
+  ('shred_boxes',    12453,   '2025-09-01', '2026-08-31',
+     'priced_lines + priced_lines_current units on shred-by-box codes with no weight: R3 12,383, R5 1, SC 69 (a cubic foot counted as a box), R4 0'),
+  ('lb_per_box',     28.4,    '2025-09-01', '2026-08-31',
+     'S5 lb ÷ R3/R4/R5 boxes on the 256 work orders carrying both (12,898 boxes; median 28.3 a box). An estimate, applied to shred_boxes'),
+  ('bins_unweighed', 114,     '2025-09-01', '2026-08-31',
+     'B1–B6 bin services on the 16 accounts with bin work and no S5 weight ($1,141 of bin revenue). Estimated at the all-bin lb per bin in model/rates.js'),
   ('visits',     4329,    '2025-09-01', '2026-08-31',
      'vs_service_orders: customer-days, distinct date × route × customer with a done service'),
   ('services',   25102,   '2025-09-01', '2026-08-31',
@@ -159,7 +170,7 @@ INSERT INTO model.driver_volume (driver, value, period_from, period_to, source) 
 ON CONFLICT (driver) DO UPDATE SET
   value = EXCLUDED.value, period_from = EXCLUDED.period_from, period_to = EXCLUDED.period_to,
   source = EXCLUDED.source;
-DELETE FROM model.driver_volume WHERE driver = 'stops';
+DELETE FROM model.driver_volume WHERE driver IN ('stops', 'pounds');
 
 -- ── Service codes: which cost family each belongs to and what its units count ───────────────
 -- unit: what one unit on a priced line means. drives_cost: the line's units feed the account's
@@ -230,12 +241,12 @@ INSERT INTO model.service_family (servcode, servtype, family, unit, drives_cost,
   ('S9', 'S', 'itad', 'device', true,  NULL, 'printer ribbons'),
   ('SI', 'S', 'itad', 'dollar', false, NULL, 'certified shredding ITAD: units are dollars'),
   -- shred: weighed paper, plant cost per pound, no route time of its own
-  ('S3', 'S', 'shred', 'lb',         true,  NULL, 'certified shredding per lb'),
-  ('S5', 'S', 'shred', 'lb',         true,  NULL, 'zero-rated weight record for bin and purge work'),
-  ('R3', 'S', 'shred', 'box',        false, NULL, 'shredding fee per standard box; no weight on the line'),
-  ('R4', 'S', 'shred', 'box',        false, NULL, 'shredding fee per letter box; no weight'),
-  ('R5', 'S', 'shred', 'box',        false, NULL, 'shredding fee per legal box; no weight'),
-  ('SC', 'S', 'shred', 'cubic foot', false, NULL, 'shredding by cubic foot; no weight'),
+  ('S3', 'S', 'shred', 'lb',         true,  'pounds_s3',   'certified shredding per lb'),
+  ('S5', 'S', 'shred', 'lb',         true,  'pounds_s5',   'zero-rated weight record for bin, purge and shred-truck work; on bin accounts it is the bin plant line'),
+  ('R3', 'S', 'shred', 'box',        true,  'shred_boxes', 'shredding fee per standard box; no weight, costed at lb_per_box'),
+  ('R4', 'S', 'shred', 'box',        true,  'shred_boxes', 'shredding fee per letter box; no weight, costed at lb_per_box'),
+  ('R5', 'S', 'shred', 'box',        true,  'shred_boxes', 'shredding fee per legal box; no weight, costed at lb_per_box'),
+  ('SC', 'S', 'shred', 'cubic foot', true,  'shred_boxes', 'shredding by cubic foot; no weight, a cubic foot counted as a box'),
   -- labour
   ('53', 'L', 'labour', 'hour',   true,  NULL, 'customer support'),
   ('54', 'L', 'labour', 'hour',   true,  NULL, 'data entry'),

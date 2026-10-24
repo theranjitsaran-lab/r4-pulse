@@ -101,7 +101,7 @@ If the model returns anything else, the model is wrong.
 3. **All Veri-Shred columns are text.** Cast everything: `NULLIF(weight,'')::numeric`.
 4. **Storage bills in advance, service in arrears.** A billing month is this month's storage and last month's work.
 5. **Never divide twelve months of `ret_tot` by boxes.** Use a single recent month.
-6. **Executive bin weights (B3, B6) sit at capacity on every order** — a default, not a weigh. 95-gallon weights are real.
+6. **Executive bin weights (B3, B6) sit at capacity in Veri-Shred** — a default, not a weigh. 95-gallon weights are real. **Plant pounds come from S5 in VCK**, which does not carry the default and agrees with Veri-Shred within 0.3% in total where both exist.
 7. **The live month is whatever `invoices_current` holds with no `invdate`.** When a run posts, its rows move to `invoices` with an `invdate`. The posted series reads `invoices` only. `invoices_current` is read only through `v_current_run`: the undated rows are the run, and the few dated rows (printed, not yet in `invoices`; 14 on 8 October 2026) are shown there as pending until they post. Work done is `priced_lines_current`, joined by `invoice_no`.
 8. **GPS, arrival times and service duration were never captured** — zero real values across 365,000 records. Build nothing that needs them.
 9. **The `units` field on retrieval, return and destruction-pull lines is the box barcode.** One row per box. That is the bottom of the drill path.

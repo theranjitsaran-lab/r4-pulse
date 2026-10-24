@@ -24,17 +24,17 @@ Where the build stands. Update it at the end of each prompt.
 Committed as WIP (`c75599c`). `sql/model_schema.sql` is applied to the live database; rates are
 derived as pool ÷ the database's twelve-month volume, all provisional. 12/12 tests pass.
 
-Open, waiting on Theran:
+**S5 decided 24 October 2026** (branch `prompt4-shred`): plant pounds all from VCK, S3 + S5 +
+unweighed shred boxes at 28.4 lb + unweighed bins by size = 3,330,582 lb; shred plant $0.1406/lb.
+See DECISIONS.md "Shred plant pounds". 15/15 tests pass offline and against a local Postgres.
 
-1. **S5 pounds.** S5 double-counts bin paper, and S3 + S5 (2,968,424 lb) does not match the shred
-   rate's denominator (1,756,127 lb).
-   - (a) S5 drives shred cost, the bin family drops its own pound line, volume = S3 + S5,
-     shred rate about $0.158/lb.
-   - (b) S5 is a record only, S3 drives shred, and S3's 836,376 lb is added to the volume.
-2. Then the eight-account before/after (Ingalls, Larabida, ICU Medical, City of Chicago 2FM,
-   UChicago Medicine, Chapman & Cutler, Walsh, Citadel). Stop if any margin changes sign.
-3. Then replace the rate figures in CLAUDE.md, the logic pack and the margin spec, add the
-   DECISIONS.md line, and commit "Prompt 4: model schema; rates derived from pools and database
+Next:
+
+1. **On the PC:** `node scripts/prompt4_before_after.js` (read-only) prints each rate and the
+   eight accounts' margins before and after. Exits 2 and says STOP if any margin changes sign.
+2. If none does, apply `sql/model_schema.sql` on the PC and rerun `npm test` there. Open: Mike on
+   shred-truck paper (DECISIONS.md, open questions).
+3. Then replace the rate figures in CLAUDE.md, the logic pack and the margin spec, and commit "Prompt 4: model schema; rates derived from pools and database
    volumes".
 
 ## Next
