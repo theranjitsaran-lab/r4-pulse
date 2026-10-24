@@ -1,5 +1,5 @@
 {
- "snapshotAt": "2026-10-24T22:40:10.989Z",
+ "snapshotAt": "2026-10-24T22:45:50.430Z",
  "data": {
   "monthly": [
    {
@@ -865,301 +865,301 @@
   "concentration": [
    {
     "level1": 6714,
-    "customer": "2q`",
+    "customer": "CITADEL",
     "ltm": 1636479.54,
     "share": 0.16890695079246956
    },
    {
     "level1": 8153,
-    "customer": "2q`",
+    "customer": "CITY OF CHICAGO",
     "ltm": 723629.69,
     "share": 0.0746884280880163
    },
    {
     "level1": 947,
-    "customer": "2q`",
+    "customer": "CHAPMAN & CUTLER",
     "ltm": 500334.95,
     "share": 0.05164137327338826
    },
    {
     "level1": 3507,
-    "customer": "2q`",
+    "customer": "ACCESS COMMUNITY HEALTH NETWORK",
     "ltm": 281960.4,
     "share": 0.02910214899981275
    },
    {
     "level1": 9703,
-    "customer": "2q`",
+    "customer": "ICU MEDICAL",
     "ltm": 203114.75,
     "share": 0.02096420532301599
    },
    {
     "level1": 1,
-    "customer": "2q`",
+    "customer": "K&L GATES LLP",
     "ltm": 190094.75,
     "share": 0.01962036420214383
    },
    {
     "level1": 9993,
-    "customer": "2q`",
+    "customer": "CHICAGO PUBLIC SCHOOLS",
     "ltm": 186210.97,
     "share": 0.01921950527215759
    },
    {
     "level1": 2948,
-    "customer": "2q`",
+    "customer": "WALSH GROUP",
     "ltm": 170999.72,
     "share": 0.017649497342060307
    },
    {
     "level1": 6382,
-    "customer": "2q`",
+    "customer": "METRA",
     "ltm": 161035.57,
     "share": 0.016621061512218652
    },
    {
     "level1": 1891,
-    "customer": "2q`",
+    "customer": "MUCH SHELIST, P.C.",
     "ltm": 156779.01,
     "share": 0.016181726615025135
    },
    {
     "level1": 12601,
-    "customer": "2q`",
+    "customer": "UNIVERSITY OF CHICAGO MEDICINE",
     "ltm": 151613.39,
     "share": 0.01564856435920335
    },
    {
     "level1": 50,
-    "customer": "2q`",
+    "customer": "PEDERSEN AND HOUPT",
     "ltm": 147223.79,
     "share": 0.015195497924166454
    },
    {
     "level1": 5369,
-    "customer": "2q`",
+    "customer": "ACCESS COMMUNITY LEASED PROPERTY",
     "ltm": 138240,
     "share": 0.014268248582900702
    },
    {
     "level1": 6008,
-    "customer": "2q`",
+    "customer": "CBOE EXCHANGE INC",
     "ltm": 129603.65,
     "share": 0.013376859776123108
    },
    {
     "level1": 1977,
-    "customer": "2q`",
+    "customer": "SG AMERICAS SECURITIES LLC",
     "ltm": 121929.15,
     "share": 0.012584746974115936
    },
    {
     "level1": 1754,
-    "customer": "2q`",
+    "customer": "LATHAM & WATKINS",
     "ltm": 118081.19,
     "share": 0.01218758515541615
    },
    {
     "level1": 2972,
-    "customer": "2q`",
+    "customer": "ATTORNEY GENERAL'S OFFICE",
     "ltm": 115065.39,
     "share": 0.011876313569215976
    },
    {
     "level1": 10720,
-    "customer": "2q`",
+    "customer": "CHICAGO PARK DISTRICT RECORDS",
     "ltm": 107671.44,
     "share": 0.011113157343741882
    },
    {
     "level1": 2345,
-    "customer": "2q`",
+    "customer": "MCANDREWS, HELD & MALLOY",
     "ltm": 102237.49,
     "share": 0.01055229978162489
    },
    {
     "level1": 6526,
-    "customer": "2q`",
+    "customer": "CHICAGO HOUSING AUTHORITY",
     "ltm": 101988.74,
     "share": 0.010526625397691175
    },
    {
     "level1": 5201,
-    "customer": "2q`",
+    "customer": "KILPATRICK, TOWNSEND AND STOCKTON LLP",
     "ltm": 98115.08,
     "share": 0.01012681098937492
    },
    {
     "level1": 4418,
-    "customer": "2q`",
+    "customer": "TURNER CONSTRUCTION",
     "ltm": 94822.72,
     "share": 0.009786994648920645
    },
    {
     "level1": 8389,
-    "customer": "2q`",
+    "customer": "UNITED AIRLINES",
     "ltm": 84540.64,
     "share": 0.008725744118037605
    },
    {
     "level1": 4089,
-    "customer": "2q`",
+    "customer": "JOHNSON & BELL",
     "ltm": 83054.7,
     "share": 0.008572374895675947
    },
    {
     "level1": 1732,
-    "customer": "2q`",
+    "customer": "SOLOMON CORDWELL BUENZ",
     "ltm": 82664.24,
     "share": 0.008532074111954308
    },
    {
     "level1": 8107,
-    "customer": "2q`",
+    "customer": "CITY COLLEGES OF CHICAGO",
     "ltm": 78718.2,
     "share": 0.008124789102998365
    },
    {
     "level1": 6782,
-    "customer": "2q`",
+    "customer": "GROSVENOR CAPITAL MANAGEMENT IT/DISASTER RECOVERY",
     "ltm": 78551.55,
     "share": 0.008107588555932825
    },
    {
     "level1": 5236,
-    "customer": "2q`",
+    "customer": "MERCY",
     "ltm": 67523.3,
     "share": 0.006969323130336943
    },
    {
     "level1": 3337,
-    "customer": "2q`",
+    "customer": "MCHUGH CONSTRUCTION",
     "ltm": 66630.51,
     "share": 0.0068771750570417465
    },
    {
     "level1": 8689,
-    "customer": "2q`",
+    "customer": "METROPOLITAN WATER RECLAMATION DISTRICT OF CHICAGO",
     "ltm": 63147.42,
     "share": 0.006517672785943543
    },
    {
     "level1": 1607,
-    "customer": "2q`",
+    "customer": "PUBLIC BUILDING COMMISSION",
     "ltm": 62889.65,
     "share": 0.006491067415303972
    },
    {
     "level1": 1078,
-    "customer": "2q`",
+    "customer": "MOLEX, LLC",
     "ltm": 61797.43,
     "share": 0.006378335453012191
    },
    {
     "level1": 1138,
-    "customer": "2q`",
+    "customer": "WOLTERS KLUWER",
     "ltm": 55472.19,
     "share": 0.005725484638005631
    },
    {
     "level1": 62,
-    "customer": "2q`",
+    "customer": "WIGHT AND COMPANY",
     "ltm": 53657.55,
     "share": 0.005538189104090159
    },
    {
     "level1": 1003,
-    "customer": "2q`",
+    "customer": "NEAL & LEROY, LLC",
     "ltm": 53572.08,
     "share": 0.005529367437377337
    },
    {
     "level1": 10165,
-    "customer": "2q`",
+    "customer": "COMED CLOUD MANAGEMENT",
     "ltm": 51744.33,
     "share": 0.005340718773116654
    },
    {
     "level1": 8006,
-    "customer": "2q`",
+    "customer": "WISCONSIN ENERGY GROUP PO#4510519019",
     "ltm": 49556.33,
     "share": 0.005114887408103729
    },
    {
     "level1": 6872,
-    "customer": "2q`",
+    "customer": "REYES HOLDINGS",
     "ltm": 48134.61,
     "share": 0.00496814656337513
    },
    {
     "level1": 5682,
-    "customer": "2q`",
+    "customer": "ASSURANT",
     "ltm": 48120.3,
     "share": 0.004966669576705415
    },
    {
     "level1": 8700,
-    "customer": "2q`",
+    "customer": "CHICAGO PUBLIC LIBRARY FOUNDATION",
     "ltm": 48093.59,
     "share": 0.0049639127413491566
    },
    {
     "level1": 3201,
-    "customer": "2q`",
+    "customer": "WEST SUBURBAN HOSPITAL",
     "ltm": 47224.29,
     "share": 0.004874189155606132
    },
    {
     "level1": 6778,
-    "customer": "2q`",
+    "customer": "GROSVENOR CAPITAL MANAGEMENT, LP. MAIN",
     "ltm": 44380.06,
     "share": 0.004580625927401968
    },
    {
     "level1": 1042,
-    "customer": "2q`",
+    "customer": "SCHNEIDER ELECTRIC",
     "ltm": 41085.3,
     "share": 0.004240561874298685
    },
    {
     "level1": 359,
-    "customer": "2q`",
+    "customer": "ENCYCLOPEDIA BRITANNICA",
     "ltm": 39055.92,
     "share": 0.00403110225111316
    },
    {
     "level1": 3197,
-    "customer": "2q`",
+    "customer": "NATIONAL EQUITY FUND",
     "ltm": 38907.89,
     "share": 0.004015823541349511
    },
    {
     "level1": 12530,
-    "customer": "2q`",
+    "customer": "INGALLS HOSPITAL",
     "ltm": 38488.25,
     "share": 0.003972510984670341
    },
    {
     "level1": 1758,
-    "customer": "2q`",
+    "customer": "NATIONAL FUTURES ASSOCIATION",
     "ltm": 37356.5,
     "share": 0.003855698988622179
    },
    {
     "level1": 1779,
-    "customer": "2q`",
+    "customer": "AMERICAN HOSPITAL ASSOCIATION",
     "ltm": 37149.81,
     "share": 0.0038343657688623433
    },
    {
     "level1": 3849,
-    "customer": "2q`",
+    "customer": "VI CHICAGO",
     "ltm": 36936.85,
     "share": 0.003812385399806972
    },
    {
     "level1": 7010,
-    "customer": "2q`",
+    "customer": "DEPAUL UNIVERSITY LIBRARIES",
     "ltm": 35815.44,
     "share": 0.0036966406324216226
    }
