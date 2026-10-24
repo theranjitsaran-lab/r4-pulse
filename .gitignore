@@ -7,3 +7,6 @@ fixtures/*.json
 *.xlsx
 *.xls
 *.csv
+
+# Script output with client figures stays local
+levers_output.txt
