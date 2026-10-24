@@ -21,21 +21,22 @@ Where the build stands. Update it at the end of each prompt.
 
 ## In progress — Prompt 4, the model schema
 
-Committed as WIP (`c75599c`). `sql/model_schema.sql` is applied to the live database; rates are
-derived as pool ÷ the database's twelve-month volume, all provisional. 12/12 tests pass.
+Branch `levers` (on top of `prompt4-shred` and `setup-tidy`). Rates derived as GL pool ÷ the
+database's twelve-month volume, all provisional: route day $450.62 · handling $7.53 · shred plant
+$0.1509/lb · facilities $0.0994. Measured 24 October 2026 (`scripts/measure.js`): shred-truck pounds
+(228,493) come out of the plant total; Veri-Shred done bins agree with VCK billing within 4%; the
+decline is mostly a Pfizer prepayment and an ended badging project plus Access and 2FM. Ingalls and
+ICU Medical sign changes accepted. CLAUDE.md, the logic pack and the margin spec carry the new
+rates and the Ingalls worked check ($10.53 a bin, +$1,148). 15/15 tests, offline and local Postgres.
 
-**S5 decided 24 October 2026** (branch `prompt4-shred`): plant pounds all from VCK, S3 + S5 +
-unweighed shred boxes at 28.4 lb + unweighed bins by size = 3,330,582 lb; shred plant $0.1406/lb.
-See DECISIONS.md "Shred plant pounds". 15/15 tests pass offline and against a local Postgres.
+Next, on the PC:
 
-Next:
+1. Apply `sql/model_schema.sql`, then `npm test` with DATABASE_URL set (must pass 15/15).
+2. `node scripts/prompt4_before_after.js --accepted="Ingalls,ICU Medical"` and
+   `node scripts/levers.js > levers_output.txt`; attach both outputs.
+3. Then merge `levers` to `main`, and write the decision ledger from the lever figures.
 
-1. **On the PC:** `node scripts/prompt4_before_after.js` (read-only) prints each rate and the
-   eight accounts' margins before and after. Exits 2 and says STOP if any margin changes sign.
-2. If none does, apply `sql/model_schema.sql` on the PC and rerun `npm test` there. Open: Mike on
-   shred-truck paper (DECISIONS.md, open questions).
-3. Then replace the rate figures in CLAUDE.md, the logic pack and the margin spec, and commit "Prompt 4: model schema; rates derived from pools and database
-   volumes".
+Open: Mike on shred-truck paper; Anne on a Citadel agreement and on Access (DECISIONS.md).
 
 ## Next
 

@@ -38,8 +38,10 @@ const PL = `
     WHERE NOT EXISTS (SELECT 1 FROM priced_lines p WHERE p.woid = c.woid AND p.woservid = c.woservid
                         AND p.servcodeid = c.servcodeid AND p.units = c.units AND p.totamt = c.totamt)
   ),
-  l AS (SELECT pl.*, s.servcode FROM pl JOIN servcode s USING (servcodeid)
-        WHERE pl.wodate >= '${LTM[0]}' AND pl.wodate < '${LTM[1]}')`;
+  l AS (SELECT pl.*, pl.wodate::date AS d, s.servcode FROM pl JOIN servcode s USING (servcodeid)
+        WHERE pl.wodate >= '${LTM[0]}' AND pl.wodate < '${LTM[1]}'),
+  truck AS (SELECT DISTINCT woid FROM l WHERE servcode = 'S0'),
+  binday AS (SELECT DISTINCT level1, d FROM l WHERE servcode IN ('B1','B2','B3','B4','B5','B6','B7','IR','IP'))`;
 
 const sections = [];
 const section = (title, fn) => sections.push([title, fn]);
@@ -95,6 +97,28 @@ section('1. CORE BRIDGE — Jan–Jun 2025 average to Mar–Aug 2026 average, by
     ['storage', r => money(r.ds)], ['service', r => money(r.dv)]]);
   const top20 = rows.slice(0, 20).reduce((t, r) => t + r.d, 0);
   console.log(`\n  The 20 largest falls are ${money(top20)} of the ${money(sum('d'))}.`);
+
+  // Recurring work against projects and one-offs, from priced lines by work month (pre-tax, so
+  // it will not tie to invoices to the dollar). Pfizer's February 2025 prepaid retention and the
+  // City badging scans sit in the early-2025 baseline; this shows how much of the fall is them.
+  const PROJECT = `('Z4','ZC','ZF','ZI','PR','R3','R4','R5','SC','S0','MN')`;
+  const split = await q(`
+    SELECT CASE WHEN s.servcode IN ${PROJECT} THEN 'project and one-off' ELSE 'recurring' END AS kind,
+           (sum(pl.totamt) FILTER (WHERE pl.wodate >= '2025-01-01' AND pl.wodate < '2025-07-01') / 6)::float AS h1_2025,
+           (sum(pl.totamt) FILTER (WHERE pl.wodate >= '2026-03-01' AND pl.wodate < '2026-09-01') / 6)::float AS recent
+    FROM priced_lines pl JOIN servcode s USING (servcodeid)
+    WHERE pl.level1 <> ${CITADEL} AND lower(pl.invoiced) = 'true' GROUP BY 1 ORDER BY 1`);
+  console.log('\n  Service on priced lines, Citadel apart, a month (scanning, prepaid retention, purge shredding, shred truck and misc fees count as project):');
+  table(split, [['kind', r => r.kind], ['Jan–Jun 2025', r => money(r.h1_2025)], ['Mar–Aug 2026', r => money(r.recent)], ['change', r => money(r.recent - r.h1_2025)]]);
+  const byAcc = await q(`
+    SELECT pl.level1, ${'(SELECT name FROM customer c WHERE c.level1 = pl.level1 ORDER BY c.level NULLS LAST, c.custno LIMIT 1)'} AS customer,
+           ((coalesce(sum(pl.totamt) FILTER (WHERE pl.wodate >= '2026-03-01' AND pl.wodate < '2026-09-01'), 0)
+             - coalesce(sum(pl.totamt) FILTER (WHERE pl.wodate >= '2025-01-01' AND pl.wodate < '2025-07-01'), 0)) / 6)::float AS change
+    FROM priced_lines pl JOIN servcode s USING (servcodeid)
+    WHERE pl.level1 <> ${CITADEL} AND lower(pl.invoiced) = 'true' AND s.servcode NOT IN ${PROJECT}
+    GROUP BY 1 ORDER BY 3 LIMIT 15`);
+  console.log('\n  Largest falls in recurring service only, a month:');
+  table(byAcc, [['level1', r => r.level1], ['customer', r => (r.customer || '').slice(0, 36)], ['change/mo', r => money(r.change)]]);
 });
 
 // ── 2. Pricing: rounds, never-raised accounts, storage escalator, contract dates ─────────
@@ -140,7 +164,7 @@ section('2. PRICING — what a rate round is worth, who it missed, and when cont
     sh AS (SELECT level1, max(storage_billed / nullif(boxes, 0)) - min(storage_billed / nullif(boxes, 0)) AS spread
            FROM storage_rate_hist WHERE to_date(mth, 'YYYY-MM') >= '${H24[0]}' GROUP BY level1),
     rev AS (SELECT level1, sum(totamt) AS ltm_service, count(*) AS lines FROM l GROUP BY level1)
-    SELECT rc.level1, (SELECT min(name) FROM customer c WHERE c.level1 = rc.level1) AS customer, rc.codes::int,
+    SELECT rc.level1, (SELECT name FROM customer c WHERE c.level1 = rc.level1 ORDER BY c.level NULLS LAST, c.custno LIMIT 1) AS customer, rc.codes::int,
            rev.ltm_service::float, rev.lines::int, coalesce(sh.spread, 0)::float AS storage_spread
     FROM rc JOIN act USING (level1) LEFT JOIN rev USING (level1) LEFT JOIN sh USING (level1)
     WHERE (rc.last_changed IS NULL OR rc.last_changed < '${H24[0]}') AND rev.ltm_service > 0
@@ -166,18 +190,25 @@ section('2. PRICING — what a rate round is worth, who it missed, and when cont
 section('3. BIN WORK BELOW COST — bin revenue against the model\'s cost to serve, last 12 months', async (q) => {
   const rows = await q(`
     WITH ${PL},
-    b AS (SELECT level1,
-                 sum(totamt) FILTER (WHERE servcode IN ('B1','B2','B3','B4','B5','B6','B7','IR','IP','IB','IC'))::float AS bin_rev,
+    -- Bin revenue includes per-lb shredding (S3) billed on a bin day: some accounts pay for bin
+    -- work by weight, with the bin lines at zero. Bin pounds are S5 and S3 on bin days, never
+    -- on a shred-truck work order; purge pounds on other days stay off the bin line.
+    b AS (SELECT l.level1,
+                 sum(totamt) FILTER (WHERE servcode IN ('B1','B2','B3','B4','B5','B6','B7','IR','IP','IB','IC')
+                                        OR (servcode = 'S3' AND bd.level1 IS NOT NULL))::float AS bin_rev,
                  sum(totamt) FILTER (WHERE servcode IN ('IR','B7'))::float AS flat_fee_rev,
-                 coalesce(sum(units) FILTER (WHERE servcode = 'S5'), 0)::float AS s5
-          FROM l GROUP BY level1),
+                 sum(totamt) FILTER (WHERE servcode = 'S3' AND bd.level1 IS NOT NULL)::float AS by_weight_rev,
+                 coalesce(sum(units) FILTER (WHERE servcode IN ('S5','S3') AND bd.level1 IS NOT NULL
+                                               AND woid NOT IN (SELECT woid FROM truck)), 0)::float AS s5
+          FROM l LEFT JOIN binday bd ON bd.level1 = l.level1 AND bd.d = l.d GROUP BY l.level1),
     so AS (SELECT NULLIF(level1, '')::int AS level1, NULLIF(date, '')::date AS date, NULLIF(route, '') AS route, NULLIF(cbtcode, '') AS bin
            FROM vs_service_orders WHERE billable = 'true'),
     v AS (SELECT level1, count(*)::int AS bins, count(DISTINCT (date, route))::int AS visits,
                  mode() WITHIN GROUP (ORDER BY bin) AS main_bin
           FROM so WHERE bin ~ '^B[1-6]$' AND date >= '${LTM[0]}' AND date < '${LTM[1]}' GROUP BY level1)
-    SELECT v.level1, (SELECT min(name) FROM customer c WHERE c.level1 = v.level1) AS customer,
-           v.bins, v.visits, v.main_bin, coalesce(b.bin_rev, 0) AS bin_rev, coalesce(b.flat_fee_rev, 0) AS flat_fee_rev, coalesce(b.s5, 0) AS s5
+    SELECT v.level1, (SELECT name FROM customer c WHERE c.level1 = v.level1 ORDER BY c.level NULLS LAST, c.custno LIMIT 1) AS customer,
+           v.bins, v.visits, v.main_bin, coalesce(b.bin_rev, 0) AS bin_rev, coalesce(b.flat_fee_rev, 0) AS flat_fee_rev,
+           coalesce(b.by_weight_rev, 0) AS by_weight_rev, coalesce(b.s5, 0) AS s5
     FROM v LEFT JOIN b USING (level1)`);
   for (const r of rows) {
     const c = R.costToServe('bin', r.bins, Object.assign({ visits: r.visits || null }, r.s5 > 0 ? { pounds: r.s5 } : { binCode: r.main_bin }));
@@ -190,7 +221,9 @@ section('3. BIN WORK BELOW COST — bin revenue against the model\'s cost to ser
   console.log(`    of which with a flat monthly fee (IR or B7): ${below.filter(r => r.flat_fee_rev > 0).length} accounts, gap ${money(below.filter(r => r.flat_fee_rev > 0).reduce((t, r) => t + r.gap, 0))}`);
   table(below.slice(0, 15), [['level1', r => r.level1], ['customer', r => (r.customer || '').slice(0, 34)], ['bins', r => num(r.bins)], ['visits', r => num(r.visits)],
     ['main', r => r.main_bin || '—'], ['revenue', r => money(r.bin_rev)], ['per bin', r => '$' + r.perBin.toFixed(2)], ['cost/bin', r => '$' + r.costBin.toFixed(2)],
-    ['gap/yr', r => money(r.gap)], ['flat fee', r => r.flat_fee_rev > 0 ? 'yes' : 'no']]);
+    ['gap/yr', r => money(r.gap)], ['flat fee', r => r.flat_fee_rev > 0 ? 'yes' : 'no'], ['by weight', r => r.by_weight_rev > 0 ? 'yes' : 'no']]);
+  const zero = rows.filter(r => r.bin_rev <= 0);
+  console.log(`  Bin accounts with no bin revenue at all (work done, nothing billed under a bin or weight code): ${zero.length}, ${num(zero.reduce((t, r) => t + r.bins, 0))} bins`);
   for (const split of [0.3, 0.5]) {
     const was = R.SETTINGS.split; R.SETTINGS.split = split;
     const n = rows.filter(r => r.bin_rev < R.costToServe('bin', r.bins, Object.assign({ visits: r.visits || null }, r.s5 > 0 ? { pounds: r.s5 } : { binCode: r.main_bin })).total).length;
@@ -230,7 +263,17 @@ section('5. SCHEDULING — the abandoned module and what route days carry', asyn
     LEFT JOIN (SELECT DISTINCT iplpk FROM vs_service_orders WHERE billable = 'true'
                AND NULLIF(date, '')::date >= '${LTM[0]}' AND NULLIF(date, '')::date < '${LTM[1]}') s USING (iplpk)
     WHERE lower(coalesce(p.lplactive, '')) IN ('true', 't', '1', '.t.')`);
-  console.log(`  Active placements ${num(sv.placements)}, serviced at least once in the last 12 months ${num(sv.serviced)}, never ${num(sv.placements - sv.serviced)}`);
+  console.log(`  Placements flagged active ${num(sv.placements)} (the flag is true on every record, so it does not mean live), serviced in the last 12 months ${num(sv.serviced)}`);
+  const [band] = await q(`
+    WITH ltm AS (SELECT DISTINCT iplpk FROM vs_service_orders WHERE billable = 'true'
+                 AND NULLIF(date, '')::date >= '${LTM[0]}' AND NULLIF(date, '')::date < '${LTM[1]}')
+    SELECT count(*) FILTER (WHERE left(tplcreate, 4) < '2021')::int AS old_n,
+           count(*) FILTER (WHERE left(tplcreate, 4) < '2021' AND iplpk IN (SELECT iplpk FROM ltm))::int AS old_done,
+           count(*) FILTER (WHERE left(tplcreate, 4) >= '2021')::int AS new_n,
+           count(*) FILTER (WHERE left(tplcreate, 4) >= '2021' AND iplpk IN (SELECT iplpk FROM ltm))::int AS new_done
+    FROM vs_placement`);
+  console.log(`  Created before 2021: ${num(band.old_n)}, serviced in the last 12 months ${num(band.old_done)} — mostly records never closed`);
+  console.log(`  Created 2021 or later: ${num(band.new_n)}, serviced in the last 12 months ${num(band.new_done)}`);
   const [sh] = await q(`SELECT count(*)::int AS n, max(NULLIF(tshupdate, '')) AS last_update, max(NULLIF(dshstart, '')) AS last_start FROM vs_schedule_hd`);
   const [sx] = await q(`SELECT count(*)::int AS n, max(NULLIF(tsxupdate, '')) AS last_update FROM vs_schedule_xref`);
   console.log(`  Schedule rules: ${num(sh.n)} headers, last updated ${sh.last_update || '—'}, latest start ${sh.last_start || '—'}; ${num(sx.n)} links to placements, last ${sx.last_update || '—'}`);
@@ -261,13 +304,15 @@ section('6. STORAGE ANNUITY — boxes, erosion and the retention backlog', async
     console.log(`  Storage billed per box ${a.m} $${(a.billed / a.boxes).toFixed(4)} → ${b.m} $${(b.billed / b.boxes).toFixed(4)}; cost to house ${'$' + R.RATES.facilities.v.toFixed(4)} ◇`);
     console.log('  Monthly boxes: ' + m.map(x => `${x.m} ${num(x.boxes / 1000)}k`).join(' · '));
   }
+  // status I = in storage (1,195,560 boxes on 24 October 2026, matching the ~1.2m billed); the
+  // other statuses are boxes out, withdrawn or destroyed
   const [r] = await q(`SELECT sum(boxes)::float AS boxes, sum(review_overdue)::float AS overdue, sum(permanent)::float AS permanent,
-                              sum(legal_hold)::float AS hold, sum(over_ten_years)::float AS ten FROM storage_retention`);
-  console.log(`  storage_retention: ${num(r.boxes)} boxes · review overdue ${num(r.overdue)} · permanent ${num(r.permanent)} · legal hold ${num(r.hold)} · over ten years ${num(r.ten)}`);
+                              sum(legal_hold)::float AS hold, sum(over_ten_years)::float AS ten FROM storage_retention WHERE status = 'I'`);
+  console.log(`  In storage (status I): ${num(r.boxes)} boxes · review overdue ${num(r.overdue)} · permanent ${num(r.permanent)} · legal hold ${num(r.hold)} · over ten years ${num(r.ten)}`);
   const top = await q(`
     WITH s AS (SELECT level1, sum(storage_billed) AS ltm FROM storage_rate_hist
                WHERE to_date(mth, 'YYYY-MM') >= '${LTM[0]}' AND to_date(mth, 'YYYY-MM') < '${LTM[1]}' GROUP BY level1)
-    SELECT level1, (SELECT min(name) FROM customer c WHERE c.level1 = s.level1) AS customer, ltm::float,
+    SELECT level1, (SELECT name FROM customer c WHERE c.level1 = s.level1 ORDER BY c.level NULLS LAST, c.custno LIMIT 1) AS customer, ltm::float,
            (ltm / sum(ltm) OVER ())::float AS share FROM s ORDER BY ltm DESC LIMIT 10`);
   console.log(`  Ten largest storage accounts hold ${pc(top.reduce((t, x) => t + x.share, 0))} of storage revenue:`);
   table(top, [['level1', x => x.level1], ['customer', x => (x.customer || '').slice(0, 36)], ['LTM storage', x => money(x.ltm)], ['share', x => pc(x.share)]]);

@@ -74,10 +74,13 @@ Every rate carries its derivation and a confidence flag (`measured` · `observed
 `estimate` · `assumed`). Every displayed cost line traces to a named rate. Nothing is a percentage
 of revenue.
 
-GL-corrected rates, twelve months to August 2026: facilities $0.124/box/month · handling $6.13 a
-movement · shred plant $0.34/lb · route day $680 · driver hour $32.49 · 5.4 visits a day · 6.5
-services a visit · 24 lb a bin (partial) · 1.5 lb an ITAD unit (estimate) · travel share of a
-route day 40% (**the one assumption**, exposed as a slider that recomputes Pricing and Margin).
+Rates are GL pools ÷ the database's twelve-month volumes (September 2025 to August 2026), all
+**provisional** until the GL is restated over the same twelve months: facilities $0.0994/box/month ·
+handling $7.53 a movement · shred plant $0.1509/lb · route day $450.62 · driver hour $32.49 · 3.27
+customer visits a route day · 5.80 services a visit · bin pounds from the account's own S5, else by
+bin size (estimate) · 28.4 lb a shred box (estimate) · 1.5 lb an ITAD unit (estimate) · travel
+share of a route day 40% (**the one assumption**, exposed as a slider that recomputes Pricing and
+Margin). `model/rates.js` holds every derivation; DECISIONS.md "Data basis" records each choice.
 
 | Family | Costs | Never |
 |---|---|---|
@@ -88,16 +91,18 @@ route day 40% (**the one assumption**, exposed as a slider that recomputes Prici
 | `itad` | travel + on-site per visit, plant per lb | facilities, box handling |
 | `labour` | hours × the loaded rate | travel, boxes |
 
-**Visits, not units, drive route cost.** Use observed visit counts where they exist (Ingalls 62,
-Larabida 17, UChicago 148); otherwise units ÷ 6.5 for bins and movement, ÷ 4,000 for ITAD.
+**Visits, not units, drive route cost.** A visit is one customer on one route on one day, from
+Veri-Shred done orders (Ingalls 101, Larabida 15, UChicago Medicine 300); otherwise units ÷ 5.80 for
+bins and movement, ÷ 4,000 for ITAD.
 
-Worked check: Ingalls, 6,886 bins, 62 visits → **$9.29 a bin, $63,997 a year**, −$41,549 at $3.26.
-If the model returns anything else, the model is wrong.
+Worked check: Ingalls, 3,540 bins, 101 visits, 154,887 lb on S5 → **$10.53 a bin, $37,273 a year**,
++$1,148 on its $38,421 of revenue: thin, not below cost. If the model returns anything else, the
+model is wrong.
 
 ## Data rules — each cost a wrong answer once
 
 1. **Revenue on `invdate`, not `billdate`** — `COALESCE(invdate, billdate)`. Reconciles to QuickBooks within 0.4%.
-2. **`billable` is a completion flag, not a contract flag.** 56% of scheduled services are confirmed complete. Forward bookings show `billable='false'`.
+2. **`billable` is a completion flag, not a contract flag.** Bookings run at about 1.9 times completions (Ingalls 2.8) because forward and recurring bookings that never happen stay in the table with `billable='false'`. Count done work only: Veri-Shred done bins agree with VCK billed bin units within 4% across the book (24,861 against 25,812).
 3. **All Veri-Shred columns are text.** Cast everything: `NULLIF(weight,'')::numeric`.
 4. **Storage bills in advance, service in arrears.** A billing month is this month's storage and last month's work.
 5. **Never divide twelve months of `ret_tot` by boxes.** Use a single recent month.
@@ -112,7 +117,7 @@ If the model returns anything else, the model is wrong.
 
 Copy is part of the product. Plain English. British spelling in prose; US dollar figures.
 
-- Sentences where a sentence explains more: "Ingalls pays $3.26 a bin and costs $9.29 to serve" beats "Margin: −156%".
+- Sentences where a sentence explains more: "Larabida pays $991 a year for 356 bin services that cost $4,108 to serve" beats "Margin: −314%".
 - Every chart is titled by its conclusion, not a label, and carries its source line.
 - Every number carries its comparison: last year, the account's own six-month run, or the book's median.
 - **Measured and modelled look different.** Modelled figures carry the ◇ mark and the assumption named once nearby.
@@ -142,7 +147,7 @@ under 640px.
 - Section labels must never share a line with their rule (the rule was striking through "Needs a decision", "This week", "October to date"). Use `.sec`.
 - The Pricing strip's left-edge labels must stay inside the plot; swing the anchor at the edges.
 - Off-scale accounts on the strip are counted ("33 accounts above $49") not stacked at the edge.
-- Long negatives (−$41,549) never break across lines: `white-space: nowrap` on `.num`.
+- Long negatives (−$432,637) never break across lines: `white-space: nowrap` on `.num`.
 
 ## When you are unsure
 

@@ -18,19 +18,19 @@ if (process.env.DATABASE_URL) {
   });
 }
 
-// Ingalls, Sep 2025 – Aug 2026 from Veri-Shred: 3,540 done services on 101 customer visits, and
-// 154,887 lb recorded on S5. Completion is confirmed on only 35% of Ingalls' 10,024 booked
-// services (54% across the book), so the true count sits between 3,540 and 10,024.
-test('Ingalls: 3,540 bins, 101 visits, 154,887 lb → $10.08 a bin, $35,670 a year', () => {
+// Ingalls, Sep 2025 – Aug 2026: 3,540 done services in Veri-Shred (VCK billed 3,821) on 101
+// customer visits, and 154,887 lb recorded on S5. Its 10,024 bookings include work never done;
+// the done count agrees with VCK billing within 8% for Ingalls and 4% across the book.
+test('Ingalls: 3,540 bins, 101 visits, 154,887 lb → $10.53 a bin, $37,273 a year', () => {
   const c = R.costToServe('bin', 3540, { visits: 101, miles: 11.4, pounds: 154887 });
-  near(c.total, 35670, 5, 'total');
-  near(c.perUnit, 10.08, 0.01, 'per unit');
+  near(c.total, 37273, 5, 'total');
+  near(c.perUnit, 10.53, 0.01, 'per unit');
   assert.equal(c.lines.length, 3);
   assert.equal(c.visits, 101);
   near(c.lines[2][1], 154887 * R.RATES.shredPlant.v, 0.01, 'plant line is its own S5 pounds');
   assert.equal(c.lines[2][3], undefined, 'recorded weight is not an estimate');
-  // gross margin at the price actually paid
-  near(3.26 * 3540 - c.total, -24129, 5, 'margin at $3.26');
+  // gross margin on its twelve months of invoiced revenue: thin, not below cost
+  near(38421 - c.total, 1148, 5, 'margin on $38,421');
 });
 
 test('Bins with no S5 weight: lb per bin by size, flagged as an estimate', () => {
@@ -71,7 +71,7 @@ test('Shred: weighed paper costs plant per pound and no route time', () => {
   assert.equal(c.lines.length, 1);
   assert.ok(c.lines.every(l => !/travel|on site/i.test(l[0])));
   near(c.total, 10000 * R.RATES.shredPlant.v, 0.01, 'total');
-  near(c.total, 1405.59, 0.01, 'total at $0.1406 a lb');
+  near(c.total, 1509.12, 0.01, 'total at $0.1509 a lb');
   const was = R.SETTINGS.split;
   R.SETTINGS.split = 0.55;
   near(R.costToServe('shred', 10000).total, c.total, 1e-9, 'split does not touch shred');
@@ -88,12 +88,12 @@ test('Shred boxes with no weight: 28.4 lb a box, plant only, flagged as an estim
 
 test('Plant pounds: the rate divides by exactly the pounds accounts are charged for', () => {
   const v = R.MODEL.volumes;
-  const lb = v.pounds_s3 + v.pounds_s5 + v.shred_boxes * v.lb_per_box + v.bins_unweighed * R.RATES.lbPerBin.v.all;
-  near(lb, 3330582, 1, 'total plant pounds');
+  const lb = v.pounds_s3 + v.pounds_s5 - v.pounds_s5_truck + v.shred_boxes * v.lb_per_box + v.bins_unweighed * R.RATES.lbPerBin.v.all;
+  near(lb, 3102089, 1, 'total plant pounds');
   // charging every source at the rate recovers the shred plant pool, no more and no less
   const pool = R.RATES.shredPlant.v * lb;
   const charged = R.costToServe('shred', v.pounds_s3).total
-    + R.costToServe('shred', v.pounds_s5).total
+    + R.costToServe('shred', v.pounds_s5 - v.pounds_s5_truck).total
     + R.costToServe('shred', v.shred_boxes, { unit: 'box' }).total
     + R.costToServe('bin', v.bins_unweighed, { visits: 1 }).lines[2][1];
   near(charged, pool, 0.01, 'charged = pool');
@@ -149,7 +149,7 @@ test('familyOf maps the common service names', () => {
 
 test('No cost number lives outside model/rates.js', () => {
   // the rates that would be tempting to hard-code elsewhere, and the superseded ones
-  const needles = ['7.53', '0.0994', '450.62', '0.1406', '0.2666', '28.4', '219.3', '32.49', '4.31', '6.13', '0.124', '680', '0.34'];
+  const needles = ['7.53', '0.0994', '450.62', '0.1509', '0.1406', '0.2666', '28.4', '219.3', '32.49', '4.31', '6.13', '0.124', '680', '0.34'];
   const roots = ['server', 'public'];
   const offenders = [];
   const walk = (dir) => {
@@ -176,8 +176,9 @@ test('Pool-based rates are pool ÷ volume and say so', () => {
   }
   near(R.RATES.routeDay.v, 450.62, 0.01, 'route day');
   near(R.RATES.handling.v, 7.5309, 0.0001, 'handling');
-  near(R.RATES.shredPlant.v, 0.140559, 0.000001, 'shred plant');
-  assert.match(R.RATES.shredPlant.d, /\$468,144 a year ÷ 3,330,582 lb = \$0\.1406/);
+  near(R.RATES.shredPlant.v, 0.150912, 0.000001, 'shred plant');
+  assert.match(R.RATES.shredPlant.d, /\$468,144 a year ÷ 3,102,089 lb = \$0\.1509/);
+  assert.match(R.RATES.shredPlant.d, /less 228,493 shredded on site by the truck/);
   near(R.RATES.facilities.v, 0.099417, 0.000001, 'facilities');
   near(R.RATES.visitsDay.v, 3.2746, 0.0001, 'customer visits per route day');
   near(R.RATES.unitsVisit.v, 5.7986, 0.0001, 'services per visit');

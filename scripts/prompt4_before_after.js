@@ -9,7 +9,8 @@
 // Before = the original cost model (commit f5702d2: route day $680, 24 lb a bin at $0.34/lb).
 // After  = model/rates.js as it stands, on its seed (what sql/model_schema.sql would load).
 // Both models get the same inputs, from the database, 1 September 2025 to 31 August 2026, so
-// only the rates differ. Exits 2 if any account's margin changes sign.
+// only the rates differ. Exits 2 if any account's margin changes sign, unless that account is
+// named in --accepted="Ingalls,ICU Medical".
 'use strict';
 require('dotenv').config();
 const fs = require('fs');
@@ -19,6 +20,8 @@ const { execSync } = require('child_process');
 const { Client } = require('pg');
 
 const FROM = '2025-09-01', TO = '2026-09-01';
+// Sign changes already reviewed and accepted, e.g. --accepted="Ingalls,ICU Medical"
+const ACCEPTED = (process.argv.find(a => a.startsWith('--accepted=')) || '').slice(11).split(',').map(x => x.trim()).filter(Boolean);
 
 const ACCOUNTS = [
   { label: 'Ingalls', like: '%ingalls%' },
@@ -38,7 +41,9 @@ const CODES = {
   delivery:  ['02', '03', '90'],
   itad:      ['S4', 'S6', 'SR', 'SN', 'S9'],
   shredLb:   ['S3'],
-  s5:        ['S5'],
+  s5bin:     ['S5B'],
+  s5other:   ['S5P'],
+  s5truck:   ['S5T'],
   shredBox:  ['R3', 'R4', 'R5', 'SC'],
   centreHr:  ['53', '54'],
   driverHr:  ['55', 'S0'],
@@ -61,11 +66,20 @@ const SQL_PL = `
     SELECT c.level1, c.woid, c.woservid, c.servcodeid, c.units, c.totamt, c.wodate FROM priced_lines_current c
     WHERE NOT EXISTS (SELECT 1 FROM priced_lines p WHERE p.woid = c.woid AND p.woservid = c.woservid
                         AND p.servcodeid = c.servcodeid AND p.units = c.units AND p.totamt = c.totamt)
-  )
-  SELECT pl.level1, s.servcode, sum(pl.units)::float AS units, count(DISTINCT pl.wodate::date)::int AS days
-  FROM pl JOIN servcode s USING (servcodeid)
-  WHERE pl.wodate >= $2 AND pl.wodate < $3 AND pl.level1 = ANY($1)
-  GROUP BY 1, 2`;
+  ),
+  lj AS (SELECT pl.*, pl.wodate::date AS d, s.servcode FROM pl JOIN servcode s USING (servcodeid)
+         WHERE pl.wodate >= $2 AND pl.wodate < $3 AND pl.level1 = ANY($1)),
+  truck AS (SELECT DISTINCT woid FROM lj WHERE servcode = 'S0'),
+  binday AS (SELECT DISTINCT level1, d FROM lj WHERE servcode IN ('B1','B2','B3','B4','B5','B6','B7','IR','IP')),
+  -- S5 split three ways: on a shred-truck work order (shredded on site, no plant cost), on an
+  -- account-day with bin work (the bin plant line), and the rest (purges and drop-offs)
+  tagged AS (SELECT lj.*, CASE WHEN servcode <> 'S5' THEN servcode
+                               WHEN woid IN (SELECT woid FROM truck) THEN 'S5T'
+                               WHEN (level1, d) IN (SELECT level1, d FROM binday) THEN 'S5B'
+                               ELSE 'S5P' END AS code
+             FROM lj)
+  SELECT level1, code AS servcode, sum(units)::float AS units, count(DISTINCT d)::int AS days
+  FROM tagged GROUP BY 1, 2`;
 
 const SQL_VS = `
   WITH so AS (
@@ -91,14 +105,13 @@ function costs(M, isNew, a) {
   const trips = u(CODES.trips), dboxes = u(CODES.delivery);
   if (trips > 0 || dboxes > 0) put('movement', M.costToServe('movement', dboxes, { visits: trips || null }).total);
 
-  const s5 = u(CODES.s5);
+  const s5bin = u(CODES.s5bin), s5other = u(CODES.s5other);
   if (a.bins > 0) {
     const opts = { visits: a.visits || null };
-    if (isNew) Object.assign(opts, s5 > 0 ? { pounds: s5 } : { binCode: a.mainBin });
+    if (isNew) Object.assign(opts, s5bin > 0 ? { pounds: s5bin } : { binCode: a.mainBin });
     put('bin', M.costToServe('bin', a.bins, opts).total);
-  } else if (isNew && s5 > 0) {
-    put('shred', M.costToServe('shred', s5).total);       // S5 on purge or truck work, no bins
   }
+  if (isNew && s5other > 0) put('shred', M.costToServe('shred', s5other).total);   // purges and drop-offs
   if (u(CODES.itad) > 0) put('itad', M.costToServe('itad', u(CODES.itad), { visits: days(CODES.itad) || null }).total);
 
   const s3 = u(CODES.shredLb), sbox = u(CODES.shredBox);
@@ -135,7 +148,7 @@ function costs(M, isNew, a) {
   const chosen = [];
   for (const acc of ACCOUNTS) {
     const cands = await q(`
-      SELECT c.level1, min(c.name) AS name,
+      SELECT c.level1, (array_agg(c.name ORDER BY c.level NULLS LAST, c.custno))[1] AS name,
              coalesce((SELECT sum(i.ret_tot + i.ser_tot) FROM invoices i WHERE i.level1 = c.level1
                         AND COALESCE(i.invdate, i.billdate) >= $2 AND COALESCE(i.invdate, i.billdate) < $3), 0)::float AS revenue
       FROM customer c
@@ -160,10 +173,10 @@ function costs(M, isNew, a) {
     a.lines = Object.fromEntries(lines.filter(r => r.level1 === a.level1).map(r => [r.servcode, r]));
   }
 
-  console.log('\nINPUTS (12 months)   boxes   handling   trips   bins  visits  main bin      S5 lb     S3 lb  shred boxes   ITAD units');
+  console.log('\nINPUTS (12 months)   boxes   handling   trips   bins  visits  main bin  S5 bin / other / truck lb    S3 lb  shred boxes   ITAD units');
   const U = (a, codes) => codes.reduce((t, c) => t + ((a.lines[c] || {}).units || 0), 0);
   for (const a of chosen) {
-    console.log(`  ${a.label.padEnd(18)} ${num(a.boxes).padStart(7)} ${num(U(a, CODES.handling)).padStart(10)} ${num(U(a, CODES.trips)).padStart(7)} ${num(a.bins).padStart(6)} ${num(a.visits).padStart(7)}  ${String(a.mainBin || '—').padEnd(8)} ${num(U(a, CODES.s5)).padStart(10)} ${num(U(a, CODES.shredLb)).padStart(9)} ${num(U(a, CODES.shredBox)).padStart(12)} ${num(U(a, CODES.itad)).padStart(12)}`);
+    console.log(`  ${a.label.padEnd(18)} ${num(a.boxes).padStart(7)} ${num(U(a, CODES.handling)).padStart(10)} ${num(U(a, CODES.trips)).padStart(7)} ${num(a.bins).padStart(6)} ${num(a.visits).padStart(7)}  ${String(a.mainBin || '—').padEnd(8)} ${(num(U(a, CODES.s5bin)) + ' / ' + num(U(a, CODES.s5other)) + ' / ' + num(U(a, CODES.s5truck))).padStart(26)} ${num(U(a, CODES.shredLb)).padStart(9)} ${num(U(a, CODES.shredBox)).padStart(12)} ${num(U(a, CODES.itad)).padStart(12)}`);
   }
 
   console.log('\nGROSS MARGIN              revenue   cost before    cost after   margin before   margin after');
@@ -172,8 +185,9 @@ function costs(M, isNew, a) {
     const b = costs(OLD, false, a), n = costs(NEW, true, a);
     a.after = n;
     const mb = a.revenue - b.total, ma = a.revenue - n.total;
-    if (Math.sign(Math.round(mb)) !== Math.sign(Math.round(ma))) flips.push(a.label);
-    console.log(`  ${a.label.padEnd(20)} ${money(a.revenue).padStart(12)} ${money(b.total).padStart(13)} ${money(n.total).padStart(13)} ${money(mb).padStart(15)} ${money(ma).padStart(14)}${flips.includes(a.label) ? '   ← SIGN CHANGED' : ''}`);
+    const flipped = Math.sign(Math.round(mb)) !== Math.sign(Math.round(ma));
+    if (flipped && !ACCEPTED.includes(a.label)) flips.push(a.label);
+    console.log(`  ${a.label.padEnd(20)} ${money(a.revenue).padStart(12)} ${money(b.total).padStart(13)} ${money(n.total).padStart(13)} ${money(mb).padStart(15)} ${money(ma).padStart(14)}${flipped ? (ACCEPTED.includes(a.label) ? '   ← sign changed, accepted' : '   ← SIGN CHANGED') : ''}`);
   }
 
   console.log('\nCOST AFTER, BY FAMILY');

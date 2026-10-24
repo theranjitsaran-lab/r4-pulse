@@ -52,6 +52,7 @@ const MODEL = {
     // the same pounds. S5 reconciles to Veri-Shred within 0.3% where both exist.
     pounds_s3:      836376,   // S3 certified shredding, billed per lb
     pounds_s5:      2132048,  // S5 weight recorded on bin, purge and shred-truck work
+    pounds_s5_truck: 228493,  // S5 on shred-truck (S0) work orders: shredded on site, not at the plant
     shred_boxes:    12453,    // R3 12,383 + R5 1 + SC 69 (a cubic foot counted as a box): no weight
     lb_per_box:     28.4,     // S5 lb ÷ boxes on the 256 work orders carrying both
     bins_unweighed: 114,      // bin services on the 16 accounts with no S5 weight
@@ -93,7 +94,7 @@ function derive(model) {
 
   const fac = pool('facilities'), hnd = pool('handling'), shr = pool('shred_plant'), rd = pool('route_day');
   const lbBoxes = v.shred_boxes * v.lb_per_box, lbBins = v.bins_unweighed * FIXED.lbPerBin.v.all;
-  const lb = v.pounds_s3 + v.pounds_s5 + lbBoxes + lbBins;
+  const lb = v.pounds_s3 + v.pounds_s5 - v.pounds_s5_truck + lbBoxes + lbBins;
   for (const key of Object.keys(RATES)) delete RATES[key];
   Object.assign(RATES, {
     facilities: { v: fac / (v.boxes * 12), u: '$ per box per month', c: 'provisional', n: PROVISIONAL,
@@ -101,7 +102,7 @@ function derive(model) {
     handling:   { v: hnd / v.movements, u: '$ per box movement', c: 'provisional', n: PROVISIONAL,
       d: `${parts('handling')}: ${m0(hnd)} a year ÷ ${n0(v.movements)} box movements = ${m2(hnd / v.movements)}. Movements are retrieval, pull and return boxes plus delivery boxes, all handled in the warehouse; ${per}` },
     shredPlant: { v: shr / lb, u: '$ per lb', c: 'provisional', n: PROVISIONAL,
-      d: `${parts('shred_plant')}: ${m0(shr)} a year ÷ ${n0(lb)} lb = ${m4(shr / lb)}. The pounds are S3 weighed shredding ${n0(v.pounds_s3)} + S5 recorded weight ${n0(v.pounds_s5)} + ${n0(v.shred_boxes)} unweighed shred boxes at ${v.lb_per_box} lb (${n0(lbBoxes)}) + ${n0(v.bins_unweighed)} unweighed bins at ${FIXED.lbPerBin.v.all} lb (${n0(lbBins)}). S5 agrees with Veri-Shred within 0.3% where both exist; 19% of it has no Veri-Shred weight (shred truck, one-offs). Shred-truck pounds count as plant pounds until confirmed otherwise; ${per}` },
+      d: `${parts('shred_plant')}: ${m0(shr)} a year ÷ ${n0(lb)} lb = ${m4(shr / lb)}. The pounds are S3 weighed shredding ${n0(v.pounds_s3)} + S5 recorded weight ${n0(v.pounds_s5)} less ${n0(v.pounds_s5_truck)} shredded on site by the truck + ${n0(v.shred_boxes)} unweighed shred boxes at ${v.lb_per_box} lb (${n0(lbBoxes)}) + ${n0(v.bins_unweighed)} unweighed bins at ${FIXED.lbPerBin.v.all} lb (${n0(lbBins)}). S5 agrees with Veri-Shred within 0.3% where both exist. Truck paper is taken as finished on site, to be confirmed with operations; ${per}` },
     lbPerBox:   { v: v.lb_per_box, u: 'lb per shred box', c: 'estimate',
       d: `S5 recorded weight ÷ boxes on the 256 work orders carrying both S5 and R3/R4/R5 box counts (median 28.3), ${model.volumesPeriod}. Applied to shred boxes billed with no weight` },
     routeDay:   { v: rd / v.route_days, u: '$ per route day', c: 'provisional', n: PROVISIONAL,

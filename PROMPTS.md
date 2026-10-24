@@ -172,7 +172,8 @@ model/rates.js. Input rail left; verdict sentence in Newsreader with red / amber
 the strip; cost to serve with every derivation; what the decision is worth at your price, the
 comparison and break-even. The SPLIT slider recomputes everything live.
 
-Opening state: Ingalls Memorial, 95-gallon bins, $3.26. It must read −$41,549 and $9.29.
+Opening state: Ingalls Hospital, its modal bin rate from v_rate_by_customer_service. Cost to serve
+must match model/rates.js to the cent: $10.53 a bin on 3,540 bins, 101 visits, 154,887 lb.
 ```
 
 ---

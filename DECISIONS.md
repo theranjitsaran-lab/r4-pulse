@@ -22,6 +22,12 @@ to reach. Newest section first.
 | **Service credit month** | November 2025 at −$60,759, the 23-month low; was "−$144k". The high is April 2026 at $781,944, was "$784k" |
 | **Shred plant pounds** | One source, VCK priced lines, for both the rate's total and each account's charge: S3 weighed shredding + S5 recorded weight + unweighed shred boxes (R3/R5/SC) at 28.4 lb + unweighed bins at lb per bin by size. 3,330,582 lb; shred plant $0.1406/lb, provisional. Chosen 24 October 2026 over Veri-Shred weights: S5 agrees with Veri-Shred within 0.3% where both exist, also covers the 19% Veri-Shred never weighs (shred truck, one-offs), and does not carry the B3/B6 capacity default |
 | **Lb per bin** | The flat 24 lb is withdrawn. Where an account has no S5: 95-gallon 219.3, 65-gallon 121.7, executive 34.9, under-desk 15.7, from S5 on single-code work orders. Flagged estimate |
+| **Shred truck** | S5 on shred-truck (S0) work orders, 228,493 lb, is shredded on site and carries no plant cost; plant pounds 3,102,089, shred plant $0.1509/lb. Theran's understanding, 24 October 2026, to confirm with Mike |
+| **Bin counts** | Veri-Shred done bins, confirmed by VCK billed bin units within 4% (24,861 against 25,812). Bookings are not work: Ingalls' 10,024 bookings are 3,540 done, 3,821 billed |
+| **Sign changes accepted** | Under the derived rates Ingalls (−$3,184 → +$2,679) and ICU Medical (−$3,055 → +$48,850) move from loss to profit. Both were within 1.5% of break-even; the new rates trace to the GL, the old ones did not. Accepted 24 October 2026 |
+| **The decline, restated** | Of the −$135,071 between the two six-month averages, Pfizer's −$36.6k is timing (a $219k prepaid-retention and scanning bill in February 2025) and City badging's −$31.5k is a scanning project that ended in August 2025. The recurring losses are Access Community Health (executive bins about $32k → $11k a month from February 2026) and 2FM (storage price cut July 2025, −$22.4k a month) |
+| **Retention backlog** | `storage_retention` status I is in storage: 1,195,560 boxes, 284,553 overdue for review, 725,640 over ten years. Other statuses are boxes out, withdrawn or destroyed |
+| **Placements** | `vs_placement.lplactive` is true on every record and means nothing. Placements created before 2021 are mostly records never closed; idle-bin counts use 2021 onward |
 | **17 September 2026** | 283 booked, 200 done, 23 customers, 6 routes from `v_route_day`; was 272, 13 and 5. Angel ran 13 services across 6 customers, not one bin. Activity reproduces `v_route_day`, not the addendum |
 
 ## Design — settled 7 October 2026, in Claude Design
@@ -86,7 +92,7 @@ route-hour, route-day margin, pounds per route-day. Stored in a `kpi` schema reb
 - The decline is quoted on **six-month averages**: $781,590 early 2025 (January–June) against $646,519 now (March–August 2026), −17%. Both on invoice date, posted invoices only, Citadel `custno 00870` held apart. Never mix an average with a single month
 - On that basis **service is about three-quarters of the fall**, storage a quarter
 - **October in-month range: $598k–$699k** — storage $387,101 from the October run, core service modelled at $211k–$312k (the last six posted months). Marked modelled, narrows through the month
-- **Ingalls break-even is $9.29 a bin** under GL-corrected rates. $7.17 is the pre-GL figure and is wrong wherever it still appears
+- **Ingalls costs $10.53 a bin to serve** (3,540 bins, 101 visits, 154,887 lb) against $38,421 of revenue: thin, not below cost. The $9.29, −$41,549 and $7.17 figures are withdrawn wherever they still appear (corrected 24 October 2026)
 - **City of Chicago 2FM to the $0.246 median = $24,843 a month** (227,915 × $0.109)
 - Every figure strip states its basis
 
@@ -113,6 +119,9 @@ diagnostic narrative, never in the cost of service.
 - **Mike:** real travel / on-site split; rack capacity and square footage of the three centres
 - **Mike:** driver pay rates by person, with overtime — turns the route day into a real P&L per driver per day
 - **Mike:** does shred-truck (S0) paper come back through the plant, or is it finished on site? If on site, its S5 pounds leave the plant total — one row in `model.service_family`
+- **Anne:** is there a written agreement with Citadel (term, volumes, rebate), and who holds it?
+- **Anne:** Access Community Health's executive-bin work fell by two-thirds from February 2026. Did they cut back or move some to another vendor?
+- **Mike:** do drivers mark every emptied bin done? Done agrees with VCK billing within 4%, so probably yes; worth one sentence from him
 - **Anne:** are the sixteen never-raised accounts contractually fixed?
 - **Anne:** does a permanent-withdrawal or termination fee exist in the price sheet?
 - **Anne:** is shredded paper sold, and where does that revenue land in the GL?

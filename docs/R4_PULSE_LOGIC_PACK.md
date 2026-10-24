@@ -50,7 +50,7 @@ Use this for the six-level walkthrough. Every level has a real number.
 | 3 Family | Carton storage, not retrieval or handling | Storage line only |
 | 4 Customer | City of Chicago group has fallen 74% | $211,304 a month (Aug 2025) → $55,755 (Aug 2026), roughly $1.9m annualised |
 | 5 Line | Two things: 2FM storage rate stepped down; Badging scanning project ended | Storage −$29.5k a month from July 2025. Badging peaked at $138k in July 2025, ended August 2025, now $960 a month |
-| 6 Rate | 2FM pays $0.137 a box a month against a $0.60 list and a $0.124 cost to house | 227,915 boxes. Law firms pay $0.191–$0.434 for the same thing |
+| 6 Rate | 2FM pays $0.137 a box a month against a $0.60 list and a $0.0994 cost to house ◇ | 227,915 boxes. Law firms pay $0.191–$0.434 for the same thing |
 
 Source line at every level: `invoices` and `priced_lines`, 24 months to August 2026; `storage_rate_hist` for the rate change date.
 
@@ -62,16 +62,17 @@ Nothing is a percentage of revenue. Every rate is a GL pool divided by the volum
 
 | Rate | Value | Derivation | Status |
 |---|---|---|---|
-| Facilities | $0.124 per box per month | GL facilities $1,777,802 across four sites ÷ 1.2m boxes ÷ 12 | measured |
-| Handling | $6.13 per box movement | Warehouse payroll plus allocated supervision and supplies ÷ 135,000 movements a year | measured |
-| Shred plant | $0.34 per lb | Shred share of warehouse payroll and plant ÷ ~1.5m lb processed | measured |
-| Route day | $680 | Driver payroll $510,098 (GL 7335700, not the ADP summary) + vehicles $445,508 ÷ 1,134 route days | measured |
+| Facilities | $0.0994 per box per month | 7028 Bldg Exp and 7335660 Maintenance payroll, $1,354,998 a year ÷ (1,135,790 boxes × 12) | provisional |
+| Handling | $7.53 per box movement | 40% of warehouse payroll and temp labour, supplies, equipment, half of uniforms, $489,999 a year ÷ 65,065 box movements (retrievals, pulls, returns, delivery boxes) | provisional |
+| Shred plant | $0.1509 per lb | 60% of warehouse payroll and temp labour, Allegheny, shredding payroll, $468,144 a year ÷ 3,102,089 lb (S3 + S5 less shred-truck pounds + estimated unweighed boxes and bins) | provisional |
+| Route day | $450.62 | Drivers payroll 7335700, 7011 Auto, Routeware, half of uniforms, $595,725 a year ÷ 1,322 route days | provisional |
 | Driver hour | $32.49 | ADP payroll, loaded | measured |
 | Service Centre hour | $25.05 | ADP payroll, loaded | measured |
-| Visits per route day | 5.4 | Observed across Mark, Jorge, Demond and Angel, September 2026 | observed |
-| Services per visit | 6.5 | Observed across the four daily routes | observed |
+| Visits per route day | 3.27 | 4,329 customer visits ÷ 1,322 route days, September 2025 to August 2026; a visit is one customer on one route on one day | observed |
+| Services per visit | 5.80 | 25,102 done services ÷ 4,329 customer visits | observed |
 | Average miles from yard | 11.4 | Volume-weighted across 150 postcodes | observed |
-| Pounds per bin | 24 | Ingalls 167,640 lb ÷ 6,886 services | **partial** — 95-gallon bins are weighed; executive consoles sit at capacity on every order |
+| Pounds per bin | the account's S5 recorded weight; without it, by size: 95-gallon 219.3, 65-gallon 121.7, executive 34.9, under-desk 15.7 | S5 on single-code work orders | **estimate** where there is no S5 |
+| Pounds per shred box | 28.4 | S5 ÷ boxes on 256 work orders carrying both | **estimate** |
 | Pounds per ITAD unit | 1.5 | Media destruction is not weighed; paper rate stands in | **estimate** |
 | Travel / on-site split of a route day | 40 / 60 | **The one assumption.** GPS, arrival times and durations were never captured — 0 real values across 365,000 records | assumed, exposed as a slider |
 
@@ -79,25 +80,27 @@ Nothing is a percentage of revenue. Every rate is a GL pool divided by the volum
 
 - **Storage** — boxes × facilities × 12. No route time, no handling.
 - **Retrieval / carton process** — movements × handling. Warehouse work only; no route time.
-- **Delivery / pickup** — visits × travel + visits × on-site + movements × handling. Visits = units ÷ 6.5 unless known.
-- **Bin rotation** — visits × travel + visits × on-site + bins × 24 lb × shred plant.
+- **Delivery / pickup** — visits × travel + visits × on-site + movements × handling. Visits = units ÷ 5.80 unless known.
+- **Bin rotation** — visits × travel + visits × on-site + the account's S5 pounds × shred plant (bins × lb per bin by size where there is no S5).
 - **ITAD / media destruction** — visits × travel + visits × on-site + units × 1.5 lb × shred plant. Visits = units ÷ 4,000.
 - **Labour** — hours × the loaded hourly rate.
 
-Travel per visit = (route day × travel share ÷ 5.4) × (miles ÷ 11.4). On-site per visit = route day × (1 − travel share) ÷ 5.4.
+Travel per visit = (route day × travel share ÷ 3.27) × (miles ÷ 11.4). On-site per visit = route day × (1 − travel share) ÷ 3.27.
 
-### Worked example: Ingalls Memorial, 95-gallon bins
+### Worked example: Ingalls Hospital, bins
 
-6,886 bin services a year, 62 visit days, 11.4 miles, paying $3.26 a bin.
+3,540 done bin services in the twelve months to August 2026 (VCK billed 3,821), 101 customer visits,
+11.4 miles, 154,887 lb recorded on S5. *Rewritten 24 October 2026: the earlier 6,886 bins, 62 visits
+and $3.26 a bin gave −$41,549, which the database and the derived rates do not support.*
 
 | Line | Per bin | A year |
 |---|---|---|
-| Travel to site — 62 visits at $50.37 | $0.45 | $3,123 |
-| Time on site — 62 visits at $75.56 | $0.68 | $4,684 |
-| Shred plant — 6,886 bins at ~24 lb, $0.34/lb | $8.16 | $56,190 |
-| **Total cost to serve** | **$9.29** | **$63,997** |
-| Revenue at $3.26 | | $22,448 |
-| **Gross margin** | | **−$41,549 (−185%)** |
+| Travel to site — 101 visits at $55.05 | $1.57 | $5,560 |
+| Time on site — 101 visits at $82.57 | $2.36 | $8,339 |
+| Shred plant — 154,887 lb at $0.1509 | $6.60 | $23,374 |
+| **Total cost to serve** | **$10.53** | **$37,273** ◇ |
+| Revenue, twelve months invoiced | | $38,421 |
+| **Gross margin** | | **+$1,148 (+3%)** — thin, not below cost |
 
 ---
 
@@ -130,9 +133,9 @@ Three states, by comparing the entered price to cost to serve and to the median:
 
 | State | Condition | Colour | Sentence pattern |
 |---|---|---|---|
-| Below cost | price < cost to serve | red #B3261E | "$3.26 is below what this costs to serve. Cost to serve is $9.29 a bin service. Every one loses $6.03, and the volume makes it worse, not better." |
+| Below cost | price < cost to serve | red #B3261E | "$2.78 is below what this costs to serve. Cost to serve is $11.54 a bin service. Every one loses $8.76, and the volume makes it worse, not better." (Larabida, derived rates) |
 | Below median | cost ≤ price < median | amber #C07A1E | "$14.00 earns, but sits below the median. Cheaper than 71% of the 371 accounts on this service." |
-| Sound | price ≥ median | **ink — no colour** | "$25.00 is a sound price. Cheaper than 38% of the 371 accounts. Cost to serve is $9.29." |
+| Sound | price ≥ median | **ink — no colour** | "$25.00 is a sound price. Cheaper than 38% of the 371 accounts. Cost to serve is $10.53." |
 
 Colour marks exceptions, never the default. "Sound" and "up" sit in ink; only amber and red carry status colour. R4's brand green is reserved for the masthead, links and the drill affordance, so it never collides with a status. Amber and red pass colour-blind separation against a light surface.
 
@@ -150,7 +153,7 @@ At your price · at the comparison (median / list / upper quartile, user's choic
 | A typical day | Thursday 17 September 2026: 283 services booked, 200 done, 23 customers, 6 routes (`v_route_day`) |
 | Weekday imbalance | Week of 14 September 2026, booked: Mon 184 · Tue 209 · Wed 216 · **Thu 283** · **Fri 117** — a 2.4× spread; done: 125 · 108 · 160 · 200 · 44 |
 | Single-stop journeys | 1,145 trips in nine months carried one or two stops; ~$43k a year |
-| Scheduling | 97% of bin work booked as "Client Request Rotation" — reactive. Last schedule rule created May 2021 |
+| Scheduling | 97% of bin work booked as "Client Request Rotation" — reactive. The schedule module is in use (rules updated 19 October 2026, 34,421 links to placements); "last rule May 2021" was wrong |
 | Bin fill | Measured bins emptied at 13–15% full |
 | Idle placements | 4,336 of 7,509 bin placements unserviced this year |
 | Route productivity | One route at 34 effort units a day vs 72–74 for peers |
@@ -167,7 +170,7 @@ Ten accounts a week, each put on the list by one of these signals:
 | Signal | Example | Count today |
 |---|---|---|
 | Rate not raised in two years | Administration: 20 service lines, $105,670, delivery at $14.00, retrieval at $1.70 | **16 accounts** |
-| Below cost to serve | Ingalls $3.26 vs $9.29; Larabida $991 a year for 601 services | 2 |
+| Below cost to serve | Larabida $991 a year for 356 bin services that cost $4,108 to serve | from `scripts/levers.js` section 3 |
 | Storage with no destruction | Every law firm; the whole City group | ~60 |
 | Destruction with no storage | Citadel, $1.6m, 24% of revenue, nothing contractual | 1 critical |
 | Volume up 20% against own six-month run | from `kpi.customer_monthly` | varies weekly |

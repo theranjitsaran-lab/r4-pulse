@@ -22,11 +22,15 @@ Same cost model as the Pricing screen. Nothing is a percentage of revenue.
 
 | Family | Cost per unit | Where it comes from |
 |---|---|---|
-| Storage | $0.124 a box a month | Facilities pool ÷ 1.2m boxes. No route time, no handling. |
-| Retrieval / handling | $6.13 a movement | Warehouse payroll ÷ 135,000 movements. Warehouse work only. |
-| Delivery / movement | travel + on-site per visit, plus $6.13 handling per box | A $680 route day, 5.4 visits a day, 40/60 travel/on-site |
-| Bin rotation | travel + on-site per visit, plus 24 lb × $0.34 shred | Bin weights are defaulted for executive consoles — **partial** |
-| ITAD / media destruction | travel + on-site per collection, plus 1.5 lb × $0.34 | Media is not weighed — **estimate** |
+| Storage | $0.0994 a box a month | Facilities pool ÷ 1,135,790 boxes. No route time, no handling. |
+| Retrieval / handling | $7.53 a movement | Warehouse pools ÷ 65,065 box movements. Warehouse work only. |
+| Delivery / movement | travel + on-site per visit, plus $7.53 handling per box | A $450.62 route day, 3.27 customer visits a day, 40/60 travel/on-site |
+| Bin rotation | travel + on-site per visit, plus the account's S5 pounds × $0.1509 | Without S5, lb per bin by size — **estimate** |
+| Shredding by weight or box | S3 pounds × $0.1509; shred boxes at 28.4 lb | No route time of its own; box weight **estimate** |
+| ITAD / media destruction | travel + on-site per collection, plus 1.5 lb × $0.1509 | Media is not weighed — **estimate** |
+
+All rates are provisional: the GL is annualised from 17.1 months until it is restated over the twelve
+months to August 2026.
 
 Where a customer's margin leans on a partial or estimated rate, the row carries the modelled mark.
 
@@ -35,6 +39,11 @@ Where a customer's margin leans on a partial or estimated rate, the row carries 
 ## 3. The customer ranking — real figures
 
 Eight accounts, twelve months, cost model run over their actual invoiced lines and visit counts. Worst at the top, because that is where the decisions are.
+
+> **Superseded 24 October 2026.** The table below uses the old rates ($680 route day, 24 lb a bin at
+> $0.34). Under the derived rates Ingalls is thin but positive (+$1,148) and ICU Medical moves to a
+> clear profit. Regenerate it from `node scripts/prompt4_before_after.js` once the model schema is
+> applied; Margin itself computes these rows live from `model/rates.js`.
 
 | Customer | Revenue | Cost to serve | Gross margin | Margin % | Mix | What is going on | Fix |
 |---|---|---|---|---|---|---|---|
@@ -72,7 +81,8 @@ The book-wide family margins are the numbers that run once the cost model is in 
 
 ## 5. Drill-down from a customer
 
-Click a row and it opens to the lines beneath it. Use Ingalls:
+Click a row and it opens to the lines beneath it. Use Ingalls (line figures below are under the
+old rates and the old 6,886-bin count; Margin regenerates them):
 
 | Line | Family | Units | Visits | Revenue | Cost | Margin |
 |---|---|---|---|---|---|---|
@@ -80,16 +90,17 @@ Click a row and it opens to the lines beneath it. Use Ingalls:
 | Purge and box shredding | ITAD | 180 | 3 | $3,188 | $1,532 | $1,656 |
 | | | | | **$25,643** | **$65,529** | **−$39,886** |
 
-Then the cost of the bin line, built up the same way the Pricing screen shows it:
+Then the cost of the bin line, built up the same way the Pricing screen shows it (derived rates,
+3,540 done bins, 101 visits, 154,887 lb on S5):
 
 | Cost line | Per bin | A year |
 |---|---|---|
-| Travel to site — 62 visits at $50.37 | $0.45 | $3,123 |
-| Time on site — 62 visits at $75.56 | $0.68 | $4,684 |
-| Shred plant — 6,886 bins at ~24 lb, $0.34/lb | $8.16 | $56,190 |
-| **Cost to serve** | **$9.29** | **$63,997** |
+| Travel to site — 101 visits at $55.05 | $1.57 | $5,560 |
+| Time on site — 101 visits at $82.57 | $2.36 | $8,339 |
+| Shred plant — 154,887 lb at $0.1509 | $6.60 | $23,374 |
+| **Cost to serve** | **$10.53** | **$37,273** ◇ |
 
-And beneath that, the visits themselves — 62 rows from Veri-Shred: date, driver (Mark), postcode (60406), bins serviced. That is level six of the drill path, and it is where Trisha stops doubting the number.
+And beneath that, the visits themselves — 101 rows from Veri-Shred: date, driver (Mark), postcode (60406), bins serviced. That is level six of the drill path, and it is where Trisha stops doubting the number.
 
 ---
 
@@ -117,7 +128,7 @@ The drill path does not stop at the visit. VCK records every retrieval, return a
 | 535340 | 7 Jul | Standard | 19 boxes returned | 19 | Verified | MCK |
 | 535569 | 10 Jul | None | 2 retrieved | 2 | New | MCK |
 
-Open work order 535149 and the rows beneath it are the boxes: barcodes 687709, 687710, 687711, 687728, 687731, 687732, 687736, 695931 … and 2,095 more. Each one is a $6.13 handling movement, so that single work order carries **$12,891 of warehouse cost** before anything is invoiced — and it is still marked in progress four months later. That is the kind of thing the margin screen should surface: a cost incurred, a revenue not yet raised.
+Open work order 535149 and the rows beneath it are the boxes: barcodes 687709, 687710, 687711, 687728, 687731, 687732, 687736, 695931 … and 2,095 more. Each one is a $7.53 handling movement, so that single work order carries **$12,891 of warehouse cost** before anything is invoiced — and it is still marked in progress four months later. That is the kind of thing the margin screen should surface: a cost incurred, a revenue not yet raised.
 
 ### What the extract shows about the whole book
 
