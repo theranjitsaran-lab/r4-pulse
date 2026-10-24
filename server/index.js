@@ -18,6 +18,12 @@ app.use('/api', api);
 app.use(express.static(path.join(__dirname, '..', 'public'), { extensions: ['html'] }));
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`R4 Pulse on http://localhost:${port}  (${USE_FIXTURES ? 'fixtures' : 'live database'})`);
-});
+const rates = require('../model/rates');
+const { query } = require('./db');
+
+// Live: derive the cost model from model.* before serving. Fixtures: the seed in rates.js.
+(USE_FIXTURES ? Promise.resolve() : rates.loadFromDb(query)).then(() => {
+  app.listen(port, () => {
+    console.log(`R4 Pulse on http://localhost:${port}  (${USE_FIXTURES ? 'fixtures' : 'live database'}; route day $${rates.RATES.routeDay.v.toFixed(2)})`);
+  });
+}).catch(e => { console.error(`cost model did not load: ${e.message}`); process.exit(1); });
