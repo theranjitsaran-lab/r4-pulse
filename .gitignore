@@ -10,3 +10,4 @@ fixtures/*.json
 
 # Script output with client figures stays local
 levers_output.txt
+measure_output.txt
