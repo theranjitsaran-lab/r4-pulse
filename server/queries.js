@@ -14,8 +14,12 @@ const BOUNDS = `b AS (SELECT (max(month) - interval '11 months')::date AS f,
                              (max(month) + interval '1 month')::date AS t,
                              max(month) AS latest FROM kpi.monthly)`;
 
-// An account's name is its level-1 customer row.
-const NAME = (col) => `(SELECT c.name FROM customer c WHERE c.level1 = ${col} ORDER BY c.level NULLS LAST, c.custno LIMIT 1)`;
+// An account's name is its level-1 customer row. col must be table-qualified (r.level1): a bare
+// level1 resolves to the customer table's own column and names every account the same.
+const NAME = (col) => {
+  if (!/\./.test(col)) throw new Error(`NAME(${col}): qualify the column with its table alias`);
+  return `(SELECT c.name FROM customer c WHERE c.level1 = ${col} ORDER BY (c.level = 1) DESC NULLS LAST, c.level, c.custno LIMIT 1)`;
+};
 
 // Priced lines from both tables, a line present in both counted once, within the window.
 const PL = `
@@ -64,8 +68,8 @@ async function pulse() {
   const concentration = await query(`
     WITH ${BOUNDS},
     r AS (SELECT level1, sum(revenue) AS ltm FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t GROUP BY level1)
-    SELECT level1, ${NAME('level1')} AS customer, ltm::float, (ltm / sum(ltm) OVER ())::float AS share
-    FROM r WHERE ltm > 0 ORDER BY ltm DESC LIMIT 50`);
+    SELECT r.level1, ${NAME('r.level1')} AS customer, r.ltm::float, (r.ltm / sum(r.ltm) OVER ())::float AS share
+    FROM r WHERE r.ltm > 0 ORDER BY r.ltm DESC LIMIT 50`);
   return { monthly, currentRun, customers, downTwoMonths, concentration };
 }
 
@@ -162,7 +166,7 @@ async function calls() {
       LEFT JOIN destruction USING (level1) LEFT JOIN overdue USING (level1)
       WHERE ltm.revenue > 0
     )
-    SELECT level1, ${NAME('level1')} AS customer, storage::float, service::float, revenue::float,
+    SELECT a.level1, ${NAME('a.level1')} AS customer, storage::float, service::float, revenue::float,
            month_revenue::float, trailing6_mean::float, deviation_pct::float, down_two_months, up_20pct,
            coalesce(not_raised_2y, false) AS not_raised_2y, last_changed::text, codes::int,
            storage_no_destruction, destruction_no_storage, destruction_revenue::float, boxes_review_overdue::float
