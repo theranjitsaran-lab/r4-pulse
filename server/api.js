@@ -26,6 +26,23 @@ for (const name of SCREENS) {
   });
 }
 
+// The drill below one customer: live for any account; from fixtures/drill.json for the 50 largest.
+router.get('/customer/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'account id must be a number' });
+  try {
+    if (USE_FIXTURES) {
+      const f = path.join(__dirname, '..', 'fixtures', 'drill.json');
+      const j = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null;
+      const a = j && j.data.accounts.find(x => x.level1 === id);
+      if (!a) return res.status(404).json({ error: 'Work orders and visits are kept offline for the 50 largest accounts only; the live app has them for every account.' });
+      return res.json({ snapshotAt: j.snapshotAt, data: a });
+    }
+    const data = await cached('customer:' + id, () => queries.customerDrill(id));
+    res.json({ snapshotAt: new Date().toISOString(), data });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 router.get('/me', (req, res) => res.json(req.session.user));
 
 module.exports = router;

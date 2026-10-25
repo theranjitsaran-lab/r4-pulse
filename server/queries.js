@@ -260,4 +260,46 @@ async function margin() {
   return { accounts, lines };
 }
 
-module.exports = { pulse, activity, pricing, calls, margin, customers };
+// ── The drill below a customer: work orders and visits ───────────────────────────────────
+// One account's work orders over the last six months (each with its lines) and its Veri-Shred
+// visits (done orders by day and route). Live, /api/customer/:id runs this for any account; the
+// snapshot keeps the 50 largest accounts in fixtures/drill.json.
+async function customerDrill(level1) {
+  const orders = await query(`
+    WITH b AS (SELECT (max(month) - interval '5 months')::date AS f, (max(month) + interval '1 month')::date AS t FROM kpi.monthly), ${PL}
+    SELECT l.woid, min(l.d)::text AS date, count(*)::int AS lines, sum(l.totamt)::float AS revenue,
+           json_agg(json_build_object('code', l.servcode, 'units', l.units::float, 'revenue', l.totamt::float) ORDER BY l.totamt DESC) AS items
+    FROM l WHERE l.level1 = $1 GROUP BY l.woid ORDER BY min(l.d) DESC, l.woid DESC LIMIT 200`, [level1]);
+  const visits = await query(`
+    WITH b AS (SELECT (max(month) - interval '5 months')::date AS f, (max(month) + interval '1 month')::date AS t FROM kpi.monthly)
+    SELECT NULLIF(date, '')::date::text AS date, NULLIF(route, '') AS route, string_agg(DISTINCT NULLIF(driver, ''), ' ') AS driver,
+           count(*)::int AS services, count(DISTINCT NULLIF(slocid, ''))::int AS stops,
+           sum(CASE WHEN weight ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN weight::numeric ELSE 0 END)::float AS pounds,
+           string_agg(DISTINCT NULLIF(cbtcode, ''), ' ') AS bins
+    FROM vs_service_orders, b
+    WHERE billable = 'true' AND NULLIF(level1, '')::int = $1
+      AND NULLIF(date, '')::date >= b.f AND NULLIF(date, '')::date < b.t
+    GROUP BY 1, 2 ORDER BY 1 DESC, 2 LIMIT 200`, [level1]);
+  return { level1, orders, visits };
+}
+
+// Snapshot: the drill for the 50 largest accounts, and a check of data rule 9 (is the units field
+// on retrieval, return and destruction-pull lines a box barcode, or a count of boxes?).
+async function drill() {
+  const top = await query(`
+    WITH ${BOUNDS}
+    SELECT level1 FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t
+    GROUP BY level1 ORDER BY sum(revenue) DESC, level1 LIMIT 50`);
+  const accounts = [];
+  for (const t of top) accounts.push(await customerDrill(t.level1));
+  const unitsCheck = await query(`
+    SELECT s.servcode, count(*)::int AS lines, min(p.units)::float AS min_units, max(p.units)::float AS max_units,
+           percentile_cont(0.5) WITHIN GROUP (ORDER BY p.units)::float AS median_units,
+           (count(*) FILTER (WHERE p.units = 1)::float / count(*))::float AS share_one
+    FROM priced_lines p JOIN servcode s USING (servcodeid)
+    WHERE s.servcode IN ('20', '30', 'S1') AND p.wodate >= now() - interval '12 months'
+    GROUP BY 1 ORDER BY 1`);
+  return { accounts, unitsCheck };
+}
+
+module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill };

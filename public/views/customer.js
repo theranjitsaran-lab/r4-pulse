@@ -139,6 +139,7 @@ export async function render(main, C, params) {
         </div>
       </div>
     </div>
+    <div class="grid drill" id="cp-drill"><div class="card"><div class="card-head"><h3>Work orders</h3><small>last six months</small></div><p class="sub">Loading…</p></div><div class="card"><div class="card-head"><h3>Visits</h3><small>last six months</small></div><p class="sub">Loading…</p></div></div>
   </div>`;
 
   if (s) {
@@ -149,6 +150,8 @@ export async function render(main, C, params) {
       source: 'VCK invoices, posted runs · storage ret_tot, service ser_tot',
     });
   } else main.querySelector('#cp-chart').remove();
+
+  drawDrill(main.querySelector('#cp-drill'), id, svcName);
 
   // right or not right on a signal: logged, and the buttons show what was said
   const sigBox = main.querySelector('#cp-sigs');
@@ -183,6 +186,54 @@ export async function render(main, C, params) {
       { key: 'revenue', label: 'Revenue', num: true, fmt: v => money0(v) },
     ], rows: ls });
   });
+}
+
+// Below the page: the account's work orders (what was billed, order by order) and its Veri-Shred
+// visits (one row per day and route). Per account, so fetched here rather than in the snapshot.
+async function drawDrill(el, id, svcName) {
+  if (!el) return;
+  let d;
+  try {
+    const r = await fetch(`/api/customer/${id}`, { credentials: 'same-origin' });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+    d = j.data;
+  } catch (e) {
+    el.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="card-head"><h3>Work orders and visits</h3></div><div class="pending">${esc(e.message)}</div></div>`;
+    return;
+  }
+  if (!el.isConnected) return;
+  const day = t => new Date(t + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
+  const n0 = v => Math.round(v || 0).toLocaleString('en-US');
+  const ordRev = d.orders.reduce((t, o) => t + o.revenue, 0);
+  const lbs = d.visits.reduce((t, v) => t + (v.pounds || 0), 0);
+  el.innerHTML = `
+    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? `${n0(d.orders.length)}${d.orders.length >= 200 ? '+' : ''} in six months · ${money0(ordRev)}` : 'last six months'}</small></div><div id="cp-orders"></div><div class="src">VCK priced lines by work order · tap an order for its lines</div></div>
+    <div class="card"><div class="card-head"><h3>Visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} route-days · ${n0(lbs)} lb weighed` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Veri-Shred done orders · one row per day and route · executive-bin pounds are a default, not a weigh</div></div>`;
+  const oBox = el.querySelector('#cp-orders'), vBox = el.querySelector('#cp-visits');
+  if (d.orders.length) ledgerTable(oBox, {
+    columns: [
+      { key: 'date', label: 'Date', fmt: v => day(v) },
+      { key: 'woid', label: 'Order', fmt: v => `<span class="sub" style="display:inline">${esc(v)}</span>` },
+      { key: 'lines', label: 'Lines', num: true },
+      { key: 'revenue', label: 'Value', num: true, fmt: v => money0(v) },
+    ],
+    rows: d.orders.slice(0, 60),
+    detail: (o, td) => {
+      td.innerHTML = o.items.map(i => `<div style="display:flex;justify-content:space-between;gap:12px;padding:3px 0"><span>${esc(titleCase(svcName.get(String(i.code).replace(/^S5[BPT]$/, 'S5')) || i.code))} <span class="sub" style="display:inline">${esc(i.code)} · ${n0(i.units)}</span></span><span class="num">${money0(i.revenue)}</span></div>`).join('');
+    },
+  });
+  else oBox.innerHTML = '<p class="sub">No billed work orders in the last six months.</p>';
+  if (d.visits.length) ledgerTable(vBox, {
+    columns: [
+      { key: 'date', label: 'Date', fmt: v => v ? day(v) : '—' },
+      { key: 'route', label: 'Route', fmt: (v, r) => `${esc(v || '—')}${r.driver ? ` <span class="sub" style="display:inline">${esc(r.driver)}</span>` : ''}` },
+      { key: 'services', label: 'Services', num: true, fmt: (v, r) => `${n0(v)}${r.stops > 1 ? ` <span class="sub" style="display:inline">${r.stops} stops</span>` : ''}` },
+      { key: 'pounds', label: 'Pounds', num: true, fmt: v => v ? n0(v) : '—' },
+    ],
+    rows: d.visits.slice(0, 60),
+  });
+  else vBox.innerHTML = '<p class="sub">No done Veri-Shred orders in the last six months: this account\'s work is storage or warehouse handling.</p>';
 }
 
 function pos(v, r) {

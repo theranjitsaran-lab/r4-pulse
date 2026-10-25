@@ -12,7 +12,7 @@ const queries = require('./queries');
   fs.mkdirSync(dir, { recursive: true });
   let failed = 0;
   for (const [name, fn] of Object.entries(queries)) {
-    if (name.startsWith('_')) continue;
+    if (name.startsWith('_') || name === 'customerDrill') continue;   // per-account, served live
     try {
       const data = await fn();
       fs.writeFileSync(path.join(dir, `${name}.json`), JSON.stringify({ snapshotAt: new Date().toISOString(), data }, null, 1));
