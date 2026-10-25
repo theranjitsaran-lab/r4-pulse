@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R4 Pulse · Style guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/tokens.css">
+<link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/components/components.css">
+<style>
+  .sg { display: grid; gap: 34px; }
+  .sg h1 { font-family: var(--f-display); font-weight: 400; font-size: 34px; letter-spacing: var(--track-tight); margin: 0; }
+  .sg .intro { color: var(--ink-3); max-width: 70ch; margin: 6px 0 0; }
+  .sg section > .sec h2 { font-size: var(--fs-head); margin: 0; }
+  .sg .sec small { font-family: var(--f-narrow); font-size: var(--fs-source); color: var(--ink-3); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card { background: var(--surface); border-radius: var(--r-lg); padding: 16px 18px; }
+  .states .card .fig-l { font-family: var(--f-narrow); font-size: var(--fs-num); font-weight: 600; margin: 4px 0 2px; }
+  .states .card .note { font-size: var(--fs-label); color: var(--ink-3); }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+  .sw { width: 128px; font-family: var(--f-narrow); font-size: var(--fs-source); color: var(--ink-3); }
+  .sw i { display: block; height: 36px; border-radius: var(--r-sm); border: 1px solid var(--rule-2); margin-bottom: 4px; }
+  .type-specimen p { margin: 0 0 10px; }
+  .t-display { font-family: var(--f-display); font-size: var(--fs-display); line-height: 1.08; letter-spacing: var(--track-tight); }
+  .t-display-ph { font-family: var(--f-display); font-size: 28px; line-height: 1.12; letter-spacing: var(--track-tight); }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } .t-display { font-size: 28px; } }
+</style>
+</head>
+<body>
+<header class="mast"><div class="mast-in"><a class="brand" href="/#pulse"><b>R4 Pulse</b><span>Style guide · every component, every state</span></a><div class="mast-right"><span id="asof"></span></div></div></header>
+<main id="main" class="sg">
+  <div>
+    <h1>Components, on real figures</h1>
+    <p class="intro">Every component in every state, drawn from the committed fixtures and costed with <code>model/rates.js</code>. Components read <code>tokens.css</code> variables only; nothing here is green but the masthead and links.</p>
+  </div>
+
+  <section>
+    <div class="sec"><h2>States</h2><small>measured · modelled ◇ · pending · below cost · below median · sound</small></div>
+    <div class="grid3 states" id="states"></div>
+  </section>
+
+  <section>
+    <div class="sec"><h2>Core bar</h2><small>meter.js · straight, no dial · the month in progress dashed</small></div>
+    <div class="card" id="meter"></div>
+  </section>
+
+  <section>
+    <div class="sec"><h2>Line chart</h2><small>chart.js · one axis · conclusion title · source line · crosshair</small></div>
+    <div id="line"></div>
+  </section>
+
+  <section>
+    <div class="sec"><h2>Bar chart</h2><small>chart.js · the thin day in amber</small></div>
+    <div id="bars"></div>
+  </section>
+
+  <section>
+    <div class="sec"><h2>Distribution strip</h2><small>strip.js · one dot per account · below cost, below median, sound</small></div>
+    <div class="grid2" id="verdicts"></div>
+    <div class="card" style="margin-top:18px"><div id="strip"></div><div class="src" id="strip-src"></div></div>
+  </section>
+
+  <section>
+    <div class="sec"><h2>Ledger table</h2><small>table.js · 28px rows · hairlines · click a row to open it in place · restacks under 640px</small></div>
+    <div class="card" id="table"></div>
+  </section>
+
+  <section>
+    <div class="sec"><h2>Drill path</h2><small>drill.js · breadcrumb · open in place · back to where you were</small></div>
+    <div class="card" id="drill"></div>
+  </section>
+
+  <section>
+    <div class="sec"><h2>Type and colour</h2><small>tokens.css</small></div>
+    <div class="card type-specimen">
+      <p class="t-display">Core revenue is $353,481 a month short of $1.0m.</p>
+      <p class="t-display-ph">The same headline at 28px, on a phone.</p>
+      <p>IBM Plex Sans for body copy, at 13px in the Ledger register.</p>
+      <p class="lab">Plex Sans Condensed labels</p>
+      <p class="fig" style="font-size:var(--fs-num);font-weight:600">$646,519 · −$432,637</p>
+    </div>
+    <div class="swatches" id="swatches" style="margin-top:14px"></div>
+  </section>
+</main>
+
+<script src="/model/rates.js"></script>
+<script type="module">
+import { lineChart, barChart, money0, moneyK } from '/components/chart.js';
+import { meter } from '/components/meter.js';
+import { ledgerTable } from '/components/table.js';
+import { strip } from '/components/strip.js';
+import { drill } from '/components/drill.js';
+
+const R = window.R4RATES;
+const get = async n => { const r = await fetch('/api/' + n); if (!r.ok) throw new Error(n + ': ' + r.status); return r.json(); };
+const [pulseJ, actJ, priJ, marJ] = await Promise.all(['pulse', 'activity', 'pricing', 'margin'].map(get));
+const P = pulseJ.data, A = actJ.data, PR = priJ.data, M = marJ.data;
+document.getElementById('asof').textContent = 'fixtures of ' + new Date(pulseJ.snapshotAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+const pct = v => (v * 100).toFixed(0) + '%';
+const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+
+// ── figures every section uses ──
+const months = P.monthly;
+const avg = (from, to) => { const w = months.filter(m => m.month >= from && m.month <= to); return w.reduce((t, m) => t + m.core, 0) / w.length; };
+const core = avg('2026-03-01', '2026-08-01'), early = avg('2025-01-01', '2025-06-01');
+const run = P.currentRun.find(r => r.part === 'run');
+const last6 = months.slice(-6).map(m => m.core_service);
+const range = [run.storage + Math.min(...last6), run.storage + Math.max(...last6)];
+// Larabida, costed from its fixture lines with the model: the below-cost example
+const lara = M.accounts.find(a => /LARABIDA CHILDREN/i.test(a.customer || ''));
+const laraLb = M.lines.filter(l => l.level1 === lara.level1 && l.servcode === 'S5B').reduce((t, l) => t + l.units, 0);
+const laraCost = R.costToServe('bin', lara.bins, Object.assign({ visits: lara.visits }, laraLb > 0 ? { pounds: laraLb } : { binCode: lara.main_bin }));
+const laraRev = lara.storage_revenue + lara.service_revenue;
+// storage rate per box: 2FM (level1 8153) against the book's median
+const sr = PR.storage.map(r => r.rate_per_box).sort((a, b) => a - b), srMed = sr[Math.floor(sr.length / 2)];
+const fm = PR.storage.find(r => r.level1 === 8153);
+
+// ── states ──
+document.getElementById('states').innerHTML = `
+  <div class="card"><div class="lab">Measured</div><div class="fig-l">${money0(core)}</div><div class="note">Core, six-month average Mar–Aug 2026, posted invoices</div></div>
+  <div class="card"><div class="lab">Modelled</div><div class="fig-l modelled">${moneyK(range[0])}–${moneyK(range[1])}</div><div class="note">October in-month range; service modelled from the last six posted months</div></div>
+  <div class="card"><div class="lab">Retention rate</div><div class="pending">Not yet measured. Needs box in/out history from VCK.</div></div>
+  <div class="card"><div class="lab">Below cost</div><div class="fig-l is-bad">${money0(laraRev - laraCost.total)}</div><div class="note">Larabida: ${money0(laraRev)} a year for ${lara.bins} bin services that cost ${money0(laraCost.total)} to serve ◇</div></div>
+  <div class="card"><div class="lab">Below median</div><div class="fig-l is-warn">$${fm.rate_per_box.toFixed(3)}</div><div class="note">2FM storage a box a month, against the book's $${srMed.toFixed(3)} median (${mon(fm.month)})</div></div>
+  <div class="card"><div class="lab">Sound</div><div class="fig-l">$${srMed.toFixed(3)}</div><div class="note">At the median. Sound and up carry no colour</div></div>`;
+
+// ── meter ──
+meter(document.getElementById('meter'), {
+  label: 'Core, 6-month average', value: core, delta: { text: '▼ ' + pct(1 - core / early) + ' since early 2025', cls: 'is-bad' },
+  target: 1e6, range, rangeLabel: `October ${moneyK(range[0])}–${moneyK(range[1])}, narrowing`, tick: early, tickLabel: 'early-2025 average',
+});
+
+// ── line chart: storage against service, Citadel as a band within service ──
+const svc = months.map(m => ({ x: m.month, y: m.service }));
+const lowS = months.reduce((a, m) => m.service < a.service ? m : a), highS = months.reduce((a, m) => m.service > a.service ? m : a);
+lineChart(document.getElementById('line'), {
+  title: `Storage is the annuity with one step. Service swings ten times as wide, from ${moneyK(lowS.service)} to ${moneyK(highS.service)}.`,
+  sub: `${mon(months[0].month)} – ${mon(months[months.length - 1].month)} · invoice month · one axis`,
+  series: [{ name: 'Storage', points: months.map(m => ({ x: m.month, y: m.storage })) }, { name: 'Service, all', cls: 's-2', points: svc }],
+  band: { name: 'of which Citadel', points: months.map(m => ({ x: m.month, lo: m.service - m.citadel, hi: m.service })) },
+  marks: [{ x: '2025-07-01', text: 'Jul 2025 · storage steps down, 2FM rate cut' }],
+  notes: [{ x: lowS.month, y: lowS.service, text: `${mon(lowS.month)} credit run ${money0(lowS.service)}`, cls: 'is-bad' },
+          { x: highS.month, y: highS.service, text: `${mon(highS.month)} ${money0(highS.service)}` }],
+  source: 'kpi.monthly from VCK invoices, posted runs, COALESCE(invdate, billdate) · storage ret_tot, service ser_tot · Citadel = ser_tot for custno 00870, negative months carried',
+});
+
+// ── bar chart: done services a day by weekday ──
+const wd = A.weekdays.filter(d => d.dow <= 5);
+const thin = wd.reduce((a, d) => d.done_per_day < a.done_per_day ? d : a);
+const fat = wd.reduce((a, d) => d.done_per_day > a.done_per_day ? d : a);
+barChart(document.getElementById('bars'), {
+  title: `${fat.day} carries ${(fat.done_per_day / thin.done_per_day).toFixed(1)} times ${thin.day}'s work.`,
+  sub: 'Done services per route day, by weekday, last twelve months',
+  bars: wd.map(d => ({ label: d.day, value: d.done_per_day, cls: d === thin ? 'is-warn' : '' })),
+  yFormat: v => v.toFixed(1),
+  source: 'v_route_day, Veri-Shred done orders (billable = true) · amber = the thin day',
+});
+
+// ── strip and verdicts: 95-gallon bins ──
+const b2 = PR.rates.filter(r => r.servcode === 'B2' && r.modal_rate > 0 && r.lines > 0).map(r => ({ v: r.modal_rate, name: r.customer, rev: r.revenue }));
+const named = b2.slice().sort((a, b) => b.rev - a.rev).slice(0, 6).map(r => r.name);
+// cost to serve a 95-gallon bin service on a typical account: a visit at the book's services per visit
+const unit = R.costToServe('bin', R.RATES.unitsVisit.v * 100, { visits: 100, binCode: 'B2' }).perUnit;
+const st0 = (await import('/components/strip.js')).stripStats(b2);
+const price = Math.round((unit + st0.median) / 2);   // an example price above cost and below the median
+const st = strip(document.getElementById('strip'), { values: b2, cost: unit, price, named });
+document.getElementById('strip-src').textContent =
+  `priced_lines, modal invoiced rate per account, 13 months · ${st.n} accounts · cost to serve ◇ ${'$' + unit.toFixed(2)} a bin at ${R.RATES.unitsVisit.v.toFixed(2)} services a visit and ${R.RATES.lbPerBin.v.B2} lb · no list line: list prices are not in the database`;
+const verdict = (cls, lab, text) => `<div class="verdict ${cls}"><div class="lab">${lab}</div><p>${text}</p></div>`;
+document.getElementById('verdicts').innerHTML =
+  verdict('is-bad', 'Below cost', `$${(laraRev / lara.bins).toFixed(2)} is below what this costs to serve. Cost to serve is $${laraCost.perUnit.toFixed(2)} a bin service. Every one loses $${(laraCost.perUnit - laraRev / lara.bins).toFixed(2)}, and the volume makes it worse, not better.`) +
+  verdict('is-warn', 'Below median', `$${price.toFixed(2)} earns, but sits below the median. Cheaper than ${pct(1 - st.below(price))} of the ${st.n} accounts.`) +
+  verdict('', 'Sound', `$${st.median.toFixed(2)} is a sound price. Cost to serve is $${unit.toFixed(2)}.`);
+
+// ── ledger table: the largest accounts, opening to their lines ──
+const linesOf = l1 => M.lines.filter(l => l.level1 === l1);
+const top = P.concentration.slice(0, 10);
+ledgerTable(document.getElementById('table'), {
+  columns: [
+    { key: 'customer', label: 'Customer', sub: r => r.level1 === 6714 ? 'Citadel, held apart from core' : `level1 ${r.level1}` },
+    { key: 'ltm', label: 'Revenue, 12 mo', num: true, fmt: v => money0(v) },
+    { key: 'share', label: 'Share', num: true, fmt: v => (v * 100).toFixed(1) + '%' },
+  ],
+  rows: top,
+  detail: (r, td) => {
+    const ls = linesOf(r.level1).filter(l => l.revenue !== 0).sort((a, b) => b.revenue - a.revenue).slice(0, 8);
+    ledgerTable(td, { columns: [
+      { key: 'servcode', label: 'Code' }, { key: 'family', label: 'Family', fmt: v => v || '—' },
+      { key: 'units', label: 'Units', num: true, fmt: v => Math.round(v).toLocaleString('en-US') },
+      { key: 'revenue', label: 'Revenue', num: true, fmt: v => money0(v), cls: x => x.revenue < 0 ? 'is-bad' : '' },
+    ], rows: ls });
+  },
+});
+
+// ── drill: company → half → customer ──
+drill(document.getElementById('drill'), {
+  title: 'Company',
+  render(body, d) {
+    body.innerHTML = `<p>Core is <b class="fig">${money0(core)}</b> a month against a $1.0m target. <button class="drill-open" data-h="storage">Storage</button> · <button class="drill-open" data-h="service">Service</button></p>`;
+    body.addEventListener('click', ev => {
+      const b = ev.target.closest('[data-h]'); if (!b) return;
+      d.open({ title: b.dataset.h === 'storage' ? 'Storage' : 'Service', render(b2, d2) {
+        const key = b.dataset.h;
+        const rows = M.accounts.filter(a => (key === 'storage' ? a.storage_revenue : a.service_revenue) > 0 && a.level1 !== 6714)
+          .sort((x, y) => (key === 'storage' ? y.storage_revenue - x.storage_revenue : y.service_revenue - x.service_revenue)).slice(0, 6);
+        b2.innerHTML = '<div></div>';
+        ledgerTable(b2.firstChild, { columns: [
+          { key: 'customer', label: 'Customer', fmt: (v, r) => `<button class="drill-open" data-l="${r.level1}">${v}</button>` },
+          { key: key + '_revenue', label: 'Revenue, 12 mo', num: true, fmt: v => money0(v) },
+        ], rows });
+        b2.addEventListener('click', e2 => {
+          const c = e2.target.closest('[data-l]'); if (!c) return;
+          const a = M.accounts.find(x => x.level1 === +c.dataset.l);
+          d2.open({ title: a.customer, render(b3) { b3.innerHTML = `<p class="fig">${a.customer}: ${money0(a.storage_revenue)} storage, ${money0(a.service_revenue)} service, ${Math.round(a.boxes).toLocaleString('en-US')} boxes, ${a.bins.toLocaleString('en-US')} bin services on ${a.visits} visits.</p><p class="src">The customer level. Below it: lines, the cost build, visits and boxes (Prompt 8).</p>`; } });
+        });
+      } });
+    });
+  },
+});
+
+// ── swatches ──
+document.getElementById('swatches').innerHTML = ['--ink', '--ink-3', '--ink-5', '--ground', '--surface', '--well', '--rule-3', '--brand', '--warn', '--bad', '--warn-bg', '--bad-bg']
+  .map(v => `<div class="sw"><i style="background:var(${v})"></i>${v}</div>`).join('');
+</script>
+</body>
+</html>

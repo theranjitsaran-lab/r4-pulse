@@ -16,6 +16,8 @@ app.get('/health', (req, res) => res.json({ ok: true, fixtures: USE_FIXTURES }))
 auth.install(app);
 app.use('/api', api);
 app.use(express.static(path.join(__dirname, '..', 'public'), { extensions: ['html'] }));
+// The cost model runs in the browser too (Pricing, Margin): the same file, never a copy.
+app.get('/model/rates.js', (req, res) => res.sendFile(path.join(__dirname, '..', 'model', 'rates.js')));
 
 const port = process.env.PORT || 3000;
 const rates = require('../model/rates');
