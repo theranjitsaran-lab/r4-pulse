@@ -9,7 +9,8 @@
 //   barChart(el, { title, sub, source, bars: [{ label, value, cls, note }], yFormat })
 'use strict';
 
-const W = 900;
+// Drawn 900 wide on a desktop and 420 on a phone, so the text stays legible when it scales.
+const widthFor = (el, o) => o.width || ((el.clientWidth && el.clientWidth < 600) ? 420 : 900);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 export const money0 = v => (v < 0 ? '−$' : '$') + Math.round(Math.abs(v)).toLocaleString('en-US');
@@ -43,7 +44,8 @@ function frame(el, o, svg, key) {
 
 export function lineChart(el, o) {
   if (!el) return;
-  const H = o.height || 320, L = 54, R = 18, T = 18, B = 30;
+  const W = widthFor(el, o), compact = W < 600;
+  const H = o.height || (compact ? 260 : 320), L = compact ? 44 : 54, R = compact ? 8 : 18, T = 18, B = 30;
   const xs = [...new Set(o.series.flatMap(s => s.points.map(p => p.x)))].sort();
   const all = o.series.flatMap(s => s.points.map(p => p.y)).concat((o.band ? o.band.points : []).flatMap(p => [p.lo, p.hi]));
   const tk = ticks(Math.min(0, ...all), Math.max(...all));
@@ -58,14 +60,16 @@ export function lineChart(el, o) {
   // x labels: first, last and every January, so the years read without crowding
   xs.forEach((x, i) => {
     const last = i === xs.length - 1, nearLast = !last && fx(xs[xs.length - 1]) - fx(x) < 70;
-    if (i === 0 || last || (!nearLast && (x.slice(5, 7) === '01' || x.slice(5, 7) === '07'))) {
+    const nearFirst = i > 0 && fx(x) - fx(xs[0]) < 70;
+    const every = compact ? ['01'] : ['01', '07'];
+    if (i === 0 || last || (!nearLast && !nearFirst && every.includes(x.slice(5, 7)))) {
       const anchor = i === 0 ? 'start' : i === xs.length - 1 ? 'end' : 'middle';
       g += `<text class="c-axis" x="${fx(x)}" y="${H - 8}" text-anchor="${anchor}">${xf(x)}</text>`;
     }
   });
   for (const m of o.marks || []) {
     g += `<line class="c-mark" x1="${fx(m.x)}" x2="${fx(m.x)}" y1="${T}" y2="${H - B}"/>
-      <text class="c-note" x="${fx(m.x) + 6}" y="${T + 10}">${esc(m.text)}</text>`;
+      ${compact ? '' : `<text class="c-note" x="${fx(m.x) + 6}" y="${T + 10}">${esc(m.text)}</text>`}`;
   }
   if (o.band) {
     const p = o.band.points.filter(q => xs.includes(q.x));
@@ -107,6 +111,7 @@ export function lineChart(el, o) {
 
 export function barChart(el, o) {
   if (!el) return;
+  const W = widthFor(el, o);
   const H = o.height || 200, L = 8, R = 8, T = 22, B = 26, gap = 14;
   const max = Math.max(...o.bars.map(b => b.value), 0);
   const bw = (W - L - R - gap * (o.bars.length - 1)) / o.bars.length;

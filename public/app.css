@@ -17,4 +17,5 @@ a{color:var(--brand)}
 .empty{margin:60px auto;max-width:520px;border:1.5px dashed var(--ink-5);border-radius:var(--r);padding:22px 24px;color:var(--ink-3)}
 .empty h2{font-family:var(--f-display);font-weight:400;font-size:24px;color:var(--ink);margin:0 0 8px}
 .empty code{font-family:var(--f-narrow)}
-@media(max-width:640px){.mast-in{padding:0 16px;gap:14px}.brand span{display:none}#main{padding:18px 16px 60px}}
+@media(max-width:640px){.mast-in{padding:0 12px;gap:6px}.brand span{display:none}.brand b{font-size:14px}#nav{margin-left:0;gap:0}#nav a{padding:6px 7px;font-size:12.5px}#asof{display:none}.mast-right button{padding:3px 6px}#main{padding:18px 16px 60px}}
+html,body{overflow-x:hidden}
