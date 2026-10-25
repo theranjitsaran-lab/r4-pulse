@@ -125,7 +125,7 @@ async function activity() {
     SELECT date::text, route, routeid, driver, services::int, services_done::int, customers::int, stops::int,
            stops_done::int, postcodes::int, postcode_list, pounds::float, pounds_exec_default::float
     FROM v_route_day
-    WHERE date >= $1::date - 34 AND date <= $1::date + 14
+    WHERE date >= least($1::date - 34, (date_trunc('month', $1::date) - interval '1 month')::date) AND date <= $1::date + 14
     ORDER BY date, route NULLS LAST`, [anchor.latest_done]);
   const orders = await query(`
     SELECT NULLIF(date, '')::date::text AS date, NULLIF(route, '') AS route, NULLIF(driver, '') AS driver,

@@ -30,7 +30,17 @@ to reach. Newest section first.
 | **Placements** | `vs_placement.lplactive` is true on every record and means nothing. Placements created before 2021 are mostly records never closed; idle-bin counts use 2021 onward |
 | **17 September 2026** | 283 booked, 200 done, 23 customers, 6 routes from `v_route_day`; was 272, 13 and 5. Angel ran 13 services across 6 customers, not one bin. Activity reproduces `v_route_day`, not the addendum |
 
-## Design — settled 7 October 2026, in Claude Design
+## Redesign — settled 26 October 2026
+
+Trisha's needs (in-month tracking, levers to grow EBITDA, margin views that point to action, pricing
+the team can use and size) and an end-user review of Pulse v2 led to a customer-centred app: Home →
+customer list → customer page → lines, visits, boxes. One system typeface, a validated chart palette
+(storage blue, service orange, Citadel neutral), cards, a phone tab bar, light and dark. Citadel is
+held apart everywhere and its change reads "lumpy". The month's pace is the bill so far plus work
+done per working day against last month (VCK prices work only at the run). The 7 October design
+below is superseded: registers, serif headline, hairline-only layout and the Iron Mountain panel.
+
+## Design — settled 7 October 2026, in Claude Design (superseded 26 October 2026)
 
 | | |
 |---|---|

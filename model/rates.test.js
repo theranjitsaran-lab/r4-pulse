@@ -184,3 +184,14 @@ test('Pool-based rates are pool ÷ volume and say so', () => {
   near(R.RATES.unitsVisit.v, 5.7986, 0.0001, 'services per visit');
   assert.match(R.RATES.routeDay.d, /\$595,725 a year ÷ 1,322 route days = \$450\.62/);
 });
+
+test('Margin by line of business adds up to the accounts it is built from', async () => {
+  const { buildMargins } = await import('../public/components/margin.js');
+  const M = require('../fixtures/margin.json').data;
+  const book = buildMargins(R, M, { exclude: [6714] });
+  const famRev = Object.values(book.families).reduce((t, f) => t + f.revenue, 0);
+  const famCost = Object.values(book.families).reduce((t, f) => t + f.cost, 0);
+  near(famCost, book.accounts.reduce((t, a) => t + a.cost, 0), 0.01, 'cost: families = accounts');
+  near(famRev, book.accounts.reduce((t, a) => t + Object.values(a.fam).reduce((u, f) => u + f.revenue, 0), 0), 0.01, 'revenue: families = accounts');
+  assert.ok(!book.accounts.some(a => a.level1 === 6714), 'Citadel held apart');
+});

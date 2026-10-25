@@ -20,6 +20,9 @@ of them. Nothing is for all three.
 
 ## The four screens
 
+*Restructured 26 October 2026 around the customer: Home (Trisha), Customers (lists and the customer
+page, with Calls folded in as a view), Pricing (Anne), Routes (Mike). See Design below.*
+
 | Screen | Owner | Register | What it is |
 |---|---|---|---|
 | **Pulse** | Trisha | Briefing | Headline sentence carrying the gap · four "Needs a decision" rows · storage and service side by side with Iron Mountain beside them · the 24-month chart · one finding a week |
@@ -124,30 +127,30 @@ Copy is part of the product. Plain English. British spelling in prose; US dollar
 - **Not yet calculable is an honest empty state** — dashed border, one-line reason — never an invented figure. Today: retention rate, book-wide service gross margin, book-wide bin and ITAD margins.
 - No invented data, ever. If it isn't in the database, the panel says where it will come from.
 
-## Design
+## Design — redesigned 26 October 2026 (supersedes the 7 October design)
 
-`public/tokens.css` holds every colour, size and font. Components read variables only.
+**The customer is the centre.** Home → a customer list (`#customers?view=…`) → one customer page
+(`#customer/<level1>`) → lines → visits → boxes. Every number on Home opens a list; every list row
+opens the customer page. Nothing is a dead end. Nav: Home · Customers · Pricing · Routes; on a
+phone it is a tab bar at the bottom.
 
-**Two registers, chosen on purpose.** Briefing for Pulse: Newsreader display headline (46px
-desktop, 28px phone), generous measure, charts support prose. Ledger for everything else: dense,
-tabular, 28px rows, hairline rules instead of boxes, Plex Sans Condensed labels and figures.
+**Type and tokens.** One system sans everywhere (`--f-sans`: San Francisco, Segoe UI); no serif,
+no web font. `public/tokens.css` holds every colour, light and dark. Components read variables only.
 
-**Colour rule.** Brand green `#2B4F1E` is the masthead, links and the drill affordance only. Data
-sits in ink. Status colour marks exceptions, never the default: amber `#C07A1E` below median and
-for the thin day; red `#B3261E` below cost and for down. "Sound" and "up" carry no colour.
+**Charts** (`components/chart.js`, method from the dataviz skill): one axis always; 2px lines over a
+12% area wash; bars no wider than ~24px with 4px rounded ends; hairline grids; legend for two or more
+series; crosshair tooltip; drawn at their on-screen width. Colour follows the entity: storage blue
+`--s-storage`, service orange `--s-service`, Citadel a neutral `--s-citadel`. Text never wears a
+series colour. Real sparklines on customer rows.
 
-**Never on screen:** a gauge or dial, a KPI-tile row, a pie chart, a target meter with commit
-buttons, a dual axis, count-ups, reveal choreography. The core gauge is a straight bar.
+**Status colour** marks exceptions only and always comes with a word: red below cost and down,
+amber below median, green only for a delta that is up. Sound is ink.
 
-Phone: Trisha's Pulse above the fold is the headline, the core bar and one chart. Tables restack
-under 640px.
+**Copy.** One idea per row: a number and one line; detail on tap. Show what changed, not what Anne
+and Mike already know. Modelled figures carry ◇. Route-based costs (bins, handling, delivery) show
+"under review" until delivery routes are in the route volumes.
 
-## Known fixes carried from the design review
-
-- Section labels must never share a line with their rule (the rule was striking through "Needs a decision", "This week", "October to date"). Use `.sec`.
-- The Pricing strip's left-edge labels must stay inside the plot; swing the anchor at the edges.
-- Off-scale accounts on the strip are counted ("33 accounts above $49") not stacked at the edge.
-- Long negatives (−$432,637) never break across lines: `white-space: nowrap` on `.num`.
+**Never on screen:** a dual axis, a pie chart, a gauge or dial, count-ups, invented figures.
 
 ## When you are unsure
 

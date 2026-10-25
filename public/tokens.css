@@ -1,101 +1,122 @@
-/* R4 Pulse — design tokens
-   Extracted from the committed design (Claude Design, 7 October 2026).
-   Components read these variables only. No hard-coded colours anywhere else. */
+/* R4 Pulse — design tokens. Redesign, 26 October 2026.
+   One system typeface, a validated chart palette (dataviz reference instance), quiet chrome,
+   status colour for exceptions only, light and dark. Components read these variables only.
+   Token names are kept from the first design so earlier components inherit the new values. */
 
 :root {
+  color-scheme: light;
+
   /* ── ink ── */
-  --ink:        #171A15;   /* primary text, measured figures, chart lines */
-  --ink-2:      #33372F;   /* secondary headings */
-  --ink-3:      #5A5F55;   /* labels, captions, source lines */
-  --ink-4:      #8A8F84;   /* muted */
-  --ink-5:      #9A988D;   /* modelled-figure mark, dashed borders */
+  --ink:        #1d1d1f;   /* primary text and figures */
+  --ink-2:      #3a3a3c;   /* secondary headings */
+  --ink-3:      #6e6e73;   /* labels, captions, source lines */
+  --ink-4:      #8e8e93;   /* axis text, muted */
+  --ink-5:      #aeaeb2;   /* modelled mark, dashed borders */
 
   /* ── surfaces ── */
-  --ground:     #F4F4EF;   /* page */
-  --surface:    #FFFFFF;   /* raised card */
-  --well:       #FBFAF6;   /* inset: evidence, source lines */
-  --well-2:     #EEEEE8;
-  --tint-brand: #E9EFE4;   /* brand green at 10% — selected row, link hover */
+  --ground:     #f5f5f7;   /* page */
+  --surface:    #ffffff;   /* card */
+  --well:       #f9f9fb;   /* inset: source lines, opened rows */
+  --well-2:     #ececf0;   /* tracks, empty bars */
+  --tint-brand: #eaf1e6;   /* selected row */
 
   /* ── rules ── */
-  --rule:       #ECECE6;   /* hairline between rows */
-  --rule-2:     #E4E4DE;
-  --rule-3:     #DCDCD4;
-  --rule-4:     #BDBDB5;   /* input borders */
-  --rule-ink:   #171A15;   /* section heads: 2px; table heads: 1.5px */
+  --rule:       #ececf0;   /* hairline between rows */
+  --rule-2:     #e3e3e8;
+  --rule-3:     #d8d8de;
+  --rule-4:     #c7c7cc;   /* input borders */
+  --rule-ink:   #1d1d1f;
 
-  /* ── brand — masthead, links and the drill affordance ONLY ── */
-  --brand:      #2B4F1E;
+  /* ── brand: the R4 mark, links and the tap affordance ── */
+  --brand:      #2b4f1e;
+  --brand-2:    #3d6b2b;
 
-  /* ── status — exceptions only; the normal state is ink ── */
-  --warn:       #C07A1E;   /* below median; the thin day */
-  --bad:        #B3261E;   /* below cost; down */
-  --bad-bg:     #FBE9E7;
-  --warn-bg:    #FAF1E2;
+  /* ── chart series: validated palette slots, colour follows the entity ── */
+  --s-storage:  #2a78d6;   /* slot 1 blue */
+  --s-service:  #eb6834;   /* slot 2 orange */
+  --s-citadel:  #b4b2aa;   /* held apart: a neutral, never a series hue */
+  --s-wash:     .12;       /* area fill opacity */
+  --grid:       #ececf0;
+  --baseline:   #c7c7cc;
 
-  /* ── type ── */
-  --f-display:  'Newsreader', Georgia, serif;          /* Pulse headline, verdict sentences, pull quotes */
-  --f-body:     'IBM Plex Sans', system-ui, sans-serif;
-  --f-narrow:   'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;  /* labels, figures, source lines */
+  /* ── status: exceptions only, always with a word or icon ── */
+  --good:       #0a7d0a;   /* delta up, as text */
+  --warn:       #b26b00;   /* below median; the thin day (text-safe amber) */
+  --bad:        #c62f2f;   /* below cost; down */
+  --bad-bg:     #fdecec;
+  --warn-bg:    #fdf3e2;
 
-  --fs-source:  11px;
-  --fs-label:   12px;
-  --fs-body:    13px;
-  --fs-body-lg: 14px;
-  --fs-head:    15px;
-  --fs-num:     22px;
-  --fs-num-lg:  27px;
-  --fs-display: 46px;      /* desktop headline; 28px on a phone */
+  /* ── type: the system sans, everywhere ── */
+  --f-sans:     system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --f-display:  var(--f-sans);
+  --f-body:     var(--f-sans);
+  --f-narrow:   var(--f-sans);
 
-  --track-label: .08em;    /* uppercase labels */
-  --track-tight: -.015em;  /* display */
+  --fs-source:  12px;
+  --fs-label:   13px;
+  --fs-body:    15px;
+  --fs-body-lg: 16px;
+  --fs-head:    17px;
+  --fs-num:     24px;
+  --fs-num-lg:  32px;
+  --fs-hero:    52px;
+  --fs-display: 34px;
+
+  --track-label: .02em;
+  --track-tight: -.02em;
 
   /* ── shape ── */
-  --r-sm: 3px;
-  --r:    4px;
-  --r-lg: 6px;
-  --row-h: 28px;           /* Ledger register row height */
+  --r-sm: 6px;
+  --r:    10px;
+  --r-lg: 16px;
+  --row-h: 44px;           /* a tap target, not a ledger line */
+  --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 4px 16px rgba(0, 0, 0, .04);
 
-  /* ── motion: almost none ── */
   --t-fast: 120ms;
   --t:      200ms;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  :root { --t-fast: 0ms; --t: 0ms; }
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #8e8e93; --ink-5: #636366;
+    --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #1f2d1a;
+    --rule: #2c2c2e; --rule-2: #333336; --rule-3: #3a3a3c; --rule-4: #48484a; --rule-ink: #f5f5f7;
+    --brand: #8fc27a; --brand-2: #a6d191;
+    --s-storage: #3987e5; --s-service: #d95926; --s-citadel: #6b6a64;
+    --grid: #2c2c2e; --baseline: #48484a;
+    --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #8e8e93; --ink-5: #636366;
+  --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #1f2d1a;
+  --rule: #2c2c2e; --rule-2: #333336; --rule-3: #3a3a3c; --rule-4: #48484a; --rule-ink: #f5f5f7;
+  --brand: #8fc27a; --brand-2: #a6d191;
+  --s-storage: #3987e5; --s-service: #d95926; --s-citadel: #6b6a64;
+  --grid: #2c2c2e; --baseline: #48484a;
+  --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
+  --shadow: none;
 }
 
-/* ── the two registers ──
-   Briefing (Pulse): display serif headline, generous measure, charts support prose.
-   Ledger (Activity, Pricing, Calls, Margin): dense, tabular, hairline rules, narrow labels. */
-.register-briefing { --measure: 62ch; }
-.register-ledger   { --measure: none; font-size: var(--fs-body); }
+@media (prefers-reduced-motion: reduce) { :root { --t-fast: 0ms; --t: 0ms; } }
 
 /* ── primitives every screen shares ── */
-.lab {
-  font-family: var(--f-narrow); font-size: 10px; font-weight: 600;
-  letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-3);
-}
-.num { font-variant-numeric: tabular-nums; }
-.src {
-  font-family: var(--f-narrow); font-size: var(--fs-source); color: var(--ink-3);
-  background: var(--well); padding: 8px 10px; border-radius: var(--r-sm);
-}
+.lab { font-size: 12px; font-weight: 500; color: var(--ink-3); letter-spacing: var(--track-label); }
+.num, .fig { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.src { font-size: var(--fs-source); color: var(--ink-4); padding: 10px 0 0; }
 /* a figure that is modelled rather than measured */
-.modelled { color: var(--ink-3); }
-.modelled::before { content: "◇ "; color: var(--ink-5); }
+.modelled::after { content: " ◇"; color: var(--ink-5); font-weight: 400; }
 /* an honest empty state */
-.pending {
-  border: 1.5px dashed var(--ink-5); border-radius: var(--r); padding: 8px 10px;
-  font-size: var(--fs-label); color: var(--ink-3);
-}
-.pending::before { content: "◇ "; }
+.pending { border: 1px dashed var(--ink-5); border-radius: var(--r-sm); padding: 8px 10px; font-size: var(--fs-label); color: var(--ink-3); }
 /* status, exceptions only */
 .is-bad  { color: var(--bad); }
 .is-warn { color: var(--warn); }
-/* section head: the label never shares a line with the rule */
-.sec {
-  display: flex; justify-content: space-between; align-items: baseline;
-  padding-bottom: 10px; border-bottom: 2px solid var(--rule-ink); margin-bottom: 12px;
-}
-.sec > * { background: none; line-height: 1.2; }
+.is-good { color: var(--good); }
+/* section head */
+.sec { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0 0 10px; }
+.sec h2 { font-size: 20px; font-weight: 700; letter-spacing: var(--track-tight); margin: 0; }
+.sec small, .sec a { font-size: var(--fs-label); color: var(--ink-3); }
+.sec a { color: var(--brand); text-decoration: none; font-weight: 500; }
