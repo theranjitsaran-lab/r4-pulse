@@ -1,254 +1,226 @@
-// Pulse — Trisha, phone first, weekly. Briefing register.
-// Top to bottom: date · headline carrying the gap · the core bar with the month in progress as a
-// dashed range · Needs a decision (four rows, ranked by money at stake) · storage and service side
-// by side · the 23-month chart titled by its conclusion · finding of the week.
-// Every figure comes from /api/pulse, plus /api/margin and /api/pricing for the decision rows;
-// costs come from model/rates.js. Nothing is typed in.
-import { lineChart, money0, moneyK } from '/components/chart.js';
-import { meter } from '/components/meter.js';
+// Pulse — Trisha, phone first. One idea per card: a number and a line, a tap for the rest.
+// Top to bottom: this month · levers to grow EBITDA · gross margin by line of business · price it
+// · the team · the trend. Citadel is lumpy: shown on its own line, never inside a total or a lever.
+// Figures from /api/pulse, /api/margin, /api/pricing, /api/activity and /api/calls; costs from
+// model/rates.js through components/margin.js. Nothing is typed in.
+import { barChart, money0, moneyK } from '/components/chart.js';
+import { buildMargins, FAMILY_NAMES } from '/components/margin.js';
 
 const TARGET = 1e6;
 const CITADEL = 6714, CITY_2FM = 8153;
-
-// Iron Mountain's published figures, shown beside R4's. Not in the database: carried from the
-// committed design (docs/design/pulse-desktop.png), Iron Mountain Q3 2025. Confirm the source.
-const IRON_MOUNTAIN = { label: 'Iron Mountain Q3 2025', storageGrowth: 5.1, serviceGrowth: 4.7, storageMargin: 70.5, serviceMargin: 32.0, retention: 93.2 };
+const TYPICAL_RISE = 0.08;   // the median rise when a rate moves (rate rounds, 24 months; scripts/levers.js §2)
+// Route costs leave out delivery routes, whose days are not yet in the route volumes, so anything
+// built on a visit is shown as under review rather than as a verdict.
+const UNDER_REVIEW = new Set(['movement', 'handling', 'bin']);
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-const pct0 = v => Math.round(v) + '%';
-const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-const monShort = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
-// VCK names are in capitals; set them in title case, small words lower, firm suffixes upper
+const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
+const monY = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', year: '2-digit', timeZone: 'UTC' });
+const nextMonth = d => new Date(Date.UTC(+d.slice(0, 4), +d.slice(5, 7), 1)).toISOString().slice(0, 10);
 const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase())
-  .replace(/(?!^)\b(Of|And|The|For|In|At|On)\b/g, m => m.toLowerCase()).replace(/\b(Llp|Pc|Inc|Llc|It)\b/g, m => m.toUpperCase());
+  .replace(/(?!^)\b(Of|And|The|For|In|At|On)\b/g, m => m.toLowerCase()).replace(/\b(Llp|Pc|Inc|Llc|It|Icu|Cboe|Aha|Ups|Nfa)\b/g, m => m.toUpperCase());
+const perMonth = v => moneyK(v) + '/mo';
 
 const CSS = `
-.pulse { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; }
-.pulse .date { font-family: var(--f-narrow); color: var(--ink-3); font-size: var(--fs-label); margin: 0 0 6px; }
-.pulse .top { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 40px; align-items: end; margin-bottom: 40px; }
-.pulse h1 { font-family: var(--f-display); font-weight: 400; font-size: var(--fs-display); line-height: 1.06; letter-spacing: var(--track-tight); margin: 0; max-width: 24ch; }
-.pulse section { margin-bottom: 40px; }
-.pulse .sec h2 { font-size: var(--fs-head); margin: 0; }
-.pulse .sec small { font-family: var(--f-narrow); font-size: var(--fs-source); color: var(--ink-3); text-align: right; }
-.decisions .row { display: grid; grid-template-columns: 120px minmax(0, 1.6fr) 150px minmax(0, 1.4fr) 56px; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--rule-2); align-items: start; }
-.decisions .tag { font-family: var(--f-narrow); font-size: var(--fs-label); font-weight: 600; display: flex; gap: 8px; align-items: baseline; color: var(--ink-2); }
-.decisions .tag::before { content: ""; width: 9px; height: 9px; background: currentColor; display: inline-block; }
-.decisions .tag.is-bad { color: var(--bad); }
-.decisions .tag.is-warn { color: var(--warn); }
-.decisions .tag.is-warn::before { background: none; border: 1.5px solid currentColor; }
-.decisions .say { font-weight: 600; font-size: var(--fs-body-lg); line-height: 1.4; }
-.decisions .money { font-family: var(--f-narrow); font-size: var(--fs-num); font-weight: 600; text-align: right; white-space: nowrap; line-height: 1.1; }
-.decisions .money small { display: block; font-size: var(--fs-source); font-weight: 400; color: var(--ink-3); }
-.decisions .why { font-size: var(--fs-label); color: var(--ink-3); line-height: 1.5; }
-.decisions .open { font-family: var(--f-narrow); font-weight: 600; text-align: right; }
-.halves { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.half { background: var(--surface); border-radius: var(--r-lg); padding: 16px 18px; display: grid; grid-template-columns: 1.15fr 1fr 1fr 1fr; gap: 16px; }
-.half h3 { margin: 0 0 4px; font-size: var(--fs-head); }
-.half .big { font-family: var(--f-narrow); font-size: var(--fs-num-lg); font-weight: 600; white-space: nowrap; }
-.half .note { font-size: var(--fs-source); color: var(--ink-3); line-height: 1.4; margin-top: 2px; }
-.half .k { font-family: var(--f-narrow); font-size: var(--fs-num); font-weight: 600; white-space: nowrap; margin: 2px 0; }
-.half .im { font-family: var(--f-narrow); font-size: var(--fs-source); color: var(--ink-3); margin-top: 4px; }
-.finding { border-top: 2px solid var(--rule-ink); padding-top: 12px; }
-.finding p { font-family: var(--f-display); font-size: 30px; line-height: 1.2; margin: 6px 0 12px; max-width: 34ch; }
-@media (max-width: 900px) {
-  .pulse .top { grid-template-columns: 1fr; gap: 22px; margin-bottom: 28px; }
-  .pulse h1 { font-size: 28px; line-height: 1.12; }
-  .decisions .row { grid-template-columns: 1fr auto; gap: 6px 14px; }
-  .decisions .tag { grid-column: 1 / -1; }
-  .decisions .why { grid-column: 1 / -1; }
-  .decisions .open { grid-column: 1 / -1; text-align: left; }
-  .halves { grid-template-columns: 1fr; }
-  .half { grid-template-columns: 1fr 1fr; }
-  .finding p { font-size: 24px; }
-  /* above the fold on a phone: the headline, the core bar and one chart */
-  .pulse .p-chart { order: 1; } .pulse .p-decide { order: 2; } .pulse .p-halves { order: 3; } .pulse .finding { order: 4; }
+.pv2 { max-width: 1080px; margin: 0 auto; display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pv2 .wide { grid-column: 1 / -1; }
+.pv2 .card { background: var(--surface); border-radius: 14px; padding: 20px 22px; }
+.pv2 .eyebrow { font-family: var(--f-narrow); font-size: 11px; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--ink-3); margin: 0 0 8px; display: flex; justify-content: space-between; gap: 12px; }
+.pv2 .eyebrow a { text-transform: none; letter-spacing: 0; font-size: 13px; text-decoration: none; }
+.pv2 .hero { font-family: var(--f-narrow); font-size: 52px; font-weight: 600; line-height: 1; letter-spacing: -.01em; white-space: nowrap; }
+.pv2 .lede { font-family: var(--f-display); font-size: 22px; line-height: 1.3; margin: 10px 0 0; max-width: 40ch; }
+.pv2 .bar { height: 10px; background: var(--well-2); border-radius: 5px; margin: 16px 0 6px; position: relative; overflow: hidden; }
+.pv2 .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); border-radius: 5px; }
+.pv2 .bar b { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink-4); }
+.pv2 .barfoot { display: flex; justify-content: space-between; font-family: var(--f-narrow); font-size: 12px; color: var(--ink-3); }
+.pv2 .aside { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--ink-3); }
+.pv2 .list { list-style: none; margin: 0; padding: 0; }
+.pv2 .list li a { display: grid; grid-template-columns: minmax(0, 1fr) auto 14px; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; }
+.pv2 .list li:first-child a { border-top: 0; }
+.pv2 .list .t { font-weight: 600; font-size: 15px; line-height: 1.3; }
+.pv2 .list .s { display: block; font-weight: 400; font-size: 12.5px; color: var(--ink-3); margin-top: 2px; }
+.pv2 .list .v { font-family: var(--f-narrow); font-size: 19px; font-weight: 600; text-align: right; white-space: nowrap; }
+.pv2 .list .v small { display: block; font-size: 11px; font-weight: 400; color: var(--ink-3); }
+.pv2 .list .go { color: var(--brand); font-size: 18px; }
+.pv2 .total { font-family: var(--f-narrow); font-size: 34px; font-weight: 600; }
+.pv2 .fam { display: grid; grid-template-columns: minmax(0, 1.2fr) 52px minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--rule); font-size: 14px; }
+.pv2 .fam:first-of-type { border-top: 0; }
+.pv2 .fam .pc { font-family: var(--f-narrow); font-weight: 600; text-align: right; }
+.pv2 .fam .track { height: 8px; background: var(--well-2); border-radius: 4px; position: relative; }
+.pv2 .fam .track i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); border-radius: 4px; }
+.pv2 .fam.review { color: var(--ink-3); }
+.pv2 .fam.review .track i { background: repeating-linear-gradient(135deg, var(--ink-5) 0 3px, transparent 3px 6px); }
+.pv2 .chip { display: inline-block; font-family: var(--f-narrow); font-size: 11px; font-weight: 400; color: var(--ink-3); border: 1px dashed var(--ink-5); border-radius: 10px; padding: 0 7px; margin-left: 6px; vertical-align: 3px; white-space: nowrap; }
+.pv2 .btn { display: inline-block; margin-top: 14px; background: var(--ink); color: var(--surface); text-decoration: none; font-weight: 600; padding: 10px 16px; border-radius: 10px; }
+.pv2 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.pv2 .k { font-family: var(--f-narrow); font-size: 30px; font-weight: 600; white-space: nowrap; }
+.pv2 .ks { font-size: 12.5px; color: var(--ink-3); }
+.pv2 .chart { padding: 0; background: none; }
+.pv2 .chart .chart-head { display: none; }
+.pv2 .foot { grid-column: 1 / -1; font-family: var(--f-narrow); font-size: 11px; color: var(--ink-4); text-align: center; padding: 8px 0 20px; }
+@media (max-width: 760px) {
+  .pv2 { grid-template-columns: 1fr; gap: 12px; }
+  .pv2 .card { padding: 18px; border-radius: 12px; }
+  .pv2 .hero { font-size: 44px; }
+  .pv2 .lede { font-size: 19px; }
+  .pv2 .two { grid-template-columns: 1fr; }
 }`;
 
 function injectCss() {
-  if (document.getElementById('pulse-css')) return;
-  const s = document.createElement('style');
-  s.id = 'pulse-css';
-  s.textContent = CSS;
-  document.head.appendChild(s);
+  if (document.getElementById('pv2-css')) return;
+  const s = document.createElement('style'); s.id = 'pv2-css'; s.textContent = CSS; document.head.appendChild(s);
 }
-
 async function getJson(name) {
-  const r = await fetch('/api/' + name);
-  if (!r.ok) throw new Error(`${name}: ${r.status}`);
-  return (await r.json()).data;
+  const r = await fetch('/api/' + name); if (!r.ok) throw new Error(`${name}: ${r.status}`); return (await r.json()).data;
 }
-
 // model/rates.js is a classic script: add it once, however many times the screen renders
 let ratesLoading = null;
 function loadRates() {
   if (window.R4RATES) return Promise.resolve(window.R4RATES);
   return ratesLoading || (ratesLoading = new Promise((ok, fail) => {
-    const s = document.createElement('script');
-    s.src = '/model/rates.js';
-    s.onload = () => ok(window.R4RATES);
-    s.onerror = () => { ratesLoading = null; fail(new Error('model/rates.js did not load')); };
+    const s = document.createElement('script'); s.src = '/model/rates.js';
+    s.onload = () => ok(window.R4RATES); s.onerror = () => { ratesLoading = null; fail(new Error('model/rates.js did not load')); };
     document.head.appendChild(s);
   }));
 }
 
-// The four decision rows, each from the data, ranked by money at stake.
-function decisions(P, M, PR, R) {
-  const rows = [];
-  const conc = P.concentration;
-
-  // Citadel: concentration and the swing, with nothing contractual on file
-  const cit = conc.find(c => c.level1 === CITADEL);
-  const citNow = P.downTwoMonths.find(d => d.level1 === CITADEL);
-  if (cit) rows.push({
-    tag: 'Critical', cls: 'is-bad', stake: cit.ltm,
-    say: `Citadel is ${(cit.share * 100).toFixed(0)}% of revenue, all of it service, with no contract date on file.`,
-    money: money0(cit.ltm), unit: 'last 12 months',
-    why: citNow ? `${monShort(citNow.month)} billed ${money0(citNow.revenue)} against its own six-month run of ${money0(citNow.trailing6_mean)}. Settlements and credits land in lumps; nothing holds the volume in place.` : 'Settlements and credits land in lumps; nothing holds the volume in place.',
-    href: `#margin/${CITADEL}`,
-  });
-
-  // 2FM storage rate against the rest of the book, per box
-  const fm = PR.storage.find(r => r.level1 === CITY_2FM);
-  const rest = PR.storage.filter(r => r.level1 !== CITY_2FM);
+// Levers to grow EBITDA, each sized from the data in dollars a month, Citadel never among them.
+function levers(P, PR, CA, A, R) {
+  const out = [];
+  // accounts that missed every rate round: the typical rise on their last twelve months
+  const missed = CA.filter(c => c.not_raised_2y && c.level1 !== CITADEL);
+  if (missed.length) {
+    const rev = missed.reduce((t, c) => t + c.service, 0);
+    out.push({ t: `Raise the ${missed.length} accounts that missed every rate round`, s: `${moneyK(rev)} of service a year at rates unchanged for two years`, v: rev * TYPICAL_RISE / 12, conf: 'measured', href: '#calls', owner: 'Anne' });
+  }
+  // 2FM storage, halfway towards the rest of the book
+  const fm = PR.storage.find(r => r.level1 === CITY_2FM), rest = PR.storage.filter(r => r.level1 !== CITY_2FM);
   if (fm) {
     const restRate = rest.reduce((t, r) => t + r.storage_billed, 0) / rest.reduce((t, r) => t + r.boxes, 0);
-    const perCent = fm.boxes * 0.01;
-    rows.push({
-      tag: 'Below the book', cls: 'is-warn', stake: (restRate - fm.rate_per_box) * fm.boxes * 12,
-      say: `City of Chicago 2FM stores ${fm.boxes.toLocaleString('en-US')} boxes at $${fm.rate_per_box.toFixed(3)} a box. The rest of the book averages $${restRate.toFixed(3)}.`,
-      money: '$' + fm.rate_per_box.toFixed(3), unit: 'a box a month',
-      why: `Every cent a box is ${money0(perCent)} a month. The rate stepped down in July 2025; the cost to house a box is $${R.RATES.facilities.v.toFixed(4)} ◇.`,
-      href: `#margin/${CITY_2FM}`,
-    });
+    out.push({ t: `Move 2FM storage halfway to the book's rate`, s: `$${fm.rate_per_box.toFixed(3)} a box on ${fm.boxes.toLocaleString('en-US')} boxes; the rest of the book pays $${restRate.toFixed(3)}`, v: (restRate - fm.rate_per_box) / 2 * fm.boxes, conf: 'measured', href: '#pricing', owner: 'Trisha' });
   }
-
-  // Accounts below their own six-month run two months running, Citadel apart
+  // accounts below their own run two months running: back to their six-month level
   const down = P.downTwoMonths.filter(d => d.level1 !== CITADEL && d.trailing6_mean > d.revenue);
-  if (down.length) {
-    const short = down.reduce((t, d) => t + (d.trailing6_mean - d.revenue), 0);
-    const top = down.slice().sort((a, b) => (b.trailing6_mean - b.revenue) - (a.trailing6_mean - a.revenue)).slice(0, 3);
-    rows.push({
-      tag: 'Down', cls: 'is-bad', stake: short * 12,
-      say: `${down.length} accounts are below their own six-month run for a second month.`,
-      money: money0(short), unit: 'a month short',
-      why: top.map(d => `${title(d.customer)} ${money0(d.revenue)} against ${money0(d.trailing6_mean)}`).join(' · ') + '.',
-      href: '#calls',
-    });
+  if (down.length) out.push({ t: `Win back ${down.length} accounts running below their own level`, s: down.slice(0, 2).map(d => title(d.customer)).join(', ') + ' and others, two months down', v: down.reduce((t, d) => t + d.trailing6_mean - d.revenue, 0), conf: 'measured', href: '#calls', owner: 'Anne' });
+  // 95-gallon accounts below the median, to the median
+  const b2 = PR.rates.filter(r => r.servcode === 'B2' && r.modal_rate > 0 && r.units > 0);
+  if (b2.length) {
+    const med = b2.map(r => r.modal_rate).sort((a, b) => a - b)[Math.floor(b2.length / 2)];
+    const low = b2.filter(r => r.modal_rate < med);
+    out.push({ t: `Bring ${low.length} 95-gallon accounts up to the median`, s: `median $${med.toFixed(2)} a service; the rate definition is being confirmed`, v: low.reduce((t, r) => t + (med - r.modal_rate) * r.units, 0) / 12, conf: 'review', href: '#pricing', owner: 'Anne' });
   }
-
-  // Below cost: the account whose bin work loses most, costed with the model
-  const binLb = new Map();
-  for (const l of M.lines) if (l.servcode === 'S5B') binLb.set(l.level1, (binLb.get(l.level1) || 0) + l.units);
-  let worst = null;
-  for (const a of M.accounts) {
-    if (!a.bins || a.level1 === CITADEL) continue;
-    const lb = binLb.get(a.level1) || 0;
-    const binRev = M.lines.filter(l => l.level1 === a.level1 && l.family === 'bin').reduce((t, l) => t + l.revenue, 0);
-    if (binRev <= 0) continue;   // work billed some other way: Margin sorts those out
-    const c = R.costToServe('bin', a.bins, Object.assign({ visits: a.visits || null }, lb > 0 ? { pounds: lb } : { binCode: a.main_bin }));
-    const gap = binRev - c.total;
-    if (!worst || gap < worst.gap) worst = { a, gap, c, binRev };
+  // route days: a fuller day on the lighter routes (the last five weeks against the 75th percentile)
+  const days = A.routeDays.filter(d => d.services_done > 0 && d.date <= A.latestDone);
+  if (days.length > 10) {
+    const s = days.map(d => d.services_done).sort((a, b) => a - b), p75 = s[Math.floor(s.length * .75)];
+    const needed = Math.ceil(s.reduce((t, v) => t + v, 0) / p75);
+    out.push({ t: 'Fill the lighter route days', s: `${days.length - needed} fewer route days in five weeks at today's fuller-day load, a ceiling`, v: (days.length - needed) * R.RATES.routeDay.v / 5 * 52 / 12, conf: 'review', href: '#activity', owner: 'Mike' });
   }
-  if (worst) rows.push({
-    tag: 'Below cost', cls: 'is-bad', stake: -worst.gap,
-    say: `${title(worst.a.customer)} pays $${(worst.binRev / worst.a.bins).toFixed(2)} a bin service against $${worst.c.perUnit.toFixed(2)} to serve it.`,
-    money: money0(worst.gap), unit: 'a year ◇',
-    why: `${worst.a.bins.toLocaleString('en-US')} bin services on ${worst.a.visits} visits in the last twelve months. Cost to serve uses a ${R.SETTINGS.split * 100}% travel share of a route day.`,
-    href: `#margin/${worst.a.level1}`,
-  });
-
-  return rows.sort((a, b) => b.stake - a.stake).slice(0, 4);
+  return out.sort((a, b) => b.v - a.v);
 }
 
 export async function render(main, P) {
-  const el = main; if (!el) return;
+  if (!main) return;
   injectCss();
-  const [R, M, PR] = await Promise.all([loadRates(), getJson('margin'), getJson('pricing')]);
+  const [R, M, PR, A, CA] = await Promise.all([loadRates(), getJson('margin'), getJson('pricing'), getJson('activity'), getJson('calls')]);
 
-  const months = P.monthly;
-  const avg = (from, to) => { const w = months.filter(m => m.month >= from && m.month <= to); return w.reduce((t, m) => t + m.core, 0) / w.length; };
-  // the six-month average to the month before the latest, as the headline basis in DECISIONS.md
-  const last = months[months.length - 1];
-  const six = months.slice(-7, -1), core = six.reduce((t, m) => t + m.core, 0) / six.length;
-  const early = avg('2025-01-01', '2025-06-01');
-  const fall = 1 - core / early;
+  const months = P.monthly, last = months[months.length - 1];
   const run = P.currentRun.find(r => r.part === 'run');
-  const svc6 = months.slice(-6).map(m => m.core_service);
-  const range = run ? [run.storage + Math.min(...svc6), run.storage + Math.max(...svc6)] : null;
-  const rows = decisions(P, M, PR, R);
-  const words = ['', 'One thing needs', 'Two things need', 'Three things need', 'Four things need'][rows.length];
+  const runCore = run ? run.storage + run.service - run.citadel : null;
+  const runMonth = nextMonth(last.month);
+  const six = months.slice(-7, -1), core6 = six.reduce((t, m) => t + m.core, 0) / six.length;
+  const book = buildMargins(R, M, { exclude: [CITADEL] });
+  const lv = levers(P, PR, CA, A, R);
+  const lvTotal = lv.reduce((t, l) => t + l.v, 0);
+  const lvSolid = lv.filter(l => l.conf === 'measured').reduce((t, l) => t + l.v, 0);
 
-  // storage gross margin, modelled: revenue less the facilities pool's share for the boxes held
-  const stoMargin = last.storage_boxes ? 1 - (last.storage_boxes * R.RATES.facilities.v) / last.storage : null;
-  const prevYear = months.find(m => m.month === last.month.replace(/^(\d{4})/, y => String(+y - 1)));
-  const prevMonth = months[months.length - 2];
-  const C = P.customers;
+  // margin by line of business, Citadel apart; 'other' carries no cost, so it stays out of the list
+  const fams = Object.entries(book.families).filter(([f, v]) => f !== 'other' && v.revenue > 0)
+    .map(([f, v]) => ({ f, ...v, pc: 1 - v.cost / v.revenue })).sort((a, b) => b.revenue - a.revenue);
+  const solid = fams.filter(x => !UNDER_REVIEW.has(x.f));
+  const solidPc = 1 - solid.reduce((t, x) => t + x.cost, 0) / solid.reduce((t, x) => t + x.revenue, 0);
 
-  el.innerHTML = `
-  <div class="pulse register-briefing">
-    <p class="date">${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })} · posted through ${mon(last.month)}</p>
-    <div class="top">
-      <h1>Core revenue is ${money0(TARGET - core)} a month short of $1.0m and down ${pct0(fall * 100)} since early 2025.${words ? ` ${words} a decision.` : ''}</h1>
-      <div id="p-meter"></div>
-    </div>
+  // Mike: done services per route day, the latest week against the twelve-month norm
+  const done = A.routeDays.filter(d => d.services_done > 0 && d.date <= A.latestDone);
+  const wkFrom = new Date(new Date(A.latestDone + 'T00:00:00Z') - 6 * 864e5).toISOString().slice(0, 10);
+  const wk = done.filter(d => d.date >= wkFrom);
+  const wkRate = wk.reduce((t, d) => t + d.services_done, 0) / (wk.length || 1);
+  const wd = A.weekdays.filter(d => d.dow <= 5);
+  const norm = wd.reduce((t, d) => t + d.done_per_day * d.route_days, 0) / wd.reduce((t, d) => t + d.route_days, 0);
 
-    <section class="decisions p-decide">
-      <div class="sec"><h2>Needs a decision</h2><small>ranked by money at stake · open any row for its evidence</small></div>
-      ${rows.map(r => `
-        <div class="row">
-          <span class="tag ${r.cls}">${esc(r.tag)}</span>
-          <span class="say">${esc(r.say)}</span>
-          <span class="money ${r.money.startsWith('−') ? 'is-bad' : ''}">${esc(r.money)}<small>${esc(r.unit)}</small></span>
-          <span class="why">${esc(r.why)}</span>
-          <a class="open" href="${r.href}">Open ↓</a>
-        </div>`).join('')}
+  // price it: the biggest single price gaps in the book, each account's rate against its service's
+  // median, sized by its volume. Codes whose units are services, boxes, trips, pounds or devices.
+  const PRICED = ['B2', 'B3', 'B6', '01', '20', '25', '30', 'S3', 'S4', 'S6'];
+  const meds = {};
+  for (const code of PRICED) {
+    const v = PR.rates.filter(r => r.servcode === code && r.modal_rate > 0 && r.units > 0).map(r => r.modal_rate).sort((a, b) => a - b);
+    if (v.length >= 20) meds[code] = v[Math.floor(v.length / 2)];
+  }
+  const gaps = PR.rates.filter(r => meds[r.servcode] && r.level1 !== CITADEL && r.modal_rate > 0 && r.modal_rate < meds[r.servcode] && r.units > 0)
+    .map(r => ({ ...r, med: meds[r.servcode], worth: (meds[r.servcode] - r.modal_rate) * r.units / 12 }))
+    .sort((a, b) => b.worth - a.worth);
+  const gapTop = gaps.slice(0, 3), gapAll = gaps.reduce((t, g) => t + g.worth, 0);
+  const svcName = s => String(s || '').toLowerCase().replace(/^./, c => c.toUpperCase());
+
+  const ahead = runCore != null ? runCore - last.core : null;
+  const shortDate = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  main.innerHTML = `
+  <div class="pv2">
+    <section class="card wide">
+      <p class="eyebrow"><span>${mon(runMonth)} billing run so far · core</span><span>${new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}</span></p>
+      <div class="hero">${runCore != null ? money0(runCore) : '—'}</div>
+      <p class="lede">${runCore != null ? `${ahead >= 0 ? 'Ahead of' : 'Behind'} ${mon(last.month)} by ${money0(Math.abs(ahead))}, and ${money0(TARGET - runCore)} short of $1.0m.` : 'The run for this month has not started.'}</p>
+      <div class="bar"><i style="width:${Math.min(100, (runCore || 0) / TARGET * 100)}%"></i><b style="left:${last.core / TARGET * 100}%" title="${mon(last.month)}"></b></div>
+      <div class="barfoot"><span>grey mark: ${mon(last.month)} ${moneyK(last.core)}</span><span>$1.0m</span></div>
+      <div class="aside">Citadel, held apart: ${run ? money0(run.citadel) : '—'} in this run. Settlements land in lumps and are never counted above. · ${run ? run.invoices.toLocaleString('en-US') : '—'} invoices in the run, work to ${run ? shortDate(run.latest_work_date) : '—'}.</div>
     </section>
 
-    <section class="p-halves">
-      <div class="sec"><h2>Two businesses. Storage carries the margin; service is winning customers and losing revenue.</h2><small>${mon(last.month)} · beside ${IRON_MOUNTAIN.label}</small></div>
-      <div class="halves">
-        <div class="half">
-          <div><h3>Storage</h3><div class="big">${money0(last.storage)}</div><div class="note">${C.storage_ltm} accounts in the last 12 months · ${(last.storage_boxes / 1e6).toFixed(2)}m boxes · billed on the 1st</div></div>
-          <div><div class="lab">Growth</div><div class="k ${last.storage_growth_yoy_pct < 0 ? 'is-bad' : ''}">${last.storage_growth_yoy_pct < 0 ? '▼' : '▲'} ${Math.abs(last.storage_growth_yoy_pct).toFixed(1)}%</div><div class="note">on ${prevYear ? monShort(prevYear.month) : 'a year ago'}</div><div class="im">IM +${IRON_MOUNTAIN.storageGrowth}%</div></div>
-          <div><div class="lab">Gross margin</div><div class="k modelled">${stoMargin != null ? pct0(stoMargin * 100) : '—'}</div><div class="note">revenue less the facilities pool</div><div class="im">IM ${IRON_MOUNTAIN.storageMargin}%</div></div>
-          <div><div class="lab">Retention rate</div><div class="pending">Not yet measured. Needs box in/out history from VCK.</div><div class="im">IM ${IRON_MOUNTAIN.retention}%</div></div>
-        </div>
-        <div class="half">
-          <div><h3>Service</h3><div class="big">${money0(last.core_service)}</div><div class="note">Citadel apart · ${C.service_ltm} accounts in the last 12 months, ${C.service_prior} the year before</div></div>
-          <div><div class="lab">Growth</div><div class="k ${last.core_service_growth_yoy_pct < 0 ? 'is-bad' : ''}">${last.core_service_growth_yoy_pct < 0 ? '▼' : '▲'} ${Math.abs(last.core_service_growth_yoy_pct).toFixed(0)}%</div><div class="note">on ${prevYear ? monShort(prevYear.month) : 'a year ago'}; accounts ▲ ${pct0((C.service_ltm / C.service_prior - 1) * 100)}</div><div class="im">IM +${IRON_MOUNTAIN.serviceGrowth}%</div></div>
-          <div><div class="lab">Gross margin</div><div class="pending">Runs once line costs load in Margin.</div><div class="im">IM ${IRON_MOUNTAIN.serviceMargin}%</div></div>
-          <div><div class="lab">Revenue per stop</div><div class="k">${money0(last.revenue_per_stop)}</div><div class="note">${monShort(prevMonth.month)} ${money0(prevMonth.revenue_per_stop)} · ${last.stops_per_route_day} stops a route day</div><div class="im">no published benchmark</div></div>
-        </div>
+    <section class="card wide">
+      <p class="eyebrow"><span>Levers to grow EBITDA</span><span>a month, Citadel apart</span></p>
+      <div class="total">up to ${moneyK(lvTotal)}/mo<span class="chip">${moneyK(lvSolid)} measured · the rest under review</span></div>
+      <ul class="list" style="margin-top:8px">
+        ${lv.map(l => `<li><a href="${l.href}"><span class="t">${esc(l.t)}<span class="s">${esc(l.s)} · ${esc(l.owner)}</span></span><span class="v">${perMonth(l.v)}${l.conf === 'review' ? '<small>◇ under review</small>' : ''}</span><span class="go">›</span></a></li>`).join('')}
+      </ul>
+    </section>
+
+    <section class="card">
+      <p class="eyebrow"><span>Gross margin · last 12 months</span><a href="#margin">All accounts ›</a></p>
+      <div class="k">${Math.round(solidPc * 100)}%</div><div class="ks">across storage, shredding, labour and ITAD, Citadel apart ◇</div>
+      <div style="margin-top:12px">
+        ${fams.map(x => `<div class="fam ${UNDER_REVIEW.has(x.f) ? 'review' : ''}"><span>${esc(FAMILY_NAMES[x.f] || x.f)}${UNDER_REVIEW.has(x.f) ? '<span class="chip">under review</span>' : ''}</span><span class="pc">${UNDER_REVIEW.has(x.f) ? '—' : Math.round(x.pc * 100) + '%'}</span><span class="track"><i style="width:${UNDER_REVIEW.has(x.f) ? 100 : Math.max(0, x.pc) * 100}%"></i></span></div>`).join('')}
+      </div>
+      <div class="aside">Route-based lines are under review: delivery routes are not yet in the route volumes, so visit costs run high.</div>
+    </section>
+
+    <section class="card">
+      <p class="eyebrow"><span>Price it</span><span>the biggest gaps to the median</span></p>
+      <div class="k">${perMonth(gapAll)}</div>
+      <div class="ks">if every account under its service's median moved to it · ${gaps.length} account-services, Citadel apart</div>
+      <ul class="list" style="margin-top:8px">
+        ${gapTop.map(g => `<li><a href="#pricing"><span class="t">${esc(title(g.customer))}<span class="s">${esc(svcName(g.service))}: $${g.modal_rate.toFixed(2)} against a $${g.med.toFixed(2)} median</span></span><span class="v">${perMonth(g.worth)}</span><span class="go">›</span></a></li>`).join('')}
+      </ul>
+      <a class="btn" href="#pricing">Price a customer ›</a>
+    </section>
+
+    <section class="card wide">
+      <p class="eyebrow"><span>The team this week</span><span>against their own norm</span></p>
+      <div class="two">
+        <div><div class="ks">Mike · routes</div><div class="k">${wkRate.toFixed(1)}</div><div class="ks">done services a route day in the week to ${shortDate(A.latestDone)}, against ${norm.toFixed(1)} over twelve months</div></div>
+        <div><div class="ks">Anne · pricing and calls</div><div class="pending" style="margin-top:6px">Starts with the Calls screen: accounts repriced and calls logged each week.</div></div>
       </div>
     </section>
 
-    <section class="p-chart"><div id="p-chart"></div></section>
+    <section class="card wide">
+      <p class="eyebrow"><span>Core by month · Citadel apart</span><span>six-month average ${moneyK(core6)}</span></p>
+      <div id="pv2-trend"></div>
+    </section>
 
-    <section class="finding" id="p-finding"></section>
+    <div class="foot">Data posted through ${mon(last.month)} ${last.month.slice(0, 4)} · ◇ modelled from model/rates.js · tap any row for its evidence</div>
   </div>`;
 
-  meter(el.querySelector('#p-meter'), {
-    label: 'Core, 6-month average', value: core, delta: { text: '▼ ' + pct0(fall * 100), cls: 'is-bad' }, target: TARGET,
-    // the run in invoices_current bills the month after the last posted one
-    range, rangeLabel: range ? `${new Date(Date.UTC(+last.month.slice(0, 4), +last.month.slice(5, 7), 1)).toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' })} run ${moneyK(range[0])}–${moneyK(range[1])}, narrowing` : null,
-    tick: early, tickLabel: 'early-2025 average',
+  barChart(main.querySelector('#pv2-trend'), {
+    // thirteen months on a desktop, seven on a phone so the figures stay legible
+    title: 'Core by month', bars: months.slice(innerWidth < 760 ? -7 : -13).map(m => ({ label: monY(m.month), value: m.core, cls: m.core < core6 ? 'is-muted' : '' })),
+    yFormat: v => moneyK(v), height: 170,
   });
-
-  const lowS = months.reduce((a, m) => m.service < a.service ? m : a), highS = months.reduce((a, m) => m.service > a.service ? m : a);
-  lineChart(el.querySelector('#p-chart'), {
-    title: `Storage is the annuity with one step. Service swings ten times as wide, from ${moneyK(lowS.service)} to ${moneyK(highS.service)}.`,
-    sub: `${monShort(months[0].month)} – ${monShort(last.month)} · invoice month · one axis`,
-    series: [{ name: 'Storage', points: months.map(m => ({ x: m.month, y: m.storage })) }, { name: 'Service, all', cls: 's-2', points: months.map(m => ({ x: m.month, y: m.service })) }],
-    band: { name: 'of which Citadel', points: months.map(m => ({ x: m.month, lo: m.service - m.citadel, hi: m.service })) },
-    marks: [{ x: '2025-07-01', text: 'Jul 2025 · storage steps down, 2FM rate cut' }],
-    notes: [{ x: lowS.month, y: lowS.service, text: `${monShort(lowS.month)} credit run ${money0(lowS.service)}`, cls: 'is-bad' },
-            { x: highS.month, y: highS.service, text: `${monShort(highS.month)} ${money0(highS.service)}` }],
-    source: 'VCK invoices, posted runs, COALESCE(invdate, billdate) · storage ret_tot, service ser_tot · Citadel = ser_tot for custno 00870, negative months carried',
-  });
-
-  // Finding of the week: the business winning customers and losing revenue
-  const f = el.querySelector('#p-finding');
-  f.innerHTML = `<div class="lab">Finding of the week</div>
-    <p>Service accounts rose from ${C.service_prior} to ${C.service_ltm} in a year, while core service revenue in ${mon(last.month)} was ${Math.abs(last.core_service_growth_yoy_pct).toFixed(0)}% below the same month last year.</p>
-    <div class="src">kpi.customer_monthly, accounts billing any service in the twelve months to ${mon(C.ltm_to)} against the twelve before · kpi.monthly core service</div>`;
 }
