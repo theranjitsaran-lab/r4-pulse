@@ -5,7 +5,8 @@
 // "Last twelve months" is the twelve posted months to the latest month in kpi.monthly, so the
 // screens roll forward as runs post. Activity reads Veri-Shred up to the latest push.
 // Every numeric column is cast in SQL: pg returns numeric as text, and custno-like text must
-// never be coerced.
+// never be coerced. Every ORDER BY ends on a unique key, so a refresh with unchanged data writes
+// identical fixtures and a diff shows only real changes.
 'use strict';
 const { query } = require('./db');
 
@@ -64,12 +65,12 @@ async function pulse() {
            cm.revenue::float, cm.trailing6_mean::float, cm.deviation_pct::float
     FROM kpi.customer_monthly cm, b
     WHERE cm.month = b.latest AND cm.flag_down_2m
-    ORDER BY cm.revenue - cm.trailing6_mean LIMIT 25`);
+    ORDER BY cm.revenue - cm.trailing6_mean, cm.level1 LIMIT 25`);
   const concentration = await query(`
     WITH ${BOUNDS},
     r AS (SELECT level1, sum(revenue) AS ltm FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t GROUP BY level1)
     SELECT r.level1, ${NAME('r.level1')} AS customer, r.ltm::float, (r.ltm / sum(r.ltm) OVER ())::float AS share
-    FROM r WHERE r.ltm > 0 ORDER BY r.ltm DESC LIMIT 50`);
+    FROM r WHERE r.ltm > 0 ORDER BY r.ltm DESC, r.level1 LIMIT 50`);
   return { monthly, currentRun, customers, downTwoMonths, concentration };
 }
 
@@ -84,21 +85,22 @@ async function activity() {
            stops_done::int, postcodes::int, postcode_list, pounds::float, pounds_exec_default::float
     FROM v_route_day
     WHERE date >= $1::date - 34 AND date <= $1::date + 14
-    ORDER BY date, route`, [anchor.latest_done]);
+    ORDER BY date, route NULLS LAST`, [anchor.latest_done]);
   const orders = await query(`
     SELECT NULLIF(date, '')::date::text AS date, NULLIF(route, '') AS route, NULLIF(driver, '') AS driver,
            CASE WHEN rorder ~ '^[0-9]+(\\.[0-9]+)?$' THEN rorder::numeric::float END AS seq,
            NULLIF(level1, '')::int AS level1, NULLIF(company, '') AS company, NULLIF(slocid, '') AS stop,
            left(coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')), 5) AS postcode,
            NULLIF(cbtcode, '') AS bin, billable = 'true' AS done,
-           CASE WHEN weight ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN weight::numeric::float END AS weight
+           CASE WHEN weight ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN weight::numeric::float END AS weight,
+           isopk AS order_id
     FROM vs_service_orders
     WHERE NULLIF(date, '')::date >= $1::date - 20 AND NULLIF(date, '')::date <= $1::date + 7
-    ORDER BY 1, 2, 4 NULLS LAST, 5`, [anchor.latest_done]);
+    ORDER BY 1, 2, 4 NULLS LAST, 5, isopk`, [anchor.latest_done]);
   // Invoiced value by account and work date: what the day's work at each stop billed for.
   const dayValues = await query(`
     WITH b AS (SELECT $1::date - 20 AS f, $1::date + 8 AS t), ${PL.replace(/^\s*pl AS/, 'pl AS')}
-    SELECT d::text AS date, level1, sum(totamt)::float AS value FROM l GROUP BY 1, 2`, [anchor.latest_done]);
+    SELECT d::text AS date, level1, sum(totamt)::float AS value FROM l GROUP BY 1, 2 ORDER BY 1, 2`, [anchor.latest_done]);
   const weekdays = await query(`
     WITH ${BOUNDS}
     SELECT extract(isodow FROM date)::int AS dow, to_char(date, 'Dy') AS day, count(*)::int AS route_days,
@@ -124,13 +126,13 @@ async function pricing() {
            r.month::text AS rate_month, r.last_changed::text, coalesce(v.units, 0)::float AS units,
            coalesce(v.revenue, 0)::float AS revenue, coalesce(v.lines, 0)::int AS lines
     FROM r LEFT JOIN v USING (level1, servcodeid)
-    ORDER BY r.servcode, r.modal_rate`);
+    ORDER BY r.servcode, r.modal_rate, r.level1`);
   const storage = await query(`
     WITH h AS (SELECT level1, to_date(mth, 'YYYY-MM') AS m, storage_billed, boxes FROM storage_rate_hist),
          latest AS (SELECT max(m) AS m FROM h)
     SELECT h.level1, ${NAME('h.level1')} AS customer, h.m::text AS month, h.boxes::int,
            h.storage_billed::float, (h.storage_billed / nullif(h.boxes, 0))::float AS rate_per_box
-    FROM h JOIN latest USING (m) WHERE h.boxes > 0 ORDER BY 6`);
+    FROM h JOIN latest USING (m) WHERE h.boxes > 0 ORDER BY 6, 1`);
   return { rates, storage, listPrices: null, listPricesNote: 'List prices are not in the database; the 2025 list is in docs/R4_PULSE_LOGIC_PACK.md section 5' };
 }
 
@@ -173,7 +175,7 @@ async function calls() {
     FROM a
     WHERE down_two_months OR up_20pct OR coalesce(not_raised_2y, false) OR storage_no_destruction
        OR destruction_no_storage OR boxes_review_overdue > 0
-    ORDER BY revenue DESC`);
+    ORDER BY revenue DESC, a.level1`);
 }
 
 // ── Margin — the drill-down behind Pulse and Pricing ─────────────────────────────────────
@@ -198,7 +200,8 @@ async function margin() {
     SELECT coalesce(inv.level1, box.level1, vs.level1) AS level1, ${NAME('coalesce(inv.level1, box.level1, vs.level1)')} AS customer,
            coalesce(inv.storage, 0)::float AS storage_revenue, coalesce(inv.service, 0)::float AS service_revenue,
            coalesce(box.boxes, 0)::float AS boxes, coalesce(vs.bins, 0)::int AS bins, coalesce(vs.visits, 0)::int AS visits, vs.main_bin
-    FROM inv FULL JOIN box USING (level1) FULL JOIN vs USING (level1)`);
+    FROM inv FULL JOIN box USING (level1) FULL JOIN vs USING (level1)
+    ORDER BY 1`);
   const lines = await query(`
     WITH ${BOUNDS}, ${PL},
     truck AS (SELECT DISTINCT woid FROM l WHERE servcode = 'S0'),
