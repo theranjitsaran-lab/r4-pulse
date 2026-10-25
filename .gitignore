@@ -11,3 +11,7 @@ node_modules/
 
 # The calls log kept locally when running on fixtures
 data/
+
+# Render secrets written by scripts/app_role.js and scripts/app_users.js
+.env.render
+render_logins.txt

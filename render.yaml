@@ -1,0 +1,24 @@
+# Render blueprint: the R4 Pulse web service. Secrets are set in the Render dashboard, never here.
+# Steps in docs/DEPLOY.md.
+services:
+  - type: web
+    name: r4-pulse
+    runtime: node
+    region: ohio
+    plan: starter            # always on; the free plan sleeps and Trisha's first tap would wait
+    branch: main
+    autoDeploy: true
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "20"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL     # r4_pulse_app, from .env.render (scripts/app_role.js)
+        sync: false
+      - key: AUTH_USERS       # from .env.render (scripts/app_users.js)
+        sync: false
