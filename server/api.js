@@ -8,7 +8,7 @@ const { cached, USE_FIXTURES } = require('./db');
 const queries = require('./queries');
 
 const router = express.Router();
-const SCREENS = ['pulse', 'activity', 'pricing', 'calls', 'margin'];
+const SCREENS = ['pulse', 'activity', 'pricing', 'calls', 'margin', 'customers'];
 
 for (const name of SCREENS) {
   router.get(`/${name}`, async (req, res) => {
