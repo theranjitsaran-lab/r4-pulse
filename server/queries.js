@@ -71,7 +71,48 @@ async function pulse() {
     r AS (SELECT level1, sum(revenue) AS ltm FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t GROUP BY level1)
     SELECT r.level1, ${NAME('r.level1')} AS customer, r.ltm::float, (r.ltm / sum(r.ltm) OVER ())::float AS share
     FROM r WHERE r.ltm > 0 ORDER BY r.ltm DESC, r.level1 LIMIT 50`);
-  return { monthly, currentRun, customers, downTwoMonths, concentration };
+  // Pace: the value of work done each day, by work date, over the last three calendar months to
+  // the latest priced work, Citadel apart. The page compares month-to-date with the same days of
+  // the month before, like for like.
+  const pace = await query(`
+    WITH b AS (SELECT (date_trunc('month', m) - interval '2 months')::date AS f, (m::date + 1) AS t
+               FROM (SELECT greatest((SELECT max(wodate) FROM priced_lines), (SELECT max(wodate) FROM priced_lines_current)) AS m) x),
+    ${PL}
+    SELECT d::text AS date, sum(totamt)::float AS value, count(*)::int AS lines
+    FROM l WHERE level1 <> 6714 GROUP BY 1 ORDER BY 1`);
+  return { monthly, currentRun, customers, downTwoMonths, concentration, pace };
+}
+
+// ── Customers — the list and the customer page ───────────────────────────────────────────
+// Storage and service by month, 24 months to the latest posted month, for the 300 largest
+// accounts over the last twelve months and every account flagged down two months running.
+// Months with no invoice are $0, so every series has the same 24 points.
+async function customers() {
+  const rows = await query(`
+    WITH ${BOUNDS},
+    ltm AS (SELECT level1, sum(revenue) AS ltm FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t GROUP BY level1),
+    pick AS (SELECT level1 FROM (SELECT level1 FROM ltm WHERE ltm > 0 ORDER BY ltm DESC, level1 LIMIT 300) top
+             UNION SELECT cm.level1 FROM kpi.customer_monthly cm, b WHERE cm.month = b.latest AND cm.flag_down_2m)
+    SELECT cm.level1, cm.month::text, cm.storage::float, cm.service::float
+    FROM kpi.customer_monthly cm JOIN pick USING (level1), b
+    WHERE cm.month > b.latest - interval '24 months' AND cm.month <= b.latest
+    ORDER BY cm.level1, cm.month`);
+  const [{ latest }] = await query(`SELECT max(month)::text AS latest FROM kpi.monthly`);
+  const months = [];
+  for (let i = 23; i >= 0; i--) {
+    const d = new Date(latest + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() - i);
+    months.push(d.toISOString().slice(0, 10));
+  }
+  const ids = [...new Set(rows.map(r => r.level1))];
+  const names = ids.length ? await query(`
+    SELECT x.level1, ${NAME('x.level1')} AS customer FROM unnest($1::int[]) AS x(level1) ORDER BY x.level1`, [ids]) : [];
+  const nameOf = new Map(names.map(n => [n.level1, n.customer]));
+  const byId = new Map(ids.map(id => [id, { level1: id, customer: nameOf.get(id), storage: months.map(() => 0), service: months.map(() => 0) }]));
+  for (const r of rows) {
+    const a = byId.get(r.level1), i = months.indexOf(r.month);
+    if (i >= 0) { a.storage[i] = r.storage; a.service[i] = r.service; }
+  }
+  return { months, accounts: [...byId.values()] };
 }
 
 // ── Activity — Mike ──────────────────────────────────────────────────────────────────────
@@ -219,4 +260,4 @@ async function margin() {
   return { accounts, lines };
 }
 
-module.exports = { pulse, activity, pricing, calls, margin };
+module.exports = { pulse, activity, pricing, calls, margin, customers };
