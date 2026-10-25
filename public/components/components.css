@@ -8,6 +8,7 @@
 .card-head h3 { margin: 0; font-size: var(--fs-head); font-weight: 600; letter-spacing: -.01em; }
 .card-head a, .card-head small { font-size: var(--fs-label); color: var(--ink-3); text-decoration: none; }
 .card-head a { color: var(--brand); font-weight: 500; }
+.card-head h3 a { font-size: inherit; font-weight: inherit; color: inherit; }
 
 /* ── figures ── */
 .hero { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -.03em; line-height: 1; }

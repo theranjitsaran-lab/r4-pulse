@@ -33,3 +33,16 @@ export const titleCase = s => String(s || '').toLowerCase().replace(/\b([a-z])/g
   .replace(/\b(?!(?:Dr|Mr|Mrs|Ms|St|Mt)\b)[B-DF-HJ-NP-TV-XZ][b-df-hj-np-tv-xz]{1,3}\b/g, m => m.toUpperCase());
 
 export const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+// The calls log (server/log.js): what the team says about a flag and what they did.
+export async function getLog(level1) {
+  const r = await fetch('/api/log' + (level1 ? '?level1=' + level1 : ''));
+  if (!r.ok) throw new Error('log: ' + r.status);
+  return (await r.json()).data;
+}
+export async function postLog(entry) {
+  const r = await fetch('/api/log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry) });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || 'log: ' + r.status);
+  return j.data;
+}

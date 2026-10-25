@@ -4,7 +4,7 @@
 import { lineChart, money0, moneyK } from '/components/chart.js';
 import { buildMargins, FAMILY_NAMES } from '/components/margin.js';
 import { ledgerTable } from '/components/table.js';
-import { getJson, loadRates, titleCase, esc } from '/components/data.js';
+import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 import { seriesOf, deltaText } from '/views/customers.js';
 
 const CITADEL = 6714;
@@ -34,7 +34,9 @@ const CSS = `
 .cp .sig { padding: 11px 0; border-top: 1px solid var(--rule); }
 .cp .sig:first-of-type { border-top: 0; }
 .cp .sig .acts { margin-top: 6px; display: flex; gap: 8px; }
-.cp .sig .acts button { border: 1px solid var(--rule-3); background: var(--surface); border-radius: 8px; padding: 3px 10px; font-size: 13px; color: var(--ink-3); }
+.cp .sig .acts { align-items: center; flex-wrap: wrap; }
+.cp .sig .acts button { border: 1px solid var(--rule-3); background: var(--surface); border-radius: 8px; padding: 4px 12px; font-size: 13px; color: var(--ink-2); cursor: pointer; }
+.cp .sig .acts button.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
 @media (max-width: 860px) {
   .cp h1 { font-size: 26px; }
   .cp .stats { grid-template-columns: 1fr 1fr; }
@@ -52,7 +54,7 @@ export async function render(main, C, params) {
   if (!main) return;
   injectCss();
   const id = Number(params.id);
-  const [R, M, PR, CA] = await Promise.all([loadRates(), getJson('margin'), getJson('pricing'), getJson('calls')]);
+  const [R, M, PR, CA, log] = await Promise.all([loadRates(), getJson('margin'), getJson('pricing'), getJson('calls'), getLog(Number(params.id)).catch(() => [])]);
   const s = seriesOf(C).get(id);
   const book = buildMargins(R, M, {});
   const m = book.accounts.find(a => a.level1 === id);
@@ -81,13 +83,16 @@ export async function render(main, C, params) {
 
   const sigs = [];
   if (signals) {
-    if (signals.down_two_months) sigs.push(`Below its own six-month level for a second month: ${money0(signals.month_revenue)} against ${money0(signals.trailing6_mean)}.`);
-    if (signals.up_20pct) sigs.push(`Up ${Math.round(signals.deviation_pct)}% on its own six-month level last month.`);
-    if (signals.not_raised_2y) sigs.push(`No rate has moved in two years across ${signals.codes} services.`);
-    if (signals.storage_no_destruction) sigs.push('Stores with R4 but buys no destruction: shredding is a natural next conversation.');
-    if (signals.destruction_no_storage) sigs.push('Buys destruction but stores nothing with R4.');
-    if (signals.boxes_review_overdue > 0) sigs.push(`${Math.round(signals.boxes_review_overdue).toLocaleString('en-US')} boxes are past their retention review: a destruction conversation.`);
+    if (signals.down_two_months) sigs.push({ key: 'slipping', text: `Below its own six-month level for a second month: ${money0(signals.month_revenue)} against ${money0(signals.trailing6_mean)}.` });
+    if (signals.up_20pct) sigs.push({ key: 'up', text: `Up ${Math.round(signals.deviation_pct)}% on its own six-month level last month.` });
+    if (signals.not_raised_2y) sigs.push({ key: 'rounds', text: `No rate has moved in two years across ${signals.codes} services.` });
+    if (signals.storage_no_destruction) sigs.push({ key: 'nodestroy', text: 'Stores with R4 but buys no destruction: shredding is a natural next conversation.' });
+    if (signals.destruction_no_storage) sigs.push({ key: 'nostorage', text: 'Buys destruction but stores nothing with R4.' });
+    if (signals.boxes_review_overdue > 0) sigs.push({ key: 'overdue', text: `${Math.round(signals.boxes_review_overdue).toLocaleString('en-US')} boxes are past their retention review: a destruction conversation.` });
   }
+  const said = new Map(log.filter(l => l.kind === 'signal').map(l => [l.signal, l]));
+  const VERB = { right: 'right', not_right: 'not right', called: 'called', emailed: 'emailed', not_this_week: 'not this week' };
+  const when = t => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
   const fams = m ? Object.entries(m.fam).map(([f, v]) => ({ f, ...v })).filter(x => x.revenue !== 0 || x.cost !== 0).sort((a, b) => b.revenue - a.revenue) : [];
   const svcName = new Map(PR.rates.map(r => [r.servcode, r.service]));
@@ -129,7 +134,8 @@ export async function render(main, C, params) {
         </div>
         <div class="card">
           <div class="card-head"><h3>Signals</h3><small>right or not? say so</small></div>
-          ${sigs.map(t => `<div class="sig">${esc(t)}<div class="acts"><button disabled title="Recording starts with the calls log">Right</button><button disabled title="Recording starts with the calls log">Not right</button></div></div>`).join('') || '<p class="sub">Nothing flagged this week.</p>'}
+          <div id="cp-sigs">${sigs.map(g => { const l = said.get(g.key); return `<div class="sig" data-sig="${g.key}">${esc(g.text)}<div class="acts"><button data-v="right" class="${l && l.verdict === 'right' ? 'on' : ''}">Right</button><button data-v="not_right" class="${l && l.verdict === 'not_right' ? 'on' : ''}">Not right</button><span class="sub said">${l ? `${esc(l.who)} said ${VERB[l.verdict]}, ${when(l.logged_at)}` : ''}</span></div></div>`; }).join('') || '<p class="sub">Nothing flagged this week.</p>'}</div>
+          ${log.length ? `<div class="aside" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--rule)"><div class="lab" style="margin-bottom:4px">Logged</div>${log.slice(0, 5).map(l => `<div class="sub">${when(l.logged_at)} · ${esc(l.who)} · ${VERB[l.verdict]} (${esc(l.signal)})</div>`).join('')}</div>` : ''}
         </div>
       </div>
     </div>
@@ -143,6 +149,20 @@ export async function render(main, C, params) {
       source: 'VCK invoices, posted runs · storage ret_tot, service ser_tot',
     });
   } else main.querySelector('#cp-chart').remove();
+
+  // right or not right on a signal: logged, and the buttons show what was said
+  const sigBox = main.querySelector('#cp-sigs');
+  if (sigBox) sigBox.addEventListener('click', async ev => {
+    const b = ev.target.closest('button[data-v]'); if (!b) return;
+    const row = b.closest('.sig');
+    row.querySelectorAll('button').forEach(x => x.disabled = true);
+    try {
+      const saved = await postLog({ level1: id, kind: 'signal', signal: row.dataset.sig, verdict: b.dataset.v });
+      row.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+      row.querySelector('.said').textContent = `${saved.who} said ${VERB[saved.verdict]}, just now`;
+    } catch (e) { row.querySelector('.said').textContent = e.message; }
+    row.querySelectorAll('button').forEach(x => x.disabled = false);
+  });
 
   // a line of business opens in place to its priced lines
   main.querySelector('#cp-fams').addEventListener('click', ev => {

@@ -3,12 +3,13 @@
 // revenue, change on the twelve months before, and gross margin (◇ modelled).
 import { sparkline, money0, moneyK } from '/components/chart.js';
 import { buildMargins } from '/components/margin.js';
-import { getJson, loadRates, titleCase, esc } from '/components/data.js';
+import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 
 const CITADEL = 6714;
 const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under review: delivery days not yet in the volumes
 
 export const VIEWS = {
+  conversations: { label: 'This week', blurb: 'Ten conversations worth having, ranked by what is at stake. Log what you did; the list learns.' },
   main:          { label: 'Main customers', blurb: 'The 20 largest accounts over the last twelve months.' },
   slipping:      { label: 'Slipping', blurb: 'Below their own six-month level for a second month running.' },
   gaps:          { label: 'Price gaps', blurb: 'Paying under the median for a service, sized by their volume.' },
@@ -126,6 +127,7 @@ export async function render(main, C, params) {
   if (!main) return;
   injectCss();
   const view = VIEWS[params.view] ? params.view : 'main';
+  if (view === 'conversations') return conversations(main, C);
   const sort = ['size', 'change', 'margin'].includes(params.sort) ? params.sort : null;
   const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
   const ser = seriesOf(C);
@@ -165,4 +167,79 @@ function row(r) {
     <span class="r ch">${r.level1 === CITADEL ? '<span class="delta flat">lumpy</span>' : `<span class="delta ${s ? deltaCls(s.change) : 'flat'}">${s ? deltaText(s.change) : '—'}</span>`}</span>
     <span class="r mg">${pc == null ? '—' : `${Math.round(pc * 100)}%${routeHeavy ? '<span class="rvm" title="route costs under review">◇</span>' : ''}`}</span>
     <span class="go">›</span></a></li>`;
+}
+
+// ── This week: ten conversations, each from a signal, ranked by what is at stake a year ─────
+const OPENERS = {
+  slipping: n => `We've seen less work from ${n} over the last two months. Is anything changing on your side we should know about?`,
+  gap: (n, x) => `Your ${x.service} rate hasn't kept pace with what similar clients pay. Could we talk about bringing it in line?`,
+  rounds: n => `Your rates haven't moved in two years. We're reviewing them for the new year and wanted to talk with you first.`,
+  overdue: (n, x) => `${x.boxes.toLocaleString('en-US')} of your boxes are past their retention date. Shall we arrange secure destruction?`,
+  nodestroy: n => `You store your records with us but shred elsewhere. We can collect and destroy on the same visit.`,
+};
+
+async function conversations(main, C) {
+  const [P, PR, CA, log] = await Promise.all([getJson('pulse'), getJson('pricing'), getJson('calls'), getLog().catch(() => [])]);
+  const ser = seriesOf(C);
+  const cands = new Map();
+  const add = (id, sig) => { if (id === CITADEL) return; const c = cands.get(id) || { level1: id, sigs: [] }; c.sigs.push(sig); cands.set(id, c); };
+  for (const d of P.downTwoMonths) if (d.trailing6_mean > d.revenue) add(d.level1, { key: 'slipping', stake: (d.trailing6_mean - d.revenue) * 12, ev: `${money0(d.revenue)} last month against its own ${money0(d.trailing6_mean)} a month`, name: d.customer });
+  const meds = {};
+  for (const code of ['B2', 'B3', 'B6', '01', '20', '25', '30', 'S3', 'S4', 'S6']) {
+    const v = PR.rates.filter(r => r.servcode === code && r.modal_rate > 0 && r.units > 0).map(r => r.modal_rate).sort((a, b) => a - b);
+    if (v.length >= 20) meds[code] = v[Math.floor(v.length / 2)];
+  }
+  for (const r of PR.rates) if (meds[r.servcode] && r.modal_rate > 0 && r.modal_rate < meds[r.servcode] && r.units > 0)
+    add(r.level1, { key: 'gap', stake: (meds[r.servcode] - r.modal_rate) * r.units, ev: `${titleCase(r.service)}: $${r.modal_rate.toFixed(2)} against a $${meds[r.servcode].toFixed(2)} median`, service: titleCase(r.service).toLowerCase(), name: r.customer });
+  for (const c of CA) {
+    if (c.not_raised_2y) add(c.level1, { key: 'rounds', stake: c.service * 0.08, ev: `no rate moved in two years on ${moneyK(c.service)} of service`, name: c.customer });
+    if (c.boxes_review_overdue >= 50) add(c.level1, { key: 'overdue', stake: 0, boxes: Math.round(c.boxes_review_overdue), ev: `${Math.round(c.boxes_review_overdue).toLocaleString('en-US')} boxes past their retention review`, name: c.customer });
+    if (c.storage_no_destruction && c.storage > 20000) add(c.level1, { key: 'nodestroy', stake: 0, ev: `${moneyK(c.storage)} of storage a year and no destruction`, name: c.customer });
+  }
+  // handled in the last seven days drops out: called, emailed or not this week
+  const week = Date.now() - 7 * 864e5;
+  const handled = new Set(log.filter(l => l.kind === 'call' && Date.parse(l.logged_at) > week).map(l => l.level1));
+  const list = [...cands.values()].filter(c => !handled.has(c.level1)).map(c => {
+    c.sigs.sort((a, b) => b.stake - a.stake || (b.boxes || 0) - (a.boxes || 0));
+    c.stake = c.sigs.reduce((t, s) => t + s.stake, 0);
+    c.name = titleCase((ser.get(c.level1) || {}).customer || c.sigs[0].name);
+    return c;
+  }).sort((a, b) => b.stake - a.stake || (b.sigs[0].boxes || 0) - (a.sigs[0].boxes || 0)).slice(0, 10);
+
+  main.innerHTML = `
+  <div class="cust">
+    <h1>Customers</h1>
+    <p class="blurb">${esc(VIEWS.conversations.blurb)}</p>
+    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'conversations' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    <div class="convs">${list.map((c, i) => `
+      <div class="card conv" data-id="${c.level1}" data-sig="${c.sigs[0].key}">
+        <div class="card-head"><h3><a href="#customer/${c.level1}" style="color:inherit;text-decoration:none">${i + 1}. ${esc(c.name)} <span style="color:var(--ink-5)">›</span></a></h3><small>${c.stake ? moneyK(c.stake) + ' a year at stake' : ''}</small></div>
+        <div class="sub">${c.sigs.slice(0, 2).map(s => esc(s.ev)).join(' · ')}</div>
+        <p class="open-line">“${esc(OPENERS[c.sigs[0].key](c.name, c.sigs[0]))}”</p>
+        <div class="acts"><button data-v="called">Called</button><button data-v="emailed">Emailed</button><button data-v="not_this_week">Not this week</button><span class="done-note"></span></div>
+      </div>`).join('') || '<div class="card">Nothing to call about this week.</div>'}</div>
+    <p class="foot">At stake: a year of the slipping shortfall, the gap to the median, or the typical 8% rise. Logged accounts drop out for seven days.</p>
+  </div>`;
+  if (!document.getElementById('conv-css')) {
+    const st = document.createElement('style'); st.id = 'conv-css';
+    st.textContent = `.convs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      .conv .open-line { font-size: 15px; line-height: 1.45; margin: 10px 0 12px; color: var(--ink-2); }
+      .conv .acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .conv .acts button { border: 1px solid var(--rule-3); background: var(--surface); border-radius: 9px; padding: 6px 12px; font-size: 14px; color: var(--ink); cursor: pointer; }
+      .conv .acts button:hover { border-color: var(--brand); color: var(--brand); }
+      .conv.logged { opacity: .55; }
+      .conv .done-note { font-size: 13px; color: var(--good); }
+      @media (max-width: 760px) { .convs { grid-template-columns: 1fr; } }`;
+    document.head.appendChild(st);
+  }
+  main.querySelector('.convs').addEventListener('click', async ev => {
+    const b = ev.target.closest('button[data-v]'); if (!b) return;
+    const card = b.closest('.conv');
+    card.querySelectorAll('button').forEach(x => x.disabled = true);
+    try {
+      await postLog({ level1: Number(card.dataset.id), kind: 'call', signal: card.dataset.sig, verdict: b.dataset.v });
+      card.classList.add('logged');
+      card.querySelector('.done-note').textContent = `Logged: ${b.textContent.toLowerCase()}`;
+    } catch (e) { card.querySelector('.done-note').textContent = e.message; card.querySelectorAll('button').forEach(x => x.disabled = false); }
+  });
 }
