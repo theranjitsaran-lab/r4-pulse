@@ -120,9 +120,9 @@ export async function render(main, C, params) {
       </div>
       <div class="stack">
         <div class="card">
-          <div class="card-head"><h3>Prices against the book</h3><a href="#pricing">Price it ›</a></div>
+          <div class="card-head"><h3>Prices against the book</h3><a href="#pricing?level1=${id}">Price it ›</a></div>
           ${mine.map(r => `<div class="price">
-            <span><b>${esc(titleCase(r.service))}</b><span class="sub" style="display:block">$${r.modal_rate.toFixed(2)} · book median $${r.med.toFixed(2)} · cheaper than ${Math.round((1 - r.below) * 100)}% of accounts</span></span>
+            <span><a href="#pricing?level1=${id}&code=${encodeURIComponent(r.servcode)}" style="color:inherit;text-decoration:none"><b>${esc(titleCase(r.service))}</b> <span style="color:var(--brand)">›</span></a><span class="sub" style="display:block">$${r.modal_rate.toFixed(2)} · book median $${r.med.toFixed(2)} · cheaper than ${Math.round((1 - r.below) * 100)}% of accounts</span></span>
             <span class="v">${r.worth > 0 ? `+${moneyK(r.worth)}/mo<span class="sub" style="display:block;font-weight:400">at the median</span>` : '<span class="sub">at or above</span>'}</span>
             <div class="pos"><b style="left:${pos(r.med, r)}%"></b><i style="left:${pos(r.modal_rate, r)}%"></i></div>
           </div>`).join('') || '<p class="sub">No service rates in the last thirteen months.</p>'}

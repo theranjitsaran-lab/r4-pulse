@@ -190,7 +190,7 @@ function costToServe(family, units, opts) {
   const tpv = travelPerVisit(o.miles), opv = onSitePerVisit();
   const routeLines = (what) => {
     add(family === 'itad' ? 'Truck time' : 'Travel to site', visits * tpv,
-      `${visits} ${what} at ${m2(tpv)}. A ${m0(RATES.routeDay.v)} route day is ${pct(SETTINGS.split)} travel, spread across ${RATES.visitsDay.v} visits, scaled for ${o.miles} miles.`);
+      `${visits} ${what} at ${m2(tpv)}. A ${m0(RATES.routeDay.v)} route day is ${pct(SETTINGS.split)} travel, spread across ${RATES.visitsDay.v.toFixed(2)} visits, scaled for ${o.miles} miles.`);
     add('Time on site', visits * opv,
       `${visits} ${what} at ${m2(opv)} — the other ${pct(1 - SETTINGS.split)} of the route day, covering about ${Math.round(units / Math.max(visits, 1))} units each.`);
   };
@@ -213,7 +213,7 @@ function costToServe(family, units, opts) {
       routeLines('visits');
       if (o.pounds != null) {
         add('Shred plant', o.pounds * RATES.shredPlant.v,
-          `${Number(o.pounds).toLocaleString('en-US')} lb recorded on S5 at ${m4(RATES.shredPlant.v)} a pound. ${RATES.shredPlant.d}.`);
+          `${Math.round(o.pounds).toLocaleString('en-US')} lb recorded on S5 at ${m4(RATES.shredPlant.v)} a pound. ${RATES.shredPlant.d}.`);
       } else {
         const code = RATES.lbPerBin.v[o.binCode] ? o.binCode : 'all';
         const lbs = RATES.lbPerBin.v[code];

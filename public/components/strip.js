@@ -18,12 +18,19 @@ export function quantile(sorted, q) {
   return sorted[a] + (sorted[b] - sorted[a]) * (i - a);
 }
 
+// With weights (values carry w, e.g. boxes), the quantiles are of the weight, not of the accounts:
+// the rate the typical box pays rather than the typical account.
 export function stripStats(values) {
-  const s = values.map(x => x.v).filter(Number.isFinite).sort((a, b) => a - b);
+  const pts = values.filter(x => Number.isFinite(x.v)).sort((a, b) => a.v - b.v), s = pts.map(x => x.v);
+  const weighted = pts.some(x => x.w > 0);
+  const total = weighted ? pts.reduce((t, x) => t + (x.w || 0), 0) : pts.length;
+  const wq = q => { let acc = 0; for (const x of pts) { acc += x.w || 0; if (acc >= q * total) return x.v; } return s[s.length - 1]; };
+  const qf = weighted ? wq : q => quantile(s, q);
   return {
-    n: s.length, min: s[0], max: s[s.length - 1],
-    p10: quantile(s, .10), p25: quantile(s, .25), median: quantile(s, .5), p75: quantile(s, .75), p90: quantile(s, .90),
-    below: (p) => s.filter(v => v < p).length / (s.length || 1),
+    n: s.length, min: s[0], max: s[s.length - 1], weighted,
+    p10: qf(.10), p25: qf(.25), median: qf(.5), p75: qf(.75), p90: qf(.90),
+    below: weighted ? (p) => pts.filter(x => x.v < p).reduce((t, x) => t + (x.w || 0), 0) / (total || 1)
+                    : (p) => s.filter(v => v < p).length / (s.length || 1),
   };
 }
 

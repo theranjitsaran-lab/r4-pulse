@@ -28,6 +28,7 @@ to reach. Newest section first.
 | **The decline, restated** | Of the −$135,071 between the two six-month averages, Pfizer's −$36.6k is timing (a $219k prepaid-retention and scanning bill in February 2025) and City badging's −$31.5k is a scanning project that ended in August 2025. The recurring losses are Access Community Health (executive bins about $32k → $11k a month from February 2026) and 2FM (storage price cut July 2025, −$22.4k a month) |
 | **Retention backlog** | `storage_retention` status I is in storage: 1,195,560 boxes, 284,553 overdue for review, 725,640 over ten years. Other statuses are boxes out, withdrawn or destroyed |
 | **Placements** | `vs_placement.lplactive` is true on every record and means nothing. Placements created before 2021 are mostly records never closed; idle-bin counts use 2021 onward |
+| **Pricing medians** | Services compare account by account: 95-gallon median $85.00 a service (378 accounts, about eight services each a year; VCK bin units match Veri-Shred done services within 4%), so the logic pack's $22 was stale. Storage compares box-weighted, because monthly minimums make small accounts look dear per box: median $0.228 a box a month against an account median of $0.750; the logic pack's $0.246 was box-weighted. Settled 26 October 2026 |
 | **17 September 2026** | 283 booked, 200 done, 23 customers, 6 routes from `v_route_day`; was 272, 13 and 5. Angel ran 13 services across 6 customers, not one bin. Activity reproduces `v_route_day`, not the addendum |
 
 ## Redesign — settled 26 October 2026
