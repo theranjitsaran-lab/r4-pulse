@@ -62,8 +62,9 @@ Four screens: **Pulse, Activity, Pricing, Calls.** Margin is a drill-down behind
 Pricing. This replaces the earlier "Brief, Month, Customers, Pricing" and the seven-tab v12.
 
 **The drill path is seven levels, every one a real table:** company → half → service family →
-customer → work order → line → box. The `units` field on retrieval, return and destruction lines is
-the box barcode. The earlier "two levels only" decision was about *fabricated* depth; real depth
+customer → work order → line → box. *Corrected 26 October 2026:* the `units` field on retrieval,
+return and destruction lines is a count of boxes, not a barcode (median 2, up to 1,832 on one line),
+so the box level is not in the database; it shows as pending until VCK's work-order detail joins the push. The earlier "two levels only" decision was about *fabricated* depth; real depth
 is the product.
 
 **The KPI set is Iron Mountain's.** Storage vs service split, organic growth of each, retention
@@ -138,3 +139,4 @@ diagnostic narrative, never in the cost of service.
 - **Anne:** is shredded paper sold, and where does that revenue land in the GL?
 - **Anne:** what does `7335200 Sales` at $1.68m cover?
 - **VCK:** the box master with date-in, date-out and out-reason — needed for retention rate
+- **VCK:** the work-order detail table, one row per box with its barcode — the bottom level of the drill (the margin spec's example came from an Excel extract of it)

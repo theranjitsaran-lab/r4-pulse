@@ -27,18 +27,16 @@ Where the build stands. Update it at the end of each piece of work.
 - **Deploy:** `render.yaml`, `scripts/app_role.js` (the read-only app login, self-checking),
   `scripts/app_users.js`, `scripts/apply_sql.js`, `docs/DEPLOY.md`.
 
-## Next, on the PC
+## Next
 
-1. `git pull origin main`, then `node scripts/apply_sql.js sql/app_schema.sql`.
-2. `npm run snapshot`. It now writes `fixtures/drill.json`: work orders and visits for the 50
-   largest accounts, plus `unitsCheck`, which settles data rule 9. Commit the fixtures,
-   `! git push origin main`, and paste the `unitsCheck` rows.
-3. Deploy: `docs/DEPLOY.md`.
+1. Deploy: `docs/DEPLOY.md`. Before that, Theran decides on putting Render's outbound addresses
+   on Trusted Sources.
+2. Design iteration with Theran, screen by screen.
 
 ## Open
 
-- **Boxes level of the drill:** waits on rule 9. The units on retrieval and refile lines look like
-  counts, not barcodes.
+- **Boxes level of the drill:** rule 9 settled 26 October 2026. Units are box counts, so barcodes
+  need VCK's work-order detail table in the daily push. The customer page shows it as pending.
 - **Route costs under review:** delivery routes are missing from the route volumes (Mike).
 - Driver pay rates; Citadel agreement and the Access fall (Anne); Iron Mountain figures are off
   until they are sourced.

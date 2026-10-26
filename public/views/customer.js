@@ -208,31 +208,41 @@ async function drawDrill(el, id, svcName) {
   const ordRev = d.orders.reduce((t, o) => t + o.revenue, 0);
   const lbs = d.visits.reduce((t, v) => t + (v.pounds || 0), 0);
   el.innerHTML = `
-    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? `${n0(d.orders.length)}${d.orders.length >= 200 ? '+' : ''} in six months · ${money0(ordRev)}` : 'last six months'}</small></div><div id="cp-orders"></div><div class="src">VCK priced lines by work order · tap an order for its lines</div></div>
+    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? `${n0(d.orders.length)}${d.orders.length >= 200 ? '+' : ''} in six months · ${money0(ordRev)}` : 'last six months'}</small></div><div id="cp-orders"></div><div class="pending" style="margin-top:12px">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · tap an order for its lines</div></div>
     <div class="card"><div class="card-head"><h3>Visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} route-days · ${n0(lbs)} lb weighed` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Veri-Shred done orders · one row per day and route · executive-bin pounds are a default, not a weigh</div></div>`;
   const oBox = el.querySelector('#cp-orders'), vBox = el.querySelector('#cp-visits');
-  if (d.orders.length) ledgerTable(oBox, {
+  // the latest twelve of each, with the rest one tap away
+  const more = (box, total, draw) => {
+    if (total <= 12) return draw(total);
+    draw(12);
+    const b = document.createElement('button');
+    b.className = 'linkbtn'; b.textContent = total > 60 ? "Show the latest 60" : `Show all ${total}`;
+    b.style.cssText = 'margin-top:8px;border:0;background:none;color:var(--brand);font:inherit;font-size:13px;font-weight:500;cursor:pointer;padding:4px 0';
+    b.onclick = () => { draw(Math.min(total, 60)); b.remove(); };
+    box.after(b);
+  };
+  if (d.orders.length) more(oBox, d.orders.length, n => ledgerTable(oBox, {
     columns: [
       { key: 'date', label: 'Date', fmt: v => day(v) },
       { key: 'woid', label: 'Order', fmt: v => `<span class="sub" style="display:inline">${esc(v)}</span>` },
       { key: 'lines', label: 'Lines', num: true },
       { key: 'revenue', label: 'Value', num: true, fmt: v => money0(v) },
     ],
-    rows: d.orders.slice(0, 60),
+    rows: d.orders.slice(0, n),
     detail: (o, td) => {
       td.innerHTML = o.items.map(i => `<div style="display:flex;justify-content:space-between;gap:12px;padding:3px 0"><span>${esc(titleCase(svcName.get(String(i.code).replace(/^S5[BPT]$/, 'S5')) || i.code))} <span class="sub" style="display:inline">${esc(i.code)} · ${n0(i.units)}</span></span><span class="num">${money0(i.revenue)}</span></div>`).join('');
     },
-  });
+  }));
   else oBox.innerHTML = '<p class="sub">No billed work orders in the last six months.</p>';
-  if (d.visits.length) ledgerTable(vBox, {
+  if (d.visits.length) more(vBox, d.visits.length, n => ledgerTable(vBox, {
     columns: [
       { key: 'date', label: 'Date', fmt: v => v ? day(v) : '—' },
       { key: 'route', label: 'Route', fmt: (v, r) => `${esc(v || '—')}${r.driver ? ` <span class="sub" style="display:inline">${esc(r.driver)}</span>` : ''}` },
       { key: 'services', label: 'Services', num: true, fmt: (v, r) => `${n0(v)}${r.stops > 1 ? ` <span class="sub" style="display:inline">${r.stops} stops</span>` : ''}` },
       { key: 'pounds', label: 'Pounds', num: true, fmt: v => v ? n0(v) : '—' },
     ],
-    rows: d.visits.slice(0, 60),
-  });
+    rows: d.visits.slice(0, n),
+  }));
   else vBox.innerHTML = '<p class="sub">No done Veri-Shred orders in the last six months: this account\'s work is storage or warehouse handling.</p>';
 }
 
