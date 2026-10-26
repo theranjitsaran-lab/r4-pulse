@@ -87,6 +87,9 @@ const dcls = v => v > 0.05 ? 'up' : v < -0.05 ? 'down' : 'flat';
 export async function render(main, A, params) {
   if (!main) return;
   injectCss();
+  // two tabs: the routes, and the warehouse (views/storage.js)
+  const tabs = `<div class="top"><div><h1>${params.tab === 'warehouse' ? 'Warehouse' : 'Routes'}</h1></div><div class="seg rt-tabs"><a href="#activity" class="${params.tab === 'warehouse' ? '' : 'on'}">Routes</a><a href="#activity?tab=warehouse" class="${params.tab === 'warehouse' ? 'on' : ''}">Warehouse</a></div></div>`;
+  if (params.tab === 'warehouse') return (await import('/views/storage.js')).render(main, tabs);
   const [R, Z] = await Promise.all([loadRates(), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({}))]);
   const real = A.routeDays.filter(r => r.route && r.route !== '--');
   const doneDays = [...new Set(real.filter(r => r.services_done > 0).map(r => r.date))].sort();
@@ -104,7 +107,7 @@ export async function render(main, A, params) {
   main.innerHTML = `
   <div class="rt">
     <div class="top">
-      <div><h1>Routes</h1><div class="sub">Done is what drivers confirmed in Veri-Shred; booked includes work not yet done.</div></div>
+      <div><h1>Routes</h1><div class="sub">Done is what drivers confirmed in Veri-Shred; booked includes work not yet done.</div><div class="seg rt-tabs" style="margin-top:10px"><a href="#activity" class="on">Routes</a><a href="#activity?tab=warehouse">Warehouse</a></div></div>
       <div class="day"><button id="rt-prev" aria-label="Previous day">‹</button><b id="rt-day"></b><button id="rt-next" aria-label="Next day">›</button></div>
     </div>
     <p class="rt-say" id="rt-say"></p>

@@ -202,3 +202,27 @@ test('margin drill: one cost per job on its real route day; actions; density nev
   const ing = R.costToServe('bin', 3540, { visits: 101, pounds: 154887 });
   near(ing.total, 37273, 1, 'Ingalls');
 });
+
+test('warehouse: cells sum to the boxes; states never overlap; eligible ties to the data', async () => {
+  const { byAccount, totals, cells, eligibleList, heldNotBilled, rowStates } = await import('../public/components/storage.js');
+  const { overdueBoxes } = await import('../public/components/levers.js');
+  const S = J('storage'), PR = J('pricing'), CA = J('calls');
+  for (const r of S.rows) {
+    const s = rowStates(r);
+    assert.ok(s.eligible <= (r.overdue || 0) && s.eligible >= 0, 'eligible within overdue');
+    assert.ok(s.eligible + s.protected + s.old + s.inuse === r.boxes && s.inuse >= 0, 'states partition the row');
+  }
+  const acc = byAccount(S), T = totals(acc), G = cells(acc, 1000);
+  const boxes = S.rows.reduce((t, r) => t + r.boxes, 0);
+  assert.equal(T.boxes, boxes);
+  assert.equal(G.blocks.reduce((t, b) => t + Object.values(b.cells).reduce((a, c) => a + c, 0), 0), Math.round(boxes / 1000), 'cells sum to the boxes');
+  // eligible here is the snapshot query's own figure, row by row
+  assert.equal(T.eligible, S.rows.reduce((t, r) => t + Math.min(r.eligible, r.boxes - Math.min(r.boxes, r.hold + r.permanent)), 0));
+  // overdue matches Customers › Overdue boxes (same table, same status), Citadel aside
+  const O = overdueBoxes(CA, PR);
+  near(T.overdue - acc.filter(a => a.level1 === 6714).reduce((t, a) => t + a.overdue, 0), O.boxes, O.boxes * 0.02, 'overdue against the Overdue boxes list');
+  const E = eligibleList(acc, PR, T.boxes);
+  near(E.eligible, T.eligible, 1e-6, 'eligible list');
+  const NB = heldNotBilled(acc, PR);
+  near(NB.gap, NB.rows.reduce((t, r) => t + r.held - r.billed, 0), 1e-6, 'not billed');
+});

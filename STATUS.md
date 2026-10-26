@@ -90,6 +90,16 @@ would have made it cheaper). One cost per job: a route job takes its real share 
 day say they use the model's average. New panel: where more volume would cut cost, by postcode.
 Shared job view `components/jobview.js` (Margin and the customer page). 26 of 26 tests.
 
+## Warehouse (Routes › Warehouse, 26 October 2026)
+
+All 1,195,560 boxes in storage are at one location (CHI) and rack capacity is not in the data, so
+the view shows what is held, never a percent full. The building is drawn one square per 1,000
+boxes, grouped by account and coloured by state (eligible to shred, over ten years, permanent or
+legal hold, in use). Then what shredding the eligible boxes would bill once and the storage it
+would end, by account (at least 256,813 boxes, about $2.6M once, $70K a month of storage), and a
+check for Anne: 30,431 boxes in storage are not on the September storage bill, 30,105 of them at
+154 accounts with no storage bill at all. `components/storage.js`, `views/storage.js`. 27 of 27 tests.
+
 ## Next
 
 1. On the PC: `node scripts/freshness.js` (why does the data stop on 6 October?), then
