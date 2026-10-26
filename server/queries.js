@@ -80,7 +80,15 @@ async function pulse() {
     ${PL}
     SELECT d::text AS date, sum(totamt)::float AS value, count(*)::int AS lines
     FROM l WHERE level1 <> 6714 GROUP BY 1 ORDER BY 1`);
-  return { monthly, currentRun, customers, downTwoMonths, concentration, pace };
+  // Done services each working day, fifteen months to the latest done work: the projection of
+  // where the month lands, and its backtest on past months. Booked is kept to check the pace.
+  const dailyDone = await query(`
+    SELECT date::text, sum(services_done)::int AS done, sum(services)::int AS booked
+    FROM v_route_day
+    WHERE date > (SELECT max(date) FROM v_route_day WHERE services_done > 0) - interval '15 months'
+      AND date <= (SELECT max(date) FROM v_route_day WHERE services_done > 0)
+    GROUP BY 1 ORDER BY 1`);
+  return { monthly, currentRun, customers, downTwoMonths, concentration, pace, dailyDone };
 }
 
 // ── Customers — the list and the customer page ───────────────────────────────────────────
@@ -164,7 +172,19 @@ async function activity() {
     WHERE billable = 'true' AND NULLIF(date, '')::date > $1::date - 365 AND NULLIF(date, '')::date <= $1::date
       AND coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')) IS NOT NULL
     GROUP BY 1 ORDER BY 1`, [anchor.latest_done]);
-  return { latestDone: anchor.latest_done, routeDays, orders, dayValues, weekdays, postcodes };
+  // Month to date by account: done services per account per day, this month and last.
+  const accountDays = await query(`
+    SELECT NULLIF(level1, '')::int AS level1, NULLIF(date, '')::date::text AS date, count(*)::int AS done
+    FROM vs_service_orders
+    WHERE billable = 'true' AND NULLIF(level1, '') IS NOT NULL
+      AND NULLIF(date, '')::date >= (date_trunc('month', $1::date) - interval '1 month')::date AND NULLIF(date, '')::date <= $1::date
+    GROUP BY 1, 2 ORDER BY 1, 2`, [anchor.latest_done]);
+  // Which postcodes each route covered on each day, six months: could a nearby route have taken a stop?
+  const routeHistory = await query(`
+    SELECT date::text, route, postcode_list FROM v_route_day
+    WHERE services_done > 0 AND date > $1::date - 183 AND date <= $1::date AND route IS NOT NULL
+    ORDER BY 1, 2`, [anchor.latest_done]);
+  return { latestDone: anchor.latest_done, routeDays, orders, dayValues, weekdays, postcodes, accountDays, routeHistory };
 }
 
 // ── Pricing — Anne ───────────────────────────────────────────────────────────────────────
@@ -316,7 +336,22 @@ async function customerDrill(level1) {
     WHERE billable = 'true' AND NULLIF(level1, '')::int = $1
       AND NULLIF(date, '')::date >= b.f AND NULLIF(date, '')::date < b.t
     GROUP BY 1, 2 ORDER BY 1 DESC, 2 LIMIT 200`, [level1]);
-  return { level1, orders, visits };
+  // The whole route on each of the account's latest 30 visit days, stop by stop in order: who else
+  // the driver served, where, and how much, so a job's share of the day can be seen on a map.
+  const routes = await query(`
+    WITH mine AS (
+      SELECT DISTINCT NULLIF(date, '')::date AS d, NULLIF(route, '') AS route FROM vs_service_orders
+      WHERE billable = 'true' AND NULLIF(level1, '')::int = $1 AND NULLIF(route, '') IS NOT NULL
+      ORDER BY 1 DESC LIMIT 30)
+    SELECT m.d::text AS date, m.route, NULLIF(o.slocid, '') AS stop,
+           min(CASE WHEN o.rorder ~ '^[0-9]+(\\.[0-9]+)?$' THEN o.rorder::numeric END)::float AS seq,
+           min(NULLIF(o.level1, '')::int) AS level1, min(NULLIF(o.company, '')) AS company,
+           min(left(coalesce(NULLIF(o.s_zip, ''), NULLIF(o.zip, '')), 5)) AS postcode,
+           count(*)::int AS services,
+           sum(CASE WHEN o.weight ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN o.weight::numeric ELSE 0 END)::float AS pounds
+    FROM mine m JOIN vs_service_orders o ON NULLIF(o.date, '')::date = m.d AND NULLIF(o.route, '') = m.route AND o.billable = 'true'
+    GROUP BY 1, 2, 3 ORDER BY 1 DESC, 2, 4 NULLS LAST, 3`, [level1]);
+  return { level1, orders, visits, routes };
 }
 
 // Snapshot: the drill for the 50 largest accounts, and a check of data rule 9 (is the units field
