@@ -188,7 +188,7 @@ export async function render(main, C, params) {
     lineChart(main.querySelector('#cp-chart'), {
       title: 'Revenue by month', sub: `${s.months.length} months to the latest posted month · invoice month · one axis`,
       series: [{ name: 'Storage', cls: 'storage', points: pts('storage') }, { name: 'Service', cls: 'service', points: pts('service') }],
-      source: 'VCK invoices, posted runs · storage ret_tot, service ser_tot',
+      source: 'VCK invoices, by invoice month · storage and service as billed',
     });
   } else main.querySelector('#cp-chart').remove();
 

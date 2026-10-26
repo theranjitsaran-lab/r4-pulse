@@ -190,9 +190,10 @@ function costToServe(family, units, opts) {
   const tpv = travelPerVisit(o.miles), opv = onSitePerVisit();
   const routeLines = (what) => {
     add(family === 'itad' ? 'Truck time' : 'Travel to site', visits * tpv,
-      `${visits} ${what} at ${m2(tpv)}. A ${m0(RATES.routeDay.v)} route day is ${pct(SETTINGS.split)} travel, spread across ${RATES.visitsDay.v.toFixed(2)} visits, scaled for ${o.miles} miles.`);
+      `${visits} ${visits === 1 ? what.replace(/s$/, '') : what} at ${m2(tpv)}. A ${m0(RATES.routeDay.v)} route day is ${pct(SETTINGS.split)} travel, spread across ${RATES.visitsDay.v.toFixed(2)} visits, scaled for ${o.miles} miles.`);
+    const per = Math.round(units / Math.max(visits, 1));
     add('Time on site', visits * opv,
-      `${visits} ${what} at ${m2(opv)} — the other ${pct(1 - SETTINGS.split)} of the route day, covering about ${Math.round(units / Math.max(visits, 1))} units each.`);
+      `${visits} ${visits === 1 ? what.replace(/s$/, '') : what} at ${m2(opv)}, the other ${pct(1 - SETTINGS.split)} of the route day, covering about ${per} ${per === 1 ? 'unit' : 'units'} each.`);
   };
 
   switch (family) {

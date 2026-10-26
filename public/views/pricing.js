@@ -142,7 +142,7 @@ export async function render(main, PR, params) {
       <div class="card-head"><h3 id="b-title">Invoiced against the book</h3><small>tap a service to price it</small></div>
       <div class="sub" style="margin-bottom:10px">For each service, the share of its volume billed under the book's median, and what moving those accounts to the median would add a year. Worst first.</div>
       <div id="b-rows"></div>
-      <div class="src">priced_lines, modal invoiced rate per account, 13 months · storage weighted by boxes · list prices are not in the database, so the book's own median is the comparison</div>
+      <div class="src">Each account's usual invoiced rate over the last 13 months, from VCK · storage weighted by boxes · list prices are not in the database, so the book's own median is the comparison</div>
     </div>
   </div>`;
 
@@ -233,7 +233,7 @@ export async function render(main, PR, params) {
     $('p-strip-title').textContent = `Every account on this service`;
     $('p-strip-sub').textContent = `${s.n} accounts · ${medName} ${f(s.median)} · open`;
     strip($('p-strip'), { values: vals, cost: unitCost, price, named, fmt: f });
-    $('p-strip-src').textContent = st.code === 'STO' ? 'storage_rate_hist, billed ÷ boxes, latest month, weighted by boxes · cost to serve from the cost model ◇' : 'priced_lines, modal invoiced rate per account, 13 months · cost to serve from the cost model ◇';
+    $('p-strip-src').textContent = st.code === 'STO' ? 'Storage billed ÷ boxes in the latest month, weighted by boxes, from VCK · cost to serve from the cost model ◇' : 'Each account\'s usual invoiced rate over the last 13 months, from VCK · cost to serve from the cost model ◇';
 
     // cost to serve
     if (c) {
@@ -329,5 +329,5 @@ function track(el, { price, cost, s, f, cls, medName, of }) {
     ${ticks.map((t, i) => `<div class="tk ${t.c}" style="left:${x(t.v)}%"></div><div class="tl ${t.c} ${i % 2 ? 'up' : 'dn'}" style="left:${x(t.v)}%">${esc(t.t)}</div>`).join('')}
     <div class="pin ${cls}" style="left:${x(price)}%"><b>${f(price)}</b><i></i></div>
   </div>
-  <div class="sub" style="margin-top:4px">Shaded: the middle half of ${of}, ${f(s.p25)} to ${f(s.p75)}.${cost != null ? ' Hatched: below the cost to serve ◇.' : ''} ${price < s.median ? `Cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.` : price > s.median ? `Dearer than ${Math.round(s.below(price) * 100)}% of ${of}.` : `At the ${medName}.`}</div>`;
+  <div class="sub" style="margin-top:4px">The grey band is where the middle half of ${of} sit, ${f(s.p25)} to ${f(s.p75)}.${cost != null ? ' The striped red stretch is below the cost to serve ◇.' : ''} ${price < s.median ? `Cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.` : price > s.median ? `Dearer than ${Math.round(s.below(price) * 100)}% of ${of}.` : `At the ${medName}.`}</div>`;
 }

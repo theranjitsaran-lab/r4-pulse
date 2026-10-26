@@ -96,7 +96,7 @@ async function rowsFor(view, ser, book, C) {
   if (view === 'rounds') {
     const CA = await getJson('calls');
     return CA.filter(c => c.not_raised_2y && c.level1 !== CITADEL).sort((a, b) => b.service - a.service)
-      .map(c => base(c.level1, `No rate moved since ${c.last_changed ? c.last_changed.slice(0, 7) : 'before the window'} · ${moneyK(c.service)} of service a year`));
+      .map(c => base(c.level1, `No rate moved since ${c.last_changed ? new Date(c.last_changed + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : 'at least two years ago'} · ${moneyK(c.service)} of service a year`));
   }
   if (view === 'margin') {
     return book.accounts.filter(a => a.revenue > 1000).sort((a, b) => a.margin - b.margin).slice(0, 50)
