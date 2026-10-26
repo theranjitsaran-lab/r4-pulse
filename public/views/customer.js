@@ -2,7 +2,7 @@
 // Header figures · 24-month storage and service on one axis · margin by line of business, each line
 // opening to its priced lines · prices against the book's median and what moving is worth · signals.
 import { lineChart, money0, moneyK } from '/components/chart.js';
-import { buildMargins, jobCost, FAMILY_NAMES } from '/components/margin.js';
+import { buildMargins, accountCosts, jobCost, FAMILY_NAMES } from '/components/margin.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { ledgerTable } from '/components/table.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
@@ -43,6 +43,8 @@ const CSS = `
 .cp .ws1 .opp { border: 1.5px dashed var(--ink-5); border-radius: 6px; padding: 1px 8px; font-weight: 600; }
 .cp .ws1b { padding: 0 0 8px; }
 .cp .ob { padding: 6px 4px 10px; }
+.cp .lp-crumb { font-size: 12px; color: var(--ink-3); padding: 4px 0 2px; }
+.cp .lines { padding: 4px 8px 14px; }
 .cp .ob-bars { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 6px 12px; align-items: center; }
 .cp .ob-bar { height: 14px; display: flex; gap: 2px; }
 .cp .ob-bar i { display: block; height: 100%; border-radius: 3px; }
@@ -119,7 +121,7 @@ export async function render(main, C, params) {
 
   main.innerHTML = `
   <div class="cp">
-    <div class="crumb"><a href="#customers">Customers</a><span>›</span><span style="color:var(--ink-2)">${esc(name)}</span></div>
+    <div class="crumb">${params.from === 'margin' ? '<a href="#customers?view=margin">Margin</a>' : '<a href="#customers">Customers</a>'}<span>›</span><span style="color:var(--ink-2)">${esc(name)}</span></div>
     <h1>${esc(name)}</h1>
     <div class="tags">
       ${id === CITADEL ? '<span class="chip">Held apart from core · settlements land in lumps</span>' : ''}
@@ -172,7 +174,8 @@ export async function render(main, C, params) {
     });
   } else main.querySelector('#cp-chart').remove();
 
-  drawDrill(main.querySelector('#cp-drill'), id, svcName, R, M);
+  const drillP = loadDrill(id, R, M);
+  drawDrill(main.querySelector('#cp-drill'), drillP, svcName);
 
   // right or not right on a signal: logged, and the buttons show what was said
   const sigBox = main.querySelector('#cp-sigs');
@@ -189,7 +192,7 @@ export async function render(main, C, params) {
   });
 
   // a line of business opens in place to its priced lines
-  main.querySelector('#cp-fams').addEventListener('click', ev => {
+  main.querySelector('#cp-fams').addEventListener('click', async ev => {
     const row = ev.target.closest('.fam'); if (!row) return;
     const box = main.querySelector(`.lines[data-for="${row.dataset.f}"]`);
     const open = !box.hidden;
@@ -197,30 +200,85 @@ export async function render(main, C, params) {
     main.querySelectorAll('.fam').forEach(f => f.classList.remove('open'));
     if (open) return;
     row.classList.add('open'); box.hidden = false;
-    const fam = row.dataset.f;
+    const fam = row.dataset.f, famName = FAMILY_NAMES[fam] || fam;
     const ls = M.lines.filter(l => l.level1 === id && ((l.family && l.family !== 'none' ? l.family : 'other') === fam))
       .sort((a, b) => b.revenue - a.revenue);
-    if (fam === 'storage') { box.innerHTML = `<p class="sub">${acct ? Math.round(acct.boxes).toLocaleString('en-US') : '—'} boxes on average, at $${R.RATES.facilities.v.toFixed(4)} a box a month to house ◇.</p>`; return; }
-    ledgerTable(box, { columns: [
+    // 1. how this line's cost is worked out, from the same results the margin is built from
+    const costs = acct ? (accountCosts(R, acct, M.lines.filter(l => l.level1 === id))[fam] || []) : [];
+    const working = costs.flatMap(c => c.lines);
+    box.innerHTML = `
+      <div class="lp-crumb">${esc(name)} › ${esc(famName)}</div>
+      <div class="lab" style="margin:8px 0 4px">How the cost is worked out ◇</div>
+      <div class="lp-cost">${working.length ? working.map(l => `<details class="ob-row"><summary><span>${esc(l[0])}${l[3] ? ' ◇' : ''}</span><span class="num">${money0(l[1])}</span></summary><p class="sub">${esc(l[2])}</p></details>`).join('') + `<div class="ob-row" style="border-top:1px solid var(--rule-ink);margin-top:4px;padding-top:6px;font-weight:600"><span>A year</span><span class="num">${money0(working.reduce((t, l) => t + l[1], 0))}</span></div>` : '<p class="sub">No modelled cost on this line: fees and charges with no volume behind them.</p>'}</div>
+      ${fam === 'storage' ? '' : '<div class="lab" style="margin:14px 0 4px">On the invoices, twelve months</div><div class="lp-lines"></div>'}
+      ${fam === 'storage' ? '' : '<div class="lab" style="margin:14px 0 4px">Its orders, last six months</div><div class="lp-orders"><p class="sub">Loading…</p></div>'}`;
+    if (fam === 'storage') return;
+    ledgerTable(box.querySelector('.lp-lines'), { columns: [
       { key: 'servcode', label: 'Service', fmt: (v) => esc(titleCase(svcName.get(v.replace(/^S5[BPT]$/, 'S5')) || v)) + ` <span class="sub" style="display:inline">${esc(v)}</span>` },
       { key: 'units', label: 'Units', num: true, fmt: (v, r) => Math.round(v).toLocaleString('en-US') + ' ' + (r.unit || '') },
       { key: 'revenue', label: 'Revenue', num: true, fmt: v => money0(v) },
     ], rows: ls });
+    // 3. this line's own work orders, each opening to its cost build
+    const { d, error, meta } = await drillP;
+    const ob = box.querySelector('.lp-orders');
+    if (!ob || !ob.isConnected) return;
+    if (error) { ob.innerHTML = `<div class="pending">${esc(error)}</div>`; return; }
+    const mine = d.orders.filter(o => o.items.some(i => { const f = (meta.get(i.code) || {}).family; return (f && f !== 'none' ? f : 'other') === fam || (fam === 'bin' && /^B\d$/.test(i.code)); }));
+    if (!mine.length) { ob.innerHTML = '<p class="sub">No orders on this line in the last six months.</p>'; return; }
+    const lost = mine.filter(o => o.cost.total && o.margin < 0).length;
+    ob.insertAdjacentHTML('beforebegin', `<p class="sub" style="margin:0 0 6px">${mine.length}${mine.length >= 200 ? '+' : ''} orders; ${lost} cost more to serve than they billed ◇.</p>`);
+    ordersTable(ob, mine.slice(0, 12), svcName, name, famName);
+    if (mine.length > 12) {
+      const b = document.createElement('button');
+      b.className = 'linkbtn'; b.textContent = `Show ${Math.min(mine.length, 60)} orders`;
+      b.style.cssText = 'margin-top:8px;border:0;background:none;color:var(--brand);font:inherit;font-size:13px;font-weight:500;cursor:pointer;padding:4px 0';
+      b.onclick = () => { ordersTable(ob, mine.slice(0, 60), svcName, name, famName); b.remove(); };
+      ob.after(b);
+    }
+  });
+}
+
+// One fetch per customer page: the orders and visits, with each order's cost worked out once.
+async function loadDrill(id, R, M) {
+  const meta = new Map();
+  for (const l of M.lines) if (l.level1 === id || !meta.has(l.servcode)) meta.set(l.servcode, { family: l.family, unit: l.unit, drives_cost: l.drives_cost });
+  try {
+    const r = await fetch(`/api/customer/${id}`, { credentials: 'same-origin' });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+    const d = j.data;
+    // a visit shared between the account's route orders on the same day
+    const routeish = o => o.items.some(i => ['bin', 'movement', 'itad'].includes((meta.get(i.code) || {}).family));
+    const perDay = new Map();
+    for (const o of d.orders) if (routeish(o)) perDay.set(o.date, (perDay.get(o.date) || 0) + 1);
+    for (const o of d.orders) { o.cost = jobCost(R, o.items, meta, perDay.get(o.date) || 1); o.margin = o.revenue - o.cost.total; }
+    return { d, meta };
+  } catch (e) { return { error: e.message, meta }; }
+}
+
+const dayFmt = t => new Date(t + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
+const n0 = v => Math.round(v || 0).toLocaleString('en-US');
+function ordersTable(el, rows, svcName, name, famName) {
+  ledgerTable(el, {
+    columns: [
+      { key: 'date', label: 'Date', fmt: v => dayFmt(v) },
+      { key: 'woid', label: 'Order', fmt: v => `<span class="sub" style="display:inline">${esc(v)}</span>` },
+      { key: 'revenue', label: 'Value', num: true, fmt: v => money0(v) },
+      { key: 'cost', label: 'Cost ◇', num: true, fmt: v => v.total ? money0(v.total) : '—' },
+      { key: 'margin', label: 'Left', num: true, fmt: (v, r) => r.cost.total ? `<span class="${v < 0 ? (r.cost.route ? 'is-warn' : 'is-bad') : ''}">${money0(v)}</span>` : '—' },
+    ],
+    rows,
+    detail: (o, td) => { td.innerHTML = `${famName ? `<div class="lp-crumb">${esc(name)} › ${esc(famName)} › order ${esc(o.woid)}, ${dayFmt(o.date)}</div>` : ''}${orderBuild(o, svcName, n0)}`; },
   });
 }
 
 // Below the page: the account's work orders (what was billed, order by order) and its Veri-Shred
 // visits (one row per day and route). Per account, so fetched here rather than in the snapshot.
-async function drawDrill(el, id, svcName, R, M) {
+async function drawDrill(el, drillP, svcName) {
   if (!el) return;
-  let d;
-  try {
-    const r = await fetch(`/api/customer/${id}`, { credentials: 'same-origin' });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
-    d = j.data;
-  } catch (e) {
-    el.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="card-head"><h3>Work orders and visits</h3></div><div class="pending">${esc(e.message)}</div></div>`;
+  const { d, error } = await drillP;
+  if (error) {
+    el.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="card-head"><h3>Work orders and visits</h3></div><div class="pending">${esc(error)}</div></div>`;
     return;
   }
   if (!el.isConnected) return;
@@ -242,24 +300,7 @@ async function drawDrill(el, id, svcName, R, M) {
     b.onclick = () => { draw(Math.min(total, 60)); b.remove(); };
     box.after(b);
   };
-  // each order's cost to serve, a visit shared between the account's route orders on the same day
-  const meta = new Map();
-  for (const l of M.lines) if (l.level1 === id || !meta.has(l.servcode)) meta.set(l.servcode, { family: l.family, unit: l.unit, drives_cost: l.drives_cost });
-  const routeish = o => o.items.some(i => ['bin', 'movement', 'itad'].includes((meta.get(i.code) || {}).family));
-  const perDay = new Map();
-  for (const o of d.orders) if (routeish(o)) perDay.set(o.date, (perDay.get(o.date) || 0) + 1);
-  for (const o of d.orders) { o.cost = jobCost(R, o.items, meta, perDay.get(o.date) || 1); o.margin = o.revenue - o.cost.total; }
-  if (d.orders.length) more(oBox, d.orders.length, n => ledgerTable(oBox, {
-    columns: [
-      { key: 'date', label: 'Date', fmt: v => day(v) },
-      { key: 'woid', label: 'Order', fmt: v => `<span class="sub" style="display:inline">${esc(v)}</span>` },
-      { key: 'revenue', label: 'Value', num: true, fmt: v => money0(v) },
-      { key: 'cost', label: 'Cost ◇', num: true, fmt: v => v.total ? money0(v.total) : '—' },
-      { key: 'margin', label: 'Left', num: true, fmt: (v, r) => r.cost.total ? `<span class="${v < 0 ? (r.cost.route ? 'is-warn' : 'is-bad') : ''}">${money0(v)}</span>` : '—' },
-    ],
-    rows: d.orders.slice(0, n),
-    detail: (o, td) => { td.innerHTML = orderBuild(o, svcName, n0); },
-  }));
+  if (d.orders.length) more(oBox, d.orders.length, n => ordersTable(oBox, d.orders.slice(0, n), svcName));
   else oBox.innerHTML = '<p class="sub">No billed work orders in the last six months.</p>';
   if (d.visits.length) more(vBox, d.visits.length, n => ledgerTable(vBox, {
     columns: [

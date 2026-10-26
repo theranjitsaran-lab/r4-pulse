@@ -38,30 +38,41 @@ export function buildMargins(R, M, opts = {}) {
       add(fam, 'revenue', l.family && l.family !== 'none' ? l.family : 'other', l.revenue);
     }
 
-    // cost by family
-    if (a.boxes > 0) add(fam, 'cost', 'storage', R.costToServe('storage', a.boxes).total);
-    const handling = units(l => l.family === 'handling' && l.drives_cost);
-    if (handling > 0) add(fam, 'cost', 'handling', R.costToServe('handling', handling).total);
-    const trips = units(l => l.servcode === '01'), dboxes = units(l => l.family === 'movement' && l.drives_cost && l.unit === 'box');
-    if (trips > 0 || dboxes > 0) add(fam, 'cost', 'movement', R.costToServe('movement', dboxes, { visits: trips || null }).total);
-    const binLb = units(l => l.servcode === 'S5B');
-    if (a.bins > 0) add(fam, 'cost', 'bin', R.costToServe('bin', a.bins, Object.assign({ visits: a.visits || null }, binLb > 0 ? { pounds: binLb } : { binCode: a.main_bin })).total);
-    const devices = units(l => l.family === 'itad' && l.drives_cost);
-    if (devices > 0) add(fam, 'cost', 'itad', R.costToServe('itad', devices, { visits: days(l => l.family === 'itad' && l.drives_cost) || null }).total);
-    const shredLb = units(l => l.servcode === 'S3' || l.servcode === 'S5P');
-    if (shredLb > 0) add(fam, 'cost', 'shred', R.costToServe('shred', shredLb).total);
-    const shredBoxes = units(l => l.family === 'shred' && l.drives_cost && (l.unit === 'box' || l.unit === 'cubic foot'));
-    if (shredBoxes > 0) add(fam, 'cost', 'shred', R.costToServe('shred', shredBoxes, { unit: 'box' }).total);
-    const centre = units(l => l.family === 'labour' && l.drives_cost && CENTRE_HOURS.has(l.servcode));
-    const driver = units(l => l.family === 'labour' && l.drives_cost && !CENTRE_HOURS.has(l.servcode));
-    if (centre > 0) add(fam, 'cost', 'labour', R.costToServe('labour', centre, { isCentre: true }).total);
-    if (driver > 0) add(fam, 'cost', 'labour', R.costToServe('labour', driver).total);
+    // cost by family: every cost-to-serve result, kept so a screen can show its working
+    for (const [f, rs] of Object.entries(accountCosts(R, a, lines))) for (const r of rs) add(fam, 'cost', f, r.total);
 
     const revenue = a.storage_revenue + a.service_revenue;
     const cost = Object.values(fam).reduce((t, f) => t + f.cost, 0);
     accounts.push({ level1: a.level1, customer: a.customer, revenue, cost, margin: revenue - cost, fam });
   }
   return { accounts, families };
+}
+
+// The cost-to-serve results behind one account's cost, by family: { family: [costToServe result] }.
+// buildMargins sums them; the customer page shows their lines as the working.
+export function accountCosts(R, a, lines) {
+  const out = {};
+  const put = (f, r) => (out[f] = out[f] || []).push(r);
+  const units = (pred) => lines.filter(pred).reduce((t, l) => t + l.units, 0);
+  const days = (pred) => lines.filter(pred).reduce((t, l) => Math.max(t, l.days), 0);
+  if (a.boxes > 0) put('storage', R.costToServe('storage', a.boxes));
+  const handling = units(l => l.family === 'handling' && l.drives_cost);
+  if (handling > 0) put('handling', R.costToServe('handling', handling));
+  const trips = units(l => l.servcode === '01'), dboxes = units(l => l.family === 'movement' && l.drives_cost && l.unit === 'box');
+  if (trips > 0 || dboxes > 0) put('movement', R.costToServe('movement', dboxes, { visits: trips || null }));
+  const binLb = units(l => l.servcode === 'S5B');
+  if (a.bins > 0) put('bin', R.costToServe('bin', a.bins, Object.assign({ visits: a.visits || null }, binLb > 0 ? { pounds: binLb } : { binCode: a.main_bin })));
+  const devices = units(l => l.family === 'itad' && l.drives_cost);
+  if (devices > 0) put('itad', R.costToServe('itad', devices, { visits: days(l => l.family === 'itad' && l.drives_cost) || null }));
+  const shredLb = units(l => l.servcode === 'S3' || l.servcode === 'S5P');
+  if (shredLb > 0) put('shred', R.costToServe('shred', shredLb));
+  const shredBoxes = units(l => l.family === 'shred' && l.drives_cost && (l.unit === 'box' || l.unit === 'cubic foot'));
+  if (shredBoxes > 0) put('shred', R.costToServe('shred', shredBoxes, { unit: 'box' }));
+  const centre = units(l => l.family === 'labour' && l.drives_cost && CENTRE_HOURS.has(l.servcode));
+  const driver = units(l => l.family === 'labour' && l.drives_cost && !CENTRE_HOURS.has(l.servcode));
+  if (centre > 0) put('labour', R.costToServe('labour', centre, { isCentre: true }));
+  if (driver > 0) put('labour', R.costToServe('labour', driver));
+  return out;
 }
 
 export const FAMILY_NAMES = {

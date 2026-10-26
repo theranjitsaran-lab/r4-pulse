@@ -17,7 +17,7 @@ export const VIEWS = {
   slipping:      { label: 'Slipping', blurb: 'Below their own six-month level for a second month running.' },
   gaps:          { label: 'Price gaps', blurb: 'Paying under the book\'s median for storage or a service, sized by their volume. Home counts half of each gap.' },
   rounds:        { label: 'Missed rate rounds', blurb: 'No rate has moved in two years.' },
-  margin:        { label: 'Lowest margin', blurb: 'Revenue less modelled cost to serve, worst first. Route costs are under review.' },
+  margin:        { label: 'Margin', blurb: 'Every account: revenue less what it costs to serve, worst first.' },
   all:           { label: 'All', blurb: 'Every account with revenue in the last twelve months.' },
 };
 
@@ -130,6 +130,7 @@ export async function render(main, C, params) {
   if (view === 'conversations') return conversations(main, C);
   if (view === 'whitespace') return whitespace(main, C, params);
   if (view === 'main') return monthGrid(main, C, params);
+  if (view === 'margin') return marginView(main, C, params);
   const sort = ['size', 'change', 'margin'].includes(params.sort) ? params.sort : null;
   const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
   const ser = seriesOf(C);
@@ -397,5 +398,82 @@ async function monthGrid(main, C, params) {
       </table>
     </div>
     <p class="foot">Invoice month, posted runs. Storage bills in advance, so a month's storage is that month's boxes; service is the month before's work. Citadel apart. Tap a name for the customer.</p>
+  </div>`;
+}
+
+// ── Margin: every account, revenue less what it costs to serve, worst first ──────────────────
+// The top of the margin drill: account → line of business → its orders → one order's cost build.
+// Filters as in v10: thin is 15–50% left, below cost is under 15%. Route-heavy accounts carry
+// "under review" while delivery routes are missing from the route volumes.
+const MV_CSS = `
+.mv2 .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 12px; max-width: 900px; }
+.mv2 .tools { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.mv2 .hd, .mv2 .rw { display: grid; grid-template-columns: minmax(0, 1fr) 96px 96px 104px 64px 14px; gap: 14px; align-items: center; }
+.mv2 .hd { font-size: 12px; color: var(--ink-3); padding: 0 4px 8px; }
+.mv2 .hd span:nth-child(n+2) { text-align: right; }
+.mv2 .rw { padding: 10px 4px; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; }
+.mv2 .rw:hover { background: var(--well); }
+.mv2 .rw .nm { font-weight: 600; line-height: 1.3; }
+.mv2 .rw .nm small { display: block; font-weight: 400; font-size: var(--fs-label); color: var(--ink-3); margin-top: 2px; }
+.mv2 .rw .r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mv2 .rw .lf { font-weight: 600; }
+.mv2 .rw .go { color: var(--ink-5); font-size: 20px; }
+.mv2 .tot { border-top: 1px solid var(--rule-ink); font-weight: 700; }
+@media (max-width: 760px) {
+  .mv2 .hd { display: none; }
+  .mv2 .rw { grid-template-columns: minmax(0, 1fr) 84px 14px; grid-template-areas: "nm lf go" "nm pc go"; gap: 2px 10px; }
+  .mv2 .rw .nm { grid-area: nm; } .mv2 .rw .lf { grid-area: lf; } .mv2 .rw .pc { grid-area: pc; font-size: 12.5px; } .mv2 .rw .go { grid-area: go; }
+  .mv2 .rw .rv, .mv2 .rw .cs { display: none; }
+}`;
+
+const MARGIN_ROUTE = ['bin', 'handling', 'movement'];
+function marginReason(a, m) {
+  const top = Object.entries(m.fam).filter(([f, v]) => v.cost > 0).sort((x, y) => y[1].cost - x[1].cost)[0];
+  if (!top) return 'no modelled cost: fees and charges only';
+  const [f] = top;
+  if (f === 'bin') return `${(a.bins || 0).toLocaleString('en-US')} bin services on ${(a.visits || 0).toLocaleString('en-US')} visits`;
+  if (f === 'storage') return `${Math.round(a.boxes).toLocaleString('en-US')} boxes stored`;
+  if (f === 'movement') return 'deliveries and pickups carry most of the cost';
+  if (f === 'handling') return 'retrievals and refiles carry most of the cost';
+  if (f === 'itad') return 'ITAD collections carry most of the cost';
+  if (f === 'shred') return 'shredding by weight or box carries most of the cost';
+  return 'labour carries most of the cost';
+}
+
+async function marginView(main, C, params) {
+  if (!document.getElementById('mv2-css')) { const st = document.createElement('style'); st.id = 'mv2-css'; st.textContent = MV_CSS; document.head.appendChild(st); }
+  const filter = ['thin', 'below'].includes(params.f) ? params.f : 'all';
+  const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
+  const book = buildMargins(R, M, { exclude: [CITADEL] });
+  const acct = new Map(M.accounts.map(a => [a.level1, a]));
+  const all = book.accounts.filter(a => a.revenue > 1000).map(m => {
+    const pc = m.revenue > 0 ? m.margin / m.revenue : null;
+    const routeCost = MARGIN_ROUTE.reduce((t, f) => t + ((m.fam[f] || {}).cost || 0), 0);
+    return { ...m, pc, review: m.cost > 0 && routeCost > 0.5 * m.cost, why: marginReason(acct.get(m.level1) || {}, m) };
+  });
+  const rows = all.filter(r => filter === 'all' || (filter === 'thin' ? r.pc >= 0.15 && r.pc < 0.5 : r.pc < 0.15)).sort((a, b) => a.margin - b.margin);
+  const below = all.filter(r => r.pc < 0.15), belowLoss = below.filter(r => r.margin < 0);
+  const visitHeavy = below.filter(r => r.review).length;
+  const sum = k => rows.reduce((t, r) => t + r[k], 0);
+  const link = f => `#customers?view=margin${f !== 'all' ? '&f=' + f : ''}`;
+  const shown = params.n === 'all' ? rows.length : 60;
+
+  main.innerHTML = `
+  <div class="cust mv2">
+    <h1>Customers</h1>
+    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'margin' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    <p class="lede">${below.length} accounts keep under 15% of what they pay after the cost to serve them ◇, and ${belowLoss.length} of them cost more than they pay, ${moneyK(-belowLoss.reduce((t, r) => t + r.margin, 0))} a year between them. ${visitHeavy} of the ${below.length} are visit-heavy (bins, deliveries, retrievals), where route costs are still under review; the rest are priced too low for the work.</p>
+    <div class="tools"><div class="seg">${[['all', 'All'], ['thin', 'Thin, 15–50%'], ['below', 'Below cost, under 15%']].map(([k, l]) => `<a href="${link(k)}" class="${k === filter ? 'on' : ''}">${l}</a>`).join('')}</div></div>
+    <div class="card">
+      <div class="hd"><span>Customer</span><span>Revenue</span><span>Cost ◇</span><span>Left</span><span>Margin</span><span></span></div>
+      ${rows.slice(0, shown).map(r => `<a class="rw" href="#customer/${r.level1}?from=margin">
+        <span class="nm">${esc(titleCase(r.customer))}${r.review ? ' <span class="chip review">under review</span>' : ''}<small>${esc(r.why)}</small></span>
+        <span class="r rv">${money0(r.revenue)}</span><span class="r cs">${money0(r.cost)}</span>
+        <span class="r lf ${r.margin < 0 && !r.review ? 'is-bad' : ''}">${money0(r.margin)}</span>
+        <span class="r pc ${r.pc < 0.15 && !r.review ? 'is-bad' : r.pc < 0.5 && !r.review ? 'is-warn' : ''}">${r.pc == null ? '—' : Math.round(r.pc * 100) + '%'}</span><span class="go">›</span></a>`).join('')}
+      <div class="rw tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r rv">${money0(sum('revenue'))}</span><span class="r cs">${money0(sum('cost'))}</span><span class="r lf">${money0(sum('margin'))}</span><span class="r pc">${sum('revenue') > 0 ? Math.round(sum('margin') / sum('revenue') * 100) + '%' : '—'}</span><span></span></div>
+      ${rows.length > shown ? `<a class="more" style="display:inline-block;margin-top:10px;color:var(--brand);font-weight:500;text-decoration:none" href="${link(filter)}&n=all">Show all ${rows.length}</a>` : ''}
+    </div>
+    <p class="foot">Twelve months. Cost to serve ◇ from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Tap an account for its lines, then its orders.</p>
   </div>`;
 }

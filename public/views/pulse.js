@@ -6,7 +6,8 @@
 //     for new business; every step opens the accounts behind it;
 //   customers moving: dollars a month against each account's own run, falls and gains.
 import { lineChart, money0, moneyK } from '/components/chart.js';
-import { getJson, titleCase, esc } from '/components/data.js';
+import { getJson, loadRates, titleCase, esc } from '/components/data.js';
+import { buildMargins } from '/components/margin.js';
 import { seriesOf } from '/views/customers.js';
 import { bridge, TARGET, CITADEL } from '/components/levers.js';
 
@@ -56,6 +57,11 @@ const CSS = `
 .home .mv .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 14px; }
 .home .mv.down .v { color: var(--bad); }
 .home .mvh { font-size: 12px; color: var(--ink-3); padding: 0 4px 6px; }
+.home .mrow { display: grid; grid-template-columns: auto minmax(0, 1fr) 14px; gap: 22px; align-items: center; color: inherit; text-decoration: none; }
+.home .mrow:hover { background: var(--well); }
+.home .mrow .lab { display: block; margin-bottom: 2px; }
+.home .mrow .mtxt { font-size: 14.5px; line-height: 1.45; color: var(--ink-2); }
+.home .mrow .go { color: var(--ink-5); font-size: 22px; }
 .home .foot { font-size: var(--fs-source); color: var(--ink-4); text-align: center; padding: 4px 0 10px; }
 @media (max-width: 760px) {
   .home .greet h1 { font-size: 28px; }
@@ -64,6 +70,7 @@ const CSS = `
   .home .step { grid-template-columns: minmax(0, 1fr) 78px 14px; grid-template-areas: "nm v go" "lane lane lane"; gap: 6px 10px; }
   .home .step .nm { grid-area: nm; } .home .step .v { grid-area: v; } .home .step .go { grid-area: go; } .home .step .lane { grid-area: lane; }
   .home .movers { grid-template-columns: 1fr; }
+  .home .mrow { grid-template-columns: minmax(0, 1fr) 14px; gap: 6px 10px; } .home .mrow > span:first-child { grid-column: 1; } .home .mrow .mtxt { grid-column: 1; grid-row: 2; } .home .mrow .go { grid-row: 1 / 3; grid-column: 2; }
   .home .mv { grid-template-columns: minmax(0, 1fr) 22% 62px; gap: 10px; }
 }`;
 
@@ -102,7 +109,7 @@ function movers(C) {
 export async function render(main, P) {
   if (!main) return;
   injectCss();
-  const [PR, A, CA, C, M] = await Promise.all([getJson('pricing'), getJson('activity'), getJson('calls'), getJson('customers'), getJson('margin')]);
+  const [PR, A, CA, C, M, R] = await Promise.all([getJson('pricing'), getJson('activity'), getJson('calls'), getJson('customers'), getJson('margin'), loadRates()]);
 
   // ── the month ──
   const last = P.monthly[P.monthly.length - 1];                 // the latest posted month
@@ -126,6 +133,13 @@ export async function render(main, P) {
   const scale = v => v / (TARGET * 1.04) * 100;
   let cum = B.today;
   const stepRows = B.steps.map(s => { const from = cum; cum += s.v; return { ...s, from }; });
+
+  // ── margin: the lines we can cost with confidence, and the accounts that cost more than they pay ──
+  const book = buildMargins(R, M, { exclude: [CITADEL] });
+  const solid = Object.entries(book.families).filter(([f, v]) => ['storage', 'shred', 'labour', 'itad'].includes(f) && v.revenue > 0);
+  const solidPc = 1 - solid.reduce((t, [, v]) => t + v.cost, 0) / solid.reduce((t, [, v]) => t + v.revenue, 0);
+  const losers = book.accounts.filter(a => a.revenue > 1000 && a.margin < 0);
+  const lossTotal = -losers.reduce((t, a) => t + a.margin, 0);
 
   const mv = movers(C), mvMax = Math.max(1, ...mv.falls.map(m => -m.d), ...mv.gains.map(m => m.d));
   const hour = new Date().getHours();
@@ -166,6 +180,12 @@ export async function render(main, P) {
       <div class="aside"><b>Boxes past their retention review:</b> ${Math.round(B.overdue.boxes).toLocaleString('en-US')} across ${B.overdue.accounts} accounts. Destroying them would bill about ${moneyK(B.overdue.oneOff)} once, at the book's median $${B.overdue.perBox.toFixed(2)} a box, and end about ${moneyK(B.overdue.storageLost)} a month of storage, so it sits beside the bridge rather than in it. <a href="#customers?view=conversations">This week's conversations ›</a></div>
       <div class="src">Cross-sell is the ceiling if every account bought like comparable accounts ◇ · prices: half the gap to the book's median (storage weighted by boxes) · slipping: each account's shortfall against its own six-month level${B.minor.length ? ` · ${B.minor.map(m => m.t.toLowerCase()).join(', ')}: under $1K a month once price gaps are counted` : ''}</div>
     </section>
+
+    <a class="card mrow" href="#customers?view=margin">
+      <span><span class="lab">Gross margin ◇</span><span class="big">${Math.round(solidPc * 100)}%</span></span>
+      <span class="mtxt">on storage, shredding, labour and ITAD over twelve months. <b>${losers.length} accounts cost more to serve than they pay</b>, ${moneyK(lossTotal)} a year between them; bins, retrieval and delivery are still under review. Open the margin drill: account, line, order.</span>
+      <span class="go">›</span>
+    </a>
 
     <section class="card">
       <div class="card-head"><h3>${mv.falls.length && -mv.falls[0].d > (mv.gains[0] ? mv.gains[0].d : 0) ? `${esc(titleCase(mv.falls[0].customer))} has fallen most, ${moneyK(-mv.falls[0].d)} a month below its own run` : mv.gains.length ? `${esc(titleCase(mv.gains[0].customer))} has grown most, ${moneyK(mv.gains[0].d)} a month above its own run` : 'Customers moving'}</h3><a href="#customers">Every customer by month ›</a></div>
