@@ -70,11 +70,41 @@ export function overdueBoxes(CA, PR) {
   return { rows, perBox, med, boxes: sum('boxes'), oneOff: sum('once'), storageLost: sum('lost'), accounts: rows.length };
 }
 
-// This month's bill, already known: the run not yet posted (this month's storage, last month's
-// work), Citadel apart.
-export function billNow(P) {
-  const run = P.currentRun.find(r => r.part === 'run');
-  return { run, core: run ? run.storage + run.service - run.citadel : null };
+// This month's bill, already known: this month's storage and last month's work, Citadel apart. It is
+// in one of three places, depending on where the month is:
+//   run      the billing run is in VCK but not posted (v_current_run, undated rows)
+//   posted   the run has posted, but kpi.monthly has not been rebuilt since (P.posted, straight
+//            from v_monthly_storage_service)
+//   pending  posted, and not yet in this snapshot either: the total is not shown; storage carries
+//            from the latest month known
+// perService prices this month's work ◇: the bill's work (core service) ÷ the services done in its
+// work month (the month before the bill), from Veri-Shred.
+//   billNow(P, A?) → { month, source, run: { storage, service, citadel } | null, core, storage, perService }
+export function billNow(P, A) {
+  const last = P.monthly[P.monthly.length - 1], nextOf = m => new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 1)).toISOString().slice(0, 10);
+  const runRow = (P.currentRun || []).find(r => r.part === 'run');
+  const posted = (P.posted || []).filter(r => r.month > last.month).slice(-1)[0];
+  let out;
+  if (runRow) out = { month: nextOf(last.month), source: 'run', run: runRow };
+  else if (posted) out = { month: posted.month, source: 'posted', run: posted };
+  else {
+    const month = A && A.latestDone ? A.latestDone.slice(0, 8) + '01' : nextOf(last.month);
+    out = { month, source: month > last.month ? 'pending' : 'posted', run: month > last.month ? null : last };
+  }
+  const r = out.run;
+  out.core = r ? r.storage + r.service - r.citadel : null;
+  out.storage = r ? r.storage : last.storage;
+  // the work it prices: the bill's own work month if known, else the latest posted month's
+  if (A) {
+    const doneIn = m => (P.dailyDone && P.dailyDone.length ? P.dailyDone.map(d => ({ date: d.date, done: d.done })) : A.routeDays.map(d => ({ date: d.date, done: d.services_done || 0 })))
+      .filter(d => d.date.startsWith(m.slice(0, 7))).reduce((t, d) => t + d.done, 0);
+    const prevOf = m => new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7) - 2, 1)).toISOString().slice(0, 10);
+    const basis = r ? { work: r.service - r.citadel, month: prevOf(out.month) } : { work: last.core_service, month: prevOf(last.month) };
+    const done = doneIn(basis.month);
+    out.perService = done ? basis.work / done : null;
+    out.perServiceMonth = basis.month;
+  }
+  return out;
 }
 
 // Down: the last three months at least 10% and $250 a month below the account's own twelve before
@@ -131,13 +161,14 @@ export function bridge({ P, PR, CA, M, C }) {
 
   const steps = [
     { key: 'cross', t: 'Sell what they don\'t buy yet', v: ws.total / 12, href: '#customers?view=whitespace', who: 'Anne',
-      s: pace ? `the ceiling at what comparable accounts spend; R4's own pace is ${pace.count} added lines a year, about $${Math.round(pace.value / 12 / 1000)}K a month` : `${ws.rows.filter(r => r.opp > 0).length} of the largest ${CROSS_SELL_DEPTH} accounts, at what comparable accounts spend`, note: 'if all took it up', modelled: true },
+      s: pace ? `the ceiling at what comparable accounts spend; R4's own pace is ${pace.count} added lines a year, about $${Math.round(pace.value / 12 / 1000)}K a month` : `${ws.rows.filter(r => r.opp > 0).length} of the largest ${CROSS_SELL_DEPTH} accounts, at what comparable accounts spend`, note: 'if all took it up', modelled: true, brief: 'the ceiling, if each bought like its peers' },
     { key: 'price', t: 'Bring prices halfway to the median', v: price, href: '#customers?view=gaps', who: 'Anne',
-      s: `${new Set([...sg.keys(), ...st.rows.map(r => r.level1)]).size} accounts pay under the book's median for storage or a service`, note: 'halfway' },
+      s: `${new Set([...sg.keys(), ...st.rows.map(r => r.level1)]).size} accounts pay under the book's median for storage or a service`, note: 'halfway',
+      brief: `${new Set([...sg.keys(), ...st.rows.map(r => r.level1)]).size} accounts under the book's median` },
     { key: 'slip', t: 'Win back half of what slipping accounts lost', v: slipV, href: '#customers?view=slipping', who: 'Anne and Trisha',
-      s: `${slip.length} accounts still billing but down 10% or more on their own run over the last three months`, note: 'halfway' },
+      s: `${slip.length} accounts still billing but down 10% or more on their own run over the last three months`, note: 'halfway', brief: `${slip.length} accounts down 10% or more` },
     { key: 'rounds', t: 'Raise the accounts that missed every rate round', v: roundsV, href: '#customers?view=rounds', who: 'Anne',
-      s: `${rounds.length} accounts with no rate moved in two years, at the typical 8% rise` },
+      s: `${rounds.length} accounts with no rate moved in two years, at the typical 8% rise`, brief: `${rounds.length} accounts, no rise in two years` },
   ].filter(x => x.v > 0).sort((a, b) => b.v - a.v);
   // a step under $1,000 a month is not a lever worth a row; it is named in the footnote instead
   const minor = steps.filter(x => x.v < 1000);

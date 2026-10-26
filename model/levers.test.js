@@ -60,12 +60,14 @@ test('slipping, pace and the bill: each figure shown twice comes from one source
   assert.ok(slipList.every(d => d.move.pct <= -0.1), 'every slipping account is down 10% or more on its own run');
   assert.ok(!slipList.some(d => d.level1 === 6714), 'Citadel held apart');
   assert.deepEqual(B.pace, crossSellPace(M.history), 'Home and the grid read one pace');
-  const run = P.currentRun.find(r => r.part === 'run');
-  near(billNow(P).core, run.storage + run.service - run.citadel, 0.01, 'bill = run core');
+  const run = P.currentRun.find(r => r.part === 'run') || (P.posted || []).slice(-1)[0];
+  if (run) near(billNow(P).core, run.storage + run.service - run.citadel, 0.01, 'bill = run core');
+  else assert.equal(billNow(P, J('activity')).core, null, 'no run and nothing posted in the snapshot: no total shown');
 });
 
 test('projection: done to date + days left × pace; the band is backtested leave-one-out', async () => {
   const { project, dailyFrom, weekdaysOf, curve } = await import('../public/components/projection.js');
+  const { billNow } = await import('../public/components/levers.js');
   // fifteen months of synthetic work, 100 a weekday with a month-by-month swing, then 4 days of October
   const daily = [];
   for (let m = 0; m < 15; m++) {
@@ -82,7 +84,7 @@ test('projection: done to date + days left × pace; the band is backtested leave
   assert.ok(x.services.lo <= x.services.central && x.services.central <= x.services.hi, 'band holds the central');
   assert.ok(x.services.lo >= x.doneToDate, 'never below the work already done');
   // on the fixtures (no backtest yet): the bill is the storage plus the work at last month's value
-  const P = J('pulse'), A = J('activity'), run = P.currentRun.find(r => r.part === 'run');
+  const P = J('pulse'), A = J('activity'), run = { storage: billNow(P, A).storage };
   const f = project({ daily: dailyFrom(P, A), latest: A.latestDone, perService: 114.5, storage: run.storage, routeDays: A.routeDays });
   near(f.bill.central, run.storage + f.services.central * 114.5, 1e-6, 'fixture bill');
   // a past month's curve ends on its total

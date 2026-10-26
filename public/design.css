@@ -1,0 +1,16 @@
+/* ?design=1 — a working overlay, never shipped to a user's eye by default.
+   A baseline grid at the 4px unit (every sixth line stronger, 24px) and every element's box,
+   so spacing that is off the grid or a box that overflows shows at a glance. Loaded by app.js. */
+html.design-overlay body {
+  background-image:
+    repeating-linear-gradient(to bottom, var(--design-grid-strong) 0 var(--hair), transparent var(--hair) calc(var(--u) * 6)),
+    repeating-linear-gradient(to bottom, var(--design-grid) 0 var(--hair), transparent var(--hair) var(--u));
+  background-attachment: local;
+}
+html.design-overlay #main * { outline: var(--hair) solid var(--design-box); outline-offset: calc(var(--hair) * -1); }
+html.design-overlay #main svg * { outline: 0; }
+html.design-overlay::after {
+  content: "design · 4px grid · boxes"; position: fixed; right: var(--sp-3); bottom: var(--sp-3); z-index: 99;
+  font: 500 var(--fs-source) var(--f-sans); color: var(--surface); background: var(--design-box-solid);
+  padding: var(--sp-1) var(--sp-2); border-radius: var(--r-sm);
+}

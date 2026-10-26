@@ -48,6 +48,10 @@ async function pulse() {
            stops_per_route_day::float, revenue_per_stop::float, revenue_per_route_hour::float, route_day_margin::float,
            pounds_per_route_day::float, pounds_exec_default_pct::float
     FROM kpi.monthly ORDER BY month`);
+  // months posted since kpi.monthly was last rebuilt, straight from the invoices view
+  const posted = await query(`
+    SELECT month::text, storage::float, service::float, citadel::float, core::float
+    FROM v_monthly_storage_service WHERE month > (SELECT max(month) FROM kpi.monthly) ORDER BY month`);
   const currentRun = await query(`
     SELECT part, storage::float, service::float, citadel::float, invoices::int,
            earliest_work_date::text, latest_work_date::text, earliest_invdate::text, latest_invdate::text
@@ -88,7 +92,7 @@ async function pulse() {
     WHERE date > (SELECT max(date) FROM v_route_day WHERE services_done > 0) - interval '15 months'
       AND date <= (SELECT max(date) FROM v_route_day WHERE services_done > 0)
     GROUP BY 1 ORDER BY 1`);
-  return { monthly, currentRun, customers, downTwoMonths, concentration, pace, dailyDone };
+  return { monthly, posted, currentRun, customers, downTwoMonths, concentration, pace, dailyDone };
 }
 
 // ── Customers — the list and the customer page ───────────────────────────────────────────

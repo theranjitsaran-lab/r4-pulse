@@ -2,12 +2,18 @@
 // last seven days. Read-only: the session is set read-only before the first query.
 //
 //   node scripts/freshness.js
+//   node scripts/freshness.js --logs <push folder>      (on the R4 machine)
 //
 // Paste the output to Claude. A table whose latest date stopped weeks ago means its part of the
-// daily push has stalled.
+// daily push has stalled. With --logs it also reads push_log.txt and vs_push_log.txt for
+// DDL FAILED: a table the push could not load keeps its old rows, so it looks stale, not broken.
 'use strict';
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const { Client } = require('pg');
+
+const LOGS = (i => (i >= 0 ? process.argv[i + 1] : null))(process.argv.indexOf('--logs'));
 
 const CHECKS = [
   ['invoices (posted)', `SELECT max(COALESCE(invdate, billdate))::date AS latest,
@@ -30,9 +36,10 @@ const CHECKS = [
   console.log(`Database date: ${today}\n`);
   for (const [label, sql] of CHECKS) {
     try {
-      const [r] = (await c.query(sql)).rows;
-      const latest = r.latest ? new Date(r.latest).toISOString().slice(0, 10) : '—';
-      const age = r.latest ? Math.round((Date.parse(today) - new Date(r.latest)) / 864e5) : null;
+      // the date as Postgres writes it: through a JS Date it shifts a day on a PC east of UTC
+      const [r] = (await c.query(`SELECT latest::date::text AS latest, last7 FROM (${sql}) q`)).rows;
+      const latest = r.latest || '—';
+      const age = r.latest ? Math.round((Date.parse(today) - Date.parse(r.latest)) / 864e5) : null;
       const tail = label.startsWith('invoices_current') ? `${r.last7} invoices in the run` : `${r.last7} rows in the last 7 days`;
       console.log(`${label.padEnd(40)} latest ${latest}${age != null ? `  (${age} days ${age < 0 ? 'ahead: booked' : 'ago'})` : ''}  ·  ${tail}`);
     } catch (e) { console.log(`${label.padEnd(40)} ERROR ${e.message}`); }
@@ -45,4 +52,15 @@ const CHECKS = [
     for (const r of rows) console.log(`  ${r.relname.padEnd(24)} analysed ${r.analysed || '—'}  ·  ${Number(r.inserted).toLocaleString('en-US')} inserted`);
   } catch (e) { console.log(`\nTable statistics unavailable: ${e.message}`); }
   await c.end();
+  if (LOGS) {
+    console.log(`\nPush logs in ${LOGS}:`);
+    for (const name of ['push_log.txt', 'vs_push_log.txt']) {
+      const file = path.join(LOGS, name);
+      if (!fs.existsSync(file)) { console.log(`  ${name.padEnd(16)} not found`); continue; }
+      const failed = fs.readFileSync(file, 'utf8').split(/\r?\n/).filter(l => l.includes('DDL FAILED'));
+      const when = fs.statSync(file).mtime.toISOString().slice(0, 16).replace('T', ' ');
+      console.log(`  ${name.padEnd(16)} written ${when} UTC  ·  ${failed.length ? `${failed.length} DDL FAILED, the last:` : 'no DDL FAILED'}`);
+      for (const l of failed.slice(-10)) console.log(`    ${l.trim()}`);
+    }
+  }
 })().catch(e => { console.error(e.message); process.exit(1); });

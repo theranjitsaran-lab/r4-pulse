@@ -1,0 +1,70 @@
+/* Routes, Mike's screen. Moved out of the view so every value reads tokens.css. */
+
+/* STYLE */
+.rt h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); margin: 0; }
+.rt .top { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-4); }
+.rt .day { display: flex; align-items: center; gap: var(--sp-2); }
+.rt .day button { border: var(--hair) solid var(--rule-3); background: var(--surface); border-radius: var(--r); width: calc(var(--u) * 9); height: calc(var(--u) * 9); font-size: var(--fs-head); color: var(--ink-2); cursor: pointer; }
+.rt .day button:disabled { opacity: .35; cursor: default; }
+.rt .day b { font-size: var(--fs-head); min-width: calc(var(--u) * 38); text-align: center; }
+.rt .sum { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-4); margin-bottom: var(--sp-4); }
+.rt .r { display: grid; grid-template-columns: calc(var(--u) * 28) minmax(0, 1fr) calc(var(--u) * 43) calc(var(--u) * 23) var(--sp-3); gap: var(--sp-4); align-items: center; padding: var(--sp-3) 0; border-top: var(--hair) solid var(--rule); cursor: pointer; }
+.rt .r:first-child { border-top: 0; }
+.rt .r.open { background: var(--well); margin: 0 calc(var(--sp-3) * -1); padding: var(--sp-3); border-radius: var(--r); }
+.rt .r .nm { font-weight: 700; }
+.rt .r .nm small { display: block; font-weight: 400; color: var(--ink-3); font-size: var(--fs-source); }
+.rt .r .meter { display: block; margin-bottom: var(--sp-1); height: var(--sp-2); background: var(--well-2); border-radius: var(--r-sm); position: relative; }
+.rt .r .meter i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--heat); border-radius: var(--r-sm); }
+.rt .r .meter b { position: absolute; top: calc(var(--hatch) * -1); bottom: calc(var(--hatch) * -1); width: var(--hair-2); background: var(--ink); opacity: .55; }
+.rt .r .v { text-align: right; font-variant-numeric: tabular-nums; }
+.rt .r .go { color: var(--ink-5); }
+.rt .stops { padding: var(--sp-2) 0 var(--sp-3) calc(var(--u) * 31); }
+.rt .stop { display: grid; grid-template-columns: calc(var(--u) * 7) minmax(0, 1fr) auto auto; gap: var(--sp-3); align-items: baseline; padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); font-size: var(--fs-sm); }
+.rt .stop:first-child { border-top: 0; }
+.rt .stop .n { color: var(--ink-4); font-variant-numeric: tabular-nums; }
+.rt .stop .v { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rt .grid { display: grid; gap: var(--sp-1); }
+.rt .grid .h { font-size: var(--fs-source); color: var(--ink-3); text-align: center; padding-bottom: var(--hair-2); }
+.rt .grid .rl { font-size: var(--fs-label); font-weight: 600; align-self: center; }
+.rt .grid .c { border-radius: var(--r-sm); min-height: var(--sp-12); display: flex; flex-direction: column; justify-content: center; align-items: center; font-variant-numeric: tabular-nums; cursor: pointer; border: var(--hair) solid transparent; }
+.rt .grid .c b { font-size: var(--fs-body); }
+.rt .grid .c small { font-size: var(--fs-tiny); opacity: .8; }
+.rt .grid .c.sel { border-color: var(--ink); }
+.rt .grid .c.none { background: var(--well); color: var(--ink-3); cursor: default; }
+.rt .rt-say { font-size: var(--fs-head); line-height: 1.45; color: var(--ink-2); margin: calc(var(--sp-1) * -1) 0 var(--sp-4); max-width: calc(var(--u) * 230); }
+.rt .bands { display: grid; grid-template-columns: calc(var(--u) * 28) minmax(0, 1fr) calc(var(--u) * 18) calc(var(--u) * 15); gap: var(--sp-2) var(--sp-3); align-items: center; font-size: var(--fs-sm); margin: var(--sp-2) 0 var(--sp-4); }
+.rt .bands .bar { height: var(--sp-3); background: var(--well-2); border-radius: var(--r-sm); position: relative; overflow: hidden; }
+.rt .bands .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink-3); border-radius: var(--r-sm); }
+.rt .bands .v { text-align: right; font-variant-numeric: tabular-nums; }
+.rt .far { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.rt .far th { font-size: var(--fs-source); font-weight: 500; color: var(--ink-3); text-align: right; padding: 0 var(--sp-2) var(--sp-2); }
+.rt .far td { padding: var(--sp-2) var(--sp-2); border-top: var(--hair) solid var(--rule); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rt .far th:first-child, .rt .far td:first-child { text-align: left; white-space: normal; }
+.rt .two { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--sp-4); margin-top: var(--sp-4); align-items: start; }
+@media (max-width: 860px) {
+  .rt h1 { font-size: var(--fs-display-ph); }
+  .rt .sum { grid-template-columns: 1fr 1fr; }
+  .rt .r { grid-template-columns: calc(var(--u) * 21) minmax(0, 1fr) calc(var(--u) * 18) var(--sp-3); }
+  .rt .r .who { display: none; }
+  .rt .stops { padding-left: 0; }
+  .rt .two { grid-template-columns: 1fr; }
+}
+
+/* each route: name, its bar with the day's counts and postcodes under it, then the move on its norm */
+.rt .r { grid-template-columns: calc(var(--u) * 28) minmax(0, 1fr) calc(var(--u) * 23) var(--sp-3);
+  grid-template-areas: "nm bar v go" "nm who v go"; row-gap: var(--hair-2); }
+.rt .r > .nm { grid-area: nm; }
+.rt .r > :nth-child(2) { grid-area: bar; }
+.rt .r > .who { grid-area: who; text-align: left; }
+.rt .r > :nth-child(4) { grid-area: v; }
+.rt .r > .go { grid-area: go; }
+.rt .r .who::before { content: "postcodes "; }
+
+/* the stale-data warning stands apart from the day's sentence */
+.rt .rt-say > .is-warn:first-child { display: block; margin: 0 0 var(--sp-3); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm);
+  background: var(--warn-bg); font-size: var(--fs-label); }
+
+@media (max-width: 860px) {
+  .rt .r { grid-template-columns: minmax(0, 1fr) auto var(--sp-3); grid-template-areas: "nm v go" "bar bar bar"; }
+  .rt .r > .who { display: none; }
+}

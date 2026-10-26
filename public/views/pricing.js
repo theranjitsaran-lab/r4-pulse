@@ -24,80 +24,11 @@ const SERVICES = {
 };
 const REVIEW_OF = { bin: 'bin', trip: 'movement', handling: 'handling' };
 
-const CSS = `
-.pr { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 16px; align-items: start; }
-.pr h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); margin: 0 0 14px; grid-column: 1 / -1; }
-.pr .rail { position: sticky; top: 72px; }
-.pr label { display: block; font-size: 12px; font-weight: 500; color: var(--ink-3); margin: 14px 0 5px; }
-.pr label:first-child { margin-top: 0; }
-.pr input, .pr select { width: 100%; font: inherit; font-size: 15px; padding: 9px 11px; border: 1px solid var(--rule-4); border-radius: 10px; background: var(--surface); color: var(--ink); }
-.pr input:focus, .pr select:focus { outline: 2px solid color-mix(in srgb, var(--brand) 40%, transparent); border-color: var(--brand); }
-.pr .price input { font-size: 30px; font-weight: 700; padding: 8px 12px; letter-spacing: -.01em; }
-.pr .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.pr .hint { font-size: 12px; color: var(--ink-4); margin-top: 5px; }
-.pr .main > * + * { margin-top: 14px; }
-.pr .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
-.pr .line { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 11px 0; border-top: 1px solid var(--rule); }
-.pr .line:first-of-type { border-top: 0; }
-.pr .line .v { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
-.pr .line .d { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-3); }
-.pr .line.total { border-top: 1px solid var(--rule-ink); font-weight: 700; }
-.pr .worth { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 16px; align-items: baseline; padding: 11px 0; border-top: 1px solid var(--rule); }
-.pr .worth:first-of-type { border-top: 0; }
-.pr .worth .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.pr .worth .s { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-3); }
-.pr .worth.you { background: var(--well); margin: 0 -10px; padding: 11px 10px; border-radius: 10px; border-top-color: transparent; }
-.pr .nocost { color: var(--ink-3); }
-.pr .book { grid-column: 1 / -1; }
-.pr details.fold summary { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; cursor: pointer; list-style: none; }
-.pr details.fold summary::-webkit-details-marker { display: none; }
-.pr details.fold summary h3 { margin: 0; font-size: var(--fs-head); font-weight: 600; }
-.pr details.fold summary h3::before { content: "› "; color: var(--ink-5); display: inline-block; transition: transform var(--t-fast); }
-.pr details.fold[open] summary h3::before { transform: rotate(90deg); }
-.pr .trk { position: relative; height: 92px; margin: 34px 8px 6px; }
-.pr .trk .base { position: absolute; left: 0; right: 0; top: 40px; height: 10px; border-radius: 5px; background: var(--well-2); }
-.pr .trk .loss { position: absolute; top: 40px; height: 10px; left: 0; border-radius: 5px 0 0 5px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--bad) 55%, transparent) 0 3px, transparent 3px 6px); }
-.pr .trk .mid { position: absolute; top: 40px; height: 10px; background: color-mix(in srgb, var(--ink) 18%, transparent); }
-.pr .trk .tk { position: absolute; top: 30px; width: 2px; height: 30px; background: var(--ink-3); transform: translateX(-1px); }
-.pr .trk .tk.cost { background: var(--bad); }
-.pr .trk .tl { position: absolute; font-size: 12px; color: var(--ink-3); white-space: nowrap; transform: translateX(-50%); }
-.pr .trk .tl.up { top: 6px; } .pr .trk .tl.dn { top: 66px; }
-.pr .trk .tl.cost { color: var(--bad); }
-.pr .trk .pin { position: absolute; top: -26px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
-.pr .trk .pin b { background: var(--ink); color: var(--surface); font-size: 14px; font-weight: 700; padding: 3px 9px; border-radius: 7px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.pr .trk .pin.is-bad b { background: var(--bad); } .pr .trk .pin.is-warn b { background: var(--warn); }
-.pr .trk .pin i { width: 3px; height: 44px; background: currentColor; color: var(--ink); }
-.pr .trk .pin.is-bad i { color: var(--bad); } .pr .trk .pin.is-warn i { color: var(--warn); }
-.pr .brow { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) 110px 14px; gap: 14px; align-items: center; padding: 9px 4px; border-top: 1px solid var(--rule); cursor: pointer; }
-.pr .brow:hover { background: var(--well); }
-.pr .brow:first-child { border-top: 0; }
-.pr .brow .nm { font-weight: 600; font-size: 14px; line-height: 1.25; }
-.pr .brow .nm small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); }
-.pr .brow .bar { height: 10px; background: var(--well-2); border-radius: 5px; position: relative; overflow: hidden; }
-.pr .brow .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--warn); border-radius: 5px; }
-.pr .brow .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.pr .brow .v small { display: block; font-weight: 400; font-size: 11.5px; color: var(--ink-3); }
-.pr .brow .go { color: var(--ink-5); font-size: 20px; }
-@media (max-width: 900px) {
-  .pr { grid-template-columns: 1fr; }
-  .pr h1 { font-size: 28px; }
-  .pr .rail { position: static; }
-  .pr .grid { grid-template-columns: 1fr; }
-  .pr details.fold summary .sub { display: none; }
-  .pr .brow { grid-template-columns: minmax(0, 1fr) 84px 14px; grid-template-areas: "nm v go" "bar bar bar"; gap: 6px 10px; }
-  .pr .brow .nm { grid-area: nm; } .pr .brow .bar { grid-area: bar; } .pr .brow .v { grid-area: v; } .pr .brow .go { grid-area: go; }
-}`;
-
-function injectCss() {
-  if (document.getElementById('pr-css')) return;
-  const s = document.createElement('style'); s.id = 'pr-css'; s.textContent = CSS; document.head.appendChild(s);
-}
 
 const median = v => v.length ? v.slice().sort((a, b) => a - b)[Math.floor(v.length / 2)] : null;
 
 export async function render(main, PR, params) {
   if (!main) return;
-  injectCss();
   const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
 
   // the book: each service's account rates; storage from storage_rate_hist's latest month
@@ -135,12 +66,12 @@ export async function render(main, PR, params) {
       <div id="p-verdict"></div>
       <div class="card"><div class="card-head"><h3 id="p-track-title"></h3><small id="p-track-sub"></small></div><div id="p-track"></div><div class="src" id="p-strip-src"></div></div>
       <div class="card"><div class="card-head"><h3>What it is worth a year</h3><small>gross margin ◇</small></div><div id="p-worth"></div></div>
-      <details class="card fold"><summary><h3 id="p-cost-title">How the cost is worked out</h3><span class="sub">◇ cost model · open</span></summary><div id="p-cost" style="margin-top:10px"></div></details>
-      <details class="card fold"><summary><h3 id="p-strip-title">Every account on this service</h3><span class="sub" id="p-strip-sub"></span></summary><div id="p-strip" style="margin-top:10px"></div></details>
+      <details class="card fold"><summary><h3 id="p-cost-title">How the cost is worked out</h3><span class="sub">◇ cost model · open</span></summary><div id="p-cost" style="margin-top:var(--sp-3)"></div></details>
+      <details class="card fold"><summary><h3 id="p-strip-title">Every account on this service</h3><span class="sub" id="p-strip-sub"></span></summary><div id="p-strip" style="margin-top:var(--sp-3)"></div></details>
     </div>
     <div class="card book">
       <div class="card-head"><h3 id="b-title">Invoiced against the book</h3><small>tap a service to price it</small></div>
-      <div class="sub" style="margin-bottom:10px">For each service, the share of its volume billed under the book's median, and what moving those accounts to the median would add a year. Worst first.</div>
+      <div class="sub" style="margin-bottom:var(--sp-3)">For each service, the share of its volume billed under the book's median, and what moving those accounts to the median would add a year. Worst first.</div>
       <div id="b-rows"></div>
       <div class="src">Each account's usual invoiced rate over the last 13 months, from VCK · storage weighted by boxes · list prices are not in the database, so the book's own median is the comparison</div>
     </div>
@@ -240,7 +171,7 @@ export async function render(main, PR, params) {
       $('p-cost-title').textContent = `How the cost is worked out: ${f(unitCost)} a ${svc.unit}`;
       // the first sentence says what the line is; the rate's full working is one tap away
       const split = t => { const i = t.indexOf('. '); return i > 0 ? [t.slice(0, i + 1), t.slice(i + 2)] : [t, '']; };
-      $('p-cost').innerHTML = c.lines.map(l => { const [head, rest] = split(l[2]); return `<div class="line"><span>${esc(l[0])}${l[3] ? ' ◇' : ''}</span><span class="v">${money0(l[1])}</span><span class="d">${esc(head)}${rest ? ` <details style="display:inline"><summary style="display:inline;cursor:pointer;color:var(--brand)">How it is worked out</summary><span style="display:block;margin-top:4px">${esc(rest)}</span></details>` : ''}</span></div>`; }).join('')
+      $('p-cost').innerHTML = c.lines.map(l => { const [head, rest] = split(l[2]); return `<div class="line"><span>${esc(l[0])}${l[3] ? ' ◇' : ''}</span><span class="v">${money0(l[1])}</span><span class="d">${esc(head)}${rest ? ` <details style="display:inline"><summary style="display:inline;cursor:pointer;color:var(--brand)">How it is worked out</summary><span style="display:block;margin-top:var(--sp-1)">${esc(rest)}</span></details>` : ''}</span></div>`; }).join('')
         + `<div class="line total"><span>A year, ${Math.round(st.units).toLocaleString('en-US')} ${svc.fam === 'storage' ? 'box-months' : svc.unit + 's'}</span><span class="v">${money0(c.total)}</span></div>`
         + (review ? `<p class="hint">Route costs are under review: delivery routes are not yet in the route volumes, so visit costs run high.</p>` : '');
     } else {
@@ -329,5 +260,5 @@ function track(el, { price, cost, s, f, cls, medName, of }) {
     ${ticks.map((t, i) => `<div class="tk ${t.c}" style="left:${x(t.v)}%"></div><div class="tl ${t.c} ${i % 2 ? 'up' : 'dn'}" style="left:${x(t.v)}%">${esc(t.t)}</div>`).join('')}
     <div class="pin ${cls}" style="left:${x(price)}%"><b>${f(price)}</b><i></i></div>
   </div>
-  <div class="sub" style="margin-top:4px">The grey band is where the middle half of ${of} sit, ${f(s.p25)} to ${f(s.p75)}.${cost != null ? ' The striped red stretch is below the cost to serve ◇.' : ''} ${price < s.median ? `Cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.` : price > s.median ? `Dearer than ${Math.round(s.below(price) * 100)}% of ${of}.` : `At the ${medName}.`}</div>`;
+  <div class="sub" style="margin-top:var(--sp-1)">The grey band is where the middle half of ${of} sit, ${f(s.p25)} to ${f(s.p75)}.${cost != null ? ' The striped red stretch is below the cost to serve ◇.' : ''} ${price < s.median ? `Cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.` : price > s.median ? `Dearer than ${Math.round(s.below(price) * 100)}% of ${of}.` : `At the ${medName}.`}</div>`;
 }

@@ -5,6 +5,7 @@
 //   #customer/<level1>          one customer
 //   #pricing, #activity         the tools
 import { getJson } from '/components/data.js';
+import { playIntro } from '/components/intro.js';
 
 const ROUTES = {
   pulse:     { view: 'pulse',     api: 'pulse',     nav: 'pulse' },
@@ -17,6 +18,12 @@ const ROUTES = {
 const main = document.getElementById('main');
 if (!main) throw new Error('no #main');
 
+// ?design=1: the baseline grid and element boxes (public/design.css), for checking spacing
+if (new URLSearchParams(location.search).get('design') === '1') {
+  document.documentElement.classList.add('design-overlay');
+  document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="/design.css">');
+}
+
 function parse() {
   const raw = (location.hash || '#pulse').slice(1);
   const [path, qs] = raw.split('?');
@@ -25,6 +32,8 @@ function parse() {
   if (id) params.id = decodeURIComponent(id);
   return { name: ROUTES[name] ? name : 'pulse', params };
 }
+
+const intro = playIntro();   // the R4 mark, once a session; lifts when the first screen is drawn
 
 let seq = 0;
 async function show() {
@@ -43,6 +52,7 @@ async function show() {
     if (e.status === 401) { location.href = '/login'; return; }
     if (my !== seq) return;
     main.innerHTML = `<div class="empty"><h2>No data yet</h2>${e.message}. This screen reads <code>/api/${route.api}</code>; run <code>npm run snapshot</code>.</div>`;
+    intro.ready();
     return;
   }
   try {
@@ -51,11 +61,24 @@ async function show() {
     main.innerHTML = '';
     await mod.render(main, data, Object.assign({}, route.params, params));
     if (my === seq) window.scrollTo(0, 0);
+    intro.ready();
   } catch (e) {
     if (my !== seq) return;
     main.innerHTML = `<div class="empty"><h2>This screen is not built yet</h2>${e.message}</div>`;
+    intro.ready();
   }
 }
+
+// The design-preview service (render.yaml, r4-pulse-design) says so in the header, so nobody takes
+// it for the team's tool.
+fetch('/health').then(r => r.json()).then(h => {
+  const right = document.querySelector('.mast-right');
+  if (!h.preview || !right) return;
+  const tag = document.createElement('span');
+  tag.className = 'preview-tag';
+  tag.textContent = 'Design preview';
+  right.prepend(tag);
+}).catch(() => {});
 
 addEventListener('hashchange', show);
 show();

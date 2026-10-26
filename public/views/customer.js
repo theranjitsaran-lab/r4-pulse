@@ -14,73 +14,9 @@ import { costOrders, jobHtml, drawRouteBlock } from '/components/jobview.js';
 const CITADEL = 6714;
 const UNDER_REVIEW = new Set(['bin', 'handling', 'movement']);
 
-const CSS = `
-.cp .crumb { margin-bottom: 10px; }
-.cp h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); margin: 0; line-height: 1.1; }
-.cp .cp-lede { font-size: 17px; line-height: 1.5; color: var(--ink-2); margin: 0 0 16px; max-width: 920px; }
-.cp .tags { margin: 8px 0 12px; display: flex; gap: 6px; flex-wrap: wrap; }
-.cp .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
-.cp .stat .lab { margin-bottom: 4px; }
-.cp .grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; margin-top: 14px; align-items: start; }
-.cp .fam { display: grid; grid-template-columns: minmax(0, 1fr) 96px 96px 64px 12px; gap: 12px; align-items: center; padding: 11px 0; border-top: 1px solid var(--rule); cursor: pointer; }
-.cp .fam:first-of-type { border-top: 0; }
-.cp .fam .r { text-align: right; font-variant-numeric: tabular-nums; }
-.cp .fam .go { color: var(--ink-5); }
-.cp .fam.open { background: var(--well); }
-.cp .famhead { display: grid; grid-template-columns: minmax(0, 1fr) 96px 96px 64px 12px; gap: 12px; font-size: 12px; color: var(--ink-3); padding-bottom: 6px; }
-.cp .famhead span:nth-child(n+2) { text-align: right; }
-.cp .lines { padding: 4px 0 12px; }
-.cp .price { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 11px 0; border-top: 1px solid var(--rule); }
-.cp .price:first-of-type { border-top: 0; }
-.cp .price .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
-.cp .price .pos { grid-column: 1 / -1; height: 6px; background: var(--well-2); border-radius: 3px; position: relative; margin-top: 4px; }
-.cp .price .pos i { position: absolute; top: -3px; width: 4px; height: 12px; border-radius: 2px; background: var(--ink); transform: translateX(-2px); }
-.cp .price .pos b { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink-4); }
-.cp .sig { padding: 11px 0; border-top: 1px solid var(--rule); }
-.cp .sig:first-of-type { border-top: 0; }
-.cp .sig .acts { margin-top: 6px; display: flex; gap: 8px; }
-.cp .sig .acts { align-items: center; flex-wrap: wrap; }
-.cp .sig .acts button { border: 1px solid var(--rule-3); background: var(--surface); border-radius: 8px; padding: 4px 12px; font-size: 13px; color: var(--ink-2); cursor: pointer; }
-.cp .sig .acts button.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
-.cp .ws1 { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0 2px; border-top: 1px solid var(--rule); }
-.cp .ws1:first-of-type { border-top: 0; }
-.cp .ws1 .opp { border: 1.5px dashed var(--ink-5); border-radius: 6px; padding: 1px 8px; font-weight: 600; background: none; font: inherit; color: inherit; cursor: pointer; }
-.cp .ws1 .opp:hover { border-color: var(--brand); color: var(--brand); }
-.cp .ws1b { padding: 0 0 8px; }
-.cp .ws1p { margin: 4px 0 6px; padding: 8px 10px; background: var(--well); border-radius: var(--r-sm); font-size: 14px; line-height: 1.45; color: var(--ink-2); }
-.cp .ob { padding: 6px 4px 10px; }
-.cp .lp-crumb { font-size: 12px; color: var(--ink-3); padding: 4px 0 2px; }
-.cp .lines { padding: 4px 8px 14px; }
-.cp .ob-bars { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 6px 12px; align-items: center; }
-.cp .ob-bar { height: 14px; display: flex; gap: 2px; }
-.cp .ob-bar i { display: block; height: 100%; border-radius: 3px; }
-.cp .ob-bar i.rev, .cp i.dot.rev { background: var(--ink); }
-.cp .c0 { background: var(--s-storage); } .cp .c1 { background: var(--s-service); } .cp .c2 { background: var(--ink-4); } .cp .c3 { background: var(--s-citadel); }
-.cp i.dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
-.cp .ob-say { margin: 12px 0; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
-.cp .ob-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.cp .ob-row { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; font-size: 13.5px; }
-.cp details.ob-row { display: block; }
-.cp details.ob-row summary { display: flex; justify-content: space-between; gap: 12px; cursor: pointer; list-style: none; }
-.cp details.ob-row summary::-webkit-details-marker { display: none; }
-.cp details.ob-row p { margin: 2px 0 6px 14px; }
-@media (max-width: 860px) {
-  .cp .ob-cols { grid-template-columns: 1fr; }
-  .cp h1 { font-size: 26px; }
-  .cp .stats { grid-template-columns: 1fr 1fr; }
-  .cp .grid { grid-template-columns: 1fr; }
-  .cp .fam, .cp .famhead { grid-template-columns: minmax(0, 1fr) 84px 52px 12px; }
-  .cp .fam .cost, .cp .famhead .cost { display: none; }
-}`;
-
-function injectCss() {
-  if (document.getElementById('cp-css')) return;
-  const s = document.createElement('style'); s.id = 'cp-css'; s.textContent = CSS; document.head.appendChild(s);
-}
 
 export async function render(main, C, params) {
   if (!main) return;
-  injectCss();
   const id = Number(params.id);
   const [R, M, PR, CA, log] = await Promise.all([loadRates(), getJson('margin'), getJson('pricing'), getJson('calls'), getLog(Number(params.id)).catch(() => [])]);
   const s = seriesOf(C).get(id);
@@ -177,7 +113,7 @@ export async function render(main, C, params) {
         <div class="card">
           <div class="card-head"><h3>Signals</h3><small>right or not? say so</small></div>
           <div id="cp-sigs">${sigs.map(g => { const l = said.get(g.key); return `<div class="sig" data-sig="${g.key}">${esc(g.text)}<div class="acts"><button data-v="right" class="${l && l.verdict === 'right' ? 'on' : ''}">Right</button><button data-v="not_right" class="${l && l.verdict === 'not_right' ? 'on' : ''}">Not right</button><span class="sub said">${l ? `${esc(l.who)} said ${VERB[l.verdict]}, ${when(l.logged_at)}` : ''}</span></div></div>`; }).join('') || '<p class="sub">Nothing flagged this week.</p>'}</div>
-          ${log.length ? `<div class="aside" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--rule)"><div class="lab" style="margin-bottom:4px">Logged</div>${log.slice(0, 5).map(l => `<div class="sub">${when(l.logged_at)} · ${esc(l.who)} · ${VERB[l.verdict]} (${esc(l.signal)})</div>`).join('')}</div>` : ''}
+          ${log.length ? `<div class="aside" style="margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:var(--hair) solid var(--rule)"><div class="lab" style="margin-bottom:var(--sp-1)">Logged</div>${log.slice(0, 5).map(l => `<div class="sub">${when(l.logged_at)} · ${esc(l.who)} · ${VERB[l.verdict]} (${esc(l.signal)})</div>`).join('')}</div>` : ''}
         </div>
       </div>
     </div>
@@ -229,10 +165,10 @@ export async function render(main, C, params) {
     const working = costs.flatMap(c => c.lines);
     box.innerHTML = `
       <div class="lp-crumb">${esc(name)} › ${esc(famName)}</div>
-      <div class="lab" style="margin:8px 0 4px">How the cost is worked out ◇</div>
-      <div class="lp-cost">${working.length ? working.map(l => `<details class="ob-row"><summary><span>${esc(l[0])}${l[3] ? ' ◇' : ''}</span><span class="num">${money0(l[1])}</span></summary><p class="sub">${esc(l[2])}</p></details>`).join('') + `<div class="ob-row" style="border-top:1px solid var(--rule-ink);margin-top:4px;padding-top:6px;font-weight:600"><span>A year</span><span class="num">${money0(working.reduce((t, l) => t + l[1], 0))}</span></div>` : '<p class="sub">No modelled cost on this line: fees and charges with no volume behind them.</p>'}</div>
-      ${fam === 'storage' ? '' : '<div class="lab" style="margin:14px 0 4px">On the invoices, twelve months</div><div class="lp-lines"></div>'}
-      ${fam === 'storage' ? '' : '<div class="lab" style="margin:14px 0 4px">Its orders, last six months</div><div class="lp-orders"><p class="sub">Loading…</p></div>'}`;
+      <div class="lab" style="margin:var(--sp-2) 0 var(--sp-1)">How the cost is worked out ◇</div>
+      <div class="lp-cost">${working.length ? working.map(l => `<details class="ob-row"><summary><span>${esc(l[0])}${l[3] ? ' ◇' : ''}</span><span class="num">${money0(l[1])}</span></summary><p class="sub">${esc(l[2])}</p></details>`).join('') + `<div class="ob-row" style="border-top:var(--hair) solid var(--rule-ink);margin-top:var(--sp-1);padding-top:var(--sp-2);font-weight:600"><span>A year</span><span class="num">${money0(working.reduce((t, l) => t + l[1], 0))}</span></div>` : '<p class="sub">No modelled cost on this line: fees and charges with no volume behind them.</p>'}</div>
+      ${fam === 'storage' ? '' : '<div class="lab" style="margin:var(--sp-4) 0 var(--sp-1)">On the invoices, twelve months</div><div class="lp-lines"></div>'}
+      ${fam === 'storage' ? '' : '<div class="lab" style="margin:var(--sp-4) 0 var(--sp-1)">Its orders, last six months</div><div class="lp-orders"><p class="sub">Loading…</p></div>'}`;
     if (fam === 'storage') return;
     ledgerTable(box.querySelector('.lp-lines'), { columns: [
       { key: 'servcode', label: 'Service', fmt: (v) => esc(titleCase(svcName.get(v.replace(/^S5[BPT]$/, 'S5')) || v)) + ` <span class="sub" style="display:inline">${esc(v)}</span>` },
@@ -247,12 +183,11 @@ export async function render(main, C, params) {
     const mine = d.orders.filter(o => o.items.some(i => { const f = (meta.get(i.code) || {}).family; return (f && f !== 'none' ? f : 'other') === fam || (fam === 'bin' && /^B\d$/.test(i.code)); }));
     if (!mine.length) { ob.innerHTML = '<p class="sub">No orders on this line in the last six months.</p>'; return; }
     const lost = mine.filter(o => o.cost.total && o.margin < 0).length;
-    ob.insertAdjacentHTML('beforebegin', `<p class="sub" style="margin:0 0 6px">${mine.length}${mine.length >= 200 ? '+' : ''} orders; ${lost} cost more to serve than they billed ◇.</p>`);
+    ob.insertAdjacentHTML('beforebegin', `<p class="sub" style="margin:0 0 var(--sp-2)">${mine.length}${mine.length >= 200 ? '+' : ''} orders; ${lost} cost more to serve than they billed ◇.</p>`);
     ordersTable(ob, mine.slice(0, 12), svcName, name, famName);
     if (mine.length > 12) {
       const b = document.createElement('button');
       b.className = 'linkbtn'; b.textContent = `Show ${Math.min(mine.length, 60)} orders`;
-      b.style.cssText = 'margin-top:8px;border:0;background:none;color:var(--brand);font:inherit;font-size:13px;font-weight:500;cursor:pointer;padding:4px 0';
       b.onclick = () => { ordersTable(ob, mine.slice(0, 60), svcName, name, famName); b.remove(); };
       ob.after(b);
     }
@@ -310,7 +245,7 @@ async function drawDrill(el, drillP, svcName) {
   const ordRev = d.orders.reduce((t, o) => t + o.revenue, 0);
   const lbs = d.visits.reduce((t, v) => t + (v.pounds || 0), 0);
   el.innerHTML = `
-    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? (d.orders.length >= 200 ? `the latest 200 orders, ${money0(ordRev)}` : `${n0(d.orders.length)} in six months, ${money0(ordRev)}`) : 'last six months'}</small></div><div id="cp-orders"></div><div class="pending" style="margin-top:12px">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · cost ◇ from the cost model, one visit shared between the day's orders · tap an order for its cost build</div></div>
+    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? (d.orders.length >= 200 ? `the latest 200 orders, ${money0(ordRev)}` : `${n0(d.orders.length)} in six months, ${money0(ordRev)}`) : 'last six months'}</small></div><div id="cp-orders"></div><div class="pending" style="margin-top:var(--sp-3)">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · cost ◇ from the cost model, one visit shared between the day's orders · tap an order for its cost build</div></div>
     <div class="card"><div class="card-head"><h3>Shredding visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} days on a route · ${n0(lbs)} lb` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Bin and shredding stops drivers marked done in Veri-Shred, one row per day and route. Box deliveries and retrievals are on the work orders, not here. Executive-bin weights are a set figure, not weighed.</div></div>`;
   const oBox = el.querySelector('#cp-orders'), vBox = el.querySelector('#cp-visits');
   // the latest twelve of each, with the rest one tap away
@@ -319,7 +254,6 @@ async function drawDrill(el, drillP, svcName) {
     draw(12);
     const b = document.createElement('button');
     b.className = 'linkbtn'; b.textContent = total > 60 ? "Show the latest 60" : `Show all ${total}`;
-    b.style.cssText = 'margin-top:8px;border:0;background:none;color:var(--brand);font:inherit;font-size:13px;font-weight:500;cursor:pointer;padding:4px 0';
     b.onclick = () => { draw(Math.min(total, 60)); b.remove(); };
     box.after(b);
   };
@@ -344,7 +278,7 @@ function wsCard(r, pitch) {
   const missing = lines.filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp);
   return `<div class="card">
     <div class="card-head"><h3>${missing.length ? `Not bought yet: about ${moneyK(r.opp)} a year ◇` : lines.every(o => o.c.have) ? 'Buys every line we sell' : 'Not bought yet: too small to size'}</h3><a href="#customers?view=whitespace">Cross-sell ›</a></div>
-    ${!missing.length && !lines.every(o => o.c.have) ? '<p class="sub" style="margin:0 0 6px">It doesn\'t buy every line, but it has too few boxes or too little other spend to size what comparable accounts would spend.</p>' : ''}
+    ${!missing.length && !lines.every(o => o.c.have) ? '<p class="sub" style="margin:0 0 var(--sp-2)">It doesn\'t buy every line, but it has too few boxes or too little other spend to size what comparable accounts would spend.</p>' : ''}
     ${lines.map(({ x, c }) => `<div class="ws1"><span>${esc(x.name)}</span>${c.have ? `<span class="num">${moneyK(c.spend)} <span class="sub" style="display:inline">a year</span></span>` : c.opp > 0 ? `<button class="num opp" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)} ◇</button>` : '<span class="sub">—</span>'}</div>${!c.have && x.key === 'shred' && pitch ? `<div class="ws1p">${esc(pitch)}</div>` : ''}${!c.have && c.opp > 0 ? `<div class="sub ws1b">${esc(c.basis)}</div>` : ''}`).join('')}
   </div>`;
 }

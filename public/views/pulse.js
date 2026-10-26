@@ -5,67 +5,17 @@
 //   the route to $1.0m: today's six-month average, each lever in dollars a month, and what is left
 //     for new business; every step opens the accounts behind it;
 //   customers moving: dollars a month against each account's own run, falls and gains.
-import { money0, moneyK } from '/components/chart.js';
+import { money0, moneyK, sparkline } from '/components/chart.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { marginSummary } from '/components/margin.js';
-import { moveReason } from '/components/series.js';
+import { moveReason, deltaText } from '/components/series.js';
+import { gapHtml } from '/components/gap.js';
+import { reveal, drawIn } from '/components/motion.js';
 import { project, dailyFrom, curve } from '/components/projection.js';
 import { templateSummary, checkNumbers } from '/components/summary.js';
-import { customerTable, falling, rising, tableHtml } from '/components/custtable.js';
+import { customerTable, falling, rising } from '/components/custtable.js';
 import { bridge, billNow, slippingAccounts, risingAccounts, TARGET, CITADEL } from '/components/levers.js';
 
-const CSS = `
-.home { display: grid; gap: 14px; }
-.home .greet .hi { color: var(--ink-3); margin: 0 0 6px; font-size: var(--fs-label); }
-.home .greet .hv { font-size: 23px; line-height: 1.35; font-weight: 500; letter-spacing: -.01em; margin: 0; max-width: 980px; }
-.home .greet .by { margin: 6px 0 0; font-size: var(--fs-source); color: var(--ink-4); }
-.home .stale { margin: 0; padding: 8px 12px; border-radius: var(--r-sm); background: var(--warn-bg); color: var(--warn); font-size: var(--fs-label); }
-.home .landgrid { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 28px; }
-.home .facts { display: flex; flex-direction: column; gap: 0; border-left: 1px solid var(--rule); padding-left: 24px; }
-.home .fact { display: block; padding: 12px 0; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); }
-.home .fact:first-child { border-top: 0; padding-top: 2px; }
-.home a.fact:hover .lab { color: var(--brand); }
-.home .fact .lab { display: block; margin-bottom: 2px; }
-.home .fact b { display: block; font-size: 30px; font-weight: 700; letter-spacing: var(--track-tight); color: var(--ink); line-height: 1.15; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
-.home .c-line.faint { stroke-dasharray: 2 4; } .home i.k.faint { opacity: .5; }
-.home .lede { font-size: 16px; color: var(--ink-2); margin: 8px 0 0; line-height: 1.45; }
-.home h2.t { font-size: 22px; font-weight: 700; letter-spacing: var(--track-tight); margin: 0 0 4px; line-height: 1.2; }
-.home .bridge { margin-top: 16px; }
-.home .step { display: grid; grid-template-columns: minmax(0, 34%) minmax(0, 1fr) 84px 14px; gap: 14px; align-items: center; padding: 9px 4px; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; }
-.home a.step:hover { background: var(--well); }
-.home .step:first-child { border-top: 0; }
-.home .step .nm { font-weight: 600; line-height: 1.3; }
-.home .step .nm small { display: block; font-weight: 400; font-size: var(--fs-label); color: var(--ink-3); margin-top: 2px; }
-.home .step .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.home .step .v small { display: block; font-weight: 400; font-size: 11.5px; color: var(--ink-3); }
-.home .step .go { color: var(--ink-5); font-size: 20px; }
-.home .lane { position: relative; height: 22px; }
-.home .lane::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: var(--well-2); border-radius: 1px; }
-.home .lane i { position: absolute; top: 3px; height: 16px; border-radius: 4px; background: var(--ink-3); }
-.home .lane i.today { background: var(--ink); }
-.home .lane i.ceil { background: repeating-linear-gradient(135deg, var(--ink-3) 0 3px, transparent 3px 6px); border: 1px solid var(--ink-3); }
-.home .lane i.newb { background: none; border: 1.5px dashed var(--ink-4); }
-.home .lane b { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); }
-.home .lane .tg { position: absolute; top: -16px; transform: translateX(-100%); font-size: 11px; color: var(--ink-3); white-space: nowrap; padding-right: 4px; }
-.home .aside { margin-top: 14px; padding: 12px 14px; background: var(--well); border-radius: var(--r); font-size: var(--fs-label); color: var(--ink-2); line-height: 1.5; }
-.home .mrow { display: grid; grid-template-columns: auto minmax(0, 1fr) 14px; gap: 22px; align-items: center; color: inherit; text-decoration: none; }
-.home .mrow:hover { background: var(--well); }
-.home .mrow .lab { display: block; margin-bottom: 2px; }
-.home .mrow .mtxt { font-size: 14.5px; line-height: 1.45; color: var(--ink-2); }
-.home .mrow .go { color: var(--ink-5); font-size: 22px; }
-.home .foot { font-size: var(--fs-source); color: var(--ink-4); text-align: center; padding: 4px 0 10px; }
-@media (max-width: 760px) {
-  .home .greet .hv { font-size: 18px; }
-  .home .landgrid { grid-template-columns: 1fr; gap: 8px; } .home .facts { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); }
-  .home .step { grid-template-columns: minmax(0, 1fr) 78px 14px; grid-template-areas: "nm v go" "lane lane lane"; gap: 6px 10px; }
-  .home .step .nm { grid-area: nm; } .home .step .v { grid-area: v; } .home .step .go { grid-area: go; } .home .step .lane { grid-area: lane; }
-  .home .mrow { grid-template-columns: minmax(0, 1fr) 14px; gap: 6px 10px; } .home .mrow > span:first-child { grid-column: 1; } .home .mrow .mtxt { grid-column: 1; grid-row: 2; } .home .mrow .go { grid-row: 1 / 3; grid-column: 2; }
-}`;
-
-function injectCss() {
-  if (document.getElementById('home-css')) return;
-  const s = document.createElement('style'); s.id = 'home-css'; s.textContent = CSS; document.head.appendChild(s);
-}
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const addMonths = (d, n) => new Date(Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1 + n, 1)).toISOString().slice(0, 10);
 const dayMonth = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
@@ -82,26 +32,24 @@ function movers(C) {
 
 export async function render(main, P) {
   if (!main) return;
-  injectCss();
   const [PR, A, CA, C, M, R] = await Promise.all([getJson('pricing'), getJson('activity'), getJson('calls'), getJson('customers'), getJson('margin'), loadRates()]);
 
   // ── the month ──
-  const last = P.monthly[P.monthly.length - 1];                 // the latest posted month
-  const billMonth = addMonths(last.month, 1);                     // the bill in the current run
-  const { run, core: runCore } = billNow(P);
+  const BN = billNow(P, A);                                       // this month's bill: run, posted, or pending
+  const billMonth = BN.month, run = BN.run, runCore = BN.core;
+  const last = P.monthly.find(m => m.month === addMonths(billMonth, -1)) || P.monthly[P.monthly.length - 1];   // the bill before it
   const workMonth = A.latestDone.slice(0, 8) + '01';              // the month being worked now
   const daily = dailyFrom(P, A);
   const doneIn = m => daily.filter(r => r.date.startsWith(m.slice(0, 7))).reduce((t, r) => t + r.done, 0);
-  // the work in the current run is last month's: its value per done service prices this month's work ◇
-  const prevDone = doneIn(addMonths(workMonth, -1));
-  const perService = run && prevDone ? (run.service - run.citadel) / prevDone : null;
-  const X = project({ daily, latest: A.latestDone, perService, storage: run ? run.storage : 0, routeDays: A.routeDays });
+  // the bill's work is last month's: its value per done service prices this month's work ◇
+  const perService = BN.perService;
+  const X = project({ daily, latest: A.latestDone, perService, storage: BN.storage, routeDays: A.routeDays });
   const nextBill = X.bill ? X.bill.central : null;
   // the same month last year, priced so it ends on what its bill actually carried
   const lyMonth = addMonths(workMonth, -12), lyBill = P.monthly.find(m => m.month === addMonths(lyMonth, 1)), lyDone = doneIn(lyMonth);
   const lastYear = lyBill && lyDone ? curve(daily, lyMonth, lyBill.core_service / lyDone, lyBill.storage) : [];
-  const lastMonth = perService ? curve(daily, addMonths(workMonth, -1), perService, run.storage) : [];
-  const thisMonth = perService ? curve(daily, workMonth, perService, run.storage, A.latestDone) : [];
+  const lastMonth = perService ? curve(daily, addMonths(workMonth, -1), perService, BN.storage) : [];
+  const thisMonth = perService ? curve(daily, workMonth, perService, BN.storage, A.latestDone) : [];
 
   // ── the route to $1.0m ──
   const B = bridge({ P, PR, CA, M, C });
@@ -138,46 +86,42 @@ export async function render(main, P) {
     { key: 'margin', line: `${sure.length} accounts cost more to serve than they pay on costs R4 is sure of; ${unsure.length} more only while route costs are under review` },
   ].filter(Boolean);
 
-  main.innerHTML = `
-  <div class="home">
-    ${staleNote}<div class="greet"><p class="hi">${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'} · core revenue, Citadel apart · target $1.0M a month</p>
-      <h1 class="hv" id="home-hv"></h1><p class="by" id="home-by"></p></div>
+  const dBill = runCore != null ? runCore / last.core - 1 : null;
+  const gapAll = TARGET - B.today;
+  const at = x => (Math.max(0, Math.min(1, x / TARGET)) * 100).toFixed(2) + '%';
+  const track = `<div class="hb-track">${runCore != null ? `<span class="hb-fill grow" style="width:${at(runCore)}"></span>` : ''}${X.bill ? `<span class="hb-range" style="left:${at(X.bill.lo)};width:${at(X.bill.hi - X.bill.lo)}"></span><span class="hb-tick" style="left:${at(X.bill.central)}"></span>` : ''}</div>
+      <div class="hb-ends"><span>$0</span><span><span class="gap-wide">${X.bill ? `${mon(nb)} likely ${moneyK(X.bill.lo)}–${moneyK(X.bill.hi)} ◇ · ` : ''}</span>$1.0M target</span></div>`;
+  const billFig = `<span class="hb-lab">${mon(billMonth)}'s bill · already known</span><span class="hb-fig">${runCore != null ? moneyK(runCore) : '—'}</span>`;
+  const billNote = dBill != null ? `<p class="hb-note"><span class="hb-pill ${dBill < 0 ? 'down' : ''}">${pct(dBill)}</span> on ${mon(last.month)} · <b>${Math.round(runCore / TARGET * 100)}%</b> of $1.0M</p>` : `<p class="hb-note">${BN.source === 'pending' ? `Posted; the total arrives with the next KPI rebuild and snapshot.` : 'The run has not started.'}</p>`;
+  const nextFact = `<span class="hb-lab">${mon(nb)}'s bill · building ◇</span><b>${nextBill != null ? '≈ ' + moneyK(nextBill) : '—'}</b><small>${X.bill ? `likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)} · working day ${X.elapsed} of ${X.workdays}` : 'no priced month to value the work yet'}</small>`;
+  const slipFact = `<span class="hb-lab">Slipping ›</span><b>${mv.slipping} accounts</b><small>${top ? `largest: ${esc(titleCase(top.customer))}, ${esc(top.why)}` : 'none down 10% on their own run'}</small>`;
 
-    <section class="card land">
-      <div class="landgrid">
-        <div id="home-land"></div>
-        <div class="facts">
-          <a class="fact" href="#customers?view=main"><span class="lab">${mon(billMonth)}'s bill · already known ›</span><b>${runCore != null ? moneyK(runCore) : '—'}</b><span>${runCore != null ? `<span class="delta ${dcls(runCore / last.core - 1)}">${pct(runCore / last.core - 1)}</span> on ${mon(last.month)}'s ${moneyK(last.core)}: ${mon(billMonth)}'s storage and ${mon(last.month)}'s work, Citadel's ${moneyK(run.citadel)} apart.` : 'The run has not started.'}</span></a>
-          <div class="fact"><span class="lab">${mon(addMonths(billMonth, 1))}'s bill · building now ◇</span><b>${nextBill != null ? '≈ ' + moneyK(nextBill) : '—'}</b><span>${X.bill ? `Likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}. ${X.doneToDate.toLocaleString('en-US')} services done in ${X.elapsed} of ${X.workdays} working days; the other ${X.remaining} at ${Math.round(X.pace)} a day, ${X.paces.length > 1 ? `the median of the last ${X.paces.length} months` : `${mon(X.paces.length ? X.paces[0].month : workMonth)}'s pace`}.` : 'Not yet calculable: no priced month to value the work.'}</span></div>
-          <div class="fact"><span class="lab">How far to trust it</span><span>${X.backtest ? `Projected this way from working day ${X.elapsed}, the last ${X.backtest.n} months landed inside their band ${X.backtest.hits} times.` : `Untested: the band is the middle half of recent days. The next snapshot adds fifteen months of daily work, and each of the last twelve months is then projected from the same day to test it.`}${X.bookings ? ` Bookings to ${dayMonth(X.bookings.horizon)} point to ${Math.round(X.bookings.done).toLocaleString('en-US')} services by then, at the ${Math.round(X.bookings.completion * 100)}% of bookings R4 completes.` : ''}</span></div>
-        </div>
-      </div>
-    </section>
+  const hero = `<section class="hero-band" data-rv><div>${billFig}${billNote}${track}</div>
+      <div class="hb-side"><div>${nextFact}</div><a href="#customers?view=slipping">${slipFact}</a></div></section>`;
 
-    <section class="card">
-      <h2 class="t">Existing customers could carry ${moneyK(B.levers)} of the ${moneyK(TARGET - B.today)} a month to $1.0M</h2>
-      <div class="sub">From today's ${moneyK(B.today)} a month (the six-month average, ${mon(B.sixFrom)} to ${mon(B.sixTo)}). The rest, ${moneyK(B.newBusiness)} a month, has to come from new business. Tap a step for the accounts behind it.</div>
-      <div class="bridge">
-        <div class="step"><span class="nm">Today<small>six-month average, core</small></span><span class="lane"><i class="today" style="left:0;width:${scale(B.today)}%"></i><b style="left:${scale(TARGET)}%"></b></span><span class="v">${moneyK(B.today)}</span><span></span></div>
-        ${stepRows.map(s => `<a class="step" href="${s.href}"><span class="nm">${esc(s.t)}<small>${esc(s.s)} · ${esc(s.who)}</small></span><span class="lane"><i class="${s.modelled ? 'ceil' : ''}" style="left:${scale(s.from)}%;width:${Math.max(.6, scale(s.v))}%"></i><b style="left:${scale(TARGET)}%"></b></span><span class="v">+${moneyK(s.v)}${s.note || s.modelled ? `<small>${esc(s.note || '')}${s.modelled ? ' ◇' : ''}</small>` : ''}</span><span class="go">›</span></a>`).join('')}
-        <div class="step"><span class="nm">New business<small>what the levers above leave to win</small></span><span class="lane"><i class="newb" style="left:${scale(cum)}%;width:${scale(B.newBusiness)}%"></i><b style="left:${scale(TARGET)}%"></b><span class="tg" style="left:${scale(TARGET)}%">$1.0M</span></span><span class="v">+${moneyK(B.newBusiness)}</span><span></span></div>
-      </div>
-      <div class="aside"><b>Boxes past their retention review:</b> ${Math.round(B.overdue.boxes).toLocaleString('en-US')} across ${B.overdue.accounts} accounts. Destroying them would bill about ${moneyK(B.overdue.oneOff)} once, at the book's median $${B.overdue.perBox.toFixed(2)} a box, and end about ${moneyK(B.overdue.storageLost)} a month of storage, so it sits beside the bridge rather than in it. <a href="#customers?view=destruction">The accounts and their boxes ›</a></div>
-      <div class="src">Cross-sell is the ceiling if every account bought like comparable accounts ◇ · prices: half the gap to the book's median (storage weighted by boxes) · slipping: half the shortfall of accounts still billing, last three months against their own twelve before · left out: ${B.stopped.accounts} accounts that have stopped or nearly (${moneyK(B.stopped.lost)} a month), often one-off projects, <a href="#customers?view=slipping" style="color:var(--brand)">listed with Slipping</a>${B.minor.length ? ` · ${B.minor.map(m => m.t.toLowerCase()).join(', ')}: under $1K a month once price gaps are counted` : ''}</div>
-    </section>
+  const gapCard = `<section class="card" data-rv>
+      <h2 class="sec-t">Existing customers could close ${moneyK(B.levers)} of the ${moneyK(gapAll)} gap</h2>
+      <p class="sec-s">From today's ${moneyK(B.today)} a month, the average of ${mon(B.sixFrom)} to ${mon(B.sixTo)}. Tap a lever for its accounts.</p>
+      ${gapHtml(B)}
+      <div class="src">◇ cross-sell is a ceiling · prices and slipping counted halfway · ${B.stopped.accounts} stopped accounts (${moneyK(B.stopped.lost)} a month) left out, <a href="#customers?view=slipping">listed with Slipping</a></div>
+    </section>`;
+  const landCard = `<section class="card" data-rv><div id="home-land"></div></section>`;
+  const moveCard = `<section class="card" data-rv>
+      <div class="card-head"><h3 id="home-ct-h"></h3><a href="#customers?view=main">All ›</a></div>
+      <div class="seg" id="home-ct-seg"><a href="#" data-f="falling" class="on">Falling</a><a href="#" data-f="rising">Rising</a></div>
+      <div id="home-ct"></div>
+    </section>`;
+  const tiles = `<div class="tiles">
+      <a class="card tile" href="#customers?view=margin" data-rv><span class="lab">Gross margin ◇ ›</span><b>${Math.round(solidPc * 100)}%</b>
+        <p><strong>${sure.length} account${sure.length === 1 ? '' : 's'}</strong> cost more to serve than ${sure.length === 1 ? 'it pays' : 'they pay'} (${moneyK(sureLoss)} a year); ${unsure.length} more while route costs are under review.</p></a>
+      <a class="card tile" href="#customers?view=destruction" data-rv><span class="lab">Boxes past retention review ›</span><b>${Math.round(B.overdue.boxes / 1000)}K boxes</b>
+        <p>Across ${B.overdue.accounts} accounts: about ${moneyK(B.overdue.oneOff)} once to destroy, and ${moneyK(B.overdue.storageLost)} a month of storage ended.</p></a>
+    </div>`;
+  const brief = `<details class="brief" data-rv><summary>The month in a paragraph ›</summary><p id="home-hv"></p><p class="src" id="home-by"></p></details>`;
 
-    <a class="card mrow" href="#customers?view=margin">
-      <span><span class="lab">Gross margin ◇</span><span class="big">${Math.round(solidPc * 100)}%</span></span>
-      <span class="mtxt">on storage, shredding, labour and ITAD over twelve months. <b>${sure.length} account${sure.length === 1 ? '' : 's'} cost more to serve than ${sure.length === 1 ? 'it pays' : 'they pay'}</b> on costs we are sure of (${moneyK(sureLoss)} a year); ${unsure.length} more look that way only because route costs are under review. Open the margin drill: account, line, order.</span>
-      <span class="go">›</span>
-    </a>
-
-    <section class="card">
-      <div class="card-head"><h3 id="home-ct-h"></h3><a href="#customers?view=main">Every customer up and down ›</a></div>
-      <div class="tools" style="margin:4px 0 6px"><div class="seg" id="home-ct-seg"><a href="#" data-f="falling" class="on">Falling</a><a href="#" data-f="rising">Rising</a></div></div>
-      <div id="home-ct" style="overflow-x:auto"></div>
-    </section>
-
+  main.innerHTML = `<div class="h">${staleNote}${hero}${brief}
+    ${gapCard}<div class="split">${landCard}${moveCard}</div>
+    ${tiles}
     <div class="foot">Posted through ${mon(last.month)} ${last.month.slice(0, 4)} · work done through ${dayMonth(A.latestDone)} · ◇ modelled · tap any row to open it</div>
   </div>`;
 
@@ -189,12 +133,13 @@ export async function render(main, P) {
     .then(j => { if (j && j.source === 'claude' && j.text && checkNumbers(j.text, sheet).ok && hv.isConnected) { hv.textContent = j.text; by.textContent = 'Written by Claude from the figures on this page; every number checked against them.'; } })
     .catch(() => {});
 
-  // customers up and down: the same table as Customers, five rows
-  const T = customerTable(C, A, { bookPerService: perService }), ctLast = mon(T.last);
+  // customers moving: a short list, each account with its thirteen months
+  const T = customerTable(C, A, { bookPerService: perService }), ctLast = mon(T.last), ctBefore = mon(T.before);
+  const list = (rows, f) => `<ul class="mv">${rows.map(r => `<li><a href="#customer/${r.level1}"><span class="t">${esc(titleCase(r.customer))}<small>${deltaText(r.lastPct)} on ${ctBefore}</small></span>${sparkline(r.spark, { w: 96, h: 28, cls: f === 'falling' ? 'down' : 'up' })}<span class="v">${f === 'falling' ? '−' : '+'}${moneyK(Math.abs(r.dLast))}</span></a></li>`).join('')}</ul>`;
   const ct = f => {
     const rows = (f === 'falling' ? falling(T) : rising(T)).slice(0, 5);
-    main.querySelector('#home-ct-h').textContent = rows[0] ? `${titleCase(rows[0].customer)} ${f === 'falling' ? 'fell' : 'rose'} most in ${ctLast}, ${f === 'falling' ? '−' : '+'}${moneyK(Math.abs(rows[0].dLast))} on the month before` : 'Customers up and down';
-    main.querySelector('#home-ct').innerHTML = tableHtml(T, rows);
+    main.querySelector('#home-ct-h').textContent = rows[0] ? `${titleCase(rows[0].customer)} ${f === 'falling' ? 'fell' : 'rose'} most in ${ctLast}` : 'Customers up and down';
+    main.querySelector('#home-ct').innerHTML = list(rows, f);
     main.querySelectorAll('#home-ct tbody tr').forEach(tr => tr.addEventListener('click', e => { if (!e.target.closest('a')) location.hash = tr.dataset.href; }));
     main.querySelectorAll('#home-ct-seg a').forEach(a => a.classList.toggle('on', a.dataset.f === f));
   };
@@ -202,8 +147,8 @@ export async function render(main, P) {
   ct('falling');
 
   landing(main.querySelector('#home-land'), {
-    title: nextBill != null ? `${mon(addMonths(billMonth, 1))}'s bill is heading for about ${moneyK(nextBill)} ◇, ${moneyK(TARGET - nextBill)} short of $1.0M` : 'Where the month lands',
-    sub: `Each line is one bill building through the month: the storage it carries, then the work done each working day, at last month's ${perService ? '$' + perService.toFixed(2) : ''} a service ◇.`,
+    title: nextBill != null ? `${mon(addMonths(billMonth, 1))}'s bill is heading for about ${moneyK(nextBill)} ◇` : 'Where the month lands',
+    sub: `Each bill building by working day: its storage, then each day's work at ${perService ? '$' + perService.toFixed(2) : "last month's value"} a service ◇`,
     series: [
       { name: `${mon(addMonths(lyMonth, 1))} ${addMonths(lyMonth, 1).slice(0, 4)}'s bill`, cls: 'neutral faint', points: lastYear },
       { name: `${mon(billMonth)}'s bill`, cls: 'neutral', points: lastMonth },
@@ -211,8 +156,9 @@ export async function render(main, P) {
     ].filter(x => x.points.length),
     cone: X.bill && thisMonth.length ? { from: thisMonth[thisMonth.length - 1], to: X.workdays, lo: X.bill.lo, c: X.bill.central, hi: X.bill.hi } : null,
     days: X.workdays, target: TARGET,
-    source: `Veri-Shred done orders by working day · storage and last month's work from the current VCK run · ${lastYear.length ? 'last year priced to end on its posted bill' : 'last year joins with the next snapshot'} · weekend work counted on the Friday`,
+    source: `Veri-Shred done orders by working day · storage and last month's work from the current VCK run · ${lastYear.length ? 'last year priced to end on its posted bill' : 'last year joins with the next snapshot'} · weekend work counted on the Friday · ${X.backtest ? `band tested: ${X.backtest.hits} of the last ${X.backtest.n} months landed inside it` : 'band untested until fifteen months of daily work'}`,
   });
+  reveal(main.querySelector('.h'));
 }
 
 // Where the month lands: bills building by working day, the projection as a cone to month end,
@@ -246,6 +192,7 @@ function landing(el, o) {
   el.classList.add('chart');
   el.innerHTML = `<div class="chart-head"><div><h3 class="chart-title">${esc(o.title)}</h3><p class="chart-sub">${esc(o.sub)}</p></div></div>${key}
     <div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.title)}">${g}</svg><div class="c-tip" hidden></div></div><div class="src">${esc(o.source)}</div>`;
+  drawIn(el.querySelector('svg'), { x: L, y: T, w: W - L, h: H - T - B });
   const svg = el.querySelector('svg'), tip = el.querySelector('.c-tip'), cross = svg.querySelector('.c-cross'), hit = svg.querySelector('.c-hit');
   const move = ev => {
     const pt = ev.touches ? ev.touches[0] : ev, r = svg.getBoundingClientRect();

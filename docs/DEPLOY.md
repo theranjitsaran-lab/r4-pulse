@@ -15,7 +15,7 @@ in the Render dashboard only. `render.yaml` holds everything that isn't a secret
 2. **`app.calls_log` exists:** `sql/app_schema.sql`.
 3. **The nightly rebuild runs after the daily push:** `npm run kpi:rebuild` with the admin
    login, on the machine that already runs the push. It stays off Render, so the admin login
-   never leaves that machine.
+   never leaves that machine. See "Scheduled tasks on the R4 machine" below.
 
 ## Steps (Theran, on the PC, in the repo folder)
 
@@ -58,3 +58,41 @@ Then, in the Render dashboard:
   users. A Postgres session store needs a write grant, so it's left out on purpose.
 - Each screen caches its query for 15 minutes. The cost model (`model.*`) loads at boot, so a
   change to the rates needs a restart (**Manual Deploy**).
+
+## Design preview
+
+A second service, `r4-pulse-design` in `render.yaml`, on the free plan. It reads the live database
+through the same `r4_pulse_app` login and redeploys on every push to `design/iterate-in-code`. It
+shows "Design preview" in the header.
+
+1. In the Render dashboard, open the Blueprint and **Sync** it. Render offers the new service.
+   Paste `DATABASE_URL` (the same string as `r4-pulse`) and an `AUTH_USERS` holding Theran's
+   entry only.
+2. Check its **Connect → Outbound** addresses. They should match `r4-pulse`'s (same region). If
+   they differ, add them to Trusted Sources or move the service to Starter.
+3. The loop: ask Claude for a change on `design/iterate-in-code` → it commits and pushes → about 2
+   minutes later, open `https://r4-pulse-design.onrender.com` on a desktop or phone. When it's right,
+   merge the branch into `main` and the team's service follows.
+
+It sleeps after 15 idle minutes, so the first load takes about 30 seconds.
+
+## Scheduled tasks on the R4 machine
+
+| Task | When | What |
+|---|---|---|
+| `R4_Daily_Push` | 06:00 | VCK → DigitalOcean; logs to `push_log.txt` |
+| `R4_Verishred_Push` | 06:30 | Veri-Shred → DigitalOcean; logs to `vs_push_log.txt` |
+| `R4_KPI_Rebuild` | 07:00 | `npm run kpi:rebuild`; logs to `logs\kpi_rebuild.txt` in this repo there |
+
+- All three run as `tsaran`, LogonType Interactive, so they fire only while that session exists.
+  **Close the Remote Desktop with the X (disconnect). Never sign out.** A reboot stops them until
+  someone signs in again. The fix is R4's IT: "Please set tasks R4_Daily_Push, R4_Verishred_Push and
+  R4_KPI_Rebuild to run whether the user is logged on or not."
+- Install the rebuild task once, signed in as `tsaran`, in a checkout with the admin `.env`:
+  `powershell -ExecutionPolicy Bypass -File scripts\install_rebuild_task.ps1` (add `-DryRun` first to see it).
+- Check on the machine: `node scripts/freshness.js --logs <push folder>` lists any `DDL FAILED`.
+  A blocked table keeps its old rows and only looks stale.
+- Check from anywhere: `https://<service>.onrender.com/health/data` (dates only, no login) and the
+  **Data freshness** GitHub Action (`.github/workflows/freshness.yml`), which fails, and emails Theran,
+  when done work is more than five days old or the rebuild missed the month. Set the repository
+  variable `PULSE_URL` to the service address to turn it on.

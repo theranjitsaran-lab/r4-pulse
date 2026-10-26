@@ -102,19 +102,20 @@ check for Anne: 30,431 boxes in storage are not on the September storage bill, 3
 
 ## Next
 
-1. On the PC: `node scripts/freshness.js` (why does the data stop on 6 October?), then
-   `npm run snapshot`, commit the fixtures, push.
-2. Deploy: `docs/DEPLOY.md`. Before that, Theran decides on putting Render's outbound addresses
-   on Trusted Sources.
+1. On the PC: `npm run snapshot`, commit the fixtures, push.
+2. Deploy: `docs/DEPLOY.md`, both services (the team's on `main`, the design preview on
+   `design/iterate-in-code`). Before that, Theran decides on putting Render's outbound addresses
+   on Trusted Sources. After that, design is iterated on the preview with live data.
 3. Theran tries it, then Trisha on her phone: can she say where the month lands and which two levers
    matter most, within 30 seconds?
 4. Theran passes on the team's process; the draft playbook is rewritten in their words.
 
 ## Open
 
-- **The daily push stopped on 8 October 2026** (`scripts/freshness.js`, 26 October). Every source
-  table was loaded once on 8 October with nothing added since; done work stops on 5 October. The push
-  runs on a machine at R4: check its scheduled task's last run and its log from 9 October.
+- **The daily push runs again** (26 October 2026): reloaded tonight, rebuilt, done work to 22 October.
+  Its tasks run as `tsaran`, Interactive, until R4's IT changes them (DECISIONS.md "Daily push"). Until
+  then, disconnect the Remote Desktop, never sign out. Also to do: install `R4_KPI_Rebuild`
+  (`scripts/install_rebuild_task.ps1`) and set `PULSE_URL` for the freshness Action.
 
 - **Boxes level of the drill:** rule 9 settled 26 October 2026. Units are box counts, so barcodes
   need VCK's work-order detail table in the daily push. The customer page shows it as pending.

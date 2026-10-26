@@ -1,3 +1,7 @@
+/* R4's display face, from r4services.com: Average Sans (SIL Open Font License), one weight,
+   served from this app so no page calls Google. Display text only; tables and labels keep the system sans. */
+@font-face { font-family: "Average Sans"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/AverageSans-Regular.ttf") format("truetype"); }
+
 /* R4 Pulse — design tokens. Redesign, 26 October 2026.
    One system typeface, a validated chart palette (dataviz reference instance), quiet chrome,
    status colour for exceptions only, light and dark. Components read these variables only.
@@ -9,8 +13,8 @@
   /* ── ink ── */
   --ink:        #1d1d1f;   /* primary text and figures */
   --ink-2:      #3a3a3c;   /* secondary headings */
-  --ink-3:      #6e6e73;   /* labels, captions, source lines */
-  --ink-4:      #8e8e93;   /* axis text, muted */
+  --ink-3:      #58585d;   /* labels, captions: 6.4:1 on the page */
+  --ink-4:      #6c6c71;   /* axis text, source lines, muted: 4.8:1 on the page, the floor for small text */
   --ink-5:      #aeaeb2;   /* modelled mark, dashed borders */
 
   /* ── surfaces ── */
@@ -18,7 +22,7 @@
   --surface:    #ffffff;   /* card */
   --well:       #f9f9fb;   /* inset: source lines, opened rows */
   --well-2:     #ececf0;   /* tracks, empty bars */
-  --tint-brand: #eaf1e6;   /* selected row */
+  --tint-brand: #e3f2e5;   /* selected row */
 
   /* ── rules ── */
   --rule:       #ececf0;   /* hairline between rows */
@@ -27,9 +31,17 @@
   --rule-4:     #c7c7cc;   /* input borders */
   --rule-ink:   #1d1d1f;
 
-  /* ── brand: the R4 mark, links and the tap affordance ── */
-  --brand:      #2b4f1e;
-  --brand-2:    #3d6b2b;
+  /* ── brand: R4 Services green from r4services.com (top bar, buttons), links and the tap affordance ── */
+  --brand:      #0e5116;
+  --brand-2:    #1a6b24;
+  --r4-bright:  #38b449;   /* the green of the R4 mark: fills and lines only, never text (2.7:1 on white) */
+
+  /* ── the R4 logo (public/brand/r4-logo.png): black bars, so it always sits on white ── */
+  --logo-ground: #ffffff;
+  --ink-on-light: #1d1d1f; /* text on the logo's ground and on light fills, in both themes */
+  --ink-on-logo: #3a3a3c;
+  --logo-h:      40px;
+  --logo-h-intro: 88px;
 
   /* ── chart series: validated palette slots, colour follows the entity ── */
   --s-storage:  #2a78d6;   /* slot 1 blue */
@@ -41,14 +53,14 @@
 
   /* ── status: exceptions only, always with a word or icon ── */
   --good:       #0a7d0a;   /* delta up, as text */
-  --warn:       #b26b00;   /* below median; the thin day (text-safe amber) */
+  --warn:       #9a5c00;   /* below median; the thin day (text-safe amber) */
   --bad:        #c62f2f;   /* below cost; down */
   --bad-bg:     #fdecec;
   --warn-bg:    #fdf3e2;
 
   /* ── type: the system sans, everywhere ── */
   --f-sans:     system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  --f-display:  var(--f-sans);
+  --f-display:  "Average Sans", var(--f-sans);   /* titles, the masthead, Home's big figures */
   --f-body:     var(--f-sans);
   --f-narrow:   var(--f-sans);
 
@@ -65,11 +77,87 @@
   --track-label: .02em;
   --track-tight: -.02em;
 
+  --fs-sm:      14px;      /* table cells, buttons */
+  --fs-lead:    20px;      /* a verdict, a lede */
+  --fs-display-ph: 28px;   /* a screen title on a phone */
+  --fs-mega:    64px;      /* Home's one hero figure, desktop */
+  --fs-mega-ph: 46px;      /* the same on a phone */
+  --fs-title:   22px;      /* a section title that states its conclusion */
+  --fs-tiny:    12px;      /* the floor: nothing on screen is smaller */
+
+  /* ── the hero band and the intro: R4's green, deepened ── */
+  --hero-bg:     #0b3f11;
+  --hero-bg-2:   #0e5116;
+  --hero-ink:    #ffffff;
+  --hero-ink-2:  rgba(255, 255, 255, .78);
+  --hero-ink-3:  rgba(255, 255, 255, .7);   /* 4.5:1 or more across the banner's gradient */
+  --hero-track:  rgba(255, 255, 255, .16);
+  --hero-accent: #8fd99a;  /* the pulse line, the known part of the bill */
+
+  /* ── route work: done services, in R4 green, never a revenue series colour ── */
+  --heat:    #38b449;
+
+  /* ── the gap to $1.0m: one hue per lever, existing customers in R4 green, new business open ── */
+  --lever-1: #0e5116;
+  --lever-2: #237a30;
+  --lever-3: #38b449;
+  --lever-4: #a5dcae;
+
+  /* ── motion: entrances only, never a count-up; off under reduced motion ── */
+  --ease-out:  cubic-bezier(.2, .8, .2, 1);
+  --ease-io:   cubic-bezier(.65, 0, .35, 1);
+  --t-slow:    600ms;
+  --t-draw:    1100ms;
+  --t-stagger: 70ms;
+  --rise:      12px;       /* how far a card travels as it arrives */
+
+  /* ── space: a 4px unit; every gap, padding and margin is one of these ── */
+  --u:    4px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* ── component sizes: lines, tracks and marks ── */
+  --hair:      1px;        /* a rule */
+  --hair-2:    2px;        /* a tick, a dashed outline, the gap between bar segments */
+  --hatch:     3px;        /* the stripe of a modelled ceiling */
+  --track-h:   8px;        /* the hero's track to $1.0m */
+  --gap-bar-h: 40px;       /* the gap bar */
+  --sw:        12px;       /* a legend swatch */
+  --r-xs:      3px;
+  --r-pill:    999px;
+  --measure:   72ch;       /* the longest line of prose */
+  --track-tighter: -.03em;
+  --hero-side: 320px;      /* the hero's right column */
+  --hero-glow: 480px;
+
+  /* ── the intro ── */
+  --intro-w:      440px;
+  --intro-stroke: 2px;
+  --intro-word:   44px;
+  --intro-beat:   56px;
+
+  /* ── the ?design=1 overlay (public/design.css) ── */
+  --design-grid:        rgba(255, 0, 128, .07);
+  --design-grid-strong: rgba(255, 0, 128, .18);
+  --design-box:         rgba(0, 120, 255, .28);
+  --design-box-solid:   #0a64d8;
+
   /* ── shape ── */
   --r-sm: 6px;
   --r:    10px;
   --r-lg: 16px;
   --row-h: 44px;           /* a tap target, not a ledger line */
+  --shadow-sm:  0 1px 2px rgba(0, 0, 0, .08);   /* the selected segment */
+  --shadow-pop: 0 4px 20px rgba(0, 0, 0, .14);  /* a tooltip */
+  --shadow-dialog: 0 20px 60px rgba(0, 0, 0, .25); /* the explainer */
+  --scrim:      rgba(0, 0, 0, .35);             /* behind a dialog */
   --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 4px 16px rgba(0, 0, 0, .04);
 
   --t-fast: 120ms;
@@ -80,28 +168,32 @@
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
     --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #98989d; --ink-5: #86868b;
-    --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #1f2d1a;
+    --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #12301a;
     --rule: #2c2c2e; --rule-2: #333336; --rule-3: #3a3a3c; --rule-4: #48484a; --rule-ink: #f5f5f7;
-    --brand: #8fc27a; --brand-2: #a6d191;
+    --brand: #4cc35d; --brand-2: #6fd27e; --ink-on-logo: #3a3a3c;
     --s-storage: #3987e5; --s-service: #d95926; --s-citadel: #6b6a64;
     --grid: #2c2c2e; --baseline: #48484a;
     --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
     --shadow: none;
+    --hero-bg: #082d0c; --hero-bg-2: #0e5116; --hero-accent: #8fd99a;
+    --lever-1: #1a6b24; --lever-2: #237a30; --lever-3: #38b449; --lever-4: #a5dcae; --heat: #38b449;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
   --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #98989d; --ink-5: #86868b;
-  --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #1f2d1a;
+  --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #12301a;
   --rule: #2c2c2e; --rule-2: #333336; --rule-3: #3a3a3c; --rule-4: #48484a; --rule-ink: #f5f5f7;
-  --brand: #8fc27a; --brand-2: #a6d191;
+  --brand: #4cc35d; --brand-2: #6fd27e; --ink-on-logo: #3a3a3c;
   --s-storage: #3987e5; --s-service: #d95926; --s-citadel: #6b6a64;
   --grid: #2c2c2e; --baseline: #48484a;
   --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
   --shadow: none;
+  --hero-bg: #082d0c; --hero-bg-2: #0e5116; --hero-accent: #8fd99a;
+  --lever-1: #1a6b24; --lever-2: #237a30; --lever-3: #38b449; --lever-4: #a5dcae; --heat: #38b449;
 }
 
-@media (prefers-reduced-motion: reduce) { :root { --t-fast: 0ms; --t: 0ms; } }
+@media (prefers-reduced-motion: reduce) { :root { --t-fast: 0ms; --t: 0ms; --t-slow: 0ms; --t-draw: 0ms; --t-stagger: 0ms; --rise: 0px; } }
 
 /* ── primitives every screen shares ── */
 .lab { font-size: 12px; font-weight: 500; color: var(--ink-3); letter-spacing: var(--track-label); }

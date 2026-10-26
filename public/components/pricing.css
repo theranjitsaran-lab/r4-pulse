@@ -1,0 +1,67 @@
+/* Pricing, Anne's screen. Moved out of the view so every value reads tokens.css. */
+
+/* CSS */
+.pr { display: grid; grid-template-columns: calc(var(--u) * 75) minmax(0, 1fr); gap: var(--sp-4); align-items: start; }
+.pr h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); margin: 0 0 var(--sp-4); grid-column: 1 / -1; }
+.pr .rail { position: sticky; top: calc(var(--u) * 18); }
+.pr label { display: block; font-size: var(--fs-source); font-weight: 500; color: var(--ink-3); margin: var(--sp-4) 0 var(--sp-1); }
+.pr .rail > label:first-child { margin-top: 0; }
+.pr input, .pr select { width: 100%; font: inherit; font-size: var(--fs-body); padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r); background: var(--surface); color: var(--ink); }
+.pr input:focus, .pr select:focus { outline: var(--hair-2) solid color-mix(in srgb, var(--brand) 40%, transparent); border-color: var(--brand); }
+.pr .price input { font-size: var(--fs-display-ph); font-weight: 700; padding: var(--sp-2) var(--sp-3); letter-spacing: -.01em; }
+.pr .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+.pr .hint { font-size: var(--fs-source); color: var(--ink-4); margin-top: var(--sp-1); }
+.pr .main > * + * { margin-top: var(--sp-4); }
+.pr .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-4); }
+.pr .line { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-1) var(--sp-3); padding: var(--sp-3) 0; border-top: var(--hair) solid var(--rule); }
+.pr .line:first-of-type { border-top: 0; }
+.pr .line .v { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.pr .line .d { grid-column: 1 / -1; font-size: var(--fs-source); color: var(--ink-3); }
+.pr .line.total { border-top: var(--hair) solid var(--rule-ink); font-weight: 700; }
+.pr .worth { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--sp-1) var(--sp-4); align-items: baseline; padding: var(--sp-3) 0; border-top: var(--hair) solid var(--rule); }
+.pr .worth:first-of-type { border-top: 0; }
+.pr .worth .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pr .worth .s { grid-column: 1 / -1; font-size: var(--fs-source); color: var(--ink-3); }
+.pr .worth.you { background: var(--well); margin: 0 calc(var(--sp-3) * -1); padding: var(--sp-3) var(--sp-3); border-radius: var(--r); border-top-color: transparent; }
+.pr .nocost { color: var(--ink-3); }
+.pr .book { grid-column: 1 / -1; }
+.pr details.fold summary { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); cursor: pointer; list-style: none; }
+.pr details.fold summary::-webkit-details-marker { display: none; }
+.pr details.fold summary h3 { margin: 0; font-size: var(--fs-head); font-weight: 600; }
+.pr details.fold summary h3::before { content: "›"; color: var(--ink-5); display: inline-block; margin-right: var(--sp-2); transition: transform var(--t-fast); }
+.pr details.fold[open] summary h3::before { transform: rotate(90deg); }
+.pr .trk { position: relative; height: calc(var(--u) * 23); margin: calc(var(--u) * 9) var(--sp-2) var(--sp-2); }
+.pr .trk .base { position: absolute; left: 0; right: 0; top: var(--sp-10); height: var(--sp-3); border-radius: var(--r-sm); background: var(--well-2); }
+.pr .trk .loss { position: absolute; top: var(--sp-10); height: var(--sp-3); left: 0; border-radius: var(--r-sm) 0 0 var(--r-sm); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--bad) 55%, transparent) 0 var(--hatch), transparent var(--hatch) var(--sp-2)); }
+.pr .trk .mid { position: absolute; top: var(--sp-10); height: var(--sp-3); background: color-mix(in srgb, var(--ink) 18%, transparent); }
+.pr .trk .tk { position: absolute; top: var(--sp-8); width: var(--hair-2); height: var(--sp-8); background: var(--ink-3); transform: translateX(calc(var(--hair) * -1)); }
+.pr .trk .tk.cost { background: var(--bad); }
+.pr .trk .tl { position: absolute; font-size: var(--fs-source); color: var(--ink-3); white-space: nowrap; transform: translateX(-50%); }
+.pr .trk .tl.up { top: var(--sp-2); } .pr .trk .tl.dn { top: calc(var(--u) * 17); }
+.pr .trk .tl.cost { color: var(--bad); }
+.pr .trk .pin { position: absolute; top: calc(calc(var(--u) * 7) * -1); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
+.pr .trk .pin b { background: var(--ink); color: var(--surface); font-size: var(--fs-sm); font-weight: 700; padding: var(--hatch) var(--sp-2); border-radius: var(--r-sm); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pr .trk .pin.is-bad b { background: var(--bad); } .pr .trk .pin.is-warn b { background: var(--warn); }
+.pr .trk .pin i { width: var(--hatch); height: calc(var(--u) * 11); background: currentColor; color: var(--ink); }
+.pr .trk .pin.is-bad i { color: var(--bad); } .pr .trk .pin.is-warn i { color: var(--warn); }
+.pr .brow { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) calc(var(--u) * 28) var(--sp-4); gap: var(--sp-4); align-items: center; padding: var(--sp-2) var(--sp-1); border-top: var(--hair) solid var(--rule); cursor: pointer; }
+.pr .brow:hover { background: var(--well); }
+.pr .brow:first-child { border-top: 0; }
+.pr .brow .nm { font-weight: 600; font-size: var(--fs-sm); line-height: 1.25; }
+.pr .brow .nm small { display: block; font-weight: 400; font-size: var(--fs-source); color: var(--ink-3); }
+.pr .brow .bar { height: var(--sp-3); background: var(--well-2); border-radius: var(--r-sm); position: relative; overflow: hidden; }
+/* the gap to the book is a size, not an exception: the bar stays neutral; amber is kept for a
+   price below the median on the track above */
+.pr .brow .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink-4); border-radius: var(--r-sm); }
+.pr .brow .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pr .brow .v small { display: block; font-weight: 400; font-size: var(--fs-tiny); color: var(--ink-3); }
+.pr .brow .go { color: var(--ink-5); font-size: var(--fs-lead); }
+@media (max-width: 900px) {
+  .pr { grid-template-columns: 1fr; }
+  .pr h1 { font-size: var(--fs-display-ph); }
+  .pr .rail { position: static; }
+  .pr .grid { grid-template-columns: 1fr; }
+  .pr details.fold summary .sub { display: none; }
+  .pr .brow { grid-template-columns: minmax(0, 1fr) auto var(--sp-4); grid-template-areas: "nm v go" "bar bar bar"; gap: var(--sp-2) var(--sp-3); }
+  .pr .brow .nm { grid-area: nm; } .pr .brow .bar { grid-area: bar; } .pr .brow .v { grid-area: v; } .pr .brow .go { grid-area: go; }
+}
