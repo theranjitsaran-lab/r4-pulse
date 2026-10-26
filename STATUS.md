@@ -27,11 +27,22 @@ Where the build stands. Update it at the end of each piece of work.
 - **Deploy:** `render.yaml`, `scripts/app_role.js` (the read-only app login, self-checking),
   `scripts/app_users.js`, `scripts/apply_sql.js`, `docs/DEPLOY.md`.
 
+## Built (route to $1.0m, 26 October 2026)
+
+- **Home:** this month's bill and next month's building; the bridge to $1.0m (`components/levers.js`);
+  customers moving in dollars a month.
+- **Customers:** Cross-sell grid (`components/whitespace.js`), Main customers as a month grid, Price
+  gaps counting storage. Customer page: "Not bought yet" card; each work order opens to its cost build.
+- **Pricing:** the price on one track; invoiced against the book, worst first.
+- 18 of 18 tests offline, including the bridge reconciling to its lists (`model/levers.test.js`).
+
 ## Next
 
 1. Deploy: `docs/DEPLOY.md`. Before that, Theran decides on putting Render's outbound addresses
    on Trusted Sources.
-2. Design iteration with Theran, screen by screen.
+2. Theran tries it, then Trisha on her phone: can she say where the month lands and which two levers
+   matter most, within 30 seconds?
+3. Next PC snapshot: net boxes per account per month from `storage_rate_hist` (storage volume).
 
 ## Open
 

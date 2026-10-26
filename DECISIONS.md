@@ -31,6 +31,24 @@ to reach. Newest section first.
 | **Pricing medians** | Services compare account by account: 95-gallon median $85.00 a service (378 accounts, about eight services each a year; VCK bin units match Veri-Shred done services within 4%), so the logic pack's $22 was stale. Storage compares box-weighted, because monthly minimums make small accounts look dear per box: median $0.228 a box a month against an account median of $0.750; the logic pack's $0.246 was box-weighted. Settled 26 October 2026 |
 | **17 September 2026** | 283 booked, 200 done, 23 customers, 6 routes from `v_route_day`; was 272, 13 and 5. Angel ran 13 services across 6 customers, not one bin. Activity reproduces `v_route_day`, not the addendum |
 
+## The route to $1.0m and cross-sell — settled 26 October 2026
+
+Theran reviewed the earlier work with the team's reactions. The Phase 1 deck and v3.3 confused them
+(a tile row and an "AI insights" box on every tab, finance words, no next action). Trisha's number is
+**core billed revenue** against $1.0m, and she believes most of the gap closes through **upselling and
+cross-selling**. So:
+
+| | |
+|---|---|
+| **Home** | This month's bill (already known: this month's storage, last month's work); next month's building from this month's done services at last month's value per service ◇; a bridge from the six-month average to $1.0m; customers moving as dollars a month against each account's own run |
+| **The bridge** | Steps from `components/levers.js`, each the sum of the list it opens: cross-sell (whitespace, top 200 accounts, full take-up, ◇), prices halfway to the median (service medians by account, storage box-weighted), slipping shortfall, missed rate rounds only where no price gap is counted. Steps under $1k a month go to the footnote. What is left is new business. On 26 October: $645k + $145k + $56k + $50k, leaving $104k of new business |
+| **Overdue boxes** | Beside the bridge, never in it: destruction bills once (R3 median $10 a box) and ends storage every month after (284,048 boxes ≈ $2.8m once, ≈ $65k a month of storage) |
+| **Cross-sell sizing** | `components/whitespace.js`. Box-driven lines (retrieval, delivery, destruction) for storers of 500+ boxes: the median spend per 1,000 boxes among storers that buy the line. Storage, bins, ITAD: the median ratio to the account's other spend among similar-sized accounts that buy it as an add-on (under 40% of their spend), so specialists (electronics clients for ITAD) are not comparables. Never more than the account spends today |
+| **Main customers** | The 30 largest by month, each cell shaded by change against the account's own six months before it |
+| **Order cost** | `margin.js jobCost()`: the account rules applied to one work order, one visit shared between the account's route orders that day |
+| **List prices** | Off the screens. The logic pack's section 5 table did not come from this database (95-gallon median $22 against $85 billed; list $45 below most accounts). The book's own median is the comparison until a list is sourced |
+| **References** | Keep from v10: the margin drill to one order, the price track, diverging movers. Keep from the Henry Broch dashboards: the customer × month grid and one sentence above it. Never copy a v10 figure |
+
 ## Redesign — settled 26 October 2026
 
 Trisha's needs (in-month tracking, levers to grow EBITDA, margin views that point to action, pricing
