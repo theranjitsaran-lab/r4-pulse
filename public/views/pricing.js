@@ -47,11 +47,44 @@ const CSS = `
 .pr .worth .s { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-3); }
 .pr .worth.you { background: var(--well); margin: 0 -10px; padding: 11px 10px; border-radius: 10px; border-top-color: transparent; }
 .pr .nocost { color: var(--ink-3); }
+.pr .book { grid-column: 1 / -1; }
+.pr details.fold summary { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; cursor: pointer; list-style: none; }
+.pr details.fold summary::-webkit-details-marker { display: none; }
+.pr details.fold summary h3 { margin: 0; font-size: var(--fs-head); font-weight: 600; }
+.pr details.fold summary h3::before { content: "› "; color: var(--ink-5); display: inline-block; transition: transform var(--t-fast); }
+.pr details.fold[open] summary h3::before { transform: rotate(90deg); }
+.pr .trk { position: relative; height: 92px; margin: 34px 8px 6px; }
+.pr .trk .base { position: absolute; left: 0; right: 0; top: 40px; height: 10px; border-radius: 5px; background: var(--well-2); }
+.pr .trk .loss { position: absolute; top: 40px; height: 10px; left: 0; border-radius: 5px 0 0 5px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--bad) 55%, transparent) 0 3px, transparent 3px 6px); }
+.pr .trk .mid { position: absolute; top: 40px; height: 10px; background: color-mix(in srgb, var(--ink) 18%, transparent); }
+.pr .trk .tk { position: absolute; top: 30px; width: 2px; height: 30px; background: var(--ink-3); transform: translateX(-1px); }
+.pr .trk .tk.cost { background: var(--bad); }
+.pr .trk .tl { position: absolute; font-size: 12px; color: var(--ink-3); white-space: nowrap; transform: translateX(-50%); }
+.pr .trk .tl.up { top: 6px; } .pr .trk .tl.dn { top: 66px; }
+.pr .trk .tl.cost { color: var(--bad); }
+.pr .trk .pin { position: absolute; top: -26px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
+.pr .trk .pin b { background: var(--ink); color: var(--surface); font-size: 14px; font-weight: 700; padding: 3px 9px; border-radius: 7px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pr .trk .pin.is-bad b { background: var(--bad); } .pr .trk .pin.is-warn b { background: var(--warn); }
+.pr .trk .pin i { width: 3px; height: 44px; background: currentColor; color: var(--ink); }
+.pr .trk .pin.is-bad i { color: var(--bad); } .pr .trk .pin.is-warn i { color: var(--warn); }
+.pr .brow { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) 110px 14px; gap: 14px; align-items: center; padding: 9px 4px; border-top: 1px solid var(--rule); cursor: pointer; }
+.pr .brow:hover { background: var(--well); }
+.pr .brow:first-child { border-top: 0; }
+.pr .brow .nm { font-weight: 600; font-size: 14px; line-height: 1.25; }
+.pr .brow .nm small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); }
+.pr .brow .bar { height: 10px; background: var(--well-2); border-radius: 5px; position: relative; overflow: hidden; }
+.pr .brow .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--warn); border-radius: 5px; }
+.pr .brow .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pr .brow .v small { display: block; font-weight: 400; font-size: 11.5px; color: var(--ink-3); }
+.pr .brow .go { color: var(--ink-5); font-size: 20px; }
 @media (max-width: 900px) {
   .pr { grid-template-columns: 1fr; }
   .pr h1 { font-size: 28px; }
   .pr .rail { position: static; }
   .pr .grid { grid-template-columns: 1fr; }
+  .pr details.fold summary .sub { display: none; }
+  .pr .brow { grid-template-columns: minmax(0, 1fr) 84px 14px; grid-template-areas: "nm v go" "bar bar bar"; gap: 6px 10px; }
+  .pr .brow .nm { grid-area: nm; } .pr .brow .bar { grid-area: bar; } .pr .brow .v { grid-area: v; } .pr .brow .go { grid-area: go; }
 }`;
 
 function injectCss() {
@@ -89,7 +122,7 @@ export async function render(main, PR, params) {
       <label>Customer</label>
       <select id="p-cust"><option value="">New customer or a quote</option>${customers.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')}</select>
       <label>Service</label>
-      <select id="p-code">${codes.map(c => `<option value="${c}">${esc(titleCase(book[c].name))}${SERVICES[c] ? '' : ' · no cost to serve'}</option>`).join('')}</select>
+      <select id="p-code">${codes.map(c => `<option value="${c}">${esc(c === 'STO' ? book[c].name : titleCase(book[c].name))}${SERVICES[c] ? '' : ' · no cost to serve'}</option>`).join('')}</select>
       <div class="two"><div><label id="p-units-lab">A year</label><input id="p-units" inputmode="decimal"></div><div><label>Visits a year</label><input id="p-visits" inputmode="decimal"></div></div>
       <label>Miles from the yard</label><input id="p-miles" inputmode="decimal">
       <div class="price"><label>Price</label><input id="p-price" inputmode="decimal"></div>
@@ -97,11 +130,16 @@ export async function render(main, PR, params) {
     </div>
     <div class="main">
       <div id="p-verdict"></div>
-      <div class="card"><div class="card-head"><h3 id="p-strip-title"></h3><small id="p-strip-sub"></small></div><div id="p-strip"></div><div class="src" id="p-strip-src"></div></div>
-      <div class="grid">
-        <div class="card"><div class="card-head"><h3 id="p-cost-title">Cost to serve</h3><small>◇ cost model</small></div><div id="p-cost"></div></div>
-        <div class="card"><div class="card-head"><h3>What it is worth a year</h3><small>gross margin</small></div><div id="p-worth"></div></div>
-      </div>
+      <div class="card"><div class="card-head"><h3 id="p-track-title"></h3><small id="p-track-sub"></small></div><div id="p-track"></div><div class="src" id="p-strip-src"></div></div>
+      <div class="card"><div class="card-head"><h3>What it is worth a year</h3><small>gross margin ◇</small></div><div id="p-worth"></div></div>
+      <details class="card fold"><summary><h3 id="p-cost-title">How the cost is worked out</h3><span class="sub">◇ cost model · open</span></summary><div id="p-cost" style="margin-top:10px"></div></details>
+      <details class="card fold"><summary><h3 id="p-strip-title">Every account on this service</h3><span class="sub" id="p-strip-sub"></span></summary><div id="p-strip" style="margin-top:10px"></div></details>
+    </div>
+    <div class="card book">
+      <div class="card-head"><h3 id="b-title">Invoiced against the book</h3><small>tap a service to price it</small></div>
+      <div class="sub" style="margin-bottom:10px">For each service, the share of its volume billed under the book's median, and what moving those accounts to the median would add a year. Worst first.</div>
+      <div id="b-rows"></div>
+      <div class="src">priced_lines, modal invoiced rate per account, 13 months · storage weighted by boxes · list prices are not in the database, so the book's own median is the comparison</div>
     </div>
   </div>`;
 
@@ -171,23 +209,27 @@ export async function render(main, PR, params) {
     else text = `${f(price)} is a sound price: above the ${f(s.median)} ${medName}${unitCost != null ? ` and ${f(price - unitCost)} a ${svc.unit} over cost` : ''}.`;
     $('p-verdict').innerHTML = `<div class="verdict ${cls}"><div class="lab">${lab}${review ? ' · route costs under review ◇' : ''}</div><p>${esc(text)}</p></div>`;
 
-    // strip
+    // the track: cost to serve, the middle half of the book, its median, and the price
+    $('p-track-title').textContent = `${who === 'A new customer' ? 'A quote' : who} at ${f(price)} a ${svc ? svc.unit : 'unit'}`;
+    $('p-track-sub').textContent = `${s.n} accounts on this service`;
+    track($('p-track'), { price, cost: unitCost, s, f, cls, medName, of });
+    // every account, one tap away
     const named = rows.slice().sort((a, b) => b.revenue - a.revenue).slice(0, 5).map(r => r.name);
-    $('p-strip-title').textContent = `Where ${f(price)} sits among ${s.n} accounts`;
-    $('p-strip-sub').textContent = `${medName} ${f(s.median)} · middle half of ${of} ${f(s.p25)}–${f(s.p75)}`;
+    $('p-strip-title').textContent = `Every account on this service`;
+    $('p-strip-sub').textContent = `${s.n} accounts · ${medName} ${f(s.median)} · open`;
     strip($('p-strip'), { values: vals, cost: unitCost, price, named, fmt: f });
-    $('p-strip-src').textContent = st.code === 'STO' ? 'storage_rate_hist, billed ÷ boxes, latest month · one dot per account' : 'priced_lines, modal invoiced rate per account, 13 months · one dot per account';
+    $('p-strip-src').textContent = st.code === 'STO' ? 'storage_rate_hist, billed ÷ boxes, latest month, weighted by boxes · cost to serve from the cost model ◇' : 'priced_lines, modal invoiced rate per account, 13 months · cost to serve from the cost model ◇';
 
     // cost to serve
     if (c) {
-      $('p-cost-title').textContent = `Cost to serve: ${f(unitCost)} a ${svc.unit}`;
+      $('p-cost-title').textContent = `How the cost is worked out: ${f(unitCost)} a ${svc.unit}`;
       // the first sentence says what the line is; the rate's full working is one tap away
       const split = t => { const i = t.indexOf('. '); return i > 0 ? [t.slice(0, i + 1), t.slice(i + 2)] : [t, '']; };
       $('p-cost').innerHTML = c.lines.map(l => { const [head, rest] = split(l[2]); return `<div class="line"><span>${esc(l[0])}${l[3] ? ' ◇' : ''}</span><span class="v">${money0(l[1])}</span><span class="d">${esc(head)}${rest ? ` <details style="display:inline"><summary style="display:inline;cursor:pointer;color:var(--brand)">How it is worked out</summary><span style="display:block;margin-top:4px">${esc(rest)}</span></details>` : ''}</span></div>`; }).join('')
         + `<div class="line total"><span>A year, ${Math.round(st.units).toLocaleString('en-US')} ${svc.fam === 'storage' ? 'box-months' : svc.unit + 's'}</span><span class="v">${money0(c.total)}</span></div>`
         + (review ? `<p class="hint">Route costs are under review: delivery routes are not yet in the route volumes, so visit costs run high.</p>` : '');
     } else {
-      $('p-cost-title').textContent = 'Cost to serve';
+      $('p-cost-title').textContent = 'How the cost is worked out';
       $('p-cost').innerHTML = `<p class="nocost">This is a product or a fee, not work the cost model prices. The strip shows where the price sits; margin is not computed.</p>`;
     }
 
@@ -215,6 +257,48 @@ export async function render(main, PR, params) {
   for (const [id, key] of [['p-units', 'units'], ['p-visits', 'visits'], ['p-miles', 'miles'], ['p-price', 'price']]) {
     $(id).addEventListener('input', () => { const v = num($(id)); if (v != null) { st[key] = v; draw(); } });
   }
+  // invoiced against the book: each priced service, the share of its volume under the median and
+  // what the median would add a year
+  const bookRows = codes.map(code => {
+    const rs = book[code].rows, weighted = code === 'STO';
+    const st2 = stripStats(rs.map(r => ({ v: r.v, w: weighted ? r.units : undefined })));
+    const under = rs.filter(r => r.v < st2.median && r.level1 !== CITADEL);
+    const vol = rs.reduce((t, r) => t + r.units, 0), uvol = under.reduce((t, r) => t + r.units, 0);
+    const gap = under.reduce((t, r) => t + (st2.median - r.v) * r.units, 0);
+    return { code, name: code === 'STO' ? book[code].name : titleCase(book[code].name), n: rs.length, med: st2.median, share: vol ? uvol / vol : 0, gap, under: under.length };
+  }).filter(r => r.n >= 20 && r.gap > 0).sort((a, b) => b.gap - a.gap).slice(0, 14);
+  $('b-title').textContent = bookRows.length ? `${bookRows[0].name} carries the biggest gap to the book: ${moneyK(bookRows[0].gap)} a year` : 'Invoiced against the book';
+  $('b-rows').innerHTML = bookRows.map(r => `<div class="brow" data-code="${r.code}">
+    <span class="nm">${esc(r.name)}<small>${r.under} of ${r.n} accounts under the $${r.med.toFixed(r.code === 'STO' ? 3 : 2)} median</small></span>
+    <span class="bar" title="${Math.round(r.share * 100)}% of the volume billed under the median"><i style="width:${r.share * 100}%"></i></span>
+    <span class="v">+${moneyK(r.gap)}<small>${Math.round(r.share * 100)}% of volume under</small></span><span class="go">›</span></div>`).join('');
+  $('b-rows').addEventListener('click', ev => {
+    const row = ev.target.closest('.brow'); if (!row) return;
+    st.code = row.dataset.code; $('p-code').value = st.code; prefill(); draw();
+    history.replaceState(null, '', `#pricing?${st.level1 ? 'level1=' + st.level1 + '&' : ''}code=${st.code}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
   prefill();
   draw();
+}
+
+// One line from zero to the top of the book: the loss zone below cost to serve, the middle half of
+// accounts, the median, and the price as a pin in its verdict colour.
+function track(el, { price, cost, s, f, cls, medName, of }) {
+  if (!el) return;
+  const hi = Math.max(s.p90 || s.max, price, cost || 0, s.median) * 1.12;
+  const x = v => Math.max(0, Math.min(100, v / hi * 100));
+  const ticks = [{ v: s.median, t: `${medName} ${f(s.median)}`, c: '' }];
+  if (cost != null) ticks.push({ v: cost, t: `cost to serve ${f(cost)}`, c: 'cost' });
+  // labels above and below, so two close ticks never collide
+  ticks.sort((a, b) => a.v - b.v);
+  el.innerHTML = `<div class="trk">
+    <div class="base"></div>
+    ${cost != null ? `<div class="loss" style="width:${x(cost)}%"></div>` : ''}
+    <div class="mid" style="left:${x(s.p25)}%;width:${Math.max(.5, x(s.p75) - x(s.p25))}%" title="middle half of ${of}: ${f(s.p25)} to ${f(s.p75)}"></div>
+    ${ticks.map((t, i) => `<div class="tk ${t.c}" style="left:${x(t.v)}%"></div><div class="tl ${t.c} ${i % 2 ? 'up' : 'dn'}" style="left:${x(t.v)}%">${esc(t.t)}</div>`).join('')}
+    <div class="pin ${cls}" style="left:${x(price)}%"><b>${f(price)}</b><i></i></div>
+  </div>
+  <div class="sub" style="margin-top:4px">Shaded: the middle half of ${of}, ${f(s.p25)} to ${f(s.p75)}.${cost != null ? ' Hatched: below the cost to serve ◇.' : ''} Cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.</div>`;
 }
