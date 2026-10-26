@@ -107,11 +107,17 @@ async function customers() {
   const names = ids.length ? await query(`
     SELECT x.level1, ${NAME('x.level1')} AS customer FROM unnest($1::int[]) AS x(level1) ORDER BY x.level1`, [ids]) : [];
   const nameOf = new Map(names.map(n => [n.level1, n.customer]));
-  const byId = new Map(ids.map(id => [id, { level1: id, customer: nameOf.get(id), storage: months.map(() => 0), service: months.map(() => 0) }]));
+  const byId = new Map(ids.map(id => [id, { level1: id, customer: nameOf.get(id), storage: months.map(() => 0), service: months.map(() => 0), boxes: months.map(() => 0) }]));
   for (const r of rows) {
     const a = byId.get(r.level1), i = months.indexOf(r.month);
     if (i >= 0) { a.storage[i] = r.storage; a.service[i] = r.service; }
   }
+  // boxes stored each month (storage_rate_hist): net boxes in and out, month by month
+  const boxes = ids.length ? await query(`
+    SELECT level1, to_date(mth, 'YYYY-MM')::text AS month, sum(boxes)::float AS boxes
+    FROM storage_rate_hist WHERE level1 = ANY($1::int[]) AND to_date(mth, 'YYYY-MM') > $2::date - interval '24 months' AND to_date(mth, 'YYYY-MM') <= $2::date
+    GROUP BY 1, 2 ORDER BY 1, 2`, [ids, latest]) : [];
+  for (const r of boxes) { const a = byId.get(r.level1), i = months.indexOf(r.month); if (a && i >= 0) a.boxes[i] = r.boxes; }
   return { months, accounts: [...byId.values()] };
 }
 
@@ -148,7 +154,17 @@ async function activity() {
            avg(services_done)::float AS done_per_day, avg(stops_done)::float AS stops_per_day
     FROM v_route_day, b WHERE services_done > 0 AND date >= b.f AND date < b.t
     GROUP BY 1, 2 ORDER BY 1`);
-  return { latestDone: anchor.latest_done, routeDays, orders, dayValues, weekdays };
+  // The long way round: done services by postcode over twelve months, service address else billing.
+  const postcodes = await query(`
+    SELECT left(coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')), 5) AS postcode, count(*)::int AS services,
+           count(DISTINCT (date, slocid))::int AS visits, count(DISTINCT level1)::int AS customers,
+           array_to_string((array_agg(DISTINCT NULLIF(company, '') ORDER BY NULLIF(company, '')))[1:2], ', ') AS names,
+           bool_and(NULLIF(s_zip, '') IS NULL) AS billing_only
+    FROM vs_service_orders
+    WHERE billable = 'true' AND NULLIF(date, '')::date > $1::date - 365 AND NULLIF(date, '')::date <= $1::date
+      AND coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')) IS NOT NULL
+    GROUP BY 1 ORDER BY 1`, [anchor.latest_done]);
+  return { latestDone: anchor.latest_done, routeDays, orders, dayValues, weekdays, postcodes };
 }
 
 // ── Pricing — Anne ───────────────────────────────────────────────────────────────────────
@@ -225,6 +241,26 @@ async function calls() {
 // (on a shred-truck work order: shredded on site), S5B (on an account-day with bin work: the bin
 // plant line) and S5P (purges and drop-offs). Bin services, customer visits and the main bin size
 // come from Veri-Shred done orders. The page costs each account with model/rates.js.
+// The first month each account bought each line of service, with what it spent in its first twelve
+// months, and the account's first billed month: a line that starts after the account did is a
+// cross-sell R4 has actually made.
+async function crossSellHistory() {
+  const firsts = await query(`
+    WITH fam AS (
+      SELECT p.level1, sf.family, date_trunc('month', p.wodate)::date AS m, sum(p.totamt) AS rev
+      FROM priced_lines p JOIN servcode s USING (servcodeid) JOIN model.service_family sf ON sf.servcode = s.servcode
+      WHERE sf.family IN ('handling', 'movement', 'bin', 'shred', 'itad') GROUP BY 1, 2, 3),
+    f AS (SELECT level1, family, min(m) AS first FROM fam WHERE rev > 0 GROUP BY 1, 2),
+    acct AS (SELECT level1, min(date_trunc('month', COALESCE(invdate, billdate)))::date AS first FROM invoices
+             WHERE coalesce(ret_tot, 0) + coalesce(ser_tot, 0) > 0 GROUP BY 1)
+    SELECT f.level1, f.family, f.first::text AS first, acct.first::text AS account_first,
+           sum(fam.rev) FILTER (WHERE fam.m < f.first + interval '12 months')::float AS first_year
+    FROM f JOIN fam USING (level1, family) LEFT JOIN acct USING (level1)
+    GROUP BY f.level1, f.family, f.first, acct.first ORDER BY 1, 2`);
+  const [{ start }] = await query(`SELECT min(wodate)::date::text AS start FROM priced_lines`);
+  return { firsts, dataStart: start };
+}
+
 async function margin() {
   const accounts = await query(`
     WITH ${BOUNDS},
@@ -257,7 +293,7 @@ async function margin() {
     FROM tagged t LEFT JOIN model.service_family sf ON sf.servcode = t.servcode
     GROUP BY 1, 2, 3, 4, 5
     ORDER BY 1, 2`);
-  return { accounts, lines };
+  return { accounts, lines, history: await crossSellHistory() };
 }
 
 // ── The drill below a customer: work orders and visits ───────────────────────────────────

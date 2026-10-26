@@ -178,7 +178,7 @@ export async function render(main, C, params) {
   } else main.querySelector('#cp-chart').remove();
 
   const wsBox = main.querySelector('.ws1') && main.querySelector('.ws1').closest('.card');
-  if (wsBox && wsRow) wsBox.addEventListener('click', ev => { const b = ev.target.closest('button.opp'); if (b) openExplainer({ row: wsRow, key: b.dataset.key, call: signals }); });
+  if (wsBox && wsRow) wsBox.addEventListener('click', ev => { const b = ev.target.closest('button.opp'); if (b) openExplainer({ row: wsRow, key: b.dataset.key, call: signals, H: M.history, names: new Map(M.accounts.map(a => [a.level1, a.customer])) }); });
   const drillP = loadDrill(id, R, M);
   drawDrill(main.querySelector('#cp-drill'), drillP, svcName);
 

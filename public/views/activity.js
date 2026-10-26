@@ -208,7 +208,7 @@ export async function render(main, A, params) {
     const el = $('rt-far');
     const pts = A.postcodes && A.postcodes.length ? A.postcodes : null;   // twelve months, from the next snapshot
     let by;
-    if (pts) by = pts.map(p => ({ pc: p.postcode, services: p.services, visits: p.visits, customers: p.customers, names: p.names || '' }));
+    if (pts) by = pts.map(p => ({ pc: p.postcode, services: p.services, visits: p.visits, customers: p.customers, names: p.names || '', billing: p.billing_only }));
     else {
       const m = new Map();
       for (const o of A.orders) {
@@ -240,7 +240,7 @@ export async function render(main, A, params) {
       ${far.length ? `<div class="card-head" style="margin-top:8px"><h3>The long way round: ${far.length} postcodes 20 miles or more out</h3><small>visit cost ◇ per service</small></div>
       <div class="sub" style="margin-bottom:8px">${farV} visits for ${farS} services, about ${money0(farC / (farS || 1))} a service in route time ◇. Bundle them onto a planned run, or price the trip.</div>
       <table class="far"><thead><tr><th>Postcode</th><th>Miles</th><th class="hide-s">Customers</th><th>Visits</th><th>Services</th><th>Per service ◇</th></tr></thead><tbody>
-      ${far.map(p => `<tr><td><b>${esc(p.pc)}</b> <span class="sub">${esc(p.names)}</span></td><td>${p.mi.toFixed(1)}</td><td class="hide-s">${p.customers}</td><td>${p.visits}</td><td>${p.services}</td><td class="${p.per > 100 ? 'is-warn' : ''}">${money0(p.per)}</td></tr>`).join('')}</tbody></table>` : '<p class="sub">No work 20 miles or more out in this window.</p>'}
+      ${far.map(p => `<tr><td><b>${esc(p.pc)}</b> <span class="sub">${esc(p.names)}${p.billing ? ' · billing address' : ''}</span></td><td>${p.mi.toFixed(1)}</td><td class="hide-s">${p.customers}</td><td>${p.visits}</td><td>${p.services}</td><td class="${p.per > 100 ? 'is-warn' : ''}">${money0(p.per)}</td></tr>`).join('')}</tbody></table>` : '<p class="sub">No work 20 miles or more out in this window.</p>'}
       <div class="src">Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles from US Census ZCTA centroids · route time from the cost model: a route day's travel share scaled for distance, plus time on site ◇ · route costs under review</div>`;
   }
 

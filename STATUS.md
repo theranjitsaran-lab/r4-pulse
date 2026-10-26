@@ -36,13 +36,29 @@ Where the build stands. Update it at the end of each piece of work.
 - **Pricing:** the price on one track; invoiced against the book, worst first.
 - 18 of 18 tests offline, including the bridge reconciling to its lists (`model/levers.test.js`).
 
+## Built (margin drill, cross-sell explained, Routes, overdue boxes, 26 October 2026)
+
+- **Margin drill as one path:** Home margin row → Margin (all · thin · below cost) → account → line
+  (its cost worked out, priced lines, its own orders) → order cost build, with a breadcrumb.
+  Finding: 88 of the 92 accounts under 15% are visit-heavy, so the delivery-route question (Mike)
+  decides most of the margin list.
+- **Cross-sell explainer:** each dashed figure opens how it was assumed (with its comparables), why
+  this account (its own data), what R4 has done before (from the next snapshot), and a draft playbook.
+- **Overdue boxes:** destruction once against the storage it ends, per account.
+- **Routes:** the day in a sentence, thin routes named, the long way round (miles from Census ZCTA
+  centroids, `public/data/zcta.json`).
+- **For the PC:** `scripts/freshness.js` (read-only) and three new snapshot queries: postcodes over
+  twelve months, boxes stored by month, and the first month each account bought each line.
+
 ## Next
 
-1. Deploy: `docs/DEPLOY.md`. Before that, Theran decides on putting Render's outbound addresses
+1. On the PC: `node scripts/freshness.js` (why does the data stop on 6 October?), then
+   `npm run snapshot`, commit the fixtures, push.
+2. Deploy: `docs/DEPLOY.md`. Before that, Theran decides on putting Render's outbound addresses
    on Trusted Sources.
-2. Theran tries it, then Trisha on her phone: can she say where the month lands and which two levers
+3. Theran tries it, then Trisha on her phone: can she say where the month lands and which two levers
    matter most, within 30 seconds?
-3. Next PC snapshot: net boxes per account per month from `storage_rate_hist` (storage volume).
+4. Theran passes on the team's process; the draft playbook is rewritten in their words.
 
 ## Open
 

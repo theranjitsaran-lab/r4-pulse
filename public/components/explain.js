@@ -55,7 +55,20 @@ const PLAY = {
   storage: { who: 'Anne or Trisha, at a senior level', open: () => 'We already shred for you. Your archive could sit in our warehouse, indexed and retrievable the same day.', needs: 'A box count, a storage quote, and the intake run planned with Mike.' },
 };
 
-export function openExplainer({ row, key, call }) {
+// R4's own record: accounts that already bought from R4 and later started this line.
+function history(H, key, names) {
+  if (!H || !H.firsts || key === 'storage') return '';
+  const plus = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCMonth(x.getUTCMonth() + n); return x.toISOString().slice(0, 10); };
+  const from = plus(H.dataStart, 3);
+  const made = H.firsts.filter(f => f.family === key && f.account_first && f.first >= from && f.first > plus(f.account_first, 2));
+  const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  if (!made.length) return `<h3>What R4 has done before</h3><p>No existing account has started buying it since ${mon(from)}. This would be a first.</p>`;
+  const fy = made.map(f => f.first_year || 0).sort((a, b) => a - b), med = fy[fy.length >> 1];
+  const recent = made.slice().sort((a, b) => b.first.localeCompare(a.first)).slice(0, 5);
+  return `<h3>What R4 has done before</h3><p>${made.length} existing account${made.length === 1 ? '' : 's'} started buying it since ${mon(from)}, spending a median ${money0(med)} in their first year. Most recently: ${recent.map(f => `<a href="#customer/${f.level1}" style="color:var(--brand);text-decoration:none">${esc(titleCase(names.get(f.level1) || 'Account ' + f.level1))}</a> (${mon(f.first)})`).join(', ')}.</p>`;
+}
+
+export function openExplainer({ row, key, call, H, names }) {
   if (!document.getElementById('xpl-css')) { const s = document.createElement('style'); s.id = 'xpl-css'; s.textContent = CSS; document.head.appendChild(s); }
   const line = LINES.find(x => x.key === key), c = row.cells[key];
   const name = titleCase(row.customer), lname = line.name === 'ITAD' ? 'ITAD' : line.name.toLowerCase();
@@ -73,19 +86,20 @@ export function openExplainer({ row, key, call }) {
     </tbody></table>` : ''}
     <h3>Why this account</h3>
     <p>${esc(trigger(key, row, call))}</p>
+    ${history(H, key, names || new Map())}
     <h3>How it is usually sold <span class="draft">draft</span></h3>
     <dl class="play">
       <dt>Who raises it</dt><dd>${esc(play.who)}</dd>
       <dt>Opening line</dt><dd>“${esc(play.open(call && call.boxes_review_overdue > 0 ? n(call.boxes_review_overdue) : 'Some'))}”</dd>
       <dt>What it needs</dt><dd>${esc(play.needs)}</dd>
     </dl>
-    <p class="sub" style="margin-top:12px">The playbook is a draft until the team's own process replaces it. The next snapshot adds the cross-sells R4 has actually made, line by line.</p>
+    <p class="sub" style="margin-top:12px">The playbook is a draft until the team's own process replaces it.${H ? '' : ' The next snapshot adds the cross-sells R4 has actually made, line by line.'}</p>
   </div>`;
   document.body.appendChild(d);
   const close = () => { d.close(); d.remove(); };
   d.querySelector('.x').addEventListener('click', close);
   d.addEventListener('click', ev => { if (ev.target === d) close(); });
   d.addEventListener('cancel', () => d.remove());
-  d.querySelectorAll('.peers a').forEach(a => a.addEventListener('click', () => close()));
+  d.querySelectorAll('.peers a, .in p a').forEach(a => a.addEventListener('click', () => close()));
   d.showModal();
 }

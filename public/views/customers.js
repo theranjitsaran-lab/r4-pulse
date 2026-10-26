@@ -327,7 +327,7 @@ async function whitespace(main, C, params) {
   main.querySelector('.ws .grid').addEventListener('click', ev => {
     const b = ev.target.closest('button.opp'); if (!b) return;
     const row = W.rows.find(r => r.level1 === Number(b.dataset.id));
-    if (row) openExplainer({ row, key: b.dataset.key, call: calls.get(row.level1) });
+    if (row) openExplainer({ row, key: b.dataset.key, call: calls.get(row.level1), H: M.history, names: new Map(M.accounts.map(a => [a.level1, a.customer])) });
   });
 }
 
