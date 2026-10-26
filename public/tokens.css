@@ -82,6 +82,9 @@
   --hero-track:  rgba(255, 255, 255, .16);
   --hero-accent: #b9e3a0;  /* the pulse line, the known part of the bill */
 
+  /* ── route work: done services, in R4 green, never a revenue series colour ── */
+  --heat:    #3d6b2b;
+
   /* ── the gap to $1.0m: one hue per lever, existing customers in R4 green, new business open ── */
   --lever-1: #2b4f1e;
   --lever-2: #4e7f38;
@@ -161,7 +164,7 @@
     --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
     --shadow: none;
     --hero-bg: #142a0e; --hero-bg-2: #1f3a16; --hero-accent: #a6d191;
-    --lever-1: #8fc27a; --lever-2: #6a9e55; --lever-3: #4d7a3b; --lever-4: #345428;
+    --lever-1: #8fc27a; --lever-2: #6a9e55; --lever-3: #4d7a3b; --lever-4: #345428; --heat: #6a9e55;
   }
 }
 :root[data-theme="dark"] {
@@ -175,7 +178,7 @@
   --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
   --shadow: none;
   --hero-bg: #142a0e; --hero-bg-2: #1f3a16; --hero-accent: #a6d191;
-  --lever-1: #8fc27a; --lever-2: #6a9e55; --lever-3: #4d7a3b; --lever-4: #345428;
+  --lever-1: #8fc27a; --lever-2: #6a9e55; --lever-3: #4d7a3b; --lever-4: #345428; --heat: #6a9e55;
 }
 
 @media (prefers-reduced-motion: reduce) { :root { --t-fast: 0ms; --t: 0ms; --t-slow: 0ms; --t-draw: 0ms; --t-stagger: 0ms; --rise: 0px; } }
