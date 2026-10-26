@@ -373,4 +373,26 @@ async function drill() {
   return { accounts, unitsCheck };
 }
 
-module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill };
+// The warehouse (Routes › Warehouse): boxes in storage by account, box type and home location, with
+// their retention state (overdue for review, permanent, legal hold, over ten years); and boxes billed
+// by month for 24 months. Capacity is not in the database, so nothing here is a percent full.
+async function storage() {
+  const rows = await query(`
+    SELECT r.level1, coalesce(NULLIF(r.home_loc, ''), '—') AS loc, coalesce(NULLIF(r.boxtype, ''), '—') AS boxtype,
+           sum(r.boxes)::int AS boxes, sum(r.review_overdue)::int AS overdue, sum(r.permanent)::int AS permanent,
+           sum(r.legal_hold)::int AS hold, sum(r.over_ten_years)::int AS ten,
+           sum(GREATEST(coalesce(r.review_overdue, 0) - coalesce(r.legal_hold, 0) - coalesce(r.permanent, 0), 0))::int AS eligible,
+           min(r.oldest_received)::date::text AS oldest
+    FROM storage_retention r WHERE r.status = 'I'
+    GROUP BY 1, 2, 3 HAVING sum(r.boxes) > 0 ORDER BY 4 DESC`);
+  const names = await query(`
+    SELECT DISTINCT ON (level1) level1, name AS customer FROM customer
+    WHERE level1 IN (SELECT DISTINCT level1 FROM storage_retention WHERE status = 'I')
+    ORDER BY level1, level NULLS LAST, custno`);
+  const months = await query(`
+    SELECT to_date(mth, 'YYYY-MM')::text AS month, sum(boxes)::float AS boxes, sum(storage_billed)::float AS billed, count(DISTINCT level1)::int AS accounts
+    FROM storage_rate_hist GROUP BY 1 ORDER BY 1 DESC LIMIT 24`);
+  return { rows, names, months: months.reverse() };
+}
+
+module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage };
