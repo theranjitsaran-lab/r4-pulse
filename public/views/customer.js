@@ -8,7 +8,7 @@ import { openExplainer } from '/components/explain.js';
 import { ledgerTable } from '/components/table.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 import { seriesOf, deltaText, moveReason } from '/components/series.js';
-import { slippingAccounts } from '/components/levers.js';
+import { slippingAccounts, unitSuspect } from '/components/levers.js';
 
 const CITADEL = 6714;
 const UNDER_REVIEW = new Set(['bin', 'handling', 'movement']);
@@ -118,7 +118,7 @@ export async function render(main, C, params) {
       const all = byCode.get(r.servcode), med = all[Math.floor(all.length / 2)];
       const p10 = all[Math.floor(all.length * .05)], p90 = all[Math.floor(all.length * .95)];
       const below = all.filter(v => v < r.modal_rate).length / all.length;
-      return { ...r, med, p10, p90, below, worth: (med - r.modal_rate) * r.units / 12 };
+      return { ...r, med, p10, p90, below, suspect: unitSuspect(r.modal_rate, med), worth: (med - r.modal_rate) * r.units };
     })
     .sort((a, b) => b.revenue - a.revenue).slice(0, 8);
 
@@ -164,8 +164,8 @@ export async function render(main, C, params) {
         <div class="card">
           <div class="card-head"><h3>Prices against the book</h3><a href="#pricing?level1=${id}">Price it ›</a></div>
           ${mine.map(r => `<div class="price">
-            <span><a href="#pricing?level1=${id}&code=${encodeURIComponent(r.servcode)}" style="color:inherit;text-decoration:none"><b>${esc(titleCase(r.service))}</b> <span style="color:var(--brand)">›</span></a><span class="sub" style="display:block">$${r.modal_rate.toFixed(2)} · book median $${r.med.toFixed(2)} · cheaper than ${Math.round((1 - r.below) * 100)}% of accounts</span></span>
-            <span class="v">${r.worth > 0 ? `+${moneyK(r.worth)}/mo<span class="sub" style="display:block;font-weight:400">at the median</span>` : '<span class="sub">at or above</span>'}</span>
+            <span><a href="#pricing?level1=${id}&code=${encodeURIComponent(r.servcode)}" style="color:inherit;text-decoration:none"><b>${esc(titleCase(r.service))}</b> <span style="color:var(--brand)">›</span></a><span class="sub" style="display:block">$${r.modal_rate.toFixed(2)} · book median $${r.med.toFixed(2)} · ${r.suspect ? 'so far apart it is probably billed in another unit: check before quoting' : r.modal_rate < r.med ? `cheaper than ${Math.round((1 - r.below) * 100)}% of accounts` : `dearer than ${Math.round(r.below * 100)}% of accounts`}</span></span>
+            <span class="v">${r.suspect ? '<span class="chip warn">check the unit</span>' : r.worth > 0 ? `+${moneyK(r.worth)} a year<span class="sub" style="display:block;font-weight:400">at the median</span>` : '<span class="sub">at or above</span>'}</span>
             <div class="pos"><b style="left:${pos(r.med, r)}%"></b><i style="left:${pos(r.modal_rate, r)}%"></i></div>
           </div>`).join('') || '<p class="sub">No service rates in the last thirteen months.</p>'}
         </div>

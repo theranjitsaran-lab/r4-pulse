@@ -171,15 +171,13 @@ async function conversations(main, C) {
   const cands = new Map();
   const add = (id, sig) => { if (id === CITADEL) return; const c = cands.get(id) || { level1: id, sigs: [] }; c.sigs.push(sig); cands.set(id, c); };
   for (const d of slippingAccounts(C)) add(d.level1, { key: 'slipping', stake: -d.move.d * 12, ev: `${moveReason(d.move, moneyK)} over the last three months, against its own run`, name: d.customer });
-  const meds = {};
-  for (const code of ['B2', 'B3', 'B6', '01', '20', '25', '30', 'S3', 'S4', 'S6']) {
-    const v = PR.rates.filter(r => r.servcode === code && r.modal_rate > 0 && r.units > 0).map(r => r.modal_rate).sort((a, b) => a - b);
-    if (v.length >= 20) meds[code] = v[Math.floor(v.length / 2)];
-  }
-  for (const r of PR.rates) if (meds[r.servcode] && r.modal_rate > 0 && r.modal_rate < meds[r.servcode] && r.units > 0)
-    add(r.level1, { key: 'gap', stake: (meds[r.servcode] - r.modal_rate) * r.units, ev: `${titleCase(r.service)}: $${r.modal_rate.toFixed(2)} against a $${meds[r.servcode].toFixed(2)} median`, service: titleCase(r.service).toLowerCase(), name: r.customer });
+  // price gaps from the same function as the Price gaps list and the bridge, so the figure agrees:
+  // a year at the full median; suspected unit mismatches are not offered as gaps
+  const sg = serviceGaps(PR);
+  for (const a of sg.values()) add(a.level1, { key: 'gap', stake: a.worth * 12, ev: `${titleCase(a.top.service)}: $${a.top.rate.toFixed(2)} against a $${a.top.med.toFixed(2)} median · ${moneyK(a.worth * 12)} a year at the median`, service: titleCase(a.top.service).toLowerCase(), name: a.customer });
+  for (const r of storageGaps(PR).rows) add(r.level1, { key: 'gap', stake: r.worth * 12, ev: `storage at $${r.rate.toFixed(3)} a box against $${r.med.toFixed(3)} · ${moneyK(r.worth * 12)} a year at the median`, service: 'storage', name: r.customer });
   for (const c of CA) {
-    if (c.not_raised_2y) add(c.level1, { key: 'rounds', stake: c.service * 0.08, ev: `no rate moved in two years on ${moneyK(c.service)} of service`, name: c.customer });
+    if (c.not_raised_2y && !sg.has(c.level1)) add(c.level1, { key: 'rounds', stake: c.service * 0.08, ev: `no rate moved in two years on ${moneyK(c.service)} of service · ${moneyK(c.service * 0.08)} a year at the typical 8% rise`, name: c.customer });
     if (c.boxes_review_overdue >= 50) add(c.level1, { key: 'overdue', stake: 0, boxes: Math.round(c.boxes_review_overdue), ev: `${Math.round(c.boxes_review_overdue).toLocaleString('en-US')} boxes past their retention review`, name: c.customer });
     if (c.storage_no_destruction && c.storage > 20000) add(c.level1, { key: 'nodestroy', stake: 0, ev: `${moneyK(c.storage)} of storage a year and no destruction`, name: c.customer });
   }

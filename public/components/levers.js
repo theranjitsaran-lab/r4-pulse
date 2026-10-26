@@ -21,12 +21,19 @@ export function serviceMedians(PR) {
   return meds;
 }
 
+// A rate under a fifth of the median, or over five times it, is more likely billed in another unit
+// (a monthly flat fee against a per-service rate) than priced that far off. Flagged, never counted.
+export const UNIT_CHECK = 0.2;
+export const unitSuspect = (rate, med) => rate < UNIT_CHECK * med || rate > med / UNIT_CHECK;
+
 // Service lines priced under the median: per account, the monthly gap at the full median, and the
-// single largest line (for the reason shown on the row).
+// single largest line (for the reason shown on the row). Suspected unit mismatches go to .suspects.
 export function serviceGaps(PR) {
   const meds = serviceMedians(PR), out = new Map();
+  out.suspects = [];
   for (const r of PR.rates) {
     if (!meds[r.servcode] || r.level1 === CITADEL || !(r.modal_rate > 0) || r.modal_rate >= meds[r.servcode] || !(r.units > 0)) continue;
+    if (unitSuspect(r.modal_rate, meds[r.servcode])) { out.suspects.push({ ...r, med: meds[r.servcode] }); continue; }
     const worth = (meds[r.servcode] - r.modal_rate) * r.units / 12;
     const a = out.get(r.level1) || { level1: r.level1, customer: r.customer, worth: 0, top: null };
     a.worth += worth;
