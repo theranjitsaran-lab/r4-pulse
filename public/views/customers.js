@@ -12,7 +12,7 @@ const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under r
 
 export const VIEWS = {
   conversations: { label: 'This week', blurb: 'Ten conversations worth having, ranked by what is at stake. Log what you did; the list learns.' },
-  main:          { label: 'Main customers', blurb: 'The 20 largest accounts over the last twelve months.' },
+  main:          { label: 'Main customers', blurb: 'The 30 largest accounts, month by month, each against its own run.' },
   whitespace:    { label: 'Cross-sell', blurb: 'What each large account buys, and what it doesn\'t buy yet, sized at what comparable accounts spend.' },
   slipping:      { label: 'Slipping', blurb: 'Below their own six-month level for a second month running.' },
   gaps:          { label: 'Price gaps', blurb: 'Paying under the book\'s median for storage or a service, sized by their volume. Home counts half of each gap.' },
@@ -129,6 +129,7 @@ export async function render(main, C, params) {
   const view = VIEWS[params.view] ? params.view : 'main';
   if (view === 'conversations') return conversations(main, C);
   if (view === 'whitespace') return whitespace(main, C, params);
+  if (view === 'main') return monthGrid(main, C, params);
   const sort = ['size', 'change', 'margin'].includes(params.sort) ? params.sort : null;
   const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
   const ser = seriesOf(C);
@@ -316,5 +317,85 @@ async function whitespace(main, C, params) {
       ${rows.length > shown ? `<a class="more" href="#customers?view=whitespace&all=1">Show all ${rows.length} accounts</a>` : ''}
     </div>
     <p class="foot">Sized from the last twelve months. Retrieval, delivery and destruction for a storer: the median spend per 1,000 boxes among storers that buy the line. Storage, bins and ITAD: the median share of spend among similar-sized accounts that buy the line as an add-on. Never more than the account spends today. Hover a dashed cell for its basis. Citadel apart.</p>
+  </div>`;
+}
+
+// ── Main customers: the 30 largest, month by month ───────────────────────────────────────────
+// Each cell is the month's billing; its shade is the change against the account's own average of
+// the six months before it. Red is down, green is up, ink is within 10%. Storage, service or both.
+const MG_CSS = `
+.mg .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 12px; max-width: 900px; }
+.mg .tools { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.mg table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.mg th { font-size: 12px; font-weight: 500; color: var(--ink-3); padding: 0 2px 8px; text-align: center; }
+.mg th.nmh { text-align: left; width: 210px; }
+.mg th.tt { width: 78px; text-align: right; }
+.mg td { padding: 2px; border-top: 1px solid var(--rule); height: 38px; }
+.mg td.nm a { color: inherit; text-decoration: none; font-weight: 600; font-size: 14px; line-height: 1.2; display: block; }
+.mg td.nm a:hover { color: var(--brand); }
+.mg td.nm small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); }
+.mg td.cl span { display: block; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; border-radius: 5px; padding: 6px 0; white-space: nowrap;
+  background: color-mix(in srgb, var(--tone) var(--a), var(--surface)); }
+.mg td.cl span.strong { color: var(--surface); font-weight: 600; }
+.mg td.tt { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; font-size: 14px; }
+.mg .key { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--ink-3); }
+.mg .key i { display: inline-block; width: 22px; height: 12px; border-radius: 3px; }
+@media (max-width: 760px) {
+  .mg th.nmh { width: 120px; }
+  .mg th.tt, .mg td.tt { display: none; }
+  .mg .old { display: none; }
+  .mg td.nm a { font-size: 13px; }
+  .mg td { padding: 2px 1px; }
+  .mg td.cl span { font-size: 10.5px; letter-spacing: -.02em; padding: 5px 0; }
+  .mg .card { padding: 14px 12px; }
+}`;
+
+async function monthGrid(main, C, params) {
+  if (!document.getElementById('mg-css')) { const st = document.createElement('style'); st.id = 'mg-css'; st.textContent = MG_CSS; document.head.appendChild(st); }
+  const which = ['storage', 'service'].includes(params.series) ? params.series : 'total';
+  const ser = [...seriesOf(C).values()].filter(s => s.ltm > 0 && s.level1 !== CITADEL).sort((a, b) => b.ltm - a.ltm).slice(0, 30);
+  const months = ser.length ? ser[0].months : [];
+  const N = Math.min(13, months.length - 6), first = months.length - N;
+  const mlab = (m, i) => new Date(m + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' }) + (i === 0 || m.slice(5, 7) === '01' ? " '" + m.slice(2, 4) : '');
+  const cells = s => {
+    const v = s[which];
+    return months.slice(first).map((m, j) => {
+      const i = first + j, run = v.slice(i - 6, i).reduce((t, x) => t + x, 0) / 6;
+      return { m, v: v[i], run, d: run > 0 ? v[i] / run - 1 : null };
+    });
+  };
+  const grid = ser.map(s => ({ s, c: cells(s) }));
+  // the biggest move in the latest month, in dollars against the account's own run
+  const lastMoves = grid.map(g => ({ s: g.s, d: g.c[g.c.length - 1].v - g.c[g.c.length - 1].run })).sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
+  const down = grid.filter(g => (g.c[g.c.length - 1].d ?? 0) < -0.1).length, up = grid.filter(g => (g.c[g.c.length - 1].d ?? 0) > 0.1).length;
+  const lastM = months[months.length - 1], lastName = new Date(lastM + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
+  const top = lastMoves[0];
+
+  const shade = d => {
+    if (d == null) return { tone: 'var(--ink)', a: 4, strong: false };
+    const mag = Math.min(1, Math.abs(d) / 0.6);
+    if (Math.abs(d) < 0.1) return { tone: 'var(--ink)', a: 5, strong: false };
+    return { tone: d < 0 ? 'var(--bad)' : 'var(--good)', a: Math.round(14 + 66 * mag), strong: mag > 0.62 };
+  };
+  const link = sv => `#customers?view=main${sv !== 'total' ? '&series=' + sv : ''}`;
+  main.innerHTML = `
+  <div class="cust mg">
+    <h1>Customers</h1>
+    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'main' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    <p class="lede">In ${lastName}, ${down} of the 30 largest accounts billed more than 10% below their own six-month average and ${up} billed more than 10% above.${top ? ` The biggest move was ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} against its own run.` : ''}</p>
+    <div class="tools">
+      <div class="seg">${[['total', 'Storage and service'], ['storage', 'Storage'], ['service', 'Service']].map(([k, l]) => `<a href="${link(k)}" class="${k === which ? 'on' : ''}">${l}</a>`).join('')}</div>
+      <div class="key"><i style="background:color-mix(in srgb, var(--bad) 70%, var(--surface))"></i>down<i style="background:color-mix(in srgb, var(--bad) 25%, var(--surface));margin-left:6px"></i><i style="background:color-mix(in srgb, var(--ink) 5%, var(--surface))"></i>within 10%<i style="background:color-mix(in srgb, var(--good) 25%, var(--surface))"></i><i style="background:color-mix(in srgb, var(--good) 70%, var(--surface));margin-left:6px"></i>up · against its own last six months</div>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th class="nmh">Customer</th>${months.slice(first).map((m, j) => `<th class="${j < N - 5 ? 'old' : ''}">${mlab(m, j)}</th>`).join('')}<th class="tt">12 months</th></tr></thead>
+        <tbody>${grid.map(g => `<tr>
+          <td class="nm"><a href="#customer/${g.s.level1}">${esc(titleCase(g.s.customer))}</a></td>
+          ${g.c.map((c, j) => { const sh = shade(c.d); return `<td class="cl ${j < N - 5 ? 'old' : ''}"><span class="${sh.strong ? 'strong' : ''}" style="--tone:${sh.tone};--a:${sh.a}%" title="${esc(titleCase(g.s.customer))}, ${mlab(c.m, 1)}: ${money0(c.v)} against its own ${money0(c.run)}">${moneyK(c.v)}</span></td>`; }).join('')}
+          <td class="tt">${moneyK(g.s[which].slice(-12).reduce((t, x) => t + x, 0))}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <p class="foot">Invoice month, posted runs. Storage bills in advance, so a month's storage is that month's boxes; service is the month before's work. Citadel apart. Tap a name for the customer.</p>
   </div>`;
 }
