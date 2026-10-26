@@ -450,7 +450,7 @@ async function marginView(main, C, params) {
   <div class="cust mv2">
     <h1>Customers</h1>
     <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'margin' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
-    <p class="lede">${below.length} accounts keep under 15% of what they pay after the cost to serve them ◇, and ${belowLoss.length} of them cost more than they pay, ${moneyK(MS.lossTotal)} a year between them. ${visitHeavy} of the ${below.length} are visit-heavy (bins, deliveries, retrievals), where route costs are still under review; the rest are priced too low for the work.</p>
+    <p class="lede">${below.length} accounts keep under 15% of what they pay after the cost to serve them ◇. But ${visitHeavy} of the ${below.length} are visit-heavy (bins, deliveries, retrievals), where route costs are still under review, so only ${below.length - visitHeavy} are thin on costs we are sure of; ${belowLoss.filter(r => !r.review).length} of those cost more than they pay. Accounts marked "under review" are a flag until Mike confirms how delivery routes run.</p>
     <div class="tools"><div class="seg">${[['all', 'All'], ['thin', 'Thin, 15–50%'], ['below', 'Below cost, under 15%']].map(([k, l]) => `<a href="${link(k)}" class="${k === filter ? 'on' : ''}">${l}</a>`).join('')}</div></div>
     <div class="card">
       <div class="hd"><span>Customer</span><span>Revenue</span><span>Cost ◇</span><span>Left</span><span>Margin</span><span></span></div>
@@ -458,7 +458,7 @@ async function marginView(main, C, params) {
         <span class="nm">${esc(titleCase(r.customer))}${r.review ? ' <span class="chip review">under review</span>' : ''}<small>${esc(r.why)}</small></span>
         <span class="r rv">${money0(r.revenue)}</span><span class="r cs">${money0(r.cost)}</span>
         <span class="r lf ${r.margin < 0 && !r.review ? 'is-bad' : ''}">${money0(r.margin)}</span>
-        <span class="r pc ${r.pc < 0.15 && !r.review ? 'is-bad' : r.pc < 0.5 && !r.review ? 'is-warn' : ''}">${r.pc == null ? '—' : Math.round(r.pc * 100) + '%'}</span><span class="go">›</span></a>`).join('')}
+        <span class="r pc ${r.pc < 0.15 && !r.review ? 'is-bad' : r.pc < 0.5 && !r.review ? 'is-warn' : ''}">${r.pc == null ? '—' : r.pc < -1 ? 'costs over 2× its pay' : r.pc < 0 ? 'below cost' : Math.round(r.pc * 100) + '%'}</span><span class="go">›</span></a>`).join('')}
       <div class="rw tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r rv">${money0(sum('revenue'))}</span><span class="r cs">${money0(sum('cost'))}</span><span class="r lf">${money0(sum('margin'))}</span><span class="r pc">${sum('revenue') > 0 ? Math.round(sum('margin') / sum('revenue') * 100) + '%' : '—'}</span><span></span></div>
       ${rows.length > shown ? `<a class="more" style="display:inline-block;margin-top:10px;color:var(--brand);font-weight:500;text-decoration:none" href="${link(filter)}&n=all">Show all ${rows.length}</a>` : ''}
     </div>

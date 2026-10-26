@@ -13,8 +13,10 @@ import { bridge, billNow, slippingAccounts, risingAccounts, TARGET, CITADEL } fr
 
 const CSS = `
 .home { display: grid; gap: 14px; }
-.home .greet h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); margin: 0; }
-.home .greet p { color: var(--ink-3); margin: 2px 0 0; }
+.home .greet .hi { color: var(--ink-3); margin: 0 0 6px; font-size: var(--fs-label); }
+.home .greet .hv { font-size: 23px; line-height: 1.35; font-weight: 500; letter-spacing: -.01em; margin: 0; max-width: 980px; }
+.home .billlink { color: inherit; text-decoration: none; display: inline-block; }
+.home .billlink:hover { color: var(--brand); }
 .home .month { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
 .home .month > div + div { border-left: 1px solid var(--rule); padding-left: 28px; }
 .home .lede { font-size: 16px; color: var(--ink-2); margin: 8px 0 0; line-height: 1.45; }
@@ -64,7 +66,8 @@ const CSS = `
 .home .mrow .go { color: var(--ink-5); font-size: 22px; }
 .home .foot { font-size: var(--fs-source); color: var(--ink-4); text-align: center; padding: 4px 0 10px; }
 @media (max-width: 760px) {
-  .home .greet h1 { font-size: 28px; }
+  .home .greet .hv { font-size: 18px; }
+  .home .month .note, .home #home-pace { display: none; }
   .home .month { grid-template-columns: 1fr; gap: 18px; }
   .home .month > div + div { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); padding-top: 16px; }
   .home .step { grid-template-columns: minmax(0, 1fr) 78px 14px; grid-template-areas: "nm v go" "lane lane lane"; gap: 6px 10px; }
@@ -129,19 +132,30 @@ export async function render(main, P) {
   const stepRows = B.steps.map(s => { const from = cum; cum += s.v; return { ...s, from }; });
 
   // ── margin: the lines we can cost with confidence, and the accounts that cost more than they pay ──
-  const { solidPc, losers, lossTotal } = marginSummary(R, M, [CITADEL]);
+  const { solidPc, losers } = marginSummary(R, M, [CITADEL]);
+  const sure = losers.filter(a => !a.review), unsure = losers.filter(a => a.review);
+  const sureLoss = -sure.reduce((t, a) => t + a.margin, 0);
 
   const mv = movers(C), mvMax = Math.max(1, ...mv.falls.map(m => -m.d), ...mv.gains.map(m => m.d));
   const hour = new Date().getHours();
+  // the answer to Trisha's three questions, before anything else: where the month lands, the two
+  // biggest levers, who is slipping and why
+  const top2 = B.steps.slice(0, 2);
+  const verdict = [
+    runCore != null ? `${mon(billMonth)} bills ${moneyK(runCore)}, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target${nextBill != null ? `; ${mon(addMonths(billMonth, 1))} is building towards ${moneyK(nextBill)} ◇` : ''}.` : '',
+    top2.length ? `The biggest levers: ${top2.map(x => `${x.t.charAt(0).toLowerCase() + x.t.slice(1)} (${x.modelled ? 'up to ' : ''}${moneyK(x.v)} a month)`).join(' and ')}.` : '',
+    mv.falls.length ? `${mv.slipping} accounts are slipping; the largest is ${esc(titleCase(mv.falls[0].customer))}, ${esc(mv.falls[0].why)}.` : '',
+  ].filter(Boolean).join(' ');
 
   main.innerHTML = `
   <div class="home">
-    <div class="greet"><h1>${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'}</h1><p>Core revenue: storage plus service, Citadel held apart · target $1.0M a month</p></div>
+    <div class="greet"><p class="hi">${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'} · core revenue, Citadel apart · target $1.0M a month</p>
+      <h1 class="hv">${verdict}</h1></div>
 
     <section class="card">
       <div class="month">
         <div>
-          <div class="lab">${mon(billMonth)}'s bill · already known</div>
+          <a class="lab billlink" href="#customers?view=main">${mon(billMonth)}'s bill · already known ›</a>
           <div class="hero">${runCore != null ? money0(runCore) : '—'}</div>
           <p class="lede">${runCore != null ? `<span class="delta ${dcls(runCore / last.core - 1)}">${pct(runCore / last.core - 1)}</span> on ${mon(last.month)}'s ${moneyK(last.core)}, and ${moneyK(TARGET - runCore)} short of $1.0M.` : 'The run has not started.'}</p>
           <div class="track"><i class="st" style="left:0;width:${run ? run.storage / TARGET * 100 : 0}%"></i><i class="sv" style="left:${run ? run.storage / TARGET * 100 : 0}%;width:${run ? (run.service - run.citadel) / TARGET * 100 : 0}%"></i></div>
@@ -173,7 +187,7 @@ export async function render(main, P) {
 
     <a class="card mrow" href="#customers?view=margin">
       <span><span class="lab">Gross margin ◇</span><span class="big">${Math.round(solidPc * 100)}%</span></span>
-      <span class="mtxt">on storage, shredding, labour and ITAD over twelve months. <b>${losers.length} accounts cost more to serve than they pay</b>, ${moneyK(lossTotal)} a year between them; bins, retrieval and delivery are still under review. Open the margin drill: account, line, order.</span>
+      <span class="mtxt">on storage, shredding, labour and ITAD over twelve months. <b>${sure.length} account${sure.length === 1 ? '' : 's'} cost more to serve than ${sure.length === 1 ? 'it pays' : 'they pay'}</b> on costs we are sure of (${moneyK(sureLoss)} a year); ${unsure.length} more look that way only because route costs are under review. Open the margin drill: account, line, order.</span>
       <span class="go">›</span>
     </a>
 
