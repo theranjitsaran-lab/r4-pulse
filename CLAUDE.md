@@ -20,43 +20,42 @@ of them. Nothing is for all three.
 
 ## The four screens
 
-*Restructured 26 October 2026 around the customer: Home (Trisha), Customers (lists and the customer
-page, with Calls folded in as a view), Pricing (Anne), Routes (Mike). See Design below.*
+*Rebuilt 26 October 2026 around Trisha's number and the customer. The 7 October screens (Pulse,
+Activity, Calls, Margin as separate screens) and the design PNGs in `docs/design/` are superseded;
+DECISIONS.md "The route to $1.0m and cross-sell" holds what was settled.*
 
-| Screen | Owner | Register | What it is |
+| Screen | Route | Owner | What it is |
 |---|---|---|---|
-| **Pulse** | Trisha | Briefing | Headline sentence carrying the gap · four "Needs a decision" rows · storage and service side by side with Iron Mountain beside them · the 24-month chart · one finding a week |
-| **Activity** | Mike | Ledger | Yesterday as one row per route-day · the week as a grid of route-days · booked ahead |
-| **Pricing** | Anne | Ledger | Input rail · verdict sentence · the distribution strip · cost to serve with derivations · what the decision is worth |
-| **Calls** | Anne, Trisha | Ledger | Ten accounts a week, each with its signal, evidence, opening line, three actions |
+| **Home** | `#pulse` | Trisha | This month's bill (already known) and next month's building · the bridge from the six-month average to $1.0m, each step opening its accounts · margin row · customers moving |
+| **Customers** | `#customers?view=` | Anne, Trisha | This week's calls · Main customers (month grid) · Cross-sell (whitespace grid, each gap explained) · Slipping · Price gaps · Missed rate rounds · Overdue boxes · Margin (all, thin, below cost) · All |
+| **Customer page** | `#customer/<id>` | Anne | Headline figures · 24-month chart · not bought yet · prices against the book · signals · margin by line → its cost, invoices and orders → one order's cost build · visits |
+| **Pricing** | `#pricing` | Anne | The price on one track (cost, middle half, median) · what it is worth a year · the cost working · invoiced against the book |
+| **Routes** | `#activity` | Mike | The day in a sentence, thin routes named · by route against its norm · the week · booked ahead · distance from the yard and the long way round |
 
-**Margin** is a drill-down behind Pulse and Pricing, not a tab: every customer ranked by gross
-margin, worst first, opening to lines, cost build, visits, boxes.
-
-The committed design is in `docs/design/` as four PNGs (Pulse desktop, Pulse phone, Margin,
-Pricing). Build to those. Tokens extracted from it are in `public/tokens.css`.
+Every figure shown in two places comes from one function (`components/levers.js`, `margin.js`,
+`whitespace.js`) and `model/levers.test.js` holds them together. Tokens are in `public/tokens.css`.
 
 ## Stack
 
-Node, Express, vanilla JS, inline SVG. **No React, no framework, no chart library.** One Google
-Fonts link (Newsreader, IBM Plex Sans, IBM Plex Sans Condensed) is the only external dependency.
-Postgres via `pg`. Deployed on Render.
+Node, Express, vanilla JS, inline SVG. **No React, no framework, no chart library, no web font**
+(the system sans). Postgres via `pg`. Deployed on Render. The API gzips its JSON with Node's zlib.
 
 If a task seems to need a library, it doesn't — write the SVG.
 
 ## Repo layout
 
 ```
-/server      db.js, api.js, auth.js, snapshot.js
-/sql         views/*.sql (one per KPI), kpi_rebuild.sql, model_schema.sql
-/model       rates.js, rates.test.js              ← the cost model; see rules below
+/server      db.js, api.js, auth.js, log.js, queries.js, snapshot.js, kpi_rebuild.js
+/sql         views/*.sql, kpi_rebuild.sql, model_schema.sql, app_schema.sql
+/model       rates.js, rates.test.js, levers.test.js   ← the cost model and the agreement tests
+/scripts     PC-side scripts: freshness, app_role, app_users, apply_sql, measurements
 /public
-  tokens.css                                      ← every design variable
-  components/  strip.js, table.js, chart.js, meter.js, drill.js
-  views/       pulse.js, activity.js, pricing.js, calls.js, margin.js
-  styleguide.html                                 ← every component, every state
-/fixtures    snapshotted JSON for offline design work
-/docs        brief, logic pack, data addendum, margin spec, design PNGs
+  tokens.css, app.css, app.js (router)
+  components/  chart.js, table.js, strip.js, margin.js, levers.js, whitespace.js, explain.js, data.js
+  views/       pulse.js (Home), customers.js, customer.js, pricing.js, activity.js (Routes)
+  data/zcta.json                                  ← postcode centroids (US Census, public)
+/fixtures    snapshotted JSON for offline work (npm run snapshot, on the PC)
+/docs        brief, logic pack, data addendum, margin spec, DEPLOY.md
 ```
 
 ## How to work
