@@ -63,3 +63,29 @@ test('slipping, pace and the bill: each figure shown twice comes from one source
   const run = P.currentRun.find(r => r.part === 'run');
   near(billNow(P).core, run.storage + run.service - run.citadel, 0.01, 'bill = run core');
 });
+
+test('projection: done to date + days left × pace; the band is backtested leave-one-out', async () => {
+  const { project, dailyFrom, weekdaysOf, curve } = await import('../public/components/projection.js');
+  // fifteen months of synthetic work, 100 a weekday with a month-by-month swing, then 4 days of October
+  const daily = [];
+  for (let m = 0; m < 15; m++) {
+    const month = new Date(Date.UTC(2025, 6 + m, 1)).toISOString().slice(0, 10);
+    for (const d of weekdaysOf(month)) daily.push({ date: d, done: 100 + 10 * Math.sin(m), booked: 190 });
+  }
+  const latest = '2026-10-06';
+  for (const d of weekdaysOf('2026-10-01').filter(d => d <= latest)) daily.push({ date: d, done: 120, booked: 200 });
+  const x = project({ daily, latest, perService: 100, storage: 400000 });
+  assert.equal(x.elapsed, 4); assert.equal(x.remaining, 18); assert.equal(x.doneToDate, 480);
+  near(x.services.central, 480 + 18 * x.pace, 1e-6, 'central');
+  near(x.bill.central, 400000 + x.services.central * 100, 1e-6, 'bill');
+  assert.ok(x.backtest && x.backtest.n === 12, 'twelve months backtested');
+  assert.ok(x.services.lo <= x.services.central && x.services.central <= x.services.hi, 'band holds the central');
+  assert.ok(x.services.lo >= x.doneToDate, 'never below the work already done');
+  // on the fixtures (no backtest yet): the bill is the storage plus the work at last month's value
+  const P = J('pulse'), A = J('activity'), run = P.currentRun.find(r => r.part === 'run');
+  const f = project({ daily: dailyFrom(P, A), latest: A.latestDone, perService: 114.5, storage: run.storage, routeDays: A.routeDays });
+  near(f.bill.central, run.storage + f.services.central * 114.5, 1e-6, 'fixture bill');
+  // a past month's curve ends on its total
+  const c = curve(daily, '2026-09-01', 100, 0);
+  near(c[c.length - 1].done, daily.filter(r => r.date.startsWith('2026-09')).reduce((t, r) => t + r.done, 0), 1e-6, 'curve total');
+});
