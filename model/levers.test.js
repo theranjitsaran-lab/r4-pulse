@@ -104,3 +104,25 @@ test('summary: every number in the paragraph must be on the figure sheet', async
   assert.ok(!bad.ok, 'an invented figure fails'); assert.deepEqual(bad.bad, ['$630K', '$700K']);
   assert.ok(!checkNumbers('About 64% of target.', sheet).ok, 'a rounded-differently percentage fails');
 });
+
+test('customer table: month so far sums to Veri-Shred done; posted months add up to the book', async () => {
+  const { customerTable } = await import('../public/components/custtable.js');
+  const C = J('customers'), A = J('activity'), P = J('pulse');
+  const T = customerTable(C, A, { bookPerService: 114.5 });
+  const month = A.latestDone.slice(0, 8) + '01';
+  const done = A.routeDays.filter(r => r.date >= month && r.date <= A.latestDone).reduce((t, r) => t + r.services_done, 0);
+  const rowsDone = T.rows.reduce((t, r) => t + r.mtd.services, 0);
+  // every done service is in a row or counted as outside the list (Citadel's apart)
+  const cit = A.orders.filter(o => o.done && o.level1 === 6714 && o.date >= month && o.date <= A.latestDone).length;
+  assert.equal(rowsDone + T.outside.services + cit, done, 'month so far reconciles to done services');
+  // last month's rows are the customers fixture's own month, Citadel apart, and most of the posted core
+  const i = C.months.length - 1;
+  const fx = C.accounts.filter(a => a.level1 !== 6714).reduce((t, a) => t + a.storage[i] + a.service[i], 0);
+  near(T.rows.reduce((t, r) => t + r.last, 0), fx, 0.5, 'last month');
+  const core = P.monthly.find(m => m.month === T.last).core;
+  assert.ok(fx <= core + 1 && fx >= 0.9 * core, `listed accounts ${fx} of core ${core}`);
+  const ytdCore = P.monthly.filter(m => m.month.slice(0, 4) === T.last.slice(0, 4)).reduce((t, m) => t + m.core, 0);
+  const ytd = T.rows.reduce((t, r) => t + (r.ytd || 0), 0);
+  assert.ok(ytd <= ytdCore + 1 && ytd >= 0.9 * ytdCore, `year to date ${ytd} of core ${ytdCore}`);
+  assert.ok(!T.rows.some(r => r.level1 === 6714), 'Citadel apart');
+});

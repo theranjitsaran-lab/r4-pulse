@@ -1,6 +1,8 @@
 // Customers — one list, several views. Every number on Home opens one of these; every row opens
 // the customer page. Each row: name and why it is listed, a 24-month sparkline, twelve-month
 // revenue, change on the twelve months before, and gross margin (◇ modelled).
+import { customerTable, falling, rising, tableHtml, sortRows, COLUMNS } from '/components/custtable.js';
+import { dailyFrom, addMonths } from '/components/projection.js';
 import { sparkline, money0, moneyK } from '/components/chart.js';
 import { buildMargins, marginSummary } from '/components/margin.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
@@ -13,7 +15,8 @@ const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under r
 
 export const VIEWS = {
   conversations: { label: 'This week', blurb: 'Ten conversations worth having, ranked by what is at stake. Log what you did; the list learns.' },
-  main:          { label: 'Main customers', blurb: 'The 30 largest accounts, month by month, each against its own run.' },
+  main:          { label: 'Up and down', blurb: 'Last month against the month before and a year ago, the year to date, and this month so far.' },
+  grid:          { label: 'Month grid', blurb: 'The 30 largest accounts, month by month, each against its own run.' },
   whitespace:    { label: 'Cross-sell', blurb: 'What each large account buys, and what it doesn\'t buy yet, sized at what comparable accounts spend.' },
   slipping:      { label: 'Slipping', blurb: 'Down 10% or more on their own run over the last three months. Still-billing accounts first; then those that have stopped or nearly, often one-off projects, which Home leaves out of the win-back.' },
   gaps:          { label: 'Price gaps', blurb: 'Paying under the book\'s median for storage or a service, sized by their volume. Home counts half of each gap.' },
@@ -112,7 +115,8 @@ export async function render(main, C, params) {
   const view = VIEWS[params.view] ? params.view : 'main';
   if (view === 'conversations') return conversations(main, C);
   if (view === 'whitespace') return whitespace(main, C, params);
-  if (view === 'main') return monthGrid(main, C, params);
+  if (view === 'main') return upDown(main, C, params);
+  if (view === 'grid') return monthGrid(main, C, params);
   if (view === 'margin') return marginView(main, C, params);
   if (view === 'destruction') return destructionView(main, C, params);
   const sort = ['size', 'change', 'margin'].includes(params.sort) ? params.sort : null;
@@ -354,6 +358,46 @@ const MG_CSS = `
   .mg .card { padding: 14px 12px; }
 }`;
 
+// Up and down: the customer table (components/custtable.js), filtered to falling, rising or all,
+// sortable by any figure. Falling and rising are last month against the month before, in dollars.
+async function upDown(main, C, params) {
+  const [A, P] = await Promise.all([getJson('activity'), getJson('pulse')]);
+  const T = customerTable(C, A, { bookPerService: bookPerService(P, A) });
+  const f = ['falling', 'rising', 'all'].includes(params.f) ? params.f : 'falling';
+  const base = f === 'falling' ? falling(T) : f === 'rising' ? rising(T) : T.rows.slice().sort((a, b) => b.last - a.last);
+  let sort = COLUMNS.some(c => c.key === params.sort) ? params.sort : null, dir = params.dir === 'up' ? 1 : -1;
+  const lastName = new Date(T.last + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
+  const fall = falling(T), rise = rising(T), net = T.rows.reduce((t, r) => t + r.dLast, 0);
+  const link = (ff, so, d) => `#customers?view=main&f=${ff}${so ? `&sort=${so}${d > 0 ? '&dir=up' : ''}` : ''}`;
+  const draw = () => {
+    const rows = sortRows(base, sort, dir).slice(0, f === 'all' ? 400 : 60);
+    main.querySelector('#ud-table').innerHTML = tableHtml(T, rows, { sort, dir });
+    main.querySelectorAll('#ud-table th[data-sort]').forEach(th => {
+      const go = () => { const k = th.dataset.sort; dir = sort === k ? -dir : -1; sort = k; history.replaceState(null, '', link(f, sort, dir)); draw(); };
+      th.addEventListener('click', go); th.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    });
+    main.querySelectorAll('#ud-table tbody tr').forEach(tr => tr.addEventListener('click', e => { if (!e.target.closest('a')) location.hash = tr.dataset.href; }));
+  };
+  main.innerHTML = `
+  <div class="cust">
+    <h1>Customers</h1>
+    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'main' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    <p class="lede">In ${lastName}, ${fall.length} accounts billed less than the month before and ${rise.length} more; net ${net < 0 ? '−' : '+'}${moneyK(Math.abs(net))}. ${fall[0] ? `The biggest fall was ${esc(titleCase(fall[0].customer))}, −${moneyK(-fall[0].dLast)}.` : ''}</p>
+    <div class="tools"><div class="seg">${[['falling', 'Falling'], ['rising', 'Rising'], ['all', 'All']].map(([k, l]) => `<a href="${link(k)}" class="${k === f ? 'on' : ''}">${l}</a>`).join('')}</div></div>
+    <div class="card" id="ud-table" style="overflow-x:auto"></div>
+    <div class="src">Posted invoices by invoice date, Citadel apart (exact) · ${esc(new Date(T.month + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' }))} so far ◇: each account's Veri-Shred done services to ${esc(T.latest)} × its own value per done service in the weeks before, or the book's where it had none${T.outside.services ? ` · ${T.outside.services} services this month were for ${T.outside.accounts} smaller accounts outside this list` : ''} · storage for the month is billed in advance and not in this column · tap a column to sort</div>
+  </div>`;
+  draw();
+}
+
+// the book's value per done service: last month's work in the current run ÷ last month's done services
+function bookPerService(P, A) {
+  const run = P.currentRun.find(r => r.part === 'run');
+  const daily = dailyFrom(P, A), prev = addMonths(A.latestDone.slice(0, 8) + '01', -1);
+  const done = daily.filter(r => r.date.startsWith(prev.slice(0, 7))).reduce((t, r) => t + r.done, 0);
+  return run && done ? (run.service - run.citadel) / done : null;
+}
+
 async function monthGrid(main, C, params) {
   if (!document.getElementById('mg-css')) { const st = document.createElement('style'); st.id = 'mg-css'; st.textContent = MG_CSS; document.head.appendChild(st); }
   const which = ['storage', 'service'].includes(params.series) ? params.series : 'total';
@@ -383,11 +427,11 @@ async function monthGrid(main, C, params) {
     if (Math.abs(d) < 0.1) return { tone: 'var(--ink)', a: 5, strong: false };
     return { tone: d < 0 ? 'var(--bad)' : 'var(--good)', a: Math.round(14 + 66 * mag), strong: mag > 0.62 };
   };
-  const link = sv => `#customers?view=main${sv !== 'total' ? '&series=' + sv : ''}`;
+  const link = sv => `#customers?view=grid${sv !== 'total' ? '&series=' + sv : ''}`;
   main.innerHTML = `
   <div class="cust mg">
     <h1>Customers</h1>
-    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'main' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'grid' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
     <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (10% or more below their own run) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} Each cell below is one month against the six before it.</p>
     <div class="tools">
       <div class="seg">${[['total', 'Storage and service'], ['storage', 'Storage'], ['service', 'Service']].map(([k, l]) => `<a href="${link(k)}" class="${k === which ? 'on' : ''}">${l}</a>`).join('')}</div>

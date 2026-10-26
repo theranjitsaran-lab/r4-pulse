@@ -145,3 +145,16 @@ i.k.neutral, i.k.band { background: var(--s-citadel); }
 .verdict p { font-size: 20px; font-weight: 600; letter-spacing: -.01em; line-height: 1.3; margin: 0; }
 .verdict.is-bad { background: var(--bad-bg); } .verdict.is-bad .lab { color: var(--bad); }
 .verdict.is-warn { background: var(--warn-bg); } .verdict.is-warn .lab { color: var(--warn); }
+
+/* ── customer table (components/custtable.js) ── */
+.ctab { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.ctab th { font-size: 12px; font-weight: 500; color: var(--ink-3); text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.ctab th[data-sort] { cursor: pointer; } .ctab th[data-sort]:hover { color: var(--ink); }
+.ctab td { padding: 8px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+.ctab .n { text-align: right; white-space: nowrap; }
+.ctab td.n small { display: block; font-size: 11.5px; color: var(--ink-4); }
+.ctab td.nm a { color: inherit; text-decoration: none; font-weight: 600; }
+.ctab tbody tr { cursor: pointer; } .ctab tbody tr:hover { background: var(--well); }
+.ctab .pend { font-size: 11.5px; color: var(--ink-4); }
+.ctab .sp { width: 100px; }
+@media (max-width: 760px) { .ctab .x { display: none; } .ctab { font-size: 13.5px; } .ctab td, .ctab th { padding: 7px 4px; } }

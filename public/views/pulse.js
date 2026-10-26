@@ -11,6 +11,7 @@ import { marginSummary } from '/components/margin.js';
 import { moveReason } from '/components/series.js';
 import { project, dailyFrom, curve } from '/components/projection.js';
 import { templateSummary, checkNumbers } from '/components/summary.js';
+import { customerTable, falling, rising, tableHtml } from '/components/custtable.js';
 import { bridge, billNow, slippingAccounts, risingAccounts, TARGET, CITADEL } from '/components/levers.js';
 
 const CSS = `
@@ -47,18 +48,6 @@ const CSS = `
 .home .lane b { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); }
 .home .lane .tg { position: absolute; top: -16px; transform: translateX(-100%); font-size: 11px; color: var(--ink-3); white-space: nowrap; padding-right: 4px; }
 .home .aside { margin-top: 14px; padding: 12px 14px; background: var(--well); border-radius: var(--r); font-size: var(--fs-label); color: var(--ink-2); line-height: 1.5; }
-.home .movers { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 28px; margin-top: 8px; }
-.home .mv { display: grid; grid-template-columns: minmax(0, 1fr) 40% 76px; gap: 12px; align-items: center; padding: 8px 4px; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; }
-.home .mv:hover { background: var(--well); }
-.home .mv .nm { font-weight: 600; font-size: 14px; line-height: 1.25; }
-.home .mv .nm small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); }
-.home .mv .bar { height: 12px; position: relative; }
-.home .mv .bar i { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
-.home .mv.down .bar i { right: 0; background: var(--bad); }
-.home .mv.up .bar i { left: 0; background: var(--good); }
-.home .mv .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 14px; }
-.home .mv.down .v { color: var(--bad); }
-.home .mvh { font-size: 12px; color: var(--ink-3); padding: 0 4px 6px; }
 .home .mrow { display: grid; grid-template-columns: auto minmax(0, 1fr) 14px; gap: 22px; align-items: center; color: inherit; text-decoration: none; }
 .home .mrow:hover { background: var(--well); }
 .home .mrow .lab { display: block; margin-bottom: 2px; }
@@ -70,9 +59,7 @@ const CSS = `
   .home .landgrid { grid-template-columns: 1fr; gap: 8px; } .home .facts { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); }
   .home .step { grid-template-columns: minmax(0, 1fr) 78px 14px; grid-template-areas: "nm v go" "lane lane lane"; gap: 6px 10px; }
   .home .step .nm { grid-area: nm; } .home .step .v { grid-area: v; } .home .step .go { grid-area: go; } .home .step .lane { grid-area: lane; }
-  .home .movers { grid-template-columns: 1fr; }
   .home .mrow { grid-template-columns: minmax(0, 1fr) 14px; gap: 6px 10px; } .home .mrow > span:first-child { grid-column: 1; } .home .mrow .mtxt { grid-column: 1; grid-row: 2; } .home .mrow .go { grid-row: 1 / 3; grid-column: 2; }
-  .home .mv { grid-template-columns: minmax(0, 1fr) 22% 62px; gap: 10px; }
 }`;
 
 function injectCss() {
@@ -127,7 +114,7 @@ export async function render(main, P) {
   const sure = losers.filter(a => !a.review), unsure = losers.filter(a => a.review);
   const sureLoss = -sure.reduce((t, a) => t + a.margin, 0);
 
-  const mv = movers(C), mvMax = Math.max(1, ...mv.falls.map(m => -m.d), ...mv.gains.map(m => m.d));
+  const mv = movers(C);
   const hour = new Date().getHours();
   // the answer to Trisha's three questions, before anything else: where the month lands, the two
   // biggest levers, who is slipping and why
@@ -186,12 +173,9 @@ export async function render(main, P) {
     </a>
 
     <section class="card">
-      <div class="card-head"><h3>${mv.falls.length && -mv.falls[0].d > (mv.gains[0] ? mv.gains[0].d : 0) ? `${esc(titleCase(mv.falls[0].customer))} has fallen most, ${moneyK(-mv.falls[0].d)} a month below its own run` : mv.gains.length ? `${esc(titleCase(mv.gains[0].customer))} has grown most, ${moneyK(mv.gains[0].d)} a month above its own run` : 'Customers moving'}</h3><a href="#customers">Every customer by month ›</a></div>
-      <div class="sub">The last three months against each account's own twelve before them, in dollars a month. Citadel apart.</div>
-      <div class="movers">
-        <div><div class="mvh">Slipping · <a href="#customers?view=slipping" style="color:var(--brand);text-decoration:none">all ${mv.slipping} ›</a></div>${mv.falls.map(m => `<a class="mv down" href="#customer/${m.level1}"><span class="nm">${esc(titleCase(m.customer))}<small>${esc(m.why)}</small></span><span class="bar"><i style="width:${-m.d / mvMax * 100}%"></i></span><span class="v">−${moneyK(-m.d)}</span></a>`).join('')}</div>
-        <div><div class="mvh">Rising</div>${mv.gains.map(m => `<a class="mv up" href="#customer/${m.level1}"><span class="nm">${esc(titleCase(m.customer))}<small>${esc(m.why)}</small></span><span class="bar"><i style="width:${m.d / mvMax * 100}%"></i></span><span class="v">+${moneyK(m.d)}</span></a>`).join('')}</div>
-      </div>
+      <div class="card-head"><h3 id="home-ct-h"></h3><a href="#customers?view=main">Every customer up and down ›</a></div>
+      <div class="tools" style="margin:4px 0 6px"><div class="seg" id="home-ct-seg"><a href="#" data-f="falling" class="on">Falling</a><a href="#" data-f="rising">Rising</a></div></div>
+      <div id="home-ct" style="overflow-x:auto"></div>
     </section>
 
     <div class="foot">Posted through ${mon(last.month)} ${last.month.slice(0, 4)} · work done through ${dayMonth(A.latestDone)} · ◇ modelled · tap any row to open it</div>
@@ -204,6 +188,18 @@ export async function render(main, P) {
     .then(r => r.ok ? r.json() : null)
     .then(j => { if (j && j.source === 'claude' && j.text && checkNumbers(j.text, sheet).ok && hv.isConnected) { hv.textContent = j.text; by.textContent = 'Written by Claude from the figures on this page; every number checked against them.'; } })
     .catch(() => {});
+
+  // customers up and down: the same table as Customers, five rows
+  const T = customerTable(C, A, { bookPerService: perService }), ctLast = mon(T.last);
+  const ct = f => {
+    const rows = (f === 'falling' ? falling(T) : rising(T)).slice(0, 5);
+    main.querySelector('#home-ct-h').textContent = rows[0] ? `${titleCase(rows[0].customer)} ${f === 'falling' ? 'fell' : 'rose'} most in ${ctLast}, ${f === 'falling' ? '−' : '+'}${moneyK(Math.abs(rows[0].dLast))} on the month before` : 'Customers up and down';
+    main.querySelector('#home-ct').innerHTML = tableHtml(T, rows);
+    main.querySelectorAll('#home-ct tbody tr').forEach(tr => tr.addEventListener('click', e => { if (!e.target.closest('a')) location.hash = tr.dataset.href; }));
+    main.querySelectorAll('#home-ct-seg a').forEach(a => a.classList.toggle('on', a.dataset.f === f));
+  };
+  main.querySelectorAll('#home-ct-seg a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); ct(a.dataset.f); }));
+  ct('falling');
 
   landing(main.querySelector('#home-land'), {
     title: nextBill != null ? `${mon(addMonths(billMonth, 1))}'s bill is heading for about ${moneyK(nextBill)} ◇, ${moneyK(TARGET - nextBill)} short of $1.0M` : 'Where the month lands',
