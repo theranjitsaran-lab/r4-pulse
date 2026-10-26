@@ -219,6 +219,7 @@ export async function render(main, P) {
 // the target as a hairline. One axis; a crosshair reads every line at a working day.
 function landing(el, o) {
   if (!el) return;
+  o = { ...o, days: Math.max(o.days, ...o.series.map(x => x.points.length)) };   // a month with more working days than this one
   const W = Math.max(300, Math.min(1000, el.clientWidth || 640)), compact = W < 560;
   const H = compact ? 230 : 290, L = compact ? 44 : 52, R = compact ? 12 : 64, T = 16, B = 28;
   const ys = o.series.flatMap(x => x.points.map(p => p.y)).concat(o.cone ? [o.cone.lo, o.cone.hi] : []).concat([o.target]);
