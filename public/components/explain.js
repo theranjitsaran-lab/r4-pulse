@@ -34,7 +34,7 @@ function trigger(key, row, call) {
   const boxes = row.boxes >= 500 ? `${n(row.boxes)} boxes` : null;
   switch (key) {
     case 'shred': return call && call.boxes_review_overdue > 0
-      ? `${n(call.boxes_review_overdue)} of its ${n(row.boxes)} boxes are past their retention review date. It is paying every month to store records it could destroy.`
+      ? `${n(call.boxes_review_overdue)} of its ${n(row.boxes)} boxes are past their retention review date. It is paying every month to store records it could destroy; R4 would bill the destruction once and the storage on those boxes would stop.`
       : `${boxes || 'Its boxes'} in storage and no destruction bought in twelve months. Every records programme retires boxes eventually; this one retires them somewhere else, or not at all.`;
     case 'bin': return `${boxes ? `It stores ${boxes} with R4` : `It spends ${moneyK(row.total)} a year with R4`} but has no shred bins in its offices, so its day-to-day paper goes to another shredder or into the recycling.`;
     case 'itad': return `It spends ${moneyK(row.total)} a year with R4 and buys no hardware or media destruction. Its laptops, drives and phones are retired somewhere.`;

@@ -46,6 +46,7 @@ const CSS = `
 .cp .ws1 .opp { border: 1.5px dashed var(--ink-5); border-radius: 6px; padding: 1px 8px; font-weight: 600; background: none; font: inherit; color: inherit; cursor: pointer; }
 .cp .ws1 .opp:hover { border-color: var(--brand); color: var(--brand); }
 .cp .ws1b { padding: 0 0 8px; }
+.cp .ws1p { margin: 4px 0 6px; padding: 8px 10px; background: var(--well); border-radius: var(--r-sm); font-size: 14px; line-height: 1.45; color: var(--ink-2); }
 .cp .ob { padding: 6px 4px 10px; }
 .cp .lp-crumb { font-size: 12px; color: var(--ink-3); padding: 4px 0 2px; }
 .cp .lines { padding: 4px 8px 14px; }
@@ -88,6 +89,9 @@ export async function render(main, C, params) {
   const name = titleCase((s && s.customer) || (m && m.customer) || `Account ${id}`);
   const signals = CA.find(c => c.level1 === id);
   const wsRow = buildWhitespace(M, { exclude: [CITADEL], top: 100000 }).rows.find(x => x.level1 === id);
+  const ownRate = (PR.storage.find(r => r.level1 === id) || {}).rate_per_box;
+  const overdue = signals && signals.boxes_review_overdue > 0 ? Math.round(signals.boxes_review_overdue) : 0;
+  const pitch = overdue && ownRate ? `The case for them: ${overdue.toLocaleString('en-US')} of their boxes are past their retention review. Destroying them would save them about ${moneyK(overdue * ownRate)} a month in storage at their own $${ownRate.toFixed(3)} a box.` : '';
 
   // an account with nothing billed in twelve months gets one honest line, not a page of blanks
   const billed = (s ? s.total.some(v => v !== 0) : false) || (m ? m.revenue !== 0 || m.cost !== 0 : false);
@@ -160,7 +164,7 @@ export async function render(main, C, params) {
         }).join('') || '<p class="sub">No priced lines in the last twelve months.</p>'}</div>
       </div>
       <div class="stack">
-        ${wsCard(wsRow)}
+        ${wsCard(wsRow, pitch)}
         <div class="card">
           <div class="card-head"><h3>Prices against the book</h3><a href="#pricing?level1=${id}">Price it ›</a></div>
           ${mine.map(r => `<div class="price">
@@ -176,7 +180,7 @@ export async function render(main, C, params) {
         </div>
       </div>
     </div>
-    <div class="grid drill" id="cp-drill"><div class="card"><div class="card-head"><h3>Work orders</h3><small>last six months</small></div><p class="sub">Loading…</p></div><div class="card"><div class="card-head"><h3>Visits</h3><small>last six months</small></div><p class="sub">Loading…</p></div></div>
+    <div class="grid drill" id="cp-drill"><div class="card"><div class="card-head"><h3>Work orders</h3><small>last six months</small></div><p class="sub">Loading…</p></div><div class="card"><div class="card-head"><h3>Shredding visits</h3><small>last six months</small></div><p class="sub">Loading…</p></div></div>
   </div>`;
 
   if (s) {
@@ -233,7 +237,7 @@ export async function render(main, C, params) {
       { key: 'servcode', label: 'Service', fmt: (v) => esc(titleCase(svcName.get(v.replace(/^S5[BPT]$/, 'S5')) || v)) + ` <span class="sub" style="display:inline">${esc(v)}</span>` },
       { key: 'units', label: 'Units', num: true, fmt: (v, r) => Math.round(v).toLocaleString('en-US') + ' ' + (r.unit || '') },
       { key: 'revenue', label: 'Revenue', num: true, fmt: v => money0(v) },
-    ], rows: ls });
+    ], rows: ls.filter(l => l.revenue !== 0 || l.drives_cost) });
     // 3. this line's own work orders, each opening to its cost build
     const { d, error, meta } = await drillP;
     const ob = box.querySelector('.lp-orders');
@@ -303,8 +307,8 @@ async function drawDrill(el, drillP, svcName) {
   const ordRev = d.orders.reduce((t, o) => t + o.revenue, 0);
   const lbs = d.visits.reduce((t, v) => t + (v.pounds || 0), 0);
   el.innerHTML = `
-    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? `${n0(d.orders.length)}${d.orders.length >= 200 ? '+' : ''} in six months · ${money0(ordRev)}` : 'last six months'}</small></div><div id="cp-orders"></div><div class="pending" style="margin-top:12px">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · cost ◇ from the cost model, one visit shared between the day's orders · tap an order for its cost build</div></div>
-    <div class="card"><div class="card-head"><h3>Visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} route-days · ${n0(lbs)} lb weighed` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Veri-Shred done orders · one row per day and route · executive-bin pounds are a default, not a weigh</div></div>`;
+    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? (d.orders.length >= 200 ? `the latest 200 orders, ${money0(ordRev)}` : `${n0(d.orders.length)} in six months, ${money0(ordRev)}`) : 'last six months'}</small></div><div id="cp-orders"></div><div class="pending" style="margin-top:12px">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · cost ◇ from the cost model, one visit shared between the day's orders · tap an order for its cost build</div></div>
+    <div class="card"><div class="card-head"><h3>Shredding visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} days on a route · ${n0(lbs)} lb` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Bin and shredding stops drivers marked done in Veri-Shred, one row per day and route. Box deliveries and retrievals are on the work orders, not here. Executive-bin weights are a set figure, not weighed.</div></div>`;
   const oBox = el.querySelector('#cp-orders'), vBox = el.querySelector('#cp-visits');
   // the latest twelve of each, with the rest one tap away
   const more = (box, total, draw) => {
@@ -348,14 +352,14 @@ function orderBuild(o, svcName, n0) {
 }
 
 // What the account doesn't buy yet, sized at what comparable accounts spend (components/whitespace.js).
-function wsCard(r) {
+function wsCard(r, pitch) {
   if (!r) return '';
   const lines = LINES.map(x => ({ x, c: r.cells[x.key] }));
   const missing = lines.filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp);
   return `<div class="card">
     <div class="card-head"><h3>${missing.length ? `Not bought yet: about ${moneyK(r.opp)} a year ◇` : lines.every(o => o.c.have) ? 'Buys every line we sell' : 'Not bought yet: too small to size'}</h3><a href="#customers?view=whitespace">Cross-sell ›</a></div>
     ${!missing.length && !lines.every(o => o.c.have) ? '<p class="sub" style="margin:0 0 6px">It doesn\'t buy every line, but it has too few boxes or too little other spend to size what comparable accounts would spend.</p>' : ''}
-    ${lines.map(({ x, c }) => `<div class="ws1"><span>${esc(x.name)}</span>${c.have ? `<span class="num">${moneyK(c.spend)} <span class="sub" style="display:inline">a year</span></span>` : c.opp > 0 ? `<button class="num opp" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)} ◇</button>` : '<span class="sub">—</span>'}</div>${!c.have && c.opp > 0 ? `<div class="sub ws1b">${esc(c.basis)}</div>` : ''}`).join('')}
+    ${lines.map(({ x, c }) => `<div class="ws1"><span>${esc(x.name)}</span>${c.have ? `<span class="num">${moneyK(c.spend)} <span class="sub" style="display:inline">a year</span></span>` : c.opp > 0 ? `<button class="num opp" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)} ◇</button>` : '<span class="sub">—</span>'}</div>${!c.have && x.key === 'shred' && pitch ? `<div class="ws1p">${esc(pitch)}</div>` : ''}${!c.have && c.opp > 0 ? `<div class="sub ws1b">${esc(c.basis)}</div>` : ''}`).join('')}
   </div>`;
 }
 
