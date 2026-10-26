@@ -126,3 +126,35 @@ test('customer table: month so far sums to Veri-Shred done; posted months add up
   assert.ok(ytd <= ytdCore + 1 && ytd >= 0.9 * ytdCore, `year to date ${ytd} of core ${ytdCore}`);
   assert.ok(!T.rows.some(r => r.level1 === 6714), 'Citadel apart');
 });
+
+test('route map: the stops share the route day exactly; travel follows the detour', async () => {
+  const R = require('./rates.js');
+  const { routeDay, allocate, cheaper } = await import('../public/components/routemap.js');
+  const Z = require('../public/data/zcta.json');
+  const A = J('activity');
+  const days = [...new Set(A.orders.filter(o => o.done).map(o => o.date + '|' + o.route + '|' + o.level1))].slice(0, 40);
+  let checked = 0;
+  for (const k of days) {
+    const [date, , id] = k.split('|');
+    const day = routeDay({ orders: A.orders }, date, +id, Z);
+    if (!day) continue;
+    const a = allocate(R, day);
+    near(day.stops.reduce((t, s) => t + s.cost, 0), R.RATES.routeDay.v, 1e-6, `${k} shares`);
+    near(day.stops.reduce((t, s) => t + s.travel, 0), R.RATES.routeDay.v * R.SETTINGS.split, 1e-6, `${k} travel`);
+    assert.ok(a.me.cost > 0 && a.me.cost <= a.total + 1e-9, `${k} this account's share`);
+    const c = cheaper(day, a, A.routeDays, Z, A.postcodes);
+    for (const n of c.nearby) assert.ok(n.saving <= a.me.travel + 1e-9 && n.miles <= 2, 'a saving never exceeds the travel it removes');
+    if (c.density.length) assert.ok(c.density[0].perService >= c.density[c.density.length - 1].perService, 'more customers at a stop never cost more');
+    checked++;
+  }
+  assert.ok(checked >= 20, `checked ${checked} route days`);
+  // two stops at the same postcode, one far: the far one carries the travel
+  const day = { date: '2026-09-01', route: 'T', stops: [
+    { level1: 1, postcode: '60609', pt: Z['60609'], services: 1, mine: true },
+    { level1: 2, postcode: '60609', pt: Z['60609'], services: 1 },
+    { level1: 3, postcode: '60426', pt: Z['60426'], services: 1 },
+  ] };
+  allocate(R, day);
+  assert.ok(day.stops[2].travel > day.stops[0].travel + day.stops[1].travel, 'the far stop carries most of the travel');
+  near(day.stops[0].travel, day.stops[1].travel, 1e-9, 'stops at one place share its travel');
+});

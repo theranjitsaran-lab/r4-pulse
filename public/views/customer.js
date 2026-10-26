@@ -9,6 +9,7 @@ import { ledgerTable } from '/components/table.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 import { seriesOf, deltaText, moveReason } from '/components/series.js';
 import { slippingAccounts, unitSuspect } from '/components/levers.js';
+import { routeDay, allocate, cheaper, mapSvg, NEAR_MILES, NEAR_DAYS } from '/components/routemap.js';
 
 const CITADEL = 6714;
 const UNDER_REVIEW = new Set(['bin', 'handling', 'movement']);
@@ -258,6 +259,9 @@ export async function render(main, C, params) {
   });
 }
 
+// the open customer page's drill, for an order's route map
+let RCTX = null;
+
 // One fetch per customer page: the orders and visits, with each order's cost worked out once.
 async function loadDrill(id, R, M) {
   const meta = new Map();
@@ -267,6 +271,7 @@ async function loadDrill(id, R, M) {
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
     const d = j.data;
+    RCTX = { id, R, d };
     // a visit shared between the account's route orders on the same day
     const routeish = o => o.items.some(i => ['bin', 'movement', 'itad'].includes((meta.get(i.code) || {}).family));
     const perDay = new Map();
@@ -288,7 +293,7 @@ function ordersTable(el, rows, svcName, name, famName) {
       { key: 'margin', label: 'Left', num: true, fmt: (v, r) => r.cost.total ? `<span class="${v < 0 ? (r.cost.route ? 'is-warn' : 'is-bad') : ''}">${money0(v)}</span>` : '—' },
     ],
     rows,
-    detail: (o, td) => { td.innerHTML = `${famName ? `<div class="lp-crumb">${esc(name)} › ${esc(famName)} › order ${esc(o.woid)}, ${dayFmt(o.date)}</div>` : ''}${orderBuild(o, svcName, n0)}`; },
+    detail: (o, td) => { td.innerHTML = `${famName ? `<div class="lp-crumb">${esc(name)} › ${esc(famName)} › order ${esc(o.woid)}, ${dayFmt(o.date)}</div>` : ''}${orderBuild(o, svcName, n0)}<div class="ob-route"></div>`; drawRoute(td.querySelector('.ob-route'), o); },
   });
 }
 
@@ -349,6 +354,60 @@ function orderBuild(o, svcName, n0) {
     <div class="ob-cols"><div><div class="lab">On the invoice</div>${items}</div>
       <div><div class="lab">How the cost is worked out ◇</div>${c.lines.map((l, k) => `<details class="ob-row"><summary><span><i class="dot c${k % 4}"></i>${esc(l[0])}${l[3] ? ' ◇' : ''}</span><span class="num">${money0(l[1])}</span></summary><p class="sub">${esc(l[2])}</p></details>`).join('') || '<p class="sub">No modelled cost.</p>'}</div></div>
   </div>`;
+}
+
+// The route that day (components/routemap.js): the map, this stop's share of the route day, and
+// what would have made it cheaper. Activity and postcode centres load once, on the first order opened.
+let routeData = null;
+async function drawRoute(el, o) {
+  if (!el || !RCTX) return;
+  const { id, R, d } = RCTX;
+  el.innerHTML = '<p class="sub">Loading the route that day…</p>';
+  routeData = routeData || Promise.all([getJson('activity'), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({}))]);
+  const [A, Z] = await routeData;
+  const day = routeDay({ routes: d.routes, orders: A.orders }, o.date, id, Z);
+  const head = t => `<div class="lab" style="margin-top:18px">${t}</div>`;
+  if (!day) {
+    const inWindow = (d.routes && d.routes.length) || (A.orders.length && o.date >= A.orders.map(x => x.date).sort()[0]);
+    el.innerHTML = `${head('The route that day')}<div class="pending">${inWindow ? 'No shredding route served this account that day in Veri-Shred. Box deliveries and retrievals run on delivery routes, which are not in the data yet (Mike).' : 'Route lists for this date arrive with the next snapshot; the offline data holds about three weeks of routes.'}</div>`;
+    return;
+  }
+  const a = allocate(R, day), c = cheaper(day, a, A.routeHistory && A.routeHistory.length ? A.routeHistory : A.routeDays, Z, A.postcodes);
+  const me = a.me, nm = s => esc(titleCase(s || ''));
+  const routeNm = /\d/.test(day.route) ? day.route : titleCase(day.route);
+  const dens = c.density;
+  el.innerHTML = `${head(`The route that day: ${esc(routeNm)} on ${dayFmt(day.date)}, ${a.stops} stops for ${a.visits} customer${a.visits === 1 ? '' : 's'}, about ${Math.round(a.dayMiles)} miles ◇`)}
+    <div class="rm-grid"><div class="rm-wrap"><div class="c-tip" hidden></div></div>
+      <ol class="rm-list">${day.stops.map((s, i) => `<li class="${s.mine ? 'me' : ''}" data-i="${i}"><span>${nm(s.company)}<small>${esc(s.postcode || 'no postcode')} · ${s.services} service${s.services === 1 ? '' : 's'}</small></span><span class="num">${money0(s.cost)}</span></li>`).join('')}</ol></div>
+    <p class="ob-say">This account's share of the day: <b>${money0(me.cost)}</b> ◇, ${money0(me.travel)} of travel (${me.detour != null ? `${me.detour.toFixed(1)} of the day's ${Math.round(a.dayMiles)} miles are there for it` : 'no postcode to place it'}) and ${money0(me.onsite)} on site (${a.visits === 1 ? 'the only visit' : `one of ${a.visits} visits`}). ${a.visits < a.model.visitsDay ? `The route made fewer visits than the usual ${a.model.visitsDay.toFixed(2)} a day, so each carried more of it.` : `The cost model charges every visit ${money0(a.model.perVisit)} (a route day ÷ ${a.model.visitsDay.toFixed(2)} visits); this day made ${a.visits}, so each carried less.`}${me.services ? ` That is ${money0(me.cost / me.services)} a service for its ${me.services}.` : ''} The cost build above prices a visit at the model's average; this is what the day itself shows.</p>
+    ${head('What would have made it cheaper ◇')}
+    <ul class="rm-why">
+      ${a.stops > 1 && day.stops.filter(s => s.mine).length > 1 ? `<li>Its costliest stop was number ${c.n}, at ${esc(c.stop.postcode || 'an unplaced address')} (${money0(c.stop.cost)}); the rest of this list is about that stop.</li>` : ''}
+      ${c.nearby.length ? c.nearby.slice(0, 3).map(n => `<li>${esc(/\d/.test(n.route) ? n.route : titleCase(n.route))} was at ${esc(n.postcode)} on ${dayFmt(n.date)}, ${n.miles < 0.1 ? 'the same postcode' : `${n.miles.toFixed(1)} miles away`}: carrying the stop on that route would have saved about <b>${money0(n.saving)}</b>.</li>`).join('') : `<li>No other route came within ${NEAR_MILES} miles within ${NEAR_DAYS} days either side.</li>`}
+      ${dens.length > 1 && c.stop.travel > 1 ? `<li>More customers at ${esc(c.stop.postcode || 'the stop')} on the same visit would share its travel: ${dens.map(x => `${x.k === 1 ? 'alone' : `with ${x.k - 1} more`} ${money0(x.perService)}`).join(' · ')} a service.${c.book && c.book.customers > 1 ? ` R4 served ${c.book.customers} customers at ${esc(c.stop.postcode)} over twelve months (${nm(c.book.names)}).` : ''}</li>` : ''}
+    </ul>
+    <div class="src">Stops at Census postcode centres joined by straight lines; no GPS was captured · a route day ${money0(a.total)}, ${Math.round(R.SETTINGS.split * 100)}% travel split by each stop's detour, the rest on site split by visit (model/rates.js, provisional) · ${day.source === 'orders' ? 'from the route orders held offline' : 'Veri-Shred done orders'} · days that also delivered boxes are under-counted until delivery routes are in the data</div>`;
+  const tip = el.querySelector('.c-tip'), wrap = el.querySelector('.rm-wrap');
+  wrap.insertAdjacentHTML('afterbegin', mapSvg(day, { width: Math.max(280, Math.min(900, wrap.clientWidth || 560)) }));   // drawn at its on-screen width
+  const svg = wrap.querySelector('svg');
+  const show = i => {
+    const s = day.stops[i]; if (!s) return;
+    el.querySelectorAll('.rm-stop').forEach(g => g.classList.toggle('hot', +g.dataset.i === i));
+    el.querySelectorAll('.rm-list li').forEach(li => li.classList.toggle('hot', +li.dataset.i === i));
+    const g = el.querySelector(`.rm-stop[data-i="${i}"]`);
+    if (!g) { tip.hidden = true; return; }
+    const r = g.getBoundingClientRect(), w = wrap.getBoundingClientRect();
+    tip.innerHTML = `<b>${i + 1}. ${nm(s.company)}</b><span>${esc(s.postcode || '')} · ${s.services} service${s.services === 1 ? '' : 's'}${s.pounds ? ` · ${n0(s.pounds)} lb` : ''}</span><span>share of the day <b>${money0(s.cost)}</b> ◇</span><span>${money0(s.travel)} travel · ${money0(s.onsite)} on site</span>`;
+    tip.style.left = Math.max(90, Math.min(w.width - 90, r.left - w.left + r.width / 2)) + 'px';
+    tip.hidden = false;
+    const below = r.top - w.top < w.height / 2;
+    tip.style.top = (below ? r.top - w.top + r.height + 6 : r.top - w.top - tip.offsetHeight - 6) + 'px';
+    tip.hidden = false;
+  };
+  const hide = () => { tip.hidden = true; el.querySelectorAll('.hot').forEach(x => x.classList.remove('hot')); };
+  el.querySelectorAll('.rm-stop').forEach(g => { g.addEventListener('mouseenter', () => show(+g.dataset.i)); g.addEventListener('click', () => show(+g.dataset.i)); });
+  el.querySelectorAll('.rm-list li').forEach(li => { li.addEventListener('mouseenter', () => show(+li.dataset.i)); li.addEventListener('click', () => show(+li.dataset.i)); });
+  svg.addEventListener('mouseleave', hide); el.querySelector('.rm-list').addEventListener('mouseleave', hide);
 }
 
 // What the account doesn't buy yet, sized at what comparable accounts spend (components/whitespace.js).
