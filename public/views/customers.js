@@ -43,6 +43,7 @@ const CSS = `
 .cust .rev { font-weight: 600; }
 .cust .go { color: var(--ink-5); font-size: 20px; }
 .cust .foot { font-size: var(--fs-source); color: var(--ink-4); margin-top: 12px; }
+.cust .find { width: 100%; max-width: 420px; box-sizing: border-box; font: inherit; font-size: 15px; padding: 9px 12px; border: 1px solid var(--rule-4); border-radius: 10px; background: var(--surface); color: var(--ink); margin: 0 0 12px; }
 .cust .list .rv small { display: none; }
 .cust .rvm { color: var(--ink-5); font-size: 11px; margin-left: 3px; vertical-align: 1px; }
 @media (max-width: 760px) {
@@ -132,15 +133,26 @@ export async function render(main, C, params) {
       <div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="${link(k)}" class="${k === view ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
       <div class="seg">${[['size', 'Size'], ['change', 'Change'], ['margin', 'Margin']].map(([k, l]) => `<a href="${link(view, k)}" class="${k === sort ? 'on' : ''}">${l}</a>`).join('')}</div>
     </div>
+    ${view === 'all' ? '<input class="find" id="c-find" type="search" placeholder="Find a customer by name" aria-label="Find a customer by name">' : ''}
     <div class="card">
       <div class="head"><span>Customer</span><span>24 months</span><span>Last 12 months</span><span>Last 3 months</span><span>Margin</span><span></span></div>
       <ul class="list">${rows.map(row).join('') || '<li style="padding:16px;color:var(--ink-3)">No accounts in this view.</li>'}</ul>
     </div>
-    <p class="foot">${rows.length} accounts · last 3 months is each account against its own twelve months before them, the same measure as Home and Slipping · margin ◇ is revenue less modelled cost to serve; route-based costs are under review.</p>
+    <p class="foot"><span id="c-count">${rows.length}</span> accounts · last 3 months is each account against its own twelve months before them, the same measure as Home and Slipping · margin ◇ is revenue less modelled cost to serve; route-based costs are under review.</p>
   </div>`;
+  wireFind(main);
 }
 
 const mvPc = s => s && s.move ? s.move.pct : null;
+function wireFind(main) {
+  const f = main.querySelector('#c-find'); if (!f) return;
+  f.addEventListener('input', () => {
+    const q = f.value.trim().toLowerCase(); let n = 0;
+    main.querySelectorAll('.list > li').forEach(li => { const hit = !q || li.textContent.toLowerCase().includes(q); li.hidden = !hit; if (hit) n++; });
+    const c = main.querySelector('#c-count'); if (c) c.textContent = n;
+  });
+}
+
 function marginPc(r) { return r.m && r.m.revenue > 0 ? r.m.margin / r.m.revenue : 9; }
 
 function row(r) {

@@ -79,7 +79,7 @@
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
-    --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #8e8e93; --ink-5: #636366;
+    --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #98989d; --ink-5: #86868b;
     --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #1f2d1a;
     --rule: #2c2c2e; --rule-2: #333336; --rule-3: #3a3a3c; --rule-4: #48484a; --rule-ink: #f5f5f7;
     --brand: #8fc27a; --brand-2: #a6d191;
@@ -91,7 +91,7 @@
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #8e8e93; --ink-5: #636366;
+  --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #98989d; --ink-5: #86868b;
   --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #1f2d1a;
   --rule: #2c2c2e; --rule-2: #333336; --rule-3: #3a3a3c; --rule-4: #48484a; --rule-ink: #f5f5f7;
   --brand: #8fc27a; --brand-2: #a6d191;

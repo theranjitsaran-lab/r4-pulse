@@ -96,10 +96,11 @@ export function openExplainer({ row, key, call, H, names }) {
     <p class="sub" style="margin-top:12px">The playbook is a draft until the team's own process replaces it.${H ? '' : ' The next snapshot adds the cross-sells R4 has actually made, line by line.'}</p>
   </div>`;
   document.body.appendChild(d);
-  const close = () => { d.close(); d.remove(); };
+  const opener = document.activeElement;
+  const close = () => { d.close(); d.remove(); if (opener && opener.focus) opener.focus(); };
   d.querySelector('.x').addEventListener('click', close);
   d.addEventListener('click', ev => { if (ev.target === d) close(); });
-  d.addEventListener('cancel', () => d.remove());
+  d.addEventListener('cancel', () => { d.remove(); if (opener && opener.focus) setTimeout(() => opener.focus()); });
   d.querySelectorAll('.peers a, .in p a').forEach(a => a.addEventListener('click', () => close()));
   d.showModal();
 }

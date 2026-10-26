@@ -43,7 +43,7 @@ const STYLE = `
 .rt .grid .c b { font-size: 15px; }
 .rt .grid .c small { font-size: 11px; opacity: .8; }
 .rt .grid .c.sel { border-color: var(--ink); }
-.rt .grid .c.none { background: var(--well); color: var(--ink-5); cursor: default; }
+.rt .grid .c.none { background: var(--well); color: var(--ink-3); cursor: default; }
 .rt .rt-say { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: -4px 0 14px; max-width: 920px; }
 .rt .bands { display: grid; grid-template-columns: 110px minmax(0, 1fr) 70px 60px; gap: 6px 12px; align-items: center; font-size: 14px; margin: 6px 0 14px; }
 .rt .bands .bar { height: 10px; background: var(--well-2); border-radius: 5px; position: relative; overflow: hidden; }
