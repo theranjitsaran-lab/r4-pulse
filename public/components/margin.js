@@ -68,3 +68,45 @@ export const FAMILY_NAMES = {
   storage: 'Storage', bin: 'Bin rotation', shred: 'Shredding by weight or box', handling: 'Retrieval and handling',
   movement: 'Delivery and pickup', itad: 'ITAD and media', labour: 'Labour', other: 'Fees, scanning and other',
 };
+
+// One work order's cost to serve, by the same rules as buildMargins: its items costed by family,
+// one visit for the order, and the route lines (travel, time on site) counted once however many
+// route families the order touches. meta maps a service code to { family, unit, drives_cost }.
+// share: how many of the account's orders that day needed the route, so one visit is split
+// between them rather than charged in full to each.
+//   jobCost(R, [{ code, units, revenue }], meta, share) → { lines: [[name, amount, why, flag]], total, route }
+export function jobCost(R, items, meta, share = 1) {
+  const of = c => meta.get(c) || {};
+  const units = pred => items.filter(i => pred(i, of(i.code))).reduce((t, i) => t + (i.units || 0), 0);
+  const parts = [];
+  const handling = units((i, m) => m.family === 'handling' && m.drives_cost);
+  if (handling > 0) parts.push(R.costToServe('handling', handling));
+  const trips = units(i => i.code === '01'), dboxes = units((i, m) => m.family === 'movement' && m.drives_cost && m.unit === 'box');
+  if (trips > 0 || dboxes > 0) parts.push(R.costToServe('movement', dboxes, { visits: 1 }));
+  // account level counts bins from Veri-Shred; at order level the bin codes themselves are the bins
+  const bins = units((i, m) => m.family === 'bin' && /^B\d$/.test(i.code)), binLb = units(i => i.code === 'S5B' || (i.code === 'S5' && bins > 0));   // S5 on an order with bins is their weight
+  if (bins > 0) parts.push(R.costToServe('bin', bins, Object.assign({ visits: 1 }, binLb > 0 ? { pounds: binLb } : { binCode: (items.find(i => of(i.code).family === 'bin') || {}).code })));
+  const devices = units((i, m) => m.family === 'itad' && m.drives_cost);
+  if (devices > 0) parts.push(R.costToServe('itad', devices, { visits: 1 }));
+  const shredLb = units(i => i.code === 'S3' || i.code === 'S5P' || (i.code === 'S5' && bins === 0));
+  if (shredLb > 0) parts.push(R.costToServe('shred', shredLb));
+  const shredBoxes = units((i, m) => m.family === 'shred' && m.drives_cost && (m.unit === 'box' || m.unit === 'cubic foot'));
+  if (shredBoxes > 0) parts.push(R.costToServe('shred', shredBoxes, { unit: 'box' }));
+  const centre = units((i, m) => m.family === 'labour' && m.drives_cost && CENTRE_HOURS.has(i.code));
+  const driver = units((i, m) => m.family === 'labour' && m.drives_cost && !CENTRE_HOURS.has(i.code));
+  if (centre > 0) parts.push(R.costToServe('labour', centre, { isCentre: true }));
+  if (driver > 0) parts.push(R.costToServe('labour', driver));
+
+  const ROUTE = new Set(['Travel to site', 'Truck time', 'Time on site']);
+  const seen = new Set(), lines = [];
+  for (const p of parts) for (let l of p.lines) {
+    if (ROUTE.has(l[0])) {
+      const k = l[0] === 'Truck time' ? 'Travel to site' : l[0];
+      if (seen.has(k)) continue;
+      seen.add(k);
+      if (share > 1) l = [l[0], l[1] / share, `${l[2]} One visit served ${share} orders that day, so this order carries a ${share === 2 ? 'half' : share === 3 ? 'third' : `1/${share}`} share.`].concat(l.slice(3));
+    }
+    if (l[1] > 0.005) lines.push(l);
+  }
+  return { lines, total: lines.reduce((t, l) => t + l[1], 0), route: seen.size > 0 };
+}

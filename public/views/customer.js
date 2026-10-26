@@ -2,7 +2,8 @@
 // Header figures · 24-month storage and service on one axis · margin by line of business, each line
 // opening to its priced lines · prices against the book's median and what moving is worth · signals.
 import { lineChart, money0, moneyK } from '/components/chart.js';
-import { buildMargins, FAMILY_NAMES } from '/components/margin.js';
+import { buildMargins, jobCost, FAMILY_NAMES } from '/components/margin.js';
+import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { ledgerTable } from '/components/table.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 import { seriesOf, deltaText } from '/views/customers.js';
@@ -37,7 +38,26 @@ const CSS = `
 .cp .sig .acts { align-items: center; flex-wrap: wrap; }
 .cp .sig .acts button { border: 1px solid var(--rule-3); background: var(--surface); border-radius: 8px; padding: 4px 12px; font-size: 13px; color: var(--ink-2); cursor: pointer; }
 .cp .sig .acts button.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.cp .ws1 { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0 2px; border-top: 1px solid var(--rule); }
+.cp .ws1:first-of-type { border-top: 0; }
+.cp .ws1 .opp { border: 1.5px dashed var(--ink-5); border-radius: 6px; padding: 1px 8px; font-weight: 600; }
+.cp .ws1b { padding: 0 0 8px; }
+.cp .ob { padding: 6px 4px 10px; }
+.cp .ob-bars { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 6px 12px; align-items: center; }
+.cp .ob-bar { height: 14px; display: flex; gap: 2px; }
+.cp .ob-bar i { display: block; height: 100%; border-radius: 3px; }
+.cp .ob-bar i.rev, .cp i.dot.rev { background: var(--ink); }
+.cp .c0 { background: var(--s-storage); } .cp .c1 { background: var(--s-service); } .cp .c2 { background: var(--ink-4); } .cp .c3 { background: var(--s-citadel); }
+.cp i.dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+.cp .ob-say { margin: 12px 0; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+.cp .ob-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cp .ob-row { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; font-size: 13.5px; }
+.cp details.ob-row { display: block; }
+.cp details.ob-row summary { display: flex; justify-content: space-between; gap: 12px; cursor: pointer; list-style: none; }
+.cp details.ob-row summary::-webkit-details-marker { display: none; }
+.cp details.ob-row p { margin: 2px 0 6px 14px; }
 @media (max-width: 860px) {
+  .cp .ob-cols { grid-template-columns: 1fr; }
   .cp h1 { font-size: 26px; }
   .cp .stats { grid-template-columns: 1fr 1fr; }
   .cp .grid { grid-template-columns: 1fr; }
@@ -124,6 +144,7 @@ export async function render(main, C, params) {
         }).join('') || '<p class="sub">No priced lines in the last twelve months.</p>'}</div>
       </div>
       <div class="stack">
+        ${wsCard(M, id)}
         <div class="card">
           <div class="card-head"><h3>Prices against the book</h3><a href="#pricing?level1=${id}">Price it ›</a></div>
           ${mine.map(r => `<div class="price">
@@ -151,7 +172,7 @@ export async function render(main, C, params) {
     });
   } else main.querySelector('#cp-chart').remove();
 
-  drawDrill(main.querySelector('#cp-drill'), id, svcName);
+  drawDrill(main.querySelector('#cp-drill'), id, svcName, R, M);
 
   // right or not right on a signal: logged, and the buttons show what was said
   const sigBox = main.querySelector('#cp-sigs');
@@ -190,7 +211,7 @@ export async function render(main, C, params) {
 
 // Below the page: the account's work orders (what was billed, order by order) and its Veri-Shred
 // visits (one row per day and route). Per account, so fetched here rather than in the snapshot.
-async function drawDrill(el, id, svcName) {
+async function drawDrill(el, id, svcName, R, M) {
   if (!el) return;
   let d;
   try {
@@ -208,7 +229,7 @@ async function drawDrill(el, id, svcName) {
   const ordRev = d.orders.reduce((t, o) => t + o.revenue, 0);
   const lbs = d.visits.reduce((t, v) => t + (v.pounds || 0), 0);
   el.innerHTML = `
-    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? `${n0(d.orders.length)}${d.orders.length >= 200 ? '+' : ''} in six months · ${money0(ordRev)}` : 'last six months'}</small></div><div id="cp-orders"></div><div class="pending" style="margin-top:12px">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · tap an order for its lines</div></div>
+    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? `${n0(d.orders.length)}${d.orders.length >= 200 ? '+' : ''} in six months · ${money0(ordRev)}` : 'last six months'}</small></div><div id="cp-orders"></div><div class="pending" style="margin-top:12px">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · cost ◇ from the cost model, one visit shared between the day's orders · tap an order for its cost build</div></div>
     <div class="card"><div class="card-head"><h3>Visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} route-days · ${n0(lbs)} lb weighed` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Veri-Shred done orders · one row per day and route · executive-bin pounds are a default, not a weigh</div></div>`;
   const oBox = el.querySelector('#cp-orders'), vBox = el.querySelector('#cp-visits');
   // the latest twelve of each, with the rest one tap away
@@ -221,17 +242,23 @@ async function drawDrill(el, id, svcName) {
     b.onclick = () => { draw(Math.min(total, 60)); b.remove(); };
     box.after(b);
   };
+  // each order's cost to serve, a visit shared between the account's route orders on the same day
+  const meta = new Map();
+  for (const l of M.lines) if (l.level1 === id || !meta.has(l.servcode)) meta.set(l.servcode, { family: l.family, unit: l.unit, drives_cost: l.drives_cost });
+  const routeish = o => o.items.some(i => ['bin', 'movement', 'itad'].includes((meta.get(i.code) || {}).family));
+  const perDay = new Map();
+  for (const o of d.orders) if (routeish(o)) perDay.set(o.date, (perDay.get(o.date) || 0) + 1);
+  for (const o of d.orders) { o.cost = jobCost(R, o.items, meta, perDay.get(o.date) || 1); o.margin = o.revenue - o.cost.total; }
   if (d.orders.length) more(oBox, d.orders.length, n => ledgerTable(oBox, {
     columns: [
       { key: 'date', label: 'Date', fmt: v => day(v) },
       { key: 'woid', label: 'Order', fmt: v => `<span class="sub" style="display:inline">${esc(v)}</span>` },
-      { key: 'lines', label: 'Lines', num: true },
       { key: 'revenue', label: 'Value', num: true, fmt: v => money0(v) },
+      { key: 'cost', label: 'Cost ◇', num: true, fmt: v => v.total ? money0(v.total) : '—' },
+      { key: 'margin', label: 'Left', num: true, fmt: (v, r) => r.cost.total ? `<span class="${v < 0 ? (r.cost.route ? 'is-warn' : 'is-bad') : ''}">${money0(v)}</span>` : '—' },
     ],
     rows: d.orders.slice(0, n),
-    detail: (o, td) => {
-      td.innerHTML = o.items.map(i => `<div style="display:flex;justify-content:space-between;gap:12px;padding:3px 0"><span>${esc(titleCase(svcName.get(String(i.code).replace(/^S5[BPT]$/, 'S5')) || i.code))} <span class="sub" style="display:inline">${esc(i.code)} · ${n0(i.units)}</span></span><span class="num">${money0(i.revenue)}</span></div>`).join('');
-    },
+    detail: (o, td) => { td.innerHTML = orderBuild(o, svcName, n0); },
   }));
   else oBox.innerHTML = '<p class="sub">No billed work orders in the last six months.</p>';
   if (d.visits.length) more(vBox, d.visits.length, n => ledgerTable(vBox, {
@@ -244,6 +271,36 @@ async function drawDrill(el, id, svcName) {
     rows: d.visits.slice(0, n),
   }));
   else vBox.innerHTML = '<p class="sub">No done Veri-Shred orders in the last six months: this account\'s work is storage or warehouse handling.</p>';
+}
+
+// One order opened: what was billed, what it cost to serve and how each cost is worked out.
+function orderBuild(o, svcName, n0) {
+  const c = o.cost, rev = Math.max(o.revenue, 0), total = Math.max(rev, c.total, 1);
+  const seg = (v, cls, label) => v > 0 ? `<i class="${cls}" style="width:${v / total * 100}%" title="${esc(label)} ${money0(v)}"></i>` : '';
+  const items = o.items.map(i => `<div class="ob-row"><span>${esc(titleCase(svcName.get(String(i.code).replace(/^S5[BPT]$/, 'S5')) || i.code))} <span class="sub" style="display:inline">${esc(i.code)} · ${n0(i.units)}</span></span><span class="num">${money0(i.revenue)}</span></div>`).join('');
+  const verdict = !c.total ? 'Nothing on this order carries a modelled cost: fees and charges with no volume behind them.'
+    : o.margin >= 0 ? `Billed ${money0(o.revenue)} against about ${money0(c.total)} to serve, leaving ${money0(o.margin)}.`
+    : `Billed ${money0(o.revenue)} against about ${money0(c.total)} to serve, ${money0(-o.margin)} short.${c.route ? ' Most of the cost is the visit, and route costs are under review while delivery routes are missing from the route volumes, so read this as a flag, not a verdict.' : ''}`;
+  return `<div class="ob">
+    <div class="ob-bars"><div class="lab">Billed</div><div class="ob-bar">${seg(rev, 'rev', 'billed')}</div>
+      <div class="lab">Cost to serve ◇</div><div class="ob-bar">${c.lines.map((l, k) => seg(l[1], 'c' + (k % 4), l[0])).join('')}</div></div>
+    <p class="ob-say">${esc(verdict)}</p>
+    <div class="ob-cols"><div><div class="lab">On the invoice</div>${items}</div>
+      <div><div class="lab">How the cost is worked out ◇</div>${c.lines.map((l, k) => `<details class="ob-row"><summary><span><i class="dot c${k % 4}"></i>${esc(l[0])}${l[3] ? ' ◇' : ''}</span><span class="num">${money0(l[1])}</span></summary><p class="sub">${esc(l[2])}</p></details>`).join('') || '<p class="sub">No modelled cost.</p>'}</div></div>
+  </div>`;
+}
+
+// What the account doesn't buy yet, sized at what comparable accounts spend (components/whitespace.js).
+function wsCard(M, id) {
+  const W = buildWhitespace(M, { exclude: [CITADEL], top: 100000 });
+  const r = W.rows.find(x => x.level1 === id);
+  if (!r) return '';
+  const lines = LINES.map(x => ({ x, c: r.cells[x.key] }));
+  const missing = lines.filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp);
+  return `<div class="card">
+    <div class="card-head"><h3>${missing.length ? `Not bought yet: about ${moneyK(r.opp)} a year ◇` : 'Buys every line we sell'}</h3><a href="#customers?view=whitespace">Cross-sell ›</a></div>
+    ${lines.map(({ x, c }) => `<div class="ws1"><span>${esc(x.name)}</span>${c.have ? `<span class="num">${moneyK(c.spend)} <span class="sub" style="display:inline">a year</span></span>` : c.opp > 0 ? `<span class="num opp" title="${esc(c.basis)}">+${moneyK(c.opp)} ◇</span>` : '<span class="sub">—</span>'}</div>${!c.have && c.opp > 0 ? `<div class="sub ws1b">${esc(c.basis)}</div>` : ''}`).join('')}
+  </div>`;
 }
 
 function pos(v, r) {
