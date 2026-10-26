@@ -15,7 +15,12 @@
 .sg .space span { display: flex; align-items: center; gap: var(--sp-3); font-size: var(--fs-source); color: var(--ink-3); }
 .sg .space i { display: block; height: var(--sp-3); background: var(--lever-2); border-radius: var(--r-xs); }
 .sg .type-specimen p { margin: 0 0 var(--sp-3); }
-.sg .t-display { font-size: var(--fs-display); font-weight: 700; line-height: 1.1; letter-spacing: var(--track-tight); }
-.sg .t-mega { font-size: var(--fs-mega); font-weight: 700; line-height: 1; letter-spacing: var(--track-tighter); }
+.sg .t-display { font-family: var(--f-display); font-synthesis: none; font-size: var(--fs-display); font-weight: 400; line-height: 1.1; letter-spacing: var(--track-tight); }
+.sg .t-mega { font-family: var(--f-display); font-synthesis: none; font-size: var(--fs-mega); font-weight: 400; line-height: 1; letter-spacing: var(--track-tighter); }
 .sg .replay { border: 0; background: var(--brand); color: var(--surface); font-weight: 600; padding: var(--sp-2) var(--sp-4); border-radius: var(--r-sm); cursor: pointer; }
 @media (max-width: 900px) { .sg .grid2, .sg .grid3 { grid-template-columns: 1fr; } .sg .t-mega { font-size: var(--fs-mega-ph); } }
+/* the type specimen: every size in both faces, so rendering on Windows can be judged side by side */
+.sg .specimen { width: 100%; border-collapse: collapse; margin-bottom: var(--sp-6); }
+.sg .specimen th { text-align: left; font-size: var(--fs-source); font-weight: 500; color: var(--ink-3); padding: 0 var(--sp-3) var(--sp-2) 0; }
+.sg .specimen td { padding: var(--sp-1) var(--sp-3) var(--sp-1) 0; border-top: var(--hair) solid var(--rule); vertical-align: baseline; overflow-wrap: anywhere; }
+.sg .specimen .disp { font-family: var(--f-display); font-synthesis: none; }

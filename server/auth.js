@@ -31,7 +31,7 @@ main{max-width:calc(var(--u) * 90);margin:var(--sp-12) auto;background:var(--sur
 h1{font-family:var(--f-display);font-weight:400;font-synthesis:none;font-size:var(--fs-display-ph);margin:0 0 var(--sp-4);letter-spacing:var(--track-tight)}
 label{display:block;font-size:var(--fs-source);font-weight:500;color:var(--ink-3);margin:var(--sp-3) 0 var(--sp-1)}
 input{width:100%;box-sizing:border-box;padding:var(--sp-2) var(--sp-3);border:var(--hair) solid var(--rule-4);border-radius:var(--r-sm);font:inherit;background:var(--surface);color:var(--ink)}
-button{margin-top:var(--sp-5);width:100%;padding:var(--sp-3);background:var(--brand);color:var(--hero-ink);border:0;border-radius:var(--r-sm);font:inherit;font-weight:600;cursor:pointer}
+button{margin-top:var(--sp-5);width:100%;padding:var(--sp-3);background:var(--hero-bg-2);color:var(--hero-ink);border:0;border-radius:var(--r-sm);font:inherit;font-weight:600;cursor:pointer}
 .err{color:var(--bad);font-size:var(--fs-source);margin-top:var(--sp-3)}
 </style></head><body>
 <div class="mast"><img src="/brand/r4-logo.png" alt="R4 Services, information management company"><span>Pulse · Reliable · Resourceful · Responsive · Reasonable</span></div>

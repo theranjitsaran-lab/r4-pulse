@@ -13,8 +13,8 @@
   /* ── ink ── */
   --ink:        #1d1d1f;   /* primary text and figures */
   --ink-2:      #3a3a3c;   /* secondary headings */
-  --ink-3:      #6e6e73;   /* labels, captions, source lines */
-  --ink-4:      #8e8e93;   /* axis text, muted */
+  --ink-3:      #58585d;   /* labels, captions: 6.4:1 on the page */
+  --ink-4:      #6c6c71;   /* axis text, source lines, muted: 4.8:1 on the page, the floor for small text */
   --ink-5:      #aeaeb2;   /* modelled mark, dashed borders */
 
   /* ── surfaces ── */
@@ -53,7 +53,7 @@
 
   /* ── status: exceptions only, always with a word or icon ── */
   --good:       #0a7d0a;   /* delta up, as text */
-  --warn:       #b26b00;   /* below median; the thin day (text-safe amber) */
+  --warn:       #9a5c00;   /* below median; the thin day (text-safe amber) */
   --bad:        #c62f2f;   /* below cost; down */
   --bad-bg:     #fdecec;
   --warn-bg:    #fdf3e2;
@@ -83,14 +83,14 @@
   --fs-mega:    64px;      /* Home's one hero figure, desktop */
   --fs-mega-ph: 46px;      /* the same on a phone */
   --fs-title:   22px;      /* a section title that states its conclusion */
-  --fs-tiny:    11px;      /* tags on a track */
+  --fs-tiny:    12px;      /* the floor: nothing on screen is smaller */
 
   /* ── the hero band and the intro: R4's green, deepened ── */
   --hero-bg:     #0b3f11;
   --hero-bg-2:   #0e5116;
   --hero-ink:    #ffffff;
   --hero-ink-2:  rgba(255, 255, 255, .78);
-  --hero-ink-3:  rgba(255, 255, 255, .56);
+  --hero-ink-3:  rgba(255, 255, 255, .7);   /* 4.5:1 or more across the banner's gradient */
   --hero-track:  rgba(255, 255, 255, .16);
   --hero-accent: #8fd99a;  /* the pulse line, the known part of the bill */
 

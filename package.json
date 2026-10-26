@@ -12,7 +12,8 @@
     "kpi:rebuild": "node server/kpi_rebuild.js",
     "test": "node --test model/*.test.js",
     "test:offline": "cross-env DATABASE_URL= node --test model/*.test.js",
-    "shots": "node scripts/shots.js"
+    "shots": "node scripts/shots.js",
+    "contrast": "node scripts/contrast.js"
   },
   "engines": {
     "node": ">=20"
