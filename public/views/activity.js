@@ -208,7 +208,7 @@ export async function render(main, A, params) {
     const el = $('rt-far');
     const pts = A.postcodes && A.postcodes.length ? A.postcodes : null;   // twelve months, from the next snapshot
     let by;
-    if (pts) by = pts.map(p => ({ pc: p.postcode, services: p.services, visits: p.visits, customers: p.customers, names: p.names || '', billing: p.billing_only }));
+    if (pts) by = pts.map(p => ({ pc: p.postcode, services: p.services, visits: p.visits, customers: p.customers, names: (p.names || '').split(', ').filter(Boolean).map(titleCase).join(', '), billing: p.billing_only }));
     else {
       const m = new Map();
       for (const o of A.orders) {

@@ -4,7 +4,7 @@
 import { sparkline, money0, moneyK } from '/components/chart.js';
 import { buildMargins } from '/components/margin.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
-import { serviceGaps, storageGaps, overdueBoxes, CROSS_SELL_DEPTH } from '/components/levers.js';
+import { serviceGaps, storageGaps, overdueBoxes, crossSellPace, CROSS_SELL_DEPTH } from '/components/levers.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 
@@ -297,6 +297,8 @@ async function whitespace(main, C, params) {
   });
   const byLine = LINES.map(x => ({ x, v: rows.reduce((t, r) => t + (r.cells[x.key].have ? 0 : r.cells[x.key].opp), 0) })).sort((a, b) => b.v - a.v);
   const shown = params.all ? rows.length : 40;
+  const pace = crossSellPace(M.history), names = new Map(M.accounts.map(a => [a.level1, a.customer]));
+  const paceLine = pace ? ` <span style="display:block;margin-top:8px">That is the ceiling. R4's own record: in the last twelve months ${pace.count} existing accounts added a line (${pace.prevCount} the year before), worth about ${moneyK(pace.value)} in their first year so far. The biggest: ${pace.best.map(f => `${esc(titleCase(names.get(f.level1) || 'Account ' + f.level1))} (${lc((LINES.find(x => x.key === f.family) || { name: f.family }).name)}, ${moneyK(f.first_year)})`).join(', ')}.</span>` : '';
 
   const cell = (r, x) => {
     const c = r.cells[x.key];
@@ -309,7 +311,7 @@ async function whitespace(main, C, params) {
   <div class="cust ws">
     <h1>Customers</h1>
     <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'whitespace' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
-    <p class="lede">If the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do, they would spend about <b>${moneyK(W.total)} a year more</b> (${moneyK(W.total / 12)} a month ◇). Most of it is ${lc(byLine[0].x.name)} and ${lc(byLine[1].x.name)}. Start with ${top3.join(', ')}.</p>
+    <p class="lede">If the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do, they would spend about <b>${moneyK(W.total)} a year more</b> (${moneyK(W.total / 12)} a month ◇). Most of it is ${lc(byLine[0].x.name)} and ${lc(byLine[1].x.name)}. Start with ${top3.join(', ')}.${paceLine}</p>
     <div class="key"><span><span style="background:color-mix(in srgb, var(--ink) 30%, var(--surface))"></span>buys it: twelve-month spend, darker is more</span><span><span style="border:1.5px dashed var(--ink-5)"></span>doesn't buy it yet: what comparable accounts spend ◇</span><span>— not sized</span></div>
     <div class="card">
       <div class="grid">

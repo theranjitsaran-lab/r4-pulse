@@ -62,6 +62,20 @@ export function overdueBoxes(CA, PR) {
   return { rows, perBox, med, boxes: sum('boxes'), oneOff: sum('once'), storageLost: sum('lost'), accounts: rows.length };
 }
 
+// R4's own cross-sell record from margin.history: accounts that already bought from R4 and later
+// started a line (after their first three months and the data's first three). The last twelve
+// months against the twelve before, with first-year spend (part-year for recent starts).
+export function crossSellPace(H) {
+  if (!H || !H.firsts || !H.firsts.length) return null;
+  const plus = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCMonth(x.getUTCMonth() + n); return x.toISOString().slice(0, 10); };
+  const end = H.firsts.reduce((m, f) => f.first > m ? f.first : m, ''), from = plus(H.dataStart, 3);
+  const made = H.firsts.filter(f => f.account_first && f.first >= from && f.first > plus(f.account_first, 2));
+  const yr = made.filter(f => f.first > plus(end, -12)), prev = made.filter(f => f.first <= plus(end, -12) && f.first > plus(end, -24));
+  const val = a => a.reduce((t, f) => t + (f.first_year || 0), 0);
+  return { count: yr.length, value: val(yr), prevCount: prev.length, prevValue: val(prev), end,
+    best: yr.slice().sort((a, b) => (b.first_year || 0) - (a.first_year || 0)).slice(0, 3) };
+}
+
 export function bridge({ P, PR, CA, M }) {
   const six = P.monthly.slice(-6);
   const today = six.reduce((t, m) => t + m.core, 0) / six.length;
@@ -77,10 +91,11 @@ export function bridge({ P, PR, CA, M }) {
   const slipV = slip.reduce((t, d) => t + d.trailing6_mean - d.revenue, 0);
 
   const ws = buildWhitespace(M, { exclude: [CITADEL], top: CROSS_SELL_DEPTH });
+  const pace = crossSellPace(M.history);
 
   const steps = [
     { key: 'cross', t: 'Sell what they don\'t buy yet', v: ws.total / 12, href: '#customers?view=whitespace', who: 'Anne',
-      s: `${ws.rows.filter(r => r.opp > 0).length} of the largest ${CROSS_SELL_DEPTH} accounts, at what comparable accounts spend`, note: 'if all took it up', modelled: true },
+      s: pace ? `the ceiling at what comparable accounts spend; R4's own pace is ${pace.count} added lines a year, about $${Math.round(pace.value / 12 / 1000)}K a month` : `${ws.rows.filter(r => r.opp > 0).length} of the largest ${CROSS_SELL_DEPTH} accounts, at what comparable accounts spend`, note: 'if all took it up', modelled: true },
     { key: 'price', t: 'Bring prices halfway to the median', v: price, href: '#customers?view=gaps', who: 'Anne',
       s: `${new Set([...sg.keys(), ...st.rows.map(r => r.level1)]).size} accounts pay under the book's median for storage or a service`, note: 'halfway' },
     { key: 'slip', t: 'Win back the slipping accounts', v: slipV, href: '#customers?view=slipping', who: 'Anne and Trisha',
@@ -98,6 +113,6 @@ export function bridge({ P, PR, CA, M }) {
     today, sixFrom: six[0].month, sixTo: six[six.length - 1].month,
     steps, minor, levers, newBusiness: Math.max(0, TARGET - today - levers),
     overdue: ob,
-    whitespace: ws, serviceGaps: sg, storageGaps: st,
+    whitespace: ws, serviceGaps: sg, storageGaps: st, pace,
   };
 }
