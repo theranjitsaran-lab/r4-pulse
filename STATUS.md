@@ -50,6 +50,16 @@ Where the build stands. Update it at the end of each piece of work.
 - **For the PC:** `scripts/freshness.js` (read-only) and three new snapshot queries: postcodes over
   twelve months, boxes stored by month, and the first month each account bought each line.
 
+## Finishing pass (26 October 2026)
+
+An independent review as Trisha, Anne and Mike found twelve problems; all fixed and pushed:
+one measure of movement everywhere (last three months against the account's own twelve, stopped
+accounts apart); one figure per price move with unit mismatches flagged; Pricing with a real
+new-customer default, a visit picker and a provisional verdict; Home opening with a verdict;
+margin separating sure losses from route costs under review; stale data said on Home and Routes;
+plain English; dark-mode contrast and focus; gzip (Home 4.1 MB to 314 KB). 21 of 21 tests.
+Walkthrough for Theran: https://claude.ai/artifact/698mNKV9ZVzDdXdgwwWTn4
+
 ## Next
 
 1. On the PC: `node scripts/freshness.js` (why does the data stop on 6 October?), then
