@@ -34,8 +34,12 @@ app.get('/health/data', async (req, res) => {
   } catch (e) { res.status(503).json({ stale: true, reasons: [e.message] }); }
 });
 
+const feedback = require('./feedback');
+app.use('/f', feedback.tap);   // a tap in the morning email: signed, no login
+
 auth.install(app);
 app.use('/api/log', require('./log'));
+app.use('/api/feedback', feedback.api);
 app.use('/api/summary', require('./summary'));
 app.use('/api', api);
 app.use(express.static(path.join(__dirname, '..', 'public'), { extensions: ['html'] }));

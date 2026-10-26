@@ -147,28 +147,29 @@ export async function render(main, PR, params) {
     const mine = rows.find(r => r.level1 === st.level1);
     const who = st.level1 ? (customers.find(x => x[0] === st.level1) || [0, ''])[1] : 'A new customer';
 
-    // verdict
+    // verdict. Where route costs are under review, the price is judged against the book only: a
+    // "below cost" built on a cost the screen itself calls provisional would cost the tool its trust.
+    const sure = review ? null : unitCost;
     let cls = '', lab = 'Sound', text;
-    if (unitCost != null && price < unitCost && review) { cls = 'is-warn'; lab = 'Below the provisional cost'; text = `${f(price)} is under the provisional cost of ${f(unitCost)} a ${svc.unit}. Route costs are under review, so read this as a flag: most of the cost is the visit, and it falls as visits are shared with nearby customers.`; }
-    else if (unitCost != null && price < unitCost) { cls = 'is-bad'; lab = 'Below cost'; text = `${f(price)} is below what this costs to serve. Cost to serve is ${f(unitCost)} a ${svc.unit}. Every one loses ${f(unitCost - price)}, and more volume makes it worse.`; }
-    else if (price < s.median) { cls = 'is-warn'; lab = 'Below the median'; text = `${f(price)} earns${unitCost != null ? ` ${f(price - unitCost)} a ${svc.unit} over cost` : ''}, but sits below the ${f(s.median)} ${medName}: cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.`; }
-    else text = `${f(price)} is a sound price: above the ${f(s.median)} ${medName}${unitCost != null ? ` and ${f(price - unitCost)} a ${svc.unit} over cost` : ''}.`;
-    $('p-verdict').innerHTML = `<div class="verdict ${cls}"><div class="lab">${lab}${review ? ' · route costs under review ◇' : ''}</div><p>${esc(text)}</p></div>`;
+    if (sure != null && price < sure) { cls = 'is-bad'; lab = 'Below cost'; text = `${f(price)} is below what this costs to serve. Cost to serve is ${f(unitCost)} a ${svc.unit}. Every one loses ${f(unitCost - price)}, and more volume makes it worse.`; }
+    else if (price < s.median) { cls = 'is-warn'; lab = 'Below the median'; text = `${f(price)} ${sure != null ? `earns ${f(price - sure)} a ${svc.unit} over cost, but ` : ''}sits below the ${f(s.median)} ${medName}: cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.`; }
+    else text = `${f(price)} is ${price > s.median ? 'above' : 'at'} the ${f(s.median)} ${medName}${sure != null ? ` and ${f(price - sure)} a ${svc.unit} over cost` : ''}.`;
+    $('p-verdict').innerHTML = `<div class="verdict ${cls}"><div class="lab">${lab}</div><p>${esc(text)}</p>${review ? `<p class="hint">Judged against the book only: the cost of a visit is under review until delivery routes are in the data, so no margin is shown.</p>` : ''}</div>`;
 
     // the track: cost to serve, the middle half of the book, its median, and the price
     $('p-track-title').textContent = `${who === 'A new customer' ? 'A quote' : who} at ${f(price)} a ${svc ? svc.unit : 'unit'}`;
     $('p-track-sub').textContent = `${s.n} accounts on this service`;
-    track($('p-track'), { price, cost: unitCost, s, f, cls, medName, of });
+    track($('p-track'), { price, cost: sure, s, f, cls, medName, of });
     // every account, one tap away
     const named = rows.slice().sort((a, b) => b.revenue - a.revenue).slice(0, 5).map(r => r.name);
     $('p-strip-title').textContent = `Every account on this service`;
     $('p-strip-sub').textContent = `${s.n} accounts · ${medName} ${f(s.median)} · open`;
-    strip($('p-strip'), { values: vals, cost: unitCost, price, named, fmt: f });
+    strip($('p-strip'), { values: vals, cost: sure, price, named, fmt: f });
     $('p-strip-src').textContent = st.code === 'STO' ? 'Storage billed ÷ boxes in the latest month, weighted by boxes, from VCK · cost to serve from the cost model ◇' : 'Each account\'s usual invoiced rate over the last 13 months, from VCK · cost to serve from the cost model ◇';
 
     // cost to serve
     if (c) {
-      $('p-cost-title').textContent = `How the cost is worked out: ${f(unitCost)} a ${svc.unit}`;
+      $('p-cost-title').textContent = review ? `The provisional cost working: ${f(unitCost)} a ${svc.unit}, under review` : `How the cost is worked out: ${f(unitCost)} a ${svc.unit}`;
       // the first sentence says what the line is; the rate's full working is one tap away
       const split = t => { const i = t.indexOf('. '); return i > 0 ? [t.slice(0, i + 1), t.slice(i + 2)] : [t, '']; };
       $('p-cost').innerHTML = c.lines.map(l => { const [head, rest] = split(l[2]); return `<div class="line"><span>${esc(l[0])}${l[3] ? ' ◇' : ''}</span><span class="v">${money0(l[1])}</span><span class="d">${esc(head)}${rest ? ` <details style="display:inline"><summary style="display:inline;cursor:pointer;color:var(--brand)">How it is worked out</summary><span style="display:block;margin-top:var(--sp-1)">${esc(rest)}</span></details>` : ''}</span></div>`; }).join('')
@@ -181,12 +182,12 @@ export async function render(main, PR, params) {
 
     // what it is worth a year
     const units = Math.max(0, st.units || 0);
-    const at = (p) => ({ rev: p * units, gm: c ? (p - unitCost) * units : null });
+    const at = (p) => ({ rev: p * units, gm: sure != null ? (p - sure) * units : null });
     const opts = [];
     opts.push({ k: 'you', label: `At ${f(price)}`, sub: 'the price entered', p: price });
     if (mine && Math.abs(mine.v - price) > 1e-9) opts.push({ k: 'now', label: `Today, ${f(mine.v)}`, sub: `what ${who} pays now`, p: mine.v });
     opts.push({ k: 'med', label: `At the ${medName}, ${f(s.median)}`, sub: s.weighted ? 'what the typical box pays' : `cheaper than half of ${s.n} accounts`, p: s.median });
-    if (c) opts.push({ k: 'be', label: `Break-even, ${f(unitCost)}`, sub: 'where gross margin is zero', p: unitCost });
+    if (sure != null) opts.push({ k: 'be', label: `Break-even, ${f(sure)}`, sub: 'where gross margin is zero', p: sure });
     const base = mine ? at(mine.v) : null;
     $('p-worth').innerHTML = opts.map(o => {
       const w = at(o.p), d = base ? w.rev - base.rev : null;

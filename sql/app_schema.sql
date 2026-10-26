@@ -15,3 +15,19 @@ CREATE TABLE IF NOT EXISTS app.calls_log (
   logged_at  timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS calls_log_level1 ON app.calls_log (level1, logged_at DESC);
+
+-- What the team says about a "what changed" line: knew (already knew it), wrong (not right), or
+-- useful. A knew or wrong line is held back from that person for 30 days. From the app or a tap in
+-- the morning email (a signed link, server/feedback.js).
+--   subject  what the line is about: 'day', 'month', 'route:MARK', 'account:3507'
+CREATE TABLE IF NOT EXISTS app.feedback (
+  id         bigserial PRIMARY KEY,
+  who        text NOT NULL,
+  key        text NOT NULL,
+  subject    text NOT NULL,
+  verdict    text NOT NULL CHECK (verdict IN ('knew', 'wrong', 'useful')),
+  brief_date date,
+  note       text,
+  at         timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS feedback_who ON app.feedback (who, at DESC);

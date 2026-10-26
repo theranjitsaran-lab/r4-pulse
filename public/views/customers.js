@@ -10,6 +10,7 @@ import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components
 import { billNow, serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippingAccounts, stoppedAccounts, risingAccounts, CROSS_SELL_DEPTH } from '/components/levers.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
+import { conversationCandidates } from '/components/lists.js';
 
 const CITADEL = 6714;
 const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under review: delivery days not yet in the volumes
@@ -136,39 +137,10 @@ function row(r) {
 }
 
 // ── This week: ten conversations, each from a signal, ranked by what is at stake a year ─────
-const OPENERS = {
-  slipping: n => `We've seen less work from ${n} over the last two months. Is anything changing on your side we should know about?`,
-  gap: (n, x) => `Your ${x.service} rate hasn't kept pace with what similar clients pay. Could we talk about bringing it in line?`,
-  rounds: n => `Your rates haven't moved in two years. We're reviewing them for the new year and wanted to talk with you first.`,
-  overdue: (n, x) => `${x.boxes.toLocaleString('en-US')} of your boxes are past their retention date. Shall we arrange secure destruction?`,
-  nodestroy: n => `You store your records with us but shred elsewhere. We can collect and destroy on the same visit.`,
-};
-
+// The ranking and the opening lines live in components/lists.js, shared with Anne's morning email.
 async function conversations(main, C) {
-  const [P, PR, CA, log] = await Promise.all([getJson('pulse'), getJson('pricing'), getJson('calls'), getLog().catch(() => [])]);
-  const ser = seriesOf(C);
-  const cands = new Map();
-  const add = (id, sig) => { if (id === CITADEL) return; const c = cands.get(id) || { level1: id, sigs: [] }; c.sigs.push(sig); cands.set(id, c); };
-  for (const d of slippingAccounts(C)) add(d.level1, { key: 'slipping', stake: -d.move.d * 12, ev: `${moveReason(d.move, moneyK)} over the last three months, against its own run`, name: d.customer });
-  // price gaps from the same function as the Price gaps list and the bridge, so the figure agrees:
-  // a year at the full median; suspected unit mismatches are not offered as gaps
-  const sg = serviceGaps(PR);
-  for (const a of sg.values()) add(a.level1, { key: 'gap', stake: a.worth * 12, ev: `${titleCase(a.top.service)}: $${a.top.rate.toFixed(2)} against a $${a.top.med.toFixed(2)} median · ${moneyK(a.worth * 12)} a year at the median`, service: titleCase(a.top.service).toLowerCase(), name: a.customer });
-  for (const r of storageGaps(PR).rows) add(r.level1, { key: 'gap', stake: r.worth * 12, ev: `storage at $${r.rate.toFixed(3)} a box against $${r.med.toFixed(3)} · ${moneyK(r.worth * 12)} a year at the median`, service: 'storage', name: r.customer });
-  for (const c of CA) {
-    if (c.not_raised_2y && !sg.has(c.level1)) add(c.level1, { key: 'rounds', stake: c.service * 0.08, ev: `no rate moved in two years on ${moneyK(c.service)} of service · ${moneyK(c.service * 0.08)} a year at the typical 8% rise`, name: c.customer });
-    if (c.boxes_review_overdue >= 50) add(c.level1, { key: 'overdue', stake: 0, boxes: Math.round(c.boxes_review_overdue), ev: `${Math.round(c.boxes_review_overdue).toLocaleString('en-US')} boxes past their retention review`, name: c.customer });
-    if (c.storage_no_destruction && c.storage > 20000) add(c.level1, { key: 'nodestroy', stake: 0, ev: `${moneyK(c.storage)} of storage a year and no destruction`, name: c.customer });
-  }
-  // handled in the last seven days drops out: called, emailed or not this week
-  const week = Date.now() - 7 * 864e5;
-  const handled = new Set(log.filter(l => l.kind === 'call' && Date.parse(l.logged_at) > week).map(l => l.level1));
-  const list = [...cands.values()].filter(c => !handled.has(c.level1)).map(c => {
-    c.sigs.sort((a, b) => b.stake - a.stake || (b.boxes || 0) - (a.boxes || 0));
-    c.stake = c.sigs.reduce((t, s) => t + s.stake, 0);
-    c.name = titleCase((ser.get(c.level1) || {}).customer || c.sigs[0].name);
-    return c;
-  }).sort((a, b) => b.stake - a.stake || (b.sigs[0].boxes || 0) - (a.sigs[0].boxes || 0)).slice(0, 10);
+  const [PR, CA, log] = await Promise.all([getJson('pricing'), getJson('calls'), getLog().catch(() => [])]);
+  const list = conversationCandidates({ C, PR, CA, log }).slice(0, 10);
 
   main.innerHTML = `
   <div class="cust">
@@ -179,7 +151,7 @@ async function conversations(main, C) {
       <div class="card conv" data-id="${c.level1}" data-sig="${c.sigs[0].key}">
         <div class="card-head"><h3><a href="#customer/${c.level1}" style="color:inherit;text-decoration:none">${i + 1}. ${esc(c.name)} <span style="color:var(--ink-5)">›</span></a></h3><small>${c.stake ? moneyK(c.stake) + ' a year at stake' : ''}</small></div>
         <div class="sub">${c.sigs.slice(0, 2).map(s => esc(s.ev)).join(' · ')}</div>
-        <p class="open-line">“${esc(OPENERS[c.sigs[0].key](c.name, c.sigs[0]))}”</p>
+        <p class="open-line">“${esc(c.opener)}”</p>
         <div class="acts"><button data-v="called">Called</button><button data-v="emailed">Emailed</button><button data-v="not_this_week">Not this week</button><span class="done-note"></span></div>
       </div>`).join('') || '<div class="card">Nothing to call about this week.</div>'}</div>
     <p class="foot">At stake: a year of the slipping shortfall, the gap to the median, or the typical 8% rise. Logged accounts drop out for seven days.</p>

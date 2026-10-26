@@ -4,7 +4,7 @@
 //
 // Run on the PC with the admin DATABASE_URL in .env. Safe to re-run: each run sets a new password.
 //
-//   r4_pulse_app   reads public, kpi and model; writes app.calls_log and nothing else.
+//   r4_pulse_app   reads public, kpi and model; writes app.calls_log and app.feedback and nothing else.
 //
 // The password is never printed. The app's connection string goes into .env.render (gitignored)
 // as DATABASE_URL=..., for pasting into Render; delete the file once it is pasted.
@@ -32,6 +32,8 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public, kpi, model TO ${ROLE};
 ALTER DEFAULT PRIVILEGES IN SCHEMA public, kpi, model GRANT SELECT ON TABLES TO ${ROLE};
 GRANT SELECT, INSERT ON app.calls_log TO ${ROLE};
 GRANT USAGE ON SEQUENCE app.calls_log_id_seq TO ${ROLE};
+GRANT SELECT, INSERT ON app.feedback TO ${ROLE};
+GRANT USAGE ON SEQUENCE app.feedback_id_seq TO ${ROLE};
 `;
 
 function connOpts(url) {
@@ -53,6 +55,8 @@ function writeEnv(key, value) {
   await admin.connect();
   const [{ exists }] = (await admin.query(`SELECT to_regclass('app.calls_log') IS NOT NULL AS exists`)).rows;
   if (!exists) throw new Error('app.calls_log does not exist yet: apply sql/app_schema.sql first');
+  const [{ fb }] = (await admin.query(`SELECT to_regclass('app.feedback') IS NOT NULL AS fb`)).rows;
+  if (!fb) throw new Error('app.feedback does not exist yet: apply sql/app_schema.sql first');
   await admin.query(GRANTS);
   const password = crypto.randomBytes(24).toString('base64url');
   await admin.query(`ALTER ROLE ${ROLE} PASSWORD '${password}'`);   // base64url: no quotes to escape
@@ -99,6 +103,11 @@ function writeEnv(key, value) {
   await step('calls log: insert (rolled back)', async () => {
     await c.query('BEGIN');
     await c.query(`INSERT INTO app.calls_log (level1, kind, signal, verdict, who) VALUES (0, 'signal', 'role-check', 'right', 'app_role.js')`);
+    await c.query('ROLLBACK');
+  });
+  await step('feedback: insert (rolled back)', async () => {
+    await c.query('BEGIN');
+    await c.query(`INSERT INTO app.feedback (who, key, subject, verdict) VALUES ('app_role.js', 'role-check', 'day', 'useful')`);
     await c.query('ROLLBACK');
   });
   const refused = async (label, sql) => step(`refused: ${label}`, async () => {

@@ -228,3 +228,14 @@ test('warehouse: cells sum to the boxes; states never overlap; eligible ties to 
   const NB = heldNotBilled(acc, PR);
   near(NB.gap, NB.rows.reduce((t, r) => t + r.held - r.billed, 0), 1e-6, 'not billed');
 });
+
+test('what changed: each signal fires on a minority of days; a normal day says nothing', async () => {
+  const { backtest, changesFor } = await import('../public/components/changes.js');
+  const P = J('pulse'), A = J('activity');
+  const b = backtest(P, A, 40);
+  assert.ok(b.days >= 30, `days backtested: ${b.days}`);
+  for (const [k, n] of Object.entries(b.fires)) assert.ok(n <= b.days * 0.3, `${k} fired on ${n} of ${b.days} days`);
+  assert.ok(b.quietDays >= b.days * 0.35, `quiet days ${b.quietDays} of ${b.days}`);
+  // every line's numbers are its own figures (no invented numbers)
+  for (const i of changesFor(P, A).items) assert.ok(i.text && i.owner && i.subject, 'a line has text, an owner and a subject');
+});

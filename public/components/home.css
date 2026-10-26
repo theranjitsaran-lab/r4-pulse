@@ -131,3 +131,50 @@ html.motion-on .is-in .gap-seg { transform: scaleX(1); transition: transform var
   .gap-wide { display: none; }
   .gap-rows a, .gap-rows li > div { grid-template-columns: var(--sw) minmax(0, 1fr) auto var(--sp-2); gap: var(--sp-2); }
 }
+
+/* ── the compact Home (26 October 2026): brief, strip, team, month, the rest folded ── */
+.h .brief .card-head { align-items: baseline; }
+.h .brief .card-head small { color: var(--ink-4); font-size: var(--fs-source); }
+.h .brief .hv { font-size: var(--fs-lead); line-height: 1.45; margin: 0 0 var(--sp-3); max-width: var(--measure); color: var(--ink); }
+.chg { list-style: none; margin: 0; padding: 0; }
+.chg li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-3); align-items: center; padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); font-size: var(--fs-sm); line-height: 1.45; }
+.chg li:first-child { border-top: 0; }
+.chg li::before { content: none; }
+.chg li.down > span:first-child { border-left: var(--hair-2) solid var(--bad); padding-left: var(--sp-2); }
+.chg li.up > span:first-child { border-left: var(--hair-2) solid var(--good); padding-left: var(--sp-2); }
+.chg li.held { opacity: .45; }
+.fb { display: inline-flex; gap: var(--sp-1); white-space: nowrap; }
+.fb button { border: var(--hair) solid var(--rule-3); background: var(--surface); color: var(--ink-3); font: inherit; font-size: var(--fs-tiny); padding: 2px var(--sp-2); border-radius: var(--r-pill); cursor: pointer; }
+.fb button:hover { color: var(--ink); border-color: var(--ink-4); }
+.fb em { font-style: normal; font-size: var(--fs-tiny); color: var(--ink-4); }
+.quiet { margin: 0; color: var(--ink-3); font-size: var(--fs-sm); }
+.strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-radius: var(--r-lg); overflow: hidden;
+  background: linear-gradient(135deg, var(--hero-bg-2), var(--hero-bg) 70%); color: var(--hero-ink); }
+.strip > a, .strip > div { display: block; padding: var(--sp-4) var(--sp-5); color: inherit; text-decoration: none; border-left: var(--hair) solid var(--hero-track); }
+.strip > :first-child { border-left: 0; }
+.strip a:hover { background: var(--hero-track); }
+.strip .lab { display: block; font-size: var(--fs-source); color: var(--hero-ink-2); font-weight: 500; }
+.strip b { display: block; font-size: var(--fs-num); font-weight: 700; letter-spacing: var(--track-tight); line-height: 1.15; margin: 2px 0; font-variant-numeric: tabular-nums; }
+.strip small { display: block; font-size: var(--fs-source); color: var(--hero-ink-3); }
+.team { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+.team .done { grid-column: 1 / -1; margin: calc(var(--sp-2) * -1) 0 0; font-size: var(--fs-source); color: var(--ink-3); }
+.calls { list-style: none; margin: 0; padding: 0; }
+.calls li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-3); align-items: center; padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); }
+.calls li:first-child { border-top: 0; }
+.calls a { color: inherit; text-decoration: none; min-width: 0; } .calls a:hover b { color: var(--brand); }
+.calls b { display: block; font-weight: 600; } .calls small { display: block; font-size: var(--fs-source); color: var(--ink-3); line-height: 1.4; }
+.calls span { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.team .next { margin: var(--sp-3) 0 0; font-size: var(--fs-sm); color: var(--ink-2); }
+.h .more summary { display: flex; justify-content: space-between; gap: var(--sp-3); cursor: pointer; list-style: none; font-weight: 600; }
+.h .more summary::-webkit-details-marker { display: none; }
+.h .more[open] .go { transform: rotate(90deg); } .h .more .go { color: var(--ink-5); }
+.h .also { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+.h .also a { display: block; padding: var(--sp-3) var(--sp-4); border-radius: var(--r); background: var(--surface); color: var(--ink-2); text-decoration: none; font-size: var(--fs-sm); line-height: 1.45; }
+.h .also a:hover { color: var(--ink); } .h .also b { color: var(--ink); }
+@media (max-width: 860px) {
+  .strip { grid-template-columns: 1fr 1fr; }
+  .strip > :nth-child(3) { border-left: 0; } .strip > :nth-child(n+3) { border-top: var(--hair) solid var(--hero-track); }
+  .team, .h .also { grid-template-columns: 1fr; }
+  .chg li { grid-template-columns: 1fr; gap: var(--sp-1); }
+  .h .brief .hv { font-size: var(--fs-body-lg); }
+}
