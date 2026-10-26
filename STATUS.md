@@ -79,6 +79,17 @@ Walkthrough for Theran: https://claude.ai/artifact/698mNKV9ZVzDdXdgwwWTn4
 - **Snapshot queries added** (need one PC snapshot): `pulse.dailyDone` (15 months), `activity.accountDays`
   and `activity.routeHistory`, `customerDrill.routes` (live per account). 25 of 25 tests.
 
+## Margin drill rebuilt the way v10 reads (26 October 2026)
+
+Customers › Margin is now four levels, each replacing the last, with a breadcrumb: every account
+(with an action: Drop · Re-route · Renegotiate · Reprice · Hold, or Check routes where the cost is
+mostly route cost under review) → one account (cost bar, lines) → one line, job by job (postcode,
+miles, stops that day) → one job (every cost line in a sentence about that day, the route map, what
+would have made it cheaper). One cost per job: a route job takes its real share of that route day
+(`jobCost` with `routemap.js allocate`), so the cost build and the map agree; jobs with no route that
+day say they use the model's average. New panel: where more volume would cut cost, by postcode.
+Shared job view `components/jobview.js` (Margin and the customer page). 26 of 26 tests.
+
 ## Next
 
 1. On the PC: `node scripts/freshness.js` (why does the data stop on 6 October?), then

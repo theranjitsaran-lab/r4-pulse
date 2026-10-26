@@ -158,3 +158,47 @@ test('route map: the stops share the route day exactly; travel follows the detou
   assert.ok(day.stops[2].travel > day.stops[0].travel + day.stops[1].travel, 'the far stop carries most of the travel');
   near(day.stops[0].travel, day.stops[1].travel, 1e-9, 'stops at one place share its travel');
 });
+
+test('margin drill: one cost per job on its real route day; actions; density never exceeds travel', async () => {
+  const R = require('./rates.js');
+  const { costOrders, densityByPostcode } = await import('../public/components/jobview.js');
+  const { marginAction, marginSummary, accountLines } = await import('../public/components/margin.js');
+  const Z = require('../public/data/zcta.json');
+  const A = J('activity'), M = J('margin'), D = J('drill');
+  // a job's lines sum to its cost; with a route that day, travel and on-site are its share of allocate
+  let real = 0;
+  for (const a of D.accounts.slice(0, 15)) {
+    const meta = new Map();
+    for (const l of M.lines) if (l.level1 === a.level1 || !meta.has(l.servcode)) meta.set(l.servcode, { family: l.family, unit: l.unit, drives_cost: l.drives_cost });
+    const d = JSON.parse(JSON.stringify(a)), C = costOrders(R, d, meta, A, Z, a.level1);
+    for (const o of d.orders) {
+      near(o.cost.lines.reduce((t, l) => t + l[1], 0), o.cost.total, 1e-6, `${o.woid} lines`);
+      if (!o.cost.real) continue;
+      real++;
+      const share = C.perDay.get(o.date), me = o.day.alloc.me;
+      const line = n => (o.cost.lines.find(l => l[0] === n) || [0, 0])[1];
+      near(line('Travel to site'), me.travel / share, 1e-6, `${o.woid} travel is its share of the day`);
+      near(line('Time on site'), me.onsite / share, 1e-6, `${o.woid} on site is its share of the day`);
+    }
+  }
+  assert.ok(real >= 10, `jobs costed on a real route day: ${real}`);
+  // action rules on known cases
+  const act = (pc, revenue, cost, travel, review = false) => marginAction({ pc, revenue, cost, review }, travel).tag;
+  assert.equal(act(0.6, 1e5, 4e4, 0), 'Hold');
+  assert.equal(act(0.3, 1e5, 7e4, 0), 'Reprice');
+  assert.equal(act(0.05, 3000, 2850, 0), 'Drop');
+  assert.equal(act(0.05, 5e4, 47500, 3e4), 'Re-route');
+  assert.equal(act(-0.2, 5e4, 6e4, 1e4), 'Renegotiate');
+  assert.equal(act(-0.5, 5e4, 7.5e4, 4e4, true), 'Check routes');
+  assert.equal(act(0.7, 5e4, 1.5e4, 1e4, true), 'Hold', 'a sound account keeps Hold whatever its route share');
+  // every account in the list gets one action
+  const MS = marginSummary(R, M, [6714]), AL = accountLines(R, M);
+  assert.ok(MS.accounts.every(m => marginAction(m, 0).tag), 'every account has an action');
+  // the density panel: a saving is never more than the travel shared a year
+  const Dn = densityByPostcode(R, A, Z, { top: 50 });
+  assert.ok(Dn.rows.length > 0, 'postcodes ranked');
+  for (const r of Dn.rows) assert.ok(r.saving <= r.visitsYear * r.travel + 1e-6, `${r.postcode} saving within its travel`);
+  // Ingalls still holds
+  const ing = R.costToServe('bin', 3540, { visits: 101, pounds: 154887 });
+  near(ing.total, 37273, 1, 'Ingalls');
+});

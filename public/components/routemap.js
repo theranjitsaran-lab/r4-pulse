@@ -127,7 +127,7 @@ export function mapSvg(day, { width = 640 } = {}) {
   const xs = pts.map(p => p[1] * k), ys = pts.map(p => p[0]);
   let x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
   const span = Math.max(x1 - x0, y1 - y0, 0.05);   // at least about three miles across
-  const height = Math.round(Math.max(240, Math.min(440, width * Math.max(y1 - y0, span * 0.6) / Math.max(x1 - x0, span * 0.6))));
+  const height = Math.round(Math.max(240, Math.min(380, width * Math.max(y1 - y0, span * 0.6) / Math.max(x1 - x0, span * 0.6))));
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, pad = 28;
   const s = Math.min((width - pad * 2) / Math.max(x1 - x0, span * 0.6), (height - pad * 2) / Math.max(y1 - y0, span * 0.6));
   const P = p => [width / 2 + (p[1] * k - cx) * s, height / 2 - (p[0] - cy) * s];

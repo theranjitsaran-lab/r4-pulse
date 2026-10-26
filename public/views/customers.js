@@ -4,7 +4,8 @@
 import { customerTable, falling, rising, tableHtml, sortRows, COLUMNS } from '/components/custtable.js';
 import { dailyFrom, addMonths } from '/components/projection.js';
 import { sparkline, money0, moneyK } from '/components/chart.js';
-import { buildMargins, marginSummary } from '/components/margin.js';
+import { buildMargins, marginSummary, marginAction, accountLines, accountCosts, costParts, PARTS, FAMILY_NAMES } from '/components/margin.js';
+import { costOrders, jobHtml, drawRouteBlock, jobPlace, densityByPostcode } from '/components/jobview.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 import { serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippingAccounts, stoppedAccounts, risingAccounts, CROSS_SELL_DEPTH } from '/components/levers.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
@@ -488,38 +489,191 @@ function marginReason(a, m) {
   return 'labour carries most of the cost';
 }
 
+// ── Margin: four levels, each replacing the last (v10's path, on real data) ──────────────────
+//   1 every account: revenue, cost to serve, what is left, margin, and what to do about it
+//   2 one account: its cost by kind and its lines of business
+//   3 one line, job by job: each order with its place on the route that day
+//   4 one job: the cost build in sentences, the route that day on a map, what would have made it cheaper
+// #customers?view=margin[&id=<level1>[&line=<family>[&job=<woid>]]]
+const MV_EXTRA = `
+.mv2 .crumb { font-size: 13px; color: var(--ink-3); margin: 0 0 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+.mv2 .crumb a { color: var(--brand); text-decoration: none; }
+.mv2 h2.t { font-size: 24px; font-weight: 700; letter-spacing: var(--track-tight); margin: 0 0 4px; line-height: 1.2; }
+.mv2 .hd.a, .mv2 .rw.a { grid-template-columns: minmax(0, 1fr) 96px 96px 104px 84px 112px 14px; }
+.mv2 .jobs .hd span:nth-child(2) { text-align: left; }
+.mv2 .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 20px; white-space: nowrap; }
+.mv2 .tag.good { background: var(--good-bg, var(--well)); color: var(--good); } .mv2 .tag.warn { background: var(--warn-bg); color: var(--warn); }
+.mv2 .tag.bad { background: var(--bad-bg, var(--well)); color: var(--bad); } .mv2 .tag.review { background: var(--well-2); color: var(--ink-2); }
+.mv2 .lines .hd, .mv2 .lines .rw { grid-template-columns: minmax(0, 1fr) 120px 96px 96px 104px 64px 14px; }
+.mv2 .jobs .hd, .mv2 .jobs .rw { grid-template-columns: 76px minmax(0, 1fr) 62px 56px 64px 84px 84px 84px 14px; }
+.mv2 .jobs .rw .pl { display: none; }
+.mv2 .note { font-size: 14px; color: var(--ink-2); line-height: 1.5; margin: 0 0 12px; padding: 10px 12px; background: var(--well); border-radius: var(--r); }
+.mv2 .dens .rw { grid-template-columns: minmax(0, 1fr) 120px 14px; }
+.mv2 .working { margin-top: 10px; }
+@media (max-width: 760px) {
+  .mv2 .rw.a { grid-template-columns: minmax(0, 1fr) 84px 14px; grid-template-areas: "nm lf go" "ac pc go"; }
+  .mv2 .rw.a .ac { grid-area: ac; }
+  .mv2 .lines .rw { grid-template-columns: minmax(0, 1fr) 84px 14px; grid-template-areas: "nm lf go" "nm pc go"; }
+  .mv2 .lines .rw .u, .mv2 .lines .rw .rv, .mv2 .lines .rw .cs { display: none; }
+  .mv2 .jobs .rw { grid-template-columns: 62px minmax(0, 1fr) 76px 14px; grid-template-areas: "dt nm lf go" "dt pl lf go"; }
+  .mv2 .jobs .rw .pl { display: block; } .mv2 .jobs .hd { display: none; }
+  .mv2 .jobs .rw .dt { grid-area: dt; } .mv2 .jobs .rw .nm { grid-area: nm; } .mv2 .jobs .rw .pl { grid-area: pl; font-size: 12px; color: var(--ink-3); }
+  .mv2 .jobs .rw .lf { grid-area: lf; } .mv2 .jobs .rw .go { grid-area: go; } .mv2 .jobs .rw .mi, .mv2 .jobs .rw .st, .mv2 .jobs .rw .u, .mv2 .jobs .rw .rv, .mv2 .jobs .rw .cs { display: none; }
+}`;
+const n0 = v => Math.round(v || 0).toLocaleString('en-US');
+const pcText = pc => pc == null ? '—' : pc < 0 ? 'below cost' : Math.round(pc * 100) + '%';
+const mlink = (o = {}) => '#customers?view=margin' + Object.entries(o).filter(([, v]) => v != null && v !== 'all').map(([k, v]) => `&${k}=${encodeURIComponent(v)}`).join('');
+const zctaP = () => fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+const jobCache = new Map();
+
 async function marginView(main, C, params) {
-  if (!document.getElementById('mv2-css')) { const st = document.createElement('style'); st.id = 'mv2-css'; st.textContent = MV_CSS; document.head.appendChild(st); }
-  const filter = ['thin', 'below'].includes(params.f) ? params.f : 'all';
+  for (const [id, css] of [['mv2-css', MV_CSS], ['mv3-css', MV_EXTRA]]) if (!document.getElementById(id)) { const st = document.createElement('style'); st.id = id; st.textContent = css; document.head.appendChild(st); }
   const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
   const MS = marginSummary(R, M, [CITADEL]);
-  const acct = new Map(M.accounts.map(a => [a.level1, a]));
-  const all = MS.accounts.map(m => ({ ...m, why: marginReason(acct.get(m.level1) || {}, m) }));
-  const rows = all.filter(r => filter === 'all' || (filter === 'thin' ? r.pc >= 0.15 && r.pc < 0.5 : r.pc < 0.15)).sort((a, b) => a.margin - b.margin);
-  const below = MS.below, belowLoss = MS.losers;
-  const visitHeavy = below.filter(r => r.review).length;
-  const sum = k => rows.reduce((t, r) => t + r[k], 0);
-  const link = f => `#customers?view=margin${f !== 'all' ? '&f=' + f : ''}`;
-  const shown = params.n === 'all' ? rows.length : 60;
+  const id = params.id != null ? Number(params.id) : null;
+  if (id != null && params.line && params.job) return marginJob(main, R, M, MS, id, params.line, params.job);
+  if (id != null && params.line) return marginLine(main, R, M, MS, id, params.line);
+  if (id != null) return marginAccount(main, R, M, MS, id);
+  return marginList(main, R, M, MS, params);
+}
 
+// level 1: every account
+async function marginList(main, R, M, MS, params) {
+  const filter = ['thin', 'below'].includes(params.f) ? params.f : 'all';
+  const [A, Z] = await Promise.all([getJson('activity').catch(() => null), zctaP()]);
+  const acct = new Map(M.accounts.map(a => [a.level1, a])), AL = accountLines(R, M);
+  const travelOf = id => (AL.get(id) || []).filter(l => l[0] === 'Travel to site' || l[0] === 'Truck time').reduce((t, l) => t + l[1], 0);
+  const all = MS.accounts.map(m => ({ ...m, why: marginReason(acct.get(m.level1) || {}, m), act: marginAction(m, travelOf(m.level1)) }));
+  const rows = all.filter(r => filter === 'all' || (filter === 'thin' ? r.pc >= 0.15 && r.pc < 0.5 : r.pc < 0.15)).sort((a, b) => a.margin - b.margin);
+  const count = t => all.filter(r => r.act.tag === t).length;
+  const sum = k => rows.reduce((t, r) => t + r[k], 0);
+  const shown = params.n === 'all' ? rows.length : 60;
+  const D = A ? densityByPostcode(R, A, Z) : { rows: [] };
   main.innerHTML = `
   <div class="cust mv2">
     <h1>Customers</h1>
     <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'margin' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
-    <p class="lede">${below.length} accounts keep under 15% of what they pay after the cost to serve them ◇. But ${visitHeavy} of the ${below.length} are visit-heavy (bins, deliveries, retrievals), where route costs are still under review, so only ${below.length - visitHeavy} are thin on costs we are sure of; ${belowLoss.filter(r => !r.review).length} of those cost more than they pay. Accounts marked "under review" are a flag until Mike confirms how delivery routes run.</p>
-    <div class="tools"><div class="seg">${[['all', 'All'], ['thin', 'Thin, 15–50%'], ['below', 'Below cost, under 15%']].map(([k, l]) => `<a href="${link(k)}" class="${k === filter ? 'on' : ''}">${l}</a>`).join('')}</div></div>
+    <p class="lede">What each account pays against what it costs to serve ◇, worst first. ${count('Renegotiate') + count('Re-route') + count('Drop')} accounts need a decision now (${count('Renegotiate')} renegotiate, ${count('Re-route')} re-route, ${count('Drop')} too small to keep), ${count('Reprice')} are thin enough to reprice, and ${count('Check routes')} look thin only on route costs still under review. Tap an account for its lines, then its jobs, then one job's cost.</p>
+    <div class="tools"><div class="seg">${[['all', 'All'], ['thin', 'Thin, 15–50%'], ['below', 'Below 15%']].map(([k, l]) => `<a href="${mlink({ f: k })}" class="${k === filter ? 'on' : ''}">${l}</a>`).join('')}</div></div>
     <div class="card">
-      <div class="hd"><span>Customer</span><span>Revenue</span><span>Cost ◇</span><span>Left</span><span>Margin</span><span></span></div>
-      ${rows.slice(0, shown).map(r => `<a class="rw" href="#customer/${r.level1}?from=margin">
-        <span class="nm">${esc(titleCase(r.customer))}${r.review ? ' <span class="chip review">under review</span>' : ''}<small>${esc(r.why)}</small></span>
+      <div class="hd a"><span>Customer</span><span>Revenue</span><span>Cost ◇</span><span>Left</span><span>Margin</span><span>Action</span><span></span></div>
+      ${rows.slice(0, shown).map(r => `<a class="rw a" href="${mlink({ id: r.level1 })}">
+        <span class="nm">${esc(titleCase(r.customer))}<small>${esc(r.why)}</small></span>
         <span class="r rv">${money0(r.revenue)}</span><span class="r cs">${money0(r.cost)}</span>
         <span class="r lf ${r.margin < 0 && !r.review ? 'is-bad' : ''}">${money0(r.margin)}</span>
-        <span class="r pc ${r.pc < 0.15 && !r.review ? 'is-bad' : r.pc < 0.5 && !r.review ? 'is-warn' : ''}">${r.pc == null ? '—' : r.pc < -1 ? 'costs over 2× its pay' : r.pc < 0 ? 'below cost' : Math.round(r.pc * 100) + '%'}</span><span class="go">›</span></a>`).join('')}
-      <div class="rw tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r rv">${money0(sum('revenue'))}</span><span class="r cs">${money0(sum('cost'))}</span><span class="r lf">${money0(sum('margin'))}</span><span class="r pc">${sum('revenue') > 0 ? Math.round(sum('margin') / sum('revenue') * 100) + '%' : '—'}</span><span></span></div>
-      ${rows.length > shown ? `<a class="more" style="display:inline-block;margin-top:10px;color:var(--brand);font-weight:500;text-decoration:none" href="${link(filter)}&n=all">Show all ${rows.length}</a>` : ''}
+        <span class="r pc ${r.pc < 0.15 && !r.review ? 'is-bad' : r.pc < 0.5 && !r.review ? 'is-warn' : ''}">${pcText(r.pc)}</span>
+        <span class="ac"><span class="tag ${r.act.cls}" title="${esc(r.act.why)}">${r.act.tag}</span></span><span class="go">›</span></a>`).join('')}
+      <div class="rw a tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r rv">${money0(sum('revenue'))}</span><span class="r cs">${money0(sum('cost'))}</span><span class="r lf">${money0(sum('margin'))}</span><span class="r pc">${sum('revenue') > 0 ? Math.round(sum('margin') / sum('revenue') * 100) + '%' : '—'}</span><span></span><span></span></div>
+      ${rows.length > shown ? `<a class="more" style="display:inline-block;margin-top:10px;color:var(--brand);font-weight:500;text-decoration:none" href="${mlink({ f: filter, n: 'all' })}">Show all ${rows.length}</a>` : ''}
     </div>
-    <p class="foot">Twelve months. Cost to serve ◇ from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Tap an account for its lines, then its orders.</p>
+    ${D.rows.length ? `<div class="card dens" style="margin-top:14px">
+      <div class="card-head"><h3>Where more volume would cut cost: ${esc(D.rows[0].postcode)} first, about ${money0(D.rows[0].saving)} a year ◇</h3></div>
+      <p class="sub" style="margin:0 0 8px">Travel to a postcode is shared by the customers on the visit. Where visits carry one customer, one more on the same visits takes this much a year off the cost of serving the ones already there.</p>
+      ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${d.miles.toFixed(0)} miles out<small>about ${n0(d.visitsYear)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${d.perVisit.toFixed(1)} customers each`} · ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
+      <div class="src">Route visits from ${D.days > 120 ? 'six months of route days' : `the ${D.days} days of routes held offline, scaled to a year`} · customers a visit from the twelve-month postcode book · travel a visit from the cost model at the postcode's distance (model/rates.js, provisional) ◇</div>
+    </div>` : ''}
+    <p class="foot">Twelve months. Cost to serve ◇ from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Actions: Drop under $5,000 and under 15% · Re-route under 15% with travel over 40% of cost · Renegotiate under 15% · Reprice 15–50% · Hold 50% and over · Check routes where most of the cost is route cost under review.</p>
   </div>`;
+}
+
+// level 2: one account, its cost by kind and its lines
+async function marginAccount(main, R, M, MS, id) {
+  const m = MS.book.accounts.find(a => a.level1 === id), a = M.accounts.find(x => x.level1 === id);
+  if (!m || !a) { main.innerHTML = `<div class="cust mv2"><div class="crumb"><a href="${mlink()}">Margin</a></div><div class="pending">No twelve-month revenue or cost for this account.</div></div>`; return; }
+  const lines = M.lines.filter(l => l.level1 === id), AC = accountCosts(R, a, lines);
+  const parts = costParts(Object.values(AC).flat().flatMap(r => r.lines)), left = m.margin;
+  const total = Math.max(m.revenue, m.cost, 1), name = titleCase(m.customer);
+  const sm = MS.accounts.find(x => x.level1 === id), act = sm ? marginAction(sm, parts.route * R.SETTINGS.split) : null;
+  const units = f => f === 'storage' ? `${n0(a.boxes)} boxes` : (() => { const ls = lines.filter(l => (l.family || 'other') === f); const u = ls.reduce((t, l) => t + (l.units || 0), 0); const un = (ls[0] || {}).unit || 'units'; return u ? `${n0(u)} ${un}${u === 1 || /s$/.test(un) ? '' : 's'}` : ''; })();
+  const fams = Object.entries(m.fam).filter(([, v]) => v.revenue > 0 || v.cost > 0).sort((x, y) => y[1].revenue - x[1].revenue);
+  const seg = (v, cls, label) => v > 0.5 ? `<i class="${cls}" style="width:${v / total * 100}%" title="${esc(label)} ${money0(v)}">${v / total > 0.1 ? moneyK(v) : ''}</i>` : '';
+  main.innerHTML = `
+  <div class="cust mv2">
+    <div class="crumb"><a href="${mlink()}">Margin</a><span>›</span><span>${esc(name)}</span></div>
+    <h2 class="t">${esc(name)} pays ${money0(m.revenue)} a year for work that costs about ${money0(m.cost)} to serve ◇</h2>
+    <p class="lede">${left >= 0 ? `That leaves ${money0(left)}, ${Math.round(left / m.revenue * 100)}% of what it pays.` : `That is ${money0(-left)} a year short.`} ${act ? `<span class="tag ${act.cls}">${act.tag}</span> ${esc(act.why)}` : ''} <a href="#customer/${id}?from=margin" style="color:var(--brand);text-decoration:none">The customer page ›</a></p>
+    <div class="card">
+      <div class="jv-bars">
+        <span class="lab">Pays</span><div class="jv-bar"><i class="p-rev" style="width:${m.revenue / total * 100}%">${moneyK(m.revenue)}</i></div>
+        <span class="lab">Costs ◇</span><div class="jv-bar">${PARTS.map(p => seg(parts[p[0]], { space: 'p-space', handling: 'p-hand', route: 'p-route', plant: 'p-plant', labour: 'p-lab' }[p[0]], p[1])).join('')}</div>
+        <span class="lab">${left >= 0 ? 'Left' : 'Short'}</span><div class="jv-bar"><i class="${left >= 0 ? 'p-left' : 'p-loss'}" style="width:${Math.abs(left) / total * 100}%">${Math.abs(left) / total > 0.1 ? moneyK(left) : ''}</i></div>
+      </div>
+      <div class="jv-key">${PARTS.filter(p => parts[p[0]] > 0.5).map(p => `<span><i class="${{ space: 'p-space', handling: 'p-hand', route: 'p-route', plant: 'p-plant', labour: 'p-lab' }[p[0]]}"></i>${p[1]} ${moneyK(parts[p[0]])}</span>`).join('')}</div>
+    </div>
+    <div class="card lines" style="margin-top:14px">
+      <div class="card-head"><h3>By line of business, largest first</h3></div>
+      <div class="hd"><span>Line</span><span>Volume</span><span>Revenue</span><span>Cost ◇</span><span>Left</span><span>Margin</span><span></span></div>
+      ${fams.map(([f, v]) => { const l = v.revenue - v.cost, pc = v.revenue > 0 ? l / v.revenue : null; return `<a class="rw" href="${mlink({ id, line: f })}">
+        <span class="nm">${esc(FAMILY_NAMES[f] || f)}${pc != null && pc < 0 ? ' <span class="tag bad">below cost</span>' : ''}</span><span class="r u">${f === 'storage' || v.cost > 0 ? esc(units(f)) : ''}</span>
+        <span class="r rv">${money0(v.revenue)}</span><span class="r cs">${v.cost ? money0(v.cost) : '—'}</span><span class="r lf ${l < 0 ? 'is-bad' : ''}">${money0(l)}</span>
+        <span class="r pc">${pcText(pc)}</span><span class="go">›</span></a>`; }).join('')}
+      <div class="src">Twelve months, posted invoices · cost ◇ from the cost model (model/rates.js) · tap a line for its jobs</div>
+    </div>
+  </div>`;
+}
+
+// the account's orders, costed on their route days, kept between levels 3 and 4
+async function accountJobs(R, M, id) {
+  if (jobCache.has(id)) return jobCache.get(id);
+  const p = (async () => {
+    const meta = new Map();
+    for (const l of M.lines) if (l.level1 === id || !meta.has(l.servcode)) meta.set(l.servcode, { family: l.family, unit: l.unit, drives_cost: l.drives_cost });
+    const [r, A, Z, PR] = await Promise.all([fetch(`/api/customer/${id}`, { credentials: 'same-origin' }), getJson('activity').catch(() => null), zctaP(), getJson('pricing')]);
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) return { error: j.error || `HTTP ${r.status}` };
+    const d = j.data, C = costOrders(R, d, meta, A, Z, id);
+    return { d, meta, A, Z, C, svcName: new Map(PR.rates.map(x => [x.servcode, x.service])) };
+  })();
+  jobCache.set(id, p);
+  return p;
+}
+const famItems = (o, f, meta) => o.items.filter(i => ((meta.get(i.code) || {}).family || 'other') === f);
+
+// level 3: one line, job by job
+async function marginLine(main, R, M, MS, id, f) {
+  const m = MS.book.accounts.find(a => a.level1 === id), name = titleCase(m ? m.customer : `Account ${id}`), fname = FAMILY_NAMES[f] || f;
+  const a = M.accounts.find(x => x.level1 === id), AC = a ? accountCosts(R, a, M.lines.filter(l => l.level1 === id)) : {};
+  const v = (m && m.fam[f]) || { revenue: 0, cost: 0 };
+  const crumb = `<div class="crumb"><a href="${mlink()}">Margin</a><span>›</span><a href="${mlink({ id })}">${esc(name)}</a><span>›</span><span>${esc(fname)}</span></div>`;
+  const working = (AC[f] || []).flatMap(r => r.lines);
+  const workHtml = working.length ? `<table class="jv-tab working"><tbody>${working.map(l => `<tr><td>${esc(l[0])}${l[3] ? ' ◇' : ''}</td><td class="why">${esc(l[2])}</td><td class="num">${money0(l[1])}</td></tr>`).join('')}</tbody></table>` : '';
+  main.innerHTML = `<div class="cust mv2">${crumb}<h2 class="t">${esc(fname)}: ${money0(v.revenue)} a year against about ${money0(v.cost)} to serve ◇</h2><div id="mv-jobs"><p class="sub">Loading the jobs…</p></div>
+    <div class="card" style="margin-top:14px"><div class="card-head"><h3>The year's cost, worked out ◇</h3></div>${workHtml || '<p class="sub">No modelled cost on this line: fees and charges with no volume behind them.</p>'}<div class="src">Twelve months of volume at the cost model's rates (model/rates.js); the jobs above are costed one by one on their own route days</div></div></div>`;
+  const box = main.querySelector('#mv-jobs');
+  if (['storage', 'other'].includes(f)) { box.innerHTML = `<p class="note">${f === 'storage' ? 'Storage bills every month for the boxes held, so it has no jobs: its cost is the warehouse space below.' : 'Fees and charges carry no volume, so there are no jobs to cost.'}</p>`; return; }
+  const J = await accountJobs(R, M, id);
+  if (!box.isConnected) return;
+  if (J.error) { box.innerHTML = `<div class="pending">${esc(J.error)}</div>`; return; }
+  const jobs = J.d.orders.map(o => { const items = famItems(o, f, J.meta); if (!items.length) return null; const x = J.C.cost(o, items); return { o, items, ...x, rev: items.reduce((t, i) => t + (i.revenue || 0), 0), place: jobPlace(x.ctx) }; }).filter(Boolean);
+  if (!jobs.length) { box.innerHTML = '<p class="note">No orders on this line in the last six months.</p>'; return; }
+  const short = jobs.filter(j => j.margin < 0), real = jobs.filter(j => j.cost.real).length, route = jobs.filter(j => j.cost.route).length;
+  const units = j => j.items.reduce((t, i) => t + (i.units || 0), 0);
+  box.innerHTML = `<p class="note">${short.length ? `<b>${short.length} of ${jobs.length} jobs did not cover their cost.</b>` : `All ${jobs.length} jobs covered their cost.`} ${route ? `The route share moves most: it depends on how many other stops the driver made that day and how far apart they were. ${real} of the ${route} route jobs are costed on their real route day; the rest at the model's average visit${real < route ? ' (no Veri-Shred route for this account that day, or the date is outside the routes held offline)' : ''}.` : ''} Tap a job to see how its cost is built.</p>
+    <div class="card jobs"><div class="hd"><span>Date</span><span>Where</span><span>Miles</span><span>Stops</span><span>Units</span><span>Billed</span><span>Cost ◇</span><span>Left</span><span></span></div>
+    ${jobs.slice(0, 80).map(j => `<a class="rw" href="${mlink({ id, line: f, job: j.o.woid })}">
+      <span class="dt">${esc(new Date(j.o.date + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }))}</span>
+      <span class="nm">${j.place ? `${esc(j.place.postcode || '—')} <small style="display:inline;color:var(--ink-4)">route ${esc(/\d/.test(j.place.route) ? j.place.route : titleCase(j.place.route))}</small>` : '<span class="sub">no route that day</span>'}</span>
+      <span class="pl">${j.place ? `${j.place.miles != null ? j.place.miles.toFixed(0) + ' mi · ' : ''}${j.place.stops} stops` : ''}</span>
+      <span class="r mi">${j.place && j.place.miles != null ? j.place.miles.toFixed(0) : '—'}</span><span class="r st">${j.place ? `${j.place.stops}` : '—'}</span>
+      <span class="r u">${n0(units(j))}</span><span class="r rv">${money0(j.rev)}</span><span class="r cs">${money0(j.cost.total)}</span>
+      <span class="r lf ${j.margin < 0 ? (j.cost.real || !j.cost.route ? 'is-bad' : 'is-warn') : ''}">${money0(j.margin)}</span><span class="go">›</span></a>`).join('')}
+    <div class="src">VCK work orders, six months, this line's items only · miles from the yard and stops on the route that day from Veri-Shred done orders${J.d.routes && J.d.routes.length ? '' : ' (about three weeks held offline)'} · cost ◇ from the cost model</div></div>`;
+}
+
+// level 4: one job
+async function marginJob(main, R, M, MS, id, f, woid) {
+  const m = MS.book.accounts.find(a => a.level1 === id), name = titleCase(m ? m.customer : `Account ${id}`), fname = FAMILY_NAMES[f] || f;
+  main.innerHTML = `<div class="cust mv2"><p class="sub">Loading the job…</p></div>`;
+  const J = await accountJobs(R, M, id);
+  const o = J.d && J.d.orders.find(x => String(x.woid) === String(woid));
+  const crumb = `<div class="crumb"><a href="${mlink()}">Margin</a><span>›</span><a href="${mlink({ id })}">${esc(name)}</a><span>›</span><a href="${mlink({ id, line: f })}">${esc(fname)}</a><span>›</span><span>${o ? esc(new Date(o.date + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })) : 'job'}</span></div>`;
+  if (!o) { main.innerHTML = `<div class="cust mv2">${crumb}<div class="pending">${esc(J.error || 'This order is not among the account\'s last six months.')}</div></div>`; return; }
+  const items = famItems(o, f, J.meta).length ? famItems(o, f, J.meta) : o.items, x = J.C.cost(o, items), pl = jobPlace(x.ctx);
+  main.innerHTML = `<div class="cust mv2">${crumb}
+    <h2 class="t">${esc(fname)} for ${esc(name)}, order ${esc(o.woid)}</h2>
+    <p class="lede">${pl ? `At ${esc(pl.postcode || 'an unplaced address')}${pl.miles != null ? `, ${pl.miles.toFixed(0)} miles from the yard` : ''}, on route ${esc(/\d/.test(pl.route) ? pl.route : titleCase(pl.route))} with ${pl.stops} stop${pl.stops === 1 ? '' : 's'} for ${pl.visits} customer${pl.visits === 1 ? '' : 's'} that day.` : 'Not on a Veri-Shred route that day.'}</p>
+    <div class="card">${jobHtml({ o, items, c: x.cost, svcName: J.svcName, ctx: x.ctx, A: J.A })}</div></div>`;
+  drawRouteBlock(main.querySelector('.jv-route'), x.ctx, { R, A: J.A, Z: J.Z });
 }
 
 // ── Overdue boxes: destruction once against the storage it ends ──────────────────────────────

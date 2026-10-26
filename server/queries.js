@@ -336,13 +336,13 @@ async function customerDrill(level1) {
     WHERE billable = 'true' AND NULLIF(level1, '')::int = $1
       AND NULLIF(date, '')::date >= b.f AND NULLIF(date, '')::date < b.t
     GROUP BY 1, 2 ORDER BY 1 DESC, 2 LIMIT 200`, [level1]);
-  // The whole route on each of the account's latest 30 visit days, stop by stop in order: who else
+  // The whole route on each of the account's visit days, six months (about 130 working days), stop by stop in order: who else
   // the driver served, where, and how much, so a job's share of the day can be seen on a map.
   const routes = await query(`
     WITH mine AS (
       SELECT DISTINCT NULLIF(date, '')::date AS d, NULLIF(route, '') AS route FROM vs_service_orders
       WHERE billable = 'true' AND NULLIF(level1, '')::int = $1 AND NULLIF(route, '') IS NOT NULL
-      ORDER BY 1 DESC LIMIT 30)
+      ORDER BY 1 DESC LIMIT 130)
     SELECT m.d::text AS date, m.route, NULLIF(o.slocid, '') AS stop,
            min(CASE WHEN o.rorder ~ '^[0-9]+(\\.[0-9]+)?$' THEN o.rorder::numeric END)::float AS seq,
            min(NULLIF(o.level1, '')::int) AS level1, min(NULLIF(o.company, '')) AS company,

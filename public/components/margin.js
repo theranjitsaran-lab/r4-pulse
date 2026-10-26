@@ -103,8 +103,12 @@ export const FAMILY_NAMES = {
 // route families the order touches. meta maps a service code to { family, unit, drives_cost }.
 // share: how many of the account's orders that day needed the route, so one visit is split
 // between them rather than charged in full to each.
-//   jobCost(R, [{ code, units, revenue }], meta, share) → { lines: [[name, amount, why, flag]], total, route }
-export function jobCost(R, items, meta, share = 1) {
+// day: when the account was on a Veri-Shred route that day, { day, alloc } from routemap.js. The
+// route lines are then the account's real share of that route day (allocate), split between its
+// route orders that day, in place of the model's average visit; so the job's cost and its route
+// map show the same figure. Without it the order says it is costed at the average.
+//   jobCost(R, [{ code, units, revenue }], meta, share, day) → { lines: [[name, amount, why, flag]], total, route, real }
+export function jobCost(R, items, meta, share = 1, day = null) {
   const of = c => meta.get(c) || {};
   const units = pred => items.filter(i => pred(i, of(i.code))).reduce((t, i) => t + (i.units || 0), 0);
   const parts = [];
@@ -133,9 +137,60 @@ export function jobCost(R, items, meta, share = 1) {
       const k = l[0] === 'Truck time' ? 'Travel to site' : l[0];
       if (seen.has(k)) continue;
       seen.add(k);
+      if (day) { lines.push(...dayLines(R, day, share).filter(x => x[0] === k)); continue; }
       if (share > 1) l = [l[0], l[1] / share, `${l[2]} One visit served ${share} orders that day, so this order carries a ${share === 2 ? 'half' : share === 3 ? 'third' : `1/${share}`} share.`].concat(l.slice(3));
     }
     if (l[1] > 0.005) lines.push(l);
   }
-  return { lines, total: lines.reduce((t, l) => t + l[1], 0), route: seen.size > 0 };
+  return { lines, total: lines.reduce((t, l) => t + l[1], 0), route: seen.size > 0, real: !!day && seen.size > 0 };
+}
+
+// The route lines of one job from its real route day: the account's travel and time on site that
+// day (routemap.js allocate), shared between the account's route orders that day.
+const m0 = v => '$' + Math.round(v).toLocaleString('en-US');
+function dayLines(R, { day, alloc }, share) {
+  const a = alloc, me = a.me, part = share > 1 ? `, and this order is one of the account's ${share} that day, so it carries ${share === 2 ? 'half' : share === 3 ? 'a third' : `1/${share}`}` : '';
+  const route = /\d/.test(day.route) ? day.route : day.route.charAt(0) + day.route.slice(1).toLowerCase();
+  return [
+    ['Travel to site', me.travel / share,
+      `Route ${route} cost ${m0(a.total)} that day. ${Math.round(R.SETTINGS.split * 100)}% of a route day is travel, ${m0(a.travel)}, split by how far each stop took the driver out of the way: this account's stops added ${me.detour != null ? me.detour.toFixed(1) : '0'} of the day's ${Math.round(a.dayMiles)} miles, ${m0(me.travel)}${part}.`, 'route'],
+    ['Time on site', me.onsite / share,
+      `The other ${m0(a.onsite)} of the route day is time on site, split between the ${a.visits} customer${a.visits === 1 ? '' : 's'} visited (${a.stops} stop${a.stops === 1 ? '' : 's'}): ${m0(me.onsite)} for this account${part}.`, 'route'],
+  ];
+}
+
+// Cost lines grouped for the bar: storage space, handling, route, shred plant, labour.
+export const PARTS = [
+  ['space', 'Storage space', ['Warehouse space']],
+  ['handling', 'Handling', ['Warehouse handling', 'Box handling']],
+  ['route', 'Route', ['Travel to site', 'Truck time', 'Time on site']],
+  ['plant', 'Shred plant', ['Shred plant', 'Plant throughput']],
+  ['labour', 'Labour', ['Driver time', 'Service Centre time']],
+];
+export function costParts(lines) {
+  const out = Object.fromEntries(PARTS.map(p => [p[0], 0]));
+  for (const l of lines) { const p = PARTS.find(x => x[2].includes(l[0])); if (p) out[p[0]] += l[1]; }
+  return out;
+}
+
+// What to do about an account, from its own figures (v10's rules, in order). Accounts whose cost is
+// mostly route cost under review get "Check routes" rather than a verdict built on a provisional cost.
+//   m: a marginSummary account; travel: its travel cost a year
+export function marginAction(m, travel) {
+  const pc = m.pc ?? 0;
+  if (pc >= 0.5) return { tag: 'Hold', cls: 'good', why: 'Keeps half or more of what it pays.' };
+  if (m.review) return { tag: 'Check routes', cls: 'review', why: 'Most of its cost is route cost, still under review until delivery routes are in the data.' };
+  if (pc < 0.15 && m.revenue < 5000) return { tag: 'Drop', cls: 'bad', why: 'Too small to fix: under $5,000 a year and under 15% left.' };
+  if (pc < 0.15 && m.cost > 0 && travel / m.cost > 0.4) return { tag: 'Re-route', cls: 'bad', why: 'Under 15% left, and most of the cost is getting there.' };
+  if (pc < 0.15) return { tag: 'Renegotiate', cls: 'bad', why: 'Costs more to serve than its prices allow.' };
+  return { tag: 'Reprice', cls: 'warn', why: 'Thin: between 15% and 50% left.' };
+}
+
+// Every account's cost lines, a year, flattened: for its travel share and its bar.
+export function accountLines(R, M) {
+  const byAcc = new Map();
+  for (const l of M.lines) { if (!byAcc.has(l.level1)) byAcc.set(l.level1, []); byAcc.get(l.level1).push(l); }
+  const out = new Map();
+  for (const a of M.accounts) out.set(a.level1, Object.values(accountCosts(R, a, byAcc.get(a.level1) || [])).flat().flatMap(r => r.lines));
+  return out;
 }
