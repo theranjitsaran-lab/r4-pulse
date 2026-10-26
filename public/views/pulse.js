@@ -10,12 +10,14 @@ import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { marginSummary } from '/components/margin.js';
 import { moveReason } from '/components/series.js';
 import { project, dailyFrom, curve } from '/components/projection.js';
+import { templateSummary, checkNumbers } from '/components/summary.js';
 import { bridge, billNow, slippingAccounts, risingAccounts, TARGET, CITADEL } from '/components/levers.js';
 
 const CSS = `
 .home { display: grid; gap: 14px; }
 .home .greet .hi { color: var(--ink-3); margin: 0 0 6px; font-size: var(--fs-label); }
 .home .greet .hv { font-size: 23px; line-height: 1.35; font-weight: 500; letter-spacing: -.01em; margin: 0; max-width: 980px; }
+.home .greet .by { margin: 6px 0 0; font-size: var(--fs-source); color: var(--ink-4); }
 .home .stale { margin: 0; padding: 8px 12px; border-radius: var(--r-sm); background: var(--warn-bg); color: var(--warn); font-size: var(--fs-label); }
 .home .landgrid { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 28px; }
 .home .facts { display: flex; flex-direction: column; gap: 0; border-left: 1px solid var(--rule); padding-left: 24px; }
@@ -132,16 +134,27 @@ export async function render(main, P) {
   const top2 = B.steps.slice(0, 2);
   const age = Math.round((Date.now() - Date.parse(A.latestDone + 'T12:00:00Z')) / 864e5);
   const staleNote = age > 2 ? `<p class="stale">The data stops on ${dayMonth(A.latestDone)}, ${age} days ago: the daily refresh has not run since. Figures below are as of then.</p>` : '';
-  const verdict = [
-    runCore != null ? `${mon(billMonth)} bills ${moneyK(runCore)}, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target${nextBill != null ? `; ${mon(addMonths(billMonth, 1))} is building towards ${moneyK(nextBill)} ◇` : ''}.` : '',
-    top2.length ? `The biggest levers: ${top2.map(x => `${x.t.charAt(0).toLowerCase() + x.t.slice(1)} (${x.modelled ? 'up to ' : ''}${moneyK(x.v)} a month)`).join(' and ')}.` : '',
-    mv.falls.length ? `${mv.slipping} accounts are slipping; the largest is ${esc(titleCase(mv.falls[0].customer))}, ${esc(mv.falls[0].why)}.` : '',
-  ].filter(Boolean).join(' ');
+  // the figure sheet behind the opening paragraph: each fact as a line for Claude and as the
+  // template's own sentence (components/summary.js checks Claude's numbers against these lines)
+  const nb = addMonths(billMonth, 1), top = mv.falls[0], gain = mv.gains[0];
+  const sheet = [
+    age > 2 && { key: 'stale', line: `The data stops on ${dayMonth(A.latestDone)}, ${age} days ago; the daily refresh has not run since` },
+    runCore != null && { key: 'bill', line: `${mon(billMonth)}'s bill, already known: ${moneyK(runCore)} core, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target, ${pct(runCore / last.core - 1).replace('▲ ', 'up ').replace('▼ ', 'down ')} on ${mon(last.month)}'s ${moneyK(last.core)}`,
+      say: `${mon(billMonth)} bills ${moneyK(runCore)}, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target.` },
+    X.bill && { key: 'next', line: `${mon(nb)}'s bill, building from ${mon(workMonth)}'s work: about ${moneyK(X.bill.central)} ◇ (likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}), ${moneyK(TARGET - X.bill.central)} short of $1.0M; ${X.elapsed} of ${X.workdays} working days in`,
+      say: `${mon(nb)} is heading for about ${moneyK(X.bill.central)} ◇, likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}.` },
+    top2.length && { key: 'levers', line: `Biggest levers to $1.0M from existing customers: ${top2.map(x => `${x.t.toLowerCase()}, ${x.modelled ? 'up to ' : ''}${moneyK(x.v)} a month${x.modelled ? ' (a ceiling ◇)' : ''}`).join('; ')}; new business must find ${moneyK(B.newBusiness)} a month`,
+      say: `The biggest levers: ${top2.map(x => `${x.t.charAt(0).toLowerCase() + x.t.slice(1)} (${x.modelled ? 'up to ' : ''}${moneyK(x.v)} a month)`).join(' and ')}.` },
+    top && { key: 'slipping', line: `${mv.slipping} accounts are slipping; the largest is ${titleCase(top.customer)}, ${top.why}, ${moneyK(-top.d)} a month below its own run`,
+      say: `${mv.slipping} accounts are slipping; the largest is ${titleCase(top.customer)}, ${top.why}.` },
+    gain && { key: 'rising', line: `Rising most: ${titleCase(gain.customer)}, ${moneyK(gain.d)} a month above its own run` },
+    { key: 'margin', line: `${sure.length} accounts cost more to serve than they pay on costs R4 is sure of; ${unsure.length} more only while route costs are under review` },
+  ].filter(Boolean);
 
   main.innerHTML = `
   <div class="home">
     ${staleNote}<div class="greet"><p class="hi">${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'} · core revenue, Citadel apart · target $1.0M a month</p>
-      <h1 class="hv">${verdict}</h1></div>
+      <h1 class="hv" id="home-hv"></h1><p class="by" id="home-by"></p></div>
 
     <section class="card land">
       <div class="landgrid">
@@ -183,6 +196,14 @@ export async function render(main, P) {
 
     <div class="foot">Posted through ${mon(last.month)} ${last.month.slice(0, 4)} · work done through ${dayMonth(A.latestDone)} · ◇ modelled · tap any row to open it</div>
   </div>`;
+
+  // the template first, then Claude's paragraph if it arrives and passes the check; text, never HTML
+  const hv = main.querySelector('#home-hv'), by = main.querySelector('#home-by');
+  hv.textContent = templateSummary(sheet);
+  fetch('/api/summary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sheet: sheet.map(({ key, line, say }) => ({ key, line, say })) }) })
+    .then(r => r.ok ? r.json() : null)
+    .then(j => { if (j && j.source === 'claude' && j.text && checkNumbers(j.text, sheet).ok && hv.isConnected) { hv.textContent = j.text; by.textContent = 'Written by Claude from the figures on this page; every number checked against them.'; } })
+    .catch(() => {});
 
   landing(main.querySelector('#home-land'), {
     title: nextBill != null ? `${mon(addMonths(billMonth, 1))}'s bill is heading for about ${moneyK(nextBill)} ◇, ${moneyK(TARGET - nextBill)} short of $1.0M` : 'Where the month lands',

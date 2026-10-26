@@ -22,3 +22,5 @@ services:
         sync: false
       - key: AUTH_USERS       # from .env.render (scripts/app_users.js)
         sync: false
+      - key: ANTHROPIC_API_KEY  # optional: Home's opening paragraph written by Claude; without it, the template
+        sync: false

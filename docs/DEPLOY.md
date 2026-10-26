@@ -41,7 +41,7 @@ Then, in the Render dashboard:
 
 1. **New → Blueprint**, pick `theranjitsaran-lab/r4-pulse`. Render reads `render.yaml`.
 2. It asks for the two `sync: false` values. Paste `DATABASE_URL` and `AUTH_USERS` from
-   `.env.render`. `SESSION_SECRET` is generated.
+   `.env.render`. `SESSION_SECRET` is generated. `ANTHROPIC_API_KEY` is optional: with it, Home's opening paragraph is written by Claude from the page's own figures (every number checked against them, `server/summary.js`); without it, the template sentence is shown. Put the key in Render's environment only, never in the repo.
 3. Once the service exists, copy its outbound addresses (**Connect → Outbound**) to the
    database's Trusted Sources (see "What has to be true first", item 1). Then **Manual Deploy →
    Deploy latest commit**.

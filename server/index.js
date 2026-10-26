@@ -15,6 +15,7 @@ app.get('/health', (req, res) => res.json({ ok: true, fixtures: USE_FIXTURES }))
 
 auth.install(app);
 app.use('/api/log', require('./log'));
+app.use('/api/summary', require('./summary'));
 app.use('/api', api);
 app.use(express.static(path.join(__dirname, '..', 'public'), { extensions: ['html'] }));
 // The cost model runs in the browser too (Pricing, Margin): the same file, never a copy.

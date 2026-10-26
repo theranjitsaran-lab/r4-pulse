@@ -89,3 +89,18 @@ test('projection: done to date + days left × pace; the band is backtested leave
   const c = curve(daily, '2026-09-01', 100, 0);
   near(c[c.length - 1].done, daily.filter(r => r.date.startsWith('2026-09')).reduce((t, r) => t + r.done, 0), 1e-6, 'curve total');
 });
+
+test('summary: every number in the paragraph must be on the figure sheet', async () => {
+  const { checkNumbers, templateSummary, numbersIn } = await import('../public/components/summary.js');
+  const sheet = [
+    { key: 'bill', line: "October's bill, already known: $628K core, 63% of the $1.0M target, up 5% on September's $600K", say: 'October bills $628K, 63% of the $1.0M target.' },
+    { key: 'next', line: "November's bill: about $632K ◇ (likely $581K to $692K); 4 of 22 working days in", say: 'November is heading for about $632K ◇, likely $581K to $692K.' },
+    { key: 'slipping', line: '24 accounts are slipping; the largest is City Of Chicago, service down $34K a month', say: '24 accounts are slipping; the largest is City Of Chicago, service down $34K a month.' },
+  ];
+  assert.deepEqual(numbersIn('From $1.0M, 1,167 boxes, −$34K and 63%.'), ['$1.0M', '1,167', '−$34K', '63%']);
+  assert.ok(checkNumbers(templateSummary(sheet), sheet).ok, 'the template passes its own check');
+  assert.ok(checkNumbers('October bills $628K, 63% of target; November is heading for $632K ◇ with 24 accounts slipping, City Of Chicago down $34K a month.', sheet).ok, 'a faithful paragraph passes');
+  const bad = checkNumbers('October bills $630K and November should reach $700K.', sheet);
+  assert.ok(!bad.ok, 'an invented figure fails'); assert.deepEqual(bad.bad, ['$630K', '$700K']);
+  assert.ok(!checkNumbers('About 64% of target.', sheet).ok, 'a rounded-differently percentage fails');
+});
