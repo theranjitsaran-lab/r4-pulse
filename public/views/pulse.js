@@ -15,6 +15,7 @@ const CSS = `
 .home { display: grid; gap: 14px; }
 .home .greet .hi { color: var(--ink-3); margin: 0 0 6px; font-size: var(--fs-label); }
 .home .greet .hv { font-size: 23px; line-height: 1.35; font-weight: 500; letter-spacing: -.01em; margin: 0; max-width: 980px; }
+.home .stale { margin: 0; padding: 8px 12px; border-radius: var(--r-sm); background: var(--warn-bg); color: var(--warn); font-size: var(--fs-label); }
 .home .billlink { color: inherit; text-decoration: none; display: inline-block; }
 .home .billlink:hover { color: var(--brand); }
 .home .month { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
@@ -141,6 +142,8 @@ export async function render(main, P) {
   // the answer to Trisha's three questions, before anything else: where the month lands, the two
   // biggest levers, who is slipping and why
   const top2 = B.steps.slice(0, 2);
+  const age = Math.round((Date.now() - Date.parse(A.latestDone + 'T12:00:00Z')) / 864e5);
+  const staleNote = age > 2 ? `<p class="stale">The data stops on ${dayMonth(A.latestDone)}, ${age} days ago: the daily refresh has not run since. Figures below are as of then.</p>` : '';
   const verdict = [
     runCore != null ? `${mon(billMonth)} bills ${moneyK(runCore)}, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target${nextBill != null ? `; ${mon(addMonths(billMonth, 1))} is building towards ${moneyK(nextBill)} ◇` : ''}.` : '',
     top2.length ? `The biggest levers: ${top2.map(x => `${x.t.charAt(0).toLowerCase() + x.t.slice(1)} (${x.modelled ? 'up to ' : ''}${moneyK(x.v)} a month)`).join(' and ')}.` : '',
@@ -149,7 +152,7 @@ export async function render(main, P) {
 
   main.innerHTML = `
   <div class="home">
-    <div class="greet"><p class="hi">${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'} · core revenue, Citadel apart · target $1.0M a month</p>
+    ${staleNote}<div class="greet"><p class="hi">${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'} · core revenue, Citadel apart · target $1.0M a month</p>
       <h1 class="hv">${verdict}</h1></div>
 
     <section class="card">

@@ -38,7 +38,7 @@ async function show() {
     const j = await getJson(route.api, { envelope: true });
     data = j.data;
     const asof = document.getElementById('asof');
-    if (asof && j.snapshotAt) asof.textContent = 'Data as of ' + new Date(j.snapshotAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    if (asof && j.snapshotAt) asof.textContent = 'Read ' + new Date(j.snapshotAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   } catch (e) {
     if (e.status === 401) { location.href = '/login'; return; }
     if (my !== seq) return;

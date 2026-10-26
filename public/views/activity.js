@@ -113,7 +113,7 @@ export async function render(main, A, params) {
     <div class="two">
       <div class="card"><div class="card-head"><h3>The week</h3><small>done services · tap a day</small></div><div id="rt-week"></div></div>
       <div class="stack">
-        <div class="card"><div class="card-head"><h3>Booked ahead</h3><small>services on the books</small></div><div id="rt-ahead"></div></div>
+        <div class="card"><div class="card-head"><h3>Booked after the latest day</h3><small>services on the books</small></div><div id="rt-ahead"></div></div>
         <div class="card"><div class="card-head"><h3>Margin per route day</h3></div><div class="pending">Starts when driver pay rates by person are loaded: the day's invoiced work less driver pay and the vehicle share of a route day.</div></div>
       </div>
     </div>
@@ -130,12 +130,14 @@ export async function render(main, A, params) {
     const normDay = rows.reduce((t, r) => t + (norm[r.route] ? norm[r.route].done : 0), 0);
     const pounds = rows.reduce((t, r) => t + r.pounds, 0);
     const thin = rows.filter(r => r.services_done > 0 && norm[r.route] && r.services_done < THIN * norm[r.route].done);
-    $('rt-say').innerHTML = done ? `${esc(dlabel(day))}: ${done.toLocaleString('en-US')} services done on ${pl(rows.filter(r => r.services_done > 0).length, 'route')}${normDay ? `, <span class="delta ${dcls(done / normDay - 1)}">${pct(done / normDay - 1)}</span> on these routes' own norm` : ''}.${thin.length ? ` <span class="is-warn">Thin: ${thin.map(r => `${esc(routeName(r.route))} (${r.services_done} against ${Math.round(norm[r.route].done)})`).join(', ')}.</span>` : ' No thin route.'}` : 'No work done on this day.';
+    const age = Math.round((Date.now() - Date.parse(A.latestDone + 'T12:00:00Z')) / 864e5);
+    const stale = age > 2 ? `<span class="is-warn">The latest work in the data is ${esc(dlabel(A.latestDone))}, ${age} days ago: the daily refresh has not run since, so "booked" dates may already have passed.</span> ` : '';
+    $('rt-say').innerHTML = stale + (done ? `${esc(dlabel(day))}: ${done.toLocaleString('en-US')} services done on ${pl(rows.filter(r => r.services_done > 0).length, 'route')}${normDay ? `, <span class="delta ${dcls(done / normDay - 1)}">${pct(done / normDay - 1)}</span> on these routes' own norm` : ''}.${thin.length ? ` <span class="is-warn">Thin: ${thin.map(r => `${esc(routeName(r.route))} (${r.services_done} against ${Math.round(norm[r.route].done)})`).join(', ')}.</span>` : ' No thin route.'}` : 'No work done on this day.');
     $('rt-sum').innerHTML = `
       <div class="card"><div class="lab">Services done</div><div class="big">${done.toLocaleString('en-US')}</div><div class="sub">${normDay ? `<span class="delta ${dcls(done / normDay - 1)}">${pct(done / normDay - 1)}</span> on these routes' norm of ${Math.round(normDay)}` : ''}</div></div>
       <div class="card"><div class="lab">Booked, not done</div><div class="big ${booked - done > done * .5 ? 'is-warn' : ''}">${(booked - done).toLocaleString('en-US')}</div><div class="sub">of ${booked.toLocaleString('en-US')} booked</div></div>
       <div class="card"><div class="lab">Routes out</div><div class="big">${rows.filter(r => r.services_done > 0).length}</div><div class="sub">${rows.reduce((t, r) => t + r.stops_done, 0)} stops done</div></div>
-      <div class="card"><div class="lab">Pounds recorded</div><div class="big">${Math.round(pounds).toLocaleString('en-US')}</div><div class="sub">${pounds ? Math.round(rows.reduce((t, r) => t + r.pounds_exec_default, 0) / pounds * 100) + '% executive-bin defaults' : 'none recorded'}</div></div>`;
+      <div class="card"><div class="lab">Pounds recorded</div><div class="big">${Math.round(pounds).toLocaleString('en-US')}</div><div class="sub">${pounds ? `${Math.round(rows.reduce((t, r) => t + r.pounds_exec_default, 0) / pounds * 100)}% of it is executive bins at a set weight, not weighed` : 'none recorded'}</div></div>`;
 
     const max = Math.max(1, ...rows.map(r => Math.max(r.services_done, norm[r.route] ? norm[r.route].done : 0)));
     $('rt-routes').innerHTML = rows.map(r => {
@@ -230,7 +232,9 @@ export async function render(main, A, params) {
       const ps = by.filter(p => p.mi >= a && p.mi < b), sv = ps.reduce((t, p) => t + p.services, 0);
       return { l, sv, share: total ? sv / total : 0, n: ps.length };
     });
-    const far = by.filter(p => p.mi >= 20).sort((a, b) => b.per - a.per).slice(0, 12);
+    // ranked by what the trips cost in route time, not by distance: a far postcode visited once is
+    // cheaper in total than a nearer one visited every week
+    const far = by.filter(p => p.mi >= 20 && !p.billing).sort((a, b) => b.cost - a.cost).slice(0, 12);
     const near10 = (bands[0].sv + bands[1].sv) / (total || 1);
     const farV = far.reduce((t, p) => t + p.visits, 0), farS = far.reduce((t, p) => t + p.services, 0), farC = far.reduce((t, p) => t + p.cost, 0);
     const window = pts ? 'twelve months' : `the ${Math.round((new Date(A.latestDone) - new Date(A.orders.map(o => o.date).sort()[0])) / 864e5) + 1} days to ${dshort(A.latestDone)}`;
@@ -239,8 +243,8 @@ export async function render(main, A, params) {
       <div class="bands">${bands.map(b => `<span>${b.l}</span><span class="bar"><i style="width:${b.share * 100}%"></i></span><span class="v">${b.sv.toLocaleString('en-US')}</span><span class="v sub">${Math.round(b.share * 100)}%</span>`).join('')}</div>
       ${far.length ? `<div class="card-head" style="margin-top:8px"><h3>The long way round: ${far.length} postcodes 20 miles or more out</h3><small>visit cost ◇ per service</small></div>
       <div class="sub" style="margin-bottom:8px">${farV} visits for ${farS} services, about ${money0(farC / (farS || 1))} a service in route time ◇. Bundle them onto a planned run, or price the trip.</div>
-      <table class="far"><thead><tr><th>Postcode</th><th>Miles</th><th class="hide-s">Customers</th><th>Visits</th><th>Services</th><th>Per service ◇</th></tr></thead><tbody>
-      ${far.map(p => `<tr><td><b>${esc(p.pc)}</b> <span class="sub">${esc(p.names)}${p.billing ? ' · billing address' : ''}</span></td><td>${p.mi.toFixed(1)}</td><td class="hide-s">${p.customers}</td><td>${p.visits}</td><td>${p.services}</td><td class="${p.per > 100 ? 'is-warn' : ''}">${money0(p.per)}</td></tr>`).join('')}</tbody></table>` : '<p class="sub">No work 20 miles or more out in this window.</p>'}
+      <table class="far"><thead><tr><th>Postcode</th><th>Miles</th><th class="hide-s">Visits</th><th class="hide-s">Services</th><th>Route time ◇</th><th>Per service ◇</th></tr></thead><tbody>
+      ${far.map(p => `<tr><td><b>${esc(p.pc)}</b> <span class="sub nm">${esc(p.names)}</span></td><td>${p.mi.toFixed(0)}</td><td class="hide-s">${p.visits}</td><td class="hide-s">${p.services}</td><td>${money0(p.cost)}</td><td class="${p.per > 100 ? 'is-warn' : ''}">${money0(p.per)}</td></tr>`).join('')}</tbody></table>` : '<p class="sub">No work 20 miles or more out in this window.</p>'}
       <div class="src">Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles from US Census ZCTA centroids · route time from the cost model: a route day's travel share scaled for distance, plus time on site ◇ · route costs under review</div>`;
   }
 
