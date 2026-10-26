@@ -3,6 +3,7 @@
 // customer list built from the same function, so the step and its list always agree.
 // Citadel is held apart from all of them.
 import { buildWhitespace } from './whitespace.js';
+import { seriesOf } from './series.js';
 
 export const TARGET = 1e6;
 export const CITADEL = 6714;
@@ -69,10 +70,25 @@ export function billNow(P) {
   return { run, core: run ? run.storage + run.service - run.citadel : null };
 }
 
-// Accounts below their own six-month level for a second month, Citadel apart: the bridge's slipping
-// step and the Slipping list.
-export function slippingAccounts(P) {
-  return P.downTwoMonths.filter(d => d.level1 !== CITADEL && d.trailing6_mean > d.revenue);
+// Down: the last three months at least 10% and $250 a month below the account's own twelve before
+// them, on a run of $500 a month or more. Citadel apart. Split in two:
+//   slipping  still billing at least a quarter of its run: a win-back conversation;
+//   stopped   under a quarter: ended or paused, often a one-off project (badging, a destruction job).
+// The one definition used by the bridge, the Slipping list, This week, Home's movers and the
+// customer page (components/series.js holds the measure).
+export const SLIP = { pct: -0.10, dollars: 250, run: 500, stopped: 0.25 };
+export function accountMoves(C) {
+  return [...seriesOf(C).values()].filter(s => s.level1 !== CITADEL && s.move && s.move.run > 0);
+}
+function downAccounts(C) {
+  return accountMoves(C).filter(s => s.move.pct <= SLIP.pct && -s.move.d >= SLIP.dollars && s.move.run >= SLIP.run)
+    .sort((a, b) => a.move.d - b.move.d);
+}
+export function slippingAccounts(C) { return downAccounts(C).filter(s => s.move.last3 >= SLIP.stopped * s.move.run); }
+export function stoppedAccounts(C) { return downAccounts(C).filter(s => s.move.last3 < SLIP.stopped * s.move.run); }
+export function risingAccounts(C) {
+  return accountMoves(C).filter(s => s.move.pct >= -SLIP.pct && s.move.d >= SLIP.dollars && s.move.last3 >= SLIP.run)
+    .sort((a, b) => b.move.d - a.move.d);
 }
 
 // R4's own cross-sell record from margin.history: accounts that already bought from R4 and later
@@ -89,7 +105,7 @@ export function crossSellPace(H) {
     best: yr.slice().sort((a, b) => (b.first_year || 0) - (a.first_year || 0)).slice(0, 3) };
 }
 
-export function bridge({ P, PR, CA, M }) {
+export function bridge({ P, PR, CA, M, C }) {
   const six = P.monthly.slice(-6);
   const today = six.reduce((t, m) => t + m.core, 0) / six.length;
 
@@ -100,8 +116,8 @@ export function bridge({ P, PR, CA, M }) {
   const rounds = CA.filter(c => c.not_raised_2y && c.level1 !== CITADEL && !sg.has(c.level1));
   const roundsV = rounds.reduce((t, c) => t + c.service, 0) * TYPICAL_RISE / 12;
 
-  const slip = slippingAccounts(P);
-  const slipV = slip.reduce((t, d) => t + d.trailing6_mean - d.revenue, 0);
+  const slip = slippingAccounts(C), stopped = stoppedAccounts(C);
+  const slipV = slip.reduce((t, d) => t - d.move.d, 0) / 2;
 
   const ws = buildWhitespace(M, { exclude: [CITADEL], top: CROSS_SELL_DEPTH });
   const pace = crossSellPace(M.history);
@@ -111,8 +127,8 @@ export function bridge({ P, PR, CA, M }) {
       s: pace ? `the ceiling at what comparable accounts spend; R4's own pace is ${pace.count} added lines a year, about $${Math.round(pace.value / 12 / 1000)}K a month` : `${ws.rows.filter(r => r.opp > 0).length} of the largest ${CROSS_SELL_DEPTH} accounts, at what comparable accounts spend`, note: 'if all took it up', modelled: true },
     { key: 'price', t: 'Bring prices halfway to the median', v: price, href: '#customers?view=gaps', who: 'Anne',
       s: `${new Set([...sg.keys(), ...st.rows.map(r => r.level1)]).size} accounts pay under the book's median for storage or a service`, note: 'halfway' },
-    { key: 'slip', t: 'Win back the slipping accounts', v: slipV, href: '#customers?view=slipping', who: 'Anne and Trisha',
-      s: `${slip.length} accounts below their own six-month level for a second month` },
+    { key: 'slip', t: 'Win back half of what slipping accounts lost', v: slipV, href: '#customers?view=slipping', who: 'Anne and Trisha',
+      s: `${slip.length} accounts still billing but down 10% or more on their own run over the last three months`, note: 'halfway' },
     { key: 'rounds', t: 'Raise the accounts that missed every rate round', v: roundsV, href: '#customers?view=rounds', who: 'Anne',
       s: `${rounds.length} accounts with no rate moved in two years, at the typical 8% rise` },
   ].filter(x => x.v > 0).sort((a, b) => b.v - a.v);
@@ -127,5 +143,6 @@ export function bridge({ P, PR, CA, M }) {
     steps, minor, levers, newBusiness: Math.max(0, TARGET - today - levers),
     overdue: ob,
     whitespace: ws, serviceGaps: sg, storageGaps: st, pace,
+    stopped: { accounts: stopped.length, lost: stopped.reduce((t, d) => t - d.move.d, 0) },
   };
 }

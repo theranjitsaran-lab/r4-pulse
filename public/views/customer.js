@@ -7,7 +7,8 @@ import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 import { ledgerTable } from '/components/table.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
-import { seriesOf, deltaText } from '/views/customers.js';
+import { seriesOf, deltaText, moveReason } from '/components/series.js';
+import { slippingAccounts } from '/components/levers.js';
 
 const CITADEL = 6714;
 const UNDER_REVIEW = new Set(['bin', 'handling', 'movement']);
@@ -15,7 +16,8 @@ const UNDER_REVIEW = new Set(['bin', 'handling', 'movement']);
 const CSS = `
 .cp .crumb { margin-bottom: 10px; }
 .cp h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); margin: 0; line-height: 1.1; }
-.cp .tags { margin: 8px 0 18px; display: flex; gap: 6px; flex-wrap: wrap; }
+.cp .cp-lede { font-size: 17px; line-height: 1.5; color: var(--ink-2); margin: 0 0 16px; max-width: 920px; }
+.cp .tags { margin: 8px 0 12px; display: flex; gap: 6px; flex-wrap: wrap; }
 .cp .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
 .cp .stat .lab { margin-bottom: 4px; }
 .cp .grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; margin-top: 14px; align-items: start; }
@@ -94,6 +96,18 @@ export async function render(main, C, params) {
   const ltm = s ? s.ltm : m.revenue;
   const pc = m && m.revenue > 0 ? m.margin / m.revenue : null;
   const routeHeavy = m && [...UNDER_REVIEW].some(f => m.fam[f] && m.fam[f].cost > 0.25 * m.cost);
+  const slipping = s && s.move && slippingAccounts(C).some(x => x.level1 === id);
+
+  // the account in a few sentences, in place of a row of figure tiles
+  const share = k => s ? Math.round(s[k].slice(-12).reduce((t, v) => t + v, 0) / Math.max(1, s.ltm) * 100) : null;
+  const n0 = v => Math.round(v || 0).toLocaleString('en-US');
+  const lede = [];
+  lede.push(`<b>${moneyK(ltm)}</b> billed in the last twelve months${s ? `, ${share('storage')}% storage and ${share('service')}% service` : ''}.`);
+  if (s && s.move) lede.push(`Over the last three months it ran at ${moneyK(s.move.last3)} a month against its own ${moneyK(s.move.run)} before${Math.abs(s.move.pct || 0) >= 0.05 ? `: ${moveReason(s.move, moneyK)}` : ', about level'}.`);
+  if (m && m.cost > 0) lede.push(`About ${moneyK(m.cost)} a year to serve ◇ ${m.margin >= 0 ? `leaves ${moneyK(m.margin)}${pc != null ? ` (${Math.round(pc * 100)}%)` : ''}` : `is ${moneyK(-m.margin)} more than it pays`}${routeHeavy ? ', with route costs under review' : ''}.`);
+  if (acct && (acct.boxes >= 1 || acct.bins)) lede.push([acct.boxes >= 1 ? `It stores ${n0(acct.boxes)} boxes` : '', acct.bins ? `${acct.boxes >= 1 ? 'and had' : 'It had'} ${n0(acct.bins)} bin services on ${n0(acct.visits)} visits` : ''].filter(Boolean).join(' ') + '.');
+  if (id === CITADEL) lede.push('Citadel\'s settlements land in lumps, so it is held apart from core.');
+  const summary = lede.join(' ');
 
   // prices: this account's rates against the book's median for each service, and what moving is worth
   const byCode = new Map();
@@ -110,7 +124,7 @@ export async function render(main, C, params) {
 
   const sigs = [];
   if (signals) {
-    if (signals.down_two_months) sigs.push({ key: 'slipping', text: `Below its own six-month level for a second month: ${money0(signals.month_revenue)} against ${money0(signals.trailing6_mean)}.` });
+    if (slipping) sigs.push({ key: 'slipping', text: `Slipping: ${moneyK(s.move.last3)} a month over the last three months against its own ${moneyK(s.move.run)} before (${moveReason(s.move, moneyK)}).` });
     if (signals.up_20pct) sigs.push({ key: 'up', text: `Up ${Math.round(signals.deviation_pct)}% on its own six-month level last month.` });
     if (signals.not_raised_2y) sigs.push({ key: 'rounds', text: `No rate has moved in two years across ${signals.codes} services.` });
     if (signals.storage_no_destruction) sigs.push({ key: 'nodestroy', text: 'Stores with R4 but buys no destruction: shredding is a natural next conversation.' });
@@ -130,16 +144,11 @@ export async function render(main, C, params) {
     <h1>${esc(name)}</h1>
     <div class="tags">
       ${id === CITADEL ? '<span class="chip">Held apart from core · settlements land in lumps</span>' : ''}
-      ${s && s.change != null && s.change < -0.1 ? `<span class="chip bad">Down ${Math.abs(Math.round(s.change * 100))}% on the year before</span>` : ''}
+      ${slipping ? `<span class="chip bad">Slipping: ${deltaText(s.move.pct)} on its own run</span>` : ''}
       ${signals && signals.not_raised_2y ? '<span class="chip warn">Missed every rate round</span>' : ''}
       ${routeHeavy ? '<span class="chip review">Route costs under review</span>' : ''}
     </div>
-    <div class="stats">
-      <div class="card stat"><div class="lab">Last 12 months</div><div class="big">${moneyK(ltm)}</div><div class="sub">${s ? `<span class="delta ${s.change > .02 ? 'up' : s.change < -.02 ? 'down' : 'flat'}">${deltaText(s.change)}</span> on the year before` : ''}</div></div>
-      <div class="card stat"><div class="lab">Gross margin</div><div class="big ${pc != null && pc < 0 ? 'is-bad' : ''}">${pc == null ? '—' : Math.round(pc * 100) + '%'}<span style="font-size:15px;color:var(--ink-5)"> ◇</span></div><div class="sub">${m ? `${moneyK(m.margin)} after ${moneyK(m.cost)} to serve` : ''}</div></div>
-      <div class="card stat"><div class="lab">Storage · service</div><div class="big">${s ? Math.round(s.storage.slice(12).reduce((t, v) => t + v, 0) / Math.max(1, ltm) * 100) : '—'}<span style="font-size:15px;color:var(--ink-3)">% · </span>${s ? Math.round(s.service.slice(12).reduce((t, v) => t + v, 0) / Math.max(1, ltm) * 100) : '—'}<span style="font-size:15px;color:var(--ink-3)">%</span></div><div class="sub">share of the last twelve months</div></div>
-      <div class="card stat"><div class="lab">Boxes · bin services</div><div class="big">${acct ? Math.round(acct.boxes).toLocaleString('en-US') : '—'}</div><div class="sub">${acct && acct.bins ? `${acct.bins.toLocaleString('en-US')} bin services on ${acct.visits} visits` : 'no bin work'}</div></div>
-    </div>
+    <p class="cp-lede">${summary}</p>
     <div class="card" id="cp-chart"></div>
     <div class="grid">
       <div class="card">

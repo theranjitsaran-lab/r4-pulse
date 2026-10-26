@@ -4,7 +4,7 @@
 import { sparkline, money0, moneyK } from '/components/chart.js';
 import { buildMargins, marginSummary } from '/components/margin.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
-import { serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippingAccounts, CROSS_SELL_DEPTH } from '/components/levers.js';
+import { serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippingAccounts, stoppedAccounts, risingAccounts, CROSS_SELL_DEPTH } from '/components/levers.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 
@@ -15,7 +15,7 @@ export const VIEWS = {
   conversations: { label: 'This week', blurb: 'Ten conversations worth having, ranked by what is at stake. Log what you did; the list learns.' },
   main:          { label: 'Main customers', blurb: 'The 30 largest accounts, month by month, each against its own run.' },
   whitespace:    { label: 'Cross-sell', blurb: 'What each large account buys, and what it doesn\'t buy yet, sized at what comparable accounts spend.' },
-  slipping:      { label: 'Slipping', blurb: 'Below their own six-month level for a second month running.' },
+  slipping:      { label: 'Slipping', blurb: 'Down 10% or more on their own run over the last three months. Still-billing accounts first; then those that have stopped or nearly, often one-off projects, which Home leaves out of the win-back.' },
   gaps:          { label: 'Price gaps', blurb: 'Paying under the book\'s median for storage or a service, sized by their volume. Home counts half of each gap.' },
   rounds:        { label: 'Missed rate rounds', blurb: 'No rate has moved in two years.' },
   destruction:   { label: 'Overdue boxes', blurb: 'Boxes past their retention review, by account: what destruction bills once, and the storage it ends.' },
@@ -60,31 +60,12 @@ function injectCss() {
   const s = document.createElement('style'); s.id = 'cust-css'; s.textContent = CSS; document.head.appendChild(s);
 }
 
-const sum = a => a.reduce((t, v) => t + v, 0);
-// Each account's series and twelve-month figures, from the customers fixture. Leading months that
-// are empty for every account fall before the data begins (the series start November 2024), so
-// they are dropped rather than drawn as a climb from zero. Change is the last twelve months against
-// the months before, scaled to twelve when fewer than twelve exist.
-export function seriesOf(C) {
-  let start = 0;
-  while (start < C.months.length - 1 && C.accounts.every(a => !a.storage[start] && !a.service[start])) start++;
-  const months = C.months.slice(start);
-  const map = new Map();
-  for (const a of C.accounts) {
-    const storage = a.storage.slice(start), service = a.service.slice(start);
-    const total = storage.map((v, i) => v + service[i]);
-    const ltm = sum(total.slice(-12)), before = total.slice(0, -12);
-    const prior = before.length ? sum(before) * 12 / before.length : 0;
-    map.set(a.level1, { ...a, months, storage, service, total, ltm, prior, change: prior > 0 ? ltm / prior - 1 : null });
-  }
-  return map;
-}
-
-function deltaCls(c) { return c == null ? 'flat' : c > 0.02 ? 'up' : c < -0.02 ? 'down' : 'flat'; }
-export function deltaText(c) { return c == null ? 'new' : (c > 0 ? '▲ ' : c < 0 ? '▼ ' : '') + Math.abs(Math.round(c * 100)) + '%'; }
+// the series and the one measure of movement live in components/series.js; re-exported for views
+export { seriesOf, deltaText } from '/components/series.js';
+import { seriesOf, deltaText, deltaCls, moveReason } from '/components/series.js';
 
 // Build the rows for a view: [{ level1, customer, why, sortValue }]
-async function rowsFor(view, ser, book) {
+async function rowsFor(view, ser, book, C) {
   const marg = new Map(book.accounts.map(a => [a.level1, a]));
   const base = (id, why, extra = {}) => {
     const s = ser.get(id), m = marg.get(id);
@@ -95,9 +76,8 @@ async function rowsFor(view, ser, book) {
     return (view === 'main' ? all.slice(0, 20) : all).map(s => base(s.level1, s.level1 === CITADEL ? 'Settlements land in lumps; held apart from core' : null));
   }
   if (view === 'slipping') {
-    const P = await getJson('pulse');
-    return slippingAccounts(P)
-      .map(d => base(d.level1, `${money0(d.revenue)} last month against its own ${money0(d.trailing6_mean)}`, { worth: d.trailing6_mean - d.revenue }));
+    const row = (d, tag) => base(d.level1, `${tag}${moneyK(d.move.last3)} a month over the last three months, against its own ${moneyK(d.move.run)} before: ${moveReason(d.move, moneyK)}`, { worth: -d.move.d });
+    return slippingAccounts(C).map(d => row(d, '')).concat(stoppedAccounts(C).map(d => row(d, 'Stopped or nearly: ')));
   }
   if (view === 'gaps') {
     const PR = await getJson('pricing');
@@ -111,7 +91,7 @@ async function rowsFor(view, ser, book) {
       by.set(r.level1, a);
     }
     return [...by.values()].sort((a, b) => b.worth - a.worth).slice(0, 60)
-      .map(g => base(g.level1, `${g.why} · ${moneyK(g.worth)}/mo at the median`, { worth: g.worth, customer: g.customer }));
+      .map(g => base(g.level1, `${g.why} · ${moneyK(g.worth * 12)} a year at the median`, { worth: g.worth, customer: g.customer }));
   }
   if (view === 'rounds') {
     const CA = await getJson('calls');
@@ -138,9 +118,9 @@ export async function render(main, C, params) {
   const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
   const ser = seriesOf(C);
   const book = buildMargins(R, M, {});
-  let rows = await rowsFor(view, ser, book);
+  let rows = await rowsFor(view, ser, book, C);
   if (sort === 'size') rows.sort((a, b) => ((b.s && b.s.ltm) || 0) - ((a.s && a.s.ltm) || 0));
-  if (sort === 'change') rows.sort((a, b) => ((a.s && a.s.change) ?? 9) - ((b.s && b.s.change) ?? 9));
+  if (sort === 'change') rows.sort((a, b) => (mvPc(a.s) ?? 9) - (mvPc(b.s) ?? 9));
   if (sort === 'margin') rows.sort((a, b) => marginPc(a) - marginPc(b));
 
   const link = (v, s) => `#customers?view=${v}${s ? '&sort=' + s : ''}`;
@@ -153,24 +133,25 @@ export async function render(main, C, params) {
       <div class="seg">${[['size', 'Size'], ['change', 'Change'], ['margin', 'Margin']].map(([k, l]) => `<a href="${link(view, k)}" class="${k === sort ? 'on' : ''}">${l}</a>`).join('')}</div>
     </div>
     <div class="card">
-      <div class="head"><span>Customer</span><span>24 months</span><span>Last 12 months</span><span>Change</span><span>Margin</span><span></span></div>
+      <div class="head"><span>Customer</span><span>24 months</span><span>Last 12 months</span><span>Last 3 months</span><span>Margin</span><span></span></div>
       <ul class="list">${rows.map(row).join('') || '<li style="padding:16px;color:var(--ink-3)">No accounts in this view.</li>'}</ul>
     </div>
-    <p class="foot">${rows.length} accounts · change is the last twelve months against the twelve before · margin ◇ is revenue less modelled cost to serve; route-based costs are under review.</p>
+    <p class="foot">${rows.length} accounts · last 3 months is each account against its own twelve months before them, the same measure as Home and Slipping · margin ◇ is revenue less modelled cost to serve; route-based costs are under review.</p>
   </div>`;
 }
 
+const mvPc = s => s && s.move ? s.move.pct : null;
 function marginPc(r) { return r.m && r.m.revenue > 0 ? r.m.margin / r.m.revenue : 9; }
 
 function row(r) {
   const s = r.s, m = r.m, pc = m && m.revenue > 0 ? m.margin / m.revenue : null;
   const routeHeavy = m && ROUTE_FAMILIES.some(f => m.fam[f] && m.fam[f].cost > 0.25 * m.cost);
-  const cls = s ? (s.change > 0.02 ? 'up' : s.change < -0.1 ? 'down' : '') : '';
+  const c = mvPc(s), cls = c == null ? '' : c > 0.02 ? 'up' : c < -0.1 ? 'down' : '';
   return `<li><a href="#customer/${r.level1}">
     <span class="nmw"><span class="nm">${esc(titleCase(r.customer))}</span>${r.why ? `<span class="why">${esc(r.why)}</span>` : ''}</span>
     <span class="sp">${s ? sparkline(s.total, { w: 130, h: 30, cls }) : ''}</span>
-    <span class="r rv"><span class="rev">${s ? moneyK(s.ltm) : '—'}</span>${s ? (r.level1 === CITADEL ? '<small class="delta flat">lumpy</small>' : `<small class="delta ${deltaCls(s.change)}">${deltaText(s.change)}</small>`) : ''}</span>
-    <span class="r ch">${r.level1 === CITADEL ? '<span class="delta flat">lumpy</span>' : `<span class="delta ${s ? deltaCls(s.change) : 'flat'}">${s ? deltaText(s.change) : '—'}</span>`}</span>
+    <span class="r rv"><span class="rev">${s ? moneyK(s.ltm) : '—'}</span>${s ? (r.level1 === CITADEL ? '<small class="delta flat">lumpy</small>' : `<small class="delta ${deltaCls(c)}">${deltaText(c)}</small>`) : ''}</span>
+    <span class="r ch">${r.level1 === CITADEL ? '<span class="delta flat">lumpy</span>' : `<span class="delta ${deltaCls(c)}">${s && s.move ? deltaText(c) : '—'}</span>`}</span>
     <span class="r mg">${pc == null ? '—' : `${Math.round(pc * 100)}%${routeHeavy ? '<span class="rvm" title="route costs under review">◇</span>' : ''}`}</span>
     <span class="go">›</span></a></li>`;
 }
@@ -189,7 +170,7 @@ async function conversations(main, C) {
   const ser = seriesOf(C);
   const cands = new Map();
   const add = (id, sig) => { if (id === CITADEL) return; const c = cands.get(id) || { level1: id, sigs: [] }; c.sigs.push(sig); cands.set(id, c); };
-  for (const d of P.downTwoMonths) if (d.trailing6_mean > d.revenue) add(d.level1, { key: 'slipping', stake: (d.trailing6_mean - d.revenue) * 12, ev: `${money0(d.revenue)} last month against its own ${money0(d.trailing6_mean)} a month`, name: d.customer });
+  for (const d of slippingAccounts(C)) add(d.level1, { key: 'slipping', stake: -d.move.d * 12, ev: `${moveReason(d.move, moneyK)} over the last three months, against its own run`, name: d.customer });
   const meds = {};
   for (const code of ['B2', 'B3', 'B6', '01', '20', '25', '30', 'S3', 'S4', 'S6']) {
     const v = PR.rates.filter(r => r.servcode === code && r.modal_rate > 0 && r.units > 0).map(r => r.modal_rate).sort((a, b) => a - b);
@@ -379,7 +360,9 @@ async function monthGrid(main, C, params) {
   };
   const grid = ser.map(s => ({ s, c: cells(s) }));
   // the biggest move in the latest month, in dollars against the account's own run
-  const lastMoves = grid.map(g => ({ s: g.s, d: g.c[g.c.length - 1].v - g.c[g.c.length - 1].run })).sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
+  // the sentence uses the app's one measure of movement (last three months against the twelve before)
+  const slipIds = new Set(slippingAccounts(C).map(x => x.level1)), riseIds = new Set(risingAccounts(C).map(x => x.level1));
+  const lastMoves = grid.filter(g => g.s.move).map(g => ({ s: g.s, d: g.s.move.d })).sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
   const down = grid.filter(g => (g.c[g.c.length - 1].d ?? 0) < -0.1).length, up = grid.filter(g => (g.c[g.c.length - 1].d ?? 0) > 0.1).length;
   const lastM = months[months.length - 1], lastName = new Date(lastM + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
   const top = lastMoves[0];
@@ -395,7 +378,7 @@ async function monthGrid(main, C, params) {
   <div class="cust mg">
     <h1>Customers</h1>
     <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'main' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
-    <p class="lede">In ${lastName}, ${down} of the 30 largest accounts billed more than 10% below their own six-month average and ${up} billed more than 10% above.${top ? ` The biggest move was ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} against its own run.` : ''}</p>
+    <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (10% or more below their own run) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} Each cell below is one month against the six before it.</p>
     <div class="tools">
       <div class="seg">${[['total', 'Storage and service'], ['storage', 'Storage'], ['service', 'Service']].map(([k, l]) => `<a href="${link(k)}" class="${k === which ? 'on' : ''}">${l}</a>`).join('')}</div>
       <div class="key"><i style="background:color-mix(in srgb, var(--bad) 70%, var(--surface))"></i>down<i style="background:color-mix(in srgb, var(--bad) 25%, var(--surface));margin-left:6px"></i><i style="background:color-mix(in srgb, var(--ink) 5%, var(--surface))"></i>within 10%<i style="background:color-mix(in srgb, var(--good) 25%, var(--surface))"></i><i style="background:color-mix(in srgb, var(--good) 70%, var(--surface));margin-left:6px"></i>up · against its own last six months</div>

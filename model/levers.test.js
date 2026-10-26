@@ -23,7 +23,7 @@ test('bridge: cross-sell step is the cross-sell grid; price step is half the pri
   const { bridge, serviceGaps, storageGaps, CROSS_SELL_DEPTH } = await import('../public/components/levers.js');
   const { buildWhitespace } = await import('../public/components/whitespace.js');
   const P = J('pulse'), PR = J('pricing'), CA = J('calls'), M = J('margin');
-  const B = bridge({ P, PR, CA, M });
+  const B = bridge({ P, PR, CA, M, C: J('customers') });
   const step = k => (B.steps.find(s => s.key === k) || B.minor.find(s => s.key === k) || { v: 0 }).v;
   near(step('cross'), buildWhitespace(M, { exclude: [6714], top: CROSS_SELL_DEPTH }).total / 12, 0.01, 'cross-sell');
   const gaps = [...serviceGaps(PR).values()].reduce((t, a) => t + a.worth, 0) + storageGaps(PR).rows.reduce((t, r) => t + r.worth, 0);
@@ -34,7 +34,7 @@ test('bridge: cross-sell step is the cross-sell grid; price step is half the pri
 test('overdue boxes: Home and the Overdue boxes list read the same figures', async () => {
   const { bridge, overdueBoxes } = await import('../public/components/levers.js');
   const P = J('pulse'), PR = J('pricing'), CA = J('calls'), M = J('margin');
-  const B = bridge({ P, PR, CA, M }), O = overdueBoxes(CA, PR);
+  const B = bridge({ P, PR, CA, M, C: J('customers') }), O = overdueBoxes(CA, PR);
   near(B.overdue.boxes, O.rows.reduce((t, r) => t + r.boxes, 0), 0.01, 'boxes');
   near(B.overdue.storageLost, O.rows.reduce((t, r) => t + r.lost, 0), 0.01, 'storage lost');
   assert.ok(!O.rows.some(r => r.level1 === 6714), 'Citadel held apart');
@@ -53,10 +53,11 @@ test('margin: Home\'s row and the Margin view count the same loss-making account
 
 test('slipping, pace and the bill: each figure shown twice comes from one source', async () => {
   const { bridge, slippingAccounts, crossSellPace, billNow } = await import('../public/components/levers.js');
-  const P = J('pulse'), PR = J('pricing'), CA = J('calls'), M = J('margin');
-  const B = bridge({ P, PR, CA, M });
-  const slipList = slippingAccounts(P);
-  near((B.steps.concat(B.minor).find(s => s.key === 'slip') || { v: 0 }).v, slipList.reduce((t, d) => t + d.trailing6_mean - d.revenue, 0), 0.01, 'slipping step = list');
+  const P = J('pulse'), PR = J('pricing'), CA = J('calls'), M = J('margin'), C = J('customers');
+  const B = bridge({ P, PR, CA, M, C });
+  const slipList = slippingAccounts(C);
+  near((B.steps.concat(B.minor).find(s => s.key === 'slip') || { v: 0 }).v, slipList.reduce((t, d) => t - d.move.d, 0) / 2, 0.01, 'slipping step = half the list');
+  assert.ok(slipList.every(d => d.move.pct <= -0.1), 'every slipping account is down 10% or more on its own run');
   assert.ok(!slipList.some(d => d.level1 === 6714), 'Citadel held apart');
   assert.deepEqual(B.pace, crossSellPace(M.history), 'Home and the grid read one pace');
   const run = P.currentRun.find(r => r.part === 'run');

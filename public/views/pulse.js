@@ -8,8 +8,8 @@
 import { lineChart, money0, moneyK } from '/components/chart.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { marginSummary } from '/components/margin.js';
-import { seriesOf } from '/views/customers.js';
-import { bridge, billNow, TARGET, CITADEL } from '/components/levers.js';
+import { moveReason } from '/components/series.js';
+import { bridge, billNow, slippingAccounts, risingAccounts, TARGET, CITADEL } from '/components/levers.js';
 
 const CSS = `
 .home { display: grid; gap: 14px; }
@@ -94,16 +94,11 @@ function cumulative(A, month) {
   return [...by.keys()].sort().map((d, i) => ({ x: String(i + 1).padStart(2, '0'), y: (t += by.get(d)), date: d }));
 }
 
-// Each account's last three months against its own twelve before them, in dollars a month.
+// The slipping and rising accounts (components/levers.js, one definition everywhere), largest
+// moves first, with which part moved.
 function movers(C) {
-  const out = [];
-  for (const s of seriesOf(C).values()) {
-    if (s.level1 === CITADEL || s.ltm < 20000 || s.total.length < 15) continue;
-    const last3 = s.total.slice(-3).reduce((t, v) => t + v, 0) / 3;
-    const run = s.total.slice(-15, -3).reduce((t, v) => t + v, 0) / 12;
-    out.push({ level1: s.level1, customer: s.customer, d: last3 - run, last3, run });
-  }
-  return { falls: out.filter(m => m.d < 0).sort((a, b) => a.d - b.d).slice(0, 5), gains: out.filter(m => m.d > 0).sort((a, b) => b.d - a.d).slice(0, 5) };
+  const pick = s => ({ level1: s.level1, customer: s.customer, d: s.move.d, last3: s.move.last3, run: s.move.run, why: moveReason(s.move, moneyK) });
+  return { falls: slippingAccounts(C).slice(0, 5).map(pick), gains: risingAccounts(C).slice(0, 5).map(pick), slipping: slippingAccounts(C).length };
 }
 
 export async function render(main, P) {
@@ -128,7 +123,7 @@ export async function render(main, P) {
   const nextBill = projService != null ? nextStorage + projService : null;
 
   // ── the route to $1.0m ──
-  const B = bridge({ P, PR, CA, M });
+  const B = bridge({ P, PR, CA, M, C });
   const scale = v => v / (TARGET * 1.04) * 100;
   let cum = B.today;
   const stepRows = B.steps.map(s => { const from = cum; cum += s.v; return { ...s, from }; });
@@ -173,7 +168,7 @@ export async function render(main, P) {
         <div class="step"><span class="nm">New business<small>what the levers above leave to win</small></span><span class="lane"><i class="newb" style="left:${scale(cum)}%;width:${scale(B.newBusiness)}%"></i><b style="left:${scale(TARGET)}%"></b><span class="tg" style="left:${scale(TARGET)}%">$1.0M</span></span><span class="v">+${moneyK(B.newBusiness)}</span><span></span></div>
       </div>
       <div class="aside"><b>Boxes past their retention review:</b> ${Math.round(B.overdue.boxes).toLocaleString('en-US')} across ${B.overdue.accounts} accounts. Destroying them would bill about ${moneyK(B.overdue.oneOff)} once, at the book's median $${B.overdue.perBox.toFixed(2)} a box, and end about ${moneyK(B.overdue.storageLost)} a month of storage, so it sits beside the bridge rather than in it. <a href="#customers?view=destruction">The accounts and their boxes ›</a></div>
-      <div class="src">Cross-sell is the ceiling if every account bought like comparable accounts ◇ · prices: half the gap to the book's median (storage weighted by boxes) · slipping: each account's shortfall against its own six-month level${B.minor.length ? ` · ${B.minor.map(m => m.t.toLowerCase()).join(', ')}: under $1K a month once price gaps are counted` : ''}</div>
+      <div class="src">Cross-sell is the ceiling if every account bought like comparable accounts ◇ · prices: half the gap to the book's median (storage weighted by boxes) · slipping: half the shortfall of accounts still billing, last three months against their own twelve before · left out: ${B.stopped.accounts} accounts that have stopped or nearly (${moneyK(B.stopped.lost)} a month), often one-off projects, <a href="#customers?view=slipping" style="color:var(--brand)">listed with Slipping</a>${B.minor.length ? ` · ${B.minor.map(m => m.t.toLowerCase()).join(', ')}: under $1K a month once price gaps are counted` : ''}</div>
     </section>
 
     <a class="card mrow" href="#customers?view=margin">
@@ -186,8 +181,8 @@ export async function render(main, P) {
       <div class="card-head"><h3>${mv.falls.length && -mv.falls[0].d > (mv.gains[0] ? mv.gains[0].d : 0) ? `${esc(titleCase(mv.falls[0].customer))} has fallen most, ${moneyK(-mv.falls[0].d)} a month below its own run` : mv.gains.length ? `${esc(titleCase(mv.gains[0].customer))} has grown most, ${moneyK(mv.gains[0].d)} a month above its own run` : 'Customers moving'}</h3><a href="#customers">Every customer by month ›</a></div>
       <div class="sub">The last three months against each account's own twelve before them, in dollars a month. Citadel apart.</div>
       <div class="movers">
-        <div><div class="mvh">Falling</div>${mv.falls.map(m => `<a class="mv down" href="#customer/${m.level1}"><span class="nm">${esc(titleCase(m.customer))}<small>${mk(m.last3)} a month, was ${mk(m.run)}</small></span><span class="bar"><i style="width:${-m.d / mvMax * 100}%"></i></span><span class="v">−${moneyK(-m.d)}</span></a>`).join('')}</div>
-        <div><div class="mvh">Rising</div>${mv.gains.map(m => `<a class="mv up" href="#customer/${m.level1}"><span class="nm">${esc(titleCase(m.customer))}<small>${mk(m.last3)} a month, was ${mk(m.run)}</small></span><span class="bar"><i style="width:${m.d / mvMax * 100}%"></i></span><span class="v">+${moneyK(m.d)}</span></a>`).join('')}</div>
+        <div><div class="mvh">Slipping · <a href="#customers?view=slipping" style="color:var(--brand);text-decoration:none">all ${mv.slipping} ›</a></div>${mv.falls.map(m => `<a class="mv down" href="#customer/${m.level1}"><span class="nm">${esc(titleCase(m.customer))}<small>${esc(m.why)}</small></span><span class="bar"><i style="width:${-m.d / mvMax * 100}%"></i></span><span class="v">−${moneyK(-m.d)}</span></a>`).join('')}</div>
+        <div><div class="mvh">Rising</div>${mv.gains.map(m => `<a class="mv up" href="#customer/${m.level1}"><span class="nm">${esc(titleCase(m.customer))}<small>${esc(m.why)}</small></span><span class="bar"><i style="width:${m.d / mvMax * 100}%"></i></span><span class="v">+${moneyK(m.d)}</span></a>`).join('')}</div>
       </div>
     </section>
 
