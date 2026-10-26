@@ -6,6 +6,7 @@ import { buildMargins } from '/components/margin.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 import { serviceGaps, storageGaps, CROSS_SELL_DEPTH } from '/components/levers.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
+import { openExplainer } from '/components/explain.js';
 
 const CITADEL = 6714;
 const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under review: delivery days not yet in the volumes
@@ -262,7 +263,8 @@ const WS_CSS = `
 .ws .c span { display: inline-block; min-width: 64px; text-align: center; font-size: 12.5px; font-variant-numeric: tabular-nums; border-radius: 6px; padding: 4px 6px; white-space: nowrap; }
 .ws .c .have { background: color-mix(in srgb, var(--ink) var(--a), var(--surface)); color: var(--ink); }
 .ws .c .have.dark { color: var(--surface); }
-.ws .c .opp { border: 1.5px dashed var(--ink-5); color: var(--ink-2); font-weight: 600; }
+.ws .c .opp { border: 1.5px dashed var(--ink-5); color: var(--ink-2); font-weight: 600; background: none; font: inherit; font-size: 12.5px; font-variant-numeric: tabular-nums; border-radius: 6px; padding: 4px 6px; min-width: 64px; cursor: pointer; }
+.ws .c .opp:hover { border-color: var(--brand); color: var(--brand); }
 .ws .c .none { color: var(--ink-5); }
 .ws .tot { justify-content: flex-end; font-weight: 700; font-variant-numeric: tabular-nums; }
 .ws .key { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); margin: 10px 0 14px; align-items: center; }
@@ -283,7 +285,7 @@ const lc = n => n === 'ITAD' ? n : n.toLowerCase();
 
 async function whitespace(main, C, params) {
   if (!document.getElementById('ws-css')) { const st = document.createElement('style'); st.id = 'ws-css'; st.textContent = WS_CSS; document.head.appendChild(st); }
-  const M = await getJson('margin');
+  const [M, CA] = await Promise.all([getJson('margin'), getJson('calls')]);
   const W = buildWhitespace(M, { exclude: [CITADEL], top: CROSS_SELL_DEPTH });
   const rows = W.rows.filter(r => r.opp > 0).sort((a, b) => b.opp - a.opp);
   const maxHave = Math.max(...W.rows.flatMap(r => LINES.map(x => r.cells[x.key].have ? r.cells[x.key].spend : 0)));
@@ -297,7 +299,7 @@ async function whitespace(main, C, params) {
   const cell = (r, x) => {
     const c = r.cells[x.key];
     if (c.have) { const a = Math.round(8 + 72 * Math.sqrt(c.spend / maxHave)); return `<div class="c" data-l="${esc(x.short || x.name)}"><span class="have ${a > 55 ? 'dark' : ''}" style="--a:${a}%" title="${esc(x.name)}: ${money0(c.spend)} in the last twelve months">${moneyK(c.spend)}</span></div>`; }
-    if (c.opp > 0) return `<div class="c" data-l="${esc(x.short || x.name)}"><span class="opp" title="${esc(c.basis)}">+${moneyK(c.opp)}</span></div>`;
+    if (c.opp > 0) return `<div class="c" data-l="${esc(x.short || x.name)}"><button class="opp" data-id="${r.level1}" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)}</button></div>`;
     return `<div class="c nobuy" data-l="${esc(x.short || x.name)}"><span class="none">—</span></div>`;
   };
 
@@ -317,8 +319,14 @@ async function whitespace(main, C, params) {
       </div>
       ${rows.length > shown ? `<a class="more" href="#customers?view=whitespace&all=1">Show all ${rows.length} accounts</a>` : ''}
     </div>
-    <p class="foot">Sized from the last twelve months. Retrieval, delivery and destruction for a storer: the median spend per 1,000 boxes among storers that buy the line. Storage, bins and ITAD: the median share of spend among similar-sized accounts that buy the line as an add-on. Never more than the account spends today. Hover a dashed cell for its basis. Citadel apart.</p>
+    <p class="foot">Tap a dashed figure to see how it was worked out, the comparable accounts behind it, and how it is usually sold. Sized from the last twelve months. Retrieval, delivery and destruction for a storer: the median spend per 1,000 boxes among storers that buy the line. Storage, bins and ITAD: the median share of spend among similar-sized accounts that buy the line as an add-on. Never more than the account spends today. Citadel apart.</p>
   </div>`;
+  const calls = new Map(CA.map(c => [c.level1, c]));
+  main.querySelector('.ws .grid').addEventListener('click', ev => {
+    const b = ev.target.closest('button.opp'); if (!b) return;
+    const row = W.rows.find(r => r.level1 === Number(b.dataset.id));
+    if (row) openExplainer({ row, key: b.dataset.key, call: calls.get(row.level1) });
+  });
 }
 
 // ── Main customers: the 30 largest, month by month ───────────────────────────────────────────

@@ -47,8 +47,12 @@ export function buildWhitespace(M, { exclude = [], top = 40 } = {}) {
   for (const x of LINES) {
     const buyers = all.filter(a => a.spend[x.key] >= BUYS);
     if (x.by === 'boxes') {
-      const r = buyers.filter(a => a.boxes >= STORER).map(a => a.spend[x.key] / a.boxes * 1000);
-      rates[x.key] = { per1000: median(r), peers: r.length };
+      const ps = buyers.filter(a => a.boxes >= STORER);
+      const r = ps.map(a => a.spend[x.key] / a.boxes * 1000);
+      // the comparables behind the median, largest spenders first, for the explainer
+      const examples = ps.sort((a, b) => b.spend[x.key] - a.spend[x.key]).slice(0, 8)
+        .map(a => ({ level1: a.level1, customer: a.customer, boxes: a.boxes, spend: a.spend[x.key], per1000: a.spend[x.key] / a.boxes * 1000 }));
+      rates[x.key] = { per1000: median(r), peers: r.length, examples };
     } else {
       const ratio = a => a.spend[x.key] / (a.total - a.spend[x.key]);
       // add-on buyers only: an account whose main business is this line (an electronics client for
@@ -56,7 +60,10 @@ export function buildWhitespace(M, { exclude = [], top = 40 } = {}) {
       const withOther = buyers.filter(a => a.total - a.spend[x.key] >= BUYS && a.spend[x.key] < ADDON * a.total);
       const byBand = [0, 1, 2].map(b => withOther.filter(a => band(a.total - a.spend[x.key]) === b).map(ratio));
       const whole = withOther.map(ratio);
-      rates[x.key] = { bands: byBand.map(v => v.length >= MIN_PEERS ? { ratio: median(v), peers: v.length } : { ratio: median(whole), peers: whole.length, widened: true }) };
+      const ex = list => list.sort((a, b) => b.spend[x.key] - a.spend[x.key]).slice(0, 8)
+        .map(a => ({ level1: a.level1, customer: a.customer, other: a.total - a.spend[x.key], spend: a.spend[x.key], ratio: ratio(a) }));
+      const inBand = b => withOther.filter(a => band(a.total - a.spend[x.key]) === b);
+      rates[x.key] = { bands: byBand.map((v, b) => v.length >= MIN_PEERS ? { ratio: median(v), peers: v.length, examples: ex(inBand(b)) } : { ratio: median(whole), peers: whole.length, widened: true, examples: ex([...withOther]) }) };
     }
   }
 
@@ -64,25 +71,27 @@ export function buildWhitespace(M, { exclude = [], top = 40 } = {}) {
     const cells = {};
     for (const x of LINES) {
       if (a.spend[x.key] >= BUYS) { cells[x.key] = { have: true, spend: a.spend[x.key] }; continue; }
-      let opp = 0, basis = '';
+      let opp = 0, basis = '', ref = null;
       if (x.by === 'boxes') {
         const r = rates[x.key];
         if (a.boxes >= STORER && r.per1000) {
           opp = r.per1000 * a.boxes / 1000;
+          ref = r;
           basis = `$${Math.round(r.per1000).toLocaleString('en-US')} a year per 1,000 boxes, the median of ${r.peers} storers that buy it, on ${Math.round(a.boxes).toLocaleString('en-US')} boxes`;
         }
       } else {
         const other = a.total - a.spend[x.key], r = rates[x.key].bands[band(other)];
         if (other >= BUYS && r.ratio) {
           opp = r.ratio * other;
+          ref = r;
           basis = `${Math.round(r.ratio * 100)}¢ on every dollar of other work, the median of ${r.peers} ${r.widened ? '' : 'similar-sized '}accounts that buy it`;
         }
       }
       opp = Math.min(opp, a.total);
-      cells[x.key] = { have: false, spend: a.spend[x.key], opp, basis };
+      cells[x.key] = { have: false, spend: a.spend[x.key], opp, basis, peers: ref ? ref.examples : [], peerCount: ref ? ref.peers : 0 };
     }
     const opp = LINES.reduce((t, x) => t + (cells[x.key].have ? 0 : cells[x.key].opp), 0);
-    return { level1: a.level1, customer: a.customer, boxes: a.boxes, total: a.total, cells, opp };
+    return { level1: a.level1, customer: a.customer, boxes: a.boxes, total: a.total, spend: a.spend, cells, opp };
   });
   return { lines: LINES, rows, rates, total: rows.reduce((t, r) => t + r.opp, 0) };
 }

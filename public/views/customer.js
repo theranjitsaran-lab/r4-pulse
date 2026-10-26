@@ -4,6 +4,7 @@
 import { lineChart, money0, moneyK } from '/components/chart.js';
 import { buildMargins, accountCosts, jobCost, FAMILY_NAMES } from '/components/margin.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
+import { openExplainer } from '/components/explain.js';
 import { ledgerTable } from '/components/table.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 import { seriesOf, deltaText } from '/views/customers.js';
@@ -40,7 +41,8 @@ const CSS = `
 .cp .sig .acts button.on { background: var(--ink); color: var(--surface); border-color: var(--ink); }
 .cp .ws1 { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0 2px; border-top: 1px solid var(--rule); }
 .cp .ws1:first-of-type { border-top: 0; }
-.cp .ws1 .opp { border: 1.5px dashed var(--ink-5); border-radius: 6px; padding: 1px 8px; font-weight: 600; }
+.cp .ws1 .opp { border: 1.5px dashed var(--ink-5); border-radius: 6px; padding: 1px 8px; font-weight: 600; background: none; font: inherit; color: inherit; cursor: pointer; }
+.cp .ws1 .opp:hover { border-color: var(--brand); color: var(--brand); }
 .cp .ws1b { padding: 0 0 8px; }
 .cp .ob { padding: 6px 4px 10px; }
 .cp .lp-crumb { font-size: 12px; color: var(--ink-3); padding: 4px 0 2px; }
@@ -83,6 +85,7 @@ export async function render(main, C, params) {
   const acct = M.accounts.find(a => a.level1 === id);
   const name = titleCase((s && s.customer) || (m && m.customer) || `Account ${id}`);
   const signals = CA.find(c => c.level1 === id);
+  const wsRow = buildWhitespace(M, { exclude: [CITADEL], top: 100000 }).rows.find(x => x.level1 === id);
 
   if (!s && !m) { main.innerHTML = `<div class="empty"><h2>No figures for this account</h2>It has no revenue or lines in the last twelve months.</div>`; return; }
 
@@ -146,7 +149,7 @@ export async function render(main, C, params) {
         }).join('') || '<p class="sub">No priced lines in the last twelve months.</p>'}</div>
       </div>
       <div class="stack">
-        ${wsCard(M, id)}
+        ${wsCard(wsRow)}
         <div class="card">
           <div class="card-head"><h3>Prices against the book</h3><a href="#pricing?level1=${id}">Price it ›</a></div>
           ${mine.map(r => `<div class="price">
@@ -174,6 +177,8 @@ export async function render(main, C, params) {
     });
   } else main.querySelector('#cp-chart').remove();
 
+  const wsBox = main.querySelector('.ws1') && main.querySelector('.ws1').closest('.card');
+  if (wsBox && wsRow) wsBox.addEventListener('click', ev => { const b = ev.target.closest('button.opp'); if (b) openExplainer({ row: wsRow, key: b.dataset.key, call: signals }); });
   const drillP = loadDrill(id, R, M);
   drawDrill(main.querySelector('#cp-drill'), drillP, svcName);
 
@@ -332,15 +337,13 @@ function orderBuild(o, svcName, n0) {
 }
 
 // What the account doesn't buy yet, sized at what comparable accounts spend (components/whitespace.js).
-function wsCard(M, id) {
-  const W = buildWhitespace(M, { exclude: [CITADEL], top: 100000 });
-  const r = W.rows.find(x => x.level1 === id);
+function wsCard(r) {
   if (!r) return '';
   const lines = LINES.map(x => ({ x, c: r.cells[x.key] }));
   const missing = lines.filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp);
   return `<div class="card">
     <div class="card-head"><h3>${missing.length ? `Not bought yet: about ${moneyK(r.opp)} a year ◇` : 'Buys every line we sell'}</h3><a href="#customers?view=whitespace">Cross-sell ›</a></div>
-    ${lines.map(({ x, c }) => `<div class="ws1"><span>${esc(x.name)}</span>${c.have ? `<span class="num">${moneyK(c.spend)} <span class="sub" style="display:inline">a year</span></span>` : c.opp > 0 ? `<span class="num opp" title="${esc(c.basis)}">+${moneyK(c.opp)} ◇</span>` : '<span class="sub">—</span>'}</div>${!c.have && c.opp > 0 ? `<div class="sub ws1b">${esc(c.basis)}</div>` : ''}`).join('')}
+    ${lines.map(({ x, c }) => `<div class="ws1"><span>${esc(x.name)}</span>${c.have ? `<span class="num">${moneyK(c.spend)} <span class="sub" style="display:inline">a year</span></span>` : c.opp > 0 ? `<button class="num opp" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)} ◇</button>` : '<span class="sub">—</span>'}</div>${!c.have && c.opp > 0 ? `<div class="sub ws1b">${esc(c.basis)}</div>` : ''}`).join('')}
   </div>`;
 }
 
