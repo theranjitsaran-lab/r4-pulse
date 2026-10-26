@@ -62,6 +62,10 @@ Where the build stands. Update it at the end of each piece of work.
 
 ## Open
 
+- **The daily push stopped on 8 October 2026** (`scripts/freshness.js`, 26 October). Every source
+  table was loaded once on 8 October with nothing added since; done work stops on 5 October. The push
+  runs on a machine at R4: check its scheduled task's last run and its log from 9 October.
+
 - **Boxes level of the drill:** rule 9 settled 26 October 2026. Units are box counts, so barcodes
   need VCK's work-order detail table in the daily push. The customer page shows it as pending.
 - **Route costs under review:** delivery routes are missing from the route volumes (Mike).
