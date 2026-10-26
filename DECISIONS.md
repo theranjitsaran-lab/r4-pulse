@@ -176,3 +176,16 @@ diagnostic narrative, never in the cost of service.
 - **Anne:** what does `7335200 Sales` at $1.68m cover?
 - **VCK:** the box master with date-in, date-out and out-reason — needed for retention rate
 - **VCK:** the work-order detail table, one row per box with its barcode — the bottom level of the drill (the margin spec's example came from an Excel extract of it)
+
+## Redesign after the CEO grill — settled 26 October 2026
+
+| | |
+|---|---|
+| **One branch** | `design/iterate-in-code` merged into `main`; all work on `main` from now |
+| **Home** | Yesterday first: the day in a sentence, then only what was not normal (`components/changes.js`), each line with Useful · Knew · Not right. A one-row strip (this month's bill, next month's likely, the gap, slipping), Anne's and Mike's lists, the month chart titled by its conclusion, the bridge folded away |
+| **What counts as unusual** | Each figure against its own norm, thresholds set by backtest over 40 working days: a day outside all of the last eight same weekdays, a route under 30% of a usual day of 20 or more, booked work not done beyond the usual share, an account served most weeks gone ten working days, month pace beyond ±10% on Mondays. Each fires on a quarter of days or fewer; half of days are quiet. Mike to confirm the flagged days |
+| **Feedback** | `app.feedback`. Knew or Not right holds that line back from that person for 30 days. Measured: someone acts on one line a week; two weeks with none and it is pulled |
+| **Morning emails** | Weekdays 07:15 from the R4 machine (`R4_Morning_Brief`), Microsoft 365 mailbox; Trisha, Anne and Mike each their own. A morning with no new data says only that. Taps are signed links to Render |
+| **Provisional costs** | Where route costs are under review, Pricing judges against the book only: no below-cost verdict, no margin. Margin keeps Check routes |
+| **This month's bill** | From the run, else the posted invoices (`P.posted`) when the KPI rebuild has not run since, else shown as posted with the total to follow |
+| **Go live** | Render's outbound addresses go on Trusted Sources (Theran, 26 October) |

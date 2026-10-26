@@ -100,6 +100,18 @@ would end, by account (at least 256,813 boxes, about $2.6M once, $70K a month of
 check for Anne: 30,431 boxes in storage are not on the September storage bill, 30,105 of them at
 154 accounts with no storage bill at all. `components/storage.js`, `views/storage.js`. 27 of 27 tests.
 
+## Redesign after the CEO grill (26 October 2026)
+
+Branches merged. Home rebuilt around yesterday: the day in a sentence, only what changed (signals
+backtested: half of days quiet), useful/knew/not right on every line, a one-row strip, Anne's and
+Mike's lists, the month chart, the bridge folded. Pricing no longer gives a below-cost verdict on
+route-costed services. Morning emails for Trisha, Anne and Mike (`npm run brief:preview` to see
+them), sent at 07:15 by `R4_Morning_Brief` on the R4 machine. 29 of 29 tests.
+
+**To switch on (Theran):** the Microsoft 365 mailbox and app password; the R4 machine's `.env`;
+apply `sql/app_schema.sql` and re-run `scripts/app_role.js`; install the task; go live on Render
+with its outbound addresses on Trusted Sources (`docs/DEPLOY.md`). Then Mike checks the flagged days.
+
 ## Next
 
 1. On the PC: `npm run snapshot`, commit the fixtures, push.

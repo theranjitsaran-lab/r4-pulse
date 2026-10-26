@@ -10,6 +10,8 @@
     "start": "node server/index.js",
     "snapshot": "node server/snapshot.js",
     "kpi:rebuild": "node server/kpi_rebuild.js",
+    "brief": "node scripts/send_brief.js",
+    "brief:preview": "node scripts/send_brief.js --dry-run --fixtures",
     "test": "node --test model/*.test.js",
     "test:offline": "cross-env DATABASE_URL= node --test model/*.test.js",
     "shots": "node scripts/shots.js",
@@ -24,6 +26,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
+    "nodemailer": "^6.10.1",
     "pg": "^8.13.1"
   },
   "devDependencies": {

@@ -239,3 +239,27 @@ test('what changed: each signal fires on a minority of days; a normal day says n
   // every line's numbers are its own figures (no invented numbers)
   for (const i of changesFor(P, A).items) assert.ok(i.text && i.owner && i.subject, 'a line has text, an owner and a subject');
 });
+
+test('morning brief: taps are signed and cannot be forged; a stale morning says only that', async () => {
+  const fb = require('../server/feedback.js');
+  const t = fb.sign({ who: 'anne', key: 'quiet', subject: 'account:3507', verdict: 'knew', brief_date: '2026-10-22' });
+  assert.deepEqual(fb.verify(t), { who: 'anne', key: 'quiet', subject: 'account:3507', verdict: 'knew', brief_date: '2026-10-22' });
+  const [body, mac] = t.split('.');
+  const forged = Buffer.from(JSON.stringify({ who: 'trisha', key: 'quiet', subject: 'account:3507', verdict: 'knew' })).toString('base64url') + '.' + mac;
+  assert.equal(fb.verify(forged), null, 'an edited token is refused');
+  assert.equal(fb.verify(body + '.x'), null, 'a bad signature is refused');
+  const { buildBriefs, workDaysSince } = await import('../server/brief.mjs');
+  const P = J('pulse'), A = J('activity'), C = J('customers'), PR = J('pricing'), CA = J('calls');
+  const people = [{ who: 'trisha', to: 't@x' }, { who: 'anne', to: 'a@x' }, { who: 'mike', to: 'm@x' }];
+  const next = d => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + 1); return x.toISOString().slice(0, 10); };
+  const fresh = buildBriefs({ P, A, C, PR, CA, today: next(A.latestDone), url: 'https://p', sign: fb.sign, people });
+  assert.equal(fresh.length, 3); assert.ok(fresh.every(m => !m.stale), 'three emails, none stale');
+  assert.ok(fresh.filter(m => m.who !== 'trisha').every(m => m.html.includes('/f/')), 'Anne and Mike get taps on their lines');
+  assert.equal(workDaysSince('2026-10-22', '2026-10-26'), 1, 'Friday only between Thursday and Monday');
+  const stale = buildBriefs({ P, A, C, PR, CA, today: '2026-10-28', url: 'https://p', sign: fb.sign, people });
+  assert.ok(stale.every(m => m.stale && /No new data since/.test(m.text)), 'stale morning: one line, nothing else');
+  // Trisha's opening is checked against her sheet: the plain opening passes its own check
+  const { checkNumbers } = await import('../public/components/summary.js');
+  const tr = fresh.find(m => m.who === 'trisha');
+  assert.ok(checkNumbers(tr.sheet[0].line, tr.sheet).ok);
+});

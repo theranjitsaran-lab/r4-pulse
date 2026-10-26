@@ -96,3 +96,47 @@ It sleeps after 15 idle minutes, so the first load takes about 30 seconds.
   **Data freshness** GitHub Action (`.github/workflows/freshness.yml`), which fails, and emails Theran,
   when done work is more than five days old or the rebuild missed the month. Set the repository
   variable `PULSE_URL` to the service address to turn it on.
+
+## Morning emails (R4_Morning_Brief)
+
+Trisha, Anne and Mike each get an email on weekdays at 07:15, built from the same lists as Home
+(`server/brief.mjs`, `scripts/send_brief.js`). It is sent from the R4 machine, after the push and the
+KPI rebuild. On a morning with no new data, each email says only that.
+
+1. **The mailbox (Theran, Microsoft 365):** create a mailbox such as `pulse@r4services.com` and an app
+   password for it. If Microsoft 365 refuses the login ("SMTP AUTH is disabled for the tenant"), R4's
+   IT has to allow SMTP AUTH for that one mailbox (Microsoft 365 admin centre → Users → the mailbox →
+   Mail → Manage email apps → Authenticated SMTP).
+2. **The R4 machine's `.env`**, in this checkout, beside the admin `DATABASE_URL`:
+   ```
+   BRIEF_TO=trisha:<her email>,anne:<her email>,mike:<his email>
+   BRIEF_FROM=pulse@r4services.com
+   BRIEF_SMTP_USER=pulse@r4services.com
+   BRIEF_SMTP_PASS=<the app password>
+   PULSE_URL=https://<service>.onrender.com
+   FEEDBACK_SECRET=<a long random string, the same on Render>
+   ANTHROPIC_API_KEY=<optional: Trisha's opening written by Claude, every number checked>
+   ```
+   The names before each colon must match the app logins in `AUTH_USERS`, so a "Knew" tapped in the
+   email and one tapped in the app hold the same line back.
+3. **Preview without sending:** `node scripts\send_brief.js --dry-run` writes `logs\brief\*.html`.
+   Open them in a browser.
+4. **Install the task**, signed in as `tsaran`:
+   `powershell -ExecutionPolicy Bypass -File scripts\install_brief_task.ps1 -DryRun`, then without
+   `-DryRun`. Run it once by hand with `Start-ScheduledTask R4_Morning_Brief` and read `logs\brief.txt`.
+5. **Apply the schema once** on the PC (`app.feedback`): `node scripts/apply_sql.js sql/app_schema.sql`,
+   then `node scripts/app_role.js` so the app login can write it.
+
+The taps in the emails land on Render (`/f/<token>`, signed with `FEEDBACK_SECRET`, no sign-in), so
+the emails need Render live; until then they still send, and the taps say the page cannot be reached.
+
+## Go live on Render (agreed 26 October 2026)
+
+1. Render dashboard → the Blueprint → **Sync**. Fill the `sync: false` values: `DATABASE_URL` and
+   `AUTH_USERS` from `.env.render`, `FEEDBACK_SECRET` (the same as the R4 machine), and
+   `ANTHROPIC_API_KEY` if wanted.
+2. Copy the service's **Connect → Outbound** addresses into the database's **Trusted Sources** in
+   DigitalOcean. Only those addresses; nothing else changes on the allow-list.
+3. **Manual Deploy → Deploy latest commit.** Check `https://<service>.onrender.com/health/data`: dates,
+   and `"stale": false` once the push and rebuild have run that morning.
+4. Sign in as each of Trisha, Anne and Mike once to confirm their logins.

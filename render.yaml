@@ -22,6 +22,8 @@ services:
         sync: false
       - key: AUTH_USERS       # from .env.render (scripts/app_users.js)
         sync: false
+      - key: FEEDBACK_SECRET    # the same value as in the R4 machine's .env, so the morning emails' taps are accepted
+        sync: false
       - key: ANTHROPIC_API_KEY  # optional: Home's opening paragraph written by Claude; without it, the template
         sync: false
 

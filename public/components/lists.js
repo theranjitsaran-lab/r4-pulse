@@ -8,7 +8,7 @@ import { seriesOf, moveReason } from './series.js';
 import { slippingAccounts, serviceGaps, storageGaps, CITADEL } from './levers.js';
 import { moneyK } from './chart.js';
 
-const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase());
+const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase()).replace(/(?!^)\b(Of|And|The|For|At|In)\b/g, w => w.toLowerCase()).replace(/\b(Llp|Llc|Inc|Pc|Icu|Cboe)\b/g, w => w.toUpperCase());
 const routeName = r => /\d/.test(r || '') ? r : title(r);
 const dayName = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' });
 export const HOLD_DAYS = 30;

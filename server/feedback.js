@@ -28,7 +28,9 @@ async function recent(days = 30) {
 }
 
 // signed tokens for the email taps: base64url(json).base64url(hmac)
-const secret = () => process.env.SESSION_SECRET || 'local-only-secret';
+// FEEDBACK_SECRET signs the email taps; the R4 machine (which sends) and Render (which records) must
+// hold the same value. SESSION_SECRET is the fallback for a single machine.
+const secret = () => process.env.FEEDBACK_SECRET || process.env.SESSION_SECRET || 'local-only-secret';
 const b64 = s => Buffer.from(s).toString('base64url');
 function sign(payload) { const body = b64(JSON.stringify(payload)); return body + '.' + crypto.createHmac('sha256', secret()).update(body).digest('base64url'); }
 function verify(token) {

@@ -13,7 +13,7 @@ const MODEL = 'claude-opus-5-5';
 let lib;
 const shared = () => lib || (lib = import('../public/components/summary.js'));
 
-async function write(sheet, S) {
+async function write(sheet, S, system) {
   const Anthropic = require('@anthropic-ai/sdk');
   const client = new (Anthropic.default || Anthropic)();
   const res = await client.beta.messages.create({
@@ -23,7 +23,7 @@ async function write(sheet, S) {
     // on a safety decline, the API re-runs the request on a fallback model it chooses
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default',
-    system: S.SYSTEM,
+    system: system || S.SYSTEM,
     messages: [{ role: 'user', content: `The facts:\n${S.sheetText(sheet)}` }],
   });
   if (res.stop_reason === 'refusal') return null;
@@ -56,4 +56,16 @@ router.post('/', async (req, res) => {
   res.json(await cache.get(key));
 });
 
+// For the morning email (scripts/send_brief.js): Claude's sentences, kept only if every number in them
+// is on the sheet; otherwise null, and the email uses its own plain lines.
+async function writeChecked(sheet, { brief = false } = {}) {
+  if (!process.env.ANTHROPIC_API_KEY) return null;
+  const S = await shared();
+  try {
+    const text = await write(sheet, S, brief ? S.BRIEF_SYSTEM : null);
+    return text && S.checkNumbers(text, sheet).ok ? text : null;
+  } catch (e) { console.warn('brief: Claude call failed:', e.message); return null; }
+}
+
 module.exports = router;
+module.exports.writeChecked = writeChecked;
