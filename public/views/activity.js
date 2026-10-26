@@ -2,8 +2,15 @@
 // for its stops in order with what each customer's work billed; the week as a grid; booked ahead.
 // From /api/activity (Veri-Shred service orders through v_route_day). Route-day margin waits for
 // driver pay rates; GPS and times were never captured, so nothing here needs them.
+// The long way round: postcodes far from the 35th Street yard with little work, from done orders,
+// miles as the crow flies from US Census ZCTA centroids (public/data/zcta.json), visit cost from
+// the cost model at that distance.
+const YARD = [41.8307, -87.6573];   // 1301 W 35th St
+const THIN = 0.6;                   // a route day under 60% of its own norm is thin
+const miles = (a, b) => { const r = Math.PI / 180, R = 3958.8, dp = (b[0] - a[0]) * r, dl = (b[1] - a[1]) * r;
+  return 2 * R * Math.asin(Math.sqrt(Math.sin(dp / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dl / 2) ** 2)); };
 import { money0, moneyK } from '/components/chart.js';
-import { titleCase, esc } from '/components/data.js';
+import { titleCase, esc, loadRates } from '/components/data.js';
 const routeName = r => /\d/.test(r || '') ? r : titleCase(r);
 
 const STYLE = `
@@ -37,6 +44,15 @@ const STYLE = `
 .rt .grid .c small { font-size: 11px; opacity: .8; }
 .rt .grid .c.sel { border-color: var(--ink); }
 .rt .grid .c.none { background: var(--well); color: var(--ink-5); cursor: default; }
+.rt .rt-say { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: -4px 0 14px; max-width: 920px; }
+.rt .bands { display: grid; grid-template-columns: 110px minmax(0, 1fr) 70px 60px; gap: 6px 12px; align-items: center; font-size: 14px; margin: 6px 0 14px; }
+.rt .bands .bar { height: 10px; background: var(--well-2); border-radius: 5px; position: relative; overflow: hidden; }
+.rt .bands .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink-3); border-radius: 5px; }
+.rt .bands .v { text-align: right; font-variant-numeric: tabular-nums; }
+.rt .far { width: 100%; border-collapse: collapse; font-size: 14px; }
+.rt .far th { font-size: 12px; font-weight: 500; color: var(--ink-3); text-align: right; padding: 0 6px 6px; }
+.rt .far td { padding: 7px 6px; border-top: 1px solid var(--rule); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rt .far th:first-child, .rt .far td:first-child { text-align: left; white-space: normal; }
 .rt .two { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px; margin-top: 14px; align-items: start; }
 @media (max-width: 860px) {
   .rt h1 { font-size: 28px; }
@@ -44,7 +60,16 @@ const STYLE = `
   .rt .r { grid-template-columns: 84px minmax(0, 1fr) 70px 12px; }
   .rt .r .who { display: none; }
   .rt .stops { padding-left: 0; }
-  .rt .two { grid-template-columns: 1fr; }
+  .rt .rt-say { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: -4px 0 14px; max-width: 920px; }
+.rt .bands { display: grid; grid-template-columns: 110px minmax(0, 1fr) 70px 60px; gap: 6px 12px; align-items: center; font-size: 14px; margin: 6px 0 14px; }
+.rt .bands .bar { height: 10px; background: var(--well-2); border-radius: 5px; position: relative; overflow: hidden; }
+.rt .bands .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink-3); border-radius: 5px; }
+.rt .bands .v { text-align: right; font-variant-numeric: tabular-nums; }
+.rt .far { width: 100%; border-collapse: collapse; font-size: 14px; }
+.rt .far th { font-size: 12px; font-weight: 500; color: var(--ink-3); text-align: right; padding: 0 6px 6px; }
+.rt .far td { padding: 7px 6px; border-top: 1px solid var(--rule); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rt .far th:first-child, .rt .far td:first-child { text-align: left; white-space: normal; }
+.rt .two { grid-template-columns: 1fr; }
 }`;
 
 function injectCss() {
@@ -59,9 +84,10 @@ const pl = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 const pct = v => (v > 0 ? '▲ ' : v < 0 ? '▼ ' : '') + Math.abs(Math.round(v * 100)) + '%';
 const dcls = v => v > 0.05 ? 'up' : v < -0.05 ? 'down' : 'flat';
 
-export function render(main, A, params) {
+export async function render(main, A, params) {
   if (!main) return;
   injectCss();
+  const [R, Z] = await Promise.all([loadRates(), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({}))]);
   const real = A.routeDays.filter(r => r.route && r.route !== '--');
   const doneDays = [...new Set(real.filter(r => r.services_done > 0).map(r => r.date))].sort();
   let day = params.date && doneDays.includes(params.date) ? params.date : A.latestDone;
@@ -81,6 +107,7 @@ export function render(main, A, params) {
       <div><h1>Routes</h1><div class="sub">Done is what drivers confirmed in Veri-Shred; booked includes work not yet done.</div></div>
       <div class="day"><button id="rt-prev" aria-label="Previous day">‹</button><b id="rt-day"></b><button id="rt-next" aria-label="Next day">›</button></div>
     </div>
+    <p class="rt-say" id="rt-say"></p>
     <div class="sum" id="rt-sum"></div>
     <div class="card"><div class="card-head"><h3>By route</h3><small>done against each route's own norm · tap for stops</small></div><div id="rt-routes"></div></div>
     <div class="two">
@@ -90,6 +117,7 @@ export function render(main, A, params) {
         <div class="card"><div class="card-head"><h3>Margin per route day</h3></div><div class="pending">Starts when driver pay rates by person are loaded: the day's invoiced work less driver pay and the vehicle share of a route day.</div></div>
       </div>
     </div>
+    <div class="card" style="margin-top:14px" id="rt-far"></div>
   </div>`;
   const $ = id => main.querySelector('#' + id);
 
@@ -101,6 +129,8 @@ export function render(main, A, params) {
     const done = rows.reduce((t, r) => t + r.services_done, 0), booked = rows.reduce((t, r) => t + r.services, 0);
     const normDay = rows.reduce((t, r) => t + (norm[r.route] ? norm[r.route].done : 0), 0);
     const pounds = rows.reduce((t, r) => t + r.pounds, 0);
+    const thin = rows.filter(r => r.services_done > 0 && norm[r.route] && r.services_done < THIN * norm[r.route].done);
+    $('rt-say').innerHTML = done ? `${esc(dlabel(day))}: ${done.toLocaleString('en-US')} services done on ${pl(rows.filter(r => r.services_done > 0).length, 'route')}${normDay ? `, <span class="delta ${dcls(done / normDay - 1)}">${pct(done / normDay - 1)}</span> on these routes' own norm` : ''}.${thin.length ? ` <span class="is-warn">Thin: ${thin.map(r => `${esc(routeName(r.route))} (${r.services_done} against ${Math.round(norm[r.route].done)})`).join(', ')}.</span>` : ' No thin route.'}` : 'No work done on this day.';
     $('rt-sum').innerHTML = `
       <div class="card"><div class="lab">Services done</div><div class="big">${done.toLocaleString('en-US')}</div><div class="sub">${normDay ? `<span class="delta ${dcls(done / normDay - 1)}">${pct(done / normDay - 1)}</span> on these routes' norm of ${Math.round(normDay)}` : ''}</div></div>
       <div class="card"><div class="lab">Booked, not done</div><div class="big ${booked - done > done * .5 ? 'is-warn' : ''}">${(booked - done).toLocaleString('en-US')}</div><div class="sub">of ${booked.toLocaleString('en-US')} booked</div></div>
@@ -115,7 +145,7 @@ export function render(main, A, params) {
         <span><span class="meter"><i style="width:${r.services_done / max * 100}%"></i>${n ? `<b style="left:${n.done / max * 100}%" title="norm ${Math.round(n.done)}"></b>` : ''}</span>
           <span class="sub">${r.services_done} of ${r.services} done · ${pl(r.stops_done, 'stop')} · ${pl(r.customers, 'customer')} · ${pl(r.postcodes, 'postcode')}</span></span>
         <span class="v who sub">${esc((r.postcode_list || '').split(' ').slice(0, 4).join(' '))}</span>
-        <span class="v">${d == null ? '' : `<span class="delta ${dcls(d)}">${pct(d)}</span><span class="sub" style="display:block">norm ${Math.round(n.done)}</span>`}</span>
+        <span class="v">${d == null ? '' : `${r.services_done > 0 && d < THIN - 1 ? '<span class="chip warn">thin</span> ' : ''}<span class="delta ${dcls(d)}">${pct(d)}</span><span class="sub" style="display:block">norm ${Math.round(n.done)}</span>`}</span>
         <span class="go">›</span></div><div class="stops" data-for="${esc(r.route)}" hidden></div>`;
     }).join('') || '<p class="sub">No routes ran on this day.</p>';
   }
@@ -174,6 +204,46 @@ export function render(main, A, params) {
     }).join('') || '<p class="sub">Nothing booked beyond the latest day.</p>';
   }
 
+  function drawFar() {
+    const el = $('rt-far');
+    const pts = A.postcodes && A.postcodes.length ? A.postcodes : null;   // twelve months, from the next snapshot
+    let by;
+    if (pts) by = pts.map(p => ({ pc: p.postcode, services: p.services, visits: p.visits, customers: p.customers, names: p.names || '' }));
+    else {
+      const m = new Map();
+      for (const o of A.orders) {
+        if (!o.done || !o.postcode || o.date > A.latestDone) continue;
+        const x = m.get(o.postcode) || { pc: o.postcode, services: 0, visitKeys: new Set(), cust: new Map() };
+        x.services++; x.visitKeys.add(o.date + '|' + o.stop); x.cust.set(o.level1, o.company);
+        m.set(o.postcode, x);
+      }
+      by = [...m.values()].map(x => ({ pc: x.pc, services: x.services, visits: x.visitKeys.size, customers: x.cust.size, names: [...x.cust.values()].slice(0, 2).map(titleCase).join(', ') }));
+    }
+    by = by.filter(p => Z[p.pc]).map(p => {
+      const mi = miles(YARD, Z[p.pc]);
+      const c = R.costToServe('movement', 0, { visits: p.visits, miles: Math.round(mi * 10) / 10 });
+      return { ...p, mi, cost: c.total, per: p.services ? c.total / p.services : null };
+    });
+    if (!by.length) { el.innerHTML = '<div class="card-head"><h3>The long way round</h3></div><div class="pending">No postcodes on done orders in this window.</div>'; return; }
+    const total = by.reduce((t, p) => t + p.services, 0);
+    const bands = [[0, 5, 'Within 5 miles'], [5, 10, '5 to 10'], [10, 20, '10 to 20'], [20, 35, '20 to 35'], [35, 999, 'Beyond 35']].map(([a, b, l]) => {
+      const ps = by.filter(p => p.mi >= a && p.mi < b), sv = ps.reduce((t, p) => t + p.services, 0);
+      return { l, sv, share: total ? sv / total : 0, n: ps.length };
+    });
+    const far = by.filter(p => p.mi >= 20).sort((a, b) => b.per - a.per).slice(0, 12);
+    const near10 = (bands[0].sv + bands[1].sv) / (total || 1);
+    const farV = far.reduce((t, p) => t + p.visits, 0), farS = far.reduce((t, p) => t + p.services, 0), farC = far.reduce((t, p) => t + p.cost, 0);
+    const window = pts ? 'twelve months' : `the ${Math.round((new Date(A.latestDone) - new Date(A.orders.map(o => o.date).sort()[0])) / 864e5) + 1} days to ${dshort(A.latestDone)}`;
+    el.innerHTML = `<div class="card-head"><h3>${Math.round(near10 * 100)}% of the work is within ten miles of the yard</h3><small>${esc(window)}</small></div>
+      <div class="sub">Done services by distance from 1301 W 35th St, as the crow flies.${pts ? '' : ' Three weeks of stops for now; the next snapshot brings a full year.'}</div>
+      <div class="bands">${bands.map(b => `<span>${b.l}</span><span class="bar"><i style="width:${b.share * 100}%"></i></span><span class="v">${b.sv.toLocaleString('en-US')}</span><span class="v sub">${Math.round(b.share * 100)}%</span>`).join('')}</div>
+      ${far.length ? `<div class="card-head" style="margin-top:8px"><h3>The long way round: ${far.length} postcodes 20 miles or more out</h3><small>visit cost ◇ per service</small></div>
+      <div class="sub" style="margin-bottom:8px">${farV} visits for ${farS} services, about ${money0(farC / (farS || 1))} a service in route time ◇. Bundle them onto a planned run, or price the trip.</div>
+      <table class="far"><thead><tr><th>Postcode</th><th>Miles</th><th class="hide-s">Customers</th><th>Visits</th><th>Services</th><th>Per service ◇</th></tr></thead><tbody>
+      ${far.map(p => `<tr><td><b>${esc(p.pc)}</b> <span class="sub">${esc(p.names)}</span></td><td>${p.mi.toFixed(1)}</td><td class="hide-s">${p.customers}</td><td>${p.visits}</td><td>${p.services}</td><td class="${p.per > 100 ? 'is-warn' : ''}">${money0(p.per)}</td></tr>`).join('')}</tbody></table>` : '<p class="sub">No work 20 miles or more out in this window.</p>'}
+      <div class="src">Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles from US Census ZCTA centroids · route time from the cost model: a route day's travel share scaled for distance, plus time on site ◇ · route costs under review</div>`;
+  }
+
   function redraw() { drawDay(); drawWeek(); history.replaceState(null, '', `#activity?date=${day}`); }
   $('rt-prev').addEventListener('click', () => { const i = doneDays.indexOf(day); if (i > 0) { day = doneDays[i - 1]; redraw(); } });
   $('rt-next').addEventListener('click', () => { const i = doneDays.indexOf(day); if (i < doneDays.length - 1) { day = doneDays[i + 1]; redraw(); } });
@@ -188,5 +258,5 @@ export function render(main, A, params) {
     if (open) return;
     row.classList.add('open'); box.hidden = false; drawStops(row.dataset.route, box);
   });
-  drawDay(); drawWeek(); drawAhead();
+  drawDay(); drawWeek(); drawAhead(); drawFar();
 }
