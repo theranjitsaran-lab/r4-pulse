@@ -146,6 +146,8 @@
   --row-h: 44px;           /* a tap target, not a ledger line */
   --shadow-sm:  0 1px 2px rgba(0, 0, 0, .08);   /* the selected segment */
   --shadow-pop: 0 4px 20px rgba(0, 0, 0, .14);  /* a tooltip */
+  --shadow-dialog: 0 20px 60px rgba(0, 0, 0, .25); /* the explainer */
+  --scrim:      rgba(0, 0, 0, .35);             /* behind a dialog */
   --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 4px 16px rgba(0, 0, 0, .04);
 
   --t-fast: 120ms;

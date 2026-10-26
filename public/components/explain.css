@@ -1,0 +1,21 @@
+/* The cross-sell explainer. Moved out of the view so every value reads tokens.css. */
+
+/* CSS */
+.xpl { border: 0; padding: 0; border-radius: var(--r-lg); width: min(calc(var(--u) * 180), calc(100vw - var(--sp-6))); max-height: calc(100vh - var(--sp-10)); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-dialog); }
+.xpl::backdrop { background: var(--scrim); }
+.xpl .in { padding: var(--sp-6) var(--sp-6) var(--sp-5); overflow: auto; max-height: calc(100vh - var(--sp-10)); box-sizing: border-box; }
+.xpl .top { display: flex; justify-content: space-between; gap: var(--sp-3); align-items: flex-start; }
+.xpl h2 { font-size: var(--fs-lead); font-weight: 700; letter-spacing: var(--track-tight); margin: 0; line-height: 1.25; }
+.xpl .x { border: 0; background: var(--well-2); border-radius: 50%; width: var(--sp-8); height: var(--sp-8); font-size: var(--fs-head); line-height: 1; cursor: pointer; color: var(--ink-2); flex: none; }
+.xpl h3 { font-size: var(--fs-label); font-weight: 600; color: var(--ink-3); margin: var(--sp-5) 0 var(--sp-2); letter-spacing: .01em; }
+.xpl p { margin: 0 0 var(--sp-2); line-height: 1.5; font-size: var(--fs-body); }
+.xpl .peers { width: 100%; border-collapse: collapse; font-size: var(--fs-label); margin-top: var(--sp-1); }
+.xpl .peers td, .xpl .peers th { padding: var(--sp-2) var(--sp-1); border-top: var(--hair) solid var(--rule); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.xpl .peers th { font-size: var(--fs-source); font-weight: 500; color: var(--ink-3); border-top: 0; }
+.xpl .peers td:first-child, .xpl .peers th:first-child { text-align: left; white-space: normal; }
+.xpl .peers a { color: inherit; text-decoration: none; } .xpl .peers a:hover { color: var(--brand); }
+.xpl .play { background: var(--well); border-radius: var(--r); padding: var(--sp-3) var(--sp-4); }
+.xpl .play dt { font-size: var(--fs-source); color: var(--ink-3); margin-top: var(--sp-2); } .xpl .play dt:first-child { margin-top: 0; }
+.xpl .play dd { margin: var(--hair-2) 0 0; font-size: var(--fs-sm); line-height: 1.45; }
+@media (max-width: 520px) { .xpl .in { padding: var(--sp-5) var(--sp-4); } .xpl h2 { font-size: var(--fs-head); } .xpl .peers td:nth-child(3), .xpl .peers th:nth-child(3) { display: none; } }
+.xpl .draft { display: inline-block; font-size: var(--fs-tiny); border: var(--hair) dashed var(--ink-5); border-radius: var(--r-lg); padding: 0 var(--sp-2); color: var(--ink-3); margin-left: var(--sp-2); vertical-align: var(--hair-2); }

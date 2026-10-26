@@ -103,7 +103,7 @@ export async function render(main, C, params) {
     ${view === 'all' ? '<input class="find" id="c-find" type="search" placeholder="Find a customer by name" aria-label="Find a customer by name">' : ''}
     <div class="card">
       <div class="head"><span>Customer</span><span>24 months</span><span>Last 12 months</span><span>Last 3 months</span><span>Margin</span><span></span></div>
-      <ul class="list">${rows.map(row).join('') || '<li style="padding:16px;color:var(--ink-3)">No accounts in this view.</li>'}</ul>
+      <ul class="list">${rows.map(row).join('') || '<li style="padding:var(--sp-4);color:var(--ink-3)">No accounts in this view.</li>'}</ul>
     </div>
     <p class="foot"><span id="c-count">${rows.length}</span> accounts · last 3 months is each account against its own twelve months before them, the same measure as Home and Slipping · margin ◇ is revenue less modelled cost to serve; route-based costs are under review.</p>
   </div>`;
@@ -212,7 +212,7 @@ async function whitespace(main, C, params) {
   const byLine = LINES.map(x => ({ x, v: rows.reduce((t, r) => t + (r.cells[x.key].have ? 0 : r.cells[x.key].opp), 0) })).sort((a, b) => b.v - a.v);
   const shown = params.all ? rows.length : 40;
   const pace = crossSellPace(M.history), names = new Map(M.accounts.map(a => [a.level1, a.customer]));
-  const paceLine = pace ? ` <span style="display:block;margin-top:8px">That is the ceiling. R4's own record: in the last twelve months ${pace.count} existing accounts added a line (${pace.prevCount} the year before), worth about ${moneyK(pace.value)} in their first year so far. The biggest: ${pace.best.map(f => `${esc(titleCase(names.get(f.level1) || 'Account ' + f.level1))} (${lc((LINES.find(x => x.key === f.family) || { name: f.family }).name)}, ${moneyK(f.first_year)})`).join(', ')}.</span>` : '';
+  const paceLine = pace ? ` <span style="display:block;margin-top:var(--sp-2)">That is the ceiling. R4's own record: in the last twelve months ${pace.count} existing accounts added a line (${pace.prevCount} the year before), worth about ${moneyK(pace.value)} in their first year so far. The biggest: ${pace.best.map(f => `${esc(titleCase(names.get(f.level1) || 'Account ' + f.level1))} (${lc((LINES.find(x => x.key === f.family) || { name: f.family }).name)}, ${moneyK(f.first_year)})`).join(', ')}.</span>` : '';
 
   const cell = (r, x) => {
     const c = r.cells[x.key];
@@ -226,7 +226,7 @@ async function whitespace(main, C, params) {
     <h1>Customers</h1>
     <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'whitespace' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
     <p class="lede">If the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do, they would spend about <b>${moneyK(W.total)} a year more</b> (${moneyK(W.total / 12)} a month ◇). Most of it is ${lc(byLine[0].x.name)} and ${lc(byLine[1].x.name)}. Start with ${top3.join(', ')}.${paceLine}</p>
-    <div class="key"><span><span style="background:color-mix(in srgb, var(--ink) 30%, var(--surface))"></span>buys it: twelve-month spend, darker is more</span><span><span style="border:1.5px dashed var(--ink-5)"></span>doesn't buy it yet: what comparable accounts spend ◇</span><span>— not sized</span></div>
+    <div class="key"><span><span style="background:color-mix(in srgb, var(--ink) 30%, var(--surface))"></span>buys it: twelve-month spend, darker is more</span><span><span style="border:var(--hair) dashed var(--ink-5)"></span>doesn't buy it yet: what comparable accounts spend ◇</span><span>— not sized</span></div>
     <div class="card">
       <div class="grid">
         <div class="gh">Customer</div>${LINES.map(x => `<div class="gh">${esc(x.short || x.name)}</div>`).join('')}<div class="gh">Not bought yet</div>
@@ -327,7 +327,7 @@ async function monthGrid(main, C, params) {
     <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (10% or more below their own run) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} Each cell below is one month against the six before it.</p>
     <div class="tools">
       <div class="seg">${[['total', 'Storage and service'], ['storage', 'Storage'], ['service', 'Service']].map(([k, l]) => `<a href="${link(k)}" class="${k === which ? 'on' : ''}">${l}</a>`).join('')}</div>
-      <div class="key"><i style="background:color-mix(in srgb, var(--bad) 70%, var(--surface))"></i>down<i style="background:color-mix(in srgb, var(--bad) 25%, var(--surface));margin-left:6px"></i><i style="background:color-mix(in srgb, var(--ink) 5%, var(--surface))"></i>within 10%<i style="background:color-mix(in srgb, var(--good) 25%, var(--surface))"></i><i style="background:color-mix(in srgb, var(--good) 70%, var(--surface));margin-left:6px"></i>up · against its own last six months</div>
+      <div class="key"><i style="background:color-mix(in srgb, var(--bad) 70%, var(--surface))"></i>down<i style="background:color-mix(in srgb, var(--bad) 25%, var(--surface));margin-left:var(--sp-2)"></i><i style="background:color-mix(in srgb, var(--ink) 5%, var(--surface))"></i>within 10%<i style="background:color-mix(in srgb, var(--good) 25%, var(--surface))"></i><i style="background:color-mix(in srgb, var(--good) 70%, var(--surface));margin-left:var(--sp-2)"></i>up · against its own last six months</div>
     </div>
     <div class="card">
       <table>
@@ -409,11 +409,11 @@ async function marginList(main, R, M, MS, params) {
         <span class="r pc ${r.pc < 0.15 && !r.review ? 'is-bad' : r.pc < 0.5 && !r.review ? 'is-warn' : ''}">${pcText(r.pc)}</span>
         <span class="ac"><span class="tag ${r.act.cls}" title="${esc(r.act.why)}">${r.act.tag}</span></span><span class="go">›</span></a>`).join('')}
       <div class="rw a tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r rv">${money0(sum('revenue'))}</span><span class="r cs">${money0(sum('cost'))}</span><span class="r lf">${money0(sum('margin'))}</span><span class="r pc">${sum('revenue') > 0 ? Math.round(sum('margin') / sum('revenue') * 100) + '%' : '—'}</span><span></span><span></span></div>
-      ${rows.length > shown ? `<a class="more" style="display:inline-block;margin-top:10px;color:var(--brand);font-weight:500;text-decoration:none" href="${mlink({ f: filter, n: 'all' })}">Show all ${rows.length}</a>` : ''}
+      ${rows.length > shown ? `<a class="more" style="display:inline-block;margin-top:var(--sp-3);color:var(--brand);font-weight:500;text-decoration:none" href="${mlink({ f: filter, n: 'all' })}">Show all ${rows.length}</a>` : ''}
     </div>
-    ${D.rows.length ? `<div class="card dens" style="margin-top:14px">
+    ${D.rows.length ? `<div class="card dens" style="margin-top:var(--sp-4)">
       <div class="card-head"><h3>Where more volume would cut cost: ${esc(D.rows[0].postcode)} first, about ${money0(D.rows[0].saving)} a year ◇</h3></div>
-      <p class="sub" style="margin:0 0 8px">Travel to a postcode is shared by the customers on the visit. Where visits carry one customer, one more on the same visits takes this much a year off the cost of serving the ones already there.</p>
+      <p class="sub" style="margin:0 0 var(--sp-2)">Travel to a postcode is shared by the customers on the visit. Where visits carry one customer, one more on the same visits takes this much a year off the cost of serving the ones already there.</p>
       ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${d.miles.toFixed(0)} miles out<small>about ${n0(d.visitsYear)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${d.perVisit.toFixed(1)} customers each`} · ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
       <div class="src">Route visits from ${D.days > 120 ? 'six months of route days' : `the ${D.days} days of routes held offline, scaled to a year`} · customers a visit from the twelve-month postcode book · travel a visit from the cost model at the postcode's distance (model/rates.js, provisional) ◇</div>
     </div>` : ''}
@@ -445,7 +445,7 @@ async function marginAccount(main, R, M, MS, id) {
       </div>
       <div class="jv-key">${PARTS.filter(p => parts[p[0]] > 0.5).map(p => `<span><i class="${{ space: 'p-space', handling: 'p-hand', route: 'p-route', plant: 'p-plant', labour: 'p-lab' }[p[0]]}"></i>${p[1]} ${moneyK(parts[p[0]])}</span>`).join('')}</div>
     </div>
-    <div class="card lines" style="margin-top:14px">
+    <div class="card lines" style="margin-top:var(--sp-4)">
       <div class="card-head"><h3>By line of business, largest first</h3></div>
       <div class="hd"><span>Line</span><span>Volume</span><span>Revenue</span><span>Cost ◇</span><span>Left</span><span>Margin</span><span></span></div>
       ${fams.map(([f, v]) => { const l = v.revenue - v.cost, pc = v.revenue > 0 ? l / v.revenue : null; return `<a class="rw" href="${mlink({ id, line: f })}">
@@ -483,7 +483,7 @@ async function marginLine(main, R, M, MS, id, f) {
   const working = (AC[f] || []).flatMap(r => r.lines);
   const workHtml = working.length ? `<table class="jv-tab working"><tbody>${working.map(l => `<tr><td>${esc(l[0])}${l[3] ? ' ◇' : ''}</td><td class="why">${esc(l[2])}</td><td class="num">${money0(l[1])}</td></tr>`).join('')}</tbody></table>` : '';
   main.innerHTML = `<div class="cust mv2">${crumb}<h2 class="t">${esc(fname)}: ${money0(v.revenue)} a year against about ${money0(v.cost)} to serve ◇</h2><div id="mv-jobs"><p class="sub">Loading the jobs…</p></div>
-    <div class="card" style="margin-top:14px"><div class="card-head"><h3>The year's cost, worked out ◇</h3></div>${workHtml || '<p class="sub">No modelled cost on this line: fees and charges with no volume behind them.</p>'}<div class="src">Twelve months of volume at the cost model's rates (model/rates.js); the jobs above are costed one by one on their own route days</div></div></div>`;
+    <div class="card" style="margin-top:var(--sp-4)"><div class="card-head"><h3>The year's cost, worked out ◇</h3></div>${workHtml || '<p class="sub">No modelled cost on this line: fees and charges with no volume behind them.</p>'}<div class="src">Twelve months of volume at the cost model's rates (model/rates.js); the jobs above are costed one by one on their own route days</div></div></div>`;
   const box = main.querySelector('#mv-jobs');
   if (['storage', 'other'].includes(f)) { box.innerHTML = `<p class="note">${f === 'storage' ? 'Storage bills every month for the boxes held, so it has no jobs: its cost is the warehouse space below.' : 'Fees and charges carry no volume, so there are no jobs to cost.'}</p>`; return; }
   const J = await accountJobs(R, M, id);
@@ -550,7 +550,7 @@ async function destructionView(main, C, params) {
         <span class="r lost">−${moneyK(r.lost)}</span>
         <span class="r mo">${r.months == null ? '—' : Math.round(r.months)}</span><span class="go">›</span></a>`).join('')}
       <div class="rw tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r bx">${Math.round(T('boxes')).toLocaleString('en-US')}</span><span class="r once">${moneyK(T('once'))}</span><span class="r lost">−${moneyK(T('lost'))}</span><span class="r mo">${Math.round(T('once') / T('lost'))}</span><span></span></div>
-      ${rows.length > shown ? `<a style="display:inline-block;margin-top:10px;color:var(--brand);font-weight:500;text-decoration:none" href="#customers?view=destruction&n=all">Show all ${rows.length}</a>` : ''}
+      ${rows.length > shown ? `<a style="display:inline-block;margin-top:var(--sp-3);color:var(--brand);font-weight:500;text-decoration:none" href="#customers?view=destruction&n=all">Show all ${rows.length}</a>` : ''}
     </div>
     <p class="foot">Overdue: storage_retention status I with a review date passed. Destruction at the median R3 shredding fee per standard box; storage at the account's latest rate per box (storage_rate_hist), else the box-weighted median. Destruction needs the client's sign-off on the retention list. Citadel apart.</p>
   </div>`;

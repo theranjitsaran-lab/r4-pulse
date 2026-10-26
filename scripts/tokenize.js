@@ -35,7 +35,9 @@ function convert(css) {
     if (prop === 'content') return m;
     // the two shadows first, before their lengths are rewritten
     let v = val.replace(/0 1px 2px rgba\(0, ?0, ?0, ?\.08\)/g, 'var(--shadow-sm)')
-               .replace(/0 4px 20px rgba\(0, ?0, ?0, ?\.14\)/g, 'var(--shadow-pop)');
+               .replace(/0 4px 20px rgba\(0, ?0, ?0, ?\.14\)/g, 'var(--shadow-pop)')
+               .replace(/0 20px 60px rgba\(0, ?0, ?0, ?\.25\)/g, 'var(--shadow-dialog)')
+               .replace(/^\s*rgba\(0, ?0, ?0, ?\.35\)\s*$/, 'var(--scrim)');
     if (prop === 'font-size') v = v.replace(/(\d*\.?\d+)px/g, (_, n) => `var(${fontVar(+n)})`);
     else if (prop === 'font') v = v.replace(/(\d*\.?\d+)px/g, (_, n) => `var(${fontVar(+n)})`);
     else v = v.replace(/(-?\d*\.?\d+)px/g, (_, n) => lengthVar(+n, prop));

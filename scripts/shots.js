@@ -28,6 +28,7 @@ const SCREENS = [
   { name: 'styleguide', page: '/styleguide.html' },
 ].concat(
   // every Customers list, with --all or by name (customers-margin, ...)
+  [{ name: 'explainer', hash: '#customers?view=whitespace', click: 'button.opp', extra: true }],
   ['conversations', 'grid', 'whitespace', 'slipping', 'gaps', 'rounds', 'destruction', 'margin', 'all'].map(v => ({ name: 'customers-' + v, hash: '#customers?view=' + v, extra: true })),
 ).filter(s => only.length ? only.includes(s.name) : !s.extra || args.includes('--all'));
 // --only=intro takes just the opening, mid-flight
@@ -66,8 +67,9 @@ async function main() {
         await page.waitForLoadState('networkidle');
         await page.waitForFunction(() => !document.querySelector('#main .loading'), null, { timeout: 15000 }).catch(() => {});
         await page.waitForTimeout(300);
+        if (s.click) { await page.click(s.click); await page.waitForTimeout(400); }
         const f = path.join(out, `${s.name}-${width}.png`);
-        await page.screenshot({ path: f, fullPage: true });
+        await page.screenshot({ path: f, fullPage: !s.click });   // a dialog: the viewport it sits in
         console.log('  ' + path.relative(ROOT, f));
       }
       // the intro, caught mid-flight, in a context that allows motion
