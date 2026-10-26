@@ -1,4 +1,4 @@
-// npm run shots [-- <label>] [-- --only=pulse,pricing]
+// npm run shots [-- <label>] [-- --only=home,pricing] [-- --all]
 // Every screen at 390 (Trisha's phone) and 1440 (Anne's and Mike's desk), from the fixtures, into
 // docs/screens/<label>/. The label defaults to "current"; use "before-x" and "after-x" to keep a pair.
 // It starts its own server on fixtures with a throwaway login, so it needs no .env and no database.
@@ -25,7 +25,10 @@ const SCREENS = [
   { name: 'pricing',   hash: '#pricing' },
   { name: 'routes',    hash: '#activity' },
   { name: 'styleguide', page: '/styleguide.html' },
-].filter(s => !only.length || only.includes(s.name));
+].concat(
+  // every Customers list, with --all or by name (customers-margin, ...)
+  ['conversations', 'grid', 'whitespace', 'slipping', 'gaps', 'rounds', 'destruction', 'margin', 'all'].map(v => ({ name: 'customers-' + v, hash: '#customers?view=' + v, extra: true })),
+).filter(s => only.length ? only.includes(s.name) : !s.extra || args.includes('--all'));
 // --only=intro takes just the opening, mid-flight
 const WIDTHS = [390, 1440];
 

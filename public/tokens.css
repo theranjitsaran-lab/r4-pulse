@@ -65,6 +65,9 @@
   --track-label: .02em;
   --track-tight: -.02em;
 
+  --fs-sm:      14px;      /* table cells, buttons */
+  --fs-lead:    20px;      /* a verdict, a lede */
+  --fs-display-ph: 28px;   /* a screen title on a phone */
   --fs-mega:    64px;      /* Home's one hero figure, desktop */
   --fs-mega-ph: 46px;      /* the same on a phone */
   --fs-title:   22px;      /* a section title that states its conclusion */
@@ -138,6 +141,8 @@
   --r:    10px;
   --r-lg: 16px;
   --row-h: 44px;           /* a tap target, not a ledger line */
+  --shadow-sm:  0 1px 2px rgba(0, 0, 0, .08);   /* the selected segment */
+  --shadow-pop: 0 4px 20px rgba(0, 0, 0, .14);  /* a tooltip */
   --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 4px 16px rgba(0, 0, 0, .04);
 
   --t-fast: 120ms;

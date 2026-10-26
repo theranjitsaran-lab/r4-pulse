@@ -27,43 +27,6 @@ export const VIEWS = {
   all:           { label: 'All', blurb: 'Every account with revenue in the last twelve months.' },
 };
 
-const CSS = `
-.cust h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); margin: 0 0 4px; }
-.cust .blurb { color: var(--ink-3); margin: 0 0 16px; }
-.cust .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-.cust .views { overflow-x: auto; max-width: 100%; }
-.cust .views .seg { flex-wrap: nowrap; }
-.cust .views .seg a { white-space: nowrap; }
-.cust .list { list-style: none; margin: 0; padding: 0; }
-.cust .list a { display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 84px 70px 14px; gap: 16px; align-items: center; padding: 12px 4px;
-  border-top: 1px solid var(--rule); color: inherit; text-decoration: none; }
-.cust .list li:first-child a { border-top: 0; }
-.cust .list a:hover { background: var(--well); }
-.cust .head { display: grid; grid-template-columns: minmax(0, 1fr) 130px 110px 84px 70px 14px; gap: 16px; padding: 0 4px 8px; font-size: 12px; color: var(--ink-3); }
-.cust .head span:nth-child(n+3) { text-align: right; }
-.cust .nm { font-weight: 600; line-height: 1.3; }
-.cust .why { display: block; font-weight: 400; font-size: var(--fs-label); color: var(--ink-3); margin-top: 2px; }
-.cust .r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.cust .rev { font-weight: 600; }
-.cust .go { color: var(--ink-5); font-size: 20px; }
-.cust .foot { font-size: var(--fs-source); color: var(--ink-4); margin-top: 12px; }
-.cust .find { width: 100%; max-width: 420px; box-sizing: border-box; font: inherit; font-size: 15px; padding: 9px 12px; border: 1px solid var(--rule-4); border-radius: 10px; background: var(--surface); color: var(--ink); margin: 0 0 12px; }
-.cust .list .rv small { display: none; }
-.cust .rvm { color: var(--ink-5); font-size: 11px; margin-left: 3px; vertical-align: 1px; }
-@media (max-width: 760px) {
-  .cust h1 { font-size: 28px; }
-  .cust .head { display: none; }
-  .cust .list a { grid-template-columns: minmax(0, 1fr) 76px 14px; grid-template-areas: "nm rev go" "why spark go"; gap: 2px 12px; }
-  .cust .list .nmw { grid-area: nm; } .cust .list .rv { grid-area: rev; } .cust .list .sp { grid-area: spark; justify-self: end; }
-  .cust .list .ch, .cust .list .mg { display: none; }
-  .cust .list .go { grid-area: go; }
-  .cust .list .rv small { display: block; font-size: 12px; font-weight: 600; }
-}`;
-
-function injectCss() {
-  if (document.getElementById('cust-css')) return;
-  const s = document.createElement('style'); s.id = 'cust-css'; s.textContent = CSS; document.head.appendChild(s);
-}
 
 // the series and the one measure of movement live in components/series.js; re-exported for views
 export { seriesOf, deltaText } from '/components/series.js';
@@ -112,7 +75,6 @@ async function rowsFor(view, ser, book, C) {
 
 export async function render(main, C, params) {
   if (!main) return;
-  injectCss();
   const view = VIEWS[params.view] ? params.view : 'main';
   if (view === 'conversations') return conversations(main, C);
   if (view === 'whitespace') return whitespace(main, C, params);
@@ -222,18 +184,6 @@ async function conversations(main, C) {
       </div>`).join('') || '<div class="card">Nothing to call about this week.</div>'}</div>
     <p class="foot">At stake: a year of the slipping shortfall, the gap to the median, or the typical 8% rise. Logged accounts drop out for seven days.</p>
   </div>`;
-  if (!document.getElementById('conv-css')) {
-    const st = document.createElement('style'); st.id = 'conv-css';
-    st.textContent = `.convs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-      .conv .open-line { font-size: 15px; line-height: 1.45; margin: 10px 0 12px; color: var(--ink-2); }
-      .conv .acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-      .conv .acts button { border: 1px solid var(--rule-3); background: var(--surface); border-radius: 9px; padding: 6px 12px; font-size: 14px; color: var(--ink); cursor: pointer; }
-      .conv .acts button:hover { border-color: var(--brand); color: var(--brand); }
-      .conv.logged { opacity: .55; }
-      .conv .done-note { font-size: 13px; color: var(--good); }
-      @media (max-width: 760px) { .convs { grid-template-columns: 1fr; } }`;
-    document.head.appendChild(st);
-  }
   main.querySelector('.convs').addEventListener('click', async ev => {
     const b = ev.target.closest('button[data-v]'); if (!b) return;
     const card = b.closest('.conv');
@@ -247,42 +197,10 @@ async function conversations(main, C) {
 }
 
 // ── Cross-sell: what each account buys, and what it doesn't buy yet ─────────────────────────
-const WS_CSS = `
-.ws .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 6px; max-width: 900px; }
-.ws .grid { display: grid; grid-template-columns: minmax(170px, 1.4fr) repeat(6, minmax(0, 1fr)) 92px; gap: 0 6px; align-items: center; }
-.ws .gh { font-size: 12px; color: var(--ink-3); padding: 0 0 8px; text-align: center; }
-.ws .gh:first-child { text-align: left; } .ws .gh:last-child { text-align: right; }
-.ws .wr { display: contents; }
-.ws .wr > * { border-top: 1px solid var(--rule); padding: 7px 0; min-height: 44px; display: flex; align-items: center; }
-.ws .wr .nm { font-weight: 600; font-size: 14px; line-height: 1.25; color: inherit; text-decoration: none; display: block; padding-top: 10px; }
-.ws .wr .nm small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); }
-.ws .wr .nm:hover { color: var(--brand); }
-.ws .c { justify-content: center; }
-.ws .c span { display: inline-block; min-width: 64px; text-align: center; font-size: 12.5px; font-variant-numeric: tabular-nums; border-radius: 6px; padding: 4px 6px; white-space: nowrap; }
-.ws .c .have { background: color-mix(in srgb, var(--ink) var(--a), var(--surface)); color: var(--ink); }
-.ws .c .have.dark { color: var(--surface); }
-.ws .c .opp { border: 1.5px dashed var(--ink-5); color: var(--ink-2); font-weight: 600; background: none; font: inherit; font-size: 12.5px; font-variant-numeric: tabular-nums; border-radius: 6px; padding: 4px 6px; min-width: 64px; cursor: pointer; }
-.ws .c .opp:hover { border-color: var(--brand); color: var(--brand); }
-.ws .c .none { color: var(--ink-5); }
-.ws .tot { justify-content: flex-end; font-weight: 700; font-variant-numeric: tabular-nums; }
-.ws .key { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); margin: 10px 0 14px; align-items: center; }
-.ws .key span span { display: inline-block; width: 26px; height: 14px; border-radius: 4px; vertical-align: -3px; margin-right: 6px; }
-.ws .more { margin-top: 10px; border: 0; background: none; color: var(--brand); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; padding: 6px 0; }
-@media (max-width: 760px) {
-  .ws .grid { grid-template-columns: 1fr 1fr; gap: 0 8px; }
-  .ws .gh { display: none; }
-  .ws .wr .nm { grid-column: 1 / -1; padding-top: 14px; border-top: 1px solid var(--rule-3); min-height: 0; }
-  .ws .wr .tot { grid-column: 1 / -1; justify-content: flex-start; border-top: 0; min-height: 0; padding: 2px 0 10px; }
-  .ws .wr .tot::before { content: "Not bought yet: "; font-weight: 400; color: var(--ink-3); margin-right: 4px; }
-  .ws .c { justify-content: space-between; border-top: 0; min-height: 0; padding: 3px 0; font-size: 12.5px; }
-  .ws .c::before { content: attr(data-l); color: var(--ink-3); }
-  .ws .c.nobuy { display: none; }
-}`;
 
 const lc = n => n === 'ITAD' ? n : n.toLowerCase();
 
 async function whitespace(main, C, params) {
-  if (!document.getElementById('ws-css')) { const st = document.createElement('style'); st.id = 'ws-css'; st.textContent = WS_CSS; document.head.appendChild(st); }
   const [M, CA] = await Promise.all([getJson('margin'), getJson('calls')]);
   const W = buildWhitespace(M, { exclude: [CITADEL], top: CROSS_SELL_DEPTH });
   const rows = W.rows.filter(r => r.opp > 0).sort((a, b) => b.opp - a.opp);
@@ -332,32 +250,6 @@ async function whitespace(main, C, params) {
 // ── Main customers: the 30 largest, month by month ───────────────────────────────────────────
 // Each cell is the month's billing; its shade is the change against the account's own average of
 // the six months before it. Red is down, green is up, ink is within 10%. Storage, service or both.
-const MG_CSS = `
-.mg .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 12px; max-width: 900px; }
-.mg .tools { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-.mg table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.mg th { font-size: 12px; font-weight: 500; color: var(--ink-3); padding: 0 2px 8px; text-align: center; }
-.mg th.nmh { text-align: left; width: 210px; }
-.mg th.tt { width: 78px; text-align: right; }
-.mg td { padding: 2px; border-top: 1px solid var(--rule); height: 38px; }
-.mg td.nm a { color: inherit; text-decoration: none; font-weight: 600; font-size: 14px; line-height: 1.2; display: block; }
-.mg td.nm a:hover { color: var(--brand); }
-.mg td.nm small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); }
-.mg td.cl span { display: block; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; border-radius: 5px; padding: 6px 0; white-space: nowrap;
-  background: color-mix(in srgb, var(--tone) var(--a), var(--surface)); }
-.mg td.cl span.strong { color: var(--surface); font-weight: 600; }
-.mg td.tt { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; font-size: 14px; }
-.mg .key { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--ink-3); }
-.mg .key i { display: inline-block; width: 22px; height: 12px; border-radius: 3px; }
-@media (max-width: 760px) {
-  .mg th.nmh { width: 120px; }
-  .mg th.tt, .mg td.tt { display: none; }
-  .mg .old { display: none; }
-  .mg td.nm a { font-size: 13px; }
-  .mg td { padding: 2px 1px; }
-  .mg td.cl span { font-size: 10.5px; letter-spacing: -.02em; padding: 5px 0; }
-  .mg .card { padding: 14px 12px; }
-}`;
 
 // Up and down: the customer table (components/custtable.js), filtered to falling, rising or all,
 // sortable by any figure. Falling and rising are last month against the month before, in dollars.
@@ -400,7 +292,6 @@ function bookPerService(P, A) {
 }
 
 async function monthGrid(main, C, params) {
-  if (!document.getElementById('mg-css')) { const st = document.createElement('style'); st.id = 'mg-css'; st.textContent = MG_CSS; document.head.appendChild(st); }
   const which = ['storage', 'service'].includes(params.series) ? params.series : 'total';
   const ser = [...seriesOf(C).values()].filter(s => s.ltm > 0 && s.level1 !== CITADEL).sort((a, b) => b.ltm - a.ltm).slice(0, 30);
   const months = ser.length ? ser[0].months : [];
@@ -455,26 +346,6 @@ async function monthGrid(main, C, params) {
 // The top of the margin drill: account → line of business → its orders → one order's cost build.
 // Filters as in v10: thin is 15–50% left, below cost is under 15%. Route-heavy accounts carry
 // "under review" while delivery routes are missing from the route volumes.
-const MV_CSS = `
-.mv2 .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 12px; max-width: 900px; }
-.mv2 .tools { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-.mv2 .hd, .mv2 .rw { display: grid; grid-template-columns: minmax(0, 1fr) 96px 96px 104px 64px 14px; gap: 14px; align-items: center; }
-.mv2 .hd { font-size: 12px; color: var(--ink-3); padding: 0 4px 8px; }
-.mv2 .hd span:nth-child(n+2) { text-align: right; }
-.mv2 .rw { padding: 10px 4px; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; }
-.mv2 .rw:hover { background: var(--well); }
-.mv2 .rw .nm { font-weight: 600; line-height: 1.3; }
-.mv2 .rw .nm small { display: block; font-weight: 400; font-size: var(--fs-label); color: var(--ink-3); margin-top: 2px; }
-.mv2 .rw .r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.mv2 .rw .lf { font-weight: 600; }
-.mv2 .rw .go { color: var(--ink-5); font-size: 20px; }
-.mv2 .tot { border-top: 1px solid var(--rule-ink); font-weight: 700; }
-@media (max-width: 760px) {
-  .mv2 .hd { display: none; }
-  .mv2 .rw { grid-template-columns: minmax(0, 1fr) 84px 14px; grid-template-areas: "nm lf go" "nm pc go"; gap: 2px 10px; }
-  .mv2 .rw .nm { grid-area: nm; } .mv2 .rw .lf { grid-area: lf; } .mv2 .rw .pc { grid-area: pc; font-size: 12.5px; } .mv2 .rw .go { grid-area: go; }
-  .mv2 .rw .rv, .mv2 .rw .cs { display: none; }
-}`;
 
 function marginReason(a, m) {
   const top = Object.entries(m.fam).filter(([f, v]) => v.cost > 0).sort((x, y) => y[1].cost - x[1].cost)[0];
@@ -495,31 +366,6 @@ function marginReason(a, m) {
 //   3 one line, job by job: each order with its place on the route that day
 //   4 one job: the cost build in sentences, the route that day on a map, what would have made it cheaper
 // #customers?view=margin[&id=<level1>[&line=<family>[&job=<woid>]]]
-const MV_EXTRA = `
-.mv2 .crumb { font-size: 13px; color: var(--ink-3); margin: 0 0 6px; display: flex; gap: 6px; flex-wrap: wrap; }
-.mv2 .crumb a { color: var(--brand); text-decoration: none; }
-.mv2 h2.t { font-size: 24px; font-weight: 700; letter-spacing: var(--track-tight); margin: 0 0 4px; line-height: 1.2; }
-.mv2 .hd.a, .mv2 .rw.a { grid-template-columns: minmax(0, 1fr) 96px 96px 104px 84px 112px 14px; }
-.mv2 .jobs .hd span:nth-child(2) { text-align: left; }
-.mv2 .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 20px; white-space: nowrap; }
-.mv2 .tag.good { background: var(--good-bg, var(--well)); color: var(--good); } .mv2 .tag.warn { background: var(--warn-bg); color: var(--warn); }
-.mv2 .tag.bad { background: var(--bad-bg, var(--well)); color: var(--bad); } .mv2 .tag.review { background: var(--well-2); color: var(--ink-2); }
-.mv2 .lines .hd, .mv2 .lines .rw { grid-template-columns: minmax(0, 1fr) 120px 96px 96px 104px 64px 14px; }
-.mv2 .jobs .hd, .mv2 .jobs .rw { grid-template-columns: 76px minmax(0, 1fr) 62px 56px 64px 84px 84px 84px 14px; }
-.mv2 .jobs .rw .pl { display: none; }
-.mv2 .note { font-size: 14px; color: var(--ink-2); line-height: 1.5; margin: 0 0 12px; padding: 10px 12px; background: var(--well); border-radius: var(--r); }
-.mv2 .dens .rw { grid-template-columns: minmax(0, 1fr) 120px 14px; }
-.mv2 .working { margin-top: 10px; }
-@media (max-width: 760px) {
-  .mv2 .rw.a { grid-template-columns: minmax(0, 1fr) 84px 14px; grid-template-areas: "nm lf go" "ac pc go"; }
-  .mv2 .rw.a .ac { grid-area: ac; }
-  .mv2 .lines .rw { grid-template-columns: minmax(0, 1fr) 84px 14px; grid-template-areas: "nm lf go" "nm pc go"; }
-  .mv2 .lines .rw .u, .mv2 .lines .rw .rv, .mv2 .lines .rw .cs { display: none; }
-  .mv2 .jobs .rw { grid-template-columns: 62px minmax(0, 1fr) 76px 14px; grid-template-areas: "dt nm lf go" "dt pl lf go"; }
-  .mv2 .jobs .rw .pl { display: block; } .mv2 .jobs .hd { display: none; }
-  .mv2 .jobs .rw .dt { grid-area: dt; } .mv2 .jobs .rw .nm { grid-area: nm; } .mv2 .jobs .rw .pl { grid-area: pl; font-size: 12px; color: var(--ink-3); }
-  .mv2 .jobs .rw .lf { grid-area: lf; } .mv2 .jobs .rw .go { grid-area: go; } .mv2 .jobs .rw .mi, .mv2 .jobs .rw .st, .mv2 .jobs .rw .u, .mv2 .jobs .rw .rv, .mv2 .jobs .rw .cs { display: none; }
-}`;
 const n0 = v => Math.round(v || 0).toLocaleString('en-US');
 const pcText = pc => pc == null ? '—' : pc < 0 ? 'below cost' : Math.round(pc * 100) + '%';
 const mlink = (o = {}) => '#customers?view=margin' + Object.entries(o).filter(([, v]) => v != null && v !== 'all').map(([k, v]) => `&${k}=${encodeURIComponent(v)}`).join('');
@@ -527,7 +373,6 @@ const zctaP = () => fetch('/data/zcta.json', { credentials: 'same-origin' }).the
 const jobCache = new Map();
 
 async function marginView(main, C, params) {
-  for (const [id, css] of [['mv2-css', MV_CSS], ['mv3-css', MV_EXTRA]]) if (!document.getElementById(id)) { const st = document.createElement('style'); st.id = id; st.textContent = css; document.head.appendChild(st); }
   const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
   const MS = marginSummary(R, M, [CITADEL]);
   const id = params.id != null ? Number(params.id) : null;
@@ -680,29 +525,8 @@ async function marginJob(main, R, M, MS, id, f, woid) {
 // Boxes past their retention review (storage_retention status I, from calls.json). Destruction is
 // priced at the book's median shredding fee per standard box (R3); the storage each destroyed box
 // stops paying is the account's own latest rate per box, else the box-weighted median.
-const DV_CSS = `
-.dv .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 14px; max-width: 920px; }
-.dv .hd, .dv .rw { display: grid; grid-template-columns: minmax(0, 1fr) 110px 120px 130px 100px 14px; gap: 14px; align-items: center; }
-.dv .hd { font-size: 12px; color: var(--ink-3); padding: 0 4px 8px; }
-.dv .hd span:nth-child(n+2) { text-align: right; }
-.dv .rw { padding: 10px 4px; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; }
-.dv .rw:hover { background: var(--well); }
-.dv .rw .nm { font-weight: 600; line-height: 1.3; }
-.dv .rw .nm small { display: block; font-weight: 400; font-size: var(--fs-label); color: var(--ink-3); margin-top: 2px; }
-.dv .rw .r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.dv .rw .go { color: var(--ink-5); font-size: 20px; }
-.dv .share { display: block; height: 6px; background: var(--well-2); border-radius: 3px; margin-top: 6px; max-width: 220px; position: relative; overflow: hidden; }
-.dv .share i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink-3); border-radius: 3px; }
-.dv .tot { border-top: 1px solid var(--rule-ink); font-weight: 700; }
-@media (max-width: 760px) {
-  .dv .hd { display: none; }
-  .dv .rw { grid-template-columns: minmax(0, 1fr) 92px 14px; grid-template-areas: "nm bx go" "nm once go"; gap: 2px 10px; }
-  .dv .rw .nm { grid-area: nm; } .dv .rw .bx { grid-area: bx; } .dv .rw .once { grid-area: once; font-size: 12.5px; color: var(--ink-3); } .dv .rw .go { grid-area: go; }
-  .dv .rw .lost, .dv .rw .mo { display: none; }
-}`;
 
 async function destructionView(main, C, params) {
-  if (!document.getElementById('dv-css')) { const st = document.createElement('style'); st.id = 'dv-css'; st.textContent = DV_CSS; document.head.appendChild(st); }
   const [CA, PR, M] = await Promise.all([getJson('calls'), getJson('pricing'), getJson('margin')]);
   const ob = overdueBoxes(CA, PR), perBox = ob.perBox, st = { med: ob.med };
   const stored = new Map(M.accounts.map(a => [a.level1, a.boxes]));

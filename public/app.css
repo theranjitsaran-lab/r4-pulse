@@ -6,34 +6,34 @@ body{background:var(--ground);color:var(--ink);font-family:var(--f-sans);font-si
 a{color:var(--brand)}
 button{font:inherit}
 
-.mast{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:saturate(180%) blur(18px);-webkit-backdrop-filter:saturate(180%) blur(18px);border-bottom:1px solid var(--rule)}
-.mast-in{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:24px;height:56px}
-.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-weight:700;font-size:17px;letter-spacing:-.01em}
-.brand i{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--brand);color:var(--surface);font-style:normal;font-size:12px;font-weight:800;letter-spacing:0}
-#nav{display:flex;gap:2px;background:var(--well-2);padding:3px;border-radius:10px}
-#nav a{color:var(--ink-2);text-decoration:none;font-size:14px;font-weight:500;padding:6px 14px;border-radius:8px}
-#nav a.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.mast{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter: saturate(180%) blur(var(--sp-5));-webkit-backdrop-filter: saturate(180%) blur(var(--sp-5));border-bottom: var(--hair) solid var(--rule)}
+.mast-in{max-width: calc(var(--u) * 300);margin:0 auto;padding: 0 var(--sp-6);display:flex;align-items:center;gap: var(--sp-6);height: calc(var(--u) * 14)}
+.brand{display:flex;align-items:center;gap: var(--sp-3);color:var(--ink);text-decoration:none;font-weight:700;font-size: var(--fs-head);letter-spacing:-.01em}
+.brand i{display:inline-grid;place-items:center;width: calc(var(--u) * 7);height: calc(var(--u) * 7);border-radius: var(--r-sm);background:var(--brand);color:var(--surface);font-style:normal;font-size: var(--fs-source);font-weight:800;letter-spacing:0}
+#nav{display:flex;gap: var(--hair-2);background:var(--well-2);padding: var(--hatch);border-radius: var(--r)}
+#nav a{color:var(--ink-2);text-decoration:none;font-size: var(--fs-sm);font-weight:500;padding: var(--sp-2) var(--sp-4);border-radius: var(--r-sm)}
+#nav a.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow: var(--shadow-sm)}
 #nav a svg{display:none}
-.mast-right{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:13px;color:var(--ink-3)}
-.mast-right button{background:none;border:0;color:var(--brand);padding:4px 0;cursor:pointer;font-weight:500}
-#main{max-width:1200px;margin:0 auto;padding:28px 24px 80px}
-.crumb{display:flex;gap:6px;align-items:center;font-size:14px;margin:0 0 14px}
+.mast-right{margin-left:auto;display:flex;align-items:center;gap: var(--sp-4);font-size: var(--fs-label);color:var(--ink-3)}
+.mast-right button{background:none;border:0;color:var(--brand);padding: var(--sp-1) 0;cursor:pointer;font-weight:500}
+#main{max-width: calc(var(--u) * 300);margin:0 auto;padding: calc(var(--u) * 7) var(--sp-6) calc(var(--u) * 20)}
+.crumb{display:flex;gap: var(--sp-2);align-items:center;font-size: var(--fs-sm);margin: 0 0 var(--sp-4)}
 .crumb a{text-decoration:none;font-weight:500}
 .crumb span{color:var(--ink-4)}
-.empty{margin:60px auto;max-width:520px;background:var(--surface);border-radius:var(--r-lg);padding:24px 26px;color:var(--ink-3);box-shadow:var(--shadow)}
-.empty h2{font-size:22px;color:var(--ink);margin:0 0 8px;letter-spacing:var(--track-tight)}
-.loading{color:var(--ink-4);text-align:center;padding:60px 0}
+.empty{margin: calc(var(--u) * 15) auto;max-width: calc(var(--u) * 130);background:var(--surface);border-radius:var(--r-lg);padding: var(--sp-6) calc(var(--u) * 7);color:var(--ink-3);box-shadow:var(--shadow)}
+.empty h2{font-size: var(--fs-title);color:var(--ink);margin: 0 0 var(--sp-2);letter-spacing:var(--track-tight)}
+.loading{color:var(--ink-4);text-align:center;padding: calc(var(--u) * 15) 0}
 
 @media(max-width:700px){
   /* a backdrop filter would make the header the containing block of the fixed tab bar */
   .mast{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surface)}
-  .mast-in{padding:0 16px;height:50px}
+  .mast-in{padding: 0 var(--sp-4);height: calc(var(--u) * 13)}
   .brand span{display:none}
   .mast-right #asof{display:none}
-  #nav{position:fixed;left:0;right:0;bottom:0;z-index:30;border-radius:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:saturate(180%) blur(18px);-webkit-backdrop-filter:saturate(180%) blur(18px);border-top:1px solid var(--rule);justify-content:space-around}
-  #nav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:4px 10px;color:var(--ink-4);box-shadow:none!important;background:none!important}
+  #nav{position:fixed;left:0;right:0;bottom:0;z-index:30;border-radius:0;padding: var(--sp-2) var(--sp-2) calc(var(--sp-2) + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter: saturate(180%) blur(var(--sp-5));-webkit-backdrop-filter: saturate(180%) blur(var(--sp-5));border-top: var(--hair) solid var(--rule);justify-content:space-around}
+  #nav a{display:flex;flex-direction:column;align-items:center;gap: var(--hair-2);font-size: var(--fs-tiny);padding: var(--sp-1) var(--sp-3);color:var(--ink-4);box-shadow:none!important;background:none!important}
   #nav a.on{color:var(--brand)}
-  #nav a svg{display:block;width:22px;height:22px}
-  #main{padding:16px 16px 96px}
+  #nav a svg{display:block;width: var(--sp-6);height: var(--sp-6)}
+  #main{padding: var(--sp-4) var(--sp-4) calc(var(--u) * 24)}
 }
 html,body{overflow-x:hidden}
