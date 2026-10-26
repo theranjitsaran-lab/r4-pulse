@@ -37,8 +37,8 @@ Every figure shown in two places comes from one function (`components/levers.js`
 
 ## Stack
 
-Node, Express, vanilla JS, inline SVG. **No React, no framework, no chart library, no web font**
-(the system sans). Postgres via `pg`. Deployed on Render. The API gzips its JSON with Node's zlib.
+Node, Express, vanilla JS, inline SVG. **No React, no framework, no chart library.** One font file:
+R4's Average Sans, self-hosted in `public/fonts/` for display text only; everything else is the system sans. Postgres via `pg`. Deployed on Render. The API gzips its JSON with Node's zlib.
 
 If a task seems to need a library, it doesn't — write the SVG.
 
@@ -133,8 +133,13 @@ Copy is part of the product. Plain English. British spelling in prose; US dollar
 opens the customer page. Nothing is a dead end. Nav: Home · Customers · Pricing · Routes; on a
 phone it is a tab bar at the bottom.
 
-**Type and tokens.** One system sans everywhere (`--f-sans`: San Francisco, Segoe UI); no serif,
-no web font. `public/tokens.css` holds every colour, light and dark. Components read variables only.
+**Brand, type and tokens.** R4 Services' own branding, from r4services.com (26 October 2026): the barcode
+logo `public/brand/r4-logo.png` (always on white: its bars are black), the icon `r4-icon-192.png`, green
+`--brand` #0e5116 and `--r4-bright` #38b449 (fills and lines only, never text). **Average Sans**
+(`--f-display`, SIL OFL, one weight) is for titles, the masthead and Home's big figures only, at 400 with
+`font-synthesis: none`; tables, labels and body stay on the system sans (`--f-sans`: San Francisco, Segoe UI)
+for tabular figures and small-size legibility on Windows. No other web font, no serif, nothing from Google at
+run time. `public/tokens.css` holds every colour and size, light and dark; components read variables only.
 
 **Charts** (`components/chart.js`, method from the dataviz skill): one axis always; 2px lines over a
 12% area wash; bars no wider than ~24px with 4px rounded ends; hairline grids; legend for two or more

@@ -3,6 +3,15 @@
 Settled. Do not re-propose these unless Theran reopens them. Each line cost a round of iteration
 to reach. Newest section first.
 
+## Brand — settled 26 October 2026
+
+| | |
+|---|---|
+| **Source** | r4services.com, read in the browser: logo `6366387.png` (247×100), icon `cropped-6366387-192x192.png`, font Average Sans (Google Fonts, SIL OFL, weight 400 only), green #0e5116 (top bar, buttons) and #38b449 (the mark). The site's blue #2ea3f2 is its theme's default, not R4's, and is not used |
+| **Web font** | Reopened by Theran: Average Sans is allowed, self-hosted, for display text only. The site fakes a bold from its one weight; R4 Pulse does not (`font-synthesis: none`) |
+| **Logo** | The everyday barcode logo, not the "30 years" header lockup (a 567 KB screenshot, time-bound). Raster only; ask R4 for the vector and replace the file, nothing else |
+| **Green as text** | #38b449 is 2.7:1 on white: fills, bars and the pulse line only. Text and links use #0e5116 (9.5:1) |
+
 ## Data basis — settled 8 October 2026, Prompt 3
 
 | | |

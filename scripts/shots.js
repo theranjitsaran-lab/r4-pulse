@@ -58,6 +58,11 @@ async function main() {
       const page = await ctx.newPage();
       page.on('pageerror', e => console.error(`  ! ${width} ${page.url()}: ${e.message}`));
       await page.goto(base + '/login');
+      if (!only.length || only.includes('login')) {   // the sign-in page, the first thing anyone sees
+        await page.waitForLoadState('networkidle');
+        await page.screenshot({ path: path.join(out, `login-${width}.png`) });
+        console.log('  ' + path.relative(ROOT, path.join(out, `login-${width}.png`)));
+      }
       await page.fill('input[name=name]', 'shots');
       await page.fill('input[name=password]', pass);
       await Promise.all([page.waitForNavigation(), page.click('button')]);

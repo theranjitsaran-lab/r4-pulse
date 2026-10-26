@@ -1,27 +1,30 @@
 /* Home, the intro and the motion it uses. Every colour, size, space and duration from tokens.css. */
 
-/* ── the intro (components/intro.js) ── */
+/* ── the intro (components/intro.js): a white sheet, as r4services.com sets the logo ── */
 html.intro-on, html.intro-on body { overflow: hidden; }
-.intro { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; color: var(--hero-ink);
-  background: radial-gradient(120% 90% at 50% 40%, var(--hero-bg-2), var(--hero-bg));
+.intro { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; color: var(--ink-on-light);
+  background: var(--logo-ground);
   transition: transform var(--t-slow) var(--ease-io), opacity var(--t-slow) var(--ease-io); }
 .intro.is-leaving { transform: translateY(-100%); opacity: .6; }
 .intro-in { display: grid; justify-items: center; gap: var(--sp-5); width: min(var(--intro-w), 86vw); }
-.intro-lock { display: flex; align-items: center; gap: var(--sp-4); }
-.intro-mark { width: var(--intro-mark); height: var(--intro-mark); overflow: visible; }
-.im-tile { fill: var(--hero-ink); fill-opacity: 0; stroke: var(--hero-ink); stroke-width: var(--intro-stroke); stroke-dasharray: 1; stroke-dashoffset: 1;
-  transition: stroke-dashoffset var(--t-draw) var(--ease-io), fill-opacity var(--t) linear calc(var(--t-draw) * .8); }
-.im-r4 { font: 800 var(--intro-r4) var(--f-sans); fill: var(--hero-bg); letter-spacing: var(--track-tight); opacity: 0;
-  transition: opacity var(--t) linear var(--t-draw); }
-.intro-word { font-size: var(--intro-word); font-weight: 700; letter-spacing: var(--track-tight); opacity: 0; transform: translateX(calc(var(--rise) * -1));
-  transition: opacity var(--t-slow) var(--ease-out) calc(var(--t-draw) * .7), transform var(--t-slow) var(--ease-out) calc(var(--t-draw) * .7); }
+.intro-lock { display: flex; align-items: center; gap: var(--sp-5); }
+/* the logo read into view by a scan line, left to right, like a barcode reader */
+.intro-mark { position: relative; display: block; height: var(--logo-h-intro); }
+.intro-mark img { display: block; height: 100%; width: auto; clip-path: inset(0 100% 0 0); transition: clip-path var(--t-draw) var(--ease-io); }
+.intro-scan { position: absolute; top: calc(var(--sp-2) * -1); bottom: calc(var(--sp-2) * -1); left: 0; width: var(--hair-2); background: var(--r4-bright);
+  box-shadow: 0 0 var(--sp-3) var(--r4-bright); opacity: 0; transition: left var(--t-draw) var(--ease-io), opacity var(--t) linear var(--t-draw); }
+.intro-word { font-family: var(--f-display); font-weight: 400; font-synthesis: none; font-size: var(--intro-word); color: var(--brand);
+  opacity: 0; transform: translateX(calc(var(--rise) * -1));
+  transition: opacity var(--t-slow) var(--ease-out) calc(var(--t-draw) * .8), transform var(--t-slow) var(--ease-out) calc(var(--t-draw) * .8); }
 .intro-beat { width: 100%; height: var(--intro-beat); overflow: visible; }
-.intro-beat path { fill: none; stroke: var(--hero-accent); stroke-width: var(--intro-stroke); stroke-linejoin: round; stroke-linecap: round;
-  stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset var(--t-draw) var(--ease-io) calc(var(--t-draw) * .5); }
-.intro-line { margin: 0; font-size: var(--fs-label); color: var(--hero-ink-3); letter-spacing: var(--track-label); opacity: 0;
+.intro-beat path { fill: none; stroke: var(--r4-bright); stroke-width: var(--intro-stroke); stroke-linejoin: round; stroke-linecap: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset var(--t-draw) var(--ease-io) calc(var(--t-draw) * .6); }
+.intro-line { margin: 0; font-size: var(--fs-label); color: var(--ink-on-logo); letter-spacing: var(--track-label); opacity: 0;
   transition: opacity var(--t-slow) linear var(--t-draw); text-align: center; }
-.intro.is-on .im-tile { stroke-dashoffset: 0; fill-opacity: 1; }
-.intro.is-on .im-r4, .intro.is-on .intro-line { opacity: 1; }
+.intro.is-on .intro-mark img { clip-path: inset(0 0 0 0); }
+.intro.is-on .intro-scan { left: 100%; opacity: 0; }
+.intro .intro-scan { opacity: 1; }
+.intro.is-on .intro-line { opacity: 1; }
 .intro.is-on .intro-word { opacity: 1; transform: none; }
 .intro.is-on .intro-beat path { stroke-dashoffset: 0; }
 

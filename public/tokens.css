@@ -1,3 +1,7 @@
+/* R4's display face, from r4services.com: Average Sans (SIL Open Font License), one weight,
+   served from this app so no page calls Google. Display text only; tables and labels keep the system sans. */
+@font-face { font-family: "Average Sans"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/AverageSans-Regular.ttf") format("truetype"); }
+
 /* R4 Pulse — design tokens. Redesign, 26 October 2026.
    One system typeface, a validated chart palette (dataviz reference instance), quiet chrome,
    status colour for exceptions only, light and dark. Components read these variables only.
@@ -18,7 +22,7 @@
   --surface:    #ffffff;   /* card */
   --well:       #f9f9fb;   /* inset: source lines, opened rows */
   --well-2:     #ececf0;   /* tracks, empty bars */
-  --tint-brand: #eaf1e6;   /* selected row */
+  --tint-brand: #e3f2e5;   /* selected row */
 
   /* ── rules ── */
   --rule:       #ececf0;   /* hairline between rows */
@@ -27,9 +31,17 @@
   --rule-4:     #c7c7cc;   /* input borders */
   --rule-ink:   #1d1d1f;
 
-  /* ── brand: the R4 mark, links and the tap affordance ── */
-  --brand:      #2b4f1e;
-  --brand-2:    #3d6b2b;
+  /* ── brand: R4 Services green from r4services.com (top bar, buttons), links and the tap affordance ── */
+  --brand:      #0e5116;
+  --brand-2:    #1a6b24;
+  --r4-bright:  #38b449;   /* the green of the R4 mark: fills and lines only, never text (2.7:1 on white) */
+
+  /* ── the R4 logo (public/brand/r4-logo.png): black bars, so it always sits on white ── */
+  --logo-ground: #ffffff;
+  --ink-on-light: #1d1d1f; /* text on the logo's ground and on light fills, in both themes */
+  --ink-on-logo: #3a3a3c;
+  --logo-h:      40px;
+  --logo-h-intro: 88px;
 
   /* ── chart series: validated palette slots, colour follows the entity ── */
   --s-storage:  #2a78d6;   /* slot 1 blue */
@@ -48,7 +60,7 @@
 
   /* ── type: the system sans, everywhere ── */
   --f-sans:     system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  --f-display:  var(--f-sans);
+  --f-display:  "Average Sans", var(--f-sans);   /* titles, the masthead, Home's big figures */
   --f-body:     var(--f-sans);
   --f-narrow:   var(--f-sans);
 
@@ -74,22 +86,22 @@
   --fs-tiny:    11px;      /* tags on a track */
 
   /* ── the hero band and the intro: R4's green, deepened ── */
-  --hero-bg:     #1c3514;
-  --hero-bg-2:   #2b4f1e;
+  --hero-bg:     #0b3f11;
+  --hero-bg-2:   #0e5116;
   --hero-ink:    #ffffff;
   --hero-ink-2:  rgba(255, 255, 255, .78);
   --hero-ink-3:  rgba(255, 255, 255, .56);
   --hero-track:  rgba(255, 255, 255, .16);
-  --hero-accent: #b9e3a0;  /* the pulse line, the known part of the bill */
+  --hero-accent: #8fd99a;  /* the pulse line, the known part of the bill */
 
   /* ── route work: done services, in R4 green, never a revenue series colour ── */
-  --heat:    #3d6b2b;
+  --heat:    #38b449;
 
   /* ── the gap to $1.0m: one hue per lever, existing customers in R4 green, new business open ── */
-  --lever-1: #2b4f1e;
-  --lever-2: #4e7f38;
-  --lever-3: #7fae63;
-  --lever-4: #b3d39f;
+  --lever-1: #0e5116;
+  --lever-2: #237a30;
+  --lever-3: #38b449;
+  --lever-4: #a5dcae;
 
   /* ── motion: entrances only, never a count-up; off under reduced motion ── */
   --ease-out:  cubic-bezier(.2, .8, .2, 1);
@@ -127,9 +139,7 @@
 
   /* ── the intro ── */
   --intro-w:      440px;
-  --intro-mark:   64px;
   --intro-stroke: 2px;
-  --intro-r4:     26px;
   --intro-word:   44px;
   --intro-beat:   56px;
 
@@ -158,29 +168,29 @@
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
     --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #98989d; --ink-5: #86868b;
-    --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #1f2d1a;
+    --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #12301a;
     --rule: #2c2c2e; --rule-2: #333336; --rule-3: #3a3a3c; --rule-4: #48484a; --rule-ink: #f5f5f7;
-    --brand: #8fc27a; --brand-2: #a6d191;
+    --brand: #4cc35d; --brand-2: #6fd27e; --ink-on-logo: #3a3a3c;
     --s-storage: #3987e5; --s-service: #d95926; --s-citadel: #6b6a64;
     --grid: #2c2c2e; --baseline: #48484a;
     --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
     --shadow: none;
-    --hero-bg: #142a0e; --hero-bg-2: #1f3a16; --hero-accent: #a6d191;
-    --lever-1: #8fc27a; --lever-2: #6a9e55; --lever-3: #4d7a3b; --lever-4: #345428; --heat: #6a9e55;
+    --hero-bg: #082d0c; --hero-bg-2: #0e5116; --hero-accent: #8fd99a;
+    --lever-1: #1a6b24; --lever-2: #237a30; --lever-3: #38b449; --lever-4: #a5dcae; --heat: #38b449;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
   --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #98989d; --ink-5: #86868b;
-  --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #1f2d1a;
+  --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #12301a;
   --rule: #2c2c2e; --rule-2: #333336; --rule-3: #3a3a3c; --rule-4: #48484a; --rule-ink: #f5f5f7;
-  --brand: #8fc27a; --brand-2: #a6d191;
+  --brand: #4cc35d; --brand-2: #6fd27e; --ink-on-logo: #3a3a3c;
   --s-storage: #3987e5; --s-service: #d95926; --s-citadel: #6b6a64;
   --grid: #2c2c2e; --baseline: #48484a;
   --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
   --shadow: none;
-  --hero-bg: #142a0e; --hero-bg-2: #1f3a16; --hero-accent: #a6d191;
-  --lever-1: #8fc27a; --lever-2: #6a9e55; --lever-3: #4d7a3b; --lever-4: #345428; --heat: #6a9e55;
+  --hero-bg: #082d0c; --hero-bg-2: #0e5116; --hero-accent: #8fd99a;
+  --lever-1: #1a6b24; --lever-2: #237a30; --lever-3: #38b449; --lever-4: #a5dcae; --heat: #38b449;
 }
 
 @media (prefers-reduced-motion: reduce) { :root { --t-fast: 0ms; --t: 0ms; --t-slow: 0ms; --t-draw: 0ms; --t-stagger: 0ms; --rise: 0px; } }

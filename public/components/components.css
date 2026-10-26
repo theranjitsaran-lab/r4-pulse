@@ -218,3 +218,10 @@ i.k.neutral, i.k.band { background: var(--s-citadel); }
 
 /* a text button: "Show all", "Show the latest 60" */
 .linkbtn { margin-top: var(--sp-2); border: 0; background: none; color: var(--brand); font: inherit; font-size: var(--fs-label); font-weight: 500; cursor: pointer; padding: var(--sp-1) 0; }
+
+/* ── display type: R4's Average Sans on titles and Home's big figures only. It has one weight, so
+   it is set at 400 and the browser may not fake a bold; tables, labels and body keep the system
+   sans, whose figures line up and which reads better small on Windows. ── */
+h1, .sec-t, .card-head h3, .chart-title, details.fold summary h3, .hb-fig, .hb-side b, .tile b, .xpl h2 {
+  font-family: var(--f-display); font-weight: 400; font-synthesis: none;
+}

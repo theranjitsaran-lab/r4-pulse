@@ -20,20 +20,21 @@ function parseUsers(raw) {
 const LOGIN_PAGE = (err) => `<!doctype html>
 <html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>R4 Pulse — sign in</title>
+<link rel="icon" href="/brand/r4-icon-192.png">
 <link rel="stylesheet" href="/tokens.css">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@400;600&family=Newsreader:opsz,wght@6..72,400&display=swap" rel="stylesheet">
 <style>
-body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:var(--fs-body)}
-.mast{background:var(--brand);color:#fff;padding:14px 32px;display:flex;gap:18px;align-items:baseline}
-.mast b{font-size:15px;letter-spacing:.02em}.mast span{font-family:var(--f-narrow);font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
-main{max-width:360px;margin:80px auto;background:var(--surface);border:1px solid var(--rule-2);border-radius:var(--r-lg);padding:28px 30px}
-h1{font-family:var(--f-display);font-weight:400;font-size:28px;margin:0 0 18px;letter-spacing:var(--track-tight)}
-label{display:block;font-family:var(--f-narrow);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:12px 0 4px}
-input{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--rule-4);border-radius:var(--r-sm);font:inherit}
-button{margin-top:18px;width:100%;padding:10px;background:var(--ink);color:#fff;border:0;border-radius:var(--r-sm);font:inherit;font-weight:600;cursor:pointer}
-.err{color:var(--bad);font-size:12px;margin-top:10px}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--f-sans);font-size:var(--fs-body)}
+.mast{background:var(--logo-ground);border-bottom:var(--hair) solid var(--rule);padding:var(--sp-3) var(--sp-8);display:flex;gap:var(--sp-4);align-items:center}
+.mast img{height:var(--logo-h);width:auto;display:block}
+.mast span{font-size:var(--fs-label);color:var(--ink-on-logo)}
+main{max-width:calc(var(--u) * 90);margin:var(--sp-12) auto;background:var(--surface);border:var(--hair) solid var(--rule-2);border-radius:var(--r-lg);padding:var(--sp-8)}
+h1{font-family:var(--f-display);font-weight:400;font-synthesis:none;font-size:var(--fs-display-ph);margin:0 0 var(--sp-4);letter-spacing:var(--track-tight)}
+label{display:block;font-size:var(--fs-source);font-weight:500;color:var(--ink-3);margin:var(--sp-3) 0 var(--sp-1)}
+input{width:100%;box-sizing:border-box;padding:var(--sp-2) var(--sp-3);border:var(--hair) solid var(--rule-4);border-radius:var(--r-sm);font:inherit;background:var(--surface);color:var(--ink)}
+button{margin-top:var(--sp-5);width:100%;padding:var(--sp-3);background:var(--brand);color:var(--hero-ink);border:0;border-radius:var(--r-sm);font:inherit;font-weight:600;cursor:pointer}
+.err{color:var(--bad);font-size:var(--fs-source);margin-top:var(--sp-3)}
 </style></head><body>
-<div class="mast"><b>R4 Pulse</b><span>Reliable · Resourceful · Responsive · Reasonable</span></div>
+<div class="mast"><img src="/brand/r4-logo.png" alt="R4 Services, information management company"><span>Pulse · Reliable · Resourceful · Responsive · Reasonable</span></div>
 <main><h1>Sign in</h1>
 <form method="post" action="/login">
 <label>Name</label><input name="name" autocomplete="username" autofocus>
@@ -66,9 +67,10 @@ function install(app) {
   });
   app.post('/logout', (req, res) => req.session.destroy(() => res.redirect('/login')));
 
-  // everything else needs a session, except the health check and the stylesheet the login page uses
+  // everything else needs a session, except the health check and what the login page draws with:
+  // the tokens, R4's logo and the display face
   app.use((req, res, next) => {
-    if (req.path === '/health' || req.path === '/tokens.css') return next();
+    if (req.path === '/health' || req.path === '/tokens.css' || req.path.startsWith('/brand/') || req.path.startsWith('/fonts/')) return next();
     if (req.session && req.session.user) return next();
     if (req.path.startsWith('/api/')) return res.status(401).json({ error: 'sign in' });
     res.redirect('/login');
