@@ -15,3 +15,6 @@ data/
 # Render secrets written by scripts/app_role.js and scripts/app_users.js
 .env.render
 render_logins.txt
+
+# Scheduled-task logs on the R4 machine (scripts/install_rebuild_task.ps1)
+logs/

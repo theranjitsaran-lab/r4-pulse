@@ -69,5 +69,16 @@ async function show() {
   }
 }
 
+// The design-preview service (render.yaml, r4-pulse-design) says so in the header, so nobody takes
+// it for the team's tool.
+fetch('/health').then(r => r.json()).then(h => {
+  const right = document.querySelector('.mast-right');
+  if (!h.preview || !right) return;
+  const tag = document.createElement('span');
+  tag.className = 'preview-tag';
+  tag.textContent = 'Design preview';
+  right.prepend(tag);
+}).catch(() => {});
+
 addEventListener('hashchange', show);
 show();

@@ -24,3 +24,31 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY  # optional: Home's opening paragraph written by Claude; without it, the template
         sync: false
+
+  # The design preview: Theran only, live data, redeploys on every push to the design branch.
+  # Free plan: it sleeps after 15 idle minutes and the first load takes about 30 seconds.
+  - type: web
+    name: r4-pulse-design
+    runtime: node
+    region: ohio               # same outbound addresses as r4-pulse, so one Trusted Sources entry
+    plan: free
+    branch: design/iterate-in-code
+    autoDeploy: true
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "20"
+      - key: DESIGN_PREVIEW    # the "Design preview" tag in the header
+        value: "1"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL     # the same r4_pulse_app string as r4-pulse
+        sync: false
+      - key: AUTH_USERS       # Theran's entry only, from .env.render
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false

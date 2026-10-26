@@ -1,0 +1,20 @@
+# Fails, and GitHub emails Theran, when the daily push or the KPI rebuild has stopped.
+# Reads /health/data on the live service: dates only, no login. Set the repository variable
+# PULSE_URL (Settings → Secrets and variables → Actions → Variables) to https://<service>.onrender.com
+name: Data freshness
+on:
+  schedule:
+    - cron: '30 13 * * 1-6'   # 07:30 Central in winter, 08:30 in summer; after the 06:00, 06:30 and 07:00 tasks
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check /health/data
+        env:
+          PULSE_URL: ${{ vars.PULSE_URL }}
+        run: |
+          if [ -z "$PULSE_URL" ]; then echo "PULSE_URL is not set; nothing to check."; exit 0; fi
+          body=$(curl -s --max-time 90 --retry 2 "$PULSE_URL/health/data")
+          echo "$body"
+          echo "$body" | grep -q '"stale":false' || { echo "::error::R4 Pulse data is stale: $body"; exit 1; }

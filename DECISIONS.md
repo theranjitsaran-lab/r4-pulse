@@ -3,6 +3,15 @@
 Settled. Do not re-propose these unless Theran reopens them. Each line cost a round of iteration
 to reach. Newest section first.
 
+## Daily push — settled 26 October 2026
+
+| | |
+|---|---|
+| **Truncate, never drop** | The push scripts truncate and reload; they never drop, because the views depend on the tables. A column change in VCK or Veri-Shred needs a manual `ALTER TABLE` before the push |
+| **Blocked looks stale** | A table the push cannot load logs `DDL FAILED` in `push_log.txt` or `vs_push_log.txt` and keeps its old rows, so it looks stale rather than broken. `node scripts/freshness.js --logs <folder>` reads both logs on the R4 machine |
+| **Who runs it** | Tasks `R4_Daily_Push` (06:00), `R4_Verishred_Push` (06:30) and `R4_KPI_Rebuild` (07:00) run as `tsaran`, LogonType Interactive, until R4's IT grants "Log on as a batch job" or re-registers them. Until then: close the Remote Desktop with the X (disconnect), never sign out; a reboot stops them too. Ask IT: "Please set tasks R4_Daily_Push, R4_Verishred_Push and R4_KPI_Rebuild to run whether the user is logged on or not." |
+| **Watching it** | `/health/data` (dates only, no login) and a GitHub Action at 07:30 Central that fails, and emails Theran, when any date is more than two days old |
+
 ## Brand — settled 26 October 2026
 
 | | |
