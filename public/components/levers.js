@@ -131,13 +131,14 @@ export function bridge({ P, PR, CA, M, C }) {
 
   const steps = [
     { key: 'cross', t: 'Sell what they don\'t buy yet', v: ws.total / 12, href: '#customers?view=whitespace', who: 'Anne',
-      s: pace ? `the ceiling at what comparable accounts spend; R4's own pace is ${pace.count} added lines a year, about $${Math.round(pace.value / 12 / 1000)}K a month` : `${ws.rows.filter(r => r.opp > 0).length} of the largest ${CROSS_SELL_DEPTH} accounts, at what comparable accounts spend`, note: 'if all took it up', modelled: true },
+      s: pace ? `the ceiling at what comparable accounts spend; R4's own pace is ${pace.count} added lines a year, about $${Math.round(pace.value / 12 / 1000)}K a month` : `${ws.rows.filter(r => r.opp > 0).length} of the largest ${CROSS_SELL_DEPTH} accounts, at what comparable accounts spend`, note: 'if all took it up', modelled: true, brief: 'the ceiling, if each bought like its peers' },
     { key: 'price', t: 'Bring prices halfway to the median', v: price, href: '#customers?view=gaps', who: 'Anne',
-      s: `${new Set([...sg.keys(), ...st.rows.map(r => r.level1)]).size} accounts pay under the book's median for storage or a service`, note: 'halfway' },
+      s: `${new Set([...sg.keys(), ...st.rows.map(r => r.level1)]).size} accounts pay under the book's median for storage or a service`, note: 'halfway',
+      brief: `${new Set([...sg.keys(), ...st.rows.map(r => r.level1)]).size} accounts under the book's median` },
     { key: 'slip', t: 'Win back half of what slipping accounts lost', v: slipV, href: '#customers?view=slipping', who: 'Anne and Trisha',
-      s: `${slip.length} accounts still billing but down 10% or more on their own run over the last three months`, note: 'halfway' },
+      s: `${slip.length} accounts still billing but down 10% or more on their own run over the last three months`, note: 'halfway', brief: `${slip.length} accounts down 10% or more` },
     { key: 'rounds', t: 'Raise the accounts that missed every rate round', v: roundsV, href: '#customers?view=rounds', who: 'Anne',
-      s: `${rounds.length} accounts with no rate moved in two years, at the typical 8% rise` },
+      s: `${rounds.length} accounts with no rate moved in two years, at the typical 8% rise`, brief: `${rounds.length} accounts, no rise in two years` },
   ].filter(x => x.v > 0).sort((a, b) => b.v - a.v);
   // a step under $1,000 a month is not a lever worth a row; it is named in the footnote instead
   const minor = steps.filter(x => x.v < 1000);

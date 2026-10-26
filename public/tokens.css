@@ -65,6 +65,74 @@
   --track-label: .02em;
   --track-tight: -.02em;
 
+  --fs-mega:    64px;      /* Home's one hero figure, desktop */
+  --fs-mega-ph: 46px;      /* the same on a phone */
+  --fs-title:   22px;      /* a section title that states its conclusion */
+  --fs-tiny:    11px;      /* tags on a track */
+
+  /* ── the hero band and the intro: R4's green, deepened ── */
+  --hero-bg:     #1c3514;
+  --hero-bg-2:   #2b4f1e;
+  --hero-ink:    #ffffff;
+  --hero-ink-2:  rgba(255, 255, 255, .78);
+  --hero-ink-3:  rgba(255, 255, 255, .56);
+  --hero-track:  rgba(255, 255, 255, .16);
+  --hero-accent: #b9e3a0;  /* the pulse line, the known part of the bill */
+
+  /* ── the gap to $1.0m: one hue per lever, existing customers in R4 green, new business open ── */
+  --lever-1: #2b4f1e;
+  --lever-2: #4e7f38;
+  --lever-3: #7fae63;
+  --lever-4: #b3d39f;
+
+  /* ── motion: entrances only, never a count-up; off under reduced motion ── */
+  --ease-out:  cubic-bezier(.2, .8, .2, 1);
+  --ease-io:   cubic-bezier(.65, 0, .35, 1);
+  --t-slow:    600ms;
+  --t-draw:    1100ms;
+  --t-stagger: 70ms;
+  --rise:      12px;       /* how far a card travels as it arrives */
+
+  /* ── space: a 4px unit; every gap, padding and margin is one of these ── */
+  --u:    4px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* ── component sizes: lines, tracks and marks ── */
+  --hair:      1px;        /* a rule */
+  --hair-2:    2px;        /* a tick, a dashed outline, the gap between bar segments */
+  --hatch:     3px;        /* the stripe of a modelled ceiling */
+  --track-h:   8px;        /* the hero's track to $1.0m */
+  --gap-bar-h: 40px;       /* the gap bar */
+  --sw:        12px;       /* a legend swatch */
+  --r-xs:      3px;
+  --r-pill:    999px;
+  --measure:   72ch;       /* the longest line of prose */
+  --track-tighter: -.03em;
+  --hero-side: 320px;      /* the hero's right column */
+  --hero-glow: 480px;
+
+  /* ── the intro ── */
+  --intro-w:      440px;
+  --intro-mark:   64px;
+  --intro-stroke: 2px;
+  --intro-r4:     26px;
+  --intro-word:   44px;
+  --intro-beat:   56px;
+
+  /* ── the ?design=1 overlay (public/design.css) ── */
+  --design-grid:        rgba(255, 0, 128, .07);
+  --design-grid-strong: rgba(255, 0, 128, .18);
+  --design-box:         rgba(0, 120, 255, .28);
+  --design-box-solid:   #0a64d8;
+
   /* ── shape ── */
   --r-sm: 6px;
   --r:    10px;
@@ -87,6 +155,8 @@
     --grid: #2c2c2e; --baseline: #48484a;
     --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
     --shadow: none;
+    --hero-bg: #142a0e; --hero-bg-2: #1f3a16; --hero-accent: #a6d191;
+    --lever-1: #8fc27a; --lever-2: #6a9e55; --lever-3: #4d7a3b; --lever-4: #345428;
   }
 }
 :root[data-theme="dark"] {
@@ -99,9 +169,11 @@
   --grid: #2c2c2e; --baseline: #48484a;
   --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
   --shadow: none;
+  --hero-bg: #142a0e; --hero-bg-2: #1f3a16; --hero-accent: #a6d191;
+  --lever-1: #8fc27a; --lever-2: #6a9e55; --lever-3: #4d7a3b; --lever-4: #345428;
 }
 
-@media (prefers-reduced-motion: reduce) { :root { --t-fast: 0ms; --t: 0ms; } }
+@media (prefers-reduced-motion: reduce) { :root { --t-fast: 0ms; --t: 0ms; --t-slow: 0ms; --t-draw: 0ms; --t-stagger: 0ms; --rise: 0px; } }
 
 /* ── primitives every screen shares ── */
 .lab { font-size: 12px; font-weight: 500; color: var(--ink-3); letter-spacing: var(--track-label); }

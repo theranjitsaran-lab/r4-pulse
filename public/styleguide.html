@@ -4,39 +4,39 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>R4 Pulse · Style guide</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/tokens.css">
 <link rel="stylesheet" href="/app.css">
 <link rel="stylesheet" href="/components/components.css">
-<style>
-  .sg { display: grid; gap: 34px; }
-  .sg h1 { font-family: var(--f-display); font-weight: 400; font-size: 34px; letter-spacing: var(--track-tight); margin: 0; }
-  .sg .intro { color: var(--ink-3); max-width: 70ch; margin: 6px 0 0; }
-  .sg section > .sec h2 { font-size: var(--fs-head); margin: 0; }
-  .sg .sec small { font-family: var(--f-narrow); font-size: var(--fs-source); color: var(--ink-3); }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-  .card { background: var(--surface); border-radius: var(--r-lg); padding: 16px 18px; }
-  .states .card .fig-l { font-family: var(--f-narrow); font-size: var(--fs-num); font-weight: 600; margin: 4px 0 2px; }
-  .states .card .note { font-size: var(--fs-label); color: var(--ink-3); }
-  .swatches { display: flex; flex-wrap: wrap; gap: 10px; }
-  .sw { width: 128px; font-family: var(--f-narrow); font-size: var(--fs-source); color: var(--ink-3); }
-  .sw i { display: block; height: 36px; border-radius: var(--r-sm); border: 1px solid var(--rule-2); margin-bottom: 4px; }
-  .type-specimen p { margin: 0 0 10px; }
-  .t-display { font-family: var(--f-display); font-size: var(--fs-display); line-height: 1.08; letter-spacing: var(--track-tight); }
-  .t-display-ph { font-family: var(--f-display); font-size: 28px; line-height: 1.12; letter-spacing: var(--track-tight); }
-  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } .t-display { font-size: 28px; } }
-</style>
+<link rel="stylesheet" href="/components/home.css">
+<link rel="stylesheet" href="/components/styleguide.css">
 </head>
 <body>
 <header class="mast"><div class="mast-in"><a class="brand" href="/#pulse"><b>R4 Pulse</b><span>Style guide · every component, every state</span></a><div class="mast-right"><span id="asof"></span></div></div></header>
 <main id="main" class="sg">
   <div>
     <h1>Components, on real figures</h1>
-    <p class="intro">Every component in every state, drawn from the committed fixtures and costed with <code>model/rates.js</code>. Components read <code>tokens.css</code> variables only; nothing here is green but the masthead and links.</p>
+    <p class="sg-lede">Every component in every state, drawn from the committed fixtures and costed with <code>model/rates.js</code>. Add <code>?design=1</code> for the 4px grid and element boxes. Components read <code>tokens.css</code> variables only; nothing here is green but the masthead and links.</p>
   </div>
+
+  <section>
+    <div class="sec"><h2>Intro</h2><small>intro.js · once a session · skipped under reduced motion · a tap skips it</small></div>
+    <div class="card"><button class="replay" id="replay">Play the intro</button></div>
+  </section>
+
+  <section>
+    <div class="sec"><h2>Hero band</h2><small>Home · the bill already known, the next one building, against $1.0M</small></div>
+    <div class="h" id="hero"></div>
+  </section>
+
+  <section>
+    <div class="sec"><h2>Gap bar</h2><small>gap.js · only what is left to $1.0M · the ceiling hatched ◇ · new business open</small></div>
+    <div class="card h" id="gap" data-rv></div>
+  </section>
+
+  <section>
+    <div class="sec"><h2>Customers moving and tiles</h2><small>Home · name, the move, thirteen months, dollars · margin and boxes as tiles</small></div>
+    <div class="h"><div class="split"><div class="card" id="mv"></div><div class="tiles" id="tiles"></div></div></div>
+  </section>
 
   <section>
     <div class="sec"><h2>States</h2><small>measured · modelled ◇ · pending · below cost · below median · sound</small></div>
@@ -75,15 +75,16 @@
   </section>
 
   <section>
-    <div class="sec"><h2>Type and colour</h2><small>tokens.css</small></div>
+    <div class="sec"><h2>Type, colour and space</h2><small>tokens.css · nothing outside it carries a colour or a size</small></div>
     <div class="card type-specimen">
-      <p class="t-display">Core revenue is $353,481 a month short of $1.0m.</p>
-      <p class="t-display-ph">The same headline at 28px, on a phone.</p>
-      <p>IBM Plex Sans for body copy, at 13px in the Ledger register.</p>
-      <p class="lab">Plex Sans Condensed labels</p>
+      <p class="t-mega fig">$628K</p>
+      <p class="t-display">Core revenue is $353,481 a month short of $1.0M.</p>
+      <p>The system sans for everything: San Francisco on Trisha's phone, Segoe UI on the desks.</p>
+      <p class="lab">Labels at 12px</p>
       <p class="fig" style="font-size:var(--fs-num);font-weight:600">$646,519 · −$432,637</p>
     </div>
-    <div class="swatches" id="swatches" style="margin-top:14px"></div>
+    <div class="swatches card" id="swatches"></div>
+    <div class="space card" id="space"></div>
   </section>
 </main>
 
@@ -94,6 +95,11 @@ import { meter } from '/components/meter.js';
 import { ledgerTable } from '/components/table.js';
 import { strip } from '/components/strip.js';
 import { drill } from '/components/drill.js';
+import { gapHtml } from '/components/gap.js';
+import { bridge, billNow, TARGET } from '/components/levers.js';
+import { sparkline as spark } from '/components/chart.js';
+import { reveal, endIntro } from '/components/motion.js';
+import { titleCase, esc } from '/components/data.js';
 
 const R = window.R4RATES;
 const get = async n => { const r = await fetch('/api/' + n); if (!r.ok) throw new Error(n + ': ' + r.status); return r.json(); };
@@ -223,8 +229,39 @@ drill(document.getElementById('drill'), {
 });
 
 // ── swatches ──
-document.getElementById('swatches').innerHTML = ['--ink', '--ink-3', '--ink-5', '--ground', '--surface', '--well', '--rule-3', '--brand', '--warn', '--bad', '--warn-bg', '--bad-bg']
+document.getElementById('swatches').innerHTML = ['--ink', '--ink-3', '--ink-5', '--ground', '--surface', '--well', '--rule-3', '--brand', '--hero-bg', '--hero-accent', '--lever-1', '--lever-2', '--lever-3', '--lever-4', '--s-storage', '--s-service', '--s-citadel', '--good', '--warn', '--bad', '--warn-bg', '--bad-bg']
   .map(v => `<div class="sw"><i style="background:var(${v})"></i>${v}</div>`).join('');
+
+// the ?design=1 overlay, as on every screen
+if (new URLSearchParams(location.search).get('design') === '1') { document.documentElement.classList.add('design-overlay'); document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="/design.css">'); }
+
+// ── space ──
+document.getElementById('space').innerHTML = ['--sp-1', '--sp-2', '--sp-3', '--sp-4', '--sp-5', '--sp-6', '--sp-8', '--sp-10', '--sp-12']
+  .map(v => `<span><i style="width:var(${v})"></i>${v}</span>`).join('');
+
+// ── Home's pieces, on the same figures as Home ──
+const [CAJ, CJ] = await Promise.all(['calls', 'customers'].map(get));
+const B = bridge({ P, PR, CA: CAJ.data, M, C: CJ.data });
+const { core: billed } = billNow(P), lastM = P.monthly[P.monthly.length - 1];
+const at = x => (x / TARGET * 100).toFixed(2) + '%';
+const heroA = `<section class="hero-band" data-rv><div><span class="hb-lab">The bill already known</span><span class="hb-fig">${moneyK(billed)}</span>
+  <p class="hb-note"><span class="hb-pill">▲ ${Math.round((billed / lastM.core - 1) * 100)}%</span> on the month before · <b>${Math.round(billed / TARGET * 100)}%</b> of $1.0M</p>
+  <div class="hb-track"><span class="hb-fill grow" style="width:${at(billed)}"></span></div><div class="hb-ends"><span>$0</span><span>$1.0M target</span></div></div>
+  <div class="hb-side"><div><span class="hb-lab">The next bill · building ◇</span><b>≈ —</b><small>the projection draws on Home</small></div><div><span class="hb-lab">Empty state</span><b>—</b><small>no priced month to value the work yet</small></div></div></section>`;
+document.getElementById('hero').innerHTML = heroA;
+document.getElementById('gap').innerHTML = gapHtml(B);
+const ser = CJ.data.accounts.filter(a => a.level1 !== 6714).slice(0, 4);
+document.getElementById('mv').innerHTML = `<div class="card-head"><h3>Customers moving</h3><a href="#">All ›</a></div><ul class="mv">${ser.map((a, i) => {
+  const t = a.storage.map((v, k) => v + a.service[k]).slice(-13), up = i % 2;
+  return `<li><a href="/#customer/${a.level1}"><span class="t">${esc(titleCase(a.customer))}<small>${up ? 'a rising row' : 'a falling row'}</small></span>${spark(t, { w: 96, h: 28, cls: up ? 'up' : 'down' })}<span class="v">${moneyK(t[t.length - 1])}</span></a></li>`; }).join('')}</ul>`;
+document.getElementById('tiles').innerHTML = `<a class="card tile" href="#"><span class="lab">A tile ›</span><b>67%</b><p>One number and one line; the detail on tap.</p></a>
+  <div class="card tile"><span class="lab">Not yet calculable</span><div class="pending">Retention rate needs box in and out history from VCK.</div></div>`;
+endIntro(); reveal(document.getElementById('main'));
+document.getElementById('replay').addEventListener('click', async () => {
+  try { sessionStorage.removeItem('r4-intro-seen'); } catch {}
+  const { playIntro } = await import('/components/intro.js?' + Date.now());
+  playIntro().ready();
+});
 </script>
 </body>
 </html>

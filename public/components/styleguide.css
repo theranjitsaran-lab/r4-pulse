@@ -1,0 +1,21 @@
+/* The style guide page (public/styleguide.html). Tokens only, like every other stylesheet. */
+.sg { display: grid; gap: var(--sp-10); }
+.sg h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); line-height: 1.1; margin: 0; }
+.sg .sg-lede { color: var(--ink-3); max-width: var(--measure); margin: var(--sp-2) 0 0; }
+.sg section > .sec h2 { font-size: var(--fs-head); margin: 0; }
+.sg .sec small { font-size: var(--fs-source); color: var(--ink-3); }
+.sg .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+.sg .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-4); }
+.sg .states .card .fig-l { font-size: var(--fs-num); font-weight: 600; margin: var(--sp-1) 0 var(--sp-1); }
+.sg .states .card .note { font-size: var(--fs-label); color: var(--ink-3); }
+.sg .swatches { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.sg .sw { width: calc(var(--sp-12) * 2.5); font-size: var(--fs-source); color: var(--ink-3); }
+.sg .sw i { display: block; height: var(--sp-10); border-radius: var(--r-sm); border: var(--hair) solid var(--rule-2); margin-bottom: var(--sp-1); }
+.sg .space { display: grid; gap: var(--sp-2); }
+.sg .space span { display: flex; align-items: center; gap: var(--sp-3); font-size: var(--fs-source); color: var(--ink-3); }
+.sg .space i { display: block; height: var(--sp-3); background: var(--lever-2); border-radius: var(--r-xs); }
+.sg .type-specimen p { margin: 0 0 var(--sp-3); }
+.sg .t-display { font-size: var(--fs-display); font-weight: 700; line-height: 1.1; letter-spacing: var(--track-tight); }
+.sg .t-mega { font-size: var(--fs-mega); font-weight: 700; line-height: 1; letter-spacing: var(--track-tighter); }
+.sg .replay { border: 0; background: var(--brand); color: var(--surface); font-weight: 600; padding: var(--sp-2) var(--sp-4); border-radius: var(--r-sm); cursor: pointer; }
+@media (max-width: 900px) { .sg .grid2, .sg .grid3 { grid-template-columns: 1fr; } .sg .t-mega { font-size: var(--fs-mega-ph); } }
