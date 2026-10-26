@@ -5,10 +5,11 @@
 //   the route to $1.0m: today's six-month average, each lever in dollars a month, and what is left
 //     for new business; every step opens the accounts behind it;
 //   customers moving: dollars a month against each account's own run, falls and gains.
-import { lineChart, money0, moneyK } from '/components/chart.js';
+import { money0, moneyK } from '/components/chart.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { marginSummary } from '/components/margin.js';
 import { moveReason } from '/components/series.js';
+import { project, dailyFrom, curve } from '/components/projection.js';
 import { bridge, billNow, slippingAccounts, risingAccounts, TARGET, CITADEL } from '/components/levers.js';
 
 const CSS = `
@@ -16,19 +17,15 @@ const CSS = `
 .home .greet .hi { color: var(--ink-3); margin: 0 0 6px; font-size: var(--fs-label); }
 .home .greet .hv { font-size: 23px; line-height: 1.35; font-weight: 500; letter-spacing: -.01em; margin: 0; max-width: 980px; }
 .home .stale { margin: 0; padding: 8px 12px; border-radius: var(--r-sm); background: var(--warn-bg); color: var(--warn); font-size: var(--fs-label); }
-.home .billlink { color: inherit; text-decoration: none; display: inline-block; }
-.home .billlink:hover { color: var(--brand); }
-.home .month { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
-.home .month > div + div { border-left: 1px solid var(--rule); padding-left: 28px; }
+.home .landgrid { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 28px; }
+.home .facts { display: flex; flex-direction: column; gap: 0; border-left: 1px solid var(--rule); padding-left: 24px; }
+.home .fact { display: block; padding: 12px 0; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); }
+.home .fact:first-child { border-top: 0; padding-top: 2px; }
+.home a.fact:hover .lab { color: var(--brand); }
+.home .fact .lab { display: block; margin-bottom: 2px; }
+.home .fact b { display: block; font-size: 30px; font-weight: 700; letter-spacing: var(--track-tight); color: var(--ink); line-height: 1.15; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.home .c-line.faint { stroke-dasharray: 2 4; } .home i.k.faint { opacity: .5; }
 .home .lede { font-size: 16px; color: var(--ink-2); margin: 8px 0 0; line-height: 1.45; }
-.home .track { height: 10px; background: var(--well-2); border-radius: 5px; position: relative; margin: 16px 0 6px; overflow: hidden; }
-.home .track i { position: absolute; top: 0; bottom: 0; }
-.home .track i.st { background: var(--s-storage); border-radius: 5px 0 0 5px; }
-.home .track i.sv { background: var(--s-service); }
-.home .track i.est { background: repeating-linear-gradient(135deg, var(--s-service) 0 3px, transparent 3px 6px); }
-.home .trackfoot { display: flex; gap: 14px; flex-wrap: wrap; font-size: var(--fs-source); color: var(--ink-3); }
-.home .trackfoot i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; vertical-align: 0; }
-.home .note { font-size: var(--fs-label); color: var(--ink-3); margin-top: 12px; line-height: 1.45; }
 .home h2.t { font-size: 22px; font-weight: 700; letter-spacing: var(--track-tight); margin: 0 0 4px; line-height: 1.2; }
 .home .bridge { margin-top: 16px; }
 .home .step { display: grid; grid-template-columns: minmax(0, 34%) minmax(0, 1fr) 84px 14px; gap: 14px; align-items: center; padding: 9px 4px; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; }
@@ -68,9 +65,7 @@ const CSS = `
 .home .foot { font-size: var(--fs-source); color: var(--ink-4); text-align: center; padding: 4px 0 10px; }
 @media (max-width: 760px) {
   .home .greet .hv { font-size: 18px; }
-  .home .month .note, .home #home-pace { display: none; }
-  .home .month { grid-template-columns: 1fr; gap: 18px; }
-  .home .month > div + div { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); padding-top: 16px; }
+  .home .landgrid { grid-template-columns: 1fr; gap: 8px; } .home .facts { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); }
   .home .step { grid-template-columns: minmax(0, 1fr) 78px 14px; grid-template-areas: "nm v go" "lane lane lane"; gap: 6px 10px; }
   .home .step .nm { grid-area: nm; } .home .step .v { grid-area: v; } .home .step .go { grid-area: go; } .home .step .lane { grid-area: lane; }
   .home .movers { grid-template-columns: 1fr; }
@@ -88,15 +83,6 @@ const dayMonth = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { d
 const pct = v => (v > 0 ? '▲ ' : v < 0 ? '▼ ' : '') + Math.abs(Math.round(v * 100)) + '%';
 const mk = v => Math.abs(v) < 50 ? '$0' : moneyK(v);   // no "−$0" from a few cents of credit
 const dcls = v => v > 0.02 ? 'up' : v < -0.02 ? 'down' : 'flat';
-const weekdays = m => { let n = 0; for (let d = new Date(m + 'T00:00:00Z'); d.getUTCMonth() === +m.slice(5, 7) - 1; d.setUTCDate(d.getUTCDate() + 1)) if (d.getUTCDay() % 6) n++; return n; };
-
-// Services done each working day of a month, from Veri-Shred done orders, cumulated.
-function cumulative(A, month) {
-  const by = new Map();
-  for (const r of A.routeDays) if (r.date.startsWith(month.slice(0, 7)) && r.services_done > 0 && r.date <= A.latestDone) by.set(r.date, (by.get(r.date) || 0) + r.services_done);
-  let t = 0;
-  return [...by.keys()].sort().map((d, i) => ({ x: String(i + 1).padStart(2, '0'), y: (t += by.get(d)), date: d }));
-}
 
 // The slipping and rising accounts (components/levers.js, one definition everywhere), largest
 // moves first, with which part moved.
@@ -115,16 +101,18 @@ export async function render(main, P) {
   const billMonth = addMonths(last.month, 1);                     // the bill in the current run
   const { run, core: runCore } = billNow(P);
   const workMonth = A.latestDone.slice(0, 8) + '01';              // the month being worked now
-  const now = cumulative(A, workMonth), before = cumulative(A, addMonths(workMonth, -1));
-  const nowDays = now.length, nowDone = nowDays ? now[nowDays - 1].y : 0;
-  const prevDays = before.length, prevDone = prevDays ? before[prevDays - 1].y : 0;
-  const atSameDay = before[nowDays - 1] ? before[nowDays - 1].y : null;
-  const perDayNow = nowDays ? nowDone / nowDays : null, perDayPrev = prevDays ? prevDone / prevDays : null;
-  // the work in the current run is last month's: its value per done service prices this month's work
+  const daily = dailyFrom(P, A);
+  const doneIn = m => daily.filter(r => r.date.startsWith(m.slice(0, 7))).reduce((t, r) => t + r.done, 0);
+  // the work in the current run is last month's: its value per done service prices this month's work ◇
+  const prevDone = doneIn(addMonths(workMonth, -1));
   const perService = run && prevDone ? (run.service - run.citadel) / prevDone : null;
-  const projService = perService && perDayNow ? perDayNow * weekdays(workMonth) * perService : null;
-  const nextStorage = run ? run.storage : null;                    // storage carries forward; it is billed in advance
-  const nextBill = projService != null ? nextStorage + projService : null;
+  const X = project({ daily, latest: A.latestDone, perService, storage: run ? run.storage : 0, routeDays: A.routeDays });
+  const nextBill = X.bill ? X.bill.central : null;
+  // the same month last year, priced so it ends on what its bill actually carried
+  const lyMonth = addMonths(workMonth, -12), lyBill = P.monthly.find(m => m.month === addMonths(lyMonth, 1)), lyDone = doneIn(lyMonth);
+  const lastYear = lyBill && lyDone ? curve(daily, lyMonth, lyBill.core_service / lyDone, lyBill.storage) : [];
+  const lastMonth = perService ? curve(daily, addMonths(workMonth, -1), perService, run.storage) : [];
+  const thisMonth = perService ? curve(daily, workMonth, perService, run.storage, A.latestDone) : [];
 
   // ── the route to $1.0m ──
   const B = bridge({ P, PR, CA, M, C });
@@ -155,25 +143,15 @@ export async function render(main, P) {
     ${staleNote}<div class="greet"><p class="hi">${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'} · core revenue, Citadel apart · target $1.0M a month</p>
       <h1 class="hv">${verdict}</h1></div>
 
-    <section class="card">
-      <div class="month">
-        <div>
-          <a class="lab billlink" href="#customers?view=main">${mon(billMonth)}'s bill · already known ›</a>
-          <div class="hero">${runCore != null ? money0(runCore) : '—'}</div>
-          <p class="lede">${runCore != null ? `<span class="delta ${dcls(runCore / last.core - 1)}">${pct(runCore / last.core - 1)}</span> on ${mon(last.month)}'s ${moneyK(last.core)}, and ${moneyK(TARGET - runCore)} short of $1.0M.` : 'The run has not started.'}</p>
-          <div class="track"><i class="st" style="left:0;width:${run ? run.storage / TARGET * 100 : 0}%"></i><i class="sv" style="left:${run ? run.storage / TARGET * 100 : 0}%;width:${run ? (run.service - run.citadel) / TARGET * 100 : 0}%"></i></div>
-          <div class="trackfoot"><span><i style="background:var(--s-storage)"></i>${mon(billMonth)} storage ${moneyK(run ? run.storage : 0)}</span><span><i style="background:var(--s-service)"></i>${mon(last.month)} work ${moneyK(run ? run.service - run.citadel : 0)}</span><span>bar ends at $1.0M</span></div>
-          <p class="note">Storage bills in advance and work in arrears, so each month's bill is that month's storage and the month before's work. Citadel in this bill: ${run ? money0(run.citadel) : '—'}, held apart.</p>
-        </div>
-        <div>
-          <div class="lab">${mon(addMonths(billMonth, 1))}'s bill · building from ${mon(workMonth)}'s work</div>
-          <div class="hero">${nextBill != null ? '≈ ' + moneyK(nextBill) : '—'}<span style="font-size:18px;color:var(--ink-5);font-weight:400"> ◇</span></div>
-          <p class="lede">${perDayNow ? `${nowDone.toLocaleString('en-US')} services done in ${nowDays} working day${nowDays === 1 ? '' : 's'} to ${dayMonth(A.latestDone)}: ${Math.round(perDayNow)} a day, <span class="delta ${dcls(perDayNow / perDayPrev - 1)}">${pct(perDayNow / perDayPrev - 1)}</span> on ${mon(addMonths(workMonth, -1))}'s ${Math.round(perDayPrev)}.${nowDays < 8 ? ' Early days: read the pace with care.' : ''}` : `No work done yet in ${mon(workMonth)}.`}</p>
-          <div class="track"><i class="st" style="left:0;width:${nextStorage ? nextStorage / TARGET * 100 : 0}%"></i><i class="est" style="left:${nextStorage ? nextStorage / TARGET * 100 : 0}%;width:${projService ? projService / TARGET * 100 : 0}%"></i></div>
-          <div class="trackfoot"><span><i style="background:var(--s-storage)"></i>storage carried forward ${moneyK(nextStorage || 0)}</span><span><i style="background:repeating-linear-gradient(135deg,var(--s-service) 0 2px,transparent 2px 4px)"></i>${mon(workMonth)} work at this pace ${moneyK(projService || 0)} ◇</span></div>
+    <section class="card land">
+      <div class="landgrid">
+        <div id="home-land"></div>
+        <div class="facts">
+          <a class="fact" href="#customers?view=main"><span class="lab">${mon(billMonth)}'s bill · already known ›</span><b>${runCore != null ? moneyK(runCore) : '—'}</b><span>${runCore != null ? `<span class="delta ${dcls(runCore / last.core - 1)}">${pct(runCore / last.core - 1)}</span> on ${mon(last.month)}'s ${moneyK(last.core)}: ${mon(billMonth)}'s storage and ${mon(last.month)}'s work, Citadel's ${moneyK(run.citadel)} apart.` : 'The run has not started.'}</span></a>
+          <div class="fact"><span class="lab">${mon(addMonths(billMonth, 1))}'s bill · building now ◇</span><b>${nextBill != null ? '≈ ' + moneyK(nextBill) : '—'}</b><span>${X.bill ? `Likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}. ${X.doneToDate.toLocaleString('en-US')} services done in ${X.elapsed} of ${X.workdays} working days; the other ${X.remaining} at ${Math.round(X.pace)} a day, ${X.paces.length > 1 ? `the median of the last ${X.paces.length} months` : `${mon(X.paces.length ? X.paces[0].month : workMonth)}'s pace`}.` : 'Not yet calculable: no priced month to value the work.'}</span></div>
+          <div class="fact"><span class="lab">How far to trust it</span><span>${X.backtest ? `Projected this way from working day ${X.elapsed}, the last ${X.backtest.n} months landed inside their band ${X.backtest.hits} times.` : `Untested: the band is the middle half of recent days. The next snapshot adds fifteen months of daily work, and each of the last twelve months is then projected from the same day to test it.`}${X.bookings ? ` Bookings to ${dayMonth(X.bookings.horizon)} point to ${Math.round(X.bookings.done).toLocaleString('en-US')} services by then, at the ${Math.round(X.bookings.completion * 100)}% of bookings R4 completes.` : ''}</span></div>
         </div>
       </div>
-      <div id="home-pace" style="margin-top:18px;padding-top:14px;border-top:1px solid var(--rule)"></div>
     </section>
 
     <section class="card">
@@ -206,12 +184,60 @@ export async function render(main, P) {
     <div class="foot">Posted through ${mon(last.month)} ${last.month.slice(0, 4)} · work done through ${dayMonth(A.latestDone)} · ◇ modelled · tap any row to open it</div>
   </div>`;
 
-  if (now.length || before.length) {
-    lineChart(main.querySelector('#home-pace'), {
-      title: atSameDay != null ? `${nowDone >= atSameDay ? 'Ahead of' : 'Behind'} ${mon(addMonths(workMonth, -1))} at the same working day` : 'Services done, by working day',
-      series: [{ name: mon(addMonths(workMonth, -1)), cls: 'neutral', points: before }, { name: mon(workMonth), cls: 'service', points: now }].filter(s => s.points.length),
-      xFormat: x => 'day ' + Number(x), yFormat: v => Math.round(v).toLocaleString('en-US'), height: 170, area: false,
-      source: 'Veri-Shred done orders · services completed, cumulated by working day',
-    });
+  landing(main.querySelector('#home-land'), {
+    title: nextBill != null ? `${mon(addMonths(billMonth, 1))}'s bill is heading for about ${moneyK(nextBill)} ◇, ${moneyK(TARGET - nextBill)} short of $1.0M` : 'Where the month lands',
+    sub: `Each line is one bill building through the month: the storage it carries, then the work done each working day, at last month's ${perService ? '$' + perService.toFixed(2) : ''} a service ◇.`,
+    series: [
+      { name: `${mon(addMonths(lyMonth, 1))} ${addMonths(lyMonth, 1).slice(0, 4)}'s bill`, cls: 'neutral faint', points: lastYear },
+      { name: `${mon(billMonth)}'s bill`, cls: 'neutral', points: lastMonth },
+      { name: `${mon(addMonths(billMonth, 1))}'s bill so far`, cls: 'service', points: thisMonth },
+    ].filter(x => x.points.length),
+    cone: X.bill && thisMonth.length ? { from: thisMonth[thisMonth.length - 1], to: X.workdays, lo: X.bill.lo, c: X.bill.central, hi: X.bill.hi } : null,
+    days: X.workdays, target: TARGET,
+    source: `Veri-Shred done orders by working day · storage and last month's work from the current VCK run · ${lastYear.length ? 'last year priced to end on its posted bill' : 'last year joins with the next snapshot'} · weekend work counted on the Friday`,
+  });
+}
+
+// Where the month lands: bills building by working day, the projection as a cone to month end,
+// the target as a hairline. One axis; a crosshair reads every line at a working day.
+function landing(el, o) {
+  if (!el) return;
+  const W = Math.max(300, Math.min(1000, el.clientWidth || 640)), compact = W < 560;
+  const H = compact ? 230 : 290, L = compact ? 44 : 52, R = compact ? 12 : 64, T = 16, B = 28;
+  const ys = o.series.flatMap(x => x.points.map(p => p.y)).concat(o.cone ? [o.cone.lo, o.cone.hi] : []).concat([o.target]);
+  const step = 100000, lo = Math.floor(Math.min(...ys) * 0.96 / step) * step, hi = Math.ceil(Math.max(...ys) / step) * step;
+  const fx = d => L + (d - 1) / Math.max(1, o.days - 1) * (W - L - R), fy = y => T + (1 - (y - lo) / (hi - lo)) * (H - T - B);
+  let g = '';
+  for (let v = lo; v <= hi + 1; v += step) g += `<line class="c-grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text class="c-axis" x="${L - 8}" y="${fy(v) + 4}" text-anchor="end">${moneyK(v)}</text>`;
+  for (const d of (compact ? [1, 10, o.days] : [1, 5, 10, 15, 20, o.days]).filter((d, i, a) => d <= o.days && a.indexOf(d) === i && (d === o.days || o.days - d >= 3)))
+    g += `<text class="c-axis" x="${fx(d)}" y="${H - 8}" text-anchor="${d === 1 ? 'start' : d === o.days ? 'end' : 'middle'}">${d === 1 ? (compact ? 'day 1' : 'working day 1') : d}</text>`;
+  g += `<line class="c-mark" x1="${L}" x2="${W - R}" y1="${fy(o.target)}" y2="${fy(o.target)}"/><text class="c-note" x="${W - R}" y="${fy(o.target) - 6}" text-anchor="end">$1.0M target</text>`;
+  if (o.cone) {
+    const f = o.cone.from;
+    g += `<polygon class="c-area service" style="opacity:.16" points="${fx(f.day)},${fy(f.y)} ${fx(o.cone.to)},${fy(o.cone.hi)} ${fx(o.cone.to)},${fy(o.cone.lo)}"/>`;
+    g += `<line class="c-line service" style="stroke-dasharray:4 4" x1="${fx(f.day)}" y1="${fy(f.y)}" x2="${fx(o.cone.to)}" y2="${fy(o.cone.c)}"/>`;
+    if (!compact) g += `<text class="c-note" x="${fx(o.cone.to) + 6}" y="${fy(o.cone.c) + 4}">≈ ${moneyK(o.cone.c)} ◇</text>`;
   }
+  for (const x of o.series) {
+    g += `<polyline class="c-line ${x.cls}" points="${x.points.map(p => `${fx(p.day)},${fy(p.y)}`).join(' ')}"/>`;
+    const e = x.points[x.points.length - 1];
+    g += `<circle class="c-end ${x.cls}" cx="${fx(e.day)}" cy="${fy(e.y)}" r="${x.cls === 'service' ? 4 : 3}"/>`;
+  }
+  g += `<line class="c-cross" x1="0" x2="0" y1="${T}" y2="${H - B}" visibility="hidden"/><rect class="c-hit" x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent"/>`;
+  const key = `<div class="chart-key">${o.series.map(x => `<span><i class="k ${x.cls}"></i>${esc(x.name)}</span>`).join('')}${o.cone ? '<span><i class="k service" style="opacity:.35"></i>likely landing ◇</span>' : ''}</div>`;
+  el.classList.add('chart');
+  el.innerHTML = `<div class="chart-head"><div><h3 class="chart-title">${esc(o.title)}</h3><p class="chart-sub">${esc(o.sub)}</p></div></div>${key}
+    <div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.title)}">${g}</svg><div class="c-tip" hidden></div></div><div class="src">${esc(o.source)}</div>`;
+  const svg = el.querySelector('svg'), tip = el.querySelector('.c-tip'), cross = svg.querySelector('.c-cross'), hit = svg.querySelector('.c-hit');
+  const move = ev => {
+    const pt = ev.touches ? ev.touches[0] : ev, r = svg.getBoundingClientRect();
+    const d = Math.max(1, Math.min(o.days, Math.round(((pt.clientX - r.left) * (W / r.width) - L) / (W - L - R) * (o.days - 1)) + 1));
+    cross.setAttribute('x1', fx(d)); cross.setAttribute('x2', fx(d)); cross.setAttribute('visibility', 'visible');
+    const rows = o.series.map(x => { const p = x.points.find(q => q.day === d); return p ? `<span><i class="k ${x.cls}"></i>${esc(x.name)} <b>${money0(p.y)}</b></span>` : null; }).filter(Boolean);
+    if (o.cone && d > o.cone.from.day) { const t = (d - o.cone.from.day) / (o.cone.to - o.cone.from.day), at = v => o.cone.from.y + (v - o.cone.from.y) * t; rows.push(`<span><i class="k service" style="opacity:.35"></i>likely ◇ <b>${moneyK(at(o.cone.lo))} to ${moneyK(at(o.cone.hi))}</b></span>`); }
+    tip.innerHTML = `<b>Working day ${d}</b>${rows.join('')}`;
+    tip.style.left = Math.max(90, Math.min(r.width - 90, fx(d) / W * r.width)) + 'px'; tip.hidden = false;
+  };
+  hit.addEventListener('mousemove', move); hit.addEventListener('touchmove', move, { passive: true });
+  hit.addEventListener('mouseleave', () => { tip.hidden = true; cross.setAttribute('visibility', 'hidden'); });
 }
