@@ -1,5 +1,5 @@
 {
- "snapshotAt": "2026-10-26T10:16:18.119Z",
+ "snapshotAt": "2026-10-26T12:05:08.836Z",
  "data": {
   "latestDone": "2026-10-06",
   "routeDays": [
@@ -48209,6 +48209,1504 @@
     "route_days": 5,
     "done_per_day": 1.8,
     "stops_per_day": 1
+   }
+  ],
+  "postcodes": [
+   {
+    "postcode": "46304",
+    "services": 119,
+    "visits": 20,
+    "customers": 1,
+    "names": "UNIVERSITY OF CHICAGO MEDICINE",
+    "billing_only": false
+   },
+   {
+    "postcode": "46307",
+    "services": 840,
+    "visits": 30,
+    "customers": 2,
+    "names": "JOHNSON & BELL, UNIVERSITY OF CHICAGO MEDICINE",
+    "billing_only": false
+   },
+   {
+    "postcode": "46311",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "RITA MUELLER",
+    "billing_only": false
+   },
+   {
+    "postcode": "46319",
+    "services": 8,
+    "visits": 4,
+    "customers": 1,
+    "names": "LAW OFFICE OF BEN MURPHY",
+    "billing_only": false
+   },
+   {
+    "postcode": "46321",
+    "services": 6,
+    "visits": 4,
+    "customers": 4,
+    "names": "BOB DICARLO, CANCER CARE CONSULTANTS PC",
+    "billing_only": false
+   },
+   {
+    "postcode": "46322",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "BARBARA TIGER MEYERS",
+    "billing_only": false
+   },
+   {
+    "postcode": "46323",
+    "services": 4,
+    "visits": 2,
+    "customers": 1,
+    "names": "ORBITAL ENGINEERING",
+    "billing_only": false
+   },
+   {
+    "postcode": "46324",
+    "services": 2,
+    "visits": 1,
+    "customers": 1,
+    "names": "SINGLE INVOICE CUSTOMER",
+    "billing_only": false
+   },
+   {
+    "postcode": "46383",
+    "services": 97,
+    "visits": 22,
+    "customers": 1,
+    "names": "UNIVERSITY OF CHICAGO MEDICINE",
+    "billing_only": false
+   },
+   {
+    "postcode": "46402",
+    "services": 6,
+    "visits": 2,
+    "customers": 2,
+    "names": "MAGNECO/METREL, INC, UNITED STEELWORKERS DISTRICT 7",
+    "billing_only": false
+   },
+   {
+    "postcode": "46406",
+    "services": 3,
+    "visits": 1,
+    "customers": 1,
+    "names": "SINGLE INVOICE CUSTOMER",
+    "billing_only": false
+   },
+   {
+    "postcode": "46410",
+    "services": 3,
+    "visits": 3,
+    "customers": 1,
+    "names": "UNIVERSITY OF CHICAGO MEDICINE",
+    "billing_only": false
+   },
+   {
+    "postcode": "53158",
+    "services": 6,
+    "visits": 6,
+    "customers": 1,
+    "names": "CARLSON DASH LLC",
+    "billing_only": false
+   },
+   {
+    "postcode": "60004",
+    "services": 247,
+    "visits": 34,
+    "customers": 2,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, UNITED AIRLINES SHRED BINS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60005",
+    "services": 15,
+    "visits": 10,
+    "customers": 1,
+    "names": "UNITED AIRLINES SHRED BINS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60007",
+    "services": 10,
+    "visits": 5,
+    "customers": 3,
+    "names": "BUILDERS CHICAGO CORP, HOLLINGER INSURANCE SERVICES",
+    "billing_only": false
+   },
+   {
+    "postcode": "60008",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "MTD FANANCIAL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60016",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "DEVOTED HEALTH CARE, INC",
+    "billing_only": false
+   },
+   {
+    "postcode": "60018",
+    "services": 463,
+    "visits": 171,
+    "customers": 5,
+    "names": "EVERSIGHT, NEAR NORTH NATIONAL TITLE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60025",
+    "services": 7,
+    "visits": 4,
+    "customers": 3,
+    "names": "MADELYN GOLDMAN, MIKE SIMPSON",
+    "billing_only": false
+   },
+   {
+    "postcode": "60026",
+    "services": 7,
+    "visits": 5,
+    "customers": 1,
+    "names": "CANTWELL AND CANTWELL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60035",
+    "services": 2,
+    "visits": 2,
+    "customers": 2,
+    "names": "IMPERIAL MOTORS, ROBERT CENTER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60043",
+    "services": 19,
+    "visits": 6,
+    "customers": 1,
+    "names": "KENILWORTH MEDICAL ASSOCIATES",
+    "billing_only": false
+   },
+   {
+    "postcode": "60044",
+    "services": 22,
+    "visits": 4,
+    "customers": 1,
+    "names": "IMPERIAL MOTORS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60045",
+    "services": 2,
+    "visits": 2,
+    "customers": 1,
+    "names": "CROKE FAIRCHILD DUARTE AND BERES",
+    "billing_only": false
+   },
+   {
+    "postcode": "60053",
+    "services": 10,
+    "visits": 5,
+    "customers": 1,
+    "names": "BUNZL RETAIL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60060",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "WISCONSIN ENERGY GROUP DESTRUCTION PO#4510519019",
+    "billing_only": false
+   },
+   {
+    "postcode": "60062",
+    "services": 62,
+    "visits": 27,
+    "customers": 2,
+    "names": "THE ASSOCIATION FOR WOMEN'S HEALTH CARE LTD, UNIVERSITY OF CHICAGO MEDICINE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60067",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "SINGLE INVOICE CUSTOMER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60068",
+    "services": 2,
+    "visits": 2,
+    "customers": 1,
+    "names": "ELITE ADMINISTRATION AND INSURANCE GROUP",
+    "billing_only": false
+   },
+   {
+    "postcode": "60069",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "LRS RECYCLES",
+    "billing_only": false
+   },
+   {
+    "postcode": "60076",
+    "services": 2,
+    "visits": 1,
+    "customers": 1,
+    "names": "JAN SELAN",
+    "billing_only": false
+   },
+   {
+    "postcode": "60077",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "GYC SENIOR CARE SERVICES",
+    "billing_only": false
+   },
+   {
+    "postcode": "60089",
+    "services": 3,
+    "visits": 1,
+    "customers": 1,
+    "names": "BARENTZ",
+    "billing_only": false
+   },
+   {
+    "postcode": "60091",
+    "services": 3,
+    "visits": 3,
+    "customers": 2,
+    "names": "CST ACADEMY, LATHAM & WATKINS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60093",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "DAVID BLOOM",
+    "billing_only": false
+   },
+   {
+    "postcode": "60101",
+    "services": 104,
+    "visits": 15,
+    "customers": 1,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK",
+    "billing_only": false
+   },
+   {
+    "postcode": "60104",
+    "services": 3,
+    "visits": 2,
+    "customers": 2,
+    "names": "CHICAGO EYE CENTER, PURES FOOD",
+    "billing_only": false
+   },
+   {
+    "postcode": "60107",
+    "services": 2,
+    "visits": 1,
+    "customers": 1,
+    "names": "KATRINA COLE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60108",
+    "services": 2,
+    "visits": 1,
+    "customers": 1,
+    "names": "EXECUTIVE REALTY GROUP",
+    "billing_only": false
+   },
+   {
+    "postcode": "60126",
+    "services": 14,
+    "visits": 9,
+    "customers": 4,
+    "names": "IMMACULATE CONCEPTION GRADE SCHOOL, JERRY HAYES",
+    "billing_only": false
+   },
+   {
+    "postcode": "60130",
+    "services": 27,
+    "visits": 23,
+    "customers": 3,
+    "names": "AVENUE ONE, REM ENV.",
+    "billing_only": false
+   },
+   {
+    "postcode": "60137",
+    "services": 14,
+    "visits": 8,
+    "customers": 5,
+    "names": "JASON M TEWS, JEFF KIMALA",
+    "billing_only": false
+   },
+   {
+    "postcode": "60148",
+    "services": 7,
+    "visits": 6,
+    "customers": 3,
+    "names": "FIREFIGHTERS PENSION INVESTMENT FUND, MIDWEST TRANSIT EQUIPMENT SOUTH HOLLAND OFFICE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60153",
+    "services": 2,
+    "visits": 2,
+    "customers": 2,
+    "names": "T.H. RYAN CARTAGE COMPANY, TIFFANY SANDERS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60155",
+    "services": 12,
+    "visits": 7,
+    "customers": 2,
+    "names": "BROADVIEW VILLAGE HALL SHRED EVENT, PURES FOOD",
+    "billing_only": false
+   },
+   {
+    "postcode": "60160",
+    "services": 25,
+    "visits": 12,
+    "customers": 2,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, GATEWAY CONSTRUCTION",
+    "billing_only": false
+   },
+   {
+    "postcode": "60162",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "JANUARY FAMILY LAW",
+    "billing_only": false
+   },
+   {
+    "postcode": "60164",
+    "services": 16,
+    "visits": 10,
+    "customers": 1,
+    "names": "PURES FOOD",
+    "billing_only": false
+   },
+   {
+    "postcode": "60169",
+    "services": 30,
+    "visits": 4,
+    "customers": 2,
+    "names": "CONSOLIDATED TAX SERVICES, DR. BRUCE KOLTON",
+    "billing_only": false
+   },
+   {
+    "postcode": "60173",
+    "services": 11,
+    "visits": 11,
+    "customers": 2,
+    "names": "GONNELLA BAKING CO., NOAH PROPERTIES",
+    "billing_only": false
+   },
+   {
+    "postcode": "60174",
+    "services": 2,
+    "visits": 1,
+    "customers": 1,
+    "names": "DENISE KULISZ",
+    "billing_only": false
+   },
+   {
+    "postcode": "60175",
+    "services": 4,
+    "visits": 2,
+    "customers": 2,
+    "names": "JERRY MICHAEL, MTD FANANCIAL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60176",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "BOTANIC SCHOOL OF NAIL TECHNOLOGY",
+    "billing_only": false
+   },
+   {
+    "postcode": "60181",
+    "services": 7,
+    "visits": 4,
+    "customers": 3,
+    "names": "DRURY LANE, ISLAMIC FOUNDATION SCHOOL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60185",
+    "services": 493,
+    "visits": 82,
+    "customers": 3,
+    "names": "FNBC BANK AND TRUST, MIDWEST SALT",
+    "billing_only": false
+   },
+   {
+    "postcode": "60188",
+    "services": 2,
+    "visits": 2,
+    "customers": 2,
+    "names": "GABRIELA CALVILLO, MARY GOLDEN",
+    "billing_only": false
+   },
+   {
+    "postcode": "60189",
+    "services": 2,
+    "visits": 2,
+    "customers": 2,
+    "names": "IIT, ROBERT SKINNER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60190",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "DR. SYLVIA HOOD WASHINGTON",
+    "billing_only": false
+   },
+   {
+    "postcode": "60192",
+    "services": 8,
+    "visits": 3,
+    "customers": 1,
+    "names": "WALSH GROUP",
+    "billing_only": false
+   },
+   {
+    "postcode": "60201",
+    "services": 164,
+    "visits": 40,
+    "customers": 4,
+    "names": "ACCUITY, MAGNETAR CAPITAL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60202",
+    "services": 106,
+    "visits": 19,
+    "customers": 6,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, ANTHONY TODD",
+    "billing_only": false
+   },
+   {
+    "postcode": "60208",
+    "services": 3,
+    "visits": 3,
+    "customers": 1,
+    "names": "WALSH GROUP",
+    "billing_only": false
+   },
+   {
+    "postcode": "60301",
+    "services": 12,
+    "visits": 6,
+    "customers": 1,
+    "names": "Lake Street Family Physicians",
+    "billing_only": false
+   },
+   {
+    "postcode": "60302",
+    "services": 5,
+    "visits": 5,
+    "customers": 4,
+    "names": "JOAN OULLETTE, SINGLE INVOICE CUSTOMER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60303",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "JOHN MITCHELL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60305",
+    "services": 228,
+    "visits": 14,
+    "customers": 2,
+    "names": "DOMINICAN UNIVERSITY, LAURA HARDWICKE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60402",
+    "services": 77,
+    "visits": 46,
+    "customers": 5,
+    "names": "ANKLE AND FOOT SPECIALISTS, BERWYN KIA / Meyer Imports",
+    "billing_only": false
+   },
+   {
+    "postcode": "60406",
+    "services": 178,
+    "visits": 21,
+    "customers": 3,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, BROADWAY AUTO WRECKERS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60409",
+    "services": 294,
+    "visits": 61,
+    "customers": 4,
+    "names": "ASHLAUR CONSTRUCTION, GASVODA",
+    "billing_only": false
+   },
+   {
+    "postcode": "60411",
+    "services": 29,
+    "visits": 12,
+    "customers": 3,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, BEVERLY COLARN CREDELLE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60419",
+    "services": 5,
+    "visits": 2,
+    "customers": 1,
+    "names": "LARVETTA LOFTIN",
+    "billing_only": false
+   },
+   {
+    "postcode": "60422",
+    "services": 597,
+    "visits": 44,
+    "customers": 4,
+    "names": "INGALLS HOSPITAL, LYNETTE ELMES",
+    "billing_only": false
+   },
+   {
+    "postcode": "60423",
+    "services": 10,
+    "visits": 6,
+    "customers": 2,
+    "names": "DEBBIE RAUCH, JEFF HEDA",
+    "billing_only": false
+   },
+   {
+    "postcode": "60425",
+    "services": 3,
+    "visits": 1,
+    "customers": 1,
+    "names": "BILL AND MARY HILL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60426",
+    "services": 2561,
+    "visits": 1369,
+    "customers": 2,
+    "names": "INGALLS HOSPITAL, SINGLE INVOICE CUSTOMER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60429",
+    "services": 5,
+    "visits": 3,
+    "customers": 3,
+    "names": "CECIL CURRIN, GRAND PRAIRIE PUBLIC LIBRARY",
+    "billing_only": false
+   },
+   {
+    "postcode": "60430",
+    "services": 40,
+    "visits": 11,
+    "customers": 1,
+    "names": "INGALLS HOSPITAL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60433",
+    "services": 2,
+    "visits": 1,
+    "customers": 1,
+    "names": "KEVIN SHELTON",
+    "billing_only": false
+   },
+   {
+    "postcode": "60438",
+    "services": 39,
+    "visits": 12,
+    "customers": 2,
+    "names": "GREAT LAKES HOTSY, INGALLS HOSPITAL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60439",
+    "services": 23,
+    "visits": 23,
+    "customers": 2,
+    "names": "HAUS OF IMPORTS, RENEWED SOLUTIONS LEMONT",
+    "billing_only": false
+   },
+   {
+    "postcode": "60440",
+    "services": 3,
+    "visits": 2,
+    "customers": 2,
+    "names": "AAM METAL FORMING, MOLEX, LLC",
+    "billing_only": false
+   },
+   {
+    "postcode": "60443",
+    "services": 6,
+    "visits": 3,
+    "customers": 2,
+    "names": "ILLINOIS ACTION FOR CHILDREN, SINGLE INVOICE CUSTOMER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60446",
+    "services": 2,
+    "visits": 2,
+    "customers": 1,
+    "names": "TOTAL STAFFING",
+    "billing_only": false
+   },
+   {
+    "postcode": "60448",
+    "services": 9,
+    "visits": 9,
+    "customers": 1,
+    "names": "NEB MEDICAL SERVICES",
+    "billing_only": false
+   },
+   {
+    "postcode": "60449",
+    "services": 4,
+    "visits": 3,
+    "customers": 2,
+    "names": "MONEE POLICE DEPARTMENT, MONEE TOWNSHIP",
+    "billing_only": false
+   },
+   {
+    "postcode": "60451",
+    "services": 180,
+    "visits": 28,
+    "customers": 1,
+    "names": "UNIVERSITY OF CHICAGO MEDICINE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60452",
+    "services": 10,
+    "visits": 10,
+    "customers": 1,
+    "names": "INGALLS HOSPITAL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60461",
+    "services": 5,
+    "visits": 2,
+    "customers": 1,
+    "names": "RICHARD CRUSOR",
+    "billing_only": false
+   },
+   {
+    "postcode": "60462",
+    "services": 1101,
+    "visits": 27,
+    "customers": 2,
+    "names": "UNIVERSITY OF CHICAGO MEDICINE, WALSH GROUP",
+    "billing_only": false
+   },
+   {
+    "postcode": "60463",
+    "services": 80,
+    "visits": 17,
+    "customers": 4,
+    "names": "ADDUCCI VEGA FINANCIAL GROUP/Profit Controls, NEAR NORTH NATIONAL TITLE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60465",
+    "services": 2,
+    "visits": 1,
+    "customers": 1,
+    "names": "LUCIA SOLIS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60466",
+    "services": 2,
+    "visits": 2,
+    "customers": 1,
+    "names": "LARABIDA CHILDREN'S HOSPITAL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60469",
+    "services": 2,
+    "visits": 2,
+    "customers": 1,
+    "names": "VILLAGE OF POSEN - MAYOR",
+    "billing_only": false
+   },
+   {
+    "postcode": "60472",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "TISHA SMITH",
+    "billing_only": false
+   },
+   {
+    "postcode": "60473",
+    "services": 161,
+    "visits": 43,
+    "customers": 5,
+    "names": "INGALLS HOSPITAL, MIDWEST TRANSIT EQUIPMENT SOUTH HOLLAND OFFICE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60477",
+    "services": 322,
+    "visits": 43,
+    "customers": 4,
+    "names": "INGALLS HOSPITAL, MICHUDA CONSTRUCTION",
+    "billing_only": false
+   },
+   {
+    "postcode": "60484",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "UNIVERSITY PARK LIBRARY",
+    "billing_only": false
+   },
+   {
+    "postcode": "60487",
+    "services": 13,
+    "visits": 9,
+    "customers": 3,
+    "names": "ACCOUNTING CONCEPTS, APPLE CHEVROLET",
+    "billing_only": false
+   },
+   {
+    "postcode": "60491",
+    "services": 4,
+    "visits": 2,
+    "customers": 2,
+    "names": "COMMUNITY HIGH SCHOOL DISTRICT 99, KAT OSINSKI",
+    "billing_only": false
+   },
+   {
+    "postcode": "60501",
+    "services": 26,
+    "visits": 13,
+    "customers": 2,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, TALERICO-MARTIN BAKING",
+    "billing_only": false
+   },
+   {
+    "postcode": "60502",
+    "services": 2,
+    "visits": 2,
+    "customers": 1,
+    "names": "CITADEL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60513",
+    "services": 65,
+    "visits": 14,
+    "customers": 2,
+    "names": "CANTATA ADULT LIFE SERVICES, SINGLE INVOICE CUSTOMER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60515",
+    "services": 21,
+    "visits": 17,
+    "customers": 7,
+    "names": "ALLERVIE, DOWNERS GROVE DISTRICT 58",
+    "billing_only": false
+   },
+   {
+    "postcode": "60516",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "DOWNERS GROVE DISTRICT 58",
+    "billing_only": false
+   },
+   {
+    "postcode": "60517",
+    "services": 14,
+    "visits": 13,
+    "customers": 3,
+    "names": "LIBERTY ASSET MANAGEMENT, RAMEYA SHANMUGAVELAYUTHAM",
+    "billing_only": false
+   },
+   {
+    "postcode": "60521",
+    "services": 75,
+    "visits": 13,
+    "customers": 1,
+    "names": "UNIVERSITY OF CHICAGO MEDICINE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60523",
+    "services": 33,
+    "visits": 27,
+    "customers": 7,
+    "names": "BUTLER NATIONAL GOLF CLUB, FRANKLIN PARTNERS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60525",
+    "services": 51,
+    "visits": 39,
+    "customers": 3,
+    "names": "FNBC BANK AND TRUST, REM ENV.",
+    "billing_only": false
+   },
+   {
+    "postcode": "60526",
+    "services": 3,
+    "visits": 2,
+    "customers": 1,
+    "names": "CHRIS OLSEN",
+    "billing_only": false
+   },
+   {
+    "postcode": "60527",
+    "services": 416,
+    "visits": 94,
+    "customers": 8,
+    "names": "ANN GRUBE, CONSTRUCTION AND GENERAL LABORER'S DISTRIC COUNCIL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60532",
+    "services": 591,
+    "visits": 162,
+    "customers": 3,
+    "names": "J APONTE AND ASSOCIATES, MOLEX, LLC",
+    "billing_only": false
+   },
+   {
+    "postcode": "60534",
+    "services": 62,
+    "visits": 9,
+    "customers": 1,
+    "names": "VILLAGE OF LYONS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60540",
+    "services": 21,
+    "visits": 11,
+    "customers": 1,
+    "names": "UNIVERSITY OF CHICAGO SCHOOL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60546",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "SINGLE INVOICE CUSTOMER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60555",
+    "services": 2,
+    "visits": 1,
+    "customers": 1,
+    "names": "BRIAN MCKILLIP",
+    "billing_only": false
+   },
+   {
+    "postcode": "60559",
+    "services": 17,
+    "visits": 9,
+    "customers": 4,
+    "names": "BALDWIN RICHARDSON FOODS, JLL FACILITIES WESTMONT",
+    "billing_only": false
+   },
+   {
+    "postcode": "60560",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "BETHANY GENENBACHER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60561",
+    "services": 15,
+    "visits": 6,
+    "customers": 2,
+    "names": "CAREY NEWSOME, UNIVERSITY OF CHICAGO MEDICINE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60563",
+    "services": 54,
+    "visits": 40,
+    "customers": 7,
+    "names": "ALLERVIE, CHICAGO HEADACHE CENTER AND RESEARCH INSTITUTE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60564",
+    "services": 3,
+    "visits": 2,
+    "customers": 2,
+    "names": "GINA SPARKS/ROCCO SALIVIOLA, OUTSIDE LEGAL COUNSEL, LTD.",
+    "billing_only": false
+   },
+   {
+    "postcode": "60565",
+    "services": 28,
+    "visits": 27,
+    "customers": 3,
+    "names": "LEONARD THOMAS, THERESA TINKER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60601",
+    "services": 423,
+    "visits": 204,
+    "customers": 31,
+    "names": "AFTER SCHOOL MATTERS, AMATA",
+    "billing_only": false
+   },
+   {
+    "postcode": "60602",
+    "services": 261,
+    "visits": 117,
+    "customers": 26,
+    "names": "AMATA, ASIAN HEALTH COALITION",
+    "billing_only": false
+   },
+   {
+    "postcode": "60603",
+    "services": 280,
+    "visits": 152,
+    "customers": 13,
+    "names": "BEACON CAPITAL PARTNERS, CHANNING CAPITAL MANAGEMENT LLC",
+    "billing_only": false
+   },
+   {
+    "postcode": "60604",
+    "services": 125,
+    "visits": 62,
+    "customers": 8,
+    "names": "ARAMI LAW, DANIELS SHARPSMART",
+    "billing_only": false
+   },
+   {
+    "postcode": "60605",
+    "services": 119,
+    "visits": 49,
+    "customers": 8,
+    "names": "ASIAN HEALTH COALITION, CHICAGO HOUSING AUTHORITY",
+    "billing_only": false
+   },
+   {
+    "postcode": "60606",
+    "services": 1792,
+    "visits": 341,
+    "customers": 42,
+    "names": "3RED Partners, AMATA",
+    "billing_only": false
+   },
+   {
+    "postcode": "60607",
+    "services": 1470,
+    "visits": 265,
+    "customers": 22,
+    "names": "ACCESS ONE, ALPHAGRAPHICS...WEST LOOP",
+    "billing_only": false
+   },
+   {
+    "postcode": "60608",
+    "services": 412,
+    "visits": 91,
+    "customers": 10,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, CHICAGO DEPARTMENT OF HEALTH",
+    "billing_only": false
+   },
+   {
+    "postcode": "60609",
+    "services": 476,
+    "visits": 151,
+    "customers": 19,
+    "names": "11TH WARD DEMOCRATIC PARTY, AAM METAL FORMING",
+    "billing_only": false
+   },
+   {
+    "postcode": "60610",
+    "services": 52,
+    "visits": 45,
+    "customers": 11,
+    "names": "1500 LSD, 18TH DISTRICT NEAR NORTH",
+    "billing_only": false
+   },
+   {
+    "postcode": "60611",
+    "services": 830,
+    "visits": 177,
+    "customers": 20,
+    "names": "860 NORTH LAKE SHORE DRIVE TRUST, ARENA PRIVATE WEALTH",
+    "billing_only": false
+   },
+   {
+    "postcode": "60612",
+    "services": 52,
+    "visits": 27,
+    "customers": 5,
+    "names": "CHICAGO BLACKHAWKS, CHICAGO BULLS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60613",
+    "services": 7,
+    "visits": 4,
+    "customers": 3,
+    "names": "CENTER ON HALSTED, HARVEST INVESTMENTS, LTD.",
+    "billing_only": false
+   },
+   {
+    "postcode": "60614",
+    "services": 90,
+    "visits": 65,
+    "customers": 7,
+    "names": "DEB ZALUDA, DEPAUL UNIVERSITY",
+    "billing_only": false
+   },
+   {
+    "postcode": "60615",
+    "services": 341,
+    "visits": 98,
+    "customers": 7,
+    "names": "HAUN SAUSSY, LARABIDA CHILDREN'S HOSPITAL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60616",
+    "services": 383,
+    "visits": 141,
+    "customers": 9,
+    "names": "ARRIVE LUXERY COMMUNITIES., CHICAGO SKY",
+    "billing_only": false
+   },
+   {
+    "postcode": "60617",
+    "services": 55,
+    "visits": 14,
+    "customers": 4,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, FOODLINER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60618",
+    "services": 15,
+    "visits": 7,
+    "customers": 4,
+    "names": "DEPAUL PREP, FETTES LOVE AND SIEBEN PLUMBING",
+    "billing_only": false
+   },
+   {
+    "postcode": "60619",
+    "services": 6,
+    "visits": 6,
+    "customers": 4,
+    "names": "C AND S FINANCIAL INC, FERRIS WALTERS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60620",
+    "services": 26,
+    "visits": 13,
+    "customers": 3,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, AUBURN GRESHAM DEVELOPMENT CORPORATION",
+    "billing_only": false
+   },
+   {
+    "postcode": "60621",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "ANGELL CAMPBELL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60622",
+    "services": 28,
+    "visits": 22,
+    "customers": 8,
+    "names": "ACTIVE INSURANCE, BELMONT BANK WICKER PARK",
+    "billing_only": false
+   },
+   {
+    "postcode": "60623",
+    "services": 56,
+    "visits": 31,
+    "customers": 2,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, CHILD LINK",
+    "billing_only": false
+   },
+   {
+    "postcode": "60624",
+    "services": 40,
+    "visits": 12,
+    "customers": 1,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK",
+    "billing_only": false
+   },
+   {
+    "postcode": "60625",
+    "services": 1,
+    "visits": 1,
+    "customers": 1,
+    "names": "CHAR MUFFITT",
+    "billing_only": false
+   },
+   {
+    "postcode": "60626",
+    "services": 37,
+    "visits": 19,
+    "customers": 1,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK",
+    "billing_only": false
+   },
+   {
+    "postcode": "60628",
+    "services": 24,
+    "visits": 14,
+    "customers": 5,
+    "names": "CORNERSTONE RECOVERING COMMUNITY, METRA",
+    "billing_only": false
+   },
+   {
+    "postcode": "60629",
+    "services": 40,
+    "visits": 16,
+    "customers": 2,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, KNAFL INSURANCE AGENCY",
+    "billing_only": false
+   },
+   {
+    "postcode": "60630",
+    "services": 26,
+    "visits": 22,
+    "customers": 4,
+    "names": "JENNIFER GUIMOND-QUIGLEY ATTORNEY AT LAW, LIBERTY HOME HEALTH",
+    "billing_only": false
+   },
+   {
+    "postcode": "60631",
+    "services": 14,
+    "visits": 10,
+    "customers": 5,
+    "names": "CONSUL GENERAL OF EL SALVADOR, CRESCENT CLEANING",
+    "billing_only": false
+   },
+   {
+    "postcode": "60632",
+    "services": 37,
+    "visits": 18,
+    "customers": 4,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, CHICAGO DEPARTMENT OF HEALTH",
+    "billing_only": false
+   },
+   {
+    "postcode": "60634",
+    "services": 110,
+    "visits": 54,
+    "customers": 3,
+    "names": "BELMONT BANK AND TRUST WEST, SINGLE INVOICE CUSTOMER",
+    "billing_only": false
+   },
+   {
+    "postcode": "60636",
+    "services": 3,
+    "visits": 2,
+    "customers": 1,
+    "names": "SHILOH BAPTIST CHURCH",
+    "billing_only": false
+   },
+   {
+    "postcode": "60637",
+    "services": 2188,
+    "visits": 1246,
+    "customers": 9,
+    "names": "1700 CONDOS, ACCESS COMMUNITY HEALTH NETWORK",
+    "billing_only": false
+   },
+   {
+    "postcode": "60638",
+    "services": 155,
+    "visits": 39,
+    "customers": 4,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, CENTRAL CLEARING DRUGS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60639",
+    "services": 32,
+    "visits": 11,
+    "customers": 1,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK",
+    "billing_only": false
+   },
+   {
+    "postcode": "60640",
+    "services": 4,
+    "visits": 4,
+    "customers": 4,
+    "names": "CHICAGO DEPARTMENT OF HEALTH, GABRIELLA CLEVELAND",
+    "billing_only": false
+   },
+   {
+    "postcode": "60641",
+    "services": 39,
+    "visits": 16,
+    "customers": 7,
+    "names": "AFTER SCHOOL MATTERS, FARMERS INSURANCE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60642",
+    "services": 26,
+    "visits": 20,
+    "customers": 6,
+    "names": "ANTONIA BELTRAN, BAUM REALTY GROUP",
+    "billing_only": false
+   },
+   {
+    "postcode": "60643",
+    "services": 197,
+    "visits": 87,
+    "customers": 4,
+    "names": "INGALLS HOSPITAL, MOORE SMILES OF BEVERLY",
+    "billing_only": false
+   },
+   {
+    "postcode": "60644",
+    "services": 12,
+    "visits": 12,
+    "customers": 1,
+    "names": "PREVENTION PARTNERSHIP",
+    "billing_only": false
+   },
+   {
+    "postcode": "60646",
+    "services": 38,
+    "visits": 9,
+    "customers": 5,
+    "names": "CHICAGO DEPARTMENT OF HEALTH, IMPERIAL REALTY COMPANY",
+    "billing_only": false
+   },
+   {
+    "postcode": "60647",
+    "services": 78,
+    "visits": 30,
+    "customers": 5,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, BENJAMIN KOPPEL AND ASSOCIATES",
+    "billing_only": false
+   },
+   {
+    "postcode": "60649",
+    "services": 717,
+    "visits": 68,
+    "customers": 4,
+    "names": "ALISA STARKS, LAKESIDE ALLIANCE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60651",
+    "services": 23,
+    "visits": 20,
+    "customers": 1,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK",
+    "billing_only": false
+   },
+   {
+    "postcode": "60652",
+    "services": 7,
+    "visits": 5,
+    "customers": 3,
+    "names": "BARBARA BROWDER, CHICAGO DEPARTMENT OF HEALTH",
+    "billing_only": false
+   },
+   {
+    "postcode": "60653",
+    "services": 173,
+    "visits": 53,
+    "customers": 6,
+    "names": "CHICAGO POLICE DEPARTMENT, DELBERT SIMS",
+    "billing_only": false
+   },
+   {
+    "postcode": "60654",
+    "services": 183,
+    "visits": 46,
+    "customers": 11,
+    "names": "ACCUITY, AFLAC CHICAGO/ENROLLWELL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60655",
+    "services": 4,
+    "visits": 3,
+    "customers": 2,
+    "names": "19TH WARD OFFICE, LIZ KNEZOVICH",
+    "billing_only": false
+   },
+   {
+    "postcode": "60656",
+    "services": 7,
+    "visits": 7,
+    "customers": 1,
+    "names": "UNITEHERE, LOCAL 1",
+    "billing_only": false
+   },
+   {
+    "postcode": "60657",
+    "services": 60,
+    "visits": 52,
+    "customers": 12,
+    "names": "ADVANCED SPINE AND SPORT CARE, CHICAGO HEADACHE CENTER AND RESEARCH INSTITUTE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60659",
+    "services": 5,
+    "visits": 5,
+    "customers": 3,
+    "names": "ANDERSON LAW OFFICE PC, BRAVIANT",
+    "billing_only": false
+   },
+   {
+    "postcode": "60660",
+    "services": 259,
+    "visits": 60,
+    "customers": 3,
+    "names": "MISERICORDIA HOME, NATIONAL FUTURES ASSOCIATION",
+    "billing_only": false
+   },
+   {
+    "postcode": "60661",
+    "services": 98,
+    "visits": 49,
+    "customers": 10,
+    "names": "16 ON CENTER, BISCHOFF PARTNERS, LLC",
+    "billing_only": false
+   },
+   {
+    "postcode": "60706",
+    "services": 41,
+    "visits": 16,
+    "customers": 2,
+    "names": "HARLEM IRVING COMPANIES, JP FINANCIAL GROUP",
+    "billing_only": false
+   },
+   {
+    "postcode": "60707",
+    "services": 11,
+    "visits": 9,
+    "customers": 3,
+    "names": "ANN CAIN, FRANK BARBALACE",
+    "billing_only": false
+   },
+   {
+    "postcode": "60712",
+    "services": 2,
+    "visits": 2,
+    "customers": 1,
+    "names": "OPTIMUM HEALTHCARE SERVICES",
+    "billing_only": false
+   },
+   {
+    "postcode": "60714",
+    "services": 64,
+    "visits": 42,
+    "customers": 2,
+    "names": "GREAT LAKES COCA COLA, MTD FANANCIAL",
+    "billing_only": false
+   },
+   {
+    "postcode": "60803",
+    "services": 4,
+    "visits": 3,
+    "customers": 2,
+    "names": "CHICAGO INTERMODAL, INC, SAMURAI LLC",
+    "billing_only": false
+   },
+   {
+    "postcode": "60804",
+    "services": 56,
+    "visits": 28,
+    "customers": 4,
+    "names": "ACCESS COMMUNITY HEALTH NETWORK, METROPOLITAN WATER RECLAMATION DISTRICT OF CHICAGO",
+    "billing_only": false
+   },
+   {
+    "postcode": "60805",
+    "services": 34,
+    "visits": 18,
+    "customers": 3,
+    "names": "ANCHOR STAFFING, MAYOR KELLEY BURKE SHRED EVENT",
+    "billing_only": false
+   },
+   {
+    "postcode": "60827",
+    "services": 2,
+    "visits": 2,
+    "customers": 2,
+    "names": "JESSICA MCKINLEY, WILLIAM RAGLIN",
+    "billing_only": false
+   },
+   {
+    "postcode": "61350",
+    "services": 7,
+    "visits": 7,
+    "customers": 1,
+    "names": "UNIVERSITY OF CHICAGO SCHOOL",
+    "billing_only": false
+   },
+   {
+    "postcode": "773-5",
+    "services": 2,
+    "visits": 1,
+    "customers": 1,
+    "names": "BILL CONWAY 34TH WARD",
+    "billing_only": false
+   },
+   {
+    "postcode": "847-9",
+    "services": 2,
+    "visits": 1,
+    "customers": 1,
+    "names": "SINGLE INVOICE CUSTOMER",
+    "billing_only": false
    }
   ]
  }
