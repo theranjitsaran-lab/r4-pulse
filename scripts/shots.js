@@ -16,8 +16,9 @@ const label = args.find(a => !a.startsWith('--')) || 'current';
 const only = (args.find(a => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
 const design = args.includes('--design');           // draw the ?design=1 overlay on every shot
 
-// the largest account with a drill in the fixtures, so the customer page is drawn on real orders
-const drill = require('../fixtures/drill.json').data.accounts;
+// the customer page on the account with the most route visits (Citadel apart), so orders, visits,
+// bins and prices are all drawn on real figures
+const drill = require('../fixtures/drill.json').data.accounts.filter(a => a.level1 !== 6714).sort((a, b) => b.visits.length - a.visits.length);
 const SCREENS = [
   { name: 'home',      hash: '#pulse' },
   { name: 'customers', hash: '#customers' },
