@@ -57,7 +57,7 @@ export function lineChart(el, o) {
   const every = compact ? 6 : 3;
   xs.forEach((x, i) => {
     const last = i === xs.length - 1;
-    if (i % every === 0 && xs.length - 1 - i >= every * 0.8 || last) {
+    if (i % every === 0 && xs.length - 1 - i >= every * (compact ? 1 : 0.8) || last) {
       g += `<text class="c-axis" x="${fx(x)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : last ? 'end' : 'middle'}">${xf(x)}</text>`;
     }
   });

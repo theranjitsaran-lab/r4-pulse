@@ -4,6 +4,8 @@
 import { sparkline, money0, moneyK } from '/components/chart.js';
 import { buildMargins } from '/components/margin.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
+import { serviceGaps, storageGaps, CROSS_SELL_DEPTH } from '/components/levers.js';
+import { buildWhitespace, LINES } from '/components/whitespace.js';
 
 const CITADEL = 6714;
 const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under review: delivery days not yet in the volumes
@@ -11,8 +13,9 @@ const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under r
 export const VIEWS = {
   conversations: { label: 'This week', blurb: 'Ten conversations worth having, ranked by what is at stake. Log what you did; the list learns.' },
   main:          { label: 'Main customers', blurb: 'The 20 largest accounts over the last twelve months.' },
+  whitespace:    { label: 'Cross-sell', blurb: 'What each large account buys, and what it doesn\'t buy yet, sized at what comparable accounts spend.' },
   slipping:      { label: 'Slipping', blurb: 'Below their own six-month level for a second month running.' },
-  gaps:          { label: 'Price gaps', blurb: 'Paying under the median for a service, sized by their volume.' },
+  gaps:          { label: 'Price gaps', blurb: 'Paying under the book\'s median for storage or a service, sized by their volume. Home counts half of each gap.' },
   rounds:        { label: 'Missed rate rounds', blurb: 'No rate has moved in two years.' },
   margin:        { label: 'Lowest margin', blurb: 'Revenue less modelled cost to serve, worst first. Route costs are under review.' },
   all:           { label: 'All', blurb: 'Every account with revenue in the last twelve months.' },
@@ -96,20 +99,17 @@ async function rowsFor(view, ser, book) {
   }
   if (view === 'gaps') {
     const PR = await getJson('pricing');
-    const meds = {};
-    for (const code of ['B2', 'B3', 'B6', '01', '20', '25', '30', 'S3', 'S4', 'S6']) {
-      const v = PR.rates.filter(r => r.servcode === code && r.modal_rate > 0 && r.units > 0).map(r => r.modal_rate).sort((a, b) => a - b);
-      if (v.length >= 20) meds[code] = v[Math.floor(v.length / 2)];
+    const sg = serviceGaps(PR), st = storageGaps(PR), by = new Map();
+    for (const a of sg.values()) by.set(a.level1, { level1: a.level1, customer: a.customer, worth: a.worth, why: `${titleCase(a.top.service)}: $${a.top.rate.toFixed(2)} against a $${a.top.med.toFixed(2)} median` });
+    for (const r of st.rows) {
+      const a = by.get(r.level1) || { level1: r.level1, customer: r.customer, worth: 0, why: null };
+      a.worth += r.worth;
+      const sw = `Storage $${r.rate.toFixed(3)} a box against $${r.med.toFixed(3)} on ${Math.round(r.boxes).toLocaleString('en-US')} boxes`;
+      a.why = a.why ? `${sw}; ${a.why}` : sw;
+      by.set(r.level1, a);
     }
-    const best = new Map();
-    for (const r of PR.rates) {
-      if (!meds[r.servcode] || r.level1 === CITADEL || !(r.modal_rate > 0) || r.modal_rate >= meds[r.servcode] || !(r.units > 0)) continue;
-      const worth = (meds[r.servcode] - r.modal_rate) * r.units / 12;
-      const cur = best.get(r.level1);
-      if (!cur || worth > cur.worth) best.set(r.level1, { worth, r, med: meds[r.servcode] });
-    }
-    return [...best.values()].sort((a, b) => b.worth - a.worth).slice(0, 50)
-      .map(g => base(g.r.level1, `${titleCase(g.r.service)}: $${g.r.modal_rate.toFixed(2)} against a $${g.med.toFixed(2)} median · ${moneyK(g.worth)}/mo`, { worth: g.worth, customer: g.r.customer }));
+    return [...by.values()].sort((a, b) => b.worth - a.worth).slice(0, 60)
+      .map(g => base(g.level1, `${g.why} · ${moneyK(g.worth)}/mo at the median`, { worth: g.worth, customer: g.customer }));
   }
   if (view === 'rounds') {
     const CA = await getJson('calls');
@@ -128,6 +128,7 @@ export async function render(main, C, params) {
   injectCss();
   const view = VIEWS[params.view] ? params.view : 'main';
   if (view === 'conversations') return conversations(main, C);
+  if (view === 'whitespace') return whitespace(main, C, params);
   const sort = ['size', 'change', 'margin'].includes(params.sort) ? params.sort : null;
   const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
   const ser = seriesOf(C);
@@ -242,4 +243,78 @@ async function conversations(main, C) {
       card.querySelector('.done-note').textContent = `Logged: ${b.textContent.toLowerCase()}`;
     } catch (e) { card.querySelector('.done-note').textContent = e.message; card.querySelectorAll('button').forEach(x => x.disabled = false); }
   });
+}
+
+// ── Cross-sell: what each account buys, and what it doesn't buy yet ─────────────────────────
+const WS_CSS = `
+.ws .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 6px; max-width: 900px; }
+.ws .grid { display: grid; grid-template-columns: minmax(170px, 1.4fr) repeat(6, minmax(0, 1fr)) 92px; gap: 0 6px; align-items: center; }
+.ws .gh { font-size: 12px; color: var(--ink-3); padding: 0 0 8px; text-align: center; }
+.ws .gh:first-child { text-align: left; } .ws .gh:last-child { text-align: right; }
+.ws .wr { display: contents; }
+.ws .wr > * { border-top: 1px solid var(--rule); padding: 7px 0; min-height: 44px; display: flex; align-items: center; }
+.ws .wr .nm { font-weight: 600; font-size: 14px; line-height: 1.25; color: inherit; text-decoration: none; display: block; padding-top: 10px; }
+.ws .wr .nm small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); }
+.ws .wr .nm:hover { color: var(--brand); }
+.ws .c { justify-content: center; }
+.ws .c span { display: inline-block; min-width: 64px; text-align: center; font-size: 12.5px; font-variant-numeric: tabular-nums; border-radius: 6px; padding: 4px 6px; white-space: nowrap; }
+.ws .c .have { background: color-mix(in srgb, var(--ink) var(--a), var(--surface)); color: var(--ink); }
+.ws .c .have.dark { color: var(--surface); }
+.ws .c .opp { border: 1.5px dashed var(--ink-5); color: var(--ink-2); font-weight: 600; }
+.ws .c .none { color: var(--ink-5); }
+.ws .tot { justify-content: flex-end; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ws .key { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); margin: 10px 0 14px; align-items: center; }
+.ws .key span span { display: inline-block; width: 26px; height: 14px; border-radius: 4px; vertical-align: -3px; margin-right: 6px; }
+.ws .more { margin-top: 10px; border: 0; background: none; color: var(--brand); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; padding: 6px 0; }
+@media (max-width: 760px) {
+  .ws .grid { grid-template-columns: 1fr 1fr; gap: 0 8px; }
+  .ws .gh { display: none; }
+  .ws .wr .nm { grid-column: 1 / -1; padding-top: 14px; border-top: 1px solid var(--rule-3); min-height: 0; }
+  .ws .wr .tot { grid-column: 1 / -1; justify-content: flex-start; border-top: 0; min-height: 0; padding: 2px 0 10px; }
+  .ws .wr .tot::before { content: "Not bought yet: "; font-weight: 400; color: var(--ink-3); margin-right: 4px; }
+  .ws .c { justify-content: space-between; border-top: 0; min-height: 0; padding: 3px 0; font-size: 12.5px; }
+  .ws .c::before { content: attr(data-l); color: var(--ink-3); }
+  .ws .c.nobuy { display: none; }
+}`;
+
+const lc = n => n === 'ITAD' ? n : n.toLowerCase();
+
+async function whitespace(main, C, params) {
+  if (!document.getElementById('ws-css')) { const st = document.createElement('style'); st.id = 'ws-css'; st.textContent = WS_CSS; document.head.appendChild(st); }
+  const M = await getJson('margin');
+  const W = buildWhitespace(M, { exclude: [CITADEL], top: CROSS_SELL_DEPTH });
+  const rows = W.rows.filter(r => r.opp > 0).sort((a, b) => b.opp - a.opp);
+  const maxHave = Math.max(...W.rows.flatMap(r => LINES.map(x => r.cells[x.key].have ? r.cells[x.key].spend : 0)));
+  const top3 = rows.slice(0, 3).map(r => {
+    const best = LINES.map(x => ({ x, c: r.cells[x.key] })).filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp)[0];
+    return `${titleCase(r.customer)} (${lc(best.x.name)}, about ${moneyK(best.c.opp)} a year)`;
+  });
+  const byLine = LINES.map(x => ({ x, v: rows.reduce((t, r) => t + (r.cells[x.key].have ? 0 : r.cells[x.key].opp), 0) })).sort((a, b) => b.v - a.v);
+  const shown = params.all ? rows.length : 40;
+
+  const cell = (r, x) => {
+    const c = r.cells[x.key];
+    if (c.have) { const a = Math.round(8 + 72 * Math.sqrt(c.spend / maxHave)); return `<div class="c" data-l="${esc(x.short || x.name)}"><span class="have ${a > 55 ? 'dark' : ''}" style="--a:${a}%" title="${esc(x.name)}: ${money0(c.spend)} in the last twelve months">${moneyK(c.spend)}</span></div>`; }
+    if (c.opp > 0) return `<div class="c" data-l="${esc(x.short || x.name)}"><span class="opp" title="${esc(c.basis)}">+${moneyK(c.opp)}</span></div>`;
+    return `<div class="c nobuy" data-l="${esc(x.short || x.name)}"><span class="none">—</span></div>`;
+  };
+
+  main.innerHTML = `
+  <div class="cust ws">
+    <h1>Customers</h1>
+    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'whitespace' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    <p class="lede">If the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do, they would spend about <b>${moneyK(W.total)} a year more</b> (${moneyK(W.total / 12)} a month ◇). Most of it is ${lc(byLine[0].x.name)} and ${lc(byLine[1].x.name)}. Start with ${top3.join(', ')}.</p>
+    <div class="key"><span><span style="background:color-mix(in srgb, var(--ink) 30%, var(--surface))"></span>buys it: twelve-month spend, darker is more</span><span><span style="border:1.5px dashed var(--ink-5)"></span>doesn't buy it yet: what comparable accounts spend ◇</span><span>— not sized</span></div>
+    <div class="card">
+      <div class="grid">
+        <div class="gh">Customer</div>${LINES.map(x => `<div class="gh">${esc(x.short || x.name)}</div>`).join('')}<div class="gh">Not bought yet</div>
+        ${rows.slice(0, shown).map(r => `<div class="wr">
+          <a class="nm" href="#customer/${r.level1}">${esc(titleCase(r.customer))}<small>${moneyK(r.total)} a year${r.boxes >= 500 ? ` · ${Math.round(r.boxes).toLocaleString('en-US')} boxes` : ''}</small></a>
+          ${LINES.map(x => cell(r, x)).join('')}
+          <div class="tot">+${moneyK(r.opp)}</div></div>`).join('')}
+      </div>
+      ${rows.length > shown ? `<a class="more" href="#customers?view=whitespace&all=1">Show all ${rows.length} accounts</a>` : ''}
+    </div>
+    <p class="foot">Sized from the last twelve months. Retrieval, delivery and destruction for a storer: the median spend per 1,000 boxes among storers that buy the line. Storage, bins and ITAD: the median share of spend among similar-sized accounts that buy the line as an add-on. Never more than the account spends today. Hover a dashed cell for its basis. Citadel apart.</p>
+  </div>`;
 }
