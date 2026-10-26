@@ -39,3 +39,26 @@ test('overdue boxes: Home and the Overdue boxes list read the same figures', asy
   near(B.overdue.storageLost, O.rows.reduce((t, r) => t + r.lost, 0), 0.01, 'storage lost');
   assert.ok(!O.rows.some(r => r.level1 === 6714), 'Citadel held apart');
 });
+
+test('margin: Home\'s row and the Margin view count the same loss-making accounts and dollars', async () => {
+  const { marginSummary, buildMargins } = await import('../public/components/margin.js');
+  const R = require('./rates');
+  const MS = marginSummary(R, J('margin'), [6714]);
+  // the Margin view's below-cost filter, rebuilt independently from buildMargins
+  const loss = buildMargins(R, J('margin'), { exclude: [6714] }).accounts.filter(a => a.revenue > 1000 && a.margin < 0);
+  assert.equal(MS.losers.length, loss.length, 'accounts');
+  near(MS.lossTotal, -loss.reduce((t, a) => t + a.margin, 0), 0.01, 'dollars');
+  assert.ok(MS.losers.every(a => MS.below.includes(a)), 'every loss-making account is in the below-cost filter');
+});
+
+test('slipping, pace and the bill: each figure shown twice comes from one source', async () => {
+  const { bridge, slippingAccounts, crossSellPace, billNow } = await import('../public/components/levers.js');
+  const P = J('pulse'), PR = J('pricing'), CA = J('calls'), M = J('margin');
+  const B = bridge({ P, PR, CA, M });
+  const slipList = slippingAccounts(P);
+  near((B.steps.concat(B.minor).find(s => s.key === 'slip') || { v: 0 }).v, slipList.reduce((t, d) => t + d.trailing6_mean - d.revenue, 0), 0.01, 'slipping step = list');
+  assert.ok(!slipList.some(d => d.level1 === 6714), 'Citadel held apart');
+  assert.deepEqual(B.pace, crossSellPace(M.history), 'Home and the grid read one pace');
+  const run = P.currentRun.find(r => r.part === 'run');
+  near(billNow(P).core, run.storage + run.service - run.citadel, 0.01, 'bill = run core');
+});

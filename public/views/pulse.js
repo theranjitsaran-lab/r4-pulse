@@ -7,9 +7,9 @@
 //   customers moving: dollars a month against each account's own run, falls and gains.
 import { lineChart, money0, moneyK } from '/components/chart.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
-import { buildMargins } from '/components/margin.js';
+import { marginSummary } from '/components/margin.js';
 import { seriesOf } from '/views/customers.js';
-import { bridge, TARGET, CITADEL } from '/components/levers.js';
+import { bridge, billNow, TARGET, CITADEL } from '/components/levers.js';
 
 const CSS = `
 .home { display: grid; gap: 14px; }
@@ -114,8 +114,7 @@ export async function render(main, P) {
   // ── the month ──
   const last = P.monthly[P.monthly.length - 1];                 // the latest posted month
   const billMonth = addMonths(last.month, 1);                     // the bill in the current run
-  const run = P.currentRun.find(r => r.part === 'run');
-  const runCore = run ? run.storage + run.service - run.citadel : null;
+  const { run, core: runCore } = billNow(P);
   const workMonth = A.latestDone.slice(0, 8) + '01';              // the month being worked now
   const now = cumulative(A, workMonth), before = cumulative(A, addMonths(workMonth, -1));
   const nowDays = now.length, nowDone = nowDays ? now[nowDays - 1].y : 0;
@@ -135,11 +134,7 @@ export async function render(main, P) {
   const stepRows = B.steps.map(s => { const from = cum; cum += s.v; return { ...s, from }; });
 
   // ── margin: the lines we can cost with confidence, and the accounts that cost more than they pay ──
-  const book = buildMargins(R, M, { exclude: [CITADEL] });
-  const solid = Object.entries(book.families).filter(([f, v]) => ['storage', 'shred', 'labour', 'itad'].includes(f) && v.revenue > 0);
-  const solidPc = 1 - solid.reduce((t, [, v]) => t + v.cost, 0) / solid.reduce((t, [, v]) => t + v.revenue, 0);
-  const losers = book.accounts.filter(a => a.revenue > 1000 && a.margin < 0);
-  const lossTotal = -losers.reduce((t, a) => t + a.margin, 0);
+  const { solidPc, losers, lossTotal } = marginSummary(R, M, [CITADEL]);
 
   const mv = movers(C), mvMax = Math.max(1, ...mv.falls.map(m => -m.d), ...mv.gains.map(m => m.d));
   const hour = new Date().getHours();

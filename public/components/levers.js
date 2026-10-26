@@ -62,6 +62,19 @@ export function overdueBoxes(CA, PR) {
   return { rows, perBox, med, boxes: sum('boxes'), oneOff: sum('once'), storageLost: sum('lost'), accounts: rows.length };
 }
 
+// This month's bill, already known: the run not yet posted (this month's storage, last month's
+// work), Citadel apart.
+export function billNow(P) {
+  const run = P.currentRun.find(r => r.part === 'run');
+  return { run, core: run ? run.storage + run.service - run.citadel : null };
+}
+
+// Accounts below their own six-month level for a second month, Citadel apart: the bridge's slipping
+// step and the Slipping list.
+export function slippingAccounts(P) {
+  return P.downTwoMonths.filter(d => d.level1 !== CITADEL && d.trailing6_mean > d.revenue);
+}
+
 // R4's own cross-sell record from margin.history: accounts that already bought from R4 and later
 // started a line (after their first three months and the data's first three). The last twelve
 // months against the twelve before, with first-year spend (part-year for recent starts).
@@ -87,7 +100,7 @@ export function bridge({ P, PR, CA, M }) {
   const rounds = CA.filter(c => c.not_raised_2y && c.level1 !== CITADEL && !sg.has(c.level1));
   const roundsV = rounds.reduce((t, c) => t + c.service, 0) * TYPICAL_RISE / 12;
 
-  const slip = P.downTwoMonths.filter(d => d.level1 !== CITADEL && d.trailing6_mean > d.revenue);
+  const slip = slippingAccounts(P);
   const slipV = slip.reduce((t, d) => t + d.trailing6_mean - d.revenue, 0);
 
   const ws = buildWhitespace(M, { exclude: [CITADEL], top: CROSS_SELL_DEPTH });

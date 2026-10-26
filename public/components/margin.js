@@ -48,6 +48,24 @@ export function buildMargins(R, M, opts = {}) {
   return { accounts, families };
 }
 
+// The book's margin as Home and the Margin view show it, from one place so they always agree:
+// accounts over $1,000 a year (Citadel apart) with their margin %, a flag when route costs are over
+// half their cost (under review), the margin on the lines costed with confidence, and the accounts
+// that cost more to serve than they pay.
+const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];
+const SOLID_FAMILIES = ['storage', 'shred', 'labour', 'itad'];
+export function marginSummary(R, M, exclude = [6714]) {
+  const book = buildMargins(R, M, { exclude });
+  const accounts = book.accounts.filter(a => a.revenue > 1000).map(m => {
+    const routeCost = ROUTE_FAMILIES.reduce((t, f) => t + ((m.fam[f] || {}).cost || 0), 0);
+    return { ...m, pc: m.revenue > 0 ? m.margin / m.revenue : null, review: m.cost > 0 && routeCost > 0.5 * m.cost };
+  });
+  const solid = Object.entries(book.families).filter(([f, v]) => SOLID_FAMILIES.includes(f) && v.revenue > 0);
+  const solidPc = 1 - solid.reduce((t, [, v]) => t + v.cost, 0) / solid.reduce((t, [, v]) => t + v.revenue, 0);
+  const losers = accounts.filter(a => a.margin < 0);
+  return { book, accounts, solidPc, losers, lossTotal: -losers.reduce((t, a) => t + a.margin, 0), below: accounts.filter(a => a.pc < 0.15) };
+}
+
 // The cost-to-serve results behind one account's cost, by family: { family: [costToServe result] }.
 // buildMargins sums them; the customer page shows their lines as the working.
 export function accountCosts(R, a, lines) {

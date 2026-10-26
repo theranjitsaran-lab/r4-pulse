@@ -2,9 +2,9 @@
 // the customer page. Each row: name and why it is listed, a 24-month sparkline, twelve-month
 // revenue, change on the twelve months before, and gross margin (◇ modelled).
 import { sparkline, money0, moneyK } from '/components/chart.js';
-import { buildMargins } from '/components/margin.js';
+import { buildMargins, marginSummary } from '/components/margin.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
-import { serviceGaps, storageGaps, overdueBoxes, crossSellPace, CROSS_SELL_DEPTH } from '/components/levers.js';
+import { serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippingAccounts, CROSS_SELL_DEPTH } from '/components/levers.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 
@@ -96,7 +96,7 @@ async function rowsFor(view, ser, book) {
   }
   if (view === 'slipping') {
     const P = await getJson('pulse');
-    return P.downTwoMonths.filter(d => d.level1 !== CITADEL && d.trailing6_mean > d.revenue)
+    return slippingAccounts(P)
       .map(d => base(d.level1, `${money0(d.revenue)} last month against its own ${money0(d.trailing6_mean)}`, { worth: d.trailing6_mean - d.revenue }));
   }
   if (view === 'gaps') {
@@ -438,7 +438,6 @@ const MV_CSS = `
   .mv2 .rw .rv, .mv2 .rw .cs { display: none; }
 }`;
 
-const MARGIN_ROUTE = ['bin', 'handling', 'movement'];
 function marginReason(a, m) {
   const top = Object.entries(m.fam).filter(([f, v]) => v.cost > 0).sort((x, y) => y[1].cost - x[1].cost)[0];
   if (!top) return 'no modelled cost: fees and charges only';
@@ -456,15 +455,11 @@ async function marginView(main, C, params) {
   if (!document.getElementById('mv2-css')) { const st = document.createElement('style'); st.id = 'mv2-css'; st.textContent = MV_CSS; document.head.appendChild(st); }
   const filter = ['thin', 'below'].includes(params.f) ? params.f : 'all';
   const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
-  const book = buildMargins(R, M, { exclude: [CITADEL] });
+  const MS = marginSummary(R, M, [CITADEL]);
   const acct = new Map(M.accounts.map(a => [a.level1, a]));
-  const all = book.accounts.filter(a => a.revenue > 1000).map(m => {
-    const pc = m.revenue > 0 ? m.margin / m.revenue : null;
-    const routeCost = MARGIN_ROUTE.reduce((t, f) => t + ((m.fam[f] || {}).cost || 0), 0);
-    return { ...m, pc, review: m.cost > 0 && routeCost > 0.5 * m.cost, why: marginReason(acct.get(m.level1) || {}, m) };
-  });
+  const all = MS.accounts.map(m => ({ ...m, why: marginReason(acct.get(m.level1) || {}, m) }));
   const rows = all.filter(r => filter === 'all' || (filter === 'thin' ? r.pc >= 0.15 && r.pc < 0.5 : r.pc < 0.15)).sort((a, b) => a.margin - b.margin);
-  const below = all.filter(r => r.pc < 0.15), belowLoss = below.filter(r => r.margin < 0);
+  const below = MS.below, belowLoss = MS.losers;
   const visitHeavy = below.filter(r => r.review).length;
   const sum = k => rows.reduce((t, r) => t + r[k], 0);
   const link = f => `#customers?view=margin${f !== 'all' ? '&f=' + f : ''}`;
@@ -474,7 +469,7 @@ async function marginView(main, C, params) {
   <div class="cust mv2">
     <h1>Customers</h1>
     <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'margin' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
-    <p class="lede">${below.length} accounts keep under 15% of what they pay after the cost to serve them ◇, and ${belowLoss.length} of them cost more than they pay, ${moneyK(-belowLoss.reduce((t, r) => t + r.margin, 0))} a year between them. ${visitHeavy} of the ${below.length} are visit-heavy (bins, deliveries, retrievals), where route costs are still under review; the rest are priced too low for the work.</p>
+    <p class="lede">${below.length} accounts keep under 15% of what they pay after the cost to serve them ◇, and ${belowLoss.length} of them cost more than they pay, ${moneyK(MS.lossTotal)} a year between them. ${visitHeavy} of the ${below.length} are visit-heavy (bins, deliveries, retrievals), where route costs are still under review; the rest are priced too low for the work.</p>
     <div class="tools"><div class="seg">${[['all', 'All'], ['thin', 'Thin, 15–50%'], ['below', 'Below cost, under 15%']].map(([k, l]) => `<a href="${link(k)}" class="${k === filter ? 'on' : ''}">${l}</a>`).join('')}</div></div>
     <div class="card">
       <div class="hd"><span>Customer</span><span>Revenue</span><span>Cost ◇</span><span>Left</span><span>Margin</span><span></span></div>
