@@ -46,6 +46,22 @@ export function storageGaps(PR) {
   return { med, rows };
 }
 
+// Boxes past their retention review, per account: destruction bills once at the book's median R3
+// fee per standard box; each destroyed box stops paying storage at the account's own latest rate,
+// else the box-weighted median. Home and the Overdue boxes list both read this.
+export function overdueBoxes(CA, PR) {
+  const r3 = PR.rates.filter(r => r.servcode === 'R3' && r.modal_rate > 0).map(r => r.modal_rate).sort((a, b) => a - b);
+  const perBox = r3.length ? r3[r3.length >> 1] : null;
+  const med = storageGaps(PR).med, rate = new Map(PR.storage.map(r => [r.level1, r.rate_per_box]));
+  const rows = CA.filter(c => c.level1 !== CITADEL && c.boxes_review_overdue > 0).map(c => {
+    const boxes = c.boxes_review_overdue, own = rate.get(c.level1), r = own > 0 ? own : med;
+    const once = perBox * boxes, lost = r * boxes;
+    return { level1: c.level1, customer: c.customer, boxes, rate: r, own: own > 0, once, lost, months: lost > 0 ? once / lost : null };
+  }).sort((a, b) => b.boxes - a.boxes);
+  const sum = k => rows.reduce((t, r) => t + r[k], 0);
+  return { rows, perBox, med, boxes: sum('boxes'), oneOff: sum('once'), storageLost: sum('lost'), accounts: rows.length };
+}
+
 export function bridge({ P, PR, CA, M }) {
   const six = P.monthly.slice(-6);
   const today = six.reduce((t, m) => t + m.core, 0) / six.length;
@@ -77,16 +93,11 @@ export function bridge({ P, PR, CA, M }) {
   steps.splice(0, steps.length, ...steps.filter(x => x.v >= 1000));
 
   const levers = steps.reduce((t, x) => t + x.v, 0);
-  // Boxes past their retention review: destruction is paid once, and each destroyed box stops paying
-  // storage every month after. Both sides are shown; neither is stacked in the bridge.
-  const overdue = CA.filter(c => c.level1 !== CITADEL && c.boxes_review_overdue > 0);
-  const boxes = overdue.reduce((t, c) => t + c.boxes_review_overdue, 0);
-  const r3 = PR.rates.filter(r => r.servcode === 'R3' && r.modal_rate > 0).map(r => r.modal_rate).sort((a, b) => a - b);
-  const perBox = r3.length ? r3[r3.length >> 1] : null;
+  const ob = overdueBoxes(CA, PR);
   return {
     today, sixFrom: six[0].month, sixTo: six[six.length - 1].month,
     steps, minor, levers, newBusiness: Math.max(0, TARGET - today - levers),
-    overdue: { accounts: overdue.length, boxes, perBox, oneOff: perBox ? boxes * perBox : null, storageLost: boxes * st.med },
+    overdue: ob,
     whitespace: ws, serviceGaps: sg, storageGaps: st,
   };
 }

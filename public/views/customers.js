@@ -4,7 +4,7 @@
 import { sparkline, money0, moneyK } from '/components/chart.js';
 import { buildMargins } from '/components/margin.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
-import { serviceGaps, storageGaps, CROSS_SELL_DEPTH } from '/components/levers.js';
+import { serviceGaps, storageGaps, overdueBoxes, CROSS_SELL_DEPTH } from '/components/levers.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 
@@ -18,6 +18,7 @@ export const VIEWS = {
   slipping:      { label: 'Slipping', blurb: 'Below their own six-month level for a second month running.' },
   gaps:          { label: 'Price gaps', blurb: 'Paying under the book\'s median for storage or a service, sized by their volume. Home counts half of each gap.' },
   rounds:        { label: 'Missed rate rounds', blurb: 'No rate has moved in two years.' },
+  destruction:   { label: 'Overdue boxes', blurb: 'Boxes past their retention review, by account: what destruction bills once, and the storage it ends.' },
   margin:        { label: 'Margin', blurb: 'Every account: revenue less what it costs to serve, worst first.' },
   all:           { label: 'All', blurb: 'Every account with revenue in the last twelve months.' },
 };
@@ -132,6 +133,7 @@ export async function render(main, C, params) {
   if (view === 'whitespace') return whitespace(main, C, params);
   if (view === 'main') return monthGrid(main, C, params);
   if (view === 'margin') return marginView(main, C, params);
+  if (view === 'destruction') return destructionView(main, C, params);
   const sort = ['size', 'change', 'margin'].includes(params.sort) ? params.sort : null;
   const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
   const ser = seriesOf(C);
@@ -483,5 +485,61 @@ async function marginView(main, C, params) {
       ${rows.length > shown ? `<a class="more" style="display:inline-block;margin-top:10px;color:var(--brand);font-weight:500;text-decoration:none" href="${link(filter)}&n=all">Show all ${rows.length}</a>` : ''}
     </div>
     <p class="foot">Twelve months. Cost to serve ◇ from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Tap an account for its lines, then its orders.</p>
+  </div>`;
+}
+
+// ── Overdue boxes: destruction once against the storage it ends ──────────────────────────────
+// Boxes past their retention review (storage_retention status I, from calls.json). Destruction is
+// priced at the book's median shredding fee per standard box (R3); the storage each destroyed box
+// stops paying is the account's own latest rate per box, else the box-weighted median.
+const DV_CSS = `
+.dv .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 14px; max-width: 920px; }
+.dv .hd, .dv .rw { display: grid; grid-template-columns: minmax(0, 1fr) 110px 120px 130px 100px 14px; gap: 14px; align-items: center; }
+.dv .hd { font-size: 12px; color: var(--ink-3); padding: 0 4px 8px; }
+.dv .hd span:nth-child(n+2) { text-align: right; }
+.dv .rw { padding: 10px 4px; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; }
+.dv .rw:hover { background: var(--well); }
+.dv .rw .nm { font-weight: 600; line-height: 1.3; }
+.dv .rw .nm small { display: block; font-weight: 400; font-size: var(--fs-label); color: var(--ink-3); margin-top: 2px; }
+.dv .rw .r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dv .rw .go { color: var(--ink-5); font-size: 20px; }
+.dv .share { display: block; height: 6px; background: var(--well-2); border-radius: 3px; margin-top: 6px; max-width: 220px; position: relative; overflow: hidden; }
+.dv .share i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink-3); border-radius: 3px; }
+.dv .tot { border-top: 1px solid var(--rule-ink); font-weight: 700; }
+@media (max-width: 760px) {
+  .dv .hd { display: none; }
+  .dv .rw { grid-template-columns: minmax(0, 1fr) 92px 14px; grid-template-areas: "nm bx go" "nm once go"; gap: 2px 10px; }
+  .dv .rw .nm { grid-area: nm; } .dv .rw .bx { grid-area: bx; } .dv .rw .once { grid-area: once; font-size: 12.5px; color: var(--ink-3); } .dv .rw .go { grid-area: go; }
+  .dv .rw .lost, .dv .rw .mo { display: none; }
+}`;
+
+async function destructionView(main, C, params) {
+  if (!document.getElementById('dv-css')) { const st = document.createElement('style'); st.id = 'dv-css'; st.textContent = DV_CSS; document.head.appendChild(st); }
+  const [CA, PR, M] = await Promise.all([getJson('calls'), getJson('pricing'), getJson('margin')]);
+  const ob = overdueBoxes(CA, PR), perBox = ob.perBox, st = { med: ob.med };
+  const stored = new Map(M.accounts.map(a => [a.level1, a.boxes]));
+  const rows = ob.rows.map(r => ({ ...r, total: stored.get(r.level1) || 0 }));
+  const T = k => rows.reduce((t, r) => t + r[k], 0);
+  const top = rows[0];
+  const medMonths = perBox / st.med;
+  const shown = params.n === 'all' ? rows.length : 50;
+
+  main.innerHTML = `
+  <div class="cust dv">
+    <h1>Customers</h1>
+    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'destruction' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    <p class="lede">${Math.round(T('boxes')).toLocaleString('en-US')} boxes across ${rows.length} accounts are past their retention review. Destroying them would bill about <b>${moneyK(T('once'))} once</b>, at the book's median $${perBox.toFixed(2)} a box, and end about <b>${moneyK(T('lost'))} a month</b> of storage. At the median storage rate one destruction equals ${Math.round(medMonths)} months of storage, so the strongest cases are the accounts paying least to store${top ? `, starting with ${esc(titleCase(top.customer))}: ${Math.round(top.boxes).toLocaleString('en-US')} overdue boxes at $${top.rate.toFixed(3)} a box` : ''}.</p>
+    <div class="card">
+      <div class="hd"><span>Customer</span><span>Overdue boxes</span><span>Destruction, once</span><span>Storage it ends, a month</span><span>Months it equals</span><span></span></div>
+      ${rows.slice(0, shown).map(r => `<a class="rw" href="#customer/${r.level1}">
+        <span class="nm">${esc(titleCase(r.customer))}<small>${r.total ? `${Math.round(r.boxes / Math.max(r.boxes, r.total) * 100)}% of ${Math.round(r.total).toLocaleString('en-US')} boxes stored · ` : ''}$${r.rate.toFixed(3)} a box${r.own ? '' : ' (book median)'}</small>${r.total ? `<span class="share"><i style="width:${Math.min(100, r.boxes / r.total * 100)}%"></i></span>` : ''}</span>
+        <span class="r bx">${Math.round(r.boxes).toLocaleString('en-US')}</span>
+        <span class="r once">${moneyK(r.once)}<span class="sub" style="display:none"> once</span></span>
+        <span class="r lost">−${moneyK(r.lost)}</span>
+        <span class="r mo">${r.months == null ? '—' : Math.round(r.months)}</span><span class="go">›</span></a>`).join('')}
+      <div class="rw tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r bx">${Math.round(T('boxes')).toLocaleString('en-US')}</span><span class="r once">${moneyK(T('once'))}</span><span class="r lost">−${moneyK(T('lost'))}</span><span class="r mo">${Math.round(T('once') / T('lost'))}</span><span></span></div>
+      ${rows.length > shown ? `<a style="display:inline-block;margin-top:10px;color:var(--brand);font-weight:500;text-decoration:none" href="#customers?view=destruction&n=all">Show all ${rows.length}</a>` : ''}
+    </div>
+    <p class="foot">Overdue: storage_retention status I with a review date passed. Destruction at the median R3 shredding fee per standard box; storage at the account's latest rate per box (storage_rate_hist), else the box-weighted median. Destruction needs the client's sign-off on the retention list. Citadel apart.</p>
   </div>`;
 }

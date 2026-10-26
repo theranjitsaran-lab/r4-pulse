@@ -30,3 +30,12 @@ test('bridge: cross-sell step is the cross-sell grid; price step is half the pri
   near(step('price'), gaps / 2, 0.01, 'price');
   near(B.today + B.levers + B.newBusiness, Math.max(1e6, B.today + B.levers), 0.01, 'bridge closes at $1.0m');
 });
+
+test('overdue boxes: Home and the Overdue boxes list read the same figures', async () => {
+  const { bridge, overdueBoxes } = await import('../public/components/levers.js');
+  const P = J('pulse'), PR = J('pricing'), CA = J('calls'), M = J('margin');
+  const B = bridge({ P, PR, CA, M }), O = overdueBoxes(CA, PR);
+  near(B.overdue.boxes, O.rows.reduce((t, r) => t + r.boxes, 0), 0.01, 'boxes');
+  near(B.overdue.storageLost, O.rows.reduce((t, r) => t + r.lost, 0), 0.01, 'storage lost');
+  assert.ok(!O.rows.some(r => r.level1 === 6714), 'Citadel held apart');
+});
