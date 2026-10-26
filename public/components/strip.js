@@ -29,8 +29,10 @@ export function stripStats(values) {
   return {
     n: s.length, min: s[0], max: s[s.length - 1], weighted,
     p10: qf(.10), p25: qf(.25), median: qf(.5), p75: qf(.75), p90: qf(.90),
-    below: weighted ? (p) => pts.filter(x => x.v < p).reduce((t, x) => t + (x.w || 0), 0) / (total || 1)
-                    : (p) => s.filter(v => v < p).length / (s.length || 1),
+    // share of the book below a price, with accounts at exactly that price counted half on each side,
+    // so the median itself reads "cheaper than half", not "cheaper than 91%" when many sit on it
+    below: weighted ? (p) => pts.reduce((t, x) => t + (x.v < p ? 1 : x.v === p ? 0.5 : 0) * (x.w || 0), 0) / (total || 1)
+                    : (p) => s.reduce((t, v) => t + (v < p ? 1 : v === p ? 0.5 : 0), 0) / (s.length || 1),
   };
 }
 
