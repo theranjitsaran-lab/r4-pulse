@@ -14,7 +14,7 @@ export function gapHtml(B, { rows = true } = {}) {
     `<span class="gap-seg ${p.cls}" style="flex-grow:${p.v};--i:${i}"><em>${moneyK(p.v)}</em></span>`).join('')}</div>
     <div class="gap-ends"><span>${moneyK(B.today)} today</span><span>$1.0M</span></div>`;
   if (!rows) return bar;
-  return bar + `<div class="gap-head"><span></span><span></span><span>of the gap</span><span>a month</span><span></span></div><ul class="gap-rows">${parts.map(p => {
+  return bar + `<div class="gap-head"><span></span><span></span><span>share</span><span>a month</span><span></span></div><ul class="gap-rows">${parts.map(p => {
     const inner = `<i class="gap-sw ${p.cls}"></i><span class="gap-t">${esc(p.t)}<small>${esc(p.brief || p.s)}${p.note ? ' · ' + esc(p.note) : ''}${p.who ? ' · ' + esc(p.who) : ''}</small></span>
       <span class="gap-pc">${pc(p.v)}%</span><span class="gap-v">+${moneyK(p.v)}${p.modelled ? ' ◇' : ''}</span>`;
     return `<li>${p.href ? `<a href="${p.href}">${inner}<span class="go">›</span></a>` : `<div>${inner}<span></span></div>`}</li>`;

@@ -17,7 +17,9 @@ to reach. Newest section first.
 | | |
 |---|---|
 | **Source** | r4services.com, read in the browser: logo `6366387.png` (247×100), icon `cropped-6366387-192x192.png`, font Average Sans (Google Fonts, SIL OFL, weight 400 only), green #0e5116 (top bar, buttons) and #38b449 (the mark). The site's blue #2ea3f2 is its theme's default, not R4's, and is not used |
-| **Web font** | Reopened by Theran: Average Sans is allowed, self-hosted, for display text only. The site fakes a bold from its one weight; R4 Pulse does not (`font-synthesis: none`) |
+| **Web font** | Average Sans, self-hosted, for the "Pulse" wordmark and the intro only (Theran, 27 October 2026). Its one light weight made titles and big figures read as body text; they are the system sans at 600 (`--w-head`). No faked bold (`font-synthesis: none`) |
+| **Type scale** | Seven sizes: 12 · 14 · 16 · 20 · 28 · 40 · 64 (`--fs-1` to `--fs-7`), and 46 for Home's figure on a phone. Weights 400 for text, 600 for titles and figures, 500 for labels |
+| **Status colour** | A delta is coloured only at a fifth or more (±20%); smaller moves keep the arrow in ink. Sparklines are ink, with only the latest point coloured. Route work is ink, not green |
 | **Logo** | The everyday barcode logo, not the "30 years" header lockup (a 567 KB screenshot, time-bound). Raster only; ask R4 for the vector and replace the file, nothing else |
 | **Green as text** | #38b449 is 2.7:1 on white: fills, bars and the pulse line only. Text and links use #0e5116 (9.5:1) |
 
