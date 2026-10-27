@@ -89,14 +89,18 @@ html.motion-on .is-in .grow { transform: scaleX(1); transition: transform var(--
 html.motion-on .gap-seg { transform: scaleX(0); transform-origin: left; }
 html.motion-on .is-in .gap-seg { transform: scaleX(1); transition: transform var(--t-slow) var(--ease-out) calc(var(--t-slow) + var(--i) * var(--t-stagger) * 2); }
 .gap-ends { display: flex; justify-content: space-between; font-size: var(--fs-source); color: var(--ink-4); }
-.gap-rows { list-style: none; margin: var(--sp-4) 0 0; padding: 0; }
-.gap-rows a, .gap-rows li > div { display: grid; grid-template-columns: var(--sw) minmax(0, 1fr) auto var(--sp-3); gap: var(--sp-3); align-items: center;
+.gap-rows { list-style: none; margin: 0; padding: 0; }
+.gap-head { margin-top: var(--sp-4); padding-bottom: var(--sp-1); font-size: var(--fs-source); color: var(--ink-3); }
+.gap-head span:nth-child(n+3) { text-align: right; }
+.gap-pc { text-align: right; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.gap-head, .gap-rows a, .gap-rows li > div { display: grid; grid-template-columns: var(--sw) minmax(0, 1fr) calc(var(--u) * 16) calc(var(--u) * 20) var(--sp-3); gap: var(--sp-3); align-items: center;
   min-height: var(--row-h); padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); color: inherit; text-decoration: none; }
 .gap-rows li:first-child > * { border-top: 0; }
+div.gap-head { min-height: 0; border-top: 0; padding: 0 0 var(--sp-1); }
 .gap-rows a:hover { background: var(--well); }
 .gap-sw { width: var(--sw); height: var(--sw); border-radius: var(--r-xs); }
 .gap-t { font-weight: 600; line-height: 1.3; }
-.gap-t small, .gap-v small { display: block; font-weight: 400; font-size: var(--fs-label); color: var(--ink-3); }
+.gap-t small { display: block; font-weight: 400; font-size: var(--fs-label); color: var(--ink-3); }
 .gap-v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .gap-rows .go { color: var(--ink-5); font-size: var(--fs-head); }
 
@@ -144,5 +148,5 @@ html.motion-on .is-in .gap-seg { transform: scaleX(1); transition: transform var
 }
 @media (max-width: 860px) {
   .gap-wide { display: none; }
-  .gap-rows a, .gap-rows li > div { grid-template-columns: var(--sw) minmax(0, 1fr) auto var(--sp-2); gap: var(--sp-2); }
+  .gap-head, .gap-rows a, .gap-rows li > div { grid-template-columns: var(--sw) minmax(0, 1fr) calc(var(--u) * 10) calc(var(--u) * 16) var(--sp-2); gap: var(--sp-2); }
 }

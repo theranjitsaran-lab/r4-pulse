@@ -65,12 +65,12 @@ export async function render(main, PR, params) {
     <div class="main">
       <div id="p-verdict"></div>
       <div class="card"><div class="card-head"><h3 id="p-track-title"></h3><small id="p-track-sub"></small></div><div id="p-track"></div><div class="src" id="p-strip-src"></div></div>
-      <div class="card"><div class="card-head"><h3>What it is worth a year</h3><small>gross margin ◇</small></div><div id="p-worth"></div></div>
+      <div class="card"><div class="card-head"><h3>What it is worth a year</h3></div><div id="p-worth"></div></div>
       <details class="card fold"><summary><h3 id="p-cost-title">How the cost is worked out</h3><span class="sub">◇ cost model · open</span></summary><div id="p-cost" style="margin-top:var(--sp-3)"></div></details>
       <details class="card fold"><summary><h3 id="p-strip-title">Every account on this service</h3><span class="sub" id="p-strip-sub"></span></summary><div id="p-strip" style="margin-top:var(--sp-3)"></div></details>
     </div>
     <div class="card book">
-      <div class="card-head"><h3 id="b-title">Invoiced against the book</h3><small>tap a service to price it</small></div>
+      <div class="card-head"><h3 id="b-title">Invoiced against the book</h3></div>
       <div class="sub" style="margin-bottom:var(--sp-3)">For each service, the share of its volume billed under the book's median, and what moving those accounts to the median would add a year. Worst first.</div>
       <div id="b-rows"></div>
       <div class="src">Each account's usual invoiced rate over the last 13 months, from VCK · storage weighted by boxes · list prices are not in the database, so the book's own median is the comparison</div>
@@ -188,12 +188,12 @@ export async function render(main, PR, params) {
     opts.push({ k: 'med', label: `At the ${medName}, ${f(s.median)}`, sub: s.weighted ? 'what the typical box pays' : `cheaper than half of ${s.n} accounts`, p: s.median });
     if (c) opts.push({ k: 'be', label: `Break-even, ${f(unitCost)}`, sub: 'where gross margin is zero', p: unitCost });
     const base = mine ? at(mine.v) : null;
-    $('p-worth').innerHTML = opts.map(o => {
+    // the column names once, at the top; each row's caption sits under its name, on the left
+    $('p-worth').innerHTML = '<div class="worth head"><span></span><span class="v">Revenue</span><span class="v">Margin ◇</span></div>' + opts.map(o => {
       const w = at(o.p), d = base ? w.rev - base.rev : null;
-      return `<div class="worth ${o.k === 'you' ? 'you' : ''}"><span><b>${esc(o.label)}</b></span>
-        <span class="v">${moneyK(w.rev)}<span class="sub" style="display:block;font-weight:400">revenue</span></span>
-        <span class="v ${w.gm != null && w.gm < 0 ? (review ? 'is-warn' : 'is-bad') : ''}">${w.gm == null ? '—' : moneyK(w.gm)}<span class="sub" style="display:block;font-weight:400">margin</span></span>
-        <span class="s">${esc(o.sub)}${d != null && Math.abs(d) >= 1 ? ` · ${d > 0 ? '+' : '−'}${moneyK(Math.abs(d))} a year against today` : ''}</span></div>`;
+      return `<div class="worth ${o.k === 'you' ? 'you' : ''}"><span><b>${esc(o.label)}</b><span class="s">${esc(o.sub)}${d != null && Math.abs(d) >= 1 ? ` · ${d > 0 ? '+' : '−'}${moneyK(Math.abs(d))} a year against today` : ''}</span></span>
+        <span class="v">${moneyK(w.rev)}</span>
+        <span class="v ${w.gm != null && w.gm < 0 ? (review ? 'is-warn' : 'is-bad') : ''}">${w.gm == null ? '—' : moneyK(w.gm)}</span></div>`;
     }).join('');
   }
 

@@ -18,10 +18,12 @@
 .pr .line .v { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
 .pr .line .d { grid-column: 1 / -1; font-size: var(--fs-source); color: var(--ink-3); }
 .pr .line.total { border-top: var(--hair) solid var(--rule-ink); font-weight: var(--w-head); }
-.pr .worth { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--sp-1) var(--sp-4); align-items: baseline; padding: var(--sp-3) 0; border-top: var(--hair) solid var(--rule); }
+.pr .worth { display: grid; grid-template-columns: minmax(0, 1fr) calc(var(--u) * 20) calc(var(--u) * 20); gap: var(--sp-1) var(--sp-4); align-items: baseline; padding: var(--sp-3) 0; border-top: var(--hair) solid var(--rule); }
 .pr .worth:first-of-type { border-top: 0; }
 .pr .worth .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.pr .worth .s { grid-column: 1 / -1; font-size: var(--fs-source); color: var(--ink-3); }
+.pr .worth .s { display: block; font-size: var(--fs-source); color: var(--ink-3); margin-top: var(--hair-2); }
+.pr .worth.head { padding: 0 0 var(--sp-1); border-top: 0; font-size: var(--fs-source); color: var(--ink-3); }
+.pr .worth.head .v { font-weight: 400; }
 .pr .worth.you { background: var(--well); margin: 0 calc(var(--sp-3) * -1); padding: var(--sp-3) var(--sp-3); border-radius: var(--r); border-top-color: transparent; }
 .pr .nocost { color: var(--ink-3); }
 .pr .book { grid-column: 1 / -1; }
