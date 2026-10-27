@@ -2,7 +2,7 @@
 
 /* CSS */
 .cp .crumb { margin-bottom: var(--sp-3); }
-.cp h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); margin: 0; line-height: 1.1; }
+.cp h1 { font-size: var(--fs-display); font-weight: var(--w-head); letter-spacing: var(--track-tight); margin: 0; line-height: 1.1; }
 .cp .cp-lede { font-size: var(--fs-head); line-height: 1.5; color: var(--ink-2); margin: 0 0 var(--sp-4); max-width: calc(var(--u) * 230); }
 .cp .tags { margin: var(--sp-2) 0 var(--sp-3); display: flex; gap: var(--sp-2); flex-wrap: wrap; }
 .cp .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-4); margin-bottom: var(--sp-4); }

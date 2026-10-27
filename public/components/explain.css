@@ -5,7 +5,7 @@
 .xpl::backdrop { background: var(--scrim); }
 .xpl .in { padding: var(--sp-6) var(--sp-6) var(--sp-5); overflow: auto; max-height: calc(100vh - var(--sp-10)); box-sizing: border-box; }
 .xpl .top { display: flex; justify-content: space-between; gap: var(--sp-3); align-items: flex-start; }
-.xpl h2 { font-size: var(--fs-lead); font-weight: 700; letter-spacing: var(--track-tight); margin: 0; line-height: 1.25; }
+.xpl h2 { font-size: var(--fs-lead); font-weight: var(--w-head); letter-spacing: var(--track-tight); margin: 0; line-height: 1.25; }
 .xpl .x { border: 0; background: var(--well-2); border-radius: 50%; width: var(--sp-8); height: var(--sp-8); font-size: var(--fs-head); line-height: 1; cursor: pointer; color: var(--ink-2); flex: none; }
 .xpl h3 { font-size: var(--fs-label); font-weight: 600; color: var(--ink-3); margin: var(--sp-5) 0 var(--sp-2); letter-spacing: .01em; }
 .xpl p { margin: 0 0 var(--sp-2); line-height: 1.5; font-size: var(--fs-body); }
