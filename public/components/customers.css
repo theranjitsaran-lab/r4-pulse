@@ -1,7 +1,7 @@
 /* Customers and its lists. Moved out of the view so every value reads tokens.css. */
 
 /* CSS */
-.cust h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); margin: 0 0 var(--sp-1); }
+.cust h1 { font-size: var(--fs-display); font-weight: var(--w-head); letter-spacing: var(--track-tight); margin: 0 0 var(--sp-1); }
 .cust .blurb { color: var(--ink-3); margin: 0 0 var(--sp-4); }
 .cust .bar { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-4); }
 .cust .views { overflow-x: auto; max-width: 100%; }
@@ -50,7 +50,7 @@
 .ws .c .opp { border: var(--hair) dashed var(--ink-5); color: var(--ink-2); font-weight: 600; background: none; font: inherit; font-size: var(--fs-source); font-variant-numeric: tabular-nums; border-radius: var(--r-sm); padding: var(--sp-1) var(--sp-2); min-width: calc(var(--u) * 16); cursor: pointer; }
 .ws .c .opp:hover { border-color: var(--brand); color: var(--brand); }
 .ws .c .none { color: var(--ink-5); }
-.ws .tot { justify-content: flex-end; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ws .tot { justify-content: flex-end; font-weight: var(--w-head); font-variant-numeric: tabular-nums; }
 .ws .key { display: flex; gap: var(--sp-5); flex-wrap: wrap; font-size: var(--fs-source); color: var(--ink-3); margin: var(--sp-3) 0 var(--sp-4); align-items: center; }
 .ws .key span span { display: inline-block; width: calc(var(--u) * 7); height: var(--sp-4); border-radius: var(--r-sm); vertical-align: calc(var(--hatch) * -1); margin-right: var(--sp-2); }
 .ws .more { margin-top: var(--sp-3); border: 0; background: none; color: var(--brand); font: inherit; font-size: var(--fs-sm); font-weight: 500; cursor: pointer; padding: var(--sp-2) 0; }
@@ -105,7 +105,7 @@
 .mv2 .rw .r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .mv2 .rw .lf { font-weight: 600; }
 .mv2 .rw .go { color: var(--ink-5); font-size: var(--fs-lead); }
-.mv2 .tot { border-top: var(--hair) solid var(--rule-ink); font-weight: 700; }
+.mv2 .tot { border-top: var(--hair) solid var(--rule-ink); font-weight: var(--w-head); }
 @media (max-width: 760px) {
   .mv2 .hd { display: none; }
   .mv2 .rw { grid-template-columns: minmax(0, 1fr) calc(var(--u) * 21) var(--sp-4); grid-template-areas: "nm lf go" "nm pc go"; gap: var(--hair-2) var(--sp-3); }
@@ -116,7 +116,7 @@
 /* MV_EXTRA */
 .mv2 .crumb { font-size: var(--fs-label); color: var(--ink-3); margin: 0 0 var(--sp-2); display: flex; gap: var(--sp-2); flex-wrap: wrap; }
 .mv2 .crumb a { color: var(--brand); text-decoration: none; }
-.mv2 h2.t { font-size: var(--fs-num); font-weight: 700; letter-spacing: var(--track-tight); margin: 0 0 var(--sp-1); line-height: 1.2; }
+.mv2 h2.t { font-size: var(--fs-num); font-weight: var(--w-head); letter-spacing: var(--track-tight); margin: 0 0 var(--sp-1); line-height: 1.2; }
 .mv2 .hd.a, .mv2 .rw.a { grid-template-columns: minmax(0, 1fr) calc(var(--u) * 24) calc(var(--u) * 24) calc(var(--u) * 26) calc(var(--u) * 21) calc(var(--u) * 28) var(--sp-4); }
 .mv2 .jobs .hd span:nth-child(2) { text-align: left; }
 .mv2 .tag { display: inline-block; font-size: var(--fs-source); font-weight: 600; padding: var(--hair-2) var(--sp-2); border-radius: var(--r-lg); white-space: nowrap; }
@@ -152,7 +152,7 @@
 .dv .rw .go { color: var(--ink-5); font-size: var(--fs-lead); }
 .dv .share { display: block; height: var(--sp-2); background: var(--well-2); border-radius: var(--r-xs); margin-top: var(--sp-2); max-width: calc(var(--u) * 55); position: relative; overflow: hidden; }
 .dv .share i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink-3); border-radius: var(--r-xs); }
-.dv .tot { border-top: var(--hair) solid var(--rule-ink); font-weight: 700; }
+.dv .tot { border-top: var(--hair) solid var(--rule-ink); font-weight: var(--w-head); }
 @media (max-width: 760px) {
   .dv .hd { display: none; }
   .dv .rw { grid-template-columns: minmax(0, 1fr) calc(var(--u) * 23) var(--sp-4); grid-template-areas: "nm bx go" "nm once go"; gap: var(--hair-2) var(--sp-3); }
