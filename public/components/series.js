@@ -31,7 +31,8 @@ export function seriesOf(C) {
 }
 
 export function deltaText(c) { return c == null ? 'new' : (c > 0 ? '▲ ' : c < 0 ? '▼ ' : '') + Math.abs(Math.round(c * 100)) + '%'; }
-export function deltaCls(c) { return c == null ? 'flat' : c > 0.02 ? 'up' : c < -0.02 ? 'down' : 'flat'; }
+// colour for a move of a fifth or more only; a smaller one keeps its arrow in ink (status marks exceptions)
+export function deltaCls(c) { return c == null ? 'flat' : c >= 0.2 ? 'up' : c <= -0.2 ? 'down' : 'flat'; }
 
 // Which part moved, in a few words: "service down $12K a month".
 export function moveReason(m, fmt) {

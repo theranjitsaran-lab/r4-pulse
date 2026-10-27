@@ -15,6 +15,7 @@ const args = process.argv.slice(2);
 const label = args.find(a => !a.startsWith('--')) || 'current';
 const only = (args.find(a => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
 const design = args.includes('--design');           // draw the ?design=1 overlay on every shot
+const scheme = args.includes('--dark') ? 'dark' : 'light';   // --dark: the same shots in the dark theme
 
 // the customer page on the account with the most route visits (Citadel apart), so orders, visits,
 // bins and prices are all drawn on real figures
@@ -28,6 +29,8 @@ const SCREENS = [
   { name: 'styleguide', page: '/styleguide.html' },
 ].concat(
   // every Customers list, with --all or by name (customers-margin, ...)
+  // the two Home layouts on trial (views/pulse.js), by name: --only=home-a,home-b
+  [{ name: 'home-a', page: '/?home=a', hash: '#pulse', extra: true }, { name: 'home-b', page: '/?home=b', hash: '#pulse', extra: true }],
   [{ name: 'explainer', hash: '#customers?view=whitespace', click: 'button.opp', extra: true }],
   ['conversations', 'grid', 'whitespace', 'slipping', 'gaps', 'rounds', 'destruction', 'margin', 'all'].map(v => ({ name: 'customers-' + v, hash: '#customers?view=' + v, extra: true })),
 ).filter(s => only.length ? only.includes(s.name) : !s.extra || args.includes('--all'));
@@ -54,7 +57,7 @@ async function main() {
   const browser = await chromium.launch();
   try {
     for (const width of WIDTHS) {
-      const ctx = await browser.newContext({ viewport: { width, height: width < 700 ? 844 : 900 }, deviceScaleFactor: width < 700 ? 2 : 1, colorScheme: 'light', reducedMotion: 'reduce', locale: 'en-GB', timezoneId: 'America/Chicago' });
+      const ctx = await browser.newContext({ viewport: { width, height: width < 700 ? 844 : 900 }, deviceScaleFactor: width < 700 ? 2 : 1, colorScheme: scheme, reducedMotion: 'reduce', locale: 'en-GB', timezoneId: 'America/Chicago' });
       const page = await ctx.newPage();
       page.on('pageerror', e => console.error(`  ! ${width} ${page.url()}: ${e.message}`));
       await page.goto(base + '/login');
@@ -73,7 +76,7 @@ async function main() {
         await page.waitForFunction(() => !document.querySelector('#main .loading'), null, { timeout: 15000 }).catch(() => {});
         await page.waitForTimeout(300);
         if (s.click) { await page.click(s.click); await page.waitForTimeout(400); }
-        const f = path.join(out, `${s.name}-${width}.png`);
+        const f = path.join(out, `${s.name}-${width}${scheme === 'dark' ? '-dark' : ''}.png`);
         await page.screenshot({ path: f, fullPage: !s.click });   // a dialog: the viewport it sits in
         console.log('  ' + path.relative(ROOT, f));
       }

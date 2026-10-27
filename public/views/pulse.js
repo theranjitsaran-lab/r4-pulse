@@ -112,26 +112,45 @@ export async function render(main, P) {
       <div class="seg" id="home-ct-seg"><a href="#" data-f="falling" class="on">Falling</a><a href="#" data-f="rising">Rising</a></div>
       <div id="home-ct"></div>
     </section>`;
-  const tiles = `<div class="tiles">
-      <a class="card tile" href="#customers?view=margin" data-rv><span class="lab">Gross margin ◇ ›</span><b>${Math.round(solidPc * 100)}%</b>
-        <p><strong>${sure.length} account${sure.length === 1 ? '' : 's'}</strong> cost more to serve than ${sure.length === 1 ? 'it pays' : 'they pay'} (${moneyK(sureLoss)} a year); ${unsure.length} more while route costs are under review.</p></a>
-      <a class="card tile" href="#customers?view=destruction" data-rv><span class="lab">Boxes past retention review ›</span><b>${Math.round(B.overdue.boxes / 1000)}K boxes</b>
-        <p>Across ${B.overdue.accounts} accounts: about ${moneyK(B.overdue.oneOff)} once to destroy, and ${moneyK(B.overdue.storageLost)} a month of storage ended.</p></a>
-    </div>`;
+  const tile = (href, lab, fig, note) => `<a class="card tile" href="${href}" data-rv><span class="lab">${lab}</span><b>${fig}</b><p>${note}</p></a>`;
+  const marginTile = tile('#customers?view=margin', 'Gross margin ◇ ›', `${Math.round(solidPc * 100)}%`,
+    `<strong>${sure.length} account${sure.length === 1 ? '' : 's'}</strong> cost more to serve than ${sure.length === 1 ? 'it pays' : 'they pay'} (${moneyK(sureLoss)} a year); ${unsure.length} more while route costs are under review.`);
+  const boxesTile = tile('#customers?view=destruction', 'Boxes past retention review ›', `${Math.round(B.overdue.boxes / 1000)}K boxes`,
+    `Across ${B.overdue.accounts} accounts: about ${moneyK(B.overdue.oneOff)} once to destroy, and ${moneyK(B.overdue.storageLost)} a month of storage ended.`);
+  const tiles = `<div class="tiles">${marginTile}${boxesTile}</div>`;
   const brief = `<details class="brief" data-rv><summary>The month in a paragraph ›</summary><p id="home-hv"></p><p class="src" id="home-by"></p></details>`;
+  const foot = `<div class="foot">Posted through ${mon(last.month)} ${last.month.slice(0, 4)} · work done through ${dayMonth(A.latestDone)} · ◇ modelled · tap any row to open it</div>`;
 
-  main.innerHTML = `<div class="h">${staleNote}${hero}${brief}
-    ${gapCard}<div class="split">${landCard}${moveCard}</div>
-    ${tiles}
-    <div class="foot">Posted through ${mon(last.month)} ${last.month.slice(0, 4)} · work done through ${dayMonth(A.latestDone)} · ◇ modelled · tap any row to open it</div>
-  </div>`;
+  // Two layouts on trial beside the current one (?home=a, ?home=b), the same figures in each:
+  //   a, a calm ledger: the bill on white with its track, then three tiles, the bridge, the chart wide;
+  //   b, the answer first: the paragraph as the lede, the gap bar as the picture, then the detail.
+  const layout = new URLSearchParams(location.search).get('home');
+  if (layout === 'a') {
+    const calm = `<section class="card hero-calm" data-rv><div>${billFig}${billNote}${track}</div>${brief}</section>`;
+    const three = `<div class="tiles three">
+      ${tile('#customers?view=main', `${mon(nb)}'s bill · building ◇`, nextBill != null ? '≈ ' + moneyK(nextBill) : '—', X.bill ? `likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)} · working day ${X.elapsed} of ${X.workdays}` : 'No priced month to value the work yet.')}
+      ${tile('#customers?view=slipping', 'Slipping ›', `${mv.slipping} accounts`, top ? `Largest: ${esc(titleCase(top.customer))}, ${esc(top.why)}.` : 'None down 10% on their own run.')}
+      ${marginTile}</div>`;
+    main.innerHTML = `<div class="h">${staleNote}${calm}${three}${gapCard}${landCard}${moveCard}<div class="tiles">${boxesTile}</div>${foot}</div>`;
+  } else if (layout === 'b') {
+    const lede = `<section class="card lede" data-rv><p id="home-hv"></p><p class="src" id="home-by"></p></section>`;
+    main.innerHTML = `<div class="h hb-first">${staleNote}${lede}${gapCard}<div class="split">${landCard}${moveCard}</div>${tiles}${foot}</div>`;
+  } else {
+    main.innerHTML = `<div class="h">${staleNote}${hero}${brief}
+      ${gapCard}<div class="split">${landCard}${moveCard}</div>
+      ${tiles}
+      ${foot}
+    </div>`;
+  }
 
-  // the template first, then Claude's paragraph if it arrives and passes the check; text, never HTML
+  // the template first, then Claude's paragraph if it arrives and passes the check; escaped text,
+  // with its figures set in bold when it is the lede
   const hv = main.querySelector('#home-hv'), by = main.querySelector('#home-by');
-  hv.textContent = templateSummary(sheet);
+  const put = t => { hv.innerHTML = layout === 'b' ? esc(t).replace(/(≈ )?\$[\d.,]+[KM]?|\d+%|\d+ accounts/g, '<b>$&</b>') : esc(t); };
+  put(templateSummary(sheet));
   fetch('/api/summary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sheet: sheet.map(({ key, line, say }) => ({ key, line, say })) }) })
     .then(r => r.ok ? r.json() : null)
-    .then(j => { if (j && j.source === 'claude' && j.text && checkNumbers(j.text, sheet).ok && hv.isConnected) { hv.textContent = j.text; by.textContent = 'Written by Claude from the figures on this page; every number checked against them.'; } })
+    .then(j => { if (j && j.source === 'claude' && j.text && checkNumbers(j.text, sheet).ok && hv.isConnected) { put(j.text); by.textContent = 'Written by Claude from the figures on this page; every number checked against them.'; } })
     .catch(() => {});
 
   // customers moving: a short list, each account with its thirteen months

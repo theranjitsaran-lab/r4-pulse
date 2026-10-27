@@ -91,7 +91,7 @@ export async function render(main, C, params) {
     </div>
     <p class="cp-lede">${summary}</p>
     <div class="card" id="cp-chart"></div>
-    <div class="grid">
+    <div class="grid one">
       <div class="card">
         <div class="card-head"><h3>Margin by line of business</h3><a href="#customers?view=margin&id=${id}">The margin drill: line, job, route ›</a></div>
         ${fams.length ? `<div class="famhead"><span>Line</span><span>Revenue</span><span class="cost">Cost ◇</span><span>Margin</span><span></span></div>` : ''}
@@ -100,7 +100,8 @@ export async function render(main, C, params) {
           return `<div class="fam" data-f="${x.f}"><span>${esc(FAMILY_NAMES[x.f] || x.f)}${rev ? ' <span class="chip review">under review</span>' : ''}</span><span class="r">${money0(x.revenue)}</span><span class="r cost">${x.f === 'other' ? '—' : money0(x.cost)}</span><span class="r ${p != null && p < 0 && !rev ? 'is-bad' : ''}">${x.f === 'other' || p == null ? '—' : rev ? '◇' : Math.round(p * 100) + '%'}</span><span class="go">›</span></div><div class="lines" data-for="${x.f}" hidden></div>`;
         }).join('') || '<p class="sub">No priced lines in the last twelve months.</p>'}</div>
       </div>
-      <div class="stack">
+    </div>
+    <div class="grid three">
         ${wsCard(wsRow, pitch)}
         <div class="card">
           <div class="card-head"><h3>Prices against the book</h3><a href="#pricing?level1=${id}">Price it ›</a></div>
@@ -111,11 +112,10 @@ export async function render(main, C, params) {
           </div>`).join('') || '<p class="sub">No service rates in the last thirteen months.</p>'}
         </div>
         <div class="card">
-          <div class="card-head"><h3>Signals</h3><small>right or not? say so</small></div>
+          <div class="card-head"><h3>Signals</h3></div>
           <div id="cp-sigs">${sigs.map(g => { const l = said.get(g.key); return `<div class="sig" data-sig="${g.key}">${esc(g.text)}<div class="acts"><button data-v="right" class="${l && l.verdict === 'right' ? 'on' : ''}">Right</button><button data-v="not_right" class="${l && l.verdict === 'not_right' ? 'on' : ''}">Not right</button><span class="sub said">${l ? `${esc(l.who)} said ${VERB[l.verdict]}, ${when(l.logged_at)}` : ''}</span></div></div>`; }).join('') || '<p class="sub">Nothing flagged this week.</p>'}</div>
           ${log.length ? `<div class="aside" style="margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:var(--hair) solid var(--rule)"><div class="lab" style="margin-bottom:var(--sp-1)">Logged</div>${log.slice(0, 5).map(l => `<div class="sub">${when(l.logged_at)} · ${esc(l.who)} · ${VERB[l.verdict]} (${esc(l.signal)})</div>`).join('')}</div>` : ''}
         </div>
-      </div>
     </div>
     <div class="grid drill" id="cp-drill"><div class="card"><div class="card-head"><h3>Work orders</h3><small>last six months</small></div><p class="sub">Loading…</p></div><div class="card"><div class="card-head"><h3>Shredding visits</h3><small>last six months</small></div><p class="sub">Loading…</p></div></div>
   </div>`;
@@ -123,9 +123,10 @@ export async function render(main, C, params) {
   if (s) {
     const pts = k => s.months.map((x, i) => ({ x, y: s[k][i] }));
     lineChart(main.querySelector('#cp-chart'), {
-      title: 'Revenue by month', sub: `${s.months.length} months to the latest posted month · invoice month · one axis`,
-      series: [{ name: 'Storage', cls: 'storage', points: pts('storage') }, { name: 'Service', cls: 'service', points: pts('service') }],
-      source: 'VCK invoices, by invoice month · storage and service as billed',
+      title: chartTitle(s), sub: `${s.months.length} months to the latest posted month · invoice month · one axis`,
+      // a part never billed is said in the source line, not drawn as a line along the axis
+      series: [{ name: 'Storage', cls: 'storage', points: pts('storage') }, { name: 'Service', cls: 'service', points: pts('service') }].filter(x => x.points.some(p => p.y)),
+      source: `VCK invoices, by invoice month · ${['storage', 'service'].filter(k => !s[k].some(Boolean)).map(k => `no ${k} billed in these months · `).join('')}storage and service as billed`,
     });
   } else main.querySelector('#cp-chart').remove();
 
@@ -286,4 +287,14 @@ function wsCard(r, pitch) {
 function pos(v, r) {
   const lo = Math.min(r.p10, r.modal_rate), hi = Math.max(r.p90, r.modal_rate, r.med * 1.01);
   return Math.max(1, Math.min(99, (v - lo) / (hi - lo) * 100));
+}
+
+// The chart says what it shows: the last three months against the account's own run before, and
+// what it buys. "Running at $13K a month, about level on its own run, all service".
+function chartTitle(s) {
+  const m = s.move, st = s.storage.reduce((a, b) => a + b, 0), sv = s.service.reduce((a, b) => a + b, 0);
+  const mix = !st ? ', all service' : !sv ? ', all storage' : `, ${Math.round(st / (st + sv) * 100)}% storage`;
+  if (!m || m.pct == null) return `Billing by month${mix}`;
+  const how = Math.abs(m.pct) < 0.05 ? 'about level' : `${m.pct > 0 ? 'up' : 'down'} ${Math.abs(Math.round(m.pct * 100))}%`;
+  return `Running at ${moneyK(m.last3)} a month, ${how} on its own run${mix}`;
 }

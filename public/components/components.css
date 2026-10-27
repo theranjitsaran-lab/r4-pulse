@@ -71,8 +71,9 @@ i.k.neutral, i.k.band { background: var(--s-citadel); }
 .spark .sp-line { fill: none; stroke: var(--ink-4); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
 .spark .sp-area { fill: var(--ink-4); opacity: .1; }
 .spark .sp-end { fill: var(--ink-3); }
-.spark.up .sp-line { stroke: var(--s-storage); } .spark.up .sp-area { fill: var(--s-storage); } .spark.up .sp-end { fill: var(--s-storage); }
-.spark.down .sp-line { stroke: var(--bad); } .spark.down .sp-area { fill: var(--bad); } .spark.down .sp-end { fill: var(--bad); }
+/* the line stays ink; only the latest month wears the status colour, and only on a big move */
+.spark.up .sp-end { fill: var(--good); }
+.spark.down .sp-end { fill: var(--bad); }
 
 /* ── meter (meter.js) ── */
 .meter-top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); }

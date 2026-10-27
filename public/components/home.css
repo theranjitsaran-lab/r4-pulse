@@ -82,7 +82,7 @@ html.motion-on .is-in .grow { transform: scaleX(1); transition: transform var(--
 .gap-seg em { font-style: normal; font-size: var(--fs-label); font-weight: 600; color: var(--hero-ink); white-space: nowrap; }
 .gap-seg.l1, .gap-sw.l1 { background: var(--lever-1); } .gap-seg.l2, .gap-sw.l2 { background: var(--lever-2); }
 .gap-seg.l3, .gap-sw.l3 { background: var(--lever-3); } .gap-seg.l4, .gap-sw.l4 { background: var(--lever-4); }
-.gap-seg.l3 em, .gap-seg.l4 em { color: var(--ink); }
+.gap-seg.l3 em, .gap-seg.l4 em { color: var(--ink-on-light); }
 .gap-seg.ceil, .gap-sw.ceil { background-image: repeating-linear-gradient(135deg, var(--hero-track) 0 var(--hatch), transparent var(--hatch) calc(var(--hatch) * 2)); }
 .gap-seg.newb, .gap-sw.newb { background: none; border: var(--hair-2) dashed var(--ink-4); }
 .gap-seg.newb em { color: var(--ink-2); }
@@ -117,11 +117,26 @@ html.motion-on .is-in .gap-seg { transform: scaleX(1); transition: transform var
 .tile b { display: block; font-size: var(--fs-num-lg); font-weight: var(--w-head); letter-spacing: var(--track-tight); line-height: 1.1; margin: var(--sp-1) 0 var(--sp-2); font-variant-numeric: tabular-nums; }
 .tile p { margin: 0; font-size: var(--fs-label); color: var(--ink-2); line-height: 1.45; }
 
-.h .split { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--sp-4); align-items: start; }
+.h .split { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--sp-4); align-items: stretch; }
 .h .c-line.faint { stroke-dasharray: var(--hatch) calc(var(--hatch) * 2); } .h i.k.faint { opacity: .5; }
 .h .foot { font-size: var(--fs-source); color: var(--ink-4); text-align: center; padding: var(--sp-1) 0 var(--sp-3); }
 
+/* ── layout a (?home=a): the bill on white, the same hero parts in ink ── */
+.hero-calm { --hero-ink: var(--ink); --hero-ink-2: var(--ink-3); --hero-ink-3: var(--ink-4); --hero-track: var(--well-2); --hero-accent: var(--brand);
+  color: var(--ink); padding: var(--sp-8); display: grid; gap: var(--sp-5); }
+.hero-calm .hb-pill { background: var(--tint-brand); }
+.hero-calm .brief { border-top: var(--hair) solid var(--rule); padding-top: var(--sp-4); }
+.tiles.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tiles .tile b { font-size: var(--fs-num); }
+/* ── layout b (?home=b): the paragraph is the lede, the gap bar the picture ── */
+.lede #home-hv { margin: 0; font-size: var(--fs-lead); line-height: 1.45; color: var(--ink-2); max-width: var(--measure); }
+.lede .src:empty { display: none; }
+.lede #home-hv b { color: var(--ink); font-weight: var(--w-head); font-variant-numeric: tabular-nums; }
+.hb-first .gap-bar { height: calc(var(--gap-bar-h) + var(--sp-4)); }
+
 @media (max-width: 860px) {
+  .hero-calm { padding: var(--sp-6) var(--sp-5); }
+  .tiles.three { grid-template-columns: 1fr; }
   .hero-band { grid-template-columns: 1fr; padding: var(--sp-6) var(--sp-5); gap: var(--sp-6); }
   .hb-fig { font-size: var(--fs-mega-ph); }
   .h .split, .tiles { grid-template-columns: 1fr; }
