@@ -83,7 +83,9 @@ const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.to
 // past threefold, a multiple reads better than a four-figure percentage
 // Only last month's change wears status colour; the other comparisons are quiet, so the column that
 // matters reads at a glance instead of a page of red and green.
-const pc = (v, quiet) => v == null ? '<span class="delta flat">—</span>' : `<span class="delta ${quiet ? 'quiet' : v > 0.02 ? 'up' : v < -0.02 ? 'down' : 'flat'}">${v > 0 ? '▲' : v < 0 ? '▼' : ''} ${v >= 2 ? Math.round(v + 1) + '×' : Math.abs(Math.round(v * 100)) + '%'}</span>`;
+// status colour marks exceptions only: a move of a fifth or more; smaller moves keep the arrow, in ink
+const LOUD = 0.2;
+const pc = (v, quiet) => v == null ? '<span class="delta flat">—</span>' : `<span class="delta ${quiet ? 'quiet' : v >= LOUD ? 'up' : v <= -LOUD ? 'down' : 'flat'}">${v > 0 ? '▲' : v < 0 ? '▼' : ''} ${v >= 2 ? Math.round(v + 1) + '×' : Math.abs(Math.round(v * 100)) + '%'}</span>`;
 
 export const COLUMNS = [
   { key: 'last', by: r => r.last },
@@ -107,7 +109,7 @@ export function tableHtml(T, rows, { sort, dir } = {}) {
     <td class="n x">${r.ytd != null ? moneyK(r.ytd) : '—'}</td><td class="n x">${pc(r.ytdPct, true)}</td>
     <td class="n xm">${r.mtd.services ? `${r.mtd.value != null ? moneyK(r.mtd.value) : '—'}<small>${r.mtd.services.toLocaleString('en-US')} done${r.mtd.own ? '' : ' · book rate'}</small>` : '<span class="pend" title="No done services yet this month">—</span>'}</td>
     <td class="n x">${T.prevCovered ? pc(r.mtd.pct, true) : '<span class="pend">next snapshot</span>'}</td>
-    <td class="sp">${sparkline(r.spark, { w: 96, h: 26, cls: r.lastPct < -0.02 ? 'down' : r.lastPct > 0.02 ? 'up' : '' })}</td>
+    <td class="sp">${sparkline(r.spark, { w: 96, h: 26, cls: r.lastPct <= -LOUD ? 'down' : r.lastPct >= LOUD ? 'up' : '' })}</td>
   </tr>`).join('')}</tbody></table>`;
 }
 
