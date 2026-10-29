@@ -60,8 +60,18 @@ test('slipping, pace and the bill: each figure shown twice comes from one source
   assert.ok(slipList.every(d => d.move.pct <= -0.1), 'every slipping account is down 10% or more on its own run');
   assert.ok(!slipList.some(d => d.level1 === 6714), 'Citadel held apart');
   assert.deepEqual(B.pace, crossSellPace(M.history), 'Home and the grid read one pace');
-  const run = P.currentRun.find(r => r.part === 'run');
-  near(billNow(P).core, run.storage + run.service - run.citadel, 0.01, 'bill = run core');
+  // the bill already known, in its three states, on made-up figures (a snapshot holds only one)
+  const sep = { month: '2026-09-01', storage: 380, service: 200, citadel: 20, core: 560 };
+  const oct = { month: '2026-10-01', storage: 390, service: 250, citadel: 30, core: 610 };
+  const open = { part: 'run', storage: 395, service: 260, citadel: 10 }, pending = { part: 'pending', storage: 0, service: 6, citadel: 0 };
+  const b1 = billNow({ monthly: [sep], currentRun: [open, pending] }, '2026-10-01');
+  assert.ok(!b1.posted && b1.basis === open, 'an open run is the bill');
+  near(b1.core, 395 + 260 - 10, 0.01, 'bill = run core');
+  const b2 = billNow({ monthly: [sep, oct], currentRun: [pending] }, '2026-10-01');
+  assert.ok(b2.posted && b2.month === '2026-10-01' && b2.basis === oct, 'once the run posts, the month being worked is the posted bill');
+  near(b2.core, 610, 0.01, 'posted bill = its core');
+  const b3 = billNow({ monthly: [sep], currentRun: [pending] }, '2026-10-01');
+  assert.ok(b3.core == null && !b3.posted, 'no run and nothing posted for the month: no figure, never an older month');
 });
 
 test('projection: done to date + days left × pace; the band is backtested leave-one-out', async () => {
@@ -82,9 +92,10 @@ test('projection: done to date + days left × pace; the band is backtested leave
   assert.ok(x.services.lo <= x.services.central && x.services.central <= x.services.hi, 'band holds the central');
   assert.ok(x.services.lo >= x.doneToDate, 'never below the work already done');
   // on the fixtures (no backtest yet): the bill is the storage plus the work at last month's value
-  const P = J('pulse'), A = J('activity'), run = P.currentRun.find(r => r.part === 'run');
-  const f = project({ daily: dailyFrom(P, A), latest: A.latestDone, perService: 114.5, storage: run.storage, routeDays: A.routeDays });
-  near(f.bill.central, run.storage + f.services.central * 114.5, 1e-6, 'fixture bill');
+  // the snapshot's storage: its open run, or the latest posted month once the run has posted
+  const P = J('pulse'), A = J('activity'), storage = (P.currentRun.find(r => r.part === 'run') || P.monthly[P.monthly.length - 1]).storage;
+  const f = project({ daily: dailyFrom(P, A), latest: A.latestDone, perService: 114.5, storage, routeDays: A.routeDays });
+  near(f.bill.central, storage + f.services.central * 114.5, 1e-6, 'fixture bill');
   // a past month's curve ends on its total
   const c = curve(daily, '2026-09-01', 100, 0);
   near(c[c.length - 1].done, daily.filter(r => r.date.startsWith('2026-09')).reduce((t, r) => t + r.done, 0), 1e-6, 'curve total');

@@ -70,11 +70,16 @@ export function overdueBoxes(CA, PR) {
   return { rows, perBox, med, boxes: sum('boxes'), oneOff: sum('once'), storageLost: sum('lost'), accounts: rows.length };
 }
 
-// This month's bill, already known: the run not yet posted (this month's storage, last month's
-// work), Citadel apart.
-export function billNow(P) {
+// This month's bill, already known (this month's storage, last month's work), Citadel apart: the run
+// while VCK holds it open; once the run posts its rows move to invoices, so the bill is that posted
+// month, if it is the month being worked (workMonth, 'YYYY-MM-01'). `basis` carries storage, service
+// and citadel either way; `posted` says which it is.
+export function billNow(P, workMonth) {
   const run = P.currentRun.find(r => r.part === 'run');
-  return { run, core: run ? run.storage + run.service - run.citadel : null };
+  if (run) return { run, basis: run, core: run.storage + run.service - run.citadel, month: null, posted: false };
+  const last = P.monthly[P.monthly.length - 1];
+  if (workMonth && last && last.month.slice(0, 7) === workMonth.slice(0, 7)) return { run: null, basis: last, core: last.core, month: last.month, posted: true };
+  return { run: null, basis: null, core: null, month: null, posted: false };
 }
 
 // Down: the last three months at least 10% and $250 a month below the account's own twelve before

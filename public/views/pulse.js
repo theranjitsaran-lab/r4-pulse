@@ -35,10 +35,12 @@ export async function render(main, P) {
   const [PR, A, CA, C, M, R] = await Promise.all([getJson('pricing'), getJson('activity'), getJson('calls'), getJson('customers'), getJson('margin'), loadRates()]);
 
   // ── the month ──
-  const last = P.monthly[P.monthly.length - 1];                 // the latest posted month
-  const billMonth = addMonths(last.month, 1);                     // the bill in the current run
-  const { run, core: runCore } = billNow(P);
   const workMonth = A.latestDone.slice(0, 8) + '01';              // the month being worked now
+  // the bill already known: the open run, or, once it has posted, the month's posted bill
+  const bill = billNow(P, workMonth), run = bill.basis, runCore = bill.core;
+  const latest = P.monthly[P.monthly.length - 1];                 // the latest posted month
+  const billMonth = bill.posted ? latest.month : addMonths(latest.month, 1);
+  const last = bill.posted ? P.monthly[P.monthly.length - 2] : latest;   // the bill before it, to compare
   const daily = dailyFrom(P, A);
   const doneIn = m => daily.filter(r => r.date.startsWith(m.slice(0, 7))).reduce((t, r) => t + r.done, 0);
   // the work in the current run is last month's: its value per done service prices this month's work ◇
@@ -75,7 +77,7 @@ export async function render(main, P) {
   const nb = addMonths(billMonth, 1), top = mv.falls[0], gain = mv.gains[0];
   const sheet = [
     age > 2 && { key: 'stale', line: `The data stops on ${dayMonth(A.latestDone)}, ${age} days ago; the daily refresh has not run since` },
-    runCore != null && { key: 'bill', line: `${mon(billMonth)}'s bill, already known: ${moneyK(runCore)} core, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target, ${pct(runCore / last.core - 1).replace('▲ ', 'up ').replace('▼ ', 'down ')} on ${mon(last.month)}'s ${moneyK(last.core)}`,
+    runCore != null && { key: 'bill', line: `${mon(billMonth)}'s bill, ${bill.posted ? 'posted' : 'already known'}: ${moneyK(runCore)} core, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target, ${pct(runCore / last.core - 1).replace('▲ ', 'up ').replace('▼ ', 'down ')} on ${mon(last.month)}'s ${moneyK(last.core)}`,
       say: `${mon(billMonth)} bills ${moneyK(runCore)}, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target.` },
     X.bill && { key: 'next', line: `${mon(nb)}'s bill, building from ${mon(workMonth)}'s work: about ${moneyK(X.bill.central)} ◇ (likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}), ${moneyK(TARGET - X.bill.central)} short of $1.0M; ${X.elapsed} of ${X.workdays} working days in`,
       say: `${mon(nb)} is heading for about ${moneyK(X.bill.central)} ◇, likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}.` },
@@ -92,8 +94,8 @@ export async function render(main, P) {
   const at = x => (Math.max(0, Math.min(1, x / TARGET)) * 100).toFixed(2) + '%';
   const track = `<div class="hb-track">${runCore != null ? `<span class="hb-fill grow" style="width:${at(runCore)}"></span>` : ''}${X.bill ? `<span class="hb-range" style="left:${at(X.bill.lo)};width:${at(X.bill.hi - X.bill.lo)}"></span><span class="hb-tick" style="left:${at(X.bill.central)}"></span>` : ''}</div>
       <div class="hb-ends"><span>$0</span><span><span class="gap-wide">${X.bill ? `${mon(nb)} likely ${moneyK(X.bill.lo)}–${moneyK(X.bill.hi)} ◇ · ` : ''}</span>$1.0M target</span></div>`;
-  const billFig = `<span class="hb-lab">${mon(billMonth)}'s bill · already known</span><span class="hb-fig">${runCore != null ? moneyK(runCore) : '—'}</span>`;
-  const billNote = dBill != null ? `<p class="hb-note"><span class="hb-pill ${dBill < 0 ? 'down' : ''}">${pct(dBill)}</span> on ${mon(last.month)} · <b>${Math.round(runCore / TARGET * 100)}%</b> of $1.0M</p>` : '<p class="hb-note">The run has not started.</p>';
+  const billFig = `<span class="hb-lab">${mon(billMonth)}'s bill · ${bill.posted ? 'posted' : 'already known'}</span><span class="hb-fig">${runCore != null ? moneyK(runCore) : '—'}</span>`;
+  const billNote = dBill != null ? `<p class="hb-note"><span class="hb-pill ${dBill < 0 ? 'down' : ''}">${pct(dBill)}</span> on ${mon(last.month)} · <b>${Math.round(runCore / TARGET * 100)}%</b> of $1.0M</p>` : `<p class="hb-note">No open run in VCK, and ${mon(billMonth)}'s bill has not posted yet.</p>`;
   const nextFact = `<span class="hb-lab">${mon(nb)}'s bill · building ◇</span><b>${nextBill != null ? '≈ ' + moneyK(nextBill) : '—'}</b><small>${X.bill ? `likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)} · working day ${X.elapsed} of ${X.workdays}` : 'no priced month to value the work yet'}</small>`;
   const slipFact = `<span class="hb-lab">Slipping ›</span><b>${mv.slipping} accounts</b><small>${top ? `largest: ${esc(titleCase(top.customer))}, ${esc(top.why)}` : 'none down 10% on their own run'}</small>`;
 
@@ -119,7 +121,7 @@ export async function render(main, P) {
     `Across ${B.overdue.accounts} accounts: about ${moneyK(B.overdue.oneOff)} once to destroy, and ${moneyK(B.overdue.storageLost)} a month of storage ended.`);
   const tiles = `<div class="tiles">${marginTile}${boxesTile}</div>`;
   const brief = `<details class="brief" data-rv><summary>The month in a paragraph ›</summary><p id="home-hv"></p><p class="src" id="home-by"></p></details>`;
-  const foot = `<div class="foot">Posted through ${mon(last.month)} ${last.month.slice(0, 4)} · work done through ${dayMonth(A.latestDone)} · ◇ modelled · tap any row to open it</div>`;
+  const foot = `<div class="foot">Posted through ${mon(latest.month)} ${latest.month.slice(0, 4)} · work done through ${dayMonth(A.latestDone)} · ◇ modelled · tap any row to open it</div>`;
 
   // Two layouts on trial beside the current one (?home=a, ?home=b), the same figures in each:
   //   a, a calm ledger: the bill on white with its track, then three tiles, the bridge, the chart wide;
@@ -176,7 +178,7 @@ export async function render(main, P) {
     ].filter(x => x.points.length),
     cone: X.bill && thisMonth.length ? { from: thisMonth[thisMonth.length - 1], to: X.workdays, lo: X.bill.lo, c: X.bill.central, hi: X.bill.hi } : null,
     days: X.workdays, target: TARGET,
-    source: `Veri-Shred done orders by working day · storage and last month's work from the current VCK run · ${lastYear.length ? 'last year priced to end on its posted bill' : 'last year joins with the next snapshot'} · weekend work counted on the Friday · ${X.backtest ? `band tested: ${X.backtest.hits} of the last ${X.backtest.n} months landed inside it` : 'band untested until fifteen months of daily work'}`,
+    source: `Veri-Shred done orders by working day · storage and last month's work from ${bill.posted ? `${mon(billMonth)}'s posted bill` : 'the current VCK run'} · ${lastYear.length ? 'last year priced to end on its posted bill' : 'last year joins with the next snapshot'} · weekend work counted on the Friday · ${X.backtest ? `band tested: ${X.backtest.hits} of the last ${X.backtest.n} months landed inside it` : 'band untested until fifteen months of daily work'}`,
   });
   reveal(main.querySelector('.h'));
 }
