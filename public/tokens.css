@@ -40,7 +40,7 @@
   --logo-ground: #ffffff;
   --ink-on-light: #1d1d1f; /* text on the logo's ground and on light fills, in both themes */
   --ink-on-logo: #3a3a3c;
-  --logo-h:      40px;
+  --logo-h:      32px;
   --logo-h-intro: 88px;
 
   /* ── chart series: validated palette slots, colour follows the entity ── */
