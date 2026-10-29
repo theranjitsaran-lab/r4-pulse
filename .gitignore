@@ -10,7 +10,7 @@ node_modules/
 *_output.txt
 
 # The calls log kept locally when running on fixtures
-data/
+/data/
 
 # Render secrets written by scripts/app_role.js and scripts/app_users.js
 .env.render
