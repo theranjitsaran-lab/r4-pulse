@@ -1,5 +1,5 @@
 // node scripts/contrast.js
-// Every text colour in tokens.css against the grounds it sits on, light and dark, by the WCAG
+// Every text colour in tokens.css against the grounds it sits on, on white, by the WCAG
 // contrast ratio. Text needs 4.5:1 (3:1 at 24px and over). Exits 1 if a text pair fails.
 'use strict';
 const fs = require('fs');
@@ -9,7 +9,6 @@ const css = fs.readFileSync(path.join(__dirname, '..', 'public', 'tokens.css'), 
 const block = re => { const m = css.match(re); if (!m) throw new Error('no block ' + re); return m[1]; };
 const vars = text => Object.fromEntries([...text.matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{6})\b/g)].map(m => [m[1], m[2]]));
 const light = vars(block(/:root \{([\s\S]*?)\n\}/));
-const dark = { ...light, ...vars(block(/:root\[data-theme="dark"\] \{([\s\S]*?)\n\}/)) };
 
 const lum = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; };
 const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
@@ -26,7 +25,7 @@ const PAIRS = [
 ];
 
 let failed = 0;
-for (const [name, T] of [['light', light], ['dark', dark]]) {
+for (const [name, T] of [['light', light]]) {   // one theme since 30 October 2026
   console.log(`\n${name}`);
   for (const [t, g, min] of PAIRS) {
     if (!T[t] || !T[g]) continue;

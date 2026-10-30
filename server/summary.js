@@ -13,7 +13,7 @@ const MODEL = 'claude-opus-5-5';
 let lib;
 const shared = () => lib || (lib = import('../public/components/summary.js'));
 
-async function write(sheet, S, system) {
+async function write(sheet, S, system, text) {
   const Anthropic = require('@anthropic-ai/sdk');
   const client = new (Anthropic.default || Anthropic)();
   const res = await client.beta.messages.create({
@@ -34,15 +34,18 @@ router.post('/', async (req, res) => {
   const sheet = req.body && Array.isArray(req.body.sheet) ? req.body.sheet.slice(0, 30) : null;
   if (!sheet || !sheet.every(f => f && typeof f.line === 'string' && f.line.length < 400)) return res.status(400).json({ error: 'sheet must be a list of { key, line }' });
   const S = await shared();
-  const template = { text: S.templateSummary(sheet), source: 'template' };
+  // form 'home2': a headline and three keyed bullets (views/home2.js); otherwise the paragraph
+  const home2 = req.body.form === 'home2';
+  const template = { text: home2 ? S.templateHome2(sheet) : S.templateSummary(sheet), source: 'template' };
   if (!process.env.ANTHROPIC_API_KEY) return res.json(template);
-  const key = crypto.createHash('sha256').update(JSON.stringify(sheet)).digest('hex');
+  const key = crypto.createHash('sha256').update((home2 ? 'home2' : '') + JSON.stringify(sheet)).digest('hex');
   if (!cache.has(key)) {
     cache.set(key, (async () => {
       try {
-        const text = await write(sheet, S);
+        const text = home2 ? await write(sheet, S, S.HOME2_SYSTEM, S.home2SheetText(sheet)) : await write(sheet, S);
         if (!text) return template;
         const check = S.checkNumbers(text, sheet);
+        if (home2 && !S.parseHome2(text, sheet)) { console.warn('summary: home2 reply not in four lines, template used'); return template; }
         if (!check.ok) { console.warn('summary: numbers not on the sheet, template used:', check.bad.join(' ')); return { ...template, bad: check.bad }; }
         return { text, source: 'claude' };
       } catch (e) {

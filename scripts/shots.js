@@ -21,6 +21,7 @@ const design = args.includes('--design');           // draw the ?design=1 overla
 const drill = require('../fixtures/drill.json').data.accounts.filter(a => a.level1 !== 6714).sort((a, b) => b.visits.length - a.visits.length);
 const SCREENS = [
   { name: 'home',      hash: '#pulse' },
+  { name: 'home2',     hash: '#home2' },
   { name: 'customers', hash: '#customers' },
   { name: 'customer',  hash: `#customer/${drill[0].level1}` },
   { name: 'pricing',   hash: '#pricing' },

@@ -1,0 +1,1003 @@
+{
+ "snapshotAt": "2026-10-30T21:10:36.671Z",
+ "data": {
+  "rows": [
+   {
+    "month": "2024-11-01",
+    "family": "bin",
+    "revenue": 88756.87,
+    "accounts": 138
+   },
+   {
+    "month": "2024-11-01",
+    "family": "handling",
+    "revenue": 14967.15,
+    "accounts": 60
+   },
+   {
+    "month": "2024-11-01",
+    "family": "itad",
+    "revenue": 19434.51,
+    "accounts": 8
+   },
+   {
+    "month": "2024-11-01",
+    "family": "labour",
+    "revenue": 39687.84,
+    "accounts": 12
+   },
+   {
+    "month": "2024-11-01",
+    "family": "movement",
+    "revenue": 11152.15,
+    "accounts": 57
+   },
+   {
+    "month": "2024-11-01",
+    "family": "other",
+    "revenue": 50824.93,
+    "accounts": 81
+   },
+   {
+    "month": "2024-11-01",
+    "family": "shred",
+    "revenue": 73906.75,
+    "accounts": 152
+   },
+   {
+    "month": "2024-12-01",
+    "family": "bin",
+    "revenue": 94795.25,
+    "accounts": 144
+   },
+   {
+    "month": "2024-12-01",
+    "family": "handling",
+    "revenue": 10943.03,
+    "accounts": 62
+   },
+   {
+    "month": "2024-12-01",
+    "family": "itad",
+    "revenue": 6794.92,
+    "accounts": 11
+   },
+   {
+    "month": "2024-12-01",
+    "family": "labour",
+    "revenue": 25342.73,
+    "accounts": 15
+   },
+   {
+    "month": "2024-12-01",
+    "family": "movement",
+    "revenue": 12019.06,
+    "accounts": 62
+   },
+   {
+    "month": "2024-12-01",
+    "family": "other",
+    "revenue": 55066.73,
+    "accounts": 73
+   },
+   {
+    "month": "2024-12-01",
+    "family": "shred",
+    "revenue": 14183.45,
+    "accounts": 151
+   },
+   {
+    "month": "2025-01-01",
+    "family": "bin",
+    "revenue": 116327.68,
+    "accounts": 166
+   },
+   {
+    "month": "2025-01-01",
+    "family": "handling",
+    "revenue": 27121.96,
+    "accounts": 73
+   },
+   {
+    "month": "2025-01-01",
+    "family": "itad",
+    "revenue": 32788.57,
+    "accounts": 17
+   },
+   {
+    "month": "2025-01-01",
+    "family": "labour",
+    "revenue": 38848.38,
+    "accounts": 15
+   },
+   {
+    "month": "2025-01-01",
+    "family": "movement",
+    "revenue": 19151.83,
+    "accounts": 79
+   },
+   {
+    "month": "2025-01-01",
+    "family": "other",
+    "revenue": 289635.65,
+    "accounts": 83
+   },
+   {
+    "month": "2025-01-01",
+    "family": "shred",
+    "revenue": 24135.55,
+    "accounts": 171
+   },
+   {
+    "month": "2025-02-01",
+    "family": "bin",
+    "revenue": 100449.6,
+    "accounts": 143
+   },
+   {
+    "month": "2025-02-01",
+    "family": "handling",
+    "revenue": 16589.05,
+    "accounts": 65
+   },
+   {
+    "month": "2025-02-01",
+    "family": "itad",
+    "revenue": 14547.55,
+    "accounts": 11
+   },
+   {
+    "month": "2025-02-01",
+    "family": "labour",
+    "revenue": 16949.13,
+    "accounts": 13
+   },
+   {
+    "month": "2025-02-01",
+    "family": "movement",
+    "revenue": 13570.91,
+    "accounts": 69
+   },
+   {
+    "month": "2025-02-01",
+    "family": "other",
+    "revenue": 62701.85,
+    "accounts": 82
+   },
+   {
+    "month": "2025-02-01",
+    "family": "shred",
+    "revenue": 19632.85,
+    "accounts": 153
+   },
+   {
+    "month": "2025-03-01",
+    "family": "bin",
+    "revenue": 113662.77,
+    "accounts": 161
+   },
+   {
+    "month": "2025-03-01",
+    "family": "handling",
+    "revenue": 37450.22,
+    "accounts": 81
+   },
+   {
+    "month": "2025-03-01",
+    "family": "itad",
+    "revenue": 29772.87,
+    "accounts": 12
+   },
+   {
+    "month": "2025-03-01",
+    "family": "labour",
+    "revenue": 13554.95,
+    "accounts": 18
+   },
+   {
+    "month": "2025-03-01",
+    "family": "movement",
+    "revenue": 17873.47,
+    "accounts": 82
+   },
+   {
+    "month": "2025-03-01",
+    "family": "other",
+    "revenue": 61760.62,
+    "accounts": 95
+   },
+   {
+    "month": "2025-03-01",
+    "family": "shred",
+    "revenue": 10157.83,
+    "accounts": 167
+   },
+   {
+    "month": "2025-04-01",
+    "family": "bin",
+    "revenue": 124496.9,
+    "accounts": 165
+   },
+   {
+    "month": "2025-04-01",
+    "family": "handling",
+    "revenue": 39296.15,
+    "accounts": 77
+   },
+   {
+    "month": "2025-04-01",
+    "family": "itad",
+    "revenue": 71954.38,
+    "accounts": 14
+   },
+   {
+    "month": "2025-04-01",
+    "family": "labour",
+    "revenue": 19118.13,
+    "accounts": 27
+   },
+   {
+    "month": "2025-04-01",
+    "family": "movement",
+    "revenue": 18673.27,
+    "accounts": 75
+   },
+   {
+    "month": "2025-04-01",
+    "family": "other",
+    "revenue": 108345.28,
+    "accounts": 95
+   },
+   {
+    "month": "2025-04-01",
+    "family": "shred",
+    "revenue": 11321.37,
+    "accounts": 181
+   },
+   {
+    "month": "2025-05-01",
+    "family": "bin",
+    "revenue": 110183.86,
+    "accounts": 153
+   },
+   {
+    "month": "2025-05-01",
+    "family": "handling",
+    "revenue": 30454.09,
+    "accounts": 64
+   },
+   {
+    "month": "2025-05-01",
+    "family": "itad",
+    "revenue": 13356.84,
+    "accounts": 11
+   },
+   {
+    "month": "2025-05-01",
+    "family": "labour",
+    "revenue": 11042.39,
+    "accounts": 18
+   },
+   {
+    "month": "2025-05-01",
+    "family": "movement",
+    "revenue": 14033.81,
+    "accounts": 61
+   },
+   {
+    "month": "2025-05-01",
+    "family": "other",
+    "revenue": 71232.7,
+    "accounts": 80
+   },
+   {
+    "month": "2025-05-01",
+    "family": "shred",
+    "revenue": 41515.85,
+    "accounts": 175
+   },
+   {
+    "month": "2025-06-01",
+    "family": "bin",
+    "revenue": 113247.12,
+    "accounts": 155
+   },
+   {
+    "month": "2025-06-01",
+    "family": "handling",
+    "revenue": 10792.65,
+    "accounts": 59
+   },
+   {
+    "month": "2025-06-01",
+    "family": "itad",
+    "revenue": 20835.4,
+    "accounts": 10
+   },
+   {
+    "month": "2025-06-01",
+    "family": "labour",
+    "revenue": 9923.63,
+    "accounts": 17
+   },
+   {
+    "month": "2025-06-01",
+    "family": "movement",
+    "revenue": 12512.75,
+    "accounts": 65
+   },
+   {
+    "month": "2025-06-01",
+    "family": "other",
+    "revenue": 154900.18,
+    "accounts": 83
+   },
+   {
+    "month": "2025-06-01",
+    "family": "shred",
+    "revenue": 78441.99,
+    "accounts": 168
+   },
+   {
+    "month": "2025-07-01",
+    "family": "bin",
+    "revenue": 129064.2,
+    "accounts": 159
+   },
+   {
+    "month": "2025-07-01",
+    "family": "handling",
+    "revenue": 22401.9,
+    "accounts": 64
+   },
+   {
+    "month": "2025-07-01",
+    "family": "itad",
+    "revenue": 19056.9,
+    "accounts": 15
+   },
+   {
+    "month": "2025-07-01",
+    "family": "labour",
+    "revenue": 11263.97,
+    "accounts": 76
+   },
+   {
+    "month": "2025-07-01",
+    "family": "movement",
+    "revenue": 12981.77,
+    "accounts": 69
+   },
+   {
+    "month": "2025-07-01",
+    "family": "other",
+    "revenue": 195844.19,
+    "accounts": 124
+   },
+   {
+    "month": "2025-07-01",
+    "family": "shred",
+    "revenue": 28677.12,
+    "accounts": 168
+   },
+   {
+    "month": "2025-08-01",
+    "family": "bin",
+    "revenue": 117154.94,
+    "accounts": 169
+   },
+   {
+    "month": "2025-08-01",
+    "family": "handling",
+    "revenue": 18725.03,
+    "accounts": 60
+   },
+   {
+    "month": "2025-08-01",
+    "family": "itad",
+    "revenue": 5951.96,
+    "accounts": 11
+   },
+   {
+    "month": "2025-08-01",
+    "family": "labour",
+    "revenue": 123116.63,
+    "accounts": 57
+   },
+   {
+    "month": "2025-08-01",
+    "family": "movement",
+    "revenue": 10528.77,
+    "accounts": 57
+   },
+   {
+    "month": "2025-08-01",
+    "family": "other",
+    "revenue": 92524.2,
+    "accounts": 115
+   },
+   {
+    "month": "2025-08-01",
+    "family": "shred",
+    "revenue": 60031.37,
+    "accounts": 192
+   },
+   {
+    "month": "2025-09-01",
+    "family": "bin",
+    "revenue": 115830.04,
+    "accounts": 154
+   },
+   {
+    "month": "2025-09-01",
+    "family": "handling",
+    "revenue": 12295.42,
+    "accounts": 77
+   },
+   {
+    "month": "2025-09-01",
+    "family": "itad",
+    "revenue": 9595.38,
+    "accounts": 10
+   },
+   {
+    "month": "2025-09-01",
+    "family": "labour",
+    "revenue": 71075.32,
+    "accounts": 85
+   },
+   {
+    "month": "2025-09-01",
+    "family": "movement",
+    "revenue": 10284.9,
+    "accounts": 69
+   },
+   {
+    "month": "2025-09-01",
+    "family": "other",
+    "revenue": 46808.19,
+    "accounts": 126
+   },
+   {
+    "month": "2025-09-01",
+    "family": "shred",
+    "revenue": 17467.88,
+    "accounts": 170
+   },
+   {
+    "month": "2025-10-01",
+    "family": "bin",
+    "revenue": 133996.57,
+    "accounts": 170
+   },
+   {
+    "month": "2025-10-01",
+    "family": "handling",
+    "revenue": 20807.63,
+    "accounts": 63
+   },
+   {
+    "month": "2025-10-01",
+    "family": "itad",
+    "revenue": 41085.78,
+    "accounts": 17
+   },
+   {
+    "month": "2025-10-01",
+    "family": "labour",
+    "revenue": 29349,
+    "accounts": 47
+   },
+   {
+    "month": "2025-10-01",
+    "family": "movement",
+    "revenue": 12910.73,
+    "accounts": 61
+   },
+   {
+    "month": "2025-10-01",
+    "family": "other",
+    "revenue": 25516.39,
+    "accounts": 96
+   },
+   {
+    "month": "2025-10-01",
+    "family": "shred",
+    "revenue": 28598.05,
+    "accounts": 181
+   },
+   {
+    "month": "2025-11-01",
+    "family": "bin",
+    "revenue": 102424.78,
+    "accounts": 162
+   },
+   {
+    "month": "2025-11-01",
+    "family": "handling",
+    "revenue": 14090.92,
+    "accounts": 57
+   },
+   {
+    "month": "2025-11-01",
+    "family": "itad",
+    "revenue": 23438.67,
+    "accounts": 18
+   },
+   {
+    "month": "2025-11-01",
+    "family": "labour",
+    "revenue": 123341.02,
+    "accounts": 54
+   },
+   {
+    "month": "2025-11-01",
+    "family": "movement",
+    "revenue": 8145.75,
+    "accounts": 56
+   },
+   {
+    "month": "2025-11-01",
+    "family": "other",
+    "revenue": 31312.43,
+    "accounts": 115
+   },
+   {
+    "month": "2025-11-01",
+    "family": "shred",
+    "revenue": 21939.36,
+    "accounts": 184
+   },
+   {
+    "month": "2025-12-01",
+    "family": "bin",
+    "revenue": 95244.03,
+    "accounts": 142
+   },
+   {
+    "month": "2025-12-01",
+    "family": "handling",
+    "revenue": 24418.55,
+    "accounts": 63
+   },
+   {
+    "month": "2025-12-01",
+    "family": "itad",
+    "revenue": 5530.65,
+    "accounts": 8
+   },
+   {
+    "month": "2025-12-01",
+    "family": "labour",
+    "revenue": 83926.28,
+    "accounts": 15
+   },
+   {
+    "month": "2025-12-01",
+    "family": "movement",
+    "revenue": 13041.18,
+    "accounts": 63
+   },
+   {
+    "month": "2025-12-01",
+    "family": "other",
+    "revenue": 27499.67,
+    "accounts": 81
+   },
+   {
+    "month": "2025-12-01",
+    "family": "shred",
+    "revenue": 52698.5,
+    "accounts": 158
+   },
+   {
+    "month": "2026-01-01",
+    "family": "bin",
+    "revenue": 105552.17,
+    "accounts": 160
+   },
+   {
+    "month": "2026-01-01",
+    "family": "handling",
+    "revenue": 62597.23,
+    "accounts": 67
+   },
+   {
+    "month": "2026-01-01",
+    "family": "itad",
+    "revenue": 14521.14,
+    "accounts": 11
+   },
+   {
+    "month": "2026-01-01",
+    "family": "labour",
+    "revenue": 37776.18,
+    "accounts": 14
+   },
+   {
+    "month": "2026-01-01",
+    "family": "movement",
+    "revenue": 10912.58,
+    "accounts": 66
+   },
+   {
+    "month": "2026-01-01",
+    "family": "other",
+    "revenue": 28155.96,
+    "accounts": 86
+   },
+   {
+    "month": "2026-01-01",
+    "family": "shred",
+    "revenue": 91258.35,
+    "accounts": 176
+   },
+   {
+    "month": "2026-02-01",
+    "family": "bin",
+    "revenue": 87841.41,
+    "accounts": 158
+   },
+   {
+    "month": "2026-02-01",
+    "family": "handling",
+    "revenue": 44093.59,
+    "accounts": 68
+   },
+   {
+    "month": "2026-02-01",
+    "family": "itad",
+    "revenue": 33533.55,
+    "accounts": 11
+   },
+   {
+    "month": "2026-02-01",
+    "family": "labour",
+    "revenue": 36995.68,
+    "accounts": 19
+   },
+   {
+    "month": "2026-02-01",
+    "family": "movement",
+    "revenue": 12843.32,
+    "accounts": 60
+   },
+   {
+    "month": "2026-02-01",
+    "family": "other",
+    "revenue": 22789.26,
+    "accounts": 80
+   },
+   {
+    "month": "2026-02-01",
+    "family": "shred",
+    "revenue": 58980.1,
+    "accounts": 165
+   },
+   {
+    "month": "2026-03-01",
+    "family": "bin",
+    "revenue": 87574.53,
+    "accounts": 163
+   },
+   {
+    "month": "2026-03-01",
+    "family": "handling",
+    "revenue": 22617.77,
+    "accounts": 65
+   },
+   {
+    "month": "2026-03-01",
+    "family": "itad",
+    "revenue": 9716.23,
+    "accounts": 13
+   },
+   {
+    "month": "2026-03-01",
+    "family": "labour",
+    "revenue": 24217.09,
+    "accounts": 19
+   },
+   {
+    "month": "2026-03-01",
+    "family": "movement",
+    "revenue": 11885.57,
+    "accounts": 63
+   },
+   {
+    "month": "2026-03-01",
+    "family": "other",
+    "revenue": 40900.18,
+    "accounts": 87
+   },
+   {
+    "month": "2026-03-01",
+    "family": "shred",
+    "revenue": 47282.61,
+    "accounts": 184
+   },
+   {
+    "month": "2026-04-01",
+    "family": "bin",
+    "revenue": 91319.78,
+    "accounts": 166
+   },
+   {
+    "month": "2026-04-01",
+    "family": "handling",
+    "revenue": 26263.2,
+    "accounts": 63
+   },
+   {
+    "month": "2026-04-01",
+    "family": "itad",
+    "revenue": 20136.69,
+    "accounts": 13
+   },
+   {
+    "month": "2026-04-01",
+    "family": "labour",
+    "revenue": 20727.94,
+    "accounts": 27
+   },
+   {
+    "month": "2026-04-01",
+    "family": "movement",
+    "revenue": 11744.43,
+    "accounts": 63
+   },
+   {
+    "month": "2026-04-01",
+    "family": "other",
+    "revenue": 24534.36,
+    "accounts": 89
+   },
+   {
+    "month": "2026-04-01",
+    "family": "shred",
+    "revenue": 47504.27,
+    "accounts": 188
+   },
+   {
+    "month": "2026-05-01",
+    "family": "bin",
+    "revenue": 96062.82,
+    "accounts": 180
+   },
+   {
+    "month": "2026-05-01",
+    "family": "handling",
+    "revenue": 11313.25,
+    "accounts": 59
+   },
+   {
+    "month": "2026-05-01",
+    "family": "itad",
+    "revenue": 34416.27,
+    "accounts": 19
+   },
+   {
+    "month": "2026-05-01",
+    "family": "labour",
+    "revenue": 15639.44,
+    "accounts": 26
+   },
+   {
+    "month": "2026-05-01",
+    "family": "movement",
+    "revenue": 10652.23,
+    "accounts": 64
+   },
+   {
+    "month": "2026-05-01",
+    "family": "other",
+    "revenue": 27272.75,
+    "accounts": 96
+   },
+   {
+    "month": "2026-05-01",
+    "family": "shred",
+    "revenue": 22907.59,
+    "accounts": 203
+   },
+   {
+    "month": "2026-06-01",
+    "family": "bin",
+    "revenue": 96955.38,
+    "accounts": 165
+   },
+   {
+    "month": "2026-06-01",
+    "family": "handling",
+    "revenue": 24711.94,
+    "accounts": 61
+   },
+   {
+    "month": "2026-06-01",
+    "family": "itad",
+    "revenue": 49123.23,
+    "accounts": 17
+   },
+   {
+    "month": "2026-06-01",
+    "family": "labour",
+    "revenue": 11710.02,
+    "accounts": 70
+   },
+   {
+    "month": "2026-06-01",
+    "family": "movement",
+    "revenue": 8637.85,
+    "accounts": 55
+   },
+   {
+    "month": "2026-06-01",
+    "family": "other",
+    "revenue": 30516.62,
+    "accounts": 123
+   },
+   {
+    "month": "2026-06-01",
+    "family": "shred",
+    "revenue": 39216.06,
+    "accounts": 184
+   },
+   {
+    "month": "2026-07-01",
+    "family": "bin",
+    "revenue": 99931.87,
+    "accounts": 187
+   },
+   {
+    "month": "2026-07-01",
+    "family": "handling",
+    "revenue": 19146.16,
+    "accounts": 66
+   },
+   {
+    "month": "2026-07-01",
+    "family": "itad",
+    "revenue": 20842.64,
+    "accounts": 22
+   },
+   {
+    "month": "2026-07-01",
+    "family": "labour",
+    "revenue": 18876.32,
+    "accounts": 81
+   },
+   {
+    "month": "2026-07-01",
+    "family": "movement",
+    "revenue": 11870.05,
+    "accounts": 58
+   },
+   {
+    "month": "2026-07-01",
+    "family": "other",
+    "revenue": 33179.7,
+    "accounts": 138
+   },
+   {
+    "month": "2026-07-01",
+    "family": "shred",
+    "revenue": 38645.29,
+    "accounts": 212
+   },
+   {
+    "month": "2026-08-01",
+    "family": "bin",
+    "revenue": 95139.63,
+    "accounts": 192
+   },
+   {
+    "month": "2026-08-01",
+    "family": "handling",
+    "revenue": 15057.01,
+    "accounts": 66
+   },
+   {
+    "month": "2026-08-01",
+    "family": "itad",
+    "revenue": 16014.65,
+    "accounts": 15
+   },
+   {
+    "month": "2026-08-01",
+    "family": "labour",
+    "revenue": 9152.95,
+    "accounts": 35
+   },
+   {
+    "month": "2026-08-01",
+    "family": "movement",
+    "revenue": 9901.15,
+    "accounts": 63
+   },
+   {
+    "month": "2026-08-01",
+    "family": "other",
+    "revenue": 26880.01,
+    "accounts": 103
+   },
+   {
+    "month": "2026-08-01",
+    "family": "shred",
+    "revenue": 28864.41,
+    "accounts": 214
+   },
+   {
+    "month": "2026-09-01",
+    "family": "bin",
+    "revenue": 90789.23,
+    "accounts": 167
+   },
+   {
+    "month": "2026-09-01",
+    "family": "handling",
+    "revenue": 15969.88,
+    "accounts": 54
+   },
+   {
+    "month": "2026-09-01",
+    "family": "itad",
+    "revenue": 46984.8,
+    "accounts": 18
+   },
+   {
+    "month": "2026-09-01",
+    "family": "labour",
+    "revenue": 12274.15,
+    "accounts": 33
+   },
+   {
+    "month": "2026-09-01",
+    "family": "movement",
+    "revenue": 10380.47,
+    "accounts": 55
+   },
+   {
+    "month": "2026-09-01",
+    "family": "other",
+    "revenue": 25268.6,
+    "accounts": 86
+   },
+   {
+    "month": "2026-09-01",
+    "family": "shred",
+    "revenue": 24410.06,
+    "accounts": 181
+   },
+   {
+    "month": "2026-10-01",
+    "family": "bin",
+    "revenue": 2247.58,
+    "accounts": 18
+   },
+   {
+    "month": "2026-10-01",
+    "family": "itad",
+    "revenue": 816,
+    "accounts": 1
+   },
+   {
+    "month": "2026-10-01",
+    "family": "labour",
+    "revenue": 850,
+    "accounts": 3
+   },
+   {
+    "month": "2026-10-01",
+    "family": "other",
+    "revenue": 302.31,
+    "accounts": 7
+   },
+   {
+    "month": "2026-10-01",
+    "family": "shred",
+    "revenue": 1628,
+    "accounts": 23
+   }
+  ]
+ }
+}

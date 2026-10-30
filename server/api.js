@@ -9,7 +9,7 @@ const { cached, USE_FIXTURES } = require('./db');
 const queries = require('./queries');
 
 const router = express.Router();
-const SCREENS = ['pulse', 'activity', 'pricing', 'calls', 'margin', 'customers', 'storage'];
+const SCREENS = ['pulse', 'activity', 'pricing', 'calls', 'margin', 'customers', 'storage', 'segments'];
 
 // The screens' JSON runs to a megabyte or more; gzipped it is a tenth of that, which is the
 // difference on a phone. Compressed once per body and kept, so a cached screen costs nothing more.

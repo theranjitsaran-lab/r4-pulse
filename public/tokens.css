@@ -4,7 +4,7 @@
 
 /* R4 Pulse — design tokens. Redesign, 26 October 2026.
    One system typeface, a validated chart palette (dataviz reference instance), quiet chrome,
-   status colour for exceptions only, light and dark. Components read these variables only.
+   status colour for exceptions only, on white. Components read these variables only.
    Token names are kept from the first design so earlier components inherit the new values. */
 
 :root {
@@ -18,9 +18,9 @@
   --ink-5:      #aeaeb2;   /* modelled mark, dashed borders */
 
   /* ── surfaces ── */
-  --ground:     #f5f5f7;   /* page */
+  --ground:     #ffffff;   /* page: white, always */
   --surface:    #ffffff;   /* card */
-  --well:       #f9f9fb;   /* inset: source lines, opened rows */
+  --well:       #f6f8f6;   /* inset: source lines, opened rows */
   --well-2:     #ececf0;   /* tracks, empty bars */
   --tint-brand: #e3f2e5;   /* selected row */
 
@@ -65,24 +65,24 @@
   --f-narrow:   var(--f-sans);
 
   --fs-source:  12px;
-  --fs-label:   13px;
-  --fs-body:    15px;
-  --fs-body-lg: 16px;
-  --fs-head:    17px;
-  --fs-num:     24px;
-  --fs-num-lg:  32px;
-  --fs-hero:    52px;
-  --fs-display: 34px;
+  --fs-label:   12px;
+  --fs-body:    14px;
+  --fs-body-lg: 15px;
+  --fs-head:    16px;
+  --fs-num:     22px;
+  --fs-num-lg:  28px;
+  --fs-hero:    40px;
+  --fs-display: 28px;
 
   --track-label: .02em;
   --track-tight: -.02em;
 
-  --fs-sm:      14px;      /* table cells, buttons */
-  --fs-lead:    20px;      /* a verdict, a lede */
-  --fs-display-ph: 28px;   /* a screen title on a phone */
-  --fs-mega:    64px;      /* Home's one hero figure, desktop */
-  --fs-mega-ph: 46px;      /* the same on a phone */
-  --fs-title:   22px;      /* a section title that states its conclusion */
+  --fs-sm:      13px;      /* table cells, buttons */
+  --fs-lead:    17px;      /* a verdict, a lede */
+  --fs-display-ph: 24px;   /* a screen title on a phone */
+  --fs-mega:    40px;      /* Home's one hero figure, desktop */
+  --fs-mega-ph: 34px;      /* the same on a phone */
+  --fs-title:   18px;      /* a section title that states its conclusion */
   --fs-tiny:    12px;      /* the floor: nothing on screen is smaller */
 
   /* ── the hero band and the intro: R4's green, deepened ── */
@@ -164,34 +164,8 @@
   --t:      200ms;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme="light"])) {
-    color-scheme: dark;
-    --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #98989d; --ink-5: #86868b;
-    --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #12301a;
-    --rule: #2c2c2e; --rule-2: #333336; --rule-3: #3a3a3c; --rule-4: #48484a; --rule-ink: #f5f5f7;
-    --brand: #4cc35d; --brand-2: #6fd27e; --ink-on-logo: #3a3a3c;
-    --s-storage: #3987e5; --s-service: #d95926; --s-citadel: #6b6a64;
-    --grid: #2c2c2e; --baseline: #48484a;
-    --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
-    --shadow: none;
-    --hero-bg: #082d0c; --hero-bg-2: #0e5116; --hero-accent: #8fd99a;
-    --lever-1: #1a6b24; --lever-2: #237a30; --lever-3: #38b449; --lever-4: #a5dcae; --heat: #38b449;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --ink: #f5f5f7; --ink-2: #e5e5ea; --ink-3: #a1a1a6; --ink-4: #98989d; --ink-5: #86868b;
-  --ground: #000000; --surface: #1c1c1e; --well: #232325; --well-2: #2c2c2e; --tint-brand: #12301a;
-  --rule: #2c2c2e; --rule-2: #333336; --rule-3: #3a3a3c; --rule-4: #48484a; --rule-ink: #f5f5f7;
-  --brand: #4cc35d; --brand-2: #6fd27e; --ink-on-logo: #3a3a3c;
-  --s-storage: #3987e5; --s-service: #d95926; --s-citadel: #6b6a64;
-  --grid: #2c2c2e; --baseline: #48484a;
-  --good: #30c030; --warn: #f0a630; --bad: #ff6b6b; --bad-bg: #3a1d1d; --warn-bg: #3a2c14;
-  --shadow: none;
-  --hero-bg: #082d0c; --hero-bg-2: #0e5116; --hero-accent: #8fd99a;
-  --lever-1: #1a6b24; --lever-2: #237a30; --lever-3: #38b449; --lever-4: #a5dcae; --heat: #38b449;
-}
+/* One theme: white ground, R4 green. Dark mode was dropped on 30 October 2026 (it turned the
+   whole app black on a PC in dark mode); the old dark values are in git history. */
 
 @media (prefers-reduced-motion: reduce) { :root { --t-fast: 0ms; --t: 0ms; --t-slow: 0ms; --t-draw: 0ms; --t-stagger: 0ms; --rise: 0px; } }
 
