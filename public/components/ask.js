@@ -6,12 +6,14 @@ import { esc } from './data.js';
 let sheet = null;
 const history = [];
 
-export function openAsk({ suggestions = [] } = {}) {
+export function openAsk({ suggestions = [], ask = null } = {}) {
   if (!sheet) sheet = build(suggestions);
+  else if (suggestions.length) sheet.querySelector('.ask-sugg').innerHTML = suggestions.map(s => `<button type="button">${esc(s)}</button>`).join('');
   document.documentElement.classList.add('ask-open');
   sheet.hidden = false;
   requestAnimationFrame(() => sheet.classList.add('is-on'));
   sheet.querySelector('textarea').focus({ preventScroll: true });
+  if (ask) sheet.send(ask);
 }
 
 function close() {
@@ -63,6 +65,7 @@ function build(suggestions) {
     log.scrollTop = log.scrollHeight;
   };
   form.addEventListener('submit', e => { e.preventDefault(); send(ta.value); });
-  el.querySelectorAll('.ask-sugg button').forEach(b => b.addEventListener('click', () => send(b.textContent)));
+  el.querySelector('.ask-log').addEventListener('click', e => { const b = e.target.closest('.ask-sugg button'); if (b) send(b.textContent); });
+  el.send = send;
   return el;
 }

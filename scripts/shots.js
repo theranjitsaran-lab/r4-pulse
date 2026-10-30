@@ -29,7 +29,10 @@ const SCREENS = [
   { name: 'styleguide', page: '/styleguide.html' },
 ].concat(
   // every Customers list, with --all or by name (customers-margin, ...)
-  [{ name: 'explainer', hash: '#customers?view=whitespace', click: 'button.opp', extra: true }],
+  [{ name: 'explainer', hash: '#customers?view=whitespace', click: 'button.opp', extra: true },
+   { name: 'pop-margin', hash: '#customers', click: '.c2-x[data-x="margin"]', extra: true },
+   { name: 'pop-price', hash: '#customers?view=overview&line=bin', click: '.c2-x[data-x="price"]', extra: true },
+   { name: 'customers-bins', hash: '#customers?view=overview&line=bin', extra: true }],
   ['conversations', 'grid', 'whitespace', 'slipping', 'gaps', 'rounds', 'destruction', 'margin', 'all'].map(v => ({ name: 'customers-' + v, hash: '#customers?view=' + v, extra: true })),
 ).filter(s => only.length ? only.includes(s.name) : !s.extra || args.includes('--all'));
 // --only=intro takes just the opening, mid-flight

@@ -6,6 +6,7 @@
 //   #pricing, #activity         the tools
 import { getJson } from '/components/data.js';
 import { playIntro } from '/components/intro.js';
+import { openAsk } from '/components/ask.js';
 
 const ROUTES = {
   pulse:     { view: 'pulse',     api: 'pulse',     nav: 'pulse' },
@@ -80,6 +81,26 @@ fetch('/health').then(r => r.json()).then(h => {
   tag.textContent = 'Design preview';
   right.prepend(tag);
 }).catch(() => {});
+
+// Ask, on every screen: what to ask depends on where you are
+const SUGGEST = {
+  pulse: ['Are we on track for this month?', 'Who should I call this week?', 'Where are the cross-sell wins?', 'What happens if customers shred their eligible boxes?'],
+  customers: ['Which customers are slipping and why?', 'Which large accounts cost most to serve?', 'Where are the cross-sell wins?', 'How are the lines of business doing?'],
+  pricing: ['Which prices are furthest under the book?', 'Who has missed every rate round?', 'How are the lines of business doing?'],
+  activity: ['Where would one more customer save most travel?', 'How busy was last week?', 'What happens if customers shred their eligible boxes?'],
+};
+const fab = document.createElement('button');
+fab.className = 'h2-fab'; fab.type = 'button'; fab.setAttribute('aria-label', 'Ask about the figures');
+fab.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/></svg><span>Ask</span>';
+const ask = (q) => {
+  const { name } = parse(), nav = ROUTES[name].nav;
+  const who = name === 'customer' && document.querySelector('#main h1') ? document.querySelector('#main h1').textContent.trim() : null;
+  openAsk({ ask: q || null, suggestions: who ? [`How is ${who} doing, and why?`, `Is ${who} priced right against the book?`, `What else could ${who} buy?`] : SUGGEST[nav] || SUGGEST.pulse });
+};
+fab.addEventListener('click', () => ask());
+document.body.appendChild(fab);
+// any screen can open it, with a question to send: dispatchEvent(new CustomEvent('open-ask', { detail: { ask } }))
+addEventListener('open-ask', e => ask(e.detail && e.detail.ask));
 
 addEventListener('hashchange', show);
 show();

@@ -2,7 +2,7 @@
    these classes, so no component file carries a colour literal. */
 
 /* ── cards ── */
-.card { background: var(--surface); border-radius: var(--r-lg); padding: var(--sp-5) var(--sp-6); box-shadow: var(--shadow); }
+.card { background: var(--surface); border: var(--hair) solid var(--rule-2); border-radius: var(--r-lg); padding: var(--sp-5) var(--sp-6); }
 .stack > * + * { margin-top: var(--sp-4); }
 .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); margin-bottom: var(--sp-3); }
 .card-head h3 { margin: 0; font-size: var(--fs-head); font-weight: 600; letter-spacing: -.01em; }
