@@ -146,7 +146,7 @@ function frame(pts, width) {
 }
 
 // The outline, in the frame: points closer than a pixel are dropped, so a far-out county costs little.
-function baseLayer(base, F) {
+function baseLayer(base, F, avoid = []) {
   if (!base) return '';
   const path = (ring, close) => {
     let d = '', last = null;
@@ -161,10 +161,11 @@ function baseLayer(base, F) {
   let g = `<path class="rm-land" d="${(base.land || []).map(r => path(r, true)).join('')}"/>`;
   g += `<path class="rm-road" d="${(base.roads || []).map(r => path(r.l || r, false)).join('')}"/>`;
   // town names: the largest first, none on top of another or of the frame's edge
-  const taken = [];
+  // town names never sit on the yard or a stop: the data is read first
+  const marks = [YARD, ...avoid].map(F.P), taken = [];
   for (const [name, lat, lon] of base.places || []) {
     const [x, y] = F.P([lat, lon]);
-    if (!inView([x, y], -F.pad) || taken.some(t => Math.abs(t[0] - x) < 70 && Math.abs(t[1] - y) < 16)) continue;
+    if (!inView([x, y], -F.pad) || taken.some(t => Math.abs(t[0] - x) < 70 && Math.abs(t[1] - y) < 16) || marks.some(m => Math.abs(m[0] - x) < 48 && Math.abs(m[1] - y) < 18)) continue;
     taken.push([x, y]);
     g += `<text class="rm-place" x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle">${esc(name)}</text>`;
     if (taken.length >= 8) break;
@@ -184,7 +185,7 @@ export function mapSvg(day, { width = 640, base = null, far = null } = {}) {
   const placed = day.stops.filter(s => s.pt);
   const F = frame([YARD, ...placed.map(s => s.pt)], width);
   const line = [YARD, ...placed.map(q => q.pt), YARD].map(F.P).map(q => q.map(v => v.toFixed(1)).join(',')).join(' ');
-  let g = baseLayer(base, F) + `<polyline class="rm-path" points="${line}"/>` + yardMark(F);
+  let g = baseLayer(base, F, placed.map(q => q.pt)) + `<polyline class="rm-path" points="${line}"/>` + yardMark(F);
   const seen = new Map();
   placed.forEach(q => {
     const [x, y] = F.P(q.pt), key = q.postcode, n = seen.get(key) || 0; seen.set(key, n + 1);
@@ -202,7 +203,7 @@ export function placesSvg(places, { width = 640, base = null, label = '' } = {})
   const placed = places.filter(p => p.pt);
   const F = frame([YARD, ...placed.map(p => p.pt)], width);
   const max = Math.max(1, ...placed.map(p => p.services || 0));
-  let g = baseLayer(base, F);
+  let g = baseLayer(base, F, placed.map(p => p.pt));
   for (const p of placed) { const [x, y] = F.P(p.pt); g += `<line class="rm-ray" x1="${F.P(YARD)[0].toFixed(1)}" y1="${F.P(YARD)[1].toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }
   // the yard goes on last, over the dots
   // every postcode a dot; names for the largest, and only where one does not sit on another or the yard

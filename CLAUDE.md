@@ -54,6 +54,7 @@ If a task seems to need a library, it doesn't — write the SVG.
   components/  chart.js, table.js, strip.js, margin.js, levers.js, whitespace.js, explain.js, data.js
   views/       pulse.js (Home), customers.js, customer.js, pricing.js, activity.js (Routes)
   data/zcta.json                                  ← postcode centroids (US Census, public)
+  data/basemap.json                               ← the Chicagoland outline under the maps (US Census; scripts/build_basemap.js)
 /fixtures    snapshotted JSON for offline work (npm run snapshot, on the PC)
 /docs        brief, logic pack, data addendum, margin spec, DEPLOY.md
 ```
