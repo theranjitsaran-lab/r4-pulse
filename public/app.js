@@ -9,6 +9,7 @@ import { playIntro } from '/components/intro.js';
 
 const ROUTES = {
   pulse:     { view: 'pulse',     api: 'pulse',     nav: 'pulse' },
+  home2:     { view: 'home2',     api: 'pulse',     nav: 'pulse' },   // the second design, on trial
   customers: { view: 'customers', api: 'customers', nav: 'customers' },
   customer:  { view: 'customer',  api: 'customers', nav: 'customers' },
   pricing:   { view: 'pricing',   api: 'pricing',   nav: 'pricing' },

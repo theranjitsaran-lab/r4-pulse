@@ -399,4 +399,22 @@ async function storage() {
   return { rows, names, months: months.reverse() };
 }
 
-module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage };
+// ── Segments — Home ──────────────────────────────────────────────────────────────────────
+// Service by line of business and month of work, from priced lines (both tables, a line counted
+// once), Citadel apart, 24 months to the latest priced work. The family is model.service_family's;
+// lines with no family, or the 'none' family (surcharges, minimums, fees), are 'other'. Storage is
+// not here: it bills from ret_tot by invoice month (pulse.monthly).
+async function segments() {
+  const rows = await query(`
+    WITH b AS (SELECT (date_trunc('month', m) - interval '23 months')::date AS f, (m::date + 1) AS t
+               FROM (SELECT greatest((SELECT max(wodate) FROM priced_lines), (SELECT max(wodate) FROM priced_lines_current)) AS m) x),
+    ${PL}
+    SELECT date_trunc('month', l.d)::date::text AS month,
+           CASE WHEN sf.family IN ('bin', 'shred', 'handling', 'movement', 'itad', 'labour') THEN sf.family ELSE 'other' END AS family,
+           sum(l.totamt)::float AS revenue, count(DISTINCT l.level1)::int AS accounts
+    FROM l LEFT JOIN model.service_family sf ON sf.servcode = l.servcode
+    WHERE l.level1 <> 6714 GROUP BY 1, 2 ORDER BY 1, 2`);
+  return { rows };
+}
+
+module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments };

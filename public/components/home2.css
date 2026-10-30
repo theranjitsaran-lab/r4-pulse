@@ -1,0 +1,176 @@
+/* Home, second design (views/home2.js) and the Ask sheet (components/ask.js). White ground, R4 green,
+   hairline cards. Every colour, size and space from tokens.css. Phone first; a desk gets columns. */
+
+.h2 { display: grid; gap: var(--sp-4); padding-bottom: var(--sp-12); }
+.h2-card { background: var(--surface); border: var(--hair) solid var(--rule-2); border-radius: var(--r-lg); padding: var(--sp-4); min-width: 0; }
+.h2-card.pending { border-style: dashed; color: var(--ink-3); font-size: var(--fs-label); }
+.h2-ch { margin-bottom: var(--sp-3); }
+.h2-ch h2 { margin: 0; font-family: var(--f-display); font-weight: 400; font-synthesis: none; font-size: var(--fs-lead); line-height: 1.25; letter-spacing: var(--track-tight); color: var(--ink); }
+.h2-ch small { display: block; margin-top: var(--sp-1); font-size: var(--fs-tiny); color: var(--ink-4); }
+.h2-sec { margin: var(--sp-4) 0 0; font-family: var(--f-display); font-weight: 400; font-synthesis: none; font-size: var(--fs-title); color: var(--brand); }
+.h2-row { display: grid; gap: var(--sp-4); }
+.h2 .src { font-size: var(--fs-tiny); }
+.h2-note { margin: var(--sp-3) 0 0; font-size: var(--fs-label); color: var(--ink-3); }
+.h2-note a, .h2-col h3 a { color: var(--brand); text-decoration: none; font-weight: 600; }
+.h2-foot { font-size: var(--fs-tiny); color: var(--ink-4); text-align: center; }
+
+/* ── the summary: a headline and three bullets, each a tap ── */
+.h2-sum { border-left: var(--hatch) solid var(--r4-bright); }
+.h2-sum-top { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-tiny); color: var(--ink-4); }
+.h2-date { font-weight: 600; color: var(--ink-3); letter-spacing: var(--track-label); text-transform: uppercase; }
+.h2-stale { padding: 0 var(--sp-2); border-radius: var(--r-pill); background: var(--warn-bg); color: var(--warn); font-weight: 600; }
+.h2-ask-inline { margin-left: auto; border: 0; background: var(--tint-brand); color: var(--brand); font: inherit; font-weight: 600; padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); cursor: pointer; }
+.h2-head { margin: var(--sp-2) 0 var(--sp-3); font-family: var(--f-display); font-weight: 400; font-synthesis: none; font-size: var(--fs-num); line-height: 1.2; letter-spacing: var(--track-tight); color: var(--ink); }
+.h2-bul { list-style: none; margin: 0; padding: 0; display: grid; }
+.h2-bul a { display: flex; gap: var(--sp-3); align-items: center; padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); color: var(--ink-2); text-decoration: none; font-size: var(--fs-body); line-height: 1.35; }
+.h2-bul a::before { content: ""; flex: none; width: var(--sp-2); height: var(--sp-2); border-radius: 50%; background: var(--r4-bright); }
+.h2-bul .slipping a::before, .h2-bul .stale a::before { background: var(--bad); }
+.h2-bul a span { flex: 1; }
+.h2-bul a i { font-style: normal; color: var(--ink-5); }
+.h2-by { margin: var(--sp-2) 0 0; font-size: var(--fs-tiny); color: var(--ink-4); }
+
+/* ── the month: three figures, the next bill on R4 green ── */
+.h2-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
+.h2-kpi { display: flex; flex-direction: column; gap: var(--hair-2); padding: var(--sp-3); border-radius: var(--r); background: var(--surface); border: var(--hair) solid var(--rule-2); color: var(--ink); text-decoration: none; min-width: 0; }
+.h2-kpi span { font-size: var(--fs-tiny); color: var(--ink-3); line-height: 1.2; }
+.h2-kpi b { font-family: var(--f-display); font-weight: 400; font-synthesis: none; font-size: var(--fs-num); letter-spacing: var(--track-tight); line-height: 1.1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.h2-kpi small { font-size: var(--fs-tiny); color: var(--ink-4); }
+.h2-kpi.lead { background: var(--brand); border-color: var(--brand); color: var(--hero-ink); }
+.h2-kpi.lead span, .h2-kpi.lead small { color: var(--hero-ink-2); }
+.h2-track { display: block; position: relative; height: var(--sp-1); margin-top: var(--sp-2); border-radius: var(--r-pill); background: var(--hero-track); overflow: hidden; }
+.h2-track i { position: absolute; inset: 0 auto 0 0; width: var(--w); border-radius: inherit; background: var(--hero-accent); }
+
+/* deltas: green up, red down, always with an arrow */
+.h2-d { font-size: var(--fs-tiny); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink-3); }
+.h2-d.up { color: var(--good); } .h2-d.down { color: var(--bad); } .h2-d.quiet { font-weight: 500; color: var(--ink-3); }
+.h2-kpi.lead .h2-d { color: var(--hero-ink); }
+
+/* ── charts ── */
+.h2-svg, .h2-map { display: block; width: 100%; height: auto; overflow: visible; }
+.h2-map { overflow: hidden; border-radius: var(--r); background: var(--surface); }
+.h2-line { fill: none; stroke: var(--brand); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.h2-line.soft { stroke: var(--r4-bright); stroke-dasharray: 5 4; }
+.h2-line.warn { stroke: var(--bad); }
+.h2-wash { fill: var(--r4-bright); opacity: .14; }
+.h2-ghost { fill: none; stroke: var(--ink-5); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.h2-dot { fill: var(--brand); stroke: var(--surface); stroke-width: 2; }
+.h2-dot.warn { fill: var(--bad); }
+.h2-lab { font-size: var(--fs-tiny); font-weight: 600; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.h2-lab.ghost { font-weight: 500; fill: var(--ink-4); }
+.h2-bar { fill: var(--lever-4); }
+.h2-bar.last { fill: var(--brand); }
+.h2-bar.partial { fill: url(#h2-hatch); }
+.h2-hatch { fill: var(--r4-bright); }
+.h2-avg { stroke: var(--ink-4); stroke-width: 1; stroke-dasharray: 3 3; }
+.h2-key { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); margin-top: var(--sp-2); font-size: var(--fs-tiny); color: var(--ink-3); }
+.h2-key span { display: inline-flex; align-items: center; gap: var(--sp-1); }
+.h2-key .k { display: inline-block; width: var(--sw); height: var(--sw); border-radius: var(--r-xs); background: var(--brand); }
+.h2-key .k.line { height: var(--hatch); }
+.h2-key .k.ghost { height: 0; border-top: var(--hair-2) dashed var(--ink-5); background: none; }
+.h2-key .k.soft { height: 0; border-top: var(--hair-2) dashed var(--r4-bright); background: none; }
+.h2-key .k.warn { height: var(--hair-2); background: var(--bad); }
+.h2-key .k.have { background: var(--well-2); }
+.h2-key .k.opp { background: var(--r4-bright); }
+.h2-key .k.best { border-radius: 50%; background: var(--brand); }
+.h2-key .k.pt { border-radius: 50%; background: var(--ink-5); }
+.h2-key .k.single { border-radius: 50%; background: none; border: var(--hair-2) solid var(--ink-4); }
+
+/* ── lines of business: small multiples ── */
+.h2-segs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); }
+.h2-seg { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: var(--hair-2) var(--sp-2); padding: var(--sp-3); border-radius: var(--r); background: var(--well); }
+.h2-seg-n { grid-column: 1 / -1; font-size: var(--fs-tiny); color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h2-seg b { font-size: var(--fs-head); font-weight: 650; font-variant-numeric: tabular-nums; }
+.h2-seg .spark { grid-column: 1 / -1; width: 100%; height: auto; }
+.h2-seg small { grid-column: 1 / -1; font-size: var(--fs-tiny); color: var(--ink-4); white-space: nowrap; }
+.h2 .spark .sp-line { stroke: var(--brand); }
+.h2 .spark .sp-area { fill: var(--r4-bright); opacity: .14; }
+.h2 .spark .sp-end { fill: var(--brand); }
+.h2 .spark.storage .sp-line { stroke: var(--s-storage); } .h2 .spark.storage .sp-area { fill: var(--s-storage); } .h2 .spark.storage .sp-end { fill: var(--s-storage); }
+
+/* ── customers: tabs on a phone, three columns on a desk ── */
+.h2-tabs { margin-bottom: var(--sp-2); }
+.h2-col { display: none; }
+.h2-col.on { display: block; }
+.h2-col h3 { display: none; margin: 0 0 var(--sp-1); font-size: var(--fs-label); font-weight: 600; color: var(--ink-3); justify-content: space-between; }
+.h2-cl, .h2-xs, .h2-dl { list-style: none; margin: 0; padding: 0; }
+.h2-cl a, .h2-dl a { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: var(--sp-3); padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); color: var(--ink); text-decoration: none; font-size: var(--fs-sm); min-height: var(--row-h); box-sizing: border-box; }
+.h2-cn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.h2-cv { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.h2-cv small { display: block; font-size: var(--fs-tiny); font-weight: 400; color: var(--ink-4); }
+.h2-cv.up { color: var(--good); } .h2-cv.down { color: var(--bad); }
+
+/* ── cross-sell: what they buy against what they could add ── */
+.h2-xs a { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-1); padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); color: var(--ink); text-decoration: none; font-size: var(--fs-sm); }
+.h2-xbar { display: flex; height: var(--sp-2); border-radius: var(--r-pill); overflow: hidden; background: none; }
+.h2-xbar i { display: block; width: var(--w); }
+.h2-xbar .have { background: var(--well-2); }
+.h2-xbar .opp { background: var(--r4-bright); }
+.h2-chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.h2-chips em { font-style: normal; font-size: var(--fs-tiny); font-weight: 600; color: var(--brand); background: var(--tint-brand); padding: 0 var(--sp-2); border-radius: var(--r-pill); }
+
+/* ── the density map ── */
+.h2-land { fill: var(--well); stroke: var(--rule-3); stroke-width: 1; }
+.h2-road { fill: none; stroke: var(--rule-3); stroke-width: 1; }
+.h2-pt { fill: var(--ink-5); opacity: .55; }
+.h2-pt.single { fill: none; stroke: var(--ink-4); stroke-width: 1.2; opacity: .8; }
+.h2-best circle { fill: var(--brand); stroke: var(--surface); stroke-width: 2; }
+.h2-best text { fill: var(--hero-ink); font-size: var(--fs-tiny); font-weight: 700; }
+.h2-yard { fill: var(--ink); }
+.h2-maplab { font-size: var(--fs-tiny); font-weight: 600; fill: var(--ink); }
+.h2-pc { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: grid; gap: var(--sp-1); font-size: var(--fs-label); }
+.h2-pc li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-2); align-items: center; }
+.h2-pc b { display: grid; place-items: center; width: var(--sp-5); height: var(--sp-5); border-radius: 50%; background: var(--brand); color: var(--hero-ink); font-size: var(--fs-tiny); }
+.h2-pc span { color: var(--ink-3); }
+.h2-pc em, .h2-dl em { font-style: normal; font-weight: 650; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.h2-dl a span:nth-child(2) { color: var(--ink-3); font-size: var(--fs-label); }
+
+/* ── Ask: the button, then the sheet ── */
+.h2-fab { position: fixed; right: var(--sp-4); bottom: calc(var(--sp-4) + env(safe-area-inset-bottom)); z-index: 25; display: inline-flex; align-items: center; gap: var(--sp-2);
+  border: 0; border-radius: var(--r-pill); padding: var(--sp-3) var(--sp-5); background: var(--brand); color: var(--hero-ink); font: inherit; font-weight: 600; box-shadow: var(--shadow-pop); cursor: pointer; }
+.h2-fab svg { width: var(--sp-5); height: var(--sp-5); fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+html.ask-open .h2-fab { display: none; }
+.ask { position: fixed; inset: 0; z-index: 60; }
+.ask-scrim { position: absolute; inset: 0; background: var(--scrim); opacity: 0; transition: opacity var(--t) var(--ease-out); }
+.ask-panel { position: absolute; right: 0; top: 0; bottom: 0; width: min(calc(var(--u) * 110), 100vw); display: flex; flex-direction: column; background: var(--surface); box-shadow: var(--shadow-dialog);
+  transform: translateX(100%); transition: transform var(--t-slow) var(--ease-out); }
+.ask.is-on .ask-scrim { opacity: 1; }
+.ask.is-on .ask-panel { transform: none; }
+.ask-panel header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 var(--sp-3); padding: var(--sp-4); border-bottom: var(--hair) solid var(--rule); }
+.ask-panel header b { font-family: var(--f-display); font-weight: 400; font-synthesis: none; font-size: var(--fs-lead); color: var(--brand); }
+.ask-panel header small { grid-column: 1; font-size: var(--fs-tiny); color: var(--ink-4); }
+.ask-x { grid-row: 1 / span 2; grid-column: 2; align-self: center; border: 0; background: var(--well-2); color: var(--ink-2); width: var(--sp-8); height: var(--sp-8); border-radius: 50%; cursor: pointer; font: inherit; }
+.ask-log { flex: 1; overflow-y: auto; padding: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-3); }
+.ask-sugg { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.ask-sugg button { border: var(--hair) solid var(--rule-3); background: var(--surface); color: var(--ink-2); font: inherit; font-size: var(--fs-label); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-pill); cursor: pointer; text-align: left; }
+.ask-sugg button:hover { border-color: var(--brand); color: var(--brand); }
+.ask-q { align-self: flex-end; max-width: 85%; margin: 0; padding: var(--sp-2) var(--sp-3); border-radius: var(--r-lg); background: var(--brand); color: var(--hero-ink); font-size: var(--fs-body); }
+.ask-a { align-self: flex-start; max-width: 92%; padding: var(--sp-3); border-radius: var(--r-lg); background: var(--well); color: var(--ink); font-size: var(--fs-body); line-height: 1.45; }
+.ask-a p { margin: 0 0 var(--sp-2); } .ask-a ul { margin: 0 0 var(--sp-2); padding-left: var(--sp-5); }
+.ask-a small { display: block; font-size: var(--fs-tiny); color: var(--ink-4); }
+.ask-a.is-wait { color: var(--ink-4); }
+.ask-a.is-err { color: var(--bad); background: var(--bad-bg); }
+.ask-form { display: flex; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom)); border-top: var(--hair) solid var(--rule); }
+.ask-form textarea { flex: 1; resize: none; border: var(--hair) solid var(--rule-4); border-radius: var(--r-lg); padding: var(--sp-2) var(--sp-3); font: inherit; font-size: var(--fs-body); color: var(--ink); background: var(--surface); }
+.ask-form button { flex: none; width: var(--sp-10); border: 0; border-radius: 50%; background: var(--brand); color: var(--hero-ink); font: inherit; font-size: var(--fs-head); cursor: pointer; }
+
+/* ── a phone: the Ask button above the tab bar, the sheet from the bottom ── */
+@media (max-width: 700px) {
+  .h2-fab { bottom: calc(var(--sp-12) + var(--sp-8) + env(safe-area-inset-bottom)); }
+  .h2-kpi b { font-size: var(--fs-head); }
+  .h2-kpi { padding: var(--sp-2) var(--sp-3); }
+  .ask-panel { top: auto; left: 0; width: 100%; height: 86vh; border-radius: var(--r-lg) var(--r-lg) 0 0; transform: translateY(100%); }
+}
+
+/* ── a desk: columns ── */
+@media (min-width: 900px) {
+  .h2 { gap: var(--sp-5); }
+  .h2-card { padding: var(--sp-5) var(--sp-6); }
+  .h2-row { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: var(--sp-5); }
+  .h2-head { font-size: var(--fs-num-lg); }
+  .h2-kpi b { font-size: var(--fs-num-lg); }
+  .h2-segs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .h2-tabs { display: none; }
+  .h2-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-6); }
+  .h2-col, .h2-col.on { display: block; }
+  .h2-col h3 { display: flex; }
+}
