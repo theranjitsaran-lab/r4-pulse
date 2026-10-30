@@ -55,6 +55,7 @@ If a task seems to need a library, it doesn't — write the SVG.
   views/       pulse.js (Home), customers.js, customer.js, pricing.js, activity.js (Routes)
   data/zcta.json                                  ← postcode centroids (US Census, public)
   data/basemap.json                               ← the Chicagoland outline under the maps (US Census; scripts/build_basemap.js)
+  data/roadnet.json                               ← main roads as a network, for road miles and the drawn path (US Census; scripts/build_roadnet.js)
 /fixtures    snapshotted JSON for offline work (npm run snapshot, on the PC)
 /docs        brief, logic pack, data addendum, margin spec, DEPLOY.md
 ```
@@ -93,6 +94,8 @@ Margin). `model/rates.js` holds every derivation; DECISIONS.md "Data basis" reco
 | `bin` | travel + on-site per visit, shred per lb | box handling |
 | `itad` | travel + on-site per visit, plant per lb | facilities, box handling |
 | `labour` | hours × the loaded rate | travel, boxes |
+
+A route day's travel is split by each stop's detour in **road miles** along the main roads (DECISIONS.md "Route miles"), straight-line where the roads give no way.
 
 **Visits, not units, drive route cost.** A visit is one customer on one route on one day, from
 Veri-Shred done orders (Ingalls 101, Larabida 15, UChicago Medicine 300); otherwise units ÷ 5.80 for

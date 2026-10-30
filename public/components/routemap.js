@@ -45,6 +45,107 @@ export function routeDay({ routes, orders }, date, level1, Z) {
   return { date, route, stops, source, routes: mine.size };
 }
 
+// ── the roads: the likely way between two points along the main roads (public/data/roadnet.json, built
+// by scripts/build_roadnet.js from the US Census). Each point joins the nearest main road anywhere along
+// it (within two miles, the hop counted as a straight line), then A* finds the fewest road miles. A leg
+// stays a straight line when a point is further from any main road, or the road way is implausible
+// (over three times the straight line and two miles more). Without the network (a test, a failed load)
+// every leg is the straight line, as before.
+export const SNAP_MILES = 2;
+let NET = null, NET_P = null;
+export function setRoadnet(raw) {
+  if (!raw) { NET = null; return null; }   // a test can unload it
+  const N = raw.n.length / 2, lat = new Float64Array(N), lon = new Float64Array(N);
+  for (let i = 0; i < N; i++) { lat[i] = raw.n[2 * i] / 1e4; lon[i] = raw.n[2 * i + 1] / 1e4; }
+  const adj = Array.from({ length: N }, () => []);
+  raw.e.forEach((e, k) => { adj[e[0]].push(k); adj[e[1]].push(k); });
+  NET = { N, lat, lon, adj, e: raw.e, cache: new Map(), grid: new Map(), cell: 0.03 };
+  // every point of every road, with how far along its segment it sits (scaled to the segment's length)
+  raw.e.forEach((e, k) => {
+    const pts = edgePts(k, e[0]); let c = 0; const cum = [0];
+    for (let j = 1; j < pts.length; j++) { c += miles(pts[j - 1], pts[j]); cum.push(c); }
+    const f = c > 0 ? (e[2] / 1000) / c : 0;
+    pts.forEach((p, j) => { const gk = Math.floor(p[0] / NET.cell) + ',' + Math.floor(p[1] / NET.cell); if (!NET.grid.has(gk)) NET.grid.set(gk, []); NET.grid.get(gk).push([k, j, cum[j] * f, p]); });
+  });
+  return NET;
+}
+export function loadRoadnet() {
+  if (!NET_P) NET_P = fetch('/data/roadnet.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).catch(() => null)
+    .then(j => (j ? setRoadnet(j) : null));
+  return NET_P;
+}
+export const roadnetNow = () => NET;
+
+// a segment's points from one end to the other, its bends decoded from deltas
+function edgePts(k, from) {
+  const e = NET.e[k], pts = [[NET.lat[e[0]], NET.lon[e[0]]]];
+  let y = Math.round(NET.lat[e[0]] * 1e4), x = Math.round(NET.lon[e[0]] * 1e4);
+  for (let j = 3; j < e.length; j += 2) { y += e[j]; x += e[j + 1]; pts.push([y / 1e4, x / 1e4]); }
+  pts.push([NET.lat[e[1]], NET.lon[e[1]]]);
+  return from === e[0] ? pts : pts.reverse();
+}
+// the nearest point on any main road: { k (segment), j (its point), along (miles from the segment's start), m, p }
+function snap(p) {
+  const g = NET, gy = Math.floor(p[0] / g.cell), gx = Math.floor(p[1] / g.cell);
+  let best = null;
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) for (const [k, j, along, q] of g.grid.get((gy + dy) + ',' + (gx + dx)) || []) {
+    const m = miles(p, q);
+    if (m <= SNAP_MILES && (!best || m < best.m)) best = { k, j, along, m, p: q };
+  }
+  return best;
+}
+// { miles, pts } along the roads from a to b, or null for a straight leg
+export function roadPath(a, b) {
+  if (!NET || !a || !b) return null;
+  const key = a.join() + '|' + b.join();
+  if (NET.cache.has(key)) return NET.cache.get(key);
+  let out = null;
+  const g = NET, sa = snap(a), sb = snap(b);
+  if (sa && sb) {
+    const lenOf = k => g.e[k][2] / 1000, ends = k => [g.e[k][0], g.e[k][1]];
+    if (sa.k === sb.k) {   // both on one stretch of road: along it
+      const pts = edgePts(sa.k, g.e[sa.k][0]), [lo, hi] = sa.j <= sb.j ? [sa.j, sb.j] : [sb.j, sa.j];
+      const mid = pts.slice(lo, hi + 1); if (sa.j > sb.j) mid.reverse();
+      out = { miles: sa.m + Math.abs(sb.along - sa.along) + sb.m, pts: [a, ...mid, b] };
+    } else {
+      // from a's point, to either end of its segment; A* to either end of b's segment, then along it to b's point
+      const [a0, a1] = ends(sa.k), [b0, b1] = ends(sb.k), tgt = new Map([[b0, sb.along], [b1, lenOf(sb.k) - sb.along]]);
+      const dist = new Map(), via = new Map(), done = new Set(), heap = [];
+      const h = i => miles([g.lat[i], g.lon[i]], sb.p);
+      const push = it => { heap.push(it); let c = heap.length - 1; while (c) { const q = (c - 1) >> 1; if (heap[q][0] <= heap[c][0]) break; [heap[q], heap[c]] = [heap[c], heap[q]]; c = q; } };
+      const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let c = 0; for (;;) { const l = 2 * c + 1, r = l + 1; let m = c; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === c) break; [heap[m], heap[c]] = [heap[c], heap[m]]; c = m; } } return top; };
+      for (const [n, d] of [[a0, sa.along], [a1, lenOf(sa.k) - sa.along]]) if (d < (dist.get(n) ?? Infinity)) { dist.set(n, d); via.set(n, null); push([d + h(n), n]); }
+      let best = null;
+      while (heap.length) {
+        const [f, u] = pop();
+        if (best && f >= best.d) break;
+        if (done.has(u)) continue; done.add(u);
+        if (tgt.has(u)) { const d = dist.get(u) + tgt.get(u); if (!best || d < best.d) best = { d, end: u }; }
+        for (const k of g.adj[u]) {
+          const e = g.e[k], v = e[0] === u ? e[1] : e[0], d = dist.get(u) + e[2] / 1000;
+          if (d < (dist.get(v) ?? Infinity)) { dist.set(v, d); via.set(v, [u, k]); push([d + h(v), v]); }
+        }
+      }
+      if (best) {
+        const chain = []; let v = best.end;
+        while (via.get(v)) { const [u, k] = via.get(v); chain.push([u, k]); v = u; }
+        const start = v, aPts = edgePts(sa.k, g.e[sa.k][0]), bPts = edgePts(sb.k, g.e[sb.k][0]);
+        const head = start === a0 ? aPts.slice(0, sa.j + 1).reverse() : aPts.slice(sa.j);   // a's point to the end it left by
+        const tail = best.end === b0 ? bPts.slice(0, sb.j + 1) : bPts.slice(sb.j).reverse();   // the end it arrived at to b's point
+        const pts = [a, ...head];
+        for (const [u, k] of chain.reverse()) pts.push(...edgePts(k, u).slice(1));
+        pts.push(...tail.slice(1), b);
+        const total = sa.m + best.d + sb.m;
+        if (total <= 3 * miles(a, b) + 2) out = { miles: total, pts };
+      }
+    }
+  }
+  NET.cache.set(key, out);
+  return out;
+}
+// road miles where the roads give a way, else the straight line
+export const dist = (a, b) => { const r = roadPath(a, b); return r ? r.miles : miles(a, b); };
+
 // share an amount between stops by their services, or equally if none carry a count
 function spread(amount, list, field) {
   const sv = list.reduce((t, s) => t + (s.services || 0), 0);
@@ -65,8 +166,8 @@ export function allocate(R, day) {
   }
   const located = places.filter(p => p.pt), path = [YARD, ...located.map(p => p.pt), YARD];
   let dayMiles = 0;
-  for (let i = 1; i < path.length; i++) dayMiles += miles(path[i - 1], path[i]);
-  located.forEach((p, i) => { p.detour = Math.max(0, miles(path[i], path[i + 1]) + miles(path[i + 1], path[i + 2]) - miles(path[i], path[i + 2])); });
+  for (let i = 1; i < path.length; i++) dayMiles += dist(path[i - 1], path[i]);   // road miles, where the roads give a way
+  located.forEach((p, i) => { p.detour = Math.max(0, dist(path[i], path[i + 1]) + dist(path[i + 1], path[i + 2]) - dist(path[i], path[i + 2])); });
   const sumDetour = located.reduce((t, p) => t + p.detour, 0);
   const customers = [...new Set(st.map(s => s.level1))];
   const byCustomer = c => st.filter(s => s.level1 === c);
@@ -79,7 +180,7 @@ export function allocate(R, day) {
   const me = st.filter(s => s.mine);
   const sum = f => me.reduce((t, s) => t + (s[f] || 0), 0);
   return {
-    total, travel, onsite, dayMiles, visits: customers.length, stops: st.length, placed: located.length,
+    total, travel, onsite, dayMiles, road: !!NET, visits: customers.length, stops: st.length, placed: located.length,
     services: st.reduce((t, s) => t + (s.services || 0), 0),
     me: { cost: sum('cost'), travel: sum('travel'), onsite: sum('onsite'), services: sum('services'), pounds: sum('pounds'), detour: sum('detour'),
       postcode: (me.find(s => s.postcode) || {}).postcode, pt: (me.find(s => s.pt) || {}).pt },
@@ -184,8 +285,14 @@ const yardMark = F => { const [x, y] = F.P(YARD); return `<rect class="rm-yard" 
 export function mapSvg(day, { width = 640, base = null, far = null } = {}) {
   const placed = day.stops.filter(s => s.pt);
   const F = frame([YARD, ...placed.map(s => s.pt)], width);
-  const line = [YARD, ...placed.map(q => q.pt), YARD].map(F.P).map(q => q.map(v => v.toFixed(1)).join(',')).join(' ');
-  let g = baseLayer(base, F, placed.map(q => q.pt)) + `<polyline class="rm-path" points="${line}"/>` + yardMark(F);
+  const stops = [YARD, ...placed.map(q => q.pt), YARD], xy = pts => pts.map(F.P).map(q => q.map(v => v.toFixed(1)).join(',')).join(' ');
+  let road = '', straight = '';
+  for (let i = 1; i < stops.length; i++) {
+    if (stops[i - 1].join() === stops[i].join()) continue;
+    const r = roadPath(stops[i - 1], stops[i]);
+    if (r) road += `<polyline class="rm-path road" points="${xy(r.pts)}"/>`; else straight += `<polyline class="rm-path" points="${xy([stops[i - 1], stops[i]])}"/>`;
+  }
+  let g = baseLayer(base, F, placed.map(q => q.pt)) + road + straight + yardMark(F);
   const seen = new Map();
   placed.forEach(q => {
     const [x, y] = F.P(q.pt), key = q.postcode, n = seen.get(key) || 0; seen.set(key, n + 1);

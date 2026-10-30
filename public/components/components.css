@@ -177,6 +177,8 @@ i.k.neutral, i.k.band { background: var(--s-citadel); }
 .rm-far { font-family: var(--f-sans); font-size: var(--fs-tiny); font-weight: 600; fill: var(--ink); }
 .rm-ray { stroke: var(--ink-5); stroke-width: 1; stroke-dasharray: 3 3; }
 .rm-path { fill: none; stroke: var(--ink-4); stroke-width: 1.5; stroke-dasharray: 4 3; }
+/* the likely way by main roads (routemap.js roadPath): solid; a straight leg stays dashed */
+.rm-path.road { stroke: var(--ink-3); stroke-width: 2; stroke-dasharray: none; stroke-linejoin: round; stroke-linecap: round; opacity: .85; }
 .rm-yard { fill: var(--ink); }
 .rm-lab { font-family: var(--f-sans); font-size: var(--fs-tiny); fill: var(--ink-3); }
 .rm-scale { stroke: var(--ink-3); stroke-width: 2; }

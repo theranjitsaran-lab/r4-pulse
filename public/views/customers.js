@@ -6,6 +6,7 @@ import { dailyFrom, addMonths } from '/components/projection.js';
 import { sparkline, money0, moneyK } from '/components/chart.js';
 import { buildMargins, marginSummary, marginAction, accountLines, accountCosts, costParts, PARTS, FAMILY_NAMES } from '/components/margin.js';
 import { costOrders, jobHtml, drawRouteBlock, jobPlace, densityByPostcode } from '/components/jobview.js';
+import { loadRoadnet } from '/components/routemap.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 import { billNow, serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippingAccounts, stoppedAccounts, risingAccounts, CROSS_SELL_DEPTH } from '/components/levers.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
@@ -352,7 +353,7 @@ async function marginView(main, C, params) {
 // level 1: every account
 async function marginList(main, R, M, MS, params) {
   const filter = ['thin', 'below'].includes(params.f) ? params.f : 'all';
-  const [A, Z] = await Promise.all([getJson('activity').catch(() => null), zctaP()]);
+  const [A, Z] = await Promise.all([getJson('activity').catch(() => null), zctaP(), loadRoadnet()]);
   const acct = new Map(M.accounts.map(a => [a.level1, a])), AL = accountLines(R, M);
   const travelOf = id => (AL.get(id) || []).filter(l => l[0] === 'Travel to site' || l[0] === 'Truck time').reduce((t, l) => t + l[1], 0);
   const all = MS.accounts.map(m => ({ ...m, why: marginReason(acct.get(m.level1) || {}, m), act: marginAction(m, travelOf(m.level1)) }));
@@ -430,7 +431,7 @@ async function accountJobs(R, M, id) {
   const p = (async () => {
     const meta = new Map();
     for (const l of M.lines) if (l.level1 === id || !meta.has(l.servcode)) meta.set(l.servcode, { family: l.family, unit: l.unit, drives_cost: l.drives_cost });
-    const [r, A, Z, PR] = await Promise.all([fetch(`/api/customer/${id}`, { credentials: 'same-origin' }), getJson('activity').catch(() => null), zctaP(), getJson('pricing')]);
+    const [r, A, Z, PR] = await Promise.all([fetch(`/api/customer/${id}`, { credentials: 'same-origin' }), getJson('activity').catch(() => null), zctaP(), getJson('pricing'), loadRoadnet()]);
     const j = await r.json().catch(() => ({}));
     if (!r.ok) return { error: j.error || `HTTP ${r.status}` };
     const d = j.data, C = costOrders(R, d, meta, A, Z, id);

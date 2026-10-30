@@ -11,7 +11,7 @@ const miles = (a, b) => { const r = Math.PI / 180, R = 3958.8, dp = (b[0] - a[0]
   return 2 * R * Math.asin(Math.sqrt(Math.sin(dp / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dl / 2) ** 2)); };
 import { money0, moneyK } from '/components/chart.js';
 import { titleCase, esc, loadRates } from '/components/data.js';
-import { allocate, mapSvg, loadBasemap, basemapNow } from '/components/routemap.js';
+import { allocate, mapSvg, loadBasemap, basemapNow, loadRoadnet } from '/components/routemap.js';
 const routeName = r => /\d/.test(r || '') ? r : titleCase(r);
 
 
@@ -29,7 +29,7 @@ export async function render(main, A, params) {
   // two tabs: the routes, and the warehouse (views/storage.js)
   const tabs = `<div class="top"><div><h1>${params.tab === 'warehouse' ? 'Warehouse' : 'Routes'}</h1></div><div class="seg rt-tabs"><a href="#activity" class="${params.tab === 'warehouse' ? '' : 'on'}">Routes</a><a href="#activity?tab=warehouse" class="${params.tab === 'warehouse' ? 'on' : ''}">Warehouse</a></div></div>`;
   if (params.tab === 'warehouse') return (await import('/views/storage.js')).render(main, tabs);
-  const [R, Z] = await Promise.all([loadRates(), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({}))]);
+  const [R, Z] = await Promise.all([loadRates(), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({})), loadRoadnet()]);
   const real = A.routeDays.filter(r => r.route && r.route !== '--');
   const doneDays = [...new Set(real.filter(r => r.services_done > 0).map(r => r.date))].sort();
   let day = params.date && doneDays.includes(params.date) ? params.date : A.latestDone;
@@ -132,7 +132,7 @@ export async function render(main, A, params) {
     }).join('') + `<p class="sub" style="margin:var(--sp-2) 0 0">${anyValue ? 'Value is what that customer\'s work billed on the day, shown at its first stop.' : 'Work on this day is not billed yet: VCK prices it at the month\'s run.'}</p>`;
     if (!a) { box.innerHTML = list; return; }
     const unplaced = rd.stops.length - placed, fs = farOk && rd.stops[farOk.i];
-    const say = `About ${Math.round(a.dayMiles)} miles yard to yard ◇${fs ? `; stop ${farOk.i + 1}, ${esc(titleCase(fs.company))} at ${esc(fs.postcode)}, took the van about ${Math.round(farOk.miles)} miles out of its way` : ''}${unplaced ? `; ${pl(unplaced, 'stop')} without a postcode centre left off the map` : ''}. Straight lines between postcode centres: no GPS was captured.`;
+    const say = `About ${Math.round(a.dayMiles)} ${a.road ? 'road ' : ''}miles yard to yard ◇${fs ? `; stop ${farOk.i + 1}, ${esc(titleCase(fs.company))} at ${esc(fs.postcode)}, took the van about ${Math.round(farOk.miles)} miles out of its way` : ''}${unplaced ? `; ${pl(unplaced, 'stop')} without a postcode centre left off the map` : ''}. ${a.road ? 'The likely way by main roads between postcode centres (US Census); dashed where the roads give no way' : 'Straight lines between postcode centres'}: no GPS was captured.`;
     box.innerHTML = `<div class="rm-grid"><div class="rm-wrap"></div><div>${list}</div></div><p class="sub" style="margin:var(--sp-2) 0 0">${say}</p>`;
     const draw = () => { const w = box.querySelector('.rm-wrap'); if (w) w.innerHTML = mapSvg(rd, { width: Math.max(280, Math.min(900, w.clientWidth || 560)), base: basemapNow(), far: farOk }); };
     draw();

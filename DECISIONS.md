@@ -3,6 +3,15 @@
 Settled. Do not re-propose these unless Theran reopens them. Each line cost a round of iteration
 to reach. Newest section first.
 
+## Route miles — settled 30 October 2026
+
+| | |
+|---|---|
+| **Road miles in the split** | Each stop's share of a route day's travel follows its detour in **road miles**: the likely way along the main roads (US Census TIGER/Line primary and secondary roads, IL IN WI, `public/data/roadnet.json`, `scripts/build_roadnet.js`), shortest by A*. The route day's total is unchanged; only how it is split moves. Theran, 30 October 2026 |
+| **Where the roads give no way** | A stop over two miles from any main road, or a road way over three times the straight line plus two miles, stays a straight leg in straight-line miles, drawn dashed |
+| **What it is not** | No GPS was captured (data rule 8): the path is an estimate between postcode centres, marked ◇. The files carry no ramps, so an interstate meets another road where they share a point, or at a join added within 200 m (a few overpasses join too) |
+| **Unchanged** | "How far from the yard" and "the long way round" on Routes stay as the crow flies, and say so; nearby-route savings use straight-line miles for the extra trip |
+
 ## Daily push — settled 26 October 2026
 
 | | |

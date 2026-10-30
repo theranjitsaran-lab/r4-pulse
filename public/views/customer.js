@@ -10,7 +10,7 @@ import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components
 import { seriesOf, deltaText, moveReason } from '/components/series.js';
 import { slippingAccounts, unitSuspect } from '/components/levers.js';
 import { costOrders, jobHtml, drawRouteBlock } from '/components/jobview.js';
-import { placesSvg, miles, YARD, loadBasemap, basemapNow } from '/components/routemap.js';
+import { placesSvg, miles, YARD, loadBasemap, basemapNow, loadRoadnet } from '/components/routemap.js';
 
 const CITADEL = 6714;
 const UNDER_REVIEW = new Set(['bin', 'handling', 'movement']);
@@ -206,7 +206,7 @@ async function loadDrill(id, R, M) {
   const meta = new Map();
   for (const l of M.lines) if (l.level1 === id || !meta.has(l.servcode)) meta.set(l.servcode, { family: l.family, unit: l.unit, drives_cost: l.drives_cost });
   try {
-    const [r, A, Z] = await Promise.all([fetch(`/api/customer/${id}`, { credentials: 'same-origin' }), getJson('activity').catch(() => null), zcta()]);
+    const [r, A, Z] = await Promise.all([fetch(`/api/customer/${id}`, { credentials: 'same-origin' }), getJson('activity').catch(() => null), zcta(), loadRoadnet()]);
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
     const d = j.data;
