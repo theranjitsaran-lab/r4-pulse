@@ -10,7 +10,7 @@ import { money0, moneyK, sparkline } from '/components/chart.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { reveal, drawIn } from '/components/motion.js';
 import { parseHome2, checkNumbers } from '/components/summary.js';
-import { YARD } from '/components/routemap.js';
+import { areaFrame, landLayer, postcodeLayer, yardMark } from '/components/areamap.js';
 import { homeView } from '/components/home2data.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
@@ -198,31 +198,11 @@ function weekBars(el, w) {
 function densityMap(el, d, base) {
   if (!el) return;
   const W = Math.max(300, Math.min(900, el.clientWidth || 600)), H = Math.round(W < 500 ? W * 0.95 : W * 0.6);
-  // frame the dense middle: the yard and the central nine-tenths of the points
-  const lat = d.points.map(p => p.pt[0]).sort((a, b) => a - b), lon = d.points.map(p => p.pt[1]).sort((a, b) => a - b);
-  const q = (a, f) => a[Math.min(a.length - 1, Math.max(0, Math.round(f * (a.length - 1))))];
-  const box = [Math.min(q(lat, .04), YARD[0]), Math.max(q(lat, .96), YARD[0]), Math.min(q(lon, .04), YARD[1]), Math.max(q(lon, .96), YARD[1])];
-  for (const p of d.save) { box[0] = Math.min(box[0], p.pt ? p.pt[0] : box[0]); }
-  const k = Math.cos((box[0] + box[1]) / 2 * Math.PI / 180), pad = 18;
-  const sx = (W - pad * 2) / ((box[3] - box[2]) * k), sy = (H - pad * 2) / (box[1] - box[0]), s = Math.min(sx, sy);
-  const cx = (box[2] + box[3]) / 2, cy = (box[0] + box[1]) / 2;
-  const P = ([la, lo]) => [W / 2 + (lo - cx) * k * s, H / 2 - (la - cy) * s];
-  let g = '';
-  if (base) {
-    const path = (ring, close) => { let out = '', last = null; for (const p of ring) { const [x, y] = P(p); if (last && Math.abs(x - last[0]) < 1.2 && Math.abs(y - last[1]) < 1.2) continue; out += (out ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); last = [x, y]; } return out + (close ? 'Z' : ''); };
-    g += `<path class="h2-land" d="${(base.land || []).map(r => path(r, true)).join('')}"/><path class="h2-road" d="${(base.roads || []).map(r => path(r.l || r, false)).join('')}"/>`;
-  }
-  const maxV = Math.max(...d.points.map(p => p.visits || 0), 1);
-  const rad = v => 2 + 9 * Math.sqrt((v || 0) / maxV);
-  for (const p of d.points.filter(p => !p.best).sort((a, b) => b.visits - a.visits)) {
-    const [x, y] = P(p.pt); if (x < -10 || x > W + 10 || y < -10 || y > H + 10) continue;
-    g += `<circle class="h2-pt${p.customers === 1 ? ' single' : ''}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rad(p.visits).toFixed(1)}"><title>${esc(p.postcode)}: ${p.visits} visits, ${p.customers} customer${p.customers === 1 ? '' : 's'}</title></circle>`;
-  }
-  const [yx, yy] = P(YARD);
-  g += `<rect class="h2-yard" x="${yx - 6}" y="${yy - 6}" width="12" height="12" rx="2"/><text class="h2-maplab" x="${yx + 10}" y="${yy + 4}">Yard</text>`;
+  const F = areaFrame(d.points.map(p => p.pt), W, H);
+  let g = landLayer(base, F) + postcodeLayer(d.points.filter(p => !p.best), F) + yardMark(F);
   d.save.forEach((r, i) => {
     const pt = d.points.find(p => p.postcode === r.postcode); if (!pt) return;
-    const [x, y] = P(pt.pt);
+    const [x, y] = F.P(pt.pt);
     g += `<g class="h2-best" transform="translate(${Math.max(10, Math.min(W - 10, x)).toFixed(1)},${Math.max(10, Math.min(H - 10, y)).toFixed(1)})"><circle r="10"/><text y="4" text-anchor="middle">${i + 1}</text><title>${esc(r.postcode)}: one more customer saves about ${money0(r.saving)} a year ◇</title></g>`;
   });
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="h2-map" role="img" aria-label="Postcodes R4 visits, sized by visits, with the best places for one more customer numbered">${g}</svg>

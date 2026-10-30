@@ -26,11 +26,11 @@ DECISIONS.md "The route to $1.0m and cross-sell" holds what was settled.*
 
 | Screen | Route | Owner | What it is |
 |---|---|---|---|
-| **Home** | `#pulse` | Trisha | This month's bill (already known) and next month's building · the bridge from the six-month average to $1.0m, each step opening its accounts · margin row · customers moving |
-| **Customers** | `#customers?view=` | Anne, Trisha | This week's calls · Main customers (month grid) · Cross-sell (whitespace grid, each gap explained) · Slipping · Price gaps · Missed rate rounds · Overdue boxes · Margin (all, thin, below cost) · All |
+| **Home** | `#pulse` | Trisha | A headline and three tappable bullets · next month's bill building, last bill, gap · this month's work against last month's, the last 13 weeks · lines of business (month, 3 months, YTD) · largest, rising, slipping five · cross-sell, the density map, shredding's effect on revenue (`views/home2.js`; the 26 October Home is at `#classic`) |
+| **Customers** | `#customers?view=` | Anne, Trisha | Overview (KPI band, the book by line, who moved, every account sortable and filterable by line, each figure opening a pop-out that explains it against peers) · This week's calls · Main customers (month grid) · Cross-sell (whitespace grid, each gap explained) · Slipping · Price gaps · Missed rate rounds · Overdue boxes · Margin (all, thin, below cost) · All |
 | **Customer page** | `#customer/<id>` | Anne | Headline figures · 24-month chart · not bought yet · prices against the book · signals · margin by line → its cost, invoices and orders → one order's cost build · visits |
-| **Pricing** | `#pricing` | Anne | The price on one track (cost, middle half, median) · what it is worth a year · the cost working · invoiced against the book |
-| **Routes** | `#activity` | Mike | The day in a sentence, thin routes named · by route against its norm · the week · booked ahead · distance from the yard and the long way round |
+| **Pricing** | `#pricing` | Anne | A compact bar with a price slider · the verdict · the price's own P&L and the levers that would improve it · the price on one track (cost, middle half, median) · what it is worth a year · the cost working · invoiced against the book |
+| **Routes** | `#activity` | Mike | The day in a sentence, thin routes named · the map: the day's routes from the yard, or where to add customers · by route against its norm · the week · booked ahead · distance from the yard and the long way round |
 
 Every figure shown in two places comes from one function (`components/levers.js`, `margin.js`,
 `whitespace.js`) and `model/levers.test.js` holds them together. Tokens are in `public/tokens.css`.
@@ -52,7 +52,7 @@ If a task seems to need a library, it doesn't — write the SVG.
 /public
   tokens.css, app.css, app.js (router)
   components/  chart.js, table.js, strip.js, margin.js, levers.js, whitespace.js, explain.js, data.js
-  views/       pulse.js (Home), customers.js, customer.js, pricing.js, activity.js (Routes)
+  views/       home2.js (Home), pulse.js (the old Home, #classic), customers.js, custoverview.js, customer.js, pricing.js, activity.js (Routes)
   data/zcta.json                                  ← postcode centroids (US Census, public)
 /fixtures    snapshotted JSON for offline work (npm run snapshot, on the PC)
 /docs        brief, logic pack, data addendum, margin spec, DEPLOY.md
@@ -139,7 +139,11 @@ logo `public/brand/r4-logo.png` (always on white: its bars are black), the icon 
 (`--f-display`, SIL OFL, one weight) is for titles, the masthead and Home's big figures only, at 400 with
 `font-synthesis: none`; tables, labels and body stay on the system sans (`--f-sans`: San Francisco, Segoe UI)
 for tabular figures and small-size legibility on Windows. No other web font, no serif, nothing from Google at
-run time. `public/tokens.css` holds every colour and size, light and dark; components read variables only.
+run time. `public/tokens.css` holds every colour and size, one theme on white (dark mode dropped 30 October 2026); components read variables only.
+
+**Ask** (`components/ask.js`, `server/ask.js`) is on every screen: Claude answers only through tools over
+`components/home2data.js` and `custbook.js`, the same functions the screens draw, and every number in an answer
+must appear in what the tools returned or the answer is refused. Pop-outs (`components/pop.js`) hand a question to it.
 
 **Charts** (`components/chart.js`, method from the dataviz skill): one axis always; 2px lines over a
 12% area wash; bars no wider than ~24px with 4px rounded ends; hairline grids; legend for two or more

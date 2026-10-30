@@ -80,6 +80,7 @@ async function main() {
         const f = path.join(out, `${s.name}-${width}.png`);
         await page.screenshot({ path: f, fullPage: !s.click });   // a dialog: the viewport it sits in
         console.log('  ' + path.relative(ROOT, f));
+        if (s.click) await page.goto('about:blank');   // a dialog stays open across a hash change
       }
       // the intro, caught mid-flight, in a context that allows motion
       if (!only.length || only.includes('intro')) {
