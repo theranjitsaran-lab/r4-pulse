@@ -1,4 +1,6 @@
-// Pricing — Anne, desktop first, mid-task. Pick a customer (or a new one) and a service; enter a
+// Pricing — Anne, desktop first, mid-task. Redesigned 30 October 2026: a compact bar with a price
+// slider, the verdict as a headline, the price's own P&L, and the levers that would improve it.
+// Pick a customer (or a new one) and a service; enter a
 // price. The verdict, where that price sits among every account, the cost to serve with its
 // arithmetic, and what the change is worth a year. Opens prefilled from #pricing?level1=&code=.
 // Every cost comes from model/rates.js; every rate and volume from the fixtures.
@@ -6,6 +8,7 @@ import { money0, moneyK } from '/components/chart.js';
 import { strip, stripStats } from '/components/strip.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { unitSuspect } from '/components/levers.js';
+import { reveal } from '/components/motion.js';
 
 const CITADEL = 6714;
 const UNDER_REVIEW = new Set(['bin', 'handling', 'movement']);
@@ -48,33 +51,38 @@ export async function render(main, PR, params) {
   const st = { level1: params.level1 ? Number(params.level1) : null, code: codes.includes(params.code) ? params.code : 'B2', price: null, units: null, visits: null, miles: R.RATES.avgMiles.v };
 
   main.innerHTML = `
-  <div class="pr">
+  <div class="pr pr2">
     <h1>Pricing</h1>
-    <div class="rail card">
-      <label for="p-cust">Customer</label>
-      <select id="p-cust"><option value="">New customer or a quote</option>${customers.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')}</select>
-      <label for="p-code">Service</label>
-      <select id="p-code">${codes.map(c => `<option value="${c}">${esc(c === 'STO' ? book[c].name : titleCase(book[c].name))}${SERVICES[c] ? '' : ' · no cost to serve'}</option>`).join('')}</select>
-      <div id="p-freq-row"><label for="p-freq">How often we visit</label>
-      <select id="p-freq"><option value="52">Weekly</option><option value="26">Every two weeks</option><option value="13">Every four weeks</option><option value="12">Monthly</option><option value="4">Quarterly</option><option value="">Other: enter visits a year</option></select></div>
-      <div class="two"><div><label for="p-units" id="p-units-lab">A year</label><input id="p-units" inputmode="decimal"></div><div><label for="p-visits">Visits a year</label><input id="p-visits" inputmode="decimal"></div></div>
-      <label for="p-miles">Miles from the yard</label><input id="p-miles" inputmode="decimal">
-      <div class="price"><label for="p-price">Price</label><input id="p-price" inputmode="decimal"></div>
-      <div class="hint" id="p-hint"></div>
+    <section class="h2-card pr2-bar" data-rv>
+      <div class="pr2-pick">
+        <label>Customer<select id="p-cust"><option value="">New customer or a quote</option>${customers.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')}</select></label>
+        <label>Service<select id="p-code">${codes.map(c => `<option value="${c}">${esc(c === 'STO' ? book[c].name : titleCase(book[c].name))}${SERVICES[c] ? '' : ' · no cost to serve'}</option>`).join('')}</select></label>
+      </div>
+      <div class="pr2-price"><label for="p-price">Price</label><input id="p-price" inputmode="decimal"><input id="p-slide" type="range" aria-label="Price" step="any"><small id="p-slide-lab"></small></div>
+      <details class="pr2-vol"><summary id="p-vol-sum">Volume</summary>
+        <div class="pr2-volin">
+          <div id="p-freq-row"><label for="p-freq">How often we visit</label>
+          <select id="p-freq"><option value="52">Weekly</option><option value="26">Every two weeks</option><option value="13">Every four weeks</option><option value="12">Monthly</option><option value="4">Quarterly</option><option value="">Other: enter visits a year</option></select></div>
+          <div><label for="p-units" id="p-units-lab">A year</label><input id="p-units" inputmode="decimal"></div>
+          <div><label for="p-visits">Visits a year</label><input id="p-visits" inputmode="decimal"></div>
+          <div><label for="p-miles">Miles from the yard</label><input id="p-miles" inputmode="decimal"></div>
+        </div><div class="hint" id="p-hint"></div></details>
+    </section>
+    <div id="p-verdict"></div>
+    <div class="pr2-grid">
+      <section class="h2-card" data-rv><div class="h2-ch"><h2 id="p-pl-title">A year at this price</h2><small>the price's own P&amp;L ◇</small></div><div id="p-pl"></div></section>
+      <section class="h2-card" data-rv><div class="h2-ch"><h2>How to improve the margin</h2><small>each lever on its own, a year ◇</small></div><div id="p-levers"></div><button class="pop-ask pr2-ask" type="button" id="p-ask">Ask Claude about this price ›</button></section>
     </div>
-    <div class="main">
-      <div id="p-verdict"></div>
-      <div class="card"><div class="card-head"><h3 id="p-track-title"></h3><small id="p-track-sub"></small></div><div id="p-track"></div><div class="src" id="p-strip-src"></div></div>
-      <div class="card"><div class="card-head"><h3>What it is worth a year</h3><small>gross margin ◇</small></div><div id="p-worth"></div></div>
-      <details class="card fold"><summary><h3 id="p-cost-title">How the cost is worked out</h3><span class="sub">◇ cost model · open</span></summary><div id="p-cost" style="margin-top:var(--sp-3)"></div></details>
-      <details class="card fold"><summary><h3 id="p-strip-title">Every account on this service</h3><span class="sub" id="p-strip-sub"></span></summary><div id="p-strip" style="margin-top:var(--sp-3)"></div></details>
-    </div>
-    <div class="card book">
-      <div class="card-head"><h3 id="b-title">Invoiced against the book</h3><small>tap a service to price it</small></div>
-      <div class="sub" style="margin-bottom:var(--sp-3)">For each service, the share of its volume billed under the book's median, and what moving those accounts to the median would add a year. Worst first.</div>
+    <section class="h2-card" data-rv><div class="h2-ch"><h2 id="p-track-title"></h2><small id="p-track-sub"></small></div><div id="p-track"></div><div class="src" id="p-strip-src"></div>
+      <details class="fold"><summary><h3 id="p-strip-title">Every account on this service</h3><span class="sub" id="p-strip-sub"></span></summary><div id="p-strip" style="margin-top:var(--sp-3)"></div></details>
+      <details class="fold"><summary><h3 id="p-cost-title">How the cost is worked out</h3><span class="sub">◇ cost model · open</span></summary><div id="p-cost" style="margin-top:var(--sp-3)"></div></details>
+      <div id="p-worth" hidden></div>
+    </section>
+    <section class="h2-card book" data-rv>
+      <div class="h2-ch"><h2 id="b-title">Invoiced against the book</h2><small>for each service, the share of its volume billed under the book's median, and what the median would add a year · tap to price it</small></div>
       <div id="b-rows"></div>
       <div class="src">Each account's usual invoiced rate over the last 13 months, from VCK · storage weighted by boxes · list prices are not in the database, so the book's own median is the comparison</div>
-    </div>
+    </section>
   </div>`;
 
   const $ = id => main.querySelector('#' + id);
@@ -154,7 +162,7 @@ export async function render(main, PR, params) {
     if (sure != null && price < sure) { cls = 'is-bad'; lab = 'Below cost'; text = `${f(price)} is below what this costs to serve. Cost to serve is ${f(unitCost)} a ${svc.unit}. Every one loses ${f(unitCost - price)}, and more volume makes it worse.`; }
     else if (price < s.median) { cls = 'is-warn'; lab = 'Below the median'; text = `${f(price)} ${sure != null ? `earns ${f(price - sure)} a ${svc.unit} over cost, but ` : ''}sits below the ${f(s.median)} ${medName}: cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.`; }
     else text = `${f(price)} is ${price > s.median ? 'above' : 'at'} the ${f(s.median)} ${medName}${sure != null ? ` and ${f(price - sure)} a ${svc.unit} over cost` : ''}.`;
-    $('p-verdict').innerHTML = `<div class="verdict ${cls}"><div class="lab">${lab}</div><p>${esc(text)}</p>${review ? `<p class="hint">Judged against the book only: the cost of a visit is under review until delivery routes are in the data, so no margin is shown.</p>` : ''}</div>`;
+    $('p-verdict').innerHTML = `<section class="h2-card pr2-verdict ${cls}"><span class="pr2-tag">${lab}</span><p class="pr2-head">${esc(text)}</p>${review ? `<p class="hint">Judged against the book only: the cost of a visit is under review until delivery routes are in the data, so the margin below is provisional.</p>` : ''}</section>`;
 
     // the track: cost to serve, the middle half of the book, its median, and the price
     $('p-track-title').textContent = `${who === 'A new customer' ? 'A quote' : who} at ${f(price)} a ${svc ? svc.unit : 'unit'}`;
@@ -196,6 +204,42 @@ export async function render(main, PR, params) {
         <span class="v ${w.gm != null && w.gm < 0 ? (review ? 'is-warn' : 'is-bad') : ''}">${w.gm == null ? '—' : moneyK(w.gm)}<span class="sub" style="display:block;font-weight:400">margin</span></span>
         <span class="s">${esc(o.sub)}${d != null && Math.abs(d) >= 1 ? ` · ${d > 0 ? '+' : '−'}${moneyK(Math.abs(d))} a year against today` : ''}</span></div>`;
     }).join('');
+
+    // the mini P&L: revenue, each cost line, what is left. The cost lines are for the volume entered.
+    const units2 = Math.max(0, st.units || 0), rev = price * units2;
+    $('p-pl-title').textContent = `${moneyK(rev)} a year at ${f(price)}`;
+    if (c) {
+      const lines = c.lines.map(l => ({ name: l[0], v: l[1] })), costT = lines.reduce((t, l) => t + l.v, 0), left = rev - costT;
+      const max = Math.max(rev, costT, 1);
+      $('p-pl').innerHTML = `<ul class="pr2-pl">
+        <li class="rev"><span>Revenue</span><i style="--w:${(rev / max * 100).toFixed(1)}%"></i><b>${money0(rev)}</b></li>
+        ${lines.map(l => `<li class="cost"><span>${esc(l.name)}</span><i style="--w:${(l.v / max * 100).toFixed(1)}%"></i><b>−${money0(l.v)}</b></li>`).join('')}
+        <li class="left ${review ? 'review' : left < 0 ? 'neg' : ''}"><span>${review ? 'Left, provisional' : 'Gross margin'}</span><i style="--w:${(Math.abs(left) / max * 100).toFixed(1)}%"></i><b>${left < 0 ? '−' : ''}${money0(Math.abs(left))}</b></li></ul>
+        <p class="pr2-pc">${rev > 0 ? `<b class="${left < 0 && !review ? 'is-bad' : ''}">${Math.round(left / rev * 100)}%</b> of revenue kept ◇` : ''}${review ? ' · route costs under review' : ''}</p>`;
+      // the levers, each on its own
+      const lv = [];
+      if (price < s.median) lv.push({ t: `Move to the ${medName}, ${f(s.median)}`, v: (s.median - price) * units2, s: `${Math.round((1 - s.below(price)) * 100)}% of ${of} pay more` });
+      if (sure != null && rev > 0 && left / rev < .4) { const p40 = sure / .6; if (p40 > price) lv.push({ t: `Price for a 40% margin, ${f(p40)}`, v: (p40 - price) * units2, s: p40 > s.p75 ? 'above three-quarters of the book: a hard conversation' : 'still inside the book' }); }
+      if (st.visits && st.visits >= 24 && svc && ['bin', 'trip', 'itad'].includes(svc.fam)) {
+        const keep = { ...st }; st.visits = Math.round(st.visits / 2); const c2 = cost(); Object.assign(st, keep);
+        if (c2 && c.total - c2.total > 0) lv.push({ t: `Visit half as often, ${Math.round(st.visits / 2)} a year`, v: c.total - c2.total, s: 'the same bins or units, fewer trips' + (review ? ' · route cost under review' : '') });
+      }
+      if (st.miles > 12 && svc && ['bin', 'trip', 'itad'].includes(svc.fam)) {
+        const keep = { ...st }; st.miles = 8; const c3 = cost(); Object.assign(st, keep);
+        if (c3 && c.total - c3.total > 0) lv.push({ t: 'Serve it on a day a route is already nearby', v: c.total - c3.total, s: `as if ${Math.round(st.miles)} miles out were 8${review ? ' · route cost under review' : ''}` });
+      }
+      lv.sort((x, y) => y.v - x.v);
+      $('p-levers').innerHTML = lv.length ? `<ul class="pr2-lv">${lv.map(l => `<li><span><b>${esc(l.t)}</b><small>${esc(l.s)}</small></span><em>+${moneyK(l.v)}</em></li>`).join('')}</ul>` : '<p class="hint">Nothing obvious: the price is at or above the book and keeps a healthy margin.</p>';
+    } else {
+      $('p-pl').innerHTML = `<p class="nocost">A product or fee the cost model does not price: ${moneyK(rev)} of revenue a year, no cost shown.</p>`;
+      $('p-levers').innerHTML = price < s.median ? `<ul class="pr2-lv"><li><span><b>Move to the ${medName}, ${f(s.median)}</b></span><em>+${moneyK((s.median - price) * units2)}</em></li></ul>` : '<p class="hint">At or above the book.</p>';
+    }
+    $('p-ask').dataset.q = `${who === 'A new customer' ? 'For a new customer' : who}: is ${f(price)} a ${svc ? svc.unit : 'unit'} right for ${st.code === 'STO' ? 'storage' : titleCase(book[st.code].name)}, and how do we improve the margin?`;
+    // the slider follows the book: from half the bottom quarter to well past the top
+    const sl = $('p-slide'), lo = Math.max(0, Math.min(s.p25 * .5, unitCost || Infinity, price)), hi = Math.max(s.p75 * 1.6, (unitCost || 0) * 1.3, price);
+    sl.min = lo; sl.max = hi; if (document.activeElement !== sl) sl.value = price;
+    $('p-slide-lab').textContent = `${f(lo)} to ${f(hi)} · median ${f(s.median)}`;
+    $('p-vol-sum').textContent = `Volume: ${Math.round(st.units || 0).toLocaleString('en-US')} ${svc ? (svc.fam === 'storage' ? 'box-months' : svc.unit + 's') : 'units'} a year${st.visits ? ` on ${Math.round(st.visits)} visits` : ''} · change`;
   }
 
   const num = el => { const v = parseFloat(String(el.value).replace(/[$,\s]/g, '')); return Number.isFinite(v) ? v : null; };
@@ -209,6 +253,8 @@ export async function render(main, PR, params) {
       draw();
     });
   }
+  $('p-slide').addEventListener('input', () => { st.price = Number($('p-slide').value); $('p-price').value = st.price.toFixed(st.code === 'STO' ? 3 : 2); draw(); });
+  $('p-ask').addEventListener('click', e => dispatchEvent(new CustomEvent('open-ask', { detail: { ask: e.currentTarget.dataset.q } })));
   // a schedule sets the visits; the bins (or units) each visit stay the same
   $('p-freq').addEventListener('change', () => {
     const f = Number($('p-freq').value); if (!f) { $('p-visits').focus(); return; }
@@ -242,6 +288,7 @@ export async function render(main, PR, params) {
 
   prefill();
   draw();
+  reveal(main.querySelector('.pr2'));
 }
 
 // One line from zero to the top of the book: the loss zone below cost to serve, the middle half of

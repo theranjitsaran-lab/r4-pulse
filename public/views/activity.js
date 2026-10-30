@@ -1,4 +1,6 @@
-// Routes — Mike, desktop first, 06:30. A day by route against each route's own norm; tap a route
+// Routes — Mike, desktop first, 06:30. Map-led since 30 October 2026: the day's routes from the yard
+// over every postcode R4 visits, or where one more customer would save most.
+// A day by route against each route's own norm; tap a route
 // for its stops in order with what each customer's work billed; the week as a grid; booked ahead.
 // From /api/activity (Veri-Shred service orders through v_route_day). Route-day margin waits for
 // driver pay rates; GPS and times were never captured, so nothing here needs them.
@@ -11,6 +13,8 @@ const miles = (a, b) => { const r = Math.PI / 180, R = 3958.8, dp = (b[0] - a[0]
   return 2 * R * Math.asin(Math.sqrt(Math.sin(dp / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dl / 2) ** 2)); };
 import { money0, moneyK } from '/components/chart.js';
 import { titleCase, esc, loadRates } from '/components/data.js';
+import { areaFrame, landLayer, postcodeLayer, yardMark, scaleBar } from '/components/areamap.js';
+import { densityByPostcode } from '/components/jobview.js';
 const routeName = r => /\d/.test(r || '') ? r : titleCase(r);
 
 
@@ -27,7 +31,8 @@ export async function render(main, A, params) {
   // two tabs: the routes, and the warehouse (views/storage.js)
   const tabs = `<div class="top"><div><h1>${params.tab === 'warehouse' ? 'Warehouse' : 'Routes'}</h1></div><div class="seg rt-tabs"><a href="#activity" class="${params.tab === 'warehouse' ? '' : 'on'}">Routes</a><a href="#activity?tab=warehouse" class="${params.tab === 'warehouse' ? 'on' : ''}">Warehouse</a></div></div>`;
   if (params.tab === 'warehouse') return (await import('/views/storage.js')).render(main, tabs);
-  const [R, Z] = await Promise.all([loadRates(), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({}))]);
+  const [R, Z, base] = await Promise.all([loadRates(), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+    fetch('/data/basemap.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).catch(() => null)]);
   const real = A.routeDays.filter(r => r.route && r.route !== '--');
   const doneDays = [...new Set(real.filter(r => r.services_done > 0).map(r => r.date))].sort();
   let day = params.date && doneDays.includes(params.date) ? params.date : A.latestDone;
@@ -48,6 +53,11 @@ export async function render(main, A, params) {
       <div class="day"><button id="rt-prev" aria-label="Previous day">‹</button><b id="rt-day"></b><button id="rt-next" aria-label="Next day">›</button></div>
     </div>
     <p class="rt-say" id="rt-say"></p>
+    <section class="h2-card rt-mapcard">
+      <div class="rt-maphead"><div class="h2-ch"><h2 id="rt-map-t"></h2><small id="rt-map-s"></small></div>
+        <div class="seg" id="rt-layer"><button data-l="day" class="on">The day's routes</button><button data-l="add">Where to add customers</button></div></div>
+      <div id="rt-map"></div><div class="h2-key" id="rt-map-key"></div>
+    </section>
     <div class="sum" id="rt-sum"></div>
     <div class="card"><div class="card-head"><h3>By route</h3><small>done against each route's own norm · tap for stops</small></div><div id="rt-routes"></div></div>
     <div class="two">
@@ -90,6 +100,48 @@ export async function render(main, A, params) {
         <span class="v">${d == null ? '' : `${r.services_done > 0 && d < THIN - 1 ? '<span class="chip warn">thin</span> ' : ''}<span class="delta ${dcls(d)}">${pct(d)}</span><span class="sub" style="display:block">norm ${Math.round(n.done)}</span>`}</span>
         <span class="go">›</span></div><div class="stops" data-for="${esc(r.route)}" hidden></div>`;
     }).join('') || '<p class="sub">No routes ran on this day.</p>';
+  }
+
+  // ── the map: every postcode R4 visits as a quiet layer; the day's routes from the yard in stop
+  // order (straight lines: no GPS was ever captured), thin routes in amber, the one tapped in green.
+  // The other layer is the sales one Home shows: where one more customer saves most ◇.
+  let layer = 'day', hl = null;
+  const pts = (A.postcodes || []).filter(p => Z[p.postcode] && !p.billing_only).map(p => ({ ...p, pt: Z[p.postcode] }));
+  function routePath(route) {
+    const os = A.orders.filter(o => o.date === day && o.route === route && o.postcode).sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
+    const list = os.length ? os.map(o => o.postcode) : String((real.find(r => r.date === day && r.route === route) || {}).postcode_list || '').split(/\s+/);
+    return [...new Set(list)].filter(p => Z[p]);
+  }
+  function drawMap() {
+    const el = $('rt-map'); if (!el) return;
+    if (!pts.length) { el.innerHTML = '<div class="pending">The map needs the postcode centres (public/data/zcta.json).</div>'; return; }
+    const W = Math.max(300, Math.min(1100, el.clientWidth || 700)), H = Math.round(W < 500 ? W * 1.0 : W * 0.52);
+    const F = areaFrame(pts.map(p => p.pt), W, H);
+    let g = landLayer(base, F) + postcodeLayer(pts, F);
+    if (layer === 'day') {
+      const rows = real.filter(r => r.date === day && r.services_done > 0);
+      const thinSet = new Set(rows.filter(r => norm[r.route] && r.services_done < THIN * norm[r.route].done).map(r => r.route));
+      const yard = F.P(YARD);
+      for (const r of rows.slice().sort((a, b) => (a.route === hl) - (b.route === hl))) {
+        const path = routePath(r.route).map(p => F.P(Z[p]));
+        if (!path.length) continue;
+        const cls = r.route === hl ? 'on' : thinSet.has(r.route) ? 'thin' : hl ? 'dim' : '';
+        g += `<polyline class="rt-line ${cls}" points="${[yard, ...path, yard].map(q => q.map(v => v.toFixed(1)).join(',')).join(' ')}"><title>${esc(routeName(r.route))}: ${r.services_done} services, ${r.stops_done} stops</title></polyline>`;
+        g += path.map(([x, y]) => `<circle class="rt-stop ${cls}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.route === hl ? 4.5 : 3}"/>`).join('');
+      }
+      const stops = rows.reduce((t, r) => t + r.stops_done, 0), pcs = new Set(rows.flatMap(r => routePath(r.route)));
+      $('rt-map-t').textContent = `${dlabel(day)}: ${pl(rows.length, 'route')}, ${pl(stops, 'stop')} across ${pl(pcs.size, 'postcode')}`;
+      $('rt-map-s').textContent = hl ? `${routeName(hl)} in green · tap it again in the list to clear` : thinSet.size ? `${[...thinSet].map(routeName).join(', ')} ran thin · tap a route below to follow it` : 'tap a route below to follow it';
+      $('rt-map-key').innerHTML = '<span><i class="k line"></i>a route, yard to its stops in order</span><span><i class="k thinline"></i>thin against its own norm</span><span><i class="k pt"></i>postcodes visited in a year, by visits</span>';
+    } else {
+      const save = densityByPostcode(R, A, Z, { top: 8 }).rows;
+      save.forEach((r, i) => { const [x, y] = F.P(Z[r.postcode]); g += `<g class="h2-best" transform="translate(${Math.max(10, Math.min(W - 10, x)).toFixed(1)},${Math.max(10, Math.min(H - 10, y)).toFixed(1)})"><circle r="10"/><text y="4" text-anchor="middle">${i + 1}</text><title>${esc(r.postcode)}: one more customer saves about ${money0(r.saving)} a year ◇</title></g>`; });
+      $('rt-map-t').textContent = `One more customer in these ${save.length} postcodes saves ${moneyK(save.reduce((t, r) => t + r.saving, 0))} a year ◇`;
+      $('rt-map-s').textContent = save.slice(0, 3).map((r, i) => `${i + 1}. ${r.postcode}, ${Math.round(r.visitsYear)} visits a year, ${Math.round(r.miles)} mi`).join(' · ');
+      $('rt-map-key').innerHTML = '<span><i class="k best"></i>one more customer saves most</span><span><i class="k pt"></i>visited, by visits a year</span><span><i class="k single"></i>one customer only</span>';
+    }
+    g += yardMark(F) + scaleBar(F);
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="h2-map rt-map" role="img" aria-label="Map of the day's routes from the yard">${g}</svg>`;
   }
 
   function drawStops(route, box) {
@@ -188,7 +240,8 @@ export async function render(main, A, params) {
       <div class="src">Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles from US Census ZCTA centroids · route time from the cost model: a route day's travel share scaled for distance, plus time on site ◇ · route costs under review</div>`;
   }
 
-  function redraw() { drawDay(); drawWeek(); history.replaceState(null, '', `#activity?date=${day}`); }
+  function redraw() { hl = null; drawDay(); drawWeek(); drawMap(); history.replaceState(null, '', `#activity?date=${day}`); }
+  $('rt-layer').addEventListener('click', ev => { const b = ev.target.closest('button[data-l]'); if (!b) return; layer = b.dataset.l; main.querySelectorAll('#rt-layer button').forEach(x => x.classList.toggle('on', x === b)); drawMap(); });
   $('rt-prev').addEventListener('click', () => { const i = doneDays.indexOf(day); if (i > 0) { day = doneDays[i - 1]; redraw(); } });
   $('rt-next').addEventListener('click', () => { const i = doneDays.indexOf(day); if (i < doneDays.length - 1) { day = doneDays[i + 1]; redraw(); } });
   $('rt-week').addEventListener('click', ev => { const c = ev.target.closest('.c[data-d]'); if (c) { day = c.dataset.d; redraw(); } });
@@ -199,8 +252,9 @@ export async function render(main, A, params) {
     const open = !box.hidden;
     main.querySelectorAll('.stops').forEach(b => { b.hidden = true; b.innerHTML = ''; });
     main.querySelectorAll('.r').forEach(r => r.classList.remove('open'));
+    hl = open ? null : row.dataset.route; if (layer === 'day') drawMap();
     if (open) return;
     row.classList.add('open'); box.hidden = false; drawStops(row.dataset.route, box);
   });
-  drawDay(); drawWeek(); drawAhead(); drawFar();
+  drawDay(); drawWeek(); drawAhead(); drawFar(); drawMap();
 }

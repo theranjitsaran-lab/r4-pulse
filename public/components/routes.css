@@ -68,3 +68,18 @@
   .rt .r { grid-template-columns: minmax(0, 1fr) auto var(--sp-3); grid-template-areas: "nm v go" "bar bar bar"; }
   .rt .r > .who { display: none; }
 }
+
+/* ── the map (30 October 2026): the day's routes over every postcode R4 visits (areamap.js) ── */
+.rt-mapcard { margin-bottom: var(--sp-4); }
+.rt-maphead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--sp-3); }
+.rt-maphead .seg button { white-space: nowrap; }
+.rt-map .h2-pt { opacity: .35; }
+.rt-line { fill: none; stroke: var(--ink-3); stroke-width: 1.6; stroke-linejoin: round; opacity: .75; }
+.rt-line.thin { stroke: var(--warn); stroke-width: 2.2; opacity: 1; }
+.rt-line.dim { opacity: .18; }
+.rt-line.on { stroke: var(--brand); stroke-width: 3.2; opacity: 1; }
+.rt-stop { fill: var(--ink-3); stroke: var(--surface); stroke-width: 1; }
+.rt-stop.thin { fill: var(--warn); } .rt-stop.dim { opacity: .2; } .rt-stop.on { fill: var(--brand); }
+.rm-scale { stroke: var(--ink-3); stroke-width: 2; }
+.h2-key .k.thinline { height: var(--hair-2); background: var(--warn); }
+.rt .r.open { background: var(--tint-brand); }

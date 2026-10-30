@@ -16,8 +16,9 @@ const CITADEL = 6714;
 const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under review: delivery days not yet in the volumes
 
 export const VIEWS = {
+  overview:      { label: 'Overview', blurb: 'Last month, who moved, and every account: sort any column, filter to a line, tap a figure for why.' },
   conversations: { label: 'This week', blurb: 'Ten conversations worth having, ranked by what is at stake. Log what you did; the list learns.' },
-  main:          { label: 'Up and down', blurb: 'Last month against the month before and a year ago, the year to date, and this month so far.' },
+  main:          { label: 'Up and down', hidden: true, blurb: 'Last month against the month before and a year ago, the year to date, and this month so far.' },
   grid:          { label: 'Month grid', blurb: 'The 30 largest accounts, month by month, each against its own run.' },
   whitespace:    { label: 'Cross-sell', blurb: 'What each large account buys, and what it doesn\'t buy yet, sized at what comparable accounts spend.' },
   slipping:      { label: 'Slipping', blurb: 'Down 10% or more on their own run over the last three months. Still-billing accounts first; then those that have stopped or nearly, often one-off projects, which Home leaves out of the win-back.' },
@@ -25,7 +26,7 @@ export const VIEWS = {
   rounds:        { label: 'Missed rate rounds', blurb: 'No rate has moved in two years.' },
   destruction:   { label: 'Overdue boxes', blurb: 'Boxes past their retention review, by account: what destruction bills once, and the storage it ends.' },
   margin:        { label: 'Margin', blurb: 'Every account: revenue less what it costs to serve, worst first.' },
-  all:           { label: 'All', blurb: 'Every account with revenue in the last twelve months.' },
+  all:           { label: 'All', hidden: true, blurb: 'Every account with revenue in the last twelve months.' },
 };
 
 
@@ -76,7 +77,8 @@ async function rowsFor(view, ser, book, C) {
 
 export async function render(main, C, params) {
   if (!main) return;
-  const view = VIEWS[params.view] ? params.view : 'main';
+  const view = VIEWS[params.view] ? params.view : 'overview';
+  if (view === 'overview') return (await import('/views/custoverview.js')).render(main, C, params, tabsHtml('overview'));
   if (view === 'conversations') return conversations(main, C);
   if (view === 'whitespace') return whitespace(main, C, params);
   if (view === 'main') return upDown(main, C, params);
@@ -98,7 +100,7 @@ export async function render(main, C, params) {
     <h1>Customers</h1>
     <p class="blurb">${esc(VIEWS[view].blurb)}</p>
     <div class="bar">
-      <div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="${link(k)}" class="${k === view ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
+      <div class="views"><div class="seg">${Object.entries(VIEWS).filter(([k, v]) => !v.hidden || k === view).map(([k, v]) => `<a href="${link(k)}" class="${k === view ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
       <div class="seg">${[['size', 'Size'], ['change', 'Change'], ['margin', 'Margin']].map(([k, l]) => `<a href="${link(view, k)}" class="${k === sort ? 'on' : ''}">${l}</a>`).join('')}</div>
     </div>
     ${view === 'all' ? '<input class="find" id="c-find" type="search" placeholder="Find a customer by name" aria-label="Find a customer by name">' : ''}
@@ -109,6 +111,11 @@ export async function render(main, C, params) {
     <p class="foot"><span id="c-count">${rows.length}</span> accounts · last 3 months is each account against its own twelve months before them, the same measure as Home and Slipping · margin ◇ is revenue less modelled cost to serve; route-based costs are under review.</p>
   </div>`;
   wireFind(main);
+}
+
+// the view tabs, the same on every Customers view; Up and down and All are kept for old links only
+export function tabsHtml(on) {
+  return `<div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).filter(([k, v]) => !v.hidden || k === on).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === on ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>`;
 }
 
 const mvPc = s => s && s.move ? s.move.pct : null;
@@ -146,7 +153,7 @@ async function conversations(main, C) {
   <div class="cust">
     <h1>Customers</h1>
     <p class="blurb">${esc(VIEWS.conversations.blurb)}</p>
-    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'conversations' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    ${tabsHtml('conversations')}
     <div class="convs">${list.map((c, i) => `
       <div class="card conv" data-id="${c.level1}" data-sig="${c.sigs[0].key}">
         <div class="card-head"><h3><a href="#customer/${c.level1}" style="color:inherit;text-decoration:none">${i + 1}. ${esc(c.name)} <span style="color:var(--ink-5)">›</span></a></h3><small>${c.stake ? moneyK(c.stake) + ' a year at stake' : ''}</small></div>
@@ -196,7 +203,7 @@ async function whitespace(main, C, params) {
   main.innerHTML = `
   <div class="cust ws">
     <h1>Customers</h1>
-    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'whitespace' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    ${tabsHtml('whitespace')}
     <p class="lede">If the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do, they would spend about <b>${moneyK(W.total)} a year more</b> (${moneyK(W.total / 12)} a month ◇). Most of it is ${lc(byLine[0].x.name)} and ${lc(byLine[1].x.name)}. Start with ${top3.join(', ')}.${paceLine}</p>
     <div class="key"><span><span style="background:color-mix(in srgb, var(--ink) 30%, var(--surface))"></span>buys it: twelve-month spend, darker is more</span><span><span style="border:var(--hair) dashed var(--ink-5)"></span>doesn't buy it yet: what comparable accounts spend ◇</span><span>— not sized</span></div>
     <div class="card">
@@ -246,7 +253,7 @@ async function upDown(main, C, params) {
   main.innerHTML = `
   <div class="cust">
     <h1>Customers</h1>
-    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'main' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    ${tabsHtml('main')}
     <p class="lede">In ${lastName}, ${fall.length} accounts billed less than the month before and ${rise.length} more; net ${net < 0 ? '−' : '+'}${moneyK(Math.abs(net))}. ${fall[0] ? `The biggest fall was ${esc(titleCase(fall[0].customer))}, −${moneyK(-fall[0].dLast)}.` : ''}</p>
     <div class="tools"><div class="seg">${[['falling', 'Falling'], ['rising', 'Rising'], ['all', 'All']].map(([k, l]) => `<a href="${link(k)}" class="${k === f ? 'on' : ''}">${l}</a>`).join('')}</div></div>
     <div class="card" id="ud-table" style="overflow-x:auto"></div>
@@ -290,7 +297,7 @@ async function monthGrid(main, C, params) {
   main.innerHTML = `
   <div class="cust mg">
     <h1>Customers</h1>
-    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'grid' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    ${tabsHtml('grid')}
     <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (10% or more below their own run) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} Each cell below is one month against the six before it.</p>
     <div class="tools">
       <div class="seg">${[['total', 'Storage and service'], ['storage', 'Storage'], ['service', 'Service']].map(([k, l]) => `<a href="${link(k)}" class="${k === which ? 'on' : ''}">${l}</a>`).join('')}</div>
@@ -364,7 +371,7 @@ async function marginList(main, R, M, MS, params) {
   main.innerHTML = `
   <div class="cust mv2">
     <h1>Customers</h1>
-    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'margin' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    ${tabsHtml('margin')}
     <p class="lede">What each account pays against what it costs to serve ◇, worst first. ${count('Renegotiate') + count('Re-route') + count('Drop')} accounts need a decision now (${count('Renegotiate')} renegotiate, ${count('Re-route')} re-route, ${count('Drop')} too small to keep), ${count('Reprice')} are thin enough to reprice, and ${count('Check routes')} look thin only on route costs still under review. Tap an account for its lines, then its jobs, then one job's cost.</p>
     <div class="tools"><div class="seg">${[['all', 'All'], ['thin', 'Thin, 15–50%'], ['below', 'Below 15%']].map(([k, l]) => `<a href="${mlink({ f: k })}" class="${k === filter ? 'on' : ''}">${l}</a>`).join('')}</div></div>
     <div class="card">
@@ -506,7 +513,7 @@ async function destructionView(main, C, params) {
   main.innerHTML = `
   <div class="cust dv">
     <h1>Customers</h1>
-    <div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === 'destruction' ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>
+    ${tabsHtml('destruction')}
     <p class="lede">${Math.round(T('boxes')).toLocaleString('en-US')} boxes across ${rows.length} accounts are past their retention review. Destroying them would bill about <b>${moneyK(T('once'))} once</b>, at the book's median $${perBox.toFixed(2)} a box, and end about <b>${moneyK(T('lost'))} a month</b> of storage. At the median storage rate one destruction equals ${Math.round(medMonths)} months of storage, so the strongest cases are the accounts paying least to store${top ? `, starting with ${esc(titleCase(top.customer))}: ${Math.round(top.boxes).toLocaleString('en-US')} overdue boxes at $${top.rate.toFixed(3)} a box` : ''}.</p>
     <div class="card">
       <div class="hd"><span>Customer</span><span>Overdue boxes</span><span>Destruction, once</span><span>Storage it ends, a month</span><span>Months it equals</span><span></span></div>

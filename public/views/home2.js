@@ -1,4 +1,4 @@
-// Home, second design (#home2) — Trisha's morning on her phone. White ground, R4 green, few words.
+// Home (#pulse; #home2 while it was on trial) — Trisha's morning on her phone. White ground, R4 green, few words.
 //   the summary: one headline and three bullets, each opening its list (Claude's, checked, or the template)
 //   the month: the bill known, the next one building ◇, the gap to $1.0M
 //   the pulse: this month's work against last month's at the same working day; the last thirteen weeks
@@ -10,9 +10,8 @@ import { money0, moneyK, sparkline } from '/components/chart.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { reveal, drawIn } from '/components/motion.js';
 import { parseHome2, checkNumbers } from '/components/summary.js';
-import { YARD } from '/components/routemap.js';
+import { areaFrame, landLayer, postcodeLayer, yardMark } from '/components/areamap.js';
 import { homeView } from '/components/home2data.js';
-import { openAsk } from '/components/ask.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const monS = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' });
@@ -42,17 +41,17 @@ export async function render(main, P) {
 
   // the sheet the summary is written from: one fact a line, the template's sentence, where it opens
   const sheet = [
-    age > 2 && { key: 'stale', line: `The data stops on ${dm(A.latestDone)}, ${age} days ago`, say: `Data stops on ${dm(A.latestDone)}, ${age} days ago.`, href: '#home2' },
+    age > 2 && { key: 'stale', line: `The data stops on ${dm(A.latestDone)}, ${age} days ago`, say: `Data stops on ${dm(A.latestDone)}, ${age} days ago.`, href: '#pulse' },
     m.next && { key: 'month', lead: true, href: '#pulse',
       line: `${mon(m.next.month)}'s bill is building towards about ${moneyK(m.next.central)} ◇ (likely ${moneyK(m.next.lo)} to ${moneyK(m.next.hi)}), ${moneyK(m.gap)} short of the $1.0M target`,
       say: `${mon(m.next.month)} is heading for about ${moneyK(m.next.central)} ◇, ${moneyK(m.gap)} short of $1.0M.` },
-    m.vsLast != null && { key: 'pace', bullet: true, href: '#home2', line: `${mon(m.workMonth)}'s work is ${word(m.vsLast)} ${mon(m.prevMonth)}'s at working day ${m.day}`,
+    m.vsLast != null && { key: 'pace', bullet: true, href: '#pulse', line: `${mon(m.workMonth)}'s work is ${word(m.vsLast)} ${mon(m.prevMonth)}'s at working day ${m.day}`,
       say: `${mon(m.workMonth)}'s work is ${word(m.vsLast)} ${mon(m.prevMonth)}'s at day ${m.day}.` },
     fall && { key: 'slipping', bullet: true, href: `#customer/${fall.level1}`, line: `${titleCase(fall.customer)} is slipping most, ${moneyK(Math.abs(fall.d))} a month below its own run; ${cust.slipping} accounts are slipping`,
       say: `${titleCase(fall.customer)} is down ${moneyK(Math.abs(fall.d))} a month on its own run.` },
     w.lastFull && w.vsAvg != null && { key: 'week', href: '#activity', line: `Last full week's work was ${moneyK(w.lastFull.value)} ◇, ${pctW(w.vsAvg)} ${w.vsAvg >= 0 ? 'above' : 'below'} the weeks before` },
     rise && { key: 'rising', href: `#customer/${rise.level1}`, line: `${titleCase(rise.customer)} is rising most, ${moneyK(rise.d)} a month above its own run` },
-    lastSeg && lastSeg.lmPct != null && { key: 'segment', href: '#home2', line: `${lastSeg.name} billed ${moneyK(lastSeg.lm)} in ${mon(seg.month)}, ${lastSeg.lmPct > 0 ? 'up' : 'down'} ${pctW(lastSeg.lmPct)} on the month before` },
+    lastSeg && lastSeg.lmPct != null && { key: 'segment', href: '#pulse', line: `${lastSeg.name} billed ${moneyK(lastSeg.lm)} in ${mon(seg.month)}, ${lastSeg.lmPct > 0 ? 'up' : 'down'} ${pctW(lastSeg.lmPct)} on the month before` },
     { key: 'cross', bullet: true, href: '#customers?view=whitespace', line: `Selling existing customers what they don't buy yet is worth up to ${moneyK(cross.totalMonth)} a month ◇; ${cross.byLine[0] ? `${cross.byLine[0].name} is missed most, by ${cross.byLine[0].accounts} accounts` : ''}`,
       say: `Cross-sell is worth up to ${moneyK(cross.totalMonth)} a month ◇${cross.byLine[0] ? `, ${cross.byLine[0].name} most of all` : ''}.` },
     dest && { key: 'shred', href: '#activity?tab=warehouse', line: `${Math.round(dest.eligible / 1000)}K boxes are eligible to shred: ${moneyK(dest.fee)} once ◇, then ${moneyK(dest.lostYear / 12)} a month of storage lost` },
@@ -62,7 +61,7 @@ export async function render(main, P) {
   const kpis = `<section class="h2-kpis" data-rv>
       <div class="h2-kpi lead"><span>${m.next ? `${mon(m.next.month)}'s bill, building ◇` : 'Next bill'}</span><b>${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b><small>${m.next ? `${moneyK(m.next.lo)}–${moneyK(m.next.hi)} · day ${m.next.day} of ${m.next.workdays}` : ''}</small>
         <i class="h2-track"><i style="--w:${Math.min(100, (m.next ? m.next.central : billShown.v) / 1e6 * 100).toFixed(1)}%"></i></i></div>
-      <a class="h2-kpi" href="#customers?view=main"><span>${mon(billShown.month)} billed</span><b>${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${mon(billShown.vs)}` : 'posted, core'}</small></a>
+      <a class="h2-kpi" href="#customers"><span>${mon(billShown.month)} billed</span><b>${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${mon(billShown.vs)}` : 'posted, core'}</small></a>
       <div class="h2-kpi"><span>Gap to $1.0M</span><b>${moneyK(m.gap)}</b><small>a month</small></div>
     </section>`;
 
@@ -121,7 +120,6 @@ export async function render(main, P) {
     <div class="h2-row">${mapCard}${crossCard}</div>
     ${destCard}
     <div class="h2-foot">Posted through ${mon(P.monthly[P.monthly.length - 1].month)} · work done through ${dm(A.latestDone)} · ◇ modelled: work priced at last month's value a service, costs from model/rates.js · Citadel held apart</div>
-    <button class="h2-fab" type="button" aria-label="Ask about the figures"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/></svg><span>Ask</span></button>
   </div>`;
 
   // the summary: the template now, Claude's when it arrives and passes the checks
@@ -129,7 +127,7 @@ export async function render(main, P) {
     const p = parseHome2(text, sheet);
     if (!p) return false;
     main.querySelector('#h2-head').textContent = p.headline;
-    main.querySelector('#h2-bul').innerHTML = p.bullets.map(b => `<li class="${esc(b.key)}"><a href="${esc(hrefOf[b.key] || '#home2')}"><span>${esc(b.text)}</span><i>›</i></a></li>`).join('');
+    main.querySelector('#h2-bul').innerHTML = p.bullets.map(b => `<li class="${esc(b.key)}"><a href="${esc(hrefOf[b.key] || '#pulse')}"><span>${esc(b.text)}</span><i>›</i></a></li>`).join('');
     main.querySelector('#h2-by').textContent = by;
     return true;
   };
@@ -151,9 +149,8 @@ export async function render(main, P) {
   if (dens) densityMap(main.querySelector('#h2-map'), dens, base);
   if (dest) destChart(main.querySelector('#h2-dest'), dest);
 
-  const ask = () => openAsk({ suggestions: [
-    'Are we on track for this month?', 'Who should I call this week?', 'Where are the cross-sell wins?', 'What happens if customers shred their eligible boxes?'] });
-  main.querySelectorAll('.h2-fab, .h2-ask-inline').forEach(b => b.addEventListener('click', ask));
+  // the Ask button lives in the app shell (app.js); this one opens the same sheet
+  main.querySelectorAll('.h2-ask-inline').forEach(b => b.addEventListener('click', () => dispatchEvent(new Event('open-ask'))));
   reveal(main.querySelector('.h2'));
 }
 
@@ -201,31 +198,11 @@ function weekBars(el, w) {
 function densityMap(el, d, base) {
   if (!el) return;
   const W = Math.max(300, Math.min(900, el.clientWidth || 600)), H = Math.round(W < 500 ? W * 0.95 : W * 0.6);
-  // frame the dense middle: the yard and the central nine-tenths of the points
-  const lat = d.points.map(p => p.pt[0]).sort((a, b) => a - b), lon = d.points.map(p => p.pt[1]).sort((a, b) => a - b);
-  const q = (a, f) => a[Math.min(a.length - 1, Math.max(0, Math.round(f * (a.length - 1))))];
-  const box = [Math.min(q(lat, .04), YARD[0]), Math.max(q(lat, .96), YARD[0]), Math.min(q(lon, .04), YARD[1]), Math.max(q(lon, .96), YARD[1])];
-  for (const p of d.save) { box[0] = Math.min(box[0], p.pt ? p.pt[0] : box[0]); }
-  const k = Math.cos((box[0] + box[1]) / 2 * Math.PI / 180), pad = 18;
-  const sx = (W - pad * 2) / ((box[3] - box[2]) * k), sy = (H - pad * 2) / (box[1] - box[0]), s = Math.min(sx, sy);
-  const cx = (box[2] + box[3]) / 2, cy = (box[0] + box[1]) / 2;
-  const P = ([la, lo]) => [W / 2 + (lo - cx) * k * s, H / 2 - (la - cy) * s];
-  let g = '';
-  if (base) {
-    const path = (ring, close) => { let out = '', last = null; for (const p of ring) { const [x, y] = P(p); if (last && Math.abs(x - last[0]) < 1.2 && Math.abs(y - last[1]) < 1.2) continue; out += (out ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); last = [x, y]; } return out + (close ? 'Z' : ''); };
-    g += `<path class="h2-land" d="${(base.land || []).map(r => path(r, true)).join('')}"/><path class="h2-road" d="${(base.roads || []).map(r => path(r.l || r, false)).join('')}"/>`;
-  }
-  const maxV = Math.max(...d.points.map(p => p.visits || 0), 1);
-  const rad = v => 2 + 9 * Math.sqrt((v || 0) / maxV);
-  for (const p of d.points.filter(p => !p.best).sort((a, b) => b.visits - a.visits)) {
-    const [x, y] = P(p.pt); if (x < -10 || x > W + 10 || y < -10 || y > H + 10) continue;
-    g += `<circle class="h2-pt${p.customers === 1 ? ' single' : ''}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rad(p.visits).toFixed(1)}"><title>${esc(p.postcode)}: ${p.visits} visits, ${p.customers} customer${p.customers === 1 ? '' : 's'}</title></circle>`;
-  }
-  const [yx, yy] = P(YARD);
-  g += `<rect class="h2-yard" x="${yx - 6}" y="${yy - 6}" width="12" height="12" rx="2"/><text class="h2-maplab" x="${yx + 10}" y="${yy + 4}">Yard</text>`;
+  const F = areaFrame(d.points.map(p => p.pt), W, H);
+  let g = landLayer(base, F) + postcodeLayer(d.points.filter(p => !p.best), F) + yardMark(F);
   d.save.forEach((r, i) => {
     const pt = d.points.find(p => p.postcode === r.postcode); if (!pt) return;
-    const [x, y] = P(pt.pt);
+    const [x, y] = F.P(pt.pt);
     g += `<g class="h2-best" transform="translate(${Math.max(10, Math.min(W - 10, x)).toFixed(1)},${Math.max(10, Math.min(H - 10, y)).toFixed(1)})"><circle r="10"/><text y="4" text-anchor="middle">${i + 1}</text><title>${esc(r.postcode)}: one more customer saves about ${money0(r.saving)} a year ◇</title></g>`;
   });
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="h2-map" role="img" aria-label="Postcodes R4 visits, sized by visits, with the best places for one more customer numbered">${g}</svg>

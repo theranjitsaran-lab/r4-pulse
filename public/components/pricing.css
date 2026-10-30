@@ -65,3 +65,48 @@
   .pr .brow { grid-template-columns: minmax(0, 1fr) auto var(--sp-4); grid-template-areas: "nm v go" "bar bar bar"; gap: var(--sp-2) var(--sp-3); }
   .pr .brow .nm { grid-area: nm; } .pr .brow .bar { grid-area: bar; } .pr .brow .v { grid-area: v; } .pr .brow .go { grid-area: go; }
 }
+
+/* ── the 30 October layout (.pr2): one column, a compact bar, the verdict, the P&L and its levers ── */
+.pr.pr2 { grid-template-columns: minmax(0, 1fr); gap: var(--sp-4); padding-bottom: var(--sp-12); }
+.pr2 h1 { margin: 0; }
+.pr2-bar { display: grid; gap: var(--sp-3); }
+.pr2-pick { display: grid; gap: var(--sp-3); grid-template-columns: minmax(0, 1fr); }
+.pr2 label { display: grid; gap: var(--sp-1); font-size: var(--fs-tiny); font-weight: 600; color: var(--ink-3); }
+.pr2 select, .pr2 input:not([type=range]) { font: inherit; font-size: var(--fs-body); padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); background: var(--surface); color: var(--ink); min-width: 0; width: 100%; box-sizing: border-box; }
+.pr2-price { display: grid; grid-template-columns: auto calc(var(--u) * 28) minmax(0, 1fr); align-items: center; gap: var(--sp-1) var(--sp-3); }
+.pr2-price input#p-price { font-size: var(--fs-num); font-weight: 650; padding: var(--sp-1) var(--sp-2); }
+.pr2-price input[type=range] { width: 100%; accent-color: var(--brand); }
+.pr2-price small { grid-column: 3; font-size: var(--fs-tiny); color: var(--ink-4); }
+.pr2-vol summary { cursor: pointer; font-size: var(--fs-label); color: var(--brand); font-weight: 600; }
+.pr2-volin { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); margin-top: var(--sp-3); }
+.pr2-verdict { display: grid; gap: var(--sp-2); border-left: var(--hatch) solid var(--r4-bright); }
+.pr2-verdict.is-warn { border-left-color: var(--warn); } .pr2-verdict.is-bad { border-left-color: var(--bad); }
+.pr2-tag { justify-self: start; padding: 0 var(--sp-2); border-radius: var(--r-pill); background: var(--good); color: var(--hero-ink); font-size: var(--fs-label); font-weight: 600; }
+.pr2-verdict.is-warn .pr2-tag { background: var(--warn); } .pr2-verdict.is-bad .pr2-tag { background: var(--bad); }
+.pr2-head { margin: 0; font-family: var(--f-display); font-weight: 400; font-synthesis: none; font-size: var(--fs-lead); line-height: 1.3; color: var(--ink); }
+.pr2-verdict .hint { margin: 0; }
+.pr2-grid { display: grid; gap: var(--sp-4); }
+.pr2-pl { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+.pr2-pl li { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 10fr) auto; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); }
+.pr2-pl i { display: block; height: var(--sp-3); width: var(--w); border-radius: var(--r-xs); background: var(--ink-5); }
+.pr2-pl .rev i { background: var(--brand); } .pr2-pl .left i { background: var(--r4-bright); } .pr2-pl .left.neg i { background: var(--bad); }
+.pr2-pl .rev, .pr2-pl .left { font-weight: 650; }
+.pr2-pl .left { border-top: var(--hair) solid var(--rule-3); padding-top: var(--sp-2); }
+.pr2-pl b { font-variant-numeric: tabular-nums; text-align: right; }
+.pr2-pc { margin: var(--sp-3) 0 0; font-size: var(--fs-label); color: var(--ink-3); }
+.pr2-pc b { font-size: var(--fs-head); color: var(--ink); }
+.pr2-lv { list-style: none; margin: 0; padding: 0; }
+.pr2-lv li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-3); align-items: center; padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); }
+.pr2-lv b { display: block; font-size: var(--fs-sm); font-weight: 600; color: var(--ink); }
+.pr2-lv small { font-size: var(--fs-tiny); color: var(--ink-4); }
+.pr2-lv em { font-style: normal; font-weight: 700; color: var(--good); font-variant-numeric: tabular-nums; }
+.pr2-ask { margin-top: var(--sp-4); }
+.pr2 .fold { margin-top: var(--sp-3); border-top: var(--hair) solid var(--rule); padding-top: var(--sp-2); }
+@media (min-width: 900px) {
+  .pr2-bar { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: end; column-gap: var(--sp-6); }
+  .pr2-pick { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .pr2-vol { grid-column: 1 / -1; }
+  .pr2-volin { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .pr2-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+}
+.pr2-pl .left.review i { background: var(--ink-5); } .pr2-pl .left.review b { color: var(--ink-3); }
