@@ -38,7 +38,7 @@ Every figure shown in two places comes from one function (`components/levers.js`
 ## Stack
 
 Node, Express, vanilla JS, inline SVG. **No React, no framework, no chart library.** One font file:
-R4's Average Sans, self-hosted in `public/fonts/` for display text only; everything else is the system sans. Postgres via `pg`. Deployed on Render. The API gzips its JSON with Node's zlib.
+R4's Average Sans, self-hosted in `public/fonts/` for the "Pulse" wordmark and the intro only; everything else is the system sans. Postgres via `pg`. Deployed on Render. The API gzips its JSON with Node's zlib.
 
 If a task seems to need a library, it doesn't — write the SVG.
 
@@ -136,10 +136,12 @@ phone it is a tab bar at the bottom.
 **Brand, type and tokens.** R4 Services' own branding, from r4services.com (26 October 2026): the barcode
 logo `public/brand/r4-logo.png` (always on white: its bars are black), the icon `r4-icon-192.png`, green
 `--brand` #0e5116 and `--r4-bright` #38b449 (fills and lines only, never text). **Average Sans**
-(`--f-display`, SIL OFL, one weight) is for titles, the masthead and Home's big figures only, at 400 with
-`font-synthesis: none`; tables, labels and body stay on the system sans (`--f-sans`: San Francisco, Segoe UI)
-for tabular figures and small-size legibility on Windows. No other web font, no serif, nothing from Google at
-run time. `public/tokens.css` holds every colour and size, light and dark; components read variables only.
+(`--f-brand`, SIL OFL, one weight) is for the "Pulse" wordmark and the intro only, with `font-synthesis: none`
+(Theran, 27 October 2026: its one light weight made titles read as body text). Titles and big figures are the
+system sans at 600 (`--f-display`, `--w-head`); tables, labels and body the system sans at 400 (`--f-sans`:
+San Francisco, Segoe UI). Seven sizes only: 12 · 14 · 16 · 20 · 28 · 40 · 64 (`--fs-1` to `--fs-7`). No other
+web font, no serif, nothing from Google at run time. `public/tokens.css` holds every colour and size, light
+and dark; components read variables only.
 
 **Charts** (`components/chart.js`, method from the dataviz skill): one axis always; 2px lines over a
 12% area wash; bars no wider than ~24px with 4px rounded ends; hairline grids; legend for two or more
@@ -148,7 +150,8 @@ series; crosshair tooltip; drawn at their on-screen width. Colour follows the en
 series colour. Real sparklines on customer rows.
 
 **Status colour** marks exceptions only and always comes with a word: red below cost and down,
-amber below median, green only for a delta that is up. Sound is ink.
+amber below median, green only for a delta that is up. Sound is ink. A delta wears colour only at a fifth
+or more (±20%); smaller moves keep the arrow in ink, and sparklines are ink with only the latest point coloured.
 
 **Copy.** One idea per row: a number and one line; detail on tap. Show what changed, not what Anne
 and Mike already know. Modelled figures carry ◇. Route-based costs (bins, handling, delivery) show
