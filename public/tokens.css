@@ -99,6 +99,13 @@
   --hero-track:  rgba(255, 255, 255, .16);
   --hero-accent: #8fd99a;  /* the pulse line, the known part of the bill */
 
+  /* ── maps: a quiet outline under the route, the lake the one landmark; never a series colour ── */
+  --map-water:  #e6edf3;
+  --map-land:   #fbfbfc;
+  --map-border: #dedee3;   /* county lines */
+  --map-road:   #cfcfd5;   /* the interstates */
+  --map-place:  #8e8e93;   /* town names: decoration, not data */
+
   /* ── route work: done services in ink, so green and red stay free for above and below the norm ── */
   --heat:    #6c6c71;
 
@@ -182,6 +189,7 @@
     --shadow: none;
     --hero-bg: #082d0c; --hero-bg-2: #0e5116; --hero-accent: #8fd99a;
     --lever-1: #2f7a3a; --lever-2: #4d6a51; --lever-3: #8fa893; --lever-4: #c9d6cb; --heat: #98989d;
+    --map-water: #121a21; --map-land: #1c1c1e; --map-border: #303033; --map-road: #3f3f43; --map-place: #7c7c82;
   }
 }
 :root[data-theme="dark"] {
@@ -196,6 +204,7 @@
   --shadow: none;
   --hero-bg: #082d0c; --hero-bg-2: #0e5116; --hero-accent: #8fd99a;
   --lever-1: #2f7a3a; --lever-2: #4d6a51; --lever-3: #8fa893; --lever-4: #c9d6cb; --heat: #98989d;
+    --map-water: #121a21; --map-land: #1c1c1e; --map-border: #303033; --map-road: #3f3f43; --map-place: #7c7c82;
 }
 
 @media (prefers-reduced-motion: reduce) { :root { --t-fast: 0ms; --t: 0ms; --t-slow: 0ms; --t-draw: 0ms; --t-stagger: 0ms; --rise: 0px; } }

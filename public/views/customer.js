@@ -10,6 +10,7 @@ import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components
 import { seriesOf, deltaText, moveReason } from '/components/series.js';
 import { slippingAccounts, unitSuspect } from '/components/levers.js';
 import { costOrders, jobHtml, drawRouteBlock } from '/components/jobview.js';
+import { placesSvg, miles, YARD, loadBasemap, basemapNow } from '/components/routemap.js';
 
 const CITADEL = 6714;
 const UNDER_REVIEW = new Set(['bin', 'handling', 'movement']);
@@ -249,6 +250,7 @@ async function drawDrill(el, drillP, svcName) {
     <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? (d.orders.length >= 200 ? `the latest 200 orders, ${money0(ordRev)}` : `${n0(d.orders.length)} in six months, ${money0(ordRev)}`) : 'last six months'}</small></div><div id="cp-orders"></div><div class="pending" style="margin-top:var(--sp-3)">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · cost ◇ from the cost model, one visit shared between the day's orders · tap an order for its cost build</div></div>
     <div class="card"><div class="card-head"><h3>Shredding visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} days on a route · ${n0(lbs)} lb` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Bin and shredding stops drivers marked done in Veri-Shred, one row per day and route. Box deliveries and retrievals are on the work orders, not here. Executive-bin weights are a set figure, not weighed.</div></div>`;
   const oBox = el.querySelector('#cp-orders'), vBox = el.querySelector('#cp-visits');
+  drawWhere(el, d);
   // the latest twelve of each, with the rest one tap away
   const more = (box, total, draw) => {
     if (total <= 12) return draw(total);
@@ -297,4 +299,34 @@ function chartTitle(s) {
   if (!m || m.pct == null) return `Billing by month${mix}`;
   const how = Math.abs(m.pct) < 0.05 ? 'about level' : `${m.pct > 0 ? 'up' : 'down'} ${Math.abs(Math.round(m.pct * 100))}%`;
   return `Running at ${moneyK(m.last3)} a month, ${how} on its own run${mix}`;
+}
+
+// Where the account is served: its own stops over six months (the drill's route lists), by postcode,
+// against the yard, above the orders and visits. One look says a city account or one far out.
+function drawWhere(el, d) {
+  const Z = RCTX && RCTX.Z;
+  if (!el || !Z || !d.routes) return;
+  const by = new Map(), days = new Set();
+  for (const r of d.routes) {
+    if (r.level1 !== d.level1 || !r.postcode) continue;
+    const x = by.get(r.postcode) || { postcode: r.postcode, services: 0, days: new Set(), pt: Z[r.postcode] || null };
+    x.services += r.services || 0; x.days.add(r.date); days.add(r.date);
+    by.set(r.postcode, x);
+  }
+  const places = [...by.values()].map(p => ({ ...p, days: p.days.size, mi: p.pt ? miles(YARD, p.pt) : null })).sort((a, b) => b.services - a.services);
+  const placed = places.filter(p => p.pt);
+  if (!placed.length) return;
+  const far = placed.reduce((m, p) => p.mi > m.mi ? p : m, placed[0]);
+  const all = places.reduce((t, p) => t + p.services, 0), within10 = placed.filter(p => p.mi <= 10).reduce((t, p) => t + p.services, 0);
+  const title = placed.length === 1 ? `Served at one postcode, ${far.mi.toFixed(0)} miles from the yard`
+    : `Served at ${placed.length} postcodes; the furthest, ${far.postcode}, is ${far.mi.toFixed(0)} miles from the yard`;
+  const card = document.createElement('div');
+  card.className = 'card'; card.style.gridColumn = '1 / -1';
+  card.innerHTML = `<div class="card-head"><h3>${esc(title)}</h3></div>
+    <div class="rm-grid"><div class="rm-wrap"></div><ol class="rm-list">${places.slice(0, 12).map(p => `<li><span>${esc(p.postcode)}<small>${p.mi != null ? `${p.mi.toFixed(1)} miles from the yard` : 'no postcode centre'} · ${p.days} day${p.days === 1 ? '' : 's'} on a route</small></span><span class="num">${p.services.toLocaleString('en-US')}<small>services</small></span></li>`).join('')}</ol></div>
+    <div class="src">${Math.round(within10 / Math.max(1, all) * 100)}% of its ${all.toLocaleString('en-US')} done services in six months were within ten miles of the yard · Veri-Shred done orders on ${days.size} route days · postcode centres from the US Census, straight lines: no GPS was captured</div>`;
+  el.prepend(card);
+  const draw = () => { const w = card.querySelector('.rm-wrap'); if (w && w.isConnected) w.innerHTML = placesSvg(placed, { width: Math.max(280, Math.min(900, w.clientWidth || 560)), base: basemapNow(), label: title }); };
+  draw();
+  if (!basemapNow()) loadBasemap().then(b => { if (b) draw(); });   // redrawn once the outline arrives
 }

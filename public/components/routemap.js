@@ -119,32 +119,104 @@ export function cheaper(day, A, history, Z, book) {
   return out;
 }
 
-// ── the map: an SVG string. Equirectangular around the middle latitude, fitted to the stops and yard.
+// ── the maps: SVG strings, equirectangular around the middle latitude, fitted to the points and yard.
+// Under the points, when public/data/basemap.json has loaded, a quiet outline of Chicagoland from the
+// US Census (scripts/build_basemap.js): land by county with the lakeshore, the interstates, and a few
+// town names. Without it the maps still draw, on a plain ground.
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-export function mapSvg(day, { width = 640 } = {}) {
-  const pts = [YARD, ...day.stops.filter(s => s.pt).map(s => s.pt)];
+let BASE = null, BASE_DATA = null;
+export function loadBasemap() {
+  if (!BASE) BASE = fetch('/data/basemap.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).catch(() => null).then(b => (BASE_DATA = b));
+  return BASE;
+}
+// the outline if it has arrived, else null: a map never waits for it
+export const basemapNow = () => BASE_DATA;
+
+// The frame: a projection fitted to the points, at least about three miles across.
+function frame(pts, width) {
   const lat0 = pts.reduce((t, p) => t + p[0], 0) / pts.length, k = Math.cos(lat0 * Math.PI / 180);
   const xs = pts.map(p => p[1] * k), ys = pts.map(p => p[0]);
-  let x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
-  const span = Math.max(x1 - x0, y1 - y0, 0.05);   // at least about three miles across
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const span = Math.max(x1 - x0, y1 - y0, 0.05);
   const height = Math.round(Math.max(240, Math.min(380, width * Math.max(y1 - y0, span * 0.6) / Math.max(x1 - x0, span * 0.6))));
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, pad = 28;
   const s = Math.min((width - pad * 2) / Math.max(x1 - x0, span * 0.6), (height - pad * 2) / Math.max(y1 - y0, span * 0.6));
   const P = p => [width / 2 + (p[1] * k - cx) * s, height / 2 - (p[0] - cy) * s];
+  return { P, width, height, pad, milePx: s / 69.0 };
+}
+
+// The outline, in the frame: points closer than a pixel are dropped, so a far-out county costs little.
+function baseLayer(base, F) {
+  if (!base) return '';
+  const path = (ring, close) => {
+    let d = '', last = null;
+    for (const p of ring) {
+      const [x, y] = F.P(p);
+      if (last && Math.abs(x - last[0]) < 1 && Math.abs(y - last[1]) < 1) continue;
+      d += (d ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); last = [x, y];
+    }
+    return d + (close ? 'Z' : '');
+  };
+  const inView = ([x, y], m = 0) => x >= -m && x <= F.width + m && y >= -m && y <= F.height + m;
+  let g = `<path class="rm-land" d="${(base.land || []).map(r => path(r, true)).join('')}"/>`;
+  g += `<path class="rm-road" d="${(base.roads || []).map(r => path(r.l || r, false)).join('')}"/>`;
+  // town names: the largest first, none on top of another or of the frame's edge
+  const taken = [];
+  for (const [name, lat, lon] of base.places || []) {
+    const [x, y] = F.P([lat, lon]);
+    if (!inView([x, y], -F.pad) || taken.some(t => Math.abs(t[0] - x) < 70 && Math.abs(t[1] - y) < 16)) continue;
+    taken.push([x, y]);
+    g += `<text class="rm-place" x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle">${esc(name)}</text>`;
+    if (taken.length >= 8) break;
+  }
+  return g;
+}
+
+const scaleBar = F => {
+  const bar = F.milePx * 5 < F.width / 3 ? 5 : 1;
+  return `<g transform="translate(${F.width - F.pad - bar * F.milePx},${F.height - 12})"><line class="rm-scale" x1="0" x2="${(bar * F.milePx).toFixed(1)}" y1="0" y2="0"/><text class="rm-lab" x="${(bar * F.milePx / 2).toFixed(1)}" y="-5" text-anchor="middle">${bar} mile${bar > 1 ? 's' : ''}</text></g>`;
+};
+const yardMark = F => { const [x, y] = F.P(YARD); return `<rect class="rm-yard" x="${x - 6}" y="${y - 6}" width="12" height="12" rx="2"/><text class="rm-lab" x="${x + 10}" y="${y + 4}">Yard</text>`; };
+
+// One route's day: the stops in order from the yard and back. far: { i, miles } names the stop that
+// took the van furthest out of its way.
+export function mapSvg(day, { width = 640, base = null, far = null } = {}) {
   const placed = day.stops.filter(s => s.pt);
-  const line = [YARD, ...placed.map(q => q.pt), YARD].map(P).map(q => q.map(v => v.toFixed(1)).join(',')).join(' ');
-  // a scale bar: five miles, or one if the map is small
-  const milePx = s * (1 / 69.0);
-  const bar = milePx * 5 < width / 3 ? 5 : 1;
-  let g = `<polyline class="rm-path" points="${line}"/>`;
-  const [yx, yy] = P(YARD);
-  g += `<rect class="rm-yard" x="${yx - 6}" y="${yy - 6}" width="12" height="12" rx="2"/><text class="rm-lab" x="${yx + 10}" y="${yy + 4}">Yard</text>`;
+  const F = frame([YARD, ...placed.map(s => s.pt)], width);
+  const line = [YARD, ...placed.map(q => q.pt), YARD].map(F.P).map(q => q.map(v => v.toFixed(1)).join(',')).join(' ');
+  let g = baseLayer(base, F) + `<polyline class="rm-path" points="${line}"/>` + yardMark(F);
   const seen = new Map();
   placed.forEach(q => {
-    const [x, y] = P(q.pt), key = q.postcode, n = seen.get(key) || 0; seen.set(key, n + 1);
-    const ox = n ? Math.cos(n * 2.1) * 7 : 0, oy = n ? Math.sin(n * 2.1) * 7 : 0;
-    g += `<g class="rm-stop${q.mine ? ' me' : ''}" data-i="${day.stops.indexOf(q)}" transform="translate(${(x + ox).toFixed(1)},${(y + oy).toFixed(1)})"><circle r="${q.mine ? 9 : 7.5}"/><text y="3.5" text-anchor="middle">${day.stops.indexOf(q) + 1}</text></g>`;
+    const [x, y] = F.P(q.pt), key = q.postcode, n = seen.get(key) || 0; seen.set(key, n + 1);
+    const ox = n ? Math.cos(n * 2.1) * 7 : 0, oy = n ? Math.sin(n * 2.1) * 7 : 0, i = day.stops.indexOf(q);
+    g += `<g class="rm-stop${q.mine ? ' me' : ''}" data-i="${i}" transform="translate(${(x + ox).toFixed(1)},${(y + oy).toFixed(1)})"><circle r="${q.mine ? 9 : 7.5}"/><text y="3.5" text-anchor="middle">${i + 1}</text></g>`;
+    if (far && far.i === i) g += `<text class="rm-far" x="${(x + ox + 13).toFixed(1)}" y="${(y + oy + 4).toFixed(1)}">+${far.miles.toFixed(0)} mi</text>`;
   });
-  g += `<g transform="translate(${width - pad - bar * milePx},${height - 12})"><line class="rm-scale" x1="0" x2="${(bar * milePx).toFixed(1)}" y1="0" y2="0"/><text class="rm-lab" x="${(bar * milePx / 2).toFixed(1)}" y="-5" text-anchor="middle">${bar} mile${bar > 1 ? 's' : ''}</text></g>`;
-  return `<svg class="rm" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(`Route ${day.route} on ${day.date}: ${placed.length} stops in order from the yard`)}">${g}</svg>`;
+  g += scaleBar(F);
+  return `<svg class="rm${base ? ' based' : ''}" viewBox="0 0 ${F.width} ${F.height}" role="img" aria-label="${esc(`Route ${day.route} on ${day.date}: ${placed.length} stops in order from the yard`)}">${g}</svg>`;
+}
+
+// Where one account is served: its postcodes against the yard, each dot sized by its services.
+// places: [{ pt, postcode, services }]
+export function placesSvg(places, { width = 640, base = null, label = '' } = {}) {
+  const placed = places.filter(p => p.pt);
+  const F = frame([YARD, ...placed.map(p => p.pt)], width);
+  const max = Math.max(1, ...placed.map(p => p.services || 0));
+  let g = baseLayer(base, F);
+  for (const p of placed) { const [x, y] = F.P(p.pt); g += `<line class="rm-ray" x1="${F.P(YARD)[0].toFixed(1)}" y1="${F.P(YARD)[1].toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }
+  // the yard goes on last, over the dots
+  // every postcode a dot; names for the largest, and only where one does not sit on another or the yard
+  const [yx, yy] = F.P(YARD), taken = [[yx + 10, yy, 36]];
+  let labels = '';
+  for (const p of [...placed].sort((a, b) => (b.services || 0) - (a.services || 0))) {
+    const [x, y] = F.P(p.pt), r = 4 + 8 * Math.sqrt((p.services || 0) / max), lx = x + r + 4;
+    g += `<g class="rm-stop me" transform="translate(${x.toFixed(1)},${y.toFixed(1)})"><circle r="${r.toFixed(1)}"/></g>`;
+    if (taken.length < 9 && !taken.some(([tx, ty, tw]) => lx < tx + tw + 4 && lx + 40 > tx - 4 && Math.abs(ty - y) < 14)) {
+      taken.push([lx, y, 40]);
+      labels += `<text class="rm-lab" x="${lx.toFixed(1)}" y="${(y + 4).toFixed(1)}">${esc(p.postcode)}</text>`;
+    }
+  }
+  g += labels + yardMark(F);
+  g += scaleBar(F);
+  return `<svg class="rm${base ? ' based' : ''}" viewBox="0 0 ${F.width} ${F.height}" role="img" aria-label="${esc(label)}">${g}</svg>`;
 }

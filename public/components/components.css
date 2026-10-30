@@ -169,6 +169,13 @@ i.k.neutral, i.k.band { background: var(--s-citadel); }
 .rm-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: var(--sp-4); margin-top: var(--sp-2); }
 .rm-wrap { position: relative; background: var(--well); border-radius: var(--r); }
 .rm { display: block; width: 100%; height: auto; }
+/* the Chicagoland outline under a map (routemap.js baseLayer): the lake, county lines, interstates, town names */
+.rm.based { background: var(--map-water); border-radius: var(--r); }
+.rm-land { fill: var(--map-land); stroke: var(--map-border); stroke-width: .6; }
+.rm-road { fill: none; stroke: var(--map-road); stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; }
+.rm-place { font-family: var(--f-sans); font-size: var(--fs-tiny); fill: var(--map-place); pointer-events: none; }
+.rm-far { font-family: var(--f-sans); font-size: var(--fs-tiny); font-weight: 600; fill: var(--ink); }
+.rm-ray { stroke: var(--ink-5); stroke-width: 1; stroke-dasharray: 3 3; }
 .rm-path { fill: none; stroke: var(--ink-4); stroke-width: 1.5; stroke-dasharray: 4 3; }
 .rm-yard { fill: var(--ink); }
 .rm-lab { font-family: var(--f-sans); font-size: var(--fs-tiny); fill: var(--ink-3); }

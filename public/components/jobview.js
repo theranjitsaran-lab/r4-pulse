@@ -5,7 +5,8 @@
 //   costOrders(R, d, meta, A, Z, id)   costs every order of one account, on its real route day where
 //                                      there was one (jobCost with routemap.js allocate)
 //   jobHtml(job, opts) + wireJob(el, job, ...)   the job, as HTML, then the map drawn and hover wired
-import { routeDay, allocate, cheaper, mapSvg, NEAR_MILES, NEAR_DAYS, miles, YARD } from './routemap.js';
+import { routeDay, allocate, cheaper, mapSvg, NEAR_MILES, NEAR_DAYS, miles, YARD, loadBasemap, basemapNow } from './routemap.js';
+loadBasemap();   // the outline under the route maps, fetched once while the page is read
 import { jobCost, costParts, PARTS } from './margin.js';
 import { money0 } from './chart.js';
 
@@ -96,7 +97,7 @@ export function drawRouteBlock(el, ctx, { R, A, Z }) {
     </ul>
     <div class="src">Stops at Census postcode centres joined by straight lines; no GPS was captured · a route day ${money0(a.total)}, ${Math.round(R.SETTINGS.split * 100)}% travel split by each stop's detour, the rest on site split by visit (model/rates.js, provisional) · ${day.source === 'orders' ? 'from the route orders held offline' : 'Veri-Shred done orders'} · days that also delivered boxes are under-counted until delivery routes are in the data</div>`;
   const tip = el.querySelector('.c-tip'), wrap = el.querySelector('.rm-wrap');
-  wrap.insertAdjacentHTML('afterbegin', mapSvg(day, { width: Math.max(280, Math.min(900, wrap.clientWidth || 560)) }));   // drawn at its on-screen width
+  wrap.insertAdjacentHTML('afterbegin', mapSvg(day, { width: Math.max(280, Math.min(900, wrap.clientWidth || 560)), base: basemapNow() }));   // drawn at its on-screen width
   const svg = wrap.querySelector('svg');
   const show = i => {
     const s = day.stops[i]; if (!s) return;

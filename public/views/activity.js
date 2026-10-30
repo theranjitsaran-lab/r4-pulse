@@ -11,6 +11,7 @@ const miles = (a, b) => { const r = Math.PI / 180, R = 3958.8, dp = (b[0] - a[0]
   return 2 * R * Math.asin(Math.sqrt(Math.sin(dp / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dl / 2) ** 2)); };
 import { money0, moneyK } from '/components/chart.js';
 import { titleCase, esc, loadRates } from '/components/data.js';
+import { allocate, mapSvg, loadBasemap, basemapNow } from '/components/routemap.js';
 const routeName = r => /\d/.test(r || '') ? r : titleCase(r);
 
 
@@ -113,14 +114,29 @@ export async function render(main, A, params) {
       if (last && last.level1 === st.level1) { last.stops++; last.n += st.n; last.done += st.done; }
       else runs.push({ ...st, stops: 1 });
     }
+    // the route on a map beside its stops: the same numbers, and the stop that took the van furthest
+    // out of its way (its detour from components/routemap.js allocate, at postcode centres)
+    const pc = p => String(p || '').slice(0, 5);
+    const rd = { date: day, route, stops: runs.map(s => ({ ...s, postcode: pc(s.postcode), services: s.done || s.n, pt: Z[pc(s.postcode)] || null, mine: false })) };
+    const placed = rd.stops.filter(s => s.pt).length;
+    const a = placed ? allocate(R, rd) : null;
+    const far = a ? rd.stops.reduce((b, s, i) => (s.detour || 0) > (b ? b.miles : 0) ? { i, miles: s.detour } : b, null) : null;
+    const farOk = far && far.miles >= 2 ? far : null;
     const seen = new Set();
     let anyValue = false;
-    box.innerHTML = runs.map((s, i) => {
+    const list = runs.map((s, i) => {
       const v = !seen.has(s.level1) ? value.get(day + '|' + s.level1) : null; seen.add(s.level1);
       if (v != null) anyValue = true;
       return `<div class="stop"><span class="n">${i + 1}</span><span><a href="#customer/${s.level1}" style="color:inherit;text-decoration:none;font-weight:600">${esc(titleCase(s.company))}</a> <span class="sub">${s.stops > 1 ? s.stops + ' stops · ' : ''}${esc(s.postcode || '')}</span></span>
         <span class="sub">${s.done} of ${s.n} done</span><span class="v">${v != null ? money0(v) : ''}</span></div>`;
     }).join('') + `<p class="sub" style="margin:var(--sp-2) 0 0">${anyValue ? 'Value is what that customer\'s work billed on the day, shown at its first stop.' : 'Work on this day is not billed yet: VCK prices it at the month\'s run.'}</p>`;
+    if (!a) { box.innerHTML = list; return; }
+    const unplaced = rd.stops.length - placed, fs = farOk && rd.stops[farOk.i];
+    const say = `About ${Math.round(a.dayMiles)} miles yard to yard ◇${fs ? `; stop ${farOk.i + 1}, ${esc(titleCase(fs.company))} at ${esc(fs.postcode)}, took the van about ${Math.round(farOk.miles)} miles out of its way` : ''}${unplaced ? `; ${pl(unplaced, 'stop')} without a postcode centre left off the map` : ''}. Straight lines between postcode centres: no GPS was captured.`;
+    box.innerHTML = `<div class="rm-grid"><div class="rm-wrap"></div><div>${list}</div></div><p class="sub" style="margin:var(--sp-2) 0 0">${say}</p>`;
+    const draw = () => { const w = box.querySelector('.rm-wrap'); if (w) w.innerHTML = mapSvg(rd, { width: Math.max(280, Math.min(900, w.clientWidth || 560)), base: basemapNow(), far: farOk }); };
+    draw();
+    if (!basemapNow()) loadBasemap().then(b => { if (b && box.isConnected && !box.hidden) draw(); });   // redrawn once the outline arrives
   }
 
   function drawWeek() {
