@@ -38,7 +38,7 @@ Every figure shown in two places comes from one function (`components/levers.js`
 ## Stack
 
 Node, Express, vanilla JS, inline SVG. **No React, no framework, no chart library.** One font file:
-R4's Average Sans, self-hosted in `public/fonts/` for display text only; everything else is the system sans. Postgres via `pg`. Deployed on Render. The API gzips its JSON with Node's zlib.
+R4's Average Sans, self-hosted in `public/fonts/` for the "Pulse" wordmark and the intro only; everything else is the system sans. Postgres via `pg`. Deployed on Render. The API gzips its JSON with Node's zlib.
 
 If a task seems to need a library, it doesn't — write the SVG.
 
@@ -54,6 +54,8 @@ If a task seems to need a library, it doesn't — write the SVG.
   components/  chart.js, table.js, strip.js, margin.js, levers.js, whitespace.js, explain.js, data.js
   views/       home2.js (Home), pulse.js (the old Home, #classic), customers.js, custoverview.js, customer.js, pricing.js, activity.js (Routes)
   data/zcta.json                                  ← postcode centroids (US Census, public)
+  data/basemap.json                               ← the Chicagoland outline under the maps (US Census; scripts/build_basemap.js)
+  data/roadnet.json                               ← main roads as a network, for road miles and the drawn path (US Census; scripts/build_roadnet.js)
 /fixtures    snapshotted JSON for offline work (npm run snapshot, on the PC)
 /docs        brief, logic pack, data addendum, margin spec, DEPLOY.md
 ```
@@ -92,6 +94,8 @@ Margin). `model/rates.js` holds every derivation; DECISIONS.md "Data basis" reco
 | `bin` | travel + on-site per visit, shred per lb | box handling |
 | `itad` | travel + on-site per visit, plant per lb | facilities, box handling |
 | `labour` | hours × the loaded rate | travel, boxes |
+
+A route day's travel is split by each stop's detour in **road miles** along the main roads (DECISIONS.md "Route miles"), straight-line where the roads give no way.
 
 **Visits, not units, drive route cost.** A visit is one customer on one route on one day, from
 Veri-Shred done orders (Ingalls 101, Larabida 15, UChicago Medicine 300); otherwise units ÷ 5.80 for
@@ -152,7 +156,8 @@ series; crosshair tooltip; drawn at their on-screen width. Colour follows the en
 series colour. Real sparklines on customer rows.
 
 **Status colour** marks exceptions only and always comes with a word: red below cost and down,
-amber below median, green only for a delta that is up. Sound is ink.
+amber below median, green only for a delta that is up. Sound is ink. A delta wears colour only at a fifth
+or more (±20%); smaller moves keep the arrow in ink, and sparklines are ink with only the latest point coloured.
 
 **Copy.** One idea per row: a number and one line; detail on tap. Show what changed, not what Anne
 and Mike already know. Modelled figures carry ◇. Route-based costs (bins, handling, delivery) show

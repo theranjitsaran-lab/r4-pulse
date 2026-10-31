@@ -10,8 +10,9 @@ button{font:inherit}
 .mast-in{max-width: calc(var(--u) * 300);margin:0 auto;padding: 0 var(--sp-6);display:flex;align-items:center;gap: var(--sp-6);height: calc(var(--u) * 14)}
 .brand{display:flex;align-items:center;gap: var(--sp-3);color:var(--ink);text-decoration:none}
 /* R4's logo on its own white ground (it has black bars), then the product name in R4's display face */
-.brand img{display:block;height: var(--logo-h);width:auto;background: var(--logo-ground);border-radius: var(--r-xs);padding: var(--hair-2)}
-.brand span{font-family: var(--f-display);font-weight:400;font-synthesis:none;font-size: var(--fs-lead);letter-spacing: var(--track-label);color: var(--brand)}
+/* cropped above the "information management company" line, which cannot be read at this size */
+.brand img{display:block;height: var(--logo-h);width:auto;aspect-ratio: 247 / 84;object-fit: cover;object-position: top;background: var(--logo-ground);border-radius: var(--r-xs);padding: var(--hair-2)}
+.brand span{font-family: var(--f-brand);font-weight:400;font-synthesis:none;font-size: var(--fs-lead);letter-spacing: var(--track-label);color: var(--brand)}
 #nav{display:flex;gap: var(--hair-2);background:var(--well-2);padding: var(--hatch);border-radius: var(--r)}
 #nav a{color:var(--ink-2);text-decoration:none;font-size: var(--fs-sm);font-weight:500;padding: var(--sp-2) var(--sp-4);border-radius: var(--r-sm)}
 #nav a.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow: var(--shadow-sm)}

@@ -1,7 +1,7 @@
 /* Routes, Mike's screen. Moved out of the view so every value reads tokens.css. */
 
 /* STYLE */
-.rt h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); margin: 0; }
+.rt h1 { font-size: var(--fs-display); font-weight: var(--w-head); letter-spacing: var(--track-tight); margin: 0; }
 .rt .top { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-4); }
 .rt .day { display: flex; align-items: center; gap: var(--sp-2); }
 .rt .day button { border: var(--hair) solid var(--rule-3); background: var(--surface); border-radius: var(--r); width: calc(var(--u) * 9); height: calc(var(--u) * 9); font-size: var(--fs-head); color: var(--ink-2); cursor: pointer; }
@@ -11,7 +11,7 @@
 .rt .r { display: grid; grid-template-columns: calc(var(--u) * 28) minmax(0, 1fr) calc(var(--u) * 43) calc(var(--u) * 23) var(--sp-3); gap: var(--sp-4); align-items: center; padding: var(--sp-3) 0; border-top: var(--hair) solid var(--rule); cursor: pointer; }
 .rt .r:first-child { border-top: 0; }
 .rt .r.open { background: var(--well); margin: 0 calc(var(--sp-3) * -1); padding: var(--sp-3); border-radius: var(--r); }
-.rt .r .nm { font-weight: 700; }
+.rt .r .nm { font-weight: var(--w-head); }
 .rt .r .nm small { display: block; font-weight: 400; color: var(--ink-3); font-size: var(--fs-source); }
 .rt .r .meter { display: block; margin-bottom: var(--sp-1); height: var(--sp-2); background: var(--well-2); border-radius: var(--r-sm); position: relative; }
 .rt .r .meter i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--heat); border-radius: var(--r-sm); }

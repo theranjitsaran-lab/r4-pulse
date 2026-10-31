@@ -263,3 +263,31 @@ test('morning brief: taps are signed and cannot be forged; a stale morning says 
   const tr = fresh.find(m => m.who === 'trisha');
   assert.ok(checkNumbers(tr.sheet[0].line, tr.sheet).ok);
 });
+
+test('road miles: the shares still add up to the route day; a road way is never shorter than the straight line', async () => {
+  const R = require('./rates.js');
+  const { routeDay, allocate, roadPath, setRoadnet, miles, YARD } = await import('../public/components/routemap.js');
+  const Z = require('../public/data/zcta.json');
+  setRoadnet(require('../public/data/roadnet.json'));
+  try {
+    const loop = roadPath(YARD, Z['60606']);
+    assert.ok(loop && loop.miles >= miles(YARD, Z['60606']) && loop.miles <= 2 * miles(YARD, Z['60606']), 'the yard to the Loop by road: longer than the straight line, not absurdly');
+    const A = J('activity');
+    const days = [...new Set(A.orders.filter(o => o.done).map(o => o.date + '|' + o.route + '|' + o.level1))].slice(0, 40);
+    let checked = 0, roadDays = 0;
+    for (const k of days) {
+      const [date, , id] = k.split('|');
+      const day = routeDay({ orders: A.orders }, date, +id, Z);
+      if (!day) continue;
+      const a = allocate(R, day);
+      near(day.stops.reduce((t, s) => t + s.cost, 0), R.RATES.routeDay.v, 1e-6, `${k} shares by road`);
+      assert.ok(a.road, 'the split used the roads');
+      const pts = day.stops.filter(s => s.pt).map(s => s.pt), path = [YARD, ...pts, YARD];
+      let crow = 0; for (let i = 1; i < path.length; i++) crow += miles(path[i - 1], path[i]);
+      assert.ok(a.dayMiles >= crow - 1e-6, `${k} road miles ${a.dayMiles.toFixed(1)} not under the straight ${crow.toFixed(1)}`);
+      if (a.dayMiles > crow + 0.5) roadDays++;
+      checked++;
+    }
+    assert.ok(checked >= 20 && roadDays >= checked / 2, `${roadDays} of ${checked} route days found a way by road`);
+  } finally { setRoadnet(null); }
+});

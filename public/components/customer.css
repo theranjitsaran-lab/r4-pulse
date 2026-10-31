@@ -2,12 +2,17 @@
 
 /* CSS */
 .cp .crumb { margin-bottom: var(--sp-3); }
-.cp h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); margin: 0; line-height: 1.1; }
+.cp h1 { font-size: var(--fs-display); font-weight: var(--w-head); letter-spacing: var(--track-tight); margin: 0; line-height: 1.1; }
 .cp .cp-lede { font-size: var(--fs-head); line-height: 1.5; color: var(--ink-2); margin: 0 0 var(--sp-4); max-width: calc(var(--u) * 230); }
 .cp .tags { margin: var(--sp-2) 0 var(--sp-3); display: flex; gap: var(--sp-2); flex-wrap: wrap; }
 .cp .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-4); margin-bottom: var(--sp-4); }
 .cp .stat .lab { margin-bottom: var(--sp-1); }
 .cp .grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--sp-4); margin-top: var(--sp-4); align-items: start; }
+/* margin by line across the page; its three neighbours in a row of equal cards, so no column runs short */
+.cp .grid.one { grid-template-columns: minmax(0, 1fr); }
+.cp .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+.cp .grid.three .card-head { flex-wrap: wrap; } .cp .grid.three .card-head a { white-space: nowrap; }
+.cp .grid.drill { align-items: stretch; }
 .cp .fam { display: grid; grid-template-columns: minmax(0, 1fr) calc(var(--u) * 24) calc(var(--u) * 24) calc(var(--u) * 16) var(--sp-3); gap: var(--sp-3); align-items: center; padding: var(--sp-3) 0; border-top: var(--hair) solid var(--rule); cursor: pointer; }
 .cp .fam:first-of-type { border-top: 0; }
 .cp .fam .r { text-align: right; font-variant-numeric: tabular-nums; }
@@ -54,7 +59,7 @@
   .cp .ob-cols { grid-template-columns: 1fr; }
   .cp h1 { font-size: var(--fs-num); }
   .cp .stats { grid-template-columns: 1fr 1fr; }
-  .cp .grid { grid-template-columns: 1fr; }
+  .cp .grid, .cp .grid.three { grid-template-columns: 1fr; }
   .cp .fam, .cp .famhead { grid-template-columns: minmax(0, 1fr) calc(var(--u) * 21) calc(var(--u) * 13) var(--sp-3); }
   .cp .fam .cost, .cp .famhead .cost { display: none; }
 }
@@ -62,7 +67,7 @@
 /* on a desk, the cards beside the margin flow into two balanced columns, so no hole opens under
    the shorter one */
 @media (min-width: 761px) {
-  .cp .grid:not(.drill) { display: block; columns: 2; column-gap: var(--sp-4); }
-  .cp .grid:not(.drill) .stack { display: contents; }
-  .cp .grid:not(.drill) > .card, .cp .grid:not(.drill) .stack > .card { break-inside: avoid; margin: 0 0 var(--sp-4); }
+  .cp .grid:not(.drill):not(.one):not(.three) { display: block; columns: 2; column-gap: var(--sp-4); }
+  .cp .grid:not(.drill):not(.one):not(.three) .stack { display: contents; }
+  .cp .grid:not(.drill):not(.one):not(.three) > .card, .cp .grid:not(.drill):not(.one):not(.three) .stack > .card { break-inside: avoid; margin: 0 0 var(--sp-4); }
 }

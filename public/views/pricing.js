@@ -197,12 +197,12 @@ export async function render(main, PR, params) {
     opts.push({ k: 'med', label: `At the ${medName}, ${f(s.median)}`, sub: s.weighted ? 'what the typical box pays' : `cheaper than half of ${s.n} accounts`, p: s.median });
     if (sure != null) opts.push({ k: 'be', label: `Break-even, ${f(sure)}`, sub: 'where gross margin is zero', p: sure });
     const base = mine ? at(mine.v) : null;
-    $('p-worth').innerHTML = opts.map(o => {
+    // the column names once, at the top; each row's caption sits under its name, on the left
+    $('p-worth').innerHTML = '<div class="worth head"><span></span><span class="v">Revenue</span><span class="v">Margin ◇</span></div>' + opts.map(o => {
       const w = at(o.p), d = base ? w.rev - base.rev : null;
-      return `<div class="worth ${o.k === 'you' ? 'you' : ''}"><span><b>${esc(o.label)}</b></span>
-        <span class="v">${moneyK(w.rev)}<span class="sub" style="display:block;font-weight:400">revenue</span></span>
-        <span class="v ${w.gm != null && w.gm < 0 ? (review ? 'is-warn' : 'is-bad') : ''}">${w.gm == null ? '—' : moneyK(w.gm)}<span class="sub" style="display:block;font-weight:400">margin</span></span>
-        <span class="s">${esc(o.sub)}${d != null && Math.abs(d) >= 1 ? ` · ${d > 0 ? '+' : '−'}${moneyK(Math.abs(d))} a year against today` : ''}</span></div>`;
+      return `<div class="worth ${o.k === 'you' ? 'you' : ''}"><span><b>${esc(o.label)}</b><span class="s">${esc(o.sub)}${d != null && Math.abs(d) >= 1 ? ` · ${d > 0 ? '+' : '−'}${moneyK(Math.abs(d))} a year against today` : ''}</span></span>
+        <span class="v">${moneyK(w.rev)}</span>
+        <span class="v ${w.gm != null && w.gm < 0 ? (review ? 'is-warn' : 'is-bad') : ''}">${w.gm == null ? '—' : moneyK(w.gm)}</span></div>`;
     }).join('');
 
     // the mini P&L: revenue, each cost line, what is left. The cost lines are for the volume entered.

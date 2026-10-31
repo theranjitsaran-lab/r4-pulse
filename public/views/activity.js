@@ -15,6 +15,7 @@ import { money0, moneyK } from '/components/chart.js';
 import { titleCase, esc, loadRates } from '/components/data.js';
 import { areaFrame, landLayer, postcodeLayer, yardMark, scaleBar } from '/components/areamap.js';
 import { densityByPostcode } from '/components/jobview.js';
+import { allocate, mapSvg, loadBasemap, basemapNow, loadRoadnet } from '/components/routemap.js';
 const routeName = r => /\d/.test(r || '') ? r : titleCase(r);
 
 
@@ -24,7 +25,8 @@ const addDays = (d, n) => new Date(new Date(d + 'T00:00:00Z').getTime() + n * 86
 const dow = d => new Date(d + 'T00:00:00Z').getUTCDay();   // 0 Sun … 6 Sat
 const pl = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 const pct = v => (v > 0 ? '▲ ' : v < 0 ? '▼ ' : '') + Math.abs(Math.round(v * 100)) + '%';
-const dcls = v => v > 0.05 ? 'up' : v < -0.05 ? 'down' : 'flat';
+// colour for a fifth or more against the norm, as everywhere else; thin routes carry their own word
+const dcls = v => v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat';
 
 export async function render(main, A, params) {
   if (!main) return;
@@ -32,7 +34,7 @@ export async function render(main, A, params) {
   const tabs = `<div class="top"><div><h1>${params.tab === 'warehouse' ? 'Warehouse' : 'Routes'}</h1></div><div class="seg rt-tabs"><a href="#activity" class="${params.tab === 'warehouse' ? '' : 'on'}">Routes</a><a href="#activity?tab=warehouse" class="${params.tab === 'warehouse' ? 'on' : ''}">Warehouse</a></div></div>`;
   if (params.tab === 'warehouse') return (await import('/views/storage.js')).render(main, tabs);
   const [R, Z, base] = await Promise.all([loadRates(), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-    fetch('/data/basemap.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).catch(() => null)]);
+    loadBasemap(), loadRoadnet()]);
   const real = A.routeDays.filter(r => r.route && r.route !== '--');
   const doneDays = [...new Set(real.filter(r => r.services_done > 0).map(r => r.date))].sort();
   let day = params.date && doneDays.includes(params.date) ? params.date : A.latestDone;
@@ -59,11 +61,11 @@ export async function render(main, A, params) {
       <div id="rt-map"></div><div class="h2-key" id="rt-map-key"></div>
     </section>
     <div class="sum" id="rt-sum"></div>
-    <div class="card"><div class="card-head"><h3>By route</h3><small>done against each route's own norm · tap for stops</small></div><div id="rt-routes"></div></div>
+    <div class="card"><div class="card-head"><h3 id="rt-routes-h">By route</h3><small>against each route's own norm</small></div><div id="rt-routes"></div></div>
     <div class="two">
-      <div class="card"><div class="card-head"><h3>The week</h3><small>done services · tap a day</small></div><div id="rt-week"></div></div>
+      <div class="card"><div class="card-head"><h3 id="rt-week-h">The week</h3></div><div id="rt-week"></div></div>
       <div class="stack">
-        <div class="card"><div class="card-head"><h3>Booked after the latest day</h3><small>services on the books</small></div><div id="rt-ahead"></div></div>
+        <div class="card"><div class="card-head"><h3 id="rt-ahead-h">Booked after the latest day</h3></div><div id="rt-ahead"></div></div>
         <div class="card"><div class="card-head"><h3>Margin per route day</h3></div><div class="pending">Starts when driver pay rates by person are loaded: the day's invoiced work less driver pay and the vehicle share of a route day.</div></div>
       </div>
     </div>
@@ -89,6 +91,9 @@ export async function render(main, A, params) {
       <div class="card"><div class="lab">Routes out</div><div class="big">${rows.filter(r => r.services_done > 0).length}</div><div class="sub">${rows.reduce((t, r) => t + r.stops_done, 0)} stops done</div></div>
       <div class="card"><div class="lab">Pounds recorded</div><div class="big">${Math.round(pounds).toLocaleString('en-US')}</div><div class="sub">${pounds ? `${Math.round(rows.reduce((t, r) => t + r.pounds_exec_default, 0) / pounds * 100)}% of it is executive bins at a set weight, not weighed` : 'none recorded'}</div></div>`;
 
+    // each card title says what it found, not what it is
+    const out = rows.filter(r => r.services_done > 0).length;
+    $('rt-routes-h').textContent = out ? `${pl(out, 'route')} out, ${thin.length ? `${thin.length} thin` : 'none thin'}` : 'No routes out';
     const max = Math.max(1, ...rows.map(r => Math.max(r.services_done, norm[r.route] ? norm[r.route].done : 0)));
     $('rt-routes').innerHTML = rows.map(r => {
       const n = norm[r.route], d = n ? r.services_done / n.done - 1 : null;
@@ -161,14 +166,29 @@ export async function render(main, A, params) {
       if (last && last.level1 === st.level1) { last.stops++; last.n += st.n; last.done += st.done; }
       else runs.push({ ...st, stops: 1 });
     }
+    // the route on a map beside its stops: the same numbers, and the stop that took the van furthest
+    // out of its way (its detour from components/routemap.js allocate, at postcode centres)
+    const pc = p => String(p || '').slice(0, 5);
+    const rd = { date: day, route, stops: runs.map(s => ({ ...s, postcode: pc(s.postcode), services: s.done || s.n, pt: Z[pc(s.postcode)] || null, mine: false })) };
+    const placed = rd.stops.filter(s => s.pt).length;
+    const a = placed ? allocate(R, rd) : null;
+    const far = a ? rd.stops.reduce((b, s, i) => (s.detour || 0) > (b ? b.miles : 0) ? { i, miles: s.detour } : b, null) : null;
+    const farOk = far && far.miles >= 2 ? far : null;
     const seen = new Set();
     let anyValue = false;
-    box.innerHTML = runs.map((s, i) => {
+    const list = runs.map((s, i) => {
       const v = !seen.has(s.level1) ? value.get(day + '|' + s.level1) : null; seen.add(s.level1);
       if (v != null) anyValue = true;
       return `<div class="stop"><span class="n">${i + 1}</span><span><a href="#customer/${s.level1}" style="color:inherit;text-decoration:none;font-weight:600">${esc(titleCase(s.company))}</a> <span class="sub">${s.stops > 1 ? s.stops + ' stops · ' : ''}${esc(s.postcode || '')}</span></span>
         <span class="sub">${s.done} of ${s.n} done</span><span class="v">${v != null ? money0(v) : ''}</span></div>`;
     }).join('') + `<p class="sub" style="margin:var(--sp-2) 0 0">${anyValue ? 'Value is what that customer\'s work billed on the day, shown at its first stop.' : 'Work on this day is not billed yet: VCK prices it at the month\'s run.'}</p>`;
+    if (!a) { box.innerHTML = list; return; }
+    const unplaced = rd.stops.length - placed, fs = farOk && rd.stops[farOk.i];
+    const say = `About ${Math.round(a.dayMiles)} ${a.road ? 'road ' : ''}miles yard to yard ◇${fs ? `; stop ${farOk.i + 1}, ${esc(titleCase(fs.company))} at ${esc(fs.postcode)}, took the van about ${Math.round(farOk.miles)} miles out of its way` : ''}${unplaced ? `; ${pl(unplaced, 'stop')} without a postcode centre left off the map` : ''}. ${a.road ? 'The likely way by main roads between postcode centres (US Census); dashed where the roads give no way' : 'Straight lines between postcode centres'}: no GPS was captured.`;
+    box.innerHTML = `<div class="rm-grid"><div class="rm-wrap"></div><div>${list}</div></div><p class="sub" style="margin:var(--sp-2) 0 0">${say}</p>`;
+    const draw = () => { const w = box.querySelector('.rm-wrap'); if (w) w.innerHTML = mapSvg(rd, { width: Math.max(280, Math.min(900, w.clientWidth || 560)), base: basemapNow(), far: farOk }); };
+    draw();
+    if (!basemapNow()) loadBasemap().then(b => { if (b && box.isConnected && !box.hidden) draw(); });   // redrawn once the outline arrives
   }
 
   function drawWeek() {
@@ -186,12 +206,16 @@ export async function render(main, A, params) {
         g += `<span class="c ${d === day ? 'sel' : ''}" data-d="${d}" style="background:color-mix(in srgb, var(--heat) ${Math.round(a * 100)}%, var(--surface))"><b>${r.services_done}</b><small>${pl(r.stops_done, 'stop')}</small></span>`;
       }
     }
+    const wk = real.filter(r => dates.includes(r.date)).reduce((t, r) => t + r.services_done, 0);
+    $('rt-week-h').textContent = `${wk.toLocaleString('en-US')} services done in the week of ${dshort(monday)}`;
     $('rt-week').innerHTML = g + '</div>';
   }
 
   function drawAhead() {
     const ahead = real.filter(r => r.date > A.latestDone && r.services > 0);
     const dates = [...new Set(ahead.map(r => r.date))].sort().slice(0, 7);
+    const bookedAhead = ahead.filter(r => dates.includes(r.date)).reduce((t, r) => t + r.services, 0);
+    $('rt-ahead-h').textContent = dates.length ? `${bookedAhead.toLocaleString('en-US')} services booked over the next ${pl(dates.length, 'day')}` : 'Nothing booked ahead';
     $('rt-ahead').innerHTML = dates.map(d => {
       const rs = ahead.filter(r => r.date === d), tot = rs.reduce((t, r) => t + r.services, 0);
       return `<div class="stop" style="grid-template-columns: minmax(0,1fr) auto"><span><b>${dshort(d)}</b> <span class="sub">${rs.map(r => routeName(r.route)).join(', ')}</span></span><span class="v"><b>${tot}</b> <span class="sub">booked</span></span></div>`;

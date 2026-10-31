@@ -1,5 +1,5 @@
-/* R4's display face, from r4services.com: Average Sans (SIL Open Font License), one weight,
-   served from this app so no page calls Google. Display text only; tables and labels keep the system sans. */
+/* R4's face, from r4services.com: Average Sans (SIL Open Font License), one weight, served from this
+   app so no page calls Google. The wordmark and the intro only: one light weight could not carry titles. */
 @font-face { font-family: "Average Sans"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/AverageSans-Regular.ttf") format("truetype"); }
 
 /* R4 Pulse — design tokens. Redesign, 26 October 2026.
@@ -40,7 +40,7 @@
   --logo-ground: #ffffff;
   --ink-on-light: #1d1d1f; /* text on the logo's ground and on light fills, in both themes */
   --ink-on-logo: #3a3a3c;
-  --logo-h:      40px;
+  --logo-h:      32px;
   --logo-h-intro: 88px;
 
   /* ── chart series: validated palette slots, colour follows the entity ── */
@@ -60,9 +60,11 @@
 
   /* ── type: the system sans, everywhere ── */
   --f-sans:     system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  --f-display:  "Average Sans", var(--f-sans);   /* titles, the masthead, Home's big figures */
+  --f-display:  var(--f-sans);                   /* titles and big figures: the system sans at 600 */
+  --f-brand:    "Average Sans", var(--f-sans);   /* the "Pulse" wordmark only (27 October 2026) */
   --f-body:     var(--f-sans);
   --f-narrow:   var(--f-sans);
+  --w-head:     600;       /* every title and figure; 400 for text, nothing else */
 
   --fs-source:  12px;
   --fs-label:   12px;
@@ -94,14 +96,21 @@
   --hero-track:  rgba(255, 255, 255, .16);
   --hero-accent: #8fd99a;  /* the pulse line, the known part of the bill */
 
-  /* ── route work: done services, in R4 green, never a revenue series colour ── */
-  --heat:    #38b449;
+  /* ── maps: a quiet outline under the route, the lake the one landmark; never a series colour ── */
+  --map-water:  #e6edf3;
+  --map-land:   #fbfbfc;
+  --map-border: #dedee3;   /* county lines */
+  --map-road:   #cfcfd5;   /* the interstates */
+  --map-place:  #8e8e93;   /* town names: decoration, not data */
 
-  /* ── the gap to $1.0m: one hue per lever, existing customers in R4 green, new business open ── */
+  /* ── route work: done services in ink, so green and red stay free for above and below the norm ── */
+  --heat:    #6c6c71;
+
+  /* ── the gap to $1.0m: R4 green fading out across the existing-customer levers, new business open ── */
   --lever-1: #0e5116;
-  --lever-2: #237a30;
-  --lever-3: #38b449;
-  --lever-4: #a5dcae;
+  --lever-2: #567a5b;
+  --lever-3: #a9bfac;
+  --lever-4: #d9e3da;
 
   /* ── motion: entrances only, never a count-up; off under reduced motion ── */
   --ease-out:  cubic-bezier(.2, .8, .2, 1);
@@ -170,7 +179,7 @@
 @media (prefers-reduced-motion: reduce) { :root { --t-fast: 0ms; --t: 0ms; --t-slow: 0ms; --t-draw: 0ms; --t-stagger: 0ms; --rise: 0px; } }
 
 /* ── primitives every screen shares ── */
-.lab { font-size: 12px; font-weight: 500; color: var(--ink-3); letter-spacing: var(--track-label); }
+.lab { font-size: var(--fs-label); font-weight: 500; color: var(--ink-3); letter-spacing: var(--track-label); }
 .num, .fig { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .src { font-size: var(--fs-source); color: var(--ink-4); padding: 10px 0 0; }
 /* a figure that is modelled rather than measured */
@@ -183,6 +192,6 @@
 .is-good { color: var(--good); }
 /* section head */
 .sec { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0 0 10px; }
-.sec h2 { font-size: 20px; font-weight: 700; letter-spacing: var(--track-tight); margin: 0; }
+.sec h2 { font-size: var(--fs-title); font-weight: var(--w-head); letter-spacing: var(--track-tight); margin: 0; }
 .sec small, .sec a { font-size: var(--fs-label); color: var(--ink-3); }
 .sec a { color: var(--brand); text-decoration: none; font-weight: 500; }

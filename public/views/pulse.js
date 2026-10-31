@@ -22,7 +22,7 @@ const addMonths = (d, n) => new Date(Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1
 const dayMonth = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const pct = v => (v > 0 ? '▲ ' : v < 0 ? '▼ ' : '') + Math.abs(Math.round(v * 100)) + '%';
 const mk = v => Math.abs(v) < 50 ? '$0' : moneyK(v);   // no "−$0" from a few cents of credit
-const dcls = v => v > 0.02 ? 'up' : v < -0.02 ? 'down' : 'flat';
+const dcls = v => v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat';   // colour for big moves only
 
 // The slipping and rising accounts (components/levers.js, one definition everywhere), largest
 // moves first, with which part moved.

@@ -1,6 +1,6 @@
 /* The style guide page (public/styleguide.html). Tokens only, like every other stylesheet. */
 .sg { display: grid; gap: var(--sp-10); }
-.sg h1 { font-size: var(--fs-display); font-weight: 700; letter-spacing: var(--track-tight); line-height: 1.1; margin: 0; }
+.sg h1 { font-size: var(--fs-display); font-weight: var(--w-head); letter-spacing: var(--track-tight); line-height: 1.1; margin: 0; }
 .sg .sg-lede { color: var(--ink-3); max-width: var(--measure); margin: var(--sp-2) 0 0; }
 .sg section > .sec h2 { font-size: var(--fs-head); margin: 0; }
 .sg .sec small { font-size: var(--fs-source); color: var(--ink-3); }
