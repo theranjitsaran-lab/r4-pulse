@@ -15,7 +15,8 @@
     "test": "node --test model/*.test.js",
     "test:offline": "cross-env DATABASE_URL= node --test model/*.test.js",
     "shots": "node scripts/shots.js",
-    "contrast": "node scripts/contrast.js"
+    "contrast": "node scripts/contrast.js",
+    "speed": "node scripts/speed.js"
   },
   "engines": {
     "node": ">=20"

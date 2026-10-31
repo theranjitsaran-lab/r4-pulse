@@ -7,13 +7,10 @@
 //   where the money is: cross-sell ◇, route density ◇, what shredding the eligible boxes does to the P&L ◇
 // Every figure from components/home2data.js, which the Ask sheet (server/ask.js) reads too.
 import { money0, moneyK, sparkline } from '/components/chart.js';
-import { getJson, loadRates, titleCase, esc, getLog } from '/components/data.js';
+import { getJson, titleCase, esc } from '/components/data.js';
 import { reveal, drawIn } from '/components/motion.js';
 import { parseHome2, checkNumbers } from '/components/summary.js';
 import { areaFrame, landLayer, postcodeLayer, yardMark } from '/components/areamap.js';
-import { homeView } from '/components/home2data.js';
-import { changesFor, daySentence } from '/components/changes.js';
-import { anneList, mikeList, trishaView } from '/components/lists.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const monS = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' });
@@ -26,14 +23,14 @@ const word = v => Math.abs(v) < 0.02 ? 'level with' : v > 0 ? `${pctW(v)} ahead 
 
 export async function render(main, P) {
   if (!main) return;
-  const [A, C, M, PR, CA, S, SG, R, Z, base] = await Promise.all([
-    getJson('activity'), getJson('customers'), getJson('margin'), getJson('pricing'), getJson('calls'), getJson('storage'),
-    getJson('segments').catch(() => null), loadRates(),
-    fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+  // the figures, worked out on the server by the same functions (server/views.js): a few KB, not the
+  // megabytes they come from; the map outline is cached by the browser for a day
+  const [V, base] = await Promise.all([
+    getJson('view/home'),
     fetch('/data/basemap.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).catch(() => null),
   ]);
-  const V = homeView({ P, A, C, M, PR, CA, S, SG, R, Z });
   const { month: m, weeks: w, seg, cust, cross, dens, dest } = V;
+  const A = { latestDone: V.latestDone };
 
   const age = Math.round((Date.now() - Date.parse(A.latestDone + 'T12:00:00Z')) / 864e5);
   const dayLabel = new Date(A.latestDone + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
@@ -119,12 +116,7 @@ export async function render(main, P) {
 
   // ── yesterday: the day in a sentence, only what was not normal (components/changes.js), each line with
   // useful · knew · not right (a knew or wrong line is held back 30 days), and the team's lists ──
-  const [log, feedback, user] = await Promise.all([getLog().catch(() => []),
-    fetch('/api/feedback', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : { data: [] }).then(j => j.data || []).catch(() => []),
-    fetch('/api/me', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({}))]);
-  const CH = changesFor(P, A), DS = daySentence(P, A);
-  const TV = trishaView({ CA, log, feedback, changes: CH, who: (user && user.name) || 'trisha' });
-  const AN = anneList({ C, PR, CA, log, feedback, changes: CH, n: 3 }), MK = mikeList({ A, feedback, changes: CH });
+  const DS = V.day, TV = V.team.trisha, AN = V.team.anne, MK = V.team.mike;
   const fbBtns = i => `<span class="fb" data-key="${esc(i.key)}" data-subject="${esc(i.subject)}"><button data-v="useful">Useful</button><button data-v="knew">Knew</button><button data-v="wrong">Not right</button></span>`;
   const lines = ls => `<ul class="chg">${ls.map(i => `<li class="${i.level}"><span>${esc(i.text)}</span>${fbBtns(i)}</li>`).join('')}</ul>`;
   const t = TV.team;
@@ -132,7 +124,7 @@ export async function render(main, P) {
       <div class="h2-ch"><h2>${esc(dayLabel)}</h2><small>${DS ? esc(DS.text) : ''}</small></div>
       ${TV.lines.length ? lines(TV.lines.slice(0, 4)) : `<p class="quiet">Nothing unusual: the day's work and every route were within their usual range.</p>`}
       <div class="h2-team">
-        <div><h3>Anne · this week <a href="#customers?view=conversations">all ›</a></h3><ol class="calls">${AN.calls.map(c => `<li><a href="#customer/${c.level1}"><b>${esc(titleCase(c.name))}</b><small>${esc(c.sigs[0].ev)}</small></a><span>${c.stake ? moneyK(c.stake) : ''}</span></li>`).join('')}</ol></div>
+        <div><h3>Anne · this week <a href="#customers?view=conversations">all ›</a></h3><ol class="calls">${AN.calls.map(c => `<li><a href="#customer/${c.level1}"><b>${esc(titleCase(c.name))}</b><small>${esc(c.ev)}</small></a><span>${c.stake ? moneyK(c.stake) : ''}</span></li>`).join('')}</ol></div>
         <div><h3>Mike · next <a href="#activity">routes ›</a></h3>${MK.next ? `<p class="next">Booked for ${esc(MK.next.label)}: ${MK.next.services.toLocaleString('en-US')} services on ${MK.next.routes.length} routes${MK.next.routes.length ? ` (${MK.next.routes.slice(0, 4).map(r => `${esc(r.route)} ${r.services}`).join(', ')})` : ''}.</p>` : '<p class="quiet">Nothing booked ahead in the data.</p>'}</div>
       </div>
       <p class="h2-by">Last 7 days: ${t.called} called · ${t.emailed} emailed · rates moved on ${t.ratesMoved} accounts in 30 days · lines marked useful ${t.useful}, already known ${t.knew}, not right ${t.wrong}</p>

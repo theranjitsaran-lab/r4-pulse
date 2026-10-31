@@ -20,19 +20,8 @@ let libs;
 const load = () => libs || (libs = Promise.all(['home2data', 'levers', 'margin', 'chart', 'series'].map(n => import('../public/components/' + n + '.js').then(m => [n, m])))
   .then(Object.fromEntries));
 
-// the data, as the screens read it: fixtures offline, the cached queries live
-const NAMES = { P: 'pulse', A: 'activity', C: 'customers', M: 'margin', PR: 'pricing', CA: 'calls', S: 'storage', SG: 'segments' };
-async function data() {
-  const out = {};
-  await Promise.all(Object.entries(NAMES).map(async ([k, n]) => {
-    if (USE_FIXTURES) { const f = path.join(ROOT, 'fixtures', n + '.json'); out[k] = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')).data : null; }
-    else out[k] = await cached(n, queries[n]);
-  }));
-  const z = path.join(ROOT, 'public', 'data', 'zcta.json');
-  out.Z = fs.existsSync(z) ? JSON.parse(fs.readFileSync(z, 'utf8')) : {};
-  out.R = R;
-  return out;
-}
+// the data, as the screens read it (server/screendata.js)
+const { data } = require('./screendata');
 
 const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase()).replace(/(?!^)\b(Of|And|The|For|In|At|On|To)\b/g, w => w.toLowerCase()).replace(/\b(Llp|Llc|Pc|Inc|Icu|Itad)\b/g, w => w.toUpperCase());
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });

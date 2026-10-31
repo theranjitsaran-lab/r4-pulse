@@ -115,10 +115,12 @@
   /* ── motion: entrances only, never a count-up; off under reduced motion ── */
   --ease-out:  cubic-bezier(.2, .8, .2, 1);
   --ease-io:   cubic-bezier(.65, 0, .35, 1);
-  --t-slow:    600ms;
-  --t-draw:    1100ms;
-  --t-stagger: 70ms;
-  --rise:      12px;       /* how far a card travels as it arrives */
+  /* quick: a page is fully on screen within half a second of its data (31 October 2026: the longer
+     timings added 1.5 s to every page) */
+  --t-slow:    260ms;
+  --t-draw:    480ms;
+  --t-stagger: 35ms;
+  --rise:      8px;        /* how far a card travels as it arrives */
 
   /* ── space: a 4px unit; every gap, padding and margin is one of these ── */
   --u:    4px;

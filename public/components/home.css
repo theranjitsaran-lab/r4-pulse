@@ -33,7 +33,7 @@ html.motion-on [data-rv] { opacity: 0; transform: translateY(var(--rise)); }
 html.motion-on [data-rv].is-in { opacity: 1; transform: none;
   transition: opacity var(--t-slow) var(--ease-out) calc(var(--i, 0) * var(--t-stagger)), transform var(--t-slow) var(--ease-out) calc(var(--i, 0) * var(--t-stagger)); }
 .draw-clip { transform: scaleX(0); transform-box: fill-box; transform-origin: left; }
-.draw-clip.is-in { transform: scaleX(1); transition: transform var(--t-draw) var(--ease-io) var(--t-slow); }
+.draw-clip.is-in { transform: scaleX(1); transition: transform var(--t-draw) var(--ease-io) calc(var(--t-slow) / 2); }
 html.motion-on .grow { transform: scaleX(0); transform-origin: left; }
 html.motion-on .is-in .grow { transform: scaleX(1); transition: transform var(--t-slow) var(--ease-out) calc(var(--t-slow) + var(--i, 0) * var(--t-stagger) * 2); }
 

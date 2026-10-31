@@ -42,16 +42,37 @@ app.use('/api/log', require('./log'));
 app.use('/api/feedback', feedback.api);
 app.use('/api/summary', require('./summary'));
 app.use('/api/ask', require('./ask'));
+app.use('/api/view', require('./views'));
 app.use('/api', api);
+// Static files gzipped, cached and preloaded (server/static.js); the cost model runs in the browser too
+// (Pricing, Margin): the same file, never a copy. express.static stays behind it for anything else.
+app.use(require('./static'));
 app.use(express.static(path.join(__dirname, '..', 'public'), { extensions: ['html'] }));
-// The cost model runs in the browser too (Pricing, Margin): the same file, never a copy.
-app.get('/model/rates.js', (req, res) => res.sendFile(path.join(__dirname, '..', 'model', 'rates.js')));
 
 const port = process.env.PORT || 3000;
 const rates = require('../model/rates');
 
 // Live: derive the cost model from model.* before serving. Fixtures: the seed in rates.js.
+// Live: warm every screen's query at start and whenever the data moves, so nobody waits on the database.
+const { clearCache } = require('./db');
+const queries = require('./queries');
+const WARM = ['pulse', 'activity', 'customers', 'pricing', 'calls', 'margin', 'storage', 'segments'];
+async function warm() {
+  for (const n of WARM) { if (!queries[n]) continue; const t = Date.now(); try { await cached(n, queries[n]); console.log(`warm ${n} ${Date.now() - t}ms`); } catch (e) { console.warn(`warm ${n}: ${e.message}`); } }
+}
+let stamp = null;
+async function watch() {
+  try {
+    const [r] = await query(`SELECT (SELECT max(NULLIF(date, '')) FROM vs_service_orders) AS a, (SELECT max(invdate)::text FROM invoices) AS b,
+      (SELECT max(month)::text FROM kpi.monthly) AS c, (SELECT count(*) FROM invoices_current)::text AS d, (SELECT max(wodate)::text FROM priced_lines_current) AS e`);
+    const now = JSON.stringify(r);
+    if (stamp && now !== stamp) { console.log('data moved: cache cleared'); clearCache(); warm(); }
+    stamp = now;
+  } catch (e) { console.warn('freshness stamp:', e.message); }
+}
+
 (USE_FIXTURES ? Promise.resolve() : rates.loadFromDb(query)).then(() => {
+  if (!USE_FIXTURES) { watch().then(warm); setInterval(watch, 10 * 60 * 1000); }
   app.listen(port, () => {
     console.log(`R4 Pulse on http://localhost:${port}  (${USE_FIXTURES ? 'fixtures' : 'live database'}; route day $${rates.RATES.routeDay.v.toFixed(2)})`);
   });

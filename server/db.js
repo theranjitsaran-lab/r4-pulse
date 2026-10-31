@@ -29,7 +29,10 @@ async function query(text, params) {
   return r.rows;
 }
 
-const TTL_MS = 15 * 60 * 1000;
+// The data changes once a day (the push at 06:00–06:30, the rebuild at 07:00), so a query result is kept
+// until the data does: server/index.js checks a cheap freshness stamp every ten minutes and clears the
+// cache when it moves. Twelve hours is the backstop.
+const TTL_MS = 12 * 60 * 60 * 1000;
 const cache = new Map();
 
 async function cached(key, fn) {

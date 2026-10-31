@@ -5,8 +5,8 @@
 // Figures from components/custbook.js and home2data.js, the same ones Home and Ask read.
 import { money0, moneyK, sparkline } from '/components/chart.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
-import { customerBook, pricePosition, sizePeers, FAMS } from '/components/custbook.js';
-import { segmentView, customerView } from '/components/home2data.js';
+import { pricePosition, sizePeers, FAMS } from '/components/custbook.js';
+import { customerView } from '/components/home2data.js';
 import { costParts, PARTS, marginAction, FAMILY_NAMES } from '/components/margin.js';
 import { serviceMedians, slippingAccounts, CITADEL } from '/components/levers.js';
 import { LINES } from '/components/whitespace.js';
@@ -42,9 +42,10 @@ const famCols = key => [
 ];
 
 export async function render(main, C, params, tabs) {
-  const [P, A, M, PR, CA, SG, R] = await Promise.all([getJson('pulse'), getJson('activity'), getJson('margin'), getJson('pricing'), getJson('calls'), getJson('segments').catch(() => null), loadRates()]);
-  const B = customerBook({ C, M, PR, R });
-  const seg = segmentView({ P, A, SG });
+  // the customer book and the book by line, worked out on the server (server/views.js); pricing loads only
+  // when a price pop-out opens
+  const [P, VW, R] = await Promise.all([getJson('pulse'), getJson('view/customers'), loadRates()]);
+  const B = { rows: VW.rows, book: VW.book, months: VW.months, ws: VW.ws }, seg = VW.seg, PR = null;
   const cust = customerView({ C });
   const last = P.monthly[P.monthly.length - 1], prev = P.monthly[P.monthly.length - 2], ly = P.monthly[P.monthly.length - 13];
   const active = B.rows.filter(r => r.last > 0 && !r.citadel).length, activePrev = C.accounts.filter(a => a.level1 !== CITADEL && (a.storage[a.storage.length - 2] + a.service[a.service.length - 2]) > 0).length;
@@ -158,7 +159,8 @@ export async function render(main, C, params, tabs) {
 // ── the pop-outs: why a figure is what it is, against similar accounts, and what to do ──
 const bars = (items, max) => `<ul class="p2-bars">${items.map(i => `<li><span>${esc(i.name)}</span><i style="--w:${Math.max(1, i.v / max * 100).toFixed(1)}%" class="${i.cls || ''}"></i><b>${i.label}</b></li>`).join('')}</ul>`;
 
-export function explain(kind, r, { B, PR, line, R }) {
+export async function explain(kind, r, { B, PR, line, R }) {
+  if (kind === 'gap' && !PR) PR = await getJson('pricing');
   const name = titleCase(r.customer);
   const peers = sizePeers(B, r);
   if (kind === 'sales') {
