@@ -34,7 +34,7 @@ function cleanOpp(b, who) {
 
 async function quotes(days = 90) {
   if (USE_FIXTURES) { const from = Date.now() - days * 864e5; return read('quotes.json').filter(r => Date.parse(r.at) > from).reverse(); }
-  return query(`SELECT id, who, level1, prospect, postcode, lines, note, at::text FROM app.quote WHERE at > now() - ($1 || ' days')::interval ORDER BY at DESC`, [String(days)]);
+  return query(`SELECT id, who, level1, prospect, postcode, lines, note, at::text FROM app.quote WHERE at > now() - ($1 || ' days')::interval ORDER BY at DESC`, [String(days)]).catch(() => []);
 }
 async function saveQuote(q) {
   if (USE_FIXTURES) { const rows = read('quotes.json'); const row = { id: rows.length + 1, ...q, at: new Date().toISOString() }; rows.push(row); write('quotes.json', rows); return row; }
@@ -45,7 +45,7 @@ async function saveQuote(q) {
 // each key's latest row, with when it was first opened and when it was won or lost
 async function opportunities() {
   const rows = USE_FIXTURES ? read('opportunities.json')
-    : await query(`SELECT key, level1, owner, status, value::float, note, who, at::text FROM app.opportunity ORDER BY at`);
+    : await query(`SELECT key, level1, owner, status, value::float, note, who, at::text FROM app.opportunity ORDER BY at`).catch(() => []);   // before sql/app_schema.sql is applied: nothing said yet
   const by = {};
   for (const r of rows) by[r.key] = { ...(by[r.key] || {}), ...r, first: (by[r.key] || {}).first || r.at };
   return by;
