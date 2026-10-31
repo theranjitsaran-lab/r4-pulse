@@ -15,7 +15,7 @@ import { money0, moneyK } from '/components/chart.js';
 import { titleCase, esc, loadRates } from '/components/data.js';
 import { areaFrame, landLayer, postcodeLayer, yardMark, scaleBar } from '/components/areamap.js';
 import { densityByPostcode } from '/components/jobview.js';
-import { allocate, mapSvg, loadBasemap, basemapNow, loadRoadnet } from '/components/routemap.js';
+import { allocate, mapSvg, loadBasemap, basemapNow, loadRoadnet, roadPath } from '/components/routemap.js';
 const routeName = r => /\d/.test(r || '') ? r : titleCase(r);
 
 
@@ -108,7 +108,8 @@ export async function render(main, A, params) {
   }
 
   // ── the map: every postcode R4 visits as a quiet layer; the day's routes from the yard in stop
-  // order (straight lines: no GPS was ever captured), thin routes in amber, the one tapped in green.
+  // order, each leg along the main roads (routemap.js roadPath; a straight line only where the roads
+  // give no way; no GPS was ever captured), thin routes in amber, the one tapped in green.
   // The other layer is the sales one Home shows: where one more customer saves most ◇.
   let layer = 'day', hl = null;
   const pts = (A.postcodes || []).filter(p => Z[p.postcode] && !p.billing_only).map(p => ({ ...p, pt: Z[p.postcode] }));
@@ -128,16 +129,19 @@ export async function render(main, A, params) {
       const thinSet = new Set(rows.filter(r => norm[r.route] && r.services_done < THIN * norm[r.route].done).map(r => r.route));
       const yard = F.P(YARD);
       for (const r of rows.slice().sort((a, b) => (a.route === hl) - (b.route === hl))) {
-        const path = routePath(r.route).map(p => F.P(Z[p]));
+        const geo = routePath(r.route).map(p => Z[p]), path = geo.map(q => F.P(q));
         if (!path.length) continue;
         const cls = r.route === hl ? 'on' : thinSet.has(r.route) ? 'thin' : hl ? 'dim' : '';
-        g += `<polyline class="rt-line ${cls}" points="${[yard, ...path, yard].map(q => q.map(v => v.toFixed(1)).join(',')).join(' ')}"><title>${esc(routeName(r.route))}: ${r.services_done} services, ${r.stops_done} stops</title></polyline>`;
+        // yard → stops → yard, each leg the likely way along the main roads
+        const way = [YARD, ...geo, YARD], line = [yard];
+        for (let i = 1; i < way.length; i++) { const rp = roadPath(way[i - 1], way[i]); line.push(...(rp ? rp.pts.slice(1) : [way[i]]).map(q => F.P(q))); }
+        g += `<polyline class="rt-line ${cls}" points="${line.map(q => q.map(v => v.toFixed(1)).join(',')).join(' ')}"><title>${esc(routeName(r.route))}: ${r.services_done} services, ${r.stops_done} stops</title></polyline>`;
         g += path.map(([x, y]) => `<circle class="rt-stop ${cls}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.route === hl ? 4.5 : 3}"/>`).join('');
       }
       const stops = rows.reduce((t, r) => t + r.stops_done, 0), pcs = new Set(rows.flatMap(r => routePath(r.route)));
       $('rt-map-t').textContent = `${dlabel(day)}: ${pl(rows.length, 'route')}, ${pl(stops, 'stop')} across ${pl(pcs.size, 'postcode')}`;
       $('rt-map-s').textContent = hl ? `${routeName(hl)} in green · tap it again in the list to clear` : thinSet.size ? `${[...thinSet].map(routeName).join(', ')} ran thin · tap a route below to follow it` : 'tap a route below to follow it';
-      $('rt-map-key').innerHTML = '<span><i class="k line"></i>a route, yard to its stops in order</span><span><i class="k thinline"></i>thin against its own norm</span><span><i class="k pt"></i>postcodes visited in a year, by visits</span>';
+      $('rt-map-key').innerHTML = '<span><i class="k line"></i>a route, yard to its stops in order along the main roads</span><span><i class="k thinline"></i>thin against its own norm</span><span><i class="k pt"></i>postcodes visited in a year, by visits</span>';
     } else {
       const save = densityByPostcode(R, A, Z, { top: 8 }).rows;
       save.forEach((r, i) => { const [x, y] = F.P(Z[r.postcode]); g += `<g class="h2-best" transform="translate(${Math.max(10, Math.min(W - 10, x)).toFixed(1)},${Math.max(10, Math.min(H - 10, y)).toFixed(1)})"><circle r="10"/><text y="4" text-anchor="middle">${i + 1}</text><title>${esc(r.postcode)}: one more customer saves about ${money0(r.saving)} a year ◇</title></g>`; });

@@ -27,9 +27,10 @@ DECISIONS.md "The route to $1.0m and cross-sell" holds what was settled.*
 | Screen | Route | Owner | What it is |
 |---|---|---|---|
 | **Home** | `#pulse` | Trisha | A headline and three tappable bullets · next month's bill building, last bill, gap · this month's work against last month's, the last 13 weeks · lines of business (month, 3 months, YTD) · largest, rising, slipping five · cross-sell, the density map, shredding's effect on revenue (`views/home2.js`; the 26 October Home is at `#classic`) |
-| **Customers** | `#customers?view=` | Anne, Trisha | Overview (KPI band, the book by line, who moved, every account sortable and filterable by line, each figure opening a pop-out that explains it against peers) · This week's calls · Main customers (month grid) · Cross-sell (whitespace grid, each gap explained) · Slipping · Price gaps · Missed rate rounds · Overdue boxes · Margin (all, thin, below cost) · All |
+| **Customers** | `#customers?view=` | Anne, Trisha | Overview (KPI band, the book by line, who moved, every account sortable and filterable by line, each figure opening a pop-out that explains it against peers) · Opportunities (one ranked list of cross-sell, price gaps, win-back, rate rounds and overdue boxes, each with an opener, an owner and a status in `app.opportunity`; `views/opps.js`, `components/opps.js`) · Month grid · Cross-sell · Margin. The old Slipping, Price gaps, Rate rounds, Overdue boxes and This week lists are folded into Opportunities, kept for old links |
 | **Customer page** | `#customer/<id>` | Anne | Headline figures · 24-month chart · not bought yet · prices against the book · signals · margin by line → its cost, invoices and orders → one order's cost build · visits |
-| **Pricing** | `#pricing` | Anne | A compact bar with a price slider · the verdict · the price's own P&L and the levers that would improve it · the price on one track (cost, middle half, median) · what it is worth a year · the cost working · invoiced against the book |
+| **Pricing** | `#pricing` | Anne | A compact bar with a price slider and a postcode · the quote builder (lines, deal total and margin, saved to `app.quote`) · the verdict · the price's own P&L and the levers that would improve it · the price on one track (cost, middle half, median) · what it is worth a year · the cost working · invoiced against the book |
+| **Numbers** | `#numbers` | Trisha, Theran | Core against $1.0M by month · the EBITDA bridge from the monthly QuickBooks export (`scripts/load_gl.js` → `model.gl_month`, sorted in `components/gl.js`) · gross margin by line (`views/numbers.js`) |
 | **Routes** | `#activity` | Mike | The day in a sentence, thin routes named · the map: the day's routes from the yard, or where to add customers · by route against its norm · the week · booked ahead · distance from the yard and the long way round |
 
 Every figure shown in two places comes from one function (`components/levers.js`, `margin.js`,
@@ -95,7 +96,7 @@ Margin). `model/rates.js` holds every derivation; DECISIONS.md "Data basis" reco
 | `itad` | travel + on-site per visit, plant per lb | facilities, box handling |
 | `labour` | hours × the loaded rate | travel, boxes |
 
-A route day's travel is split by each stop's detour in **road miles** along the main roads (DECISIONS.md "Route miles"), straight-line where the roads give no way.
+A route day is shared between its stops **by minutes** (31 October 2026): drive minutes from each stop's detour in **road miles** along the main roads at an assumed 20 mph, plus 8 minutes a stop and 3 a service (all `assumed`, `SETTINGS` in `model/rates.js`, for Mike to check). An account's bins are costed from its own route days (`components/routecost.js`, `server/routecost.js`, the `routestops` query); a new quote from route days in its postcode; the 40% split prices only what has no route days.
 
 **Visits, not units, drive route cost.** A visit is one customer on one route on one day, from
 Veri-Shred done orders (Ingalls 101, Larabida 15, UChicago Medicine 300); otherwise units ÷ 5.80 for
