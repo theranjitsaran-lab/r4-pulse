@@ -4,7 +4,7 @@
 //
 // Run on the PC with the admin DATABASE_URL in .env. Safe to re-run: each run sets a new password.
 //
-//   r4_pulse_app   reads public, kpi and model; writes app.calls_log and app.feedback and nothing else.
+//   r4_pulse_app   reads public, kpi and model; writes app.calls_log, app.feedback, app.quote and app.opportunity and nothing else.
 //
 // The password is never printed. The app's connection string goes into .env.render (gitignored)
 // as DATABASE_URL=..., for pasting into Render; delete the file once it is pasted.
@@ -34,6 +34,10 @@ GRANT SELECT, INSERT ON app.calls_log TO ${ROLE};
 GRANT USAGE ON SEQUENCE app.calls_log_id_seq TO ${ROLE};
 GRANT SELECT, INSERT ON app.feedback TO ${ROLE};
 GRANT USAGE ON SEQUENCE app.feedback_id_seq TO ${ROLE};
+GRANT SELECT, INSERT ON app.quote TO ${ROLE};
+GRANT USAGE ON SEQUENCE app.quote_id_seq TO ${ROLE};
+GRANT SELECT, INSERT ON app.opportunity TO ${ROLE};
+GRANT USAGE ON SEQUENCE app.opportunity_id_seq TO ${ROLE};
 `;
 
 function connOpts(url) {

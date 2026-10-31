@@ -72,6 +72,10 @@ export async function render(main, PR, params) {
         </div><div class="hint" id="p-hint"></div></details>
     </section>
     <div id="p-verdict"></div>
+    <section class="h2-card pr2-quote" data-rv id="q-card">
+      <div class="h2-ch"><h2 id="q-title">The quote</h2><button class="q-add" type="button" id="q-add">Add this line to the quote</button></div>
+      <div id="q-body"></div>
+    </section>
     <div class="pr2-grid">
       <section class="h2-card" data-rv><div class="h2-ch"><h2 id="p-pl-title">A year at this price</h2><small>the price's own P&amp;L ◇</small></div><div id="p-pl"></div></section>
       <section class="h2-card" data-rv><div class="h2-ch"><h2>How to improve the margin</h2><small>each lever on its own, a year ◇</small></div><div id="p-levers"></div><button class="pop-ask pr2-ask" type="button" id="p-ask">Ask Claude about this price ›</button></section>
@@ -305,6 +309,71 @@ export async function render(main, PR, params) {
   });
 
   prefill();
+  // ── the quote: several lines, each priced and costed as above, a deal total and its margin a year.
+  // A draft is kept in this browser until saved; saving writes app.quote (server/sales.js).
+  const QKEY = 'r4-quote-draft';
+  let Q = (() => { try { return JSON.parse(localStorage.getItem(QKEY)) || null; } catch { return null; } })() || { lines: [], prospect: '' };
+  const keepQ = () => { try { localStorage.setItem(QKEY, JSON.stringify(Q)); } catch {} };
+  const nameOf = id => (customers.find(x => x[0] === id) || [0, ''])[1];
+  function addLine() {
+    const svc = SERVICES[st.code], c = cost(), units = Math.max(0, st.units || 0);
+    if (!units || !(st.price > 0)) return;
+    if (Q.level1 != null && st.level1 !== Q.level1 && Q.lines.length) Q.lines = [];   // a quote is for one customer
+    Q.level1 = st.level1; Q.postcode = st.postcode || Q.postcode || null;
+    Q.lines.push({ code: st.code, name: (st.code === 'STO' ? book.STO.name : titleCase(book[st.code].name)).replace(/\s+/g, ' '), unit: svc ? (svc.fam === 'storage' ? 'box-month' : svc.unit) : 'unit',
+      units, visits: st.visits || null, price: st.price, cost: c ? c.total : null,
+      basis: !svc ? 'none' : c && c.routeBasis ? c.routeBasis : REVIEW_OF[svc.fam] ? 'average' : 'model' });
+    keepQ(); drawQuote();
+  }
+  function totals() {
+    const rev = Q.lines.reduce((t, l) => t + l.price * l.units, 0);
+    const costed = Q.lines.filter(l => l.cost != null), cost = costed.reduce((t, l) => t + l.cost, 0);
+    const crev = costed.reduce((t, l) => t + l.price * l.units, 0);
+    return { rev, cost, crev, margin: crev - cost, pc: crev > 0 ? (crev - cost) / crev : null, uncosted: Q.lines.length - costed.length, review: Q.lines.some(l => l.basis === 'average') };
+  }
+  function quoteText() {
+    const T = totals(), who = Q.level1 ? nameOf(Q.level1) : (Q.prospect || 'New customer');
+    return [`Quote for ${who}${Q.postcode ? ` (${Q.postcode})` : ''}`, ...Q.lines.map(l => `${l.name}: ${Math.round(l.units).toLocaleString('en-US')} ${l.unit}s a year at $${l.price.toFixed(l.code === 'STO' ? 3 : 2)} = ${money0(l.price * l.units)}`), `Total: ${money0(T.rev)} a year`].join('\n');
+  }
+  function drawQuote() {
+    const T = totals(), n = Q.lines.length;
+    $('q-title').textContent = n ? `The quote: ${moneyK(T.rev)} a year${T.pc != null ? `, ${moneyK(T.margin)} margin ◇` : ''}` : 'The quote';
+    if (!n) { $('q-body').innerHTML = `<p class="hint">Price a service above, then add it. Add as many lines as the deal has: storage, bins, shredding, delivery. The quote totals the revenue and the margin a year.</p>${savedHtml()}`; return; }
+    const dec = l => l.code === 'STO' ? 3 : 2;
+    $('q-body').innerHTML = `
+      ${!Q.level1 ? `<label class="q-who">Prospect<input id="q-prospect" value="${esc(Q.prospect || '')}" placeholder="Company name"></label>` : `<p class="hint">For ${esc(nameOf(Q.level1))}${Q.postcode ? ` · ${esc(Q.postcode)}` : ''}</p>`}
+      <table class="q-t"><thead><tr><th>Line</th><th class="v">A year</th><th class="v">Price</th><th class="v">Revenue</th><th class="v">Margin ◇</th><th></th></tr></thead><tbody>
+      ${Q.lines.map((l, i) => { const r = l.price * l.units, m = l.cost == null ? null : r - l.cost; return `<tr>
+        <td>${esc(l.name)}${l.basis === 'average' ? '<small>route cost under review</small>' : l.basis === 'account' || l.basis === 'postcode' ? '<small>from real route days</small>' : l.basis === 'none' ? '<small>a fee: not costed</small>' : ''}</td>
+        <td class="v">${Math.round(l.units).toLocaleString('en-US')} ${esc(l.unit)}s</td><td class="v">$${l.price.toFixed(dec(l))}</td><td class="v">${money0(r)}</td>
+        <td class="v ${m != null && m < 0 && l.basis !== 'average' ? 'is-bad' : ''}">${m == null ? '—' : (m < 0 ? '−' : '') + money0(Math.abs(m))}${m != null && r > 0 ? `<small>${Math.round(m / r * 100)}%</small>` : ''}</td>
+        <td><button class="q-x" type="button" data-i="${i}" aria-label="Remove ${esc(l.name)}">×</button></td></tr>`; }).join('')}
+      </tbody><tfoot><tr><td>Total</td><td></td><td></td><td class="v">${money0(T.rev)}</td><td class="v ${T.margin < 0 && !T.review ? 'is-bad' : ''}">${T.pc == null ? '—' : (T.margin < 0 ? '−' : '') + money0(Math.abs(T.margin))}<small>${T.pc == null ? '' : Math.round(T.pc * 100) + '%'}</small></td><td></td></tr></tfoot></table>
+      <p class="src">Margin is revenue less the cost to serve from the cost model ◇${T.uncosted ? `, on the ${n - T.uncosted} costed line${n - T.uncosted === 1 ? '' : 's'}` : ''}${T.review ? '; bin lines without route days use the average visit, under review' : ''}.</p>
+      <div class="q-acts"><button type="button" id="q-save" class="q-add">Save the quote</button><button type="button" id="q-copy">Copy as text</button><button type="button" id="q-clear">Start again</button><span id="q-msg" class="hint"></span></div>
+      ${savedHtml()}`;
+    const pr = $('q-prospect'); if (pr) pr.addEventListener('input', () => { Q.prospect = pr.value; keepQ(); });
+    $('q-body').querySelectorAll('.q-x').forEach(b => b.addEventListener('click', () => { Q.lines.splice(+b.dataset.i, 1); keepQ(); drawQuote(); }));
+    $('q-copy').addEventListener('click', () => { navigator.clipboard && navigator.clipboard.writeText(quoteText()).then(() => { $('q-msg').textContent = 'Copied.'; }, () => { $('q-msg').textContent = 'Copy failed: select and copy by hand.'; }); });
+    $('q-clear').addEventListener('click', () => { Q = { lines: [], prospect: '' }; keepQ(); drawQuote(); });
+    $('q-save').addEventListener('click', async () => {
+      const r = await fetch('/api/sales/quotes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ level1: Q.level1, prospect: Q.prospect, postcode: Q.postcode, lines: Q.lines }) }).catch(() => null);
+      if (r && r.ok) { loadSaved('Saved. It is in Saved quotes below.'); } else $('q-msg').textContent = 'Could not save just now.';
+    });
+  }
+  let saved = null;
+  function savedHtml() {
+    if (!saved || !saved.length) return '';
+    const sum = q => q.lines.reduce((t, l) => t + l.price * l.units, 0);
+    return `<details class="fold q-saved"><summary><h3>Saved quotes</h3><span class="sub">${saved.length} in the last 90 days · open</span></summary><ul>${saved.slice(0, 12).map((q, i) => `<li><button type="button" data-q="${i}">${esc(q.level1 ? nameOf(q.level1) : q.prospect || 'New customer')}</button><span>${q.lines.length} line${q.lines.length === 1 ? '' : 's'} · ${moneyK(sum(q))} a year · ${esc(q.who)} · ${esc(String(q.at).slice(0, 10))}</span></li>`).join('')}</ul></details>`;
+  }
+  function loadSaved(msg) {
+    fetch('/api/sales/quotes').then(r => r.ok ? r.json() : { data: [] }).then(j => { saved = j.data || []; drawQuote(); if (msg && $('q-msg')) $('q-msg').textContent = msg;
+      $('q-body').querySelectorAll('.q-saved [data-q]').forEach(b => b.addEventListener('click', () => { const q = saved[+b.dataset.q]; Q = { level1: q.level1, prospect: q.prospect || '', postcode: q.postcode, lines: q.lines.map(l => ({ ...l, unit: l.unit || 'unit', basis: l.basis || 'model' })) }; keepQ(); drawQuote(); })); }).catch(() => {});
+  }
+  $('q-add').addEventListener('click', addLine);
+  drawQuote(); loadSaved();
+
   draw();
   reveal(main.querySelector('.pr2'));
 }

@@ -40,6 +40,7 @@ app.use('/f', feedback.tap);   // a tap in the morning email: signed, no login
 auth.install(app);
 app.use('/api/log', require('./log'));
 app.use('/api/feedback', feedback.api);
+app.use('/api/sales', require('./sales').api);   // quotes and opportunity statuses
 app.use('/api/summary', require('./summary'));
 app.use('/api/ask', require('./ask'));
 app.use('/api/view', require('./views'));
