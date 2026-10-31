@@ -17,7 +17,7 @@ const router = express.Router();
 const MODEL = 'claude-opus-5-5';
 const ROOT = path.join(__dirname, '..');
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'levers', 'margin', 'chart', 'series'].map(n => import('../public/components/' + n + '.js').then(m => [n, m])))
+const load = () => libs || (libs = Promise.all(['home2data', 'levers', 'margin', 'chart', 'series', 'opps', 'quote'].map(n => import('../public/components/' + n + '.js').then(m => [n, m])))
   .then(Object.fromEntries));
 
 // the data, as the screens read it (server/screendata.js)
@@ -27,7 +27,7 @@ const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.to
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 
 // ── the tools: each returns plain facts with its figures already written as the screens write them ──
-function tools(L, D) {
+function tools(L, D, X = {}) {
   const { moneyK, money0 } = L.chart;
   const pc = v => v == null ? 'no comparison' : Math.abs(v) < 0.005 ? 'level' : (v > 0 ? 'up ' : 'down ') + Math.abs(Math.round(v * 100)) + '%';
   const signed = v => (v < 0 ? '−' : '+') + moneyK(Math.abs(v)).replace('−', '');
@@ -134,6 +134,67 @@ function tools(L, D) {
           postcodes: x.save.map(r => `${r.postcode}: ${Math.round(r.visitsYear)} visits a year, ${Math.round(r.miles)} miles out, one more customer saves about ${moneyK(r.saving)} a year ◇ (${title(r.names)})`) };
       },
     },
+    opportunities: {
+      description: "Customers › Opportunities: the next conversations ranked by dollars a year (cross-sell ◇, price gaps, win-back, rate rounds, overdue boxes), each with its reason, owner and status (open, contacted, quoted, won, lost); what was won this month and what is in play.",
+      input: { type: 'object', properties: { kind: { type: 'string', enum: ['all', 'cross', 'price', 'slip', 'round', 'overdue'] }, status: { type: 'string', enum: ['active', 'open', 'contacted', 'quoted', 'won', 'lost'] }, level1: { type: 'integer' } }, required: [], additionalProperties: false },
+      run: ({ kind = 'all', status = 'active', level1 } = {}) => {
+        const O = L.opps.opportunities({ C: D.C, PR: D.PR, CA: D.CA, M: D.M }, X.statuses || {});
+        let rows = O.rows.filter(r => (kind === 'all' || r.kind === kind) && (level1 == null || r.level1 === level1));
+        rows = rows.filter(r => status === 'active' ? r.status !== 'won' && r.status !== 'lost' : r.status === status);
+        const play = O.rows.filter(r => r.status === 'contacted' || r.status === 'quoted');
+        return {
+          won_this_month: `${moneyK(O.won.value)} across ${O.won.n} opportunities marked won`,
+          in_play: `${play.length} contacted or quoted, ${moneyK(play.reduce((t, r) => t + r.value, 0))} a year`,
+          matching: rows.length,
+          rows: rows.slice(0, 12).map(r => ({ level1: r.level1, customer: r.name, kind: L.opps.KINDS[r.kind], value: `${moneyK(r.value)}${r.once ? ' once' : ' a year'}${r.modelled ? ' ◇' : ''}`, reason: r.reason, status: r.status, owner: r.owner || 'nobody yet', opener: r.opener })),
+        };
+      },
+    },
+    quote: {
+      description: "Price one line for a customer or a prospect as Pricing does: revenue a year, cost to serve ◇ line by line, and margin. Bins are costed from the account's own route days, else route days in the postcode given, else the average visit (under review). Codes: B2 95-gallon bin, B3 executive bin, B4 65-gallon, B6 35-gallon, STO storage a box a month, R3 shred box, S3 shred lb, 01 delivery trip, 20 retrieval, 30 refile, 55 driver hour.",
+      input: { type: 'object', properties: { code: { type: 'string' }, units_a_year: { type: 'number' }, price: { type: 'number' }, visits_a_year: { type: 'number' }, postcode: { type: 'string' }, level1: { type: 'integer' } }, required: ['code', 'units_a_year', 'price'], additionalProperties: false },
+      run: ({ code, units_a_year, price, visits_a_year, postcode, level1 }) => {
+        if (!L.quote.SERVICES[code]) return { error: `the cost model does not price ${code}` };
+        const acct = level1 != null ? D.M.accounts.find(a => a.level1 === level1) : null;
+        const lines = level1 != null ? D.M.lines.filter(l => l.level1 === level1) : [];
+        const bin = L.quote.SERVICES[code].fam === 'bin';
+        const st = { code, units: units_a_year, visits: visits_a_year || (bin ? Math.min(units_a_year, 52) : null), level1: level1 ?? null, postcode: /^\d{5}$/.test(postcode || '') ? postcode : null, miles: R.RATES.avgMiles.v };
+        const c = L.quote.lineCost(R, st, { acct, lines, Z: D.Z });
+        const rev = price * units_a_year;
+        return {
+          revenue_a_year: money0(rev), cost_a_year: `${money0(c.total)} ◇`, margin_a_year: `${rev - c.total < 0 ? '−' : '+'}${money0(Math.abs(rev - c.total)).replace('−', '')} ◇`,
+          margin_share: rev > 0 ? `${Math.round((rev - c.total) / rev * 100)}% of revenue kept ◇` : null,
+          cost_a_unit: `$${c.perUnit.toFixed(2)} ◇`,
+          route_cost_basis: bin ? { account: "the account's own route days", postcode: `real route days in and around ${st.postcode}`, average: 'the average visit, under review until delivery routes are in the data' }[c.routeBasis] : 'no route cost',
+          lines: c.lines.map(l => `${l[0]}: ${money0(l[1])} (${String(l[2]).split('. ')[0]})`),
+        };
+      },
+    },
+    bin_route_cost: {
+      description: "What an account's bins really cost on the road ◇: its route days, its stops' share of each day by minutes (drive time from its road-mile detour, plus minutes on site), a service, against the model's average visit. Also the three assumptions it rests on.",
+      input: { type: 'object', properties: { level1: { type: 'integer' } }, required: ['level1'], additionalProperties: false },
+      run: ({ level1 }) => {
+        const rc = R.routeCostsNow(), r = rc.accounts[level1];
+        if (!r) return { note: 'no route days for this account in the data' };
+        const a = D.M.accounts.find(x => x.level1 === level1);
+        const avg = a && a.bins ? R.costToServe('bin', a.bins, { visits: a.visits || null, binCode: a.main_bin }) : null;
+        const avgRoute = avg ? avg.lines.filter(l => /Travel|on site/.test(l[0])).reduce((t, l) => t + l[1], 0) / a.bins : null;
+        return {
+          route_days: r.days, from: r.from, to: r.to, services: r.services.toLocaleString('en-US'), stops: r.stops,
+          route_cost: `${money0(r.cost)} ◇ over those days: ${money0(r.travel)} drive time, ${money0(r.onsite)} on site`,
+          a_service: `$${(r.cost / r.services).toFixed(2)} ◇ a bin service on the road`,
+          average_visit_model: avgRoute != null ? `$${avgRoute.toFixed(2)} a bin service on the road at the model's average visit` : null,
+          assumptions: `${R.SETTINGS.mph} mph between stops, ${R.SETTINGS.stopMin} minutes a stop, ${R.SETTINGS.serviceMin} minutes a service; a route day costs ${money0(R.RATES.routeDay.v)}; days that also delivered boxes are not in the route data, so these read high`,
+          book: `${rc.days} route days costed, ${rc.from} to ${rc.to}`,
+        };
+      },
+    },
+    saved_quotes: {
+      description: 'Quotes saved on Pricing in the last 90 days: who for, the lines, the total a year, who saved it and when.',
+      input: { type: 'object', properties: {}, required: [], additionalProperties: false },
+      run: () => ({ quotes: (X.quotes || []).slice(0, 15).map(q => ({ for: q.level1 ? title(names.get(q.level1) || `account ${q.level1}`) : (q.prospect || 'a prospect'), saved_by: q.who, on: String(q.at).slice(0, 10),
+        total_a_year: money0(q.lines.reduce((t, l) => t + l.price * l.units, 0)), lines: q.lines.map(l => `${l.name || l.code}: ${Math.round(l.units).toLocaleString('en-US')} at $${l.price}`) })) }),
+    },
   };
   return T;
 }
@@ -200,6 +261,7 @@ function template(question, T) {
   if (/slip|losing|down|falling|call/.test(q)) { const o = T.customers_moving.run({ kind: 'slipping' }); return o.rows.slice(0, 3).map(r => `${r.customer}: ${r.against_own_run}`).join('. ') + `. ${o.slipping_accounts} accounts are slipping in all.`; }
   if (/cross|sell|upsell|buy/.test(q)) { const o = T.cross_sell.run(); return `Ceiling ${o.ceiling}. Most missed: ${o.by_line.slice(0, 2).join('; ')}. Largest: ${o.rows.slice(0, 3).map(r => `${r.customer} (${r.lines.join(', ')}, ${r.could_add})`).join('; ')}.`; }
   if (/shred|destr|retention|boxes/.test(q)) { const o = T.destruction.run(); return `${o.eligible} boxes (${o.share}) are eligible to shred: ${o.fee_once} once, then ${o.storage_lost} of storage lost. The fee covers ${o.fee_covers}.`; }
+  if (/opportunit|won|pipeline|in play/.test(q)) { const o = T.opportunities.run({}); return `Won this month: ${o.won_this_month}. In play: ${o.in_play}. Largest open: ${o.rows.slice(0, 3).map(r => `${r.customer} (${r.kind}, ${r.value})`).join('; ')}.`; }
   if (/segment|line|itad|bins/.test(q)) { const o = T.segments.run(); return o.rows ? o.rows.slice(0, 4).map(r => `${r.line} ${r.last_month} in ${o.month}, ${r.vs_month_before}`).join('. ') + '.' : o.note; }
   return lines(T.overview.run()).slice(0, 3).join('. ') + '. Free questions need the Claude key on this server.';
 }
@@ -209,8 +271,9 @@ router.post('/', async (req, res) => {
   if (!question) return res.status(400).json({ error: 'ask a question' });
   const history = Array.isArray(req.body.history) ? req.body.history.filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string').map(m => ({ role: m.role, content: m.content.slice(0, 2000) })) : [];
   try {
-    const [L, D] = await Promise.all([load(), data()]);
-    const T = tools(L, D);
+    const sales = require('./sales');
+    const [L, D, statuses, quotes] = await Promise.all([load(), data(), sales.opportunities().catch(() => ({})), sales.quotes().catch(() => [])]);
+    const T = tools(L, D, { statuses, quotes });
     if (!process.env.ANTHROPIC_API_KEY) return res.json({ answer: template(question, T), source: 'template', tools: [] });
     res.json(await claude(question, history, T));
   } catch (e) {
@@ -220,3 +283,4 @@ router.post('/', async (req, res) => {
 });
 
 module.exports = router;
+module.exports._tools = tools;   // for the tests
