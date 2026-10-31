@@ -18,7 +18,8 @@ export function loadRates() {
   return ratesLoading || (ratesLoading = new Promise((ok, fail) => {
     const s = document.createElement('script');
     s.src = '/model/rates.js';
-    s.onload = () => ok(window.R4RATES);
+    // with the bins' real route-day costs (server/routecost.js) set into it before any screen costs a bin
+    s.onload = () => getJson('view/routecost').then(rc => { window.R4RATES.setRouteCosts(rc); }, () => {}).then(() => ok(window.R4RATES));
     s.onerror = () => { ratesLoading = null; fail(new Error('model/rates.js did not load')); };
     document.head.appendChild(s);
   }));

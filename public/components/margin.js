@@ -57,7 +57,9 @@ const SOLID_FAMILIES = ['storage', 'shred', 'labour', 'itad'];
 export function marginSummary(R, M, exclude = [6714]) {
   const book = buildMargins(R, M, { exclude });
   const accounts = book.accounts.filter(a => a.revenue > 1000).map(m => {
-    const routeCost = ROUTE_FAMILIES.reduce((t, f) => t + ((m.fam[f] || {}).cost || 0), 0);
+    // bins costed from the account's real route days are not under review; the average visit is
+    const realBins = !!(R.routeFor && R.routeFor(m.level1));
+    const routeCost = ROUTE_FAMILIES.filter(f => !(f === 'bin' && realBins)).reduce((t, f) => t + ((m.fam[f] || {}).cost || 0), 0);
     return { ...m, pc: m.revenue > 0 ? m.margin / m.revenue : null, review: m.cost > 0 && routeCost > 0.5 * m.cost };
   });
   const solid = Object.entries(book.families).filter(([f, v]) => SOLID_FAMILIES.includes(f) && v.revenue > 0);
@@ -79,7 +81,8 @@ export function accountCosts(R, a, lines) {
   const trips = units(l => l.servcode === '01'), dboxes = units(l => l.family === 'movement' && l.drives_cost && l.unit === 'box');
   if (trips > 0 || dboxes > 0) put('movement', R.costToServe('movement', dboxes, { visits: trips || null }));
   const binLb = units(l => l.servcode === 'S5B');
-  if (a.bins > 0) put('bin', R.costToServe('bin', a.bins, Object.assign({ visits: a.visits || null }, binLb > 0 ? { pounds: binLb } : { binCode: a.main_bin })));
+  // bins: from the account's real route days when they are known (components/routecost.js), else the average visit
+  if (a.bins > 0) put('bin', R.costToServe('bin', a.bins, Object.assign({ visits: a.visits || null, route: R.routeFor ? R.routeFor(a.level1) : null }, binLb > 0 ? { pounds: binLb } : { binCode: a.main_bin })));
   const devices = units(l => l.family === 'itad' && l.drives_cost);
   if (devices > 0) put('itad', R.costToServe('itad', devices, { visits: days(l => l.family === 'itad' && l.drives_cost) || null }));
   const shredLb = units(l => l.servcode === 'S3' || l.servcode === 'S5P');
@@ -153,9 +156,9 @@ function dayLines(R, { day, alloc }, share) {
   const route = /\d/.test(day.route) ? day.route : day.route.charAt(0) + day.route.slice(1).toLowerCase();
   return [
     ['Travel to site', me.travel / share,
-      `Route ${route} cost ${m0(a.total)} that day. ${Math.round(R.SETTINGS.split * 100)}% of a route day is travel, ${m0(a.travel)}, split by how far each stop took the driver out of the way: this account's stops added ${me.detour != null ? me.detour.toFixed(1) : '0'} of the day's ${Math.round(a.dayMiles)} miles, ${m0(me.travel)}${part}.`, 'route'],
+      `Route ${route} cost ${m0(a.total)} that day, shared between its ${a.stops} stop${a.stops === 1 ? '' : 's'} by minutes. This account's stops added ${me.detour != null ? me.detour.toFixed(1) : '0'} of the day's ${Math.round(a.dayMiles)} miles, ${Math.round(me.driveMin)} minutes at ${R.SETTINGS.mph} mph: ${m0(me.travel)}${part}.`, 'route'],
     ['Time on site', me.onsite / share,
-      `The other ${m0(a.onsite)} of the route day is time on site, split between the ${a.visits} customer${a.visits === 1 ? '' : 's'} visited (${a.stops} stop${a.stops === 1 ? '' : 's'}): ${m0(me.onsite)} for this account${part}.`, 'route'],
+      `${Math.round(me.dropMin)} minutes on site (${R.SETTINGS.stopMin} at each stop, ${R.SETTINGS.serviceMin} a service, ${me.services} service${me.services === 1 ? '' : 's'}) out of the day's ${Math.round(a.minutes.drive + a.minutes.drop)}: ${m0(me.onsite)}${part}.`, 'route'],
   ];
 }
 

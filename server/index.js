@@ -56,9 +56,10 @@ const rates = require('../model/rates');
 // Live: warm every screen's query at start and whenever the data moves, so nobody waits on the database.
 const { clearCache } = require('./db');
 const queries = require('./queries');
-const WARM = ['pulse', 'activity', 'customers', 'pricing', 'calls', 'margin', 'storage', 'segments'];
+const WARM = ['pulse', 'activity', 'customers', 'pricing', 'calls', 'margin', 'storage', 'segments', 'routestops'];
 async function warm() {
   for (const n of WARM) { if (!queries[n]) continue; const t = Date.now(); try { await cached(n, queries[n]); console.log(`warm ${n} ${Date.now() - t}ms`); } catch (e) { console.warn(`warm ${n}: ${e.message}`); } }
+  try { await require('./screendata').data(); } catch (e) { console.warn('warm route costs:', e.message); }   // costs the route days once
 }
 let stamp = null;
 async function watch() {

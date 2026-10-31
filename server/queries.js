@@ -358,6 +358,23 @@ async function customerDrill(level1) {
   return { level1, orders, visits, routes };
 }
 
+// Every route day's stops, twelve months to the latest done work, in route order: the route, the stop,
+// its account and postcode, and its done services. components/routecost.js shares each day's cost
+// between its stops by time, so an account's bin cost is the sum of its real days (31 October 2026).
+async function routestops() {
+  const [anchor] = await query(`SELECT max(date)::text AS latest_done FROM v_route_day WHERE services_done > 0`);
+  return query(`
+    SELECT NULLIF(date, '')::date::text AS date, NULLIF(route, '') AS route, NULLIF(slocid, '') AS stop,
+           min(CASE WHEN rorder ~ '^[0-9]+(\\.[0-9]+)?$' THEN rorder::numeric END)::float AS seq,
+           min(NULLIF(level1, '')::int) AS level1, min(left(coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')), 5)) AS postcode,
+           count(*)::int AS services,
+           sum(CASE WHEN weight ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN weight::numeric ELSE 0 END)::float AS pounds
+    FROM vs_service_orders
+    WHERE billable = 'true' AND NULLIF(route, '') IS NOT NULL
+      AND NULLIF(date, '')::date > $1::date - 365 AND NULLIF(date, '')::date <= $1::date
+    GROUP BY 1, 2, 3 ORDER BY 1, 2, 4 NULLS LAST, 3`, [anchor.latest_done]);
+}
+
 // Snapshot: the drill for the 50 largest accounts, and a check of data rule 9 (is the units field
 // on retrieval, return and destruction-pull lines a box barcode, or a count of boxes?).
 async function drill() {
@@ -417,4 +434,4 @@ async function segments() {
   return { rows };
 }
 
-module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments };
+module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, routestops };

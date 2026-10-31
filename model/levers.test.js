@@ -142,7 +142,7 @@ test('route map: the stops share the route day exactly; travel follows the detou
     if (!day) continue;
     const a = allocate(R, day);
     near(day.stops.reduce((t, s) => t + s.cost, 0), R.RATES.routeDay.v, 1e-6, `${k} shares`);
-    near(day.stops.reduce((t, s) => t + s.travel, 0), R.RATES.routeDay.v * R.SETTINGS.split, 1e-6, `${k} travel`);
+    near(day.stops.reduce((t, s) => t + s.travel, 0), R.RATES.routeDay.v * a.minutes.drive / (a.minutes.drive + a.minutes.drop), 1e-6, `${k} travel is the drive minutes' share`);
     assert.ok(a.me.cost > 0 && a.me.cost <= a.total + 1e-9, `${k} this account's share`);
     const c = cheaper(day, a, A.routeDays, Z, A.postcodes);
     for (const n of c.nearby) assert.ok(n.saving <= a.me.travel + 1e-9 && n.miles <= 2, 'a saving never exceeds the travel it removes');
@@ -203,6 +203,39 @@ test('margin drill: one cost per job on its real route day; actions; density nev
   // Ingalls still holds
   const ing = R.costToServe('bin', 3540, { visits: 101, pounds: 154887 });
   near(ing.total, 37273, 1, 'Ingalls');
+});
+
+test('route cost: every day shares its cost exactly; an account is the sum of its days; bins cost from them', async () => {
+  const R = require('./rates.js');
+  const { routeCosts, daysFrom, postcodeCost, quoteRoute } = await import('../public/components/routecost.js');
+  const { allocate } = await import('../public/components/routemap.js');
+  const Z = require('../public/data/zcta.json');
+  const D = J('drill');
+  const rows = Object.values(D).flat().flatMap(a => a.routes || []);
+  assert.ok(rows.length > 1000, 'route-day stops from the drill');
+  const rc = routeCosts(R, rows, Z);
+  // the stops' shares of every day add up to the days' cost
+  const all = Object.values(rc.accounts).reduce((t, a) => t + a.cost, 0);
+  near(all, rc.days * R.RATES.routeDay.v, 0.01 * rc.days + 1, 'accounts share every route day exactly');
+  // one account, recomputed day by day, equals its total
+  const id = 12530, days = daysFrom(rows, Z).filter(d => d.stops.some(s => s.level1 === id));
+  let sum = 0, svc = 0;
+  for (const d of days) { allocate(R, d); for (const s of d.stops) if (s.level1 === id) { sum += s.cost; svc += s.services; } }
+  near(rc.accounts[id].cost, sum, 0.01 * days.length + 1, 'Ingalls is the sum of its days');
+  assert.equal(rc.accounts[id].services, svc);
+  assert.equal(rc.accounts[id].days, days.length);
+  // bins costed from the account's days: route lines are its cost a service × bins; the plant is unchanged
+  const r = rc.accounts[id], plain = R.costToServe('bin', 3540, { visits: 101, pounds: 154887 });
+  const real = R.costToServe('bin', 3540, { visits: 101, pounds: 154887, route: r });
+  const route = c => c.lines.filter(l => /Travel|on site/.test(l[0])).reduce((t, l) => t + l[1], 0);
+  near(route(real), 3540 * r.cost / r.services, 0.01, 'route lines from real days');
+  near(real.total - route(real), plain.total - route(plain), 0.01, 'the shred plant is the same either way');
+  near(plain.total, 37273, 1, 'Ingalls without route days still holds');
+  // a quote in a postcode with real days: more bins a visit never costs more a bin
+  const pc = postcodeCost(rc, '60616', Z);
+  assert.ok(pc && pc.perService > 0, 'a central postcode has real days');
+  const q1 = quoteRoute(pc, 52, 52, R.SETTINGS), q4 = quoteRoute(pc, 208, 52, R.SETTINGS);
+  assert.ok((q4.travel + q4.onsite) / 208 < (q1.travel + q1.onsite) / 52, 'four bins a visit cost less a bin than one');
 });
 
 test('warehouse: cells sum to the boxes; states never overlap; eligible ties to the data', async () => {

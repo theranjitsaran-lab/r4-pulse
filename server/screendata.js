@@ -27,6 +27,8 @@ async function data() {
   }));
   out.Z = readJson(path.join(ROOT, 'public', 'data', 'zcta.json')) || {};
   out.R = R;
+  // the bins' real route-day costs into the cost model before anything is costed (server/routecost.js)
+  out.RC = await require('./routecost').routeCosts(stamp(out)).catch(e => { console.warn('routecost:', e.message); return null; });
   return out;
 }
 

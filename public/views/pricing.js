@@ -9,6 +9,8 @@ import { strip, stripStats } from '/components/strip.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { unitSuspect } from '/components/levers.js';
 import { reveal } from '/components/motion.js';
+import { postcodeCost, quoteRoute } from '/components/routecost.js';
+import { YARD, dist, loadRoadnet } from '/components/routemap.js';
 
 const CITADEL = 6714;
 const UNDER_REVIEW = new Set(['bin', 'handling', 'movement']);
@@ -32,7 +34,7 @@ const median = v => v.length ? v.slice().sort((a, b) => a - b)[Math.floor(v.leng
 
 export async function render(main, PR, params) {
   if (!main) return;
-  const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
+  const [R, M, Z] = await Promise.all([loadRates(), getJson('margin'), fetch('/data/zcta.json').then(r => r.json()).catch(() => ({})), loadRoadnet().catch(() => null)]);
 
   // the book: each service's account rates; storage from storage_rate_hist's latest month
   const book = {};
@@ -48,7 +50,7 @@ export async function render(main, PR, params) {
   const acctOf = new Map(M.accounts.map(a => [a.level1, a]));
   const linesOf = id => M.lines.filter(l => l.level1 === id);
 
-  const st = { level1: params.level1 ? Number(params.level1) : null, code: codes.includes(params.code) ? params.code : 'B2', price: null, units: null, visits: null, miles: R.RATES.avgMiles.v };
+  const st = { level1: params.level1 ? Number(params.level1) : null, code: codes.includes(params.code) ? params.code : 'B2', price: null, units: null, visits: null, miles: R.RATES.avgMiles.v, postcode: params.postcode || null };
 
   main.innerHTML = `
   <div class="pr pr2">
@@ -65,6 +67,7 @@ export async function render(main, PR, params) {
           <select id="p-freq"><option value="52">Weekly</option><option value="26">Every two weeks</option><option value="13">Every four weeks</option><option value="12">Monthly</option><option value="4">Quarterly</option><option value="">Other: enter visits a year</option></select></div>
           <div><label for="p-units" id="p-units-lab">A year</label><input id="p-units" inputmode="decimal"></div>
           <div><label for="p-visits">Visits a year</label><input id="p-visits" inputmode="decimal"></div>
+          <div><label for="p-pc">Postcode</label><input id="p-pc" inputmode="numeric" maxlength="5" placeholder="e.g. 60616"></div>
           <div><label for="p-miles">Miles from the yard</label><input id="p-miles" inputmode="decimal"></div>
         </div><div class="hint" id="p-hint"></div></details>
     </section>
@@ -129,7 +132,11 @@ export async function render(main, PR, params) {
       const a = acctOf.get(st.level1);
       const lb = a && a.main_bin === st.code ? linesOf(st.level1).filter(l => l.servcode === 'S5B').reduce((t, l) => t + l.units, 0) : 0;
       const share = a && a.bins ? Math.min(1, u / a.bins) : 1;
-      c = R.costToServe('bin', u, Object.assign({ visits: v, miles: mi }, lb > 0 ? { pounds: lb * share } : { binCode: svc.size }));
+      // the route: the account's own route days, else what route days in the quote's postcode cost, else the average visit
+      const own = R.routeFor && R.routeFor(st.level1);
+      const route = own || (st.postcode && quoteRoute(postcodeCost(R.routeCostsNow(), st.postcode, Z), u, v, R.SETTINGS)) || null;
+      c = R.costToServe('bin', u, Object.assign({ visits: v, miles: mi, route }, lb > 0 ? { pounds: lb * share } : { binCode: svc.size }));
+      c.routeBasis = own ? 'account' : route ? 'postcode' : 'average';
     } else if (svc.fam === 'handling') c = R.costToServe('handling', u);
     else if (svc.fam === 'trip') c = R.costToServe('movement', 0, { visits: v || u, miles: mi });
     else if (svc.fam === 'itad') c = R.costToServe('itad', u, { visits: v, miles: mi });
@@ -151,7 +158,10 @@ export async function render(main, PR, params) {
     const vals = rows.map(r => ({ v: r.v, name: r.name, w: st.code === 'STO' ? r.units : undefined }));
     const s = stripStats(vals), price = st.price || 0;
     const of = s.weighted ? 'boxes' : 'accounts', medName = s.weighted ? 'box-weighted median' : 'median';
-    const review = svc && REVIEW_OF[svc.fam];
+    // bins costed from real route days (the account's own, or the quote's postcode) are judged on cost;
+    // the average visit stays under review until delivery routes are in the data
+    const real = !!(c && c.routeBasis && c.routeBasis !== 'average');
+    const review = svc && REVIEW_OF[svc.fam] && !real;
     const mine = rows.find(r => r.level1 === st.level1);
     const who = st.level1 ? (customers.find(x => x[0] === st.level1) || [0, ''])[1] : 'A new customer';
 
@@ -162,7 +172,7 @@ export async function render(main, PR, params) {
     if (sure != null && price < sure) { cls = 'is-bad'; lab = 'Below cost'; text = `${f(price)} is below what this costs to serve. Cost to serve is ${f(unitCost)} a ${svc.unit}. Every one loses ${f(unitCost - price)}, and more volume makes it worse.`; }
     else if (price < s.median) { cls = 'is-warn'; lab = 'Below the median'; text = `${f(price)} ${sure != null ? `earns ${f(price - sure)} a ${svc.unit} over cost, but ` : ''}sits below the ${f(s.median)} ${medName}: cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.`; }
     else text = `${f(price)} is ${price > s.median ? 'above' : 'at'} the ${f(s.median)} ${medName}${sure != null ? ` and ${f(price - sure)} a ${svc.unit} over cost` : ''}.`;
-    $('p-verdict').innerHTML = `<section class="h2-card pr2-verdict ${cls}"><span class="pr2-tag">${lab}</span><p class="pr2-head">${esc(text)}</p>${review ? `<p class="hint">Judged against the book only: the cost of a visit is under review until delivery routes are in the data, so the margin below is provisional.</p>` : ''}</section>`;
+    $('p-verdict').innerHTML = `<section class="h2-card pr2-verdict ${cls}"><span class="pr2-tag">${lab}</span><p class="pr2-head">${esc(text)}</p>${review ? `<p class="hint">Judged against the book only: the cost of a visit is under review until delivery routes are in the data, so the margin below is provisional.${svc.fam === 'bin' && !st.level1 ? ' Enter the postcode under Volume to cost it from real route days there.' : ''}</p>` : real ? `<p class="hint">Route cost from ${c.routeBasis === 'account' ? `${esc(who)}'s own route days` : `real route days in and around ${esc(st.postcode)}`}, shared by minutes ◇. Days the truck also delivered boxes are not in the route data yet, so this reads a little high.</p>` : ''}</section>`;
 
     // the track: cost to serve, the middle half of the book, its median, and the price
     $('p-track-title').textContent = `${who === 'A new customer' ? 'A quote' : who} at ${f(price)} a ${svc ? svc.unit : 'unit'}`;
@@ -239,7 +249,7 @@ export async function render(main, PR, params) {
     const sl = $('p-slide'), lo = Math.max(0, Math.min(s.p25 * .5, unitCost || Infinity, price)), hi = Math.max(s.p75 * 1.6, (unitCost || 0) * 1.3, price);
     sl.min = lo; sl.max = hi; if (document.activeElement !== sl) sl.value = price;
     $('p-slide-lab').textContent = `${f(lo)} to ${f(hi)} · median ${f(s.median)}`;
-    $('p-vol-sum').textContent = `Volume: ${Math.round(st.units || 0).toLocaleString('en-US')} ${svc ? (svc.fam === 'storage' ? 'box-months' : svc.unit + 's') : 'units'} a year${st.visits ? ` on ${Math.round(st.visits)} visits` : ''} · change`;
+    $('p-vol-sum').textContent = `Volume: ${Math.round(st.units || 0).toLocaleString('en-US')} ${svc ? (svc.fam === 'storage' ? 'box-months' : svc.unit + 's') : 'units'} a year${st.visits ? ` on ${Math.round(st.visits)} visits` : ''}${st.postcode ? ` in ${st.postcode}` : ''} · change`;
   }
 
   const num = el => { const v = parseFloat(String(el.value).replace(/[$,\s]/g, '')); return Number.isFinite(v) ? v : null; };
@@ -253,6 +263,14 @@ export async function render(main, PR, params) {
       draw();
     });
   }
+  // a postcode costs a new bin quote from the route days there, and sets the miles from the yard by road
+  $('p-pc').value = st.postcode || '';
+  $('p-pc').addEventListener('input', () => {
+    const pc = $('p-pc').value.trim();
+    st.postcode = /^\d{5}$/.test(pc) ? pc : null;
+    if (st.postcode && Z[st.postcode]) { st.miles = Math.round(dist(YARD, Z[st.postcode]) * 10) / 10; $('p-miles').value = st.miles; }
+    draw();
+  });
   $('p-slide').addEventListener('input', () => { st.price = Number($('p-slide').value); $('p-price').value = st.price.toFixed(st.code === 'STO' ? 3 : 2); draw(); });
   $('p-ask').addEventListener('click', e => dispatchEvent(new CustomEvent('open-ask', { detail: { ask: e.currentTarget.dataset.q } })));
   // a schedule sets the visits; the bins (or units) each visit stay the same

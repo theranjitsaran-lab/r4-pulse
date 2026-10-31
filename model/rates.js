@@ -146,7 +146,25 @@ async function loadFromDb(query) {
 
 // The one assumption: the share of a route day spent travelling rather than on site.
 // GPS, arrival times and durations were never captured. Exposed as a slider in the UI.
-const SETTINGS = { split: 0.40 };
+// split prices a visit at the book's average (a new account, a line with no route days).
+// Where the account's real route days are known (components/routecost.js), each stop's share of
+// its day is by time instead: its drive minutes (its detour in road miles at mph) plus its drop
+// minutes (stopMin at each stop and serviceMin a service), scaled so a day's stops add up to the
+// route day. Three assumptions, all `assumed`, for Mike to check (31 October 2026).
+const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3 };
+const TIME_NOTES = {
+  mph: ['Average city speed between stops', 'assumed', 'Chicago streets with a box truck; the main roads give the miles, this turns them into minutes.'],
+  stopMin: ['Minutes at each stop before any service', 'assumed', 'Park, walk in, sign, walk out.'],
+  serviceMin: ['Minutes a service', 'assumed', 'Swap one bin, or one pickup or delivery line.'],
+};
+
+// The account's real route-day cost, set once the route days are costed (server: server/routecost.js;
+// browser: loadRates in components/data.js). { accounts: { level1: { cost, travel, onsite, services,
+// days, pounds } }, postcodes: { postcode: { cost, services, days, customers } }, from, to, days }
+let ROUTE = { accounts: {}, postcodes: {}, days: 0 };
+function setRouteCosts(rc) { if (rc && rc.accounts) ROUTE = rc; }
+function routeFor(level1) { const r = ROUTE.accounts[level1]; return r && r.services >= 20 ? r : null; }   // 20 services or more: enough days to trust
+function routeCostsNow() { return ROUTE; }
 
 const FAMILIES = ['storage', 'handling', 'movement', 'bin', 'itad', 'shred', 'labour'];
 
@@ -211,7 +229,15 @@ function costToServe(family, units, opts) {
         `${units.toLocaleString('en-US')} movements at ${m2(RATES.handling.v)}. ${RATES.handling.d}.`);
       break;
     case 'bin':
-      routeLines('visits');
+      if (o.route && o.route.services > 0) {
+        // the account's real route days: what its stops cost on the days it was served, a service at a time
+        const r = o.route, ts = r.travel / r.services, os = r.onsite / r.services;
+        const basis = r.label || `its ${r.days} route day${r.days === 1 ? '' : 's'}, ${r.from} to ${r.to}`;
+        add('Travel to site', units * ts,
+          `${units.toLocaleString('en-US')} ${units === 1 ? 'bin' : 'bins'} at ${m2(ts)} a service, from ${basis}. Each stop's share of its ${m0(RATES.routeDay.v)} route day is its minutes: drive time is its detour in road miles at ${SETTINGS.mph} mph.`, 'route');
+        add('Time on site', units * os,
+          `${units.toLocaleString('en-US')} ${units === 1 ? 'bin' : 'bins'} at ${m2(os)} a service: ${SETTINGS.stopMin} minutes at each stop and ${SETTINGS.serviceMin} a service, on the same days.`, 'route');
+      } else routeLines('visits');
       if (o.pounds != null) {
         add('Shred plant', o.pounds * RATES.shredPlant.v,
           `${Math.round(o.pounds).toLocaleString('en-US')} lb recorded on S5 at ${m4(RATES.shredPlant.v)} a pound. ${RATES.shredPlant.d}.`);
@@ -265,7 +291,7 @@ function isModelled(family) {
   return family === 'bin' || family === 'itad' || family === 'movement' || family === 'shred';
 }
 
-const api = { RATES, MODEL, SETTINGS, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
+const api = { RATES, MODEL, SETTINGS, TIME_NOTES, setRouteCosts, routeFor, routeCostsNow, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 if (typeof window !== 'undefined') window.R4RATES = api;

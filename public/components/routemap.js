@@ -2,13 +2,12 @@
 // the day cost, with what would have made it cheaper. Stops sit at US Census postcode centres
 // (public/data/zcta.json) joined by straight lines: GPS was never captured (data rule 8).
 //
-// The day's cost is one route day from the cost model (model/rates.js), split two ways:
-//   travel (the travel share, the one assumption) by each stop's detour: the miles the route would
-//     save without it, yard to yard through the stops in their order; stops at the same postcode in
-//     a row are one place, and share its detour by services;
-//   time on site equally between the customers visited (a visit is one customer, one route, one day),
-//     each customer's share split between its stops by services.
-// So the stops' shares add up to the route day exactly.
+// The day's cost is one route day from the cost model (model/rates.js), shared by time:
+//   drive minutes: each stop's detour, the road miles the route would save without it, yard to yard
+//     through the stops in their order, at an assumed city speed; stops at the same postcode in a row
+//     are one place, and share its detour by services;
+//   drop minutes: an assumed few minutes at each stop and a few more for each service.
+// So the stops' shares add up to the route day exactly (31 October 2026; it was a flat 40% travel).
 export const YARD = [41.8307, -87.6573];   // 1301 W 35th St
 export const NEAR_MILES = 2, NEAR_DAYS = 3;
 
@@ -153,10 +152,15 @@ function spread(amount, list, field) {
 }
 
 // Split the route day between its stops (see the head of the file). R is model/rates.js.
+// By time: each place's drive minutes are its detour in road miles at R.SETTINGS.mph (a place with
+// no postcode centre takes the day's average detour), shared between its stops by services; each
+// stop's drop minutes are stopMin plus serviceMin a service. The day's cost is shared by minutes,
+// so the stops add up to the route day exactly. travel is the drive minutes' share, onsite the drops'.
 export function allocate(R, day) {
-  const total = R.RATES.routeDay.v, split = R.SETTINGS.split, travel = total * split, onsite = total - travel;
+  const total = R.RATES.routeDay.v, S = R.SETTINGS;
+  const mph = S.mph || 20, stopMin = S.stopMin ?? 8, serviceMin = S.serviceMin ?? 3;
   const st = day.stops;
-  for (const s of st) { s.travel = 0; s.onsite = 0; s.detour = null; }
+  for (const s of st) { s.travel = 0; s.onsite = 0; s.detour = null; s.driveMin = 0; s.dropMin = 0; }
   // places: consecutive stops at the same postcode are one place
   const places = [];
   for (const s of st) {
@@ -168,21 +172,30 @@ export function allocate(R, day) {
   let dayMiles = 0;
   for (let i = 1; i < path.length; i++) dayMiles += dist(path[i - 1], path[i]);   // road miles, where the roads give a way
   located.forEach((p, i) => { p.detour = Math.max(0, dist(path[i], path[i + 1]) + dist(path[i + 1], path[i + 2]) - dist(path[i], path[i + 2])); });
-  const sumDetour = located.reduce((t, p) => t + p.detour, 0);
+  const avgDetour = located.length ? located.reduce((t, p) => t + p.detour, 0) / located.length : 0;
+  for (const p of places) {
+    const d = p.pt ? p.detour : avgDetour;
+    spread(d, p.stops, 'detour');
+    spread(d / mph * 60, p.stops, 'driveMin');
+  }
+  for (const s of st) s.dropMin = stopMin + serviceMin * (s.services || 0);
+  const driveMin = st.reduce((t, s) => t + s.driveMin, 0), dropMin = st.reduce((t, s) => t + s.dropMin, 0), mins = driveMin + dropMin;
+  for (const s of st) {
+    s.travel = mins > 0 ? total * s.driveMin / mins : total / st.length;
+    s.onsite = mins > 0 ? total * s.dropMin / mins : 0;
+    s.cost = s.travel + s.onsite;
+  }
   const customers = [...new Set(st.map(s => s.level1))];
-  const byCustomer = c => st.filter(s => s.level1 === c);
-  if (located.length) for (const p of located) {
-    spread(travel * (sumDetour > 0 ? p.detour / sumDetour : 1 / located.length), p.stops, 'travel');
-    spread(p.detour, p.stops, 'detour');
-  } else for (const c of customers) spread(travel / customers.length, byCustomer(c), 'travel');   // nothing placed: travel by visit
-  for (const c of customers) spread(onsite / customers.length, byCustomer(c), 'onsite');
-  for (const s of st) s.cost = s.travel + s.onsite;
   const me = st.filter(s => s.mine);
   const sum = f => me.reduce((t, s) => t + (s[f] || 0), 0);
+  const travel = st.reduce((t, s) => t + s.travel, 0);
   return {
-    total, travel, onsite, dayMiles, road: !!NET, visits: customers.length, stops: st.length, placed: located.length,
+    total, travel, onsite: total - travel, dayMiles, road: !!NET, visits: customers.length, stops: st.length, placed: located.length,
     services: st.reduce((t, s) => t + (s.services || 0), 0),
+    // the day as the time model sees it: the whole round in miles at mph, plus every drop
+    minutes: { drive: driveMin, drop: dropMin, round: dayMiles / mph * 60 + dropMin, perMinute: mins > 0 ? total / mins : 0 },
     me: { cost: sum('cost'), travel: sum('travel'), onsite: sum('onsite'), services: sum('services'), pounds: sum('pounds'), detour: sum('detour'),
+      driveMin: sum('driveMin'), dropMin: sum('dropMin'),
       postcode: (me.find(s => s.postcode) || {}).postcode, pt: (me.find(s => s.pt) || {}).pt },
     model: { perVisit: total / R.RATES.visitsDay.v, visitsDay: R.RATES.visitsDay.v },
   };

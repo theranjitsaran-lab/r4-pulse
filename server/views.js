@@ -63,6 +63,13 @@ router.get('/customers', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// The bins' real route-day costs (server/routecost.js), for the browser's copy of model/rates.js:
+// by account and by postcode, with the days and the three time assumptions they rest on.
+router.get('/routecost', async (req, res) => {
+  try { const D = await data(); send(req, res, D.RC || { accounts: {}, postcodes: {}, days: 0 }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 router.get('/home', async (req, res) => {
   try {
     const [D, L] = await Promise.all([data(), load()]);
