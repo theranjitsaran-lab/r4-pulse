@@ -132,3 +132,28 @@
 .q-saved li button { background: none; border: 0; padding: 0; color: var(--brand); font: inherit; font-weight: 500; cursor: pointer; }
 .q-saved li span { color: var(--ink-3); }
 @media (max-width: 700px) { .q-t th:nth-child(3), .q-t td:nth-child(3) { display: none; } }
+
+/* Numbers (31 October 2026) */
+.nb h1 { margin: 0 0 var(--sp-4); }
+.nb .h2-card, .nb .h2-kpis { margin-bottom: var(--sp-4); }
+.nb a.h2-kpi { color: inherit; text-decoration: none; }
+.nb-legend { display: flex; gap: var(--sp-4); font-size: var(--fs-label); color: var(--ink-3); margin-bottom: var(--sp-2); }
+.nb-k { display: inline-block; width: var(--sw); height: var(--sw); border-radius: var(--r-xs); margin-right: var(--sp-1); vertical-align: -1px; }
+.nb-k.sto, .nb-sto { fill: var(--s-storage); background: var(--s-storage); }
+.nb-k.svc, .nb-svc { fill: var(--s-service); background: var(--s-service); }
+.nb-target { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.nb svg { width: 100%; height: auto; display: block; }
+.nb-wf { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+.nb-wf li { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 10fr) 96px 44px; gap: var(--sp-2); align-items: center; font-size: var(--fs-sm); }
+.nb-wf i { position: relative; height: var(--sp-3); }
+.nb-wf i::after { content: ''; position: absolute; left: var(--l); width: var(--w); top: 0; bottom: 0; border-radius: var(--r-xs); background: var(--ink-5); }
+.nb-wf li.tot span, .nb-wf li.tot b { font-weight: 600; }
+.nb-wf li.tot i::after { background: var(--brand); }
+.nb-wf li.tot.neg i::after { background: var(--bad); }
+.nb-wf b { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+.nb-wf em { font-style: normal; text-align: right; color: var(--ink-4); font-size: var(--fs-tiny); }
+.nb-h3 { font-size: var(--fs-head); font-weight: var(--w-head); margin: var(--sp-5) 0 var(--sp-2); }
+.nb-eb { fill: var(--ink-3); } .nb-eb.neg { fill: var(--bad); }
+.nb-oh { list-style: none; margin: var(--sp-2) 0 0; padding: 0; font-size: var(--fs-sm); }
+.nb-oh li { display: flex; justify-content: space-between; padding: var(--sp-1) 0; border-bottom: 1px solid var(--rule); }
+@media (max-width: 700px) { .nb-wf li { grid-template-columns: minmax(0, 1fr) 90px 40px; } .nb-wf i { grid-column: 1 / -1; grid-row: 2; } }

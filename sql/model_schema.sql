@@ -296,3 +296,19 @@ INSERT INTO model.service_family (servcode, servtype, family, unit, drives_cost,
 ON CONFLICT (servcode) DO UPDATE SET
   servtype = EXCLUDED.servtype, family = EXCLUDED.family, unit = EXCLUDED.unit,
   drives_cost = EXCLUDED.drives_cost, volume = EXCLUDED.volume, note = EXCLUDED.note;
+
+-- ── The P&L by month, from QuickBooks (scripts/load_gl.js): Numbers' EBITDA bridge ───────────────
+-- One row per posting account per month, as exported ("Total" rows skipped). line is its place in the
+-- bridge (public/components/gl.js classify): revenue, cost_to_serve, sales, management, overhead,
+-- discretionary, below. Income and expenses are both positive. A month is replaced whole on reload.
+CREATE TABLE IF NOT EXISTS model.gl_month (
+  month    date NOT NULL,
+  account  text NOT NULL,
+  name     text NOT NULL,
+  parent   text,
+  line     text NOT NULL CHECK (line IN ('revenue', 'cost_to_serve', 'sales', 'management', 'overhead', 'discretionary', 'below')),
+  amount   numeric(14,2) NOT NULL,
+  source   text,
+  loaded_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS gl_month_month ON model.gl_month (month);

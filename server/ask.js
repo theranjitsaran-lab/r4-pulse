@@ -17,7 +17,7 @@ const router = express.Router();
 const MODEL = 'claude-opus-5-5';
 const ROOT = path.join(__dirname, '..');
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'levers', 'margin', 'chart', 'series', 'opps', 'quote'].map(n => import('../public/components/' + n + '.js').then(m => [n, m])))
+const load = () => libs || (libs = Promise.all(['home2data', 'levers', 'margin', 'chart', 'series', 'opps', 'quote', 'gl'].map(n => import('../public/components/' + n + '.js').then(m => [n, m])))
   .then(Object.fromEntries));
 
 // the data, as the screens read it (server/screendata.js)
@@ -187,6 +187,27 @@ function tools(L, D, X = {}) {
           assumptions: `${R.SETTINGS.mph} mph between stops, ${R.SETTINGS.stopMin} minutes a stop, ${R.SETTINGS.serviceMin} minutes a service; a route day costs ${money0(R.RATES.routeDay.v)}; days that also delivered boxes are not in the route data, so these read high`,
           book: `${rc.days} route days costed, ${rc.from} to ${rc.to}`,
         };
+      },
+    },
+    pnl: {
+      description: "The company P&L from QuickBooks by month (Numbers): revenue, cost to serve, contribution, sales team, management, overheads, EBITDA before and after the owner-related and discretionary lines, over the last twelve months and month by month.",
+      input: { type: 'object', properties: {}, required: [], additionalProperties: false },
+      run: () => {
+        if (!D.G || !D.G.loaded) return { note: 'The QuickBooks P&L has not been loaded yet. It comes from the monthly Profit and Loss by Month export, loaded on the PC with scripts/load_gl.js.' };
+        const G = L.gl.bridge(D.G.rows), S = L.gl.sumMonths(G.months, 12);
+        const f = k => `${S[k] < 0 ? '−' : ''}${money0(Math.abs(S[k]))}`;
+        return { period: `${mon(S.from)} to ${mon(S.to)}, ${S.n} months`, revenue: f('revenue'), cost_to_serve: f('cost_to_serve'), contribution: f('contribution'),
+          sales_team: f('sales'), management: f('management'), overheads: f('overhead'), ebitda_before_discretionary: f('ebitda'), discretionary: f('discretionary'), ebitda: f('ebitda_after'),
+          ebitda_share: S.revenue > 0 ? `${Math.round(S.ebitda_after / S.revenue * 100)}% of revenue` : null,
+          months: G.months.slice(-13).map(m => `${m.month.slice(0, 7)}: revenue ${money0(m.revenue)}, EBITDA ${m.ebitda_after < 0 ? '−' : ''}${money0(Math.abs(m.ebitda_after))}`) };
+      },
+    },
+    margin_by_line: {
+      description: 'Gross margin by line of business over the last twelve months ◇: revenue, cost to serve and margin for storage, bins, shredding, handling, delivery, ITAD, labour. Citadel apart.',
+      input: { type: 'object', properties: {}, required: [], additionalProperties: false },
+      run: () => {
+        const b = L.margin.buildMargins(D.R, D.M, { exclude: [6714] });
+        return { lines: Object.entries(b.families).filter(([, v]) => v.revenue > 0).sort((x, y) => y[1].revenue - x[1].revenue).map(([f, v]) => `${L.margin.FAMILY_NAMES[f] || f}: revenue ${money0(v.revenue)}, cost ${v.cost > 0 ? money0(v.cost) + ' ◇' : 'not costed'}${v.cost > 0 ? `, margin ${Math.round((v.revenue - v.cost) / v.revenue * 100)}% ◇` : ''}${['handling', 'movement'].includes(f) ? ' (route cost under review)' : ''}`) };
       },
     },
     saved_quotes: {

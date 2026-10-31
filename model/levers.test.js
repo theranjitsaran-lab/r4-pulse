@@ -256,6 +256,23 @@ test('opportunities: each figure is its own list\'s; won this month is the won s
   assert.deepEqual([wonIn(st).n, wonIn(st).value], [1, 100], 'won this month counts only this month\'s wins');
 });
 
+test('EBITDA bridge: lines sorted by account tree; the bridge adds up', async () => {
+  const { classify, bridge, sumMonths } = await import('../public/components/gl.js');
+  assert.equal(classify('7335201', '7335201 Regular', [{ code: '7335', name: '7335 Salaries' }, { code: '7335200', name: '7335200 Sales' }]), 'sales', 'a sub-account takes its parent\'s line');
+  assert.equal(classify('733570A', '733570A Regular', []), 'cost_to_serve', 'drivers by prefix');
+  assert.equal(classify('4000', '4000 Storage', [], 'income'), 'revenue');
+  assert.equal(classify('8100', '8100 Interest Expense', [], 'other'), 'below');
+  assert.equal(classify('7400', '7400 Transportation', []), 'overhead', '7400 is air travel, not vehicles (data rule 11)');
+  assert.equal(classify('7195', '7195 Meals & Entertainment', []), 'discretionary');
+  const rows = [['revenue', 1000], ['cost_to_serve', 300], ['sales', 150], ['management', 50], ['overhead', 100], ['discretionary', 80], ['below', 30]]
+    .flatMap(([line, amount]) => ['2026-09-01', '2026-10-01'].map(month => ({ month, account: line, name: line, line, amount })));
+  const B = bridge(rows), m = B.months[1];
+  assert.equal(m.contribution, 700); assert.equal(m.ebitda, 400); assert.equal(m.ebitda_after, 320);
+  const S = sumMonths(B.months, 12);
+  assert.equal(S.n, 2); assert.equal(S.ebitda_after, 640);
+  assert.equal(S.revenue - S.cost_to_serve - S.sales - S.management - S.overhead - S.discretionary, S.ebitda_after, 'the steps add up to EBITDA');
+});
+
 test('warehouse: cells sum to the boxes; states never overlap; eligible ties to the data', async () => {
   const { byAccount, totals, cells, eligibleList, heldNotBilled, rowStates } = await import('../public/components/storage.js');
   const { overdueBoxes } = await import('../public/components/levers.js');

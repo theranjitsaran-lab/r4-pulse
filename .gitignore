@@ -18,3 +18,6 @@ render_logins.txt
 
 # Scheduled-task logs on the R4 machine (scripts/install_rebuild_task.ps1)
 logs/
+
+# The P&L from QuickBooks, if a snapshot pulls it: company financials stay off GitHub
+fixtures/gl.json

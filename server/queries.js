@@ -375,6 +375,17 @@ async function routestops() {
     GROUP BY 1, 2, 3 ORDER BY 1, 2, 4 NULLS LAST, 3`, [anchor.latest_done]);
 }
 
+// The P&L by month from QuickBooks (scripts/load_gl.js → model.gl_month), summed by line of the
+// EBITDA bridge, with the overhead accounts named so a misfiled line shows. Empty until loaded.
+async function gl() {
+  const has = await query(`SELECT to_regclass('model.gl_month') IS NOT NULL AS ok`);
+  if (!has[0].ok) return { rows: [], loaded: false };
+  const rows = await query(`SELECT month::text, account, min(name) AS name, line, sum(amount)::float AS amount
+    FROM model.gl_month GROUP BY 1, 2, 4 ORDER BY 1, 4, 2`);
+  const [l] = await query(`SELECT max(loaded_at)::text AS at, string_agg(DISTINCT source, ', ') AS source FROM model.gl_month`);
+  return { rows, loaded: rows.length > 0, loadedAt: l.at, source: l.source };
+}
+
 // Snapshot: the drill for the 50 largest accounts, and a check of data rule 9 (is the units field
 // on retrieval, return and destruction-pull lines a box barcode, or a count of boxes?).
 async function drill() {
@@ -434,4 +445,4 @@ async function segments() {
   return { rows };
 }
 
-module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, routestops };
+module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, routestops, gl };

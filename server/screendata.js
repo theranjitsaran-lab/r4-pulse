@@ -9,7 +9,7 @@ const queries = require('./queries');
 const R = require('../model/rates');
 
 const ROOT = path.join(__dirname, '..');
-const NAMES = { P: 'pulse', A: 'activity', C: 'customers', M: 'margin', PR: 'pricing', CA: 'calls', S: 'storage', SG: 'segments' };
+const NAMES = { P: 'pulse', A: 'activity', C: 'customers', M: 'margin', PR: 'pricing', CA: 'calls', S: 'storage', SG: 'segments', G: 'gl' };
 const files = new Map();
 function readJson(f, pick = j => j) {
   if (!fs.existsSync(f)) return null;

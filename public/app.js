@@ -15,6 +15,7 @@ const ROUTES = {
   customers: { view: 'customers', api: 'customers', nav: 'customers' },
   customer:  { view: 'customer',  api: 'customers', nav: 'customers' },
   pricing:   { view: 'pricing',   api: 'pricing',   nav: 'pricing' },
+  numbers:   { view: 'numbers',   api: 'view/numbers', nav: 'numbers' },
   activity:  { view: 'activity',  api: 'activity',  nav: 'activity' },
   calls:     { view: 'customers', api: 'customers', nav: 'customers', params: { view: 'conversations' } },
 };
@@ -87,6 +88,7 @@ fetch('/health').then(r => r.json()).then(h => {
 const SUGGEST = {
   pulse: ['Are we on track for this month?', 'Who should I call this week?', 'Where are the cross-sell wins?', 'What happens if customers shred their eligible boxes?'],
   customers: ['Which customers are slipping and why?', 'Which large accounts cost most to serve?', 'Where are the cross-sell wins?', 'How are the lines of business doing?'],
+  numbers: ['How far are we from $1.0M?', 'What was EBITDA over the last twelve months?', 'Which line of business keeps the most margin?'],
   pricing: ['Which prices are furthest under the book?', 'Who has missed every rate round?', 'How are the lines of business doing?'],
   activity: ['Where would one more customer save most travel?', 'How busy was last week?', 'What happens if customers shred their eligible boxes?'],
 };

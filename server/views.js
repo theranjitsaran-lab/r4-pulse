@@ -14,7 +14,7 @@ const sales = require('./sales');
 
 const router = express.Router();
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
+const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
 
 async function callsLog() {
   if (USE_FIXTURES) { try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'calls_log.json'), 'utf8')); } catch { return []; } }
@@ -85,6 +85,32 @@ router.get('/opportunities', async (req, res) => {
       return s ? { ...r, status: s.status, owner: s.owner, at: s.at, note: s.note } : r;
     });
     send(req, res, { rows, won: L.opps.wonIn(statuses), me: (req.session.user && req.session.user.name) || null });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Numbers: core against $1.0M by month (kpi.monthly), the EBITDA bridge from QuickBooks (model.gl_month,
+// components/gl.js) when it has been loaded, and margin by line of business (components/margin.js).
+let numBase = null;
+router.get('/numbers', async (req, res) => {
+  try {
+    const [D, L] = await Promise.all([data(), load()]);
+    const st = stamp(D) + '|' + (D.G && D.G.loadedAt);
+    if (!numBase || numBase.stamp !== st) {
+      const monthly = D.P.monthly.slice(-25).map(m => ({ month: m.month, core: m.core, storage: m.storage, service: m.core_service, citadel: m.citadel }));
+      const G = D.G && D.G.loaded ? L.gl.bridge(D.G.rows) : null;
+      const book = L.margin.buildMargins(D.R, D.M, { exclude: [6714] });
+      const lines = Object.entries(book.families).map(([f, v]) => ({ family: f, name: L.margin.FAMILY_NAMES[f] || f, revenue: v.revenue, cost: v.cost }))
+        .filter(x => x.revenue > 0).sort((a, b) => b.revenue - a.revenue);
+      const rc = D.R.routeCostsNow();
+      const realBins = book.accounts.filter(a => a.fam.bin && D.R.routeFor(a.level1));
+      numBase = { stamp: st, v: {
+        monthly, target: 1e6,
+        gap: (() => { const m = L.home2data.monthView(D); return { gap: m.gap, next: m.next ? m.next.month : null }; })(),   // the same gap as Home
+        gl: G ? { months: G.months, last12: L.gl.sumMonths(G.months, 12), overheadLines: G.overheadLines, loadedAt: D.G.loadedAt, source: D.G.source } : null,
+        margin: { lines, accounts: book.accounts.length, binReal: { accounts: realBins.length, revenue: realBins.reduce((t, a) => t + a.fam.bin.revenue, 0), routeDays: rc.days, from: rc.from, to: rc.to } },
+      } };
+    }
+    send(req, res, numBase.v);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
