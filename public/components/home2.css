@@ -174,3 +174,11 @@ html.ask-open .h2-fab { display: none; }
   .h2-col, .h2-col.on { display: block; }
   .h2-col h3 { display: flex; }
 }
+
+/* yesterday, folded in from the 26 October Home: only what changed, and the team's lists */
+.h2-day .h2-ch small { display: block; font-size: var(--fs-body); color: var(--ink-2); margin-top: var(--sp-1); }
+.h2-team { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-5); margin-top: var(--sp-4); padding-top: var(--sp-3); border-top: var(--hair) solid var(--rule); }
+.h2-team h3 { font-size: var(--fs-label); color: var(--ink-3); font-weight: 600; margin: 0 0 var(--sp-2); display: flex; justify-content: space-between; }
+.h2-team h3 a { color: var(--brand); text-decoration: none; font-weight: 500; }
+.h2-team .next { margin: 0; font-size: var(--fs-sm); color: var(--ink-2); line-height: 1.45; }
+@media (max-width: 760px) { .h2-team { grid-template-columns: 1fr; } }

@@ -7,11 +7,13 @@
 //   where the money is: cross-sell ◇, route density ◇, what shredding the eligible boxes does to the P&L ◇
 // Every figure from components/home2data.js, which the Ask sheet (server/ask.js) reads too.
 import { money0, moneyK, sparkline } from '/components/chart.js';
-import { getJson, loadRates, titleCase, esc } from '/components/data.js';
+import { getJson, loadRates, titleCase, esc, getLog } from '/components/data.js';
 import { reveal, drawIn } from '/components/motion.js';
 import { parseHome2, checkNumbers } from '/components/summary.js';
 import { areaFrame, landLayer, postcodeLayer, yardMark } from '/components/areamap.js';
 import { homeView } from '/components/home2data.js';
+import { changesFor, daySentence } from '/components/changes.js';
+import { anneList, mikeList, trishaView } from '/components/lists.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const monS = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' });
@@ -115,7 +117,28 @@ export async function render(main, P) {
       <ul class="h2-dl">${dest.rows.slice(0, 3).map(r => `<li><a href="#customer/${r.level1}"><span class="h2-cn">${esc(titleCase(r.customer))}</span><span>${Math.round(r.eligible / 1000)}K boxes</span><em>${moneyK(r.fee)} once · −${moneyK(r.lostYear)} a year</em></a></li>`).join('')}</ul>
       <div class="src">Retention review overdue, not on hold or permanent · fee at the book's median $${dest.perBox.toFixed(2)} a box · storage at each account's own rate, refill at the median $${dest.med.toFixed(2)} a box a month</div></section>` : '';
 
-  main.innerHTML = `<div class="h2">${sumCard}${kpis}${pulse}${segCard}${custCard}
+  // ── yesterday: the day in a sentence, only what was not normal (components/changes.js), each line with
+  // useful · knew · not right (a knew or wrong line is held back 30 days), and the team's lists ──
+  const [log, feedback, user] = await Promise.all([getLog().catch(() => []),
+    fetch('/api/feedback', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : { data: [] }).then(j => j.data || []).catch(() => []),
+    fetch('/api/me', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({}))]);
+  const CH = changesFor(P, A), DS = daySentence(P, A);
+  const TV = trishaView({ CA, log, feedback, changes: CH, who: (user && user.name) || 'trisha' });
+  const AN = anneList({ C, PR, CA, log, feedback, changes: CH, n: 3 }), MK = mikeList({ A, feedback, changes: CH });
+  const fbBtns = i => `<span class="fb" data-key="${esc(i.key)}" data-subject="${esc(i.subject)}"><button data-v="useful">Useful</button><button data-v="knew">Knew</button><button data-v="wrong">Not right</button></span>`;
+  const lines = ls => `<ul class="chg">${ls.map(i => `<li class="${i.level}"><span>${esc(i.text)}</span>${fbBtns(i)}</li>`).join('')}</ul>`;
+  const t = TV.team;
+  const dayCard = `<section class="h2-card h2-day" data-rv>
+      <div class="h2-ch"><h2>${esc(dayLabel)}</h2><small>${DS ? esc(DS.text) : ''}</small></div>
+      ${TV.lines.length ? lines(TV.lines.slice(0, 4)) : `<p class="quiet">Nothing unusual: the day's work and every route were within their usual range.</p>`}
+      <div class="h2-team">
+        <div><h3>Anne · this week <a href="#customers?view=conversations">all ›</a></h3><ol class="calls">${AN.calls.map(c => `<li><a href="#customer/${c.level1}"><b>${esc(titleCase(c.name))}</b><small>${esc(c.sigs[0].ev)}</small></a><span>${c.stake ? moneyK(c.stake) : ''}</span></li>`).join('')}</ol></div>
+        <div><h3>Mike · next <a href="#activity">routes ›</a></h3>${MK.next ? `<p class="next">Booked for ${esc(MK.next.label)}: ${MK.next.services.toLocaleString('en-US')} services on ${MK.next.routes.length} routes${MK.next.routes.length ? ` (${MK.next.routes.slice(0, 4).map(r => `${esc(r.route)} ${r.services}`).join(', ')})` : ''}.</p>` : '<p class="quiet">Nothing booked ahead in the data.</p>'}</div>
+      </div>
+      <p class="h2-by">Last 7 days: ${t.called} called · ${t.emailed} emailed · rates moved on ${t.ratesMoved} accounts in 30 days · lines marked useful ${t.useful}, already known ${t.knew}, not right ${t.wrong}</p>
+    </section>`;
+
+  main.innerHTML = `<div class="h2">${sumCard}${kpis}${dayCard}${pulse}${segCard}${custCard}
     <h2 class="h2-sec" data-rv>Where the money is</h2>
     <div class="h2-row">${mapCard}${crossCard}</div>
     ${destCard}
@@ -148,6 +171,19 @@ export async function render(main, P) {
   weekBars(main.querySelector('#h2-weeks'), w);
   if (dens) densityMap(main.querySelector('#h2-map'), dens, base);
   if (dest) destChart(main.querySelector('#h2-dest'), dest);
+
+  // feedback on a line
+  main.querySelector('.h2-day').addEventListener('click', async ev => {
+    const b = ev.target.closest('.fb button'); if (!b) return;
+    const box = b.closest('.fb'), li = b.closest('li');
+    box.querySelectorAll('button').forEach(x => x.disabled = true);
+    try {
+      const r = await fetch('/api/feedback', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: box.dataset.key, subject: box.dataset.subject, verdict: b.dataset.v, brief_date: A.latestDone }) });
+      if (!r.ok) throw new Error('not saved');
+      box.innerHTML = `<em>${b.dataset.v === 'useful' ? 'Noted: useful' : b.dataset.v === 'knew' ? 'Held back for 30 days' : 'Marked not right'}</em>`;
+      if (b.dataset.v !== 'useful') li.classList.add('held');
+    } catch (e) { box.querySelectorAll('button').forEach(x => x.disabled = false); }
+  });
 
   // the Ask button lives in the app shell (app.js); this one opens the same sheet
   main.querySelectorAll('.h2-ask-inline').forEach(b => b.addEventListener('click', () => dispatchEvent(new Event('open-ask'))));

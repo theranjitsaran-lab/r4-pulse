@@ -9,8 +9,9 @@ import { playIntro } from '/components/intro.js';
 import { openAsk } from '/components/ask.js';
 
 const ROUTES = {
-  pulse:     { view: 'pulse',     api: 'pulse',     nav: 'pulse' },
-  home2:     { view: 'home2',     api: 'pulse',     nav: 'pulse' },   // the second design, on trial
+  pulse:     { view: 'home2',     api: 'pulse',     nav: 'pulse' },   // Home (views/home2.js)
+  home2:     { view: 'home2',     api: 'pulse',     nav: 'pulse' },   // old links to the trial
+  classic:   { view: 'pulse',     api: 'pulse',     nav: 'pulse' },   // the 26 October Home
   customers: { view: 'customers', api: 'customers', nav: 'customers' },
   customer:  { view: 'customer',  api: 'customers', nav: 'customers' },
   pricing:   { view: 'pricing',   api: 'pricing',   nav: 'pricing' },
