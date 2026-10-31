@@ -61,7 +61,7 @@ export async function render(main, P) {
       <div class="h2-kpi lead"><span>${m.next ? `${mon(m.next.month)}'s bill, building ◇` : 'Next bill'}</span><b>${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b><small>${m.next ? `${moneyK(m.next.lo)}–${moneyK(m.next.hi)} · day ${m.next.day} of ${m.next.workdays}` : ''}</small>
         <i class="h2-track"><i style="--w:${Math.min(100, (m.next ? m.next.central : billShown.v) / 1e6 * 100).toFixed(1)}%"></i></i></div>
       <a class="h2-kpi" href="#customers"><span>${mon(billShown.month)} billed</span><b>${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${mon(billShown.vs)}` : 'posted, core'}</small></a>
-      <div class="h2-kpi"><span>Gap to $1.0M</span><b>${moneyK(m.gap)}</b><small>a month</small></div>
+      <a class="h2-kpi" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(m.gap)}</b><small>a month${V.sell ? ` · won this month ${moneyK(V.sell.won.value)}${V.sell.inPlay.n ? `, ${moneyK(V.sell.inPlay.value)} in play` : ''}` : ''}</small></a>
     </section>`;
 
   const sumCard = `<section class="h2-card h2-sum" data-rv>

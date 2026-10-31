@@ -10,10 +10,11 @@ const express = require('express');
 const { query, USE_FIXTURES } = require('./db');
 const { data, stamp } = require('./screendata');
 const feedback = require('./feedback');
+const sales = require('./sales');
 
 const router = express.Router();
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
+const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
 
 async function callsLog() {
   if (USE_FIXTURES) { try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'calls_log.json'), 'utf8')); } catch { return []; } }
@@ -70,12 +71,29 @@ router.get('/routecost', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Customers › Opportunities: every opportunity (components/opps.js) with what the team has said about
+// it (server/sales.js), and what was won this month. The list is cached until the data moves; the
+// statuses are read fresh each time.
+let oppBase = null;
+router.get('/opportunities', async (req, res) => {
+  try {
+    const [D, L, statuses] = await Promise.all([data(), load(), sales.opportunities()]);
+    const st = stamp(D);
+    if (!oppBase || oppBase.stamp !== st) oppBase = { stamp: st, v: L.opps.opportunities({ C: D.C, PR: D.PR, CA: D.CA, M: D.M }, {}) };
+    const rows = oppBase.v.rows.map(r => {
+      const s = statuses[r.key];
+      return s ? { ...r, status: s.status, owner: s.owner, at: s.at, note: s.note } : r;
+    });
+    send(req, res, { rows, won: L.opps.wonIn(statuses), me: (req.session.user && req.session.user.name) || null });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 router.get('/home', async (req, res) => {
   try {
     const [D, L] = await Promise.all([data(), load()]);
     const base = await homeShared(D, L);
     const who = (req.session.user && req.session.user.name) || 'trisha';
-    const [log, fb] = await Promise.all([callsLog(), feedback.recent().catch(() => [])]);
+    const [log, fb, statuses] = await Promise.all([callsLog(), feedback.recent().catch(() => []), sales.opportunities().catch(() => ({}))]);
     const team = {
       trisha: L.lists.trishaView({ CA: D.CA, log, feedback: fb, changes: base.changes, who }),
       anne: L.lists.anneList({ C: D.C, PR: D.PR, CA: D.CA, log, feedback: fb, changes: base.changes, n: 3 }),
@@ -83,7 +101,10 @@ router.get('/home', async (req, res) => {
     };
     // the conversation candidates carry their signals; send only what the card shows
     team.anne.calls = team.anne.calls.map(c => ({ level1: c.level1, name: c.name, stake: c.stake, ev: c.sigs[0].ev }));
-    send(req, res, { ...base, team });
+    // selling: what was won this month, and what is in play (contacted or quoted), from Opportunities
+    const inPlay = Object.values(statuses).filter(x => x.status === 'contacted' || x.status === 'quoted');
+    const sell = { won: L.opps.wonIn(statuses), inPlay: { n: inPlay.length, value: inPlay.reduce((t, x) => t + (Number(x.value) || 0), 0) } };
+    send(req, res, { ...base, team, sell });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

@@ -18,14 +18,15 @@ const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under r
 
 export const VIEWS = {
   overview:      { label: 'Overview', blurb: 'Last month, who moved, and every account: sort any column, filter to a line, tap a figure for why.' },
-  conversations: { label: 'This week', blurb: 'Ten conversations worth having, ranked by what is at stake. Log what you did; the list learns.' },
+  opportunities: { label: 'Opportunities', blurb: 'Every next conversation in one list: cross-sell, price gaps, win-back, rate rounds and overdue boxes, each with an owner and a status.' },
+  conversations: { label: 'This week', hidden: true, blurb: 'Ten conversations worth having, ranked by what is at stake. Log what you did; the list learns.' },
   main:          { label: 'Up and down', hidden: true, blurb: 'Last month against the month before and a year ago, the year to date, and this month so far.' },
   grid:          { label: 'Month grid', blurb: 'The 30 largest accounts, month by month, each against its own run.' },
   whitespace:    { label: 'Cross-sell', blurb: 'What each large account buys, and what it doesn\'t buy yet, sized at what comparable accounts spend.' },
-  slipping:      { label: 'Slipping', blurb: 'Down 10% or more on their own run over the last three months. Still-billing accounts first; then those that have stopped or nearly, often one-off projects, which Home leaves out of the win-back.' },
-  gaps:          { label: 'Price gaps', blurb: 'Paying under the book\'s median for storage or a service, sized by their volume. Home counts half of each gap.' },
-  rounds:        { label: 'Missed rate rounds', blurb: 'No rate has moved in two years.' },
-  destruction:   { label: 'Overdue boxes', blurb: 'Boxes past their retention review, by account: what destruction bills once, and the storage it ends.' },
+  slipping:      { hidden: true, label: 'Slipping', blurb: 'Down 10% or more on their own run over the last three months. Still-billing accounts first; then those that have stopped or nearly, often one-off projects, which Home leaves out of the win-back.' },
+  gaps:          { hidden: true, label: 'Price gaps', blurb: 'Paying under the book\'s median for storage or a service, sized by their volume. Home counts half of each gap.' },
+  rounds:        { hidden: true, label: 'Missed rate rounds', blurb: 'No rate has moved in two years.' },
+  destruction:   { hidden: true, label: 'Overdue boxes', blurb: 'Boxes past their retention review, by account: what destruction bills once, and the storage it ends.' },
   margin:        { label: 'Margin', blurb: 'Every account: revenue less what it costs to serve, worst first.' },
   all:           { label: 'All', hidden: true, blurb: 'Every account with revenue in the last twelve months.' },
 };
@@ -80,6 +81,7 @@ export async function render(main, C, params) {
   if (!main) return;
   const view = VIEWS[params.view] ? params.view : 'overview';
   if (view === 'overview') return (await import('/views/custoverview.js')).render(main, C, params, tabsHtml('overview'));
+  if (view === 'opportunities') return (await import('/views/opps.js')).render(main, params, tabsHtml('opportunities'));
   if (view === 'conversations') return conversations(main, C);
   if (view === 'whitespace') return whitespace(main, C, params);
   if (view === 'main') return upDown(main, C, params);

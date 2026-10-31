@@ -55,7 +55,7 @@ export async function render(main, C, params, tabs) {
   const kpis = `<section class="h2-kpis four" data-rv>
       <div class="h2-kpi lead"><span>${esc(mon(last.month))} billed, core</span><b>${moneyK(last.core)}</b><small>${chip(last.core / prev.core - 1)} on ${esc(mon(prev.month))}${ly ? ` · ${chip(last.core / ly.core - 1)} on a year ago` : ''}</small></div>
       <div class="h2-kpi"><span>Customers billing</span><b>${active}</b><small>${chip(active / activePrev - 1)} on the month before</small></div>
-      <a class="h2-kpi" href="#customers?view=slipping"><span>Slipping ›</span><b>${slip.length}</b><small>${moneyK(slipV)} a month below their own run</small></a>
+      <a class="h2-kpi" href="#customers?view=opportunities&kind=slip"><span>Slipping ›</span><b>${slip.length}</b><small>${moneyK(slipV)} a month below their own run</small></a>
       <a class="h2-kpi" href="#customers?view=whitespace"><span>Cross-sell ◇ ›</span><b>${moneyK(crossV)}</b><small>a month, if each bought like its peers</small></a>
     </section>`;
 

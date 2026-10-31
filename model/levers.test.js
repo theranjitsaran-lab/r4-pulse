@@ -238,6 +238,24 @@ test('route cost: every day shares its cost exactly; an account is the sum of it
   assert.ok((q4.travel + q4.onsite) / 208 < (q1.travel + q1.onsite) / 52, 'four bins a visit cost less a bin than one');
 });
 
+test('opportunities: each figure is its own list\'s; won this month is the won statuses', async () => {
+  const { opportunities, wonIn } = await import('../public/components/opps.js');
+  const { serviceGaps, storageGaps, slippingAccounts, overdueBoxes } = await import('../public/components/levers.js');
+  const { buildWhitespace } = await import('../public/components/whitespace.js');
+  const C = J('customers'), PR = J('pricing'), CA = J('calls'), M = J('margin');
+  const O = opportunities({ C, PR, CA, M });
+  const sum = k => O.rows.filter(r => r.kind === k).reduce((t, r) => t + r.value, 0);
+  near(sum('price'), ([...serviceGaps(PR).values()].reduce((t, a) => t + a.worth, 0) + storageGaps(PR).rows.reduce((t, r) => t + r.worth, 0)) * 12, 1, 'price gaps');
+  near(sum('slip'), slippingAccounts(C).filter(d => d.level1 !== 6714).reduce((t, d) => t + -d.move.d * 12, 0), 1, 'win-back');
+  near(sum('overdue'), overdueBoxes(CA, PR).rows.filter(r => r.boxes >= 50).reduce((t, r) => t + r.once, 0), 1, 'overdue boxes');
+  const W = buildWhitespace(M, { exclude: [6714], top: 120 });
+  near(sum('cross'), W.rows.reduce((t, a) => t + Object.values(a.cells).reduce((u, c) => u + (!c.have && c.opp > 0 ? c.opp : 0), 0), 0), 1, 'cross-sell');
+  assert.equal(new Set(O.rows.map(r => r.key)).size, O.rows.length, 'one row a key');
+  const m = new Date().toISOString().slice(0, 7);
+  const st = { a: { status: 'won', value: 100, at: m + '-02' }, b: { status: 'quoted', value: 50, at: m + '-03' }, c: { status: 'won', value: 7, at: '2020-01-01' } };
+  assert.deepEqual([wonIn(st).n, wonIn(st).value], [1, 100], 'won this month counts only this month\'s wins');
+});
+
 test('warehouse: cells sum to the boxes; states never overlap; eligible ties to the data', async () => {
   const { byAccount, totals, cells, eligibleList, heldNotBilled, rowStates } = await import('../public/components/storage.js');
   const { overdueBoxes } = await import('../public/components/levers.js');
