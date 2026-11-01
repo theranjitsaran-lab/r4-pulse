@@ -238,6 +238,30 @@ test('route cost: every day shares its cost exactly; an account is the sum of it
   assert.ok((q4.travel + q4.onsite) / 208 < (q1.travel + q1.onsite) / 52, 'four bins a visit cost less a bin than one');
 });
 
+test('delivery days: off changes nothing; on, shred and delivery days share the pool exactly', async () => {
+  const R = require('./rates.js');
+  const { routeCosts } = await import('../public/components/routecost.js');
+  const Z = require('../public/data/zcta.json');
+  const rows = Object.values(J('drill')).flat().flatMap(a => a.routes || []);
+  const dels = [{ date: '2026-09-01', level1: 1, orders: 1, trips: 2, postcode: '60601' }, { date: '2026-09-01', level1: 2, orders: 2, trips: 3, postcode: '60616' },
+    { date: '2026-09-02', level1: 1, orders: 1, trips: 1, postcode: '60601' }];
+  const keep = { ...R.SETTINGS };
+  try {
+    R.SETTINGS.deliverySeparate = 0;
+    const plain = routeCosts(R, rows, Z), off = routeCosts(R, rows, Z, dels);
+    assert.deepEqual(off.accounts, plain.accounts, 'switched off, the deliveries change no account');
+    assert.equal(Object.keys(off.movement).length, 0);
+    R.SETTINGS.deliverySeparate = 1; R.SETTINGS.deliveryStops = 12;
+    const on = routeCosts(R, rows, Z, dels);
+    assert.equal(on.deliveries.truckDays, 2, 'one truck a day for two small days');
+    assert.ok(on.deliveries.dayCost < R.RATES.routeDay.v, 'the pool is shared across more days');
+    const shred = Object.values(on.accounts).reduce((t, a) => t + a.cost, 0), move = Object.values(on.movement).reduce((t, a) => t + a.cost, 0);
+    near(shred, on.days * on.deliveries.dayCost, 0.01 * on.days + 1, 'shred days at the shared day cost');
+    near(move, on.deliveries.truckDays * on.deliveries.dayCost, 0.05, 'delivery days at the shared day cost');
+    assert.equal(on.movement[1].services, 3); assert.equal(on.movement[1].days, 2);
+  } finally { Object.assign(R.SETTINGS, keep); }
+});
+
 test('opportunities: each figure is its own list\'s; won this month is the won statuses', async () => {
   const { opportunities, wonIn } = await import('../public/components/opps.js');
   const { serviceGaps, storageGaps, slippingAccounts, overdueBoxes } = await import('../public/components/levers.js');

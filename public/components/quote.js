@@ -35,7 +35,7 @@ export function lineCost(R, st, { acct = null, lines = [], Z = {} } = {}) {
     c = R.costToServe('bin', u, Object.assign({ visits: v, miles: mi, route }, lb > 0 ? { pounds: lb * share } : { binCode: svc.size }));
     c.routeBasis = own ? 'account' : route ? 'postcode' : 'average';
   } else if (svc.fam === 'handling') c = R.costToServe('handling', u);
-  else if (svc.fam === 'trip') c = R.costToServe('movement', 0, { visits: v || u, miles: mi });
+  else if (svc.fam === 'trip') { const own = R.movementFor && R.movementFor(st.level1); c = R.costToServe('movement', 0, { visits: v || u, miles: mi, route: own }); if (own) c.routeBasis = 'account'; }
   else if (svc.fam === 'itad') c = R.costToServe('itad', u, { visits: v, miles: mi });
   else if (svc.fam === 'shredlb') c = R.costToServe('shred', u);
   else if (svc.fam === 'shredbox') c = R.costToServe('shred', u, { unit: 'box' });

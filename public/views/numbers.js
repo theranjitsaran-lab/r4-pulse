@@ -114,12 +114,12 @@ function marginHtml(Mg) {
   const tot = sure.reduce((a, l) => ({ revenue: a.revenue + l.revenue, cost: a.cost + l.cost }), { revenue: 0, cost: 0 });
   const rows = Mg.lines.map(l => {
     const costed = l.cost > 0, review = ROUTE_FAMILIES.includes(l.family), m = l.revenue - l.cost;
-    return `<tr><td>${esc(l.name)}${l.family === 'bin' ? `<small>${Mg.binReal.accounts} accounts from real route days</small>` : review ? '<small>route cost under review</small>' : !costed ? '<small>not costed</small>' : ''}</td>
+    return `<tr><td>${esc(l.name)}${l.family === 'bin' ? `<small>${Mg.binReal.accounts} accounts from real route days</small>` : l.family === 'movement' && Mg.deliveriesOn ? `<small>${Mg.moveReal} accounts from delivery truck days ◇; the rest at the average visit, under review</small>` : review ? '<small>route cost under review</small>' : !costed ? '<small>not costed</small>' : ''}</td>
       <td class="v">${money0(l.revenue)}</td><td class="v">${costed ? money0(l.cost) : '—'}</td>
       <td class="v ${costed && m < 0 && !review ? 'is-bad' : ''}">${costed ? (m < 0 ? '−' : '') + money0(Math.abs(m)) : '—'}</td><td class="v">${costed && l.revenue > 0 ? pc(m / l.revenue) : '—'}</td></tr>`;
   }).join('');
   return `<div class="h2-ch"><h2>Gross margin by line of business ◇</h2><small>the last twelve months, revenue less the cost to serve, ${Mg.accounts} accounts, Citadel apart</small></div>
     <div class="c2-scroll"><table class="q-t nb-t"><thead><tr><th>Line</th><th class="v">Revenue</th><th class="v">Cost to serve ◇</th><th class="v">Margin ◇</th><th class="v">Kept</th></tr></thead><tbody>${rows}</tbody>
-    <tfoot><tr><td>The costed lines<small>leaving out the two under review and the fees</small></td><td class="v">${money0(tot.revenue)}</td><td class="v">${money0(tot.cost)}</td><td class="v">${money0(tot.revenue - tot.cost)}</td><td class="v">${pc((tot.revenue - tot.cost) / tot.revenue)}</td></tr></tfoot></table></div>
+    <tfoot><tr><td>The costed lines<small>leaving out the lines under review and the fees</small></td><td class="v">${money0(tot.revenue)}</td><td class="v">${money0(tot.cost)}</td><td class="v">${money0(tot.revenue - tot.cost)}</td><td class="v">${pc((tot.revenue - tot.cost) / tot.revenue)}</td></tr></tfoot></table></div>
     <div class="src">Cost to serve from model/rates.js (GL pools over the database's volumes, provisional) ◇ · bins from ${Mg.binReal.routeDays} real route days, ${esc(String(Mg.binReal.from))} to ${esc(String(Mg.binReal.to))}, shared by minutes, where the account has them; elsewhere the average visit · sales, management and overheads sit above this line, in the bridge, never spread across customers</div>`;
 }

@@ -39,6 +39,23 @@ function offlineRows() {
   return { rows, source: 'drill and route orders' };
 }
 
+// offline delivery days: the drill's work orders carrying a delivery (code 01) for the 50 largest
+// accounts, with each account's usual postcode from its route stops
+function offlineDeliveries() {
+  const own = readJson(path.join(ROOT, 'fixtures', 'deliverydays.json'));
+  if (own && own.data && own.data.length) return own.data;
+  const drill = readJson(path.join(ROOT, 'fixtures', 'drill.json'));
+  const out = [];
+  for (const a of Object.values((drill && drill.data) || {}).flat()) {
+    const pcs = {}; for (const r of a.routes || []) if (r.level1 === a.level1 && r.postcode) pcs[r.postcode] = (pcs[r.postcode] || 0) + 1;
+    const postcode = Object.entries(pcs).sort((x, y) => y[1] - x[1]).map(x => x[0])[0] || null;
+    const by = {};
+    for (const o of a.orders || []) { const t = o.items.filter(i => i.code === '01').reduce((s, i) => s + (i.units || 0), 0); if (t > 0) { const x = by[o.date] || (by[o.date] = { date: o.date, level1: a.level1, orders: 0, trips: 0, postcode }); x.orders++; x.trips += t; } }
+    out.push(...Object.values(by));
+  }
+  return out;
+}
+
 // rc for the current settings and data; key: the data's stamp and the three time assumptions
 async function routeCosts(stampKey) {
   const key = `${stampKey}|${JSON.stringify(R.SETTINGS)}`;
@@ -48,8 +65,9 @@ async function routeCosts(stampKey) {
     const { rc } = await load();
     const Z = readJson(path.join(ROOT, 'public', 'data', 'zcta.json')) || {};
     const { rows, source } = USE_FIXTURES ? offlineRows() : { rows: await cached('routestops', queries.routestops).catch(() => []), source: 'routestops' };
+    const deliveries = USE_FIXTURES ? offlineDeliveries() : await cached('deliverydays', queries.deliverydays).catch(() => []);
     const t = Date.now();
-    const out = Object.assign(rc.routeCosts(R, rows || [], Z), { source });
+    const out = Object.assign(rc.routeCosts(R, rows || [], Z, deliveries || []), { source });
     console.log(`routecost: ${out.days} route days, ${Object.keys(out.accounts).length} accounts in ${Date.now() - t} ms (${source})`);
     R.setRouteCosts(out);
     memo.rc = out;

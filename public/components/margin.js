@@ -59,7 +59,8 @@ export function marginSummary(R, M, exclude = [6714]) {
   const accounts = book.accounts.filter(a => a.revenue > 1000).map(m => {
     // bins costed from the account's real route days are not under review; the average visit is
     const realBins = !!(R.routeFor && R.routeFor(m.level1));
-    const routeCost = ROUTE_FAMILIES.filter(f => !(f === 'bin' && realBins)).reduce((t, f) => t + ((m.fam[f] || {}).cost || 0), 0);
+    const realMove = !!(R.movementFor && R.movementFor(m.level1));
+    const routeCost = ROUTE_FAMILIES.filter(f => !(f === 'bin' && realBins) && !(f === 'movement' && realMove)).reduce((t, f) => t + ((m.fam[f] || {}).cost || 0), 0);
     return { ...m, pc: m.revenue > 0 ? m.margin / m.revenue : null, review: m.cost > 0 && routeCost > 0.5 * m.cost };
   });
   const solid = Object.entries(book.families).filter(([f, v]) => SOLID_FAMILIES.includes(f) && v.revenue > 0);
@@ -79,7 +80,7 @@ export function accountCosts(R, a, lines) {
   const handling = units(l => l.family === 'handling' && l.drives_cost);
   if (handling > 0) put('handling', R.costToServe('handling', handling));
   const trips = units(l => l.servcode === '01'), dboxes = units(l => l.family === 'movement' && l.drives_cost && l.unit === 'box');
-  if (trips > 0 || dboxes > 0) put('movement', R.costToServe('movement', dboxes, { visits: trips || null }));
+  if (trips > 0 || dboxes > 0) put('movement', R.costToServe('movement', dboxes, { visits: trips || null, route: R.movementFor ? R.movementFor(a.level1) : null }));
   const binLb = units(l => l.servcode === 'S5B');
   // bins: from the account's real route days when they are known (components/routecost.js), else the average visit
   if (a.bins > 0) put('bin', R.costToServe('bin', a.bins, Object.assign({ visits: a.visits || null, route: R.routeFor ? R.routeFor(a.level1) : null }, binLb > 0 ? { pounds: binLb } : { binCode: a.main_bin })));

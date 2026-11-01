@@ -170,6 +170,10 @@ let ROUTE = { accounts: {}, postcodes: {}, days: 0 };
 function setRouteCosts(rc) { if (rc && rc.accounts) ROUTE = rc; }
 function routeFor(level1) { const r = ROUTE.accounts[level1]; return r && r.services >= 20 ? r : null; }   // 20 services or more: enough days to trust
 function routeCostsNow() { return ROUTE; }
+// delivery and pickup from delivery truck days, when Settings says deliveries run on their own trucks
+function movementFor(level1) { const r = ROUTE.movement && ROUTE.movement[level1]; return ROUTE.deliveries && ROUTE.deliveries.on && r && r.services > 0 ? r : null; }
+// the cost of a route day as the route costs were worked out (shared with delivery days when that is on)
+function routeDayNow() { return ROUTE.deliveries && ROUTE.deliveries.on && ROUTE.deliveries.dayCost ? ROUTE.deliveries.dayCost : RATES.routeDay.v; }
 
 const FAMILIES = ['storage', 'handling', 'movement', 'bin', 'itad', 'shred', 'labour'];
 
@@ -181,10 +185,10 @@ derive(MODEL);
 
 function travelPerVisit(miles) {
   const mi = miles || RATES.avgMiles.v;
-  return (RATES.routeDay.v * SETTINGS.split / RATES.visitsDay.v) * (mi / RATES.avgMiles.v);
+  return (routeDayNow() * SETTINGS.split / RATES.visitsDay.v) * (mi / RATES.avgMiles.v);
 }
 function onSitePerVisit() {
-  return (RATES.routeDay.v * (1 - SETTINGS.split)) / RATES.visitsDay.v;
+  return (routeDayNow() * (1 - SETTINGS.split)) / RATES.visitsDay.v;
 }
 
 /**
@@ -229,7 +233,12 @@ function costToServe(family, units, opts) {
         `${units.toLocaleString('en-US')} movements at ${m2(RATES.handling.v)}. Pulls and refiles are warehouse work, so they carry no route time at all.`);
       break;
     case 'movement':
-      routeLines('visits');
+      if (o.route && o.route.services > 0 && visits > 0) {
+        // the account's delivery truck days (VCK delivery work orders), a trip at a time
+        const r = o.route, ts = r.travel / r.services, os = r.onsite / r.services;
+        add('Travel to site', visits * ts, `${visits} ${visits === 1 ? 'trip' : 'trips'} at ${m2(ts)}, from its ${r.days} delivery day${r.days === 1 ? '' : 's'} (${r.from} to ${r.to}): each delivery truck day is ${m0(routeDayNow())}, shared between its stops by minutes.`, 'route');
+        add('Time on site', visits * os, `${visits} ${visits === 1 ? 'trip' : 'trips'} at ${m2(os)}: ${SETTINGS.stopMin} minutes a stop and ${SETTINGS.serviceMin} a trip.`, 'route');
+      } else routeLines('visits');
       add('Box handling', units * RATES.handling.v,
         `${units.toLocaleString('en-US')} movements at ${m2(RATES.handling.v)}. ${RATES.handling.d}.`);
       break;
@@ -296,7 +305,7 @@ function isModelled(family) {
   return family === 'bin' || family === 'itad' || family === 'movement' || family === 'shred';
 }
 
-const api = { RATES, MODEL, SETTINGS, TIME_NOTES, SETTING_BOUNDS, setRouteCosts, routeFor, routeCostsNow, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
+const api = { RATES, MODEL, SETTINGS, TIME_NOTES, SETTING_BOUNDS, setRouteCosts, routeFor, routeCostsNow, movementFor, routeDayNow, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 if (typeof window !== 'undefined') window.R4RATES = api;

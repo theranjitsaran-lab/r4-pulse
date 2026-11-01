@@ -12,7 +12,7 @@
 //
 // Caveat, labelled wherever it shows: days when the truck also delivered boxes are not in the route
 // data yet, so the stops on them carry the whole day and read high.
-import { allocate, miles } from './routemap.js';
+import { allocate, miles, YARD } from './routemap.js';
 
 const pc5 = p => p ? String(p).slice(0, 5) : null;
 
@@ -37,12 +37,29 @@ export function daysFrom(rows, Z) {
 }
 
 // Every day costed once; its stops' shares summed by account and by postcode.
-export function routeCosts(R, rows, Z) {
+//   deliveries: [{ date, level1, orders, trips, postcode }] from VCK (server/queries.js deliverydays).
+//   With R.SETTINGS.deliverySeparate on, each day's deliveries become delivery truck days (its
+//   delivering customers ÷ deliveryStops, rounded up), and the drivers, vehicles and route software
+//   behind the route-day rate are shared across shred route days and delivery truck days: a day then
+//   costs pool ÷ (route days + delivery truck days). Off, everything is exactly as before.
+export function routeCosts(R, rows, Z, deliveries = []) {
   const days = daysFrom(rows, Z);
-  const accounts = {}, postcodes = {};
+  const accounts = {}, postcodes = {}, movement = {};
   let services = 0, stops = 0, roundMin = 0;
+  const S = R.SETTINGS, on = !!S.deliverySeparate, perTruck = Math.max(1, S.deliveryStops || 12);
+  // delivery days: customers delivering on each date
+  const byDate = new Map();
+  for (const d of deliveries || []) { if (!d.date || d.level1 == null) continue; (byDate.get(d.date) || byDate.set(d.date, []).get(d.date)).push(d); }
+  let truckDays = 0;
+  for (const list of byDate.values()) truckDays += Math.ceil(list.length / perTruck);
+  const dates = [...byDate.keys()].sort();
+  const routeDays = (R.MODEL && R.MODEL.volumes && R.MODEL.volumes.route_days) || 0;
+  const span = dates.length ? Math.max(1, (Date.parse(dates[dates.length - 1]) - Date.parse(dates[0])) / 864e5 + 1) : 0;
+  const truckDaysYear = span ? truckDays * (span < 330 ? 365 / span : 1) : 0;   // a year's worth, if the data covers less
+  const dayCost = on && routeDays ? R.RATES.routeDay.v * routeDays / (routeDays + truckDaysYear) : R.RATES.routeDay.v;
+  const RD = on ? { ...R, RATES: { ...R.RATES, routeDay: { ...R.RATES.routeDay, v: dayCost } } } : R;
   for (const day of days) {
-    const a = allocate(R, day);
+    const a = allocate(RD, day);
     roundMin += a.minutes.round;
     const seenAcc = new Set(), seenPc = new Set();
     for (const s of day.stops) {
@@ -60,12 +77,33 @@ export function routeCosts(R, rows, Z) {
       }
     }
   }
+  // delivery truck days: each date's delivering customers split into trucks by bearing from the yard,
+  // each truck a day shared by minutes like a shred day; summed by account for delivery and pickup
+  if (on) for (const [date, list] of byDate) {
+    const placed = list.map(d => ({ ...d, pt: (Z && Z[pc5(d.postcode)]) || null }))
+      .map(d => ({ ...d, ang: d.pt ? Math.atan2(d.pt[0] - YARD[0], d.pt[1] - YARD[1]) : 9 }))
+      .sort((a, b) => a.ang - b.ang);
+    const n = Math.ceil(placed.length / perTruck), size = Math.ceil(placed.length / n);
+    for (let t = 0; t < n; t++) {
+      const day = { date, route: 'DELIVERY ' + (t + 1), stops: placed.slice(t * size, (t + 1) * size).map(d => ({ level1: d.level1, postcode: pc5(d.postcode), pt: d.pt, services: d.trips || d.orders || 1 })) };
+      if (!day.stops.length) continue;
+      allocate(RD, day);
+      const seen = new Set();
+      for (const s of day.stops) {
+        const x = movement[s.level1] || (movement[s.level1] = { cost: 0, travel: 0, onsite: 0, services: 0, days: 0, from: date, to: date });
+        x.cost += s.cost; x.travel += s.travel; x.onsite += s.onsite; x.services += s.services;
+        if (!seen.has(s.level1)) { seen.add(s.level1); x.days++; x.to = date; }
+      }
+    }
+  }
   for (const p of Object.values(postcodes)) p.customers = p.customers.size;
   const r2 = v => Math.round(v * 100) / 100;
-  for (const o of [...Object.values(accounts), ...Object.values(postcodes)]) for (const f of ['cost', 'travel', 'onsite', 'detour', 'pounds']) if (o[f] != null) o[f] = r2(o[f]);
+  for (const o of [...Object.values(accounts), ...Object.values(postcodes), ...Object.values(movement)]) for (const f of ['cost', 'travel', 'onsite', 'detour', 'pounds']) if (o[f] != null) o[f] = r2(o[f]);
   return {
     from: days.length ? days[0].date : null, to: days.length ? days[days.length - 1].date : null,
-    days: days.length, stops, services, accounts, postcodes,
+    days: days.length, stops, services, accounts, postcodes, movement,
+    deliveries: { on, days: byDate.size, orders: (deliveries || []).reduce((t, d) => t + (d.orders || 0), 0), truckDays, truckDaysYear: Math.round(truckDaysYear),
+      shredDays: routeDays, dayCost, routeDay: R.RATES.routeDay.v, from: dates[0] || null, to: dates[dates.length - 1] || null },
     // the time model's day against the eight to nine hours a route day really runs: Mike's check
     avgRoundHours: days.length ? roundMin / days.length / 60 : null,
     settings: { ...R.SETTINGS },

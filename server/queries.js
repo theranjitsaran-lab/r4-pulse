@@ -375,6 +375,23 @@ async function routestops() {
     GROUP BY 1, 2, 3 ORDER BY 1, 2, 4 NULLS LAST, 3`, [anchor.latest_done]);
 }
 
+// Box deliveries and pickups, twelve months: VCK delivery work orders (service code 01) by day and
+// account, with the account's usual Veri-Shred postcode where it has one. VCK holds no route, truck or
+// driver for them; components/routecost.js turns them into delivery truck days when Settings says
+// deliveries run on their own trucks.
+async function deliverydays() {
+  return query(`
+    WITH ${BOUNDS}, ${PL},
+    pc AS (SELECT DISTINCT ON (level1) level1, postcode FROM (
+             SELECT NULLIF(level1, '')::int AS level1, left(coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')), 5) AS postcode, count(*) AS n
+             FROM vs_service_orders WHERE NULLIF(level1, '') IS NOT NULL AND coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')) IS NOT NULL
+             GROUP BY 1, 2) x ORDER BY level1, n DESC)
+    SELECT l.d::text AS date, l.level1, count(DISTINCT l.woid)::int AS orders, sum(l.units)::float AS trips, min(pc.postcode) AS postcode
+    FROM l LEFT JOIN pc ON pc.level1 = l.level1
+    WHERE l.servcode = '01' AND l.units > 0
+    GROUP BY 1, 2 ORDER BY 1, 2`);
+}
+
 // The P&L by month from QuickBooks (scripts/load_gl.js → model.gl_month), summed by line of the
 // EBITDA bridge, with the overhead accounts named so a misfiled line shows. Empty until loaded.
 async function gl() {
@@ -445,4 +462,4 @@ async function segments() {
   return { rows };
 }
 
-module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, routestops, gl };
+module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, routestops, deliverydays, gl };
