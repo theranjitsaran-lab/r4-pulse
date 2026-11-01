@@ -100,9 +100,9 @@ export async function render(main, P) {
       <div class="h2-key"><span><i class="k have"></i>buys today</span><span><i class="k opp"></i>could add ◇</span></div>
       <p class="h2-note">${cross.byLine[0] ? `${esc(cross.byLine[0].name)} is the line missed most: ${cross.byLine[0].accounts} accounts, ${moneyK(cross.byLine[0].opp / 12)} a month ◇ at the ceiling.` : ''} <a href="#customers?view=whitespace">Every gap ›</a></p></section>`;
 
-  const mapCard = dens ? `<section class="h2-card h2-wide" data-rv><div class="h2-ch"><h2>One more customer in these ${dens.save.length} postcodes saves ${moneyK(dens.saving)} a year ◇</h2><small>R4 already drives there; a second stop shares the trip</small></div>
+  const mapCard = dens ? `<section class="h2-card h2-wide" data-rv><div class="h2-ch"><h2>${dens.saving != null ? `One more customer in these ${dens.save.length} postcodes saves ${moneyK(dens.saving)} a year ◇` : `${dens.single} postcodes R4 visits have one customer`}</h2><small>R4 already drives there; a second stop shares the trip</small></div>
       <div id="h2-map"></div>
-      <ol class="h2-pc">${dens.save.slice(0, 4).map((r, i) => `<li><b>${i + 1}</b><span>${esc(r.postcode)} · ${r.visits} visits a year · ${Math.round(r.miles)} mi</span><em>${moneyK(r.saving)}</em></li>`).join('')}</ol>
+      <ol class="h2-pc">${dens.save.slice(0, 4).map((r, i) => `<li><b>${i + 1}</b><span>${esc(r.postcode)} · ${r.visits} visits a year · ${Math.round(r.miles)} mi</span><em>${r.saving != null ? moneyK(r.saving) : ''}</em></li>`).join('')}</ol>
       <div class="src">${dens.points.length} postcodes visited · ${dens.single} with one customer · dot size is visits · straight-line miles from the yard (no GPS was ever captured)</div></section>` :
     `<section class="h2-card pending h2-wide" data-rv>The density map needs the postcode centres (public/data/zcta.json).</section>`;
 
@@ -255,10 +255,10 @@ function densityMap(el, d, base) {
   d.save.forEach((r, i) => {
     const pt = d.points.find(p => p.postcode === r.postcode); if (!pt) return;
     const [x, y] = F.P(pt.pt);
-    g += `<g class="h2-best" transform="translate(${Math.max(10, Math.min(W - 10, x)).toFixed(1)},${Math.max(10, Math.min(H - 10, y)).toFixed(1)})"><circle r="10"/><text y="4" text-anchor="middle">${i + 1}</text><title>${esc(r.postcode)}: one more customer saves about ${money0(r.saving)} a year ◇</title></g>`;
+    g += `<g class="h2-best" transform="translate(${Math.max(10, Math.min(W - 10, x)).toFixed(1)},${Math.max(10, Math.min(H - 10, y)).toFixed(1)})"><circle r="10"/><text y="4" text-anchor="middle">${i + 1}</text><title>${esc(r.postcode)}${r.saving != null ? `: one more customer saves about ${money0(r.saving)} a year ◇` : ''}</title></g>`;
   });
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="h2-map" role="img" aria-label="Postcodes R4 visits, sized by visits, with the best places for one more customer numbered">${g}</svg>
-    <div class="h2-key"><span><i class="k best"></i>one more customer saves most</span><span><i class="k pt"></i>visited, by visits a year</span><span><i class="k single"></i>one customer only</span></div>`;
+    <div class="h2-key"><span><i class="k best"></i>${d.saving != null ? 'one more customer saves most' : 'a second stop would share the most trips'}</span><span><i class="k pt"></i>visited, by visits a year</span><span><i class="k single"></i>one customer only</span></div>`;
 }
 
 // ── shredding the eligible boxes, over five years ◇: the fee once, then the storage lost each month

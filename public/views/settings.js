@@ -51,6 +51,9 @@ function draw(main, S) {
   main.innerHTML = `<div class="st">
     <h1>Settings</h1>
     <p class="hint">The assumptions behind every cost on screen. ${S.canEdit ? 'Change one and save: every screen and Ask use it at once.' : 'Only an admin can change them.'}${S.saveable ? '' : ' <b>Changes cannot be saved yet:</b> the settings table is created by the one-off setup on the PC (sql/setup_2026_11.sql).'}</p>
+    <section class="h2-card" data-rv><div class="h2-ch"><h2>Costs and margins</h2><small>for R4 users; admins always see them</small></div>
+      <ul class="st-list"><li class="st-row"><div class="st-what"><b>Costs are final</b><span>Off: margins, the Action column, the price P&amp;L and below-cost lists are hidden from everyone but admins. On: everyone sees them.</span></div>
+      <div class="st-val"><select data-k="costsFinal" ${S.canEdit ? '' : 'disabled'}><option value="0" ${S.values.costsFinal ? '' : 'selected'}>Off: hidden from R4 users</option><option value="1" ${S.values.costsFinal ? 'selected' : ''}>On: released to R4 users</option></select>${S.canEdit ? '<button type="button" class="st-save" data-k="costsFinal">Save</button>' : ''}<span class="st-msg hint" data-for="costsFinal"></span></div></li></ul></section>
     ${refHtml}
     ${GROUPS.map(g => `<section class="h2-card" data-rv><div class="h2-ch"><h2>${esc(g.title)}</h2><small>${esc(g.sub)}</small></div>
       <ul class="st-list">${g.keys.map(([k, u, q]) => row(k, u, q)).join('')}</ul>

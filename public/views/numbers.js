@@ -44,7 +44,7 @@ export async function render(main, V) {
   coreChart(main.querySelector('#nb-core'), M.slice(-13), V.target);
   main.querySelector('#nb-ebitda').innerHTML = G ? ebitdaHtml(G) : `<div class="h2-ch"><h2>The EBITDA bridge</h2><small>revenue to EBITDA, by month</small></div>
     <div class="pending">Not loaded yet: it comes from the monthly QuickBooks Profit and Loss by Month export. Run <code>node scripts/load_gl.js &lt;the CSV&gt;</code> on the PC once a month after the books close; this panel fills from <code>model.gl_month</code>.</div>`;
-  main.querySelector('#nb-margin').innerHTML = marginHtml(V.margin);
+  main.querySelector('#nb-margin').innerHTML = V.margin ? marginHtml(V.margin) : `<div class="h2-ch"><h2>Gross margin by line of business</h2></div><div class="pending">Not costed yet: margins arrive once the cost model is signed off.</div>`;
   if (G) monthBars(main.querySelector('#nb-ebitda-months'), G.months.slice(-13));
   reveal(main.querySelector('.nb'));
 }

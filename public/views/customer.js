@@ -10,6 +10,7 @@ import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components
 import { seriesOf, deltaText, moveReason } from '/components/series.js';
 import { slippingAccounts, unitSuspect } from '/components/levers.js';
 import { costOrders, jobHtml, drawRouteBlock } from '/components/jobview.js';
+import { costsVisible } from '/components/access.js';
 import { placesSvg, miles, YARD, loadBasemap, basemapNow, loadRoadnet } from '/components/routemap.js';
 
 const CITADEL = 6714;
@@ -49,7 +50,7 @@ export async function render(main, C, params) {
   const lede = [];
   lede.push(`<b>${moneyK(ltm)}</b> billed in the last twelve months${s ? `, ${share('storage')}% storage and ${share('service')}% service` : ''}.`);
   if (s && s.move) lede.push(`Over the last three months it ran at ${moneyK(s.move.last3)} a month against its own ${moneyK(s.move.run)} before${Math.abs(s.move.pct || 0) >= 0.05 ? `: ${moveReason(s.move, moneyK)}` : ', about level'}.`);
-  if (m && m.cost > 0) lede.push(`About ${moneyK(m.cost)} a year to serve ◇ ${m.margin >= 0 ? `leaves ${moneyK(m.margin)}${pc != null ? ` (${Math.round(pc * 100)}%)` : ''}` : `is ${moneyK(-m.margin)} more than it pays`}${routeHeavy ? ', with route costs under review' : R.routeFor && R.routeFor(id) && m.fam.bin ? ', its bins costed from its own route days' : ''}.`);
+  if (costsVisible() && m && m.cost > 0) lede.push(`About ${moneyK(m.cost)} a year to serve ◇ ${m.margin >= 0 ? `leaves ${moneyK(m.margin)}${pc != null ? ` (${Math.round(pc * 100)}%)` : ''}` : `is ${moneyK(-m.margin)} more than it pays`}${routeHeavy ? ', with route costs under review' : R.routeFor && R.routeFor(id) && m.fam.bin ? ', its bins costed from its own route days' : ''}.`);
   if (acct && (acct.boxes >= 1 || acct.bins)) lede.push([acct.boxes >= 1 ? `It stores ${n0(acct.boxes)} boxes` : '', acct.bins ? `${acct.boxes >= 1 ? 'and had' : 'It had'} ${n0(acct.bins)} bin services on ${n0(acct.visits)} visits` : ''].filter(Boolean).join(' ') + '.');
   if (id === CITADEL) lede.push('Citadel\'s settlements land in lumps, so it is held apart from core.');
   const summary = lede.join(' ');
@@ -91,19 +92,19 @@ export async function render(main, C, params) {
       ${id === CITADEL ? '<span class="chip">Held apart from core · settlements land in lumps</span>' : ''}
       ${slipping ? `<span class="chip bad">Slipping: ${deltaText(s.move.pct)} on its own run</span>` : ''}
       ${signals && signals.not_raised_2y ? '<span class="chip warn">Missed every rate round</span>' : ''}
-      ${routeHeavy ? '<span class="chip review">Route costs under review</span>' : ''}
+      ${costsVisible() && routeHeavy ? '<span class="chip review">Route costs under review</span>' : ''}
     </div>
     <p class="cp-lede">${summary}</p>
     <div class="card" id="cp-chart"></div>
     <section class="card cp-opps" id="cp-opps"><div class="card-head"><h3>Open opportunities</h3><a href="#customers?view=opportunities">All opportunities ›</a></div><p class="sub">Loading…</p></section>
     <div class="grid one">
       <div class="card">
-        <div class="card-head"><h3>Margin by line of business</h3><a href="#customers?view=margin&id=${id}">The margin drill: line, job, route ›</a></div>
+        ${!costsVisible() ? `<div class="card-head"><h3>What it buys, the last twelve months</h3></div><div id="cp-fams"><ul class="h2-pl">${fams.filter(x => x.revenue > 0).map(x => `<li class="rest"><span>${esc(FAMILY_NAMES[x.f] || x.f)}</span><b>${money0(x.revenue)}</b></li>`).join('') || '<li class="rest"><span>No priced lines in the last twelve months.</span></li>'}</ul></div>` : `<div class="card-head"><h3>Margin by line of business</h3><a href="#customers?view=margin&id=${id}">The margin drill: line, job, route ›</a></div>
         ${fams.length ? `<div class="famhead"><span>Line</span><span>Revenue</span><span class="cost">Cost ◇</span><span>Margin</span><span></span></div>` : ''}
         <div id="cp-fams">${fams.map(x => {
           const p = x.revenue > 0 ? 1 - x.cost / x.revenue : null, rev = review(x.f);
           return `<div class="fam" data-f="${x.f}"><span>${esc(FAMILY_NAMES[x.f] || x.f)}${rev ? ' <span class="chip review">under review</span>' : ''}</span><span class="r">${money0(x.revenue)}</span><span class="r cost">${x.f === 'other' ? '—' : money0(x.cost)}</span><span class="r ${p != null && p < 0 && !rev ? 'is-bad' : ''}">${x.f === 'other' || p == null ? '—' : rev ? '◇' : Math.round(p * 100) + '%'}</span><span class="go">›</span></div><div class="lines" data-for="${x.f}" hidden></div>`;
-        }).join('') || '<p class="sub">No priced lines in the last twelve months.</p>'}</div>
+        }).join('') || '<p class="sub">No priced lines in the last twelve months.</p>'}</div>`}
       </div>
     </div>
     <details class="fold cp-fold"><summary><h3>Not bought yet, prices against the book, signals</h3><span class="sub">${sigs.length ? `${sigs.length} signal${sigs.length === 1 ? '' : 's'} · ` : ''}${mine.length} prices · open</span></summary>
@@ -124,7 +125,7 @@ export async function render(main, C, params) {
         </div>
     </div>
     </details>
-    <details class="fold cp-fold"><summary><h3>Work orders and shredding visits</h3><span class="sub">last six months, each opening to its cost and its route day · open</span></summary>
+    <details class="fold cp-fold"><summary><h3>Work orders and shredding visits</h3><span class="sub">last six months${costsVisible() ? ', each opening to its cost and its route day' : ''} · open</span></summary>
     <div class="grid drill" id="cp-drill"><div class="card"><div class="card-head"><h3>Work orders</h3><small>last six months</small></div><p class="sub">Loading…</p></div><div class="card"><div class="card-head"><h3>Shredding visits</h3><small>last six months</small></div><p class="sub">Loading…</p></div></div>
     </details>
   </div>`;
@@ -240,11 +241,11 @@ function ordersTable(el, rows, svcName, name, famName) {
       { key: 'date', label: 'Date', fmt: v => dayFmt(v) },
       { key: 'woid', label: 'Order', fmt: v => `<span class="sub" style="display:inline">${esc(v)}</span>` },
       { key: 'revenue', label: 'Value', num: true, fmt: v => money0(v) },
-      { key: 'cost', label: 'Cost ◇', num: true, fmt: v => v.total ? money0(v.total) : '—' },
-      { key: 'margin', label: 'Left', num: true, fmt: (v, r) => r.cost.total ? `<span class="${v < 0 ? (r.cost.route ? 'is-warn' : 'is-bad') : ''}">${money0(v)}</span>` : '—' },
+      ...(costsVisible() ? [{ key: 'cost', label: 'Cost ◇', num: true, fmt: v => v.total ? money0(v.total) : '—' },
+      { key: 'margin', label: 'Left', num: true, fmt: (v, r) => r.cost.total ? `<span class="${v < 0 ? (r.cost.route ? 'is-warn' : 'is-bad') : ''}">${money0(v)}</span>` : '—' }] : []),
     ],
     rows,
-    detail: (o, td) => { td.innerHTML = `${famName ? `<div class="lp-crumb">${esc(name)} › ${esc(famName)} › order ${esc(o.woid)}, ${dayFmt(o.date)}</div>` : ''}${jobHtml({ o, items: o.items, c: o.cost, svcName, ctx: o.day, A: RCTX && RCTX.A })}`; if (RCTX) drawRouteBlock(td.querySelector('.jv-route'), o.day, RCTX); },
+    detail: !costsVisible() ? undefined : (o, td) => { td.innerHTML = `${famName ? `<div class="lp-crumb">${esc(name)} › ${esc(famName)} › order ${esc(o.woid)}, ${dayFmt(o.date)}</div>` : ''}${jobHtml({ o, items: o.items, c: o.cost, svcName, ctx: o.day, A: RCTX && RCTX.A })}`; if (RCTX) drawRouteBlock(td.querySelector('.jv-route'), o.day, RCTX); },
   });
 }
 

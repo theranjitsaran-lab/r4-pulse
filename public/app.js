@@ -6,6 +6,7 @@
 //   #pricing, #activity         the tools
 import { getJson } from '/components/data.js';
 import { playIntro } from '/components/intro.js';
+import { loadAccess, costsVisible, isAdmin } from '/components/access.js';
 import { openAsk } from '/components/ask.js';
 
 const ROUTES = {
@@ -35,7 +36,8 @@ function parse() {
   const [name, id] = path.split('/');
   const params = Object.fromEntries(new URLSearchParams(qs || ''));
   if (id) params.id = decodeURIComponent(id);
-  return { name: ROUTES[name] ? name : 'pulse', params };
+  const hidden = (name === 'settings' && !isAdmin()) || (name === 'classic' && !costsVisible());
+  return { name: ROUTES[name] && !hidden ? name : 'pulse', params };
 }
 
 const intro = playIntro();   // the R4 mark, once a session; lifts when the first screen is drawn
@@ -107,4 +109,7 @@ document.body.appendChild(fab);
 addEventListener('open-ask', e => ask(e.detail && e.detail.ask));
 
 addEventListener('hashchange', show);
-show();
+loadAccess().then(() => {
+  document.querySelectorAll('[data-screen="settings"]').forEach(a => { a.hidden = !isAdmin(); });
+  show();
+});

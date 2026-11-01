@@ -357,7 +357,7 @@ test('morning brief: taps are signed and cannot be forged; a stale morning says 
   assert.equal(fresh.length, 3); assert.ok(fresh.every(m => !m.stale), 'three emails, none stale');
   assert.ok(fresh.filter(m => m.who !== 'trisha').some(m => m.html.includes('/f/')), 'a person with a line gets taps on it');
   assert.equal(workDaysSince('2026-10-22', '2026-10-26'), 1, 'Friday only between Thursday and Monday');
-  const stale = buildBriefs({ P, A, C, PR, CA, today: '2026-10-28', url: 'https://p', sign: fb.sign, people });
+  const stale = buildBriefs({ P, A, C, PR, CA, today: new Date(Date.parse(A.latestDone + 'T00:00:00Z') + 5 * 864e5).toISOString().slice(0, 10), url: 'https://p', sign: fb.sign, people });
   assert.ok(stale.every(m => m.stale && /No new data since/.test(m.text)), 'stale morning: one line, nothing else');
   // Trisha's opening is checked against her sheet: the plain opening passes its own check
   const { checkNumbers } = await import('../public/components/summary.js');

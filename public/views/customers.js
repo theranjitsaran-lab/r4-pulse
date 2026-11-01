@@ -13,6 +13,7 @@ import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 import { conversationCandidates } from '/components/lists.js';
 import { LABELS } from '/components/metrics.js';
+import { costsVisible } from '/components/access.js';
 
 const CITADEL = 6714;
 const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under review: delivery days not yet in the volumes
@@ -80,7 +81,7 @@ async function rowsFor(view, ser, book, C) {
 
 export async function render(main, C, params) {
   if (!main) return;
-  const view = VIEWS[params.view] ? params.view : 'overview';
+  const view = VIEWS[params.view] && (params.view !== 'margin' || costsVisible()) ? params.view : 'overview';
   if (view === 'overview') return (await import('/views/custoverview.js')).render(main, C, params, tabsHtml('overview'));
   if (view === 'opportunities') return (await import('/views/opps.js')).render(main, params, tabsHtml('opportunities'));
   if (view === 'conversations') return conversations(main, C);
@@ -104,22 +105,22 @@ export async function render(main, C, params) {
     <h1>Customers</h1>
     <p class="blurb">${esc(VIEWS[view].blurb)}</p>
     <div class="bar">
-      <div class="views"><div class="seg">${Object.entries(VIEWS).filter(([k, v]) => !v.hidden || k === view).map(([k, v]) => `<a href="${link(k)}" class="${k === view ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
-      <div class="seg">${[['size', 'Size'], ['change', 'Change'], ['margin', 'Margin']].map(([k, l]) => `<a href="${link(view, k)}" class="${k === sort ? 'on' : ''}">${l}</a>`).join('')}</div>
+      <div class="views"><div class="seg">${Object.entries(VIEWS).filter(([k, v]) => (!v.hidden || k === view) && (k !== 'margin' || costsVisible())).map(([k, v]) => `<a href="${link(k)}" class="${k === view ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
+      <div class="seg">${[['size', 'Size'], ['change', 'Change'], ...(costsVisible() ? [['margin', 'Margin']] : [])].map(([k, l]) => `<a href="${link(view, k)}" class="${k === sort ? 'on' : ''}">${l}</a>`).join('')}</div>
     </div>
     ${view === 'all' ? '<input class="find" id="c-find" type="search" placeholder="Find a customer by name" aria-label="Find a customer by name">' : ''}
     <div class="card">
-      <div class="head"><span>Customer</span><span>24 months</span><span>Last 12 months</span><span>Last 3 months</span><span>Margin</span><span></span></div>
+      <div class="head"><span>Customer</span><span>24 months</span><span>Last 12 months</span><span>Last 3 months</span><span>${costsVisible() ? 'Margin' : ''}</span><span></span></div>
       <ul class="list">${rows.map(row).join('') || '<li style="padding:var(--sp-4);color:var(--ink-3)">No accounts in this view.</li>'}</ul>
     </div>
-    <p class="foot"><span id="c-count">${rows.length}</span> accounts · last 3 months is each account against its own twelve months before them, the same measure as Home and Slipping · margin ◇ is revenue less modelled cost to serve; route-based costs are under review.</p>
+    <p class="foot"><span id="c-count">${rows.length}</span> accounts · last 3 months is each account against its own twelve months before them, the same measure as Home and Slipping ${costsVisible() ? '· margin ◇ is revenue less modelled cost to serve; route-based costs are under review.' : ''}</p>
   </div>`;
   wireFind(main);
 }
 
 // the view tabs, the same on every Customers view; Up and down and All are kept for old links only
 export function tabsHtml(on) {
-  return `<div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).filter(([k, v]) => !v.hidden || k === on).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === on ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>`;
+  return `<div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).filter(([k, v]) => (!v.hidden || k === on) && (k !== 'margin' || costsVisible())).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === on ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>`;
 }
 
 const mvPc = s => s && s.move ? s.move.pct : null;
@@ -143,7 +144,7 @@ function row(r) {
     <span class="sp">${s ? sparkline(s.total, { w: 130, h: 30, cls }) : ''}</span>
     <span class="r rv"><span class="rev">${s ? moneyK(s.ltm) : '—'}</span>${s ? (r.level1 === CITADEL ? '<small class="delta flat">lumpy</small>' : `<small class="delta ${deltaCls(c)}">${deltaText(c)}</small>`) : ''}</span>
     <span class="r ch">${r.level1 === CITADEL ? '<span class="delta flat">lumpy</span>' : `<span class="delta ${deltaCls(c)}">${s && s.move ? deltaText(c) : '—'}</span>`}</span>
-    <span class="r mg">${pc == null ? '—' : `${Math.round(pc * 100)}%${routeHeavy ? '<span class="rvm" title="route costs under review">◇</span>' : ''}`}</span>
+    <span class="r mg">${!costsVisible() ? '' : pc == null ? '—' : `${Math.round(pc * 100)}%${routeHeavy ? '<span class="rvm" title="route costs under review">◇</span>' : ''}`}</span>
     <span class="go">›</span></a></li>`;
 }
 
