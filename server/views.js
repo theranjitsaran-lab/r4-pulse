@@ -15,7 +15,7 @@ const { seesCosts } = require('./settings');
 
 const router = express.Router();
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
+const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework', 'metrics'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
 
 async function callsLog() {
   if (USE_FIXTURES) { try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'calls_log.json'), 'utf8')); } catch { return []; } }
@@ -31,7 +31,7 @@ async function homeShared(D, L) {
   const v = {
     month: V.month, weeks: V.weeks, seg: V.seg, cust: V.cust, cross: V.cross, dens: V.dens, dest: V.dest,
     lines: V.lines, bills: V.bills, points: V.points,
-    latestDone: D.A.latestDone, monthly: D.P.monthly.slice(-2),
+    latestDone: D.A.latestDone, monthly: D.P.monthly.slice(-2), tie: L.metrics.tieOut(D.P),
     changes: L.changes.changesFor(D.P, D.A), day: L.changes.daySentence(D.P, D.A),
   };
   homeBase = { stamp: s, v };
@@ -109,13 +109,27 @@ router.get('/numbers', async (req, res) => {
       const rc = D.R.routeCostsNow();
       const realBins = book.accounts.filter(a => a.fam.bin && D.R.routeFor(a.level1));
       numBase = { stamp: st, v: {
-        monthly, target: 1e6,
+        monthly, target: 1e6, tie: L.metrics.tieOut(D.P), citadelBridge: (D.P.tieout || []).slice(-2)[0] || null,
         gap: (() => { const m = L.home2data.monthView(D); return { gap: m.gap, next: m.next ? m.next.month : null }; })(),   // the same gap as Home
         gl: G ? { months: G.months, last12: L.gl.sumMonths(G.months, 12), overheadLines: G.overheadLines, loadedAt: D.G.loadedAt, source: D.G.source } : null,
         margin: { lines, accounts: book.accounts.length, deliveriesOn: !!(rc.deliveries && rc.deliveries.on), moveReal: book.accounts.filter(a => a.fam.movement && D.R.movementFor(a.level1)).length, binReal: { accounts: realBins.length, revenue: realBins.reduce((t, a) => t + a.fam.bin.revenue, 0), routeDays: rc.days, from: rc.from, to: rc.to } },
       } };
     }
     send(req, res, seesCosts(req) ? numBase.v : { ...numBase.v, margin: null });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// One account's invoices in a month: live for any account; from the fixture offline
+router.get('/invoices', async (req, res) => {
+  try {
+    const level1 = Number(req.query.level1), month = String(req.query.month || '');
+    if (!Number.isInteger(level1) || !/^\d{4}-\d{2}-01$/.test(month)) return res.status(400).json({ error: 'level1 and month' });
+    if (USE_FIXTURES) {
+      const f = path.join(__dirname, '..', 'fixtures', 'invoices.json');
+      const hit = fs.existsSync(f) && JSON.parse(fs.readFileSync(f, 'utf8')).data.rows.find(r => r.level1 === level1 && r.month === month);
+      return hit ? send(req, res, hit) : res.status(404).json({ error: 'not in the offline copy' });
+    }
+    send(req, res, await require('./queries').customerInvoices(level1, month));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

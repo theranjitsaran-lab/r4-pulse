@@ -92,7 +92,15 @@ async function pulse() {
     WHERE date > (SELECT max(date) FROM v_route_day WHERE services_done > 0) - interval '15 months'
       AND date <= (SELECT max(date) FROM v_route_day WHERE services_done > 0)
     GROUP BY 1 ORDER BY 1`);
-  return { monthly, posted, currentRun, customers, downTwoMonths, concentration, pace, dailyDone };
+  // the tie-out: straight from VCK's invoices, not kpi.monthly, so a month that moves after it was built shows
+  const tieout = await query(`
+    SELECT date_trunc('month', COALESCE(invdate, billdate))::date::text AS month, count(*)::int AS invoices,
+           sum(ret_tot)::float AS storage, sum(ser_tot)::float AS service,
+           coalesce(sum(ser_tot) FILTER (WHERE custno = '00870'), 0)::float AS citadel,
+           max(COALESCE(invdate, billdate))::date::text AS latest
+    FROM invoices WHERE COALESCE(invdate, billdate) >= (SELECT max(month) FROM kpi.monthly) - interval '3 months'
+    GROUP BY 1 ORDER BY 1`);
+  return { monthly, posted, currentRun, customers, downTwoMonths, concentration, pace, dailyDone, tieout };
 }
 
 // ── Customers — the list and the customer page ───────────────────────────────────────────
@@ -509,4 +517,34 @@ async function linework() {
   return { priced, orders, lastPrice };
 }
 
-module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, linework, routestops, deliverydays, gl };
+// ── One account's invoices in a month ──────────────────────────────────────────────────────────
+// By invoice date, posted invoices; what was on each from its priced lines, by service. Storage has no
+// priced lines: it is the invoice's ret_tot.
+async function customerInvoices(level1, month) {
+  const inv = await query(`
+    SELECT invoice_no, COALESCE(invdate, billdate)::date::text AS date, ret_tot::float AS storage, ser_tot::float AS service, (ret_tot + ser_tot)::float AS total
+    FROM invoices WHERE level1 = $1 AND COALESCE(invdate, billdate) >= $2::date AND COALESCE(invdate, billdate) < ($2::date + interval '1 month')
+    ORDER BY (ret_tot + ser_tot) DESC, invoice_no`, [level1, month]);
+  const lines = await query(`
+    SELECT p.invoice_no, s.servcode, s.description AS service, sum(p.units)::float AS units, sum(p.totamt)::float AS amount
+    FROM priced_lines p JOIN servcode s USING (servcodeid)
+    WHERE p.invoice_no = ANY($1::text[]) AND p.totamt <> 0 GROUP BY 1, 2, 3 ORDER BY 1, 5 DESC`, [inv.map(i => i.invoice_no)]);
+  const by = new Map();
+  for (const l of lines) (by.get(l.invoice_no) || by.set(l.invoice_no, []).get(l.invoice_no)).push(l);
+  return { level1, month, total: inv.reduce((t, i) => t + i.total, 0), invoices: inv.map(i => ({ ...i, lines: by.get(i.invoice_no) || [] })) };
+}
+
+// the largest accounts' last three posted months, for offline work and the tests
+async function invoices() {
+  const top = await query(`
+    WITH ${BOUNDS}
+    SELECT level1 FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t
+    GROUP BY level1 ORDER BY sum(revenue) DESC, level1 LIMIT 12`);
+  const [{ latest }] = await query(`SELECT max(month)::text AS latest FROM kpi.monthly`);
+  const months = [0, 1, 2].map(n => new Date(Date.UTC(+latest.slice(0, 4), +latest.slice(5, 7) - 1 - n, 1)).toISOString().slice(0, 10));
+  const rows = [];
+  for (const t of top) for (const m of months) rows.push(await customerInvoices(t.level1, m));
+  return { rows };
+}
+
+module.exports = { invoices, customerInvoices, pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, linework, routestops, deliverydays, gl };

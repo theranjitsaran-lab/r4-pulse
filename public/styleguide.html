@@ -29,7 +29,7 @@
   </section>
 
   <section>
-    <div class="sec"><h2>Gap bar</h2><small>gap.js · only what is left to $1.0M · the ceiling hatched ◇ · new business open</small></div>
+    <div class="sec"><h2>Gap bar</h2><small>gap.js · only what is left to $1.0M · the ceiling hatched est. · new business open</small></div>
     <div class="card h" id="gap" data-rv></div>
   </section>
 
@@ -39,7 +39,7 @@
   </section>
 
   <section>
-    <div class="sec"><h2>States</h2><small>measured · modelled ◇ · pending · below cost · below median · sound</small></div>
+    <div class="sec"><h2>States</h2><small>measured · modelled est. · pending · below cost · below median · sound</small></div>
     <div class="grid3 states" id="states"></div>
   </section>
 
@@ -143,7 +143,7 @@ document.getElementById('states').innerHTML = `
   <div class="card"><div class="lab">Measured</div><div class="fig-l">${money0(core)}</div><div class="note">Core, six-month average Mar–Aug 2026, posted invoices</div></div>
   <div class="card"><div class="lab">Modelled</div><div class="fig-l modelled">${moneyK(range[0])}–${moneyK(range[1])}</div><div class="note">October in-month range; service modelled from the last six posted months</div></div>
   <div class="card"><div class="lab">Retention rate</div><div class="pending">Not yet measured. Needs box in/out history from VCK.</div></div>
-  <div class="card"><div class="lab">Below cost</div><div class="fig-l is-bad">${money0(laraRev - laraCost.total)}</div><div class="note">Larabida: ${money0(laraRev)} a year for ${lara.bins} bin services that cost ${money0(laraCost.total)} to serve ◇</div></div>
+  <div class="card"><div class="lab">Below cost</div><div class="fig-l is-bad">${money0(laraRev - laraCost.total)}</div><div class="note">Larabida: ${money0(laraRev)} a year for ${lara.bins} bin services that cost ${money0(laraCost.total)} to serve est.</div></div>
   <div class="card"><div class="lab">Below median</div><div class="fig-l is-warn">$${fm.rate_per_box.toFixed(3)}</div><div class="note">2FM storage a box a month, against the book's $${srMed.toFixed(3)} median (${mon(fm.month)})</div></div>
   <div class="card"><div class="lab">Sound</div><div class="fig-l">$${srMed.toFixed(3)}</div><div class="note">At the median. Sound and up carry no colour</div></div>`;
 
@@ -188,7 +188,7 @@ const st0 = (await import('/components/strip.js')).stripStats(b2);
 const price = Math.round((unit + st0.median) / 2);   // an example price above cost and below the median
 const st = strip(document.getElementById('strip'), { values: b2, cost: unit, price, named });
 document.getElementById('strip-src').textContent =
-  `priced_lines, modal invoiced rate per account, 13 months · ${st.n} accounts · cost to serve ◇ ${'$' + unit.toFixed(2)} a bin at ${R.RATES.unitsVisit.v.toFixed(2)} services a visit and ${R.RATES.lbPerBin.v.B2} lb · no list line: list prices are not in the database`;
+  `priced_lines, modal invoiced rate per account, 13 months · ${st.n} accounts · cost to serve est. ${'$' + unit.toFixed(2)} a bin at ${R.RATES.unitsVisit.v.toFixed(2)} services a visit and ${R.RATES.lbPerBin.v.B2} lb · no list line: list prices are not in the database`;
 const verdict = (cls, lab, text) => `<div class="verdict ${cls}"><div class="lab">${lab}</div><p>${text}</p></div>`;
 document.getElementById('verdicts').innerHTML =
   verdict('is-bad', 'Below cost', `$${(laraRev / lara.bins).toFixed(2)} is below what this costs to serve. Cost to serve is $${laraCost.perUnit.toFixed(2)} a bin service. Every one loses $${(laraCost.perUnit - laraRev / lara.bins).toFixed(2)}, and the volume makes it worse, not better.`) +
@@ -260,7 +260,7 @@ const at = x => (x / TARGET * 100).toFixed(2) + '%';
 const heroA = `<section class="hero-band" data-rv><div><span class="hb-lab">The bill already known</span><span class="hb-fig">${moneyK(billed)}</span>
   <p class="hb-note"><span class="hb-pill">▲ ${Math.round((billed / lastM.core - 1) * 100)}%</span> on the month before · <b>${Math.round(billed / TARGET * 100)}%</b> of $1.0M</p>
   <div class="hb-track"><span class="hb-fill grow" style="width:${at(billed)}"></span></div><div class="hb-ends"><span>$0</span><span>$1.0M target</span></div></div>
-  <div class="hb-side"><div><span class="hb-lab">The next bill · building ◇</span><b>≈ —</b><small>the projection draws on Home</small></div><div><span class="hb-lab">Empty state</span><b>—</b><small>no priced month to value the work yet</small></div></div></section>`;
+  <div class="hb-side"><div><span class="hb-lab">The next bill · building est.</span><b>≈ —</b><small>the projection draws on Home</small></div><div><span class="hb-lab">Empty state</span><b>—</b><small>no priced month to value the work yet</small></div></div></section>`;
 document.getElementById('hero').innerHTML = heroA;
 document.getElementById('gap').innerHTML = gapHtml(B);
 const ser = CJ.data.accounts.filter(a => a.level1 !== 6714).slice(0, 4);

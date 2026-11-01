@@ -69,12 +69,12 @@ export async function render(main, PR, params) {
       <div id="q-body"></div>
     </section>
     <div class="pr2-grid" ${costsVisible() ? '' : 'style="display:none"'}>
-      <section class="h2-card" data-rv><div class="h2-ch"><h2 id="p-pl-title">A year at this price</h2><small>the price's own P&amp;L ◇</small></div><div id="p-pl"></div></section>
-      <section class="h2-card" data-rv><div class="h2-ch"><h2>How to improve the margin</h2><small>each lever on its own, a year ◇</small></div><div id="p-levers"></div><button class="pop-ask pr2-ask" type="button" id="p-ask">Ask about this price ›</button></section>
+      <section class="h2-card" data-rv><div class="h2-ch"><h2 id="p-pl-title">A year at this price</h2><small>the price's own P&amp;L est.</small></div><div id="p-pl"></div></section>
+      <section class="h2-card" data-rv><div class="h2-ch"><h2>How to improve the margin</h2><small>each lever on its own, a year est.</small></div><div id="p-levers"></div><button class="pop-ask pr2-ask" type="button" id="p-ask">Ask about this price ›</button></section>
     </div>
     <section class="h2-card" data-rv><div class="h2-ch"><h2 id="p-track-title"></h2><small id="p-track-sub"></small></div><div id="p-track"></div><div class="src" id="p-strip-src"></div>
       <details class="fold"><summary><h3 id="p-strip-title">Every account on this service</h3><span class="sub" id="p-strip-sub"></span></summary><div id="p-strip" style="margin-top:var(--sp-3)"></div></details>
-      <details class="fold" ${costsVisible() ? '' : 'style="display:none"'}><summary><h3 id="p-cost-title">How the cost is worked out</h3><span class="sub">◇ cost model · open</span></summary><div id="p-cost" style="margin-top:var(--sp-3)"></div></details>
+      <details class="fold" ${costsVisible() ? '' : 'style="display:none"'}><summary><h3 id="p-cost-title">How the cost is worked out</h3><span class="sub">est. cost model · open</span></summary><div id="p-cost" style="margin-top:var(--sp-3)"></div></details>
       <div id="p-worth" hidden></div>
     </section>
     <section class="h2-card book" data-rv>
@@ -147,7 +147,7 @@ export async function render(main, PR, params) {
     if (sure != null && price < sure) { cls = 'is-bad'; lab = 'Below cost'; text = `${f(price)} is below what this costs to serve. Cost to serve is ${f(unitCost)} a ${svc.unit}. Every one loses ${f(unitCost - price)}, and more volume makes it worse.`; }
     else if (price < s.median && !near) { cls = 'is-warn'; text = `${f(price)} ${sure != null ? `earns ${f(price - sure)} a ${svc.unit} over cost, but ` : ''}sits below the ${f(s.median)} ${medName}: cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.`; }
     else text = `${f(price)} is ${near ? 'at' : 'above'} the ${f(s.median)} ${medName}${sure != null ? ` and ${f(price - sure)} a ${svc.unit} over cost` : ''}.`;
-    $('p-verdict').innerHTML = `<section class="h2-card pr2-verdict ${cls}"><span class="pr2-tag">${lab}</span><p class="pr2-head">${esc(text)}</p>${!costsVisible() ? `<p class="hint">${money0(price * Math.max(0, st.units || 0))} a year at this volume. ${esc(NOT_READY)}</p>` : review ? `<p class="hint">Judged against the book only: the cost of a visit is under review until delivery routes are in the data, so the margin below is provisional.${svc.fam === 'bin' && !st.level1 ? ' Enter the postcode under Volume to cost it from real route days there.' : ''}</p>` : real ? `<p class="hint">Route cost from ${c.routeBasis === 'account' ? `${esc(who)}'s own route days` : `real route days in and around ${esc(st.postcode)}`}, shared by minutes ◇. Days the truck also delivered boxes are not in the route data yet, so this reads a little high.</p>` : ''}</section>`;
+    $('p-verdict').innerHTML = `<section class="h2-card pr2-verdict ${cls}"><span class="pr2-tag">${lab}</span><p class="pr2-head">${esc(text)}</p>${!costsVisible() ? `<p class="hint">${money0(price * Math.max(0, st.units || 0))} a year at this volume. ${esc(NOT_READY)}</p>` : review ? `<p class="hint">Judged against the book only: the cost of a visit is under review until delivery routes are in the data, so the margin below is provisional.${svc.fam === 'bin' && !st.level1 ? ' Enter the postcode under Volume to cost it from real route days there.' : ''}</p>` : real ? `<p class="hint">Route cost from ${c.routeBasis === 'account' ? `${esc(who)}'s own route days` : `real route days in and around ${esc(st.postcode)}`}, shared by minutes est. Days the truck also delivered boxes are not in the route data yet, so this reads a little high.</p>` : ''}</section>`;
 
     // the track: cost to serve, the middle half of the book, its median, and the price
     $('p-track-title').textContent = `${who === 'A new customer' ? 'A quote' : who} at ${f(price)} a ${svc ? svc.unit : 'unit'}`;
@@ -165,7 +165,7 @@ export async function render(main, PR, params) {
       $('p-cost-title').textContent = review ? `The provisional cost working: ${f(unitCost)} a ${svc.unit}, under review` : `How the cost is worked out: ${f(unitCost)} a ${svc.unit}`;
       // the first sentence says what the line is; the rate's full working is one tap away
       const split = t => { const i = t.indexOf('. '); return i > 0 ? [t.slice(0, i + 1), t.slice(i + 2)] : [t, '']; };
-      $('p-cost').innerHTML = c.lines.map(l => { const [head, rest] = split(l[2]); return `<div class="line"><span>${esc(l[0])}${l[3] ? ' ◇' : ''}</span><span class="v">${money0(l[1])}</span><span class="d">${esc(head)}${rest ? ` <details style="display:inline"><summary style="display:inline;cursor:pointer;color:var(--brand)">How it is worked out</summary><span style="display:block;margin-top:var(--sp-1)">${esc(rest)}</span></details>` : ''}</span></div>`; }).join('')
+      $('p-cost').innerHTML = c.lines.map(l => { const [head, rest] = split(l[2]); return `<div class="line"><span>${esc(l[0])}${l[3] ? ' est.' : ''}</span><span class="v">${money0(l[1])}</span><span class="d">${esc(head)}${rest ? ` <details style="display:inline"><summary style="display:inline;cursor:pointer;color:var(--brand)">How it is worked out</summary><span style="display:block;margin-top:var(--sp-1)">${esc(rest)}</span></details>` : ''}</span></div>`; }).join('')
         + `<div class="line total"><span>A year, ${Math.round(st.units).toLocaleString('en-US')} ${svc.fam === 'storage' ? 'box-months' : svc.unit + 's'}</span><span class="v">${money0(c.total)}</span></div>`
         + (review ? `<p class="hint">Route costs are under review: delivery routes are not yet in the route volumes, so visit costs run high.</p>` : '');
     } else {
@@ -183,7 +183,7 @@ export async function render(main, PR, params) {
     if (sure != null) opts.push({ k: 'be', label: `Break-even, ${f(sure)}`, sub: 'where gross margin is zero', p: sure });
     const base = mine ? at(mine.v) : null;
     // the column names once, at the top; each row's caption sits under its name, on the left
-    $('p-worth').innerHTML = '<div class="worth head"><span></span><span class="v">Revenue</span><span class="v">Margin ◇</span></div>' + opts.map(o => {
+    $('p-worth').innerHTML = '<div class="worth head"><span></span><span class="v">Revenue</span><span class="v">Margin est.</span></div>' + opts.map(o => {
       const w = at(o.p), d = base ? w.rev - base.rev : null;
       return `<div class="worth ${o.k === 'you' ? 'you' : ''}"><span><b>${esc(o.label)}</b><span class="s">${esc(o.sub)}${d != null && Math.abs(d) >= 1 ? ` · ${d > 0 ? '+' : '−'}${moneyK(Math.abs(d))} a year against today` : ''}</span></span>
         <span class="v">${moneyK(w.rev)}</span>
@@ -200,7 +200,7 @@ export async function render(main, PR, params) {
         <li class="rev"><span>Revenue</span><i style="--w:${(rev / max * 100).toFixed(1)}%"></i><b>${money0(rev)}</b></li>
         ${lines.map(l => `<li class="cost"><span>${esc(l.name)}</span><i style="--w:${(l.v / max * 100).toFixed(1)}%"></i><b>−${money0(l.v)}</b></li>`).join('')}
         <li class="left ${review ? 'review' : left < 0 ? 'neg' : ''}"><span>${review ? 'Left, provisional' : 'Gross margin'}</span><i style="--w:${(Math.abs(left) / max * 100).toFixed(1)}%"></i><b>${left < 0 ? '−' : ''}${money0(Math.abs(left))}</b></li></ul>
-        <p class="pr2-pc">${rev > 0 ? `<b class="${left < 0 && !review ? 'is-bad' : ''}">${Math.round(left / rev * 100)}%</b> of revenue kept ◇` : ''}${review ? ' · route costs under review' : ''}</p>`;
+        <p class="pr2-pc">${rev > 0 ? `<b class="${left < 0 && !review ? 'is-bad' : ''}">${Math.round(left / rev * 100)}%</b> of revenue kept est.` : ''}${review ? ' · route costs under review' : ''}</p>`;
       // the levers, each on its own
       const lv = [];
       if (price < s.median) lv.push({ t: `Move to the ${medName}, ${f(s.median)}`, v: (s.median - price) * units2, s: `${Math.round((1 - s.below(price)) * 100)}% of ${of} pay more` });
@@ -311,19 +311,19 @@ export async function render(main, PR, params) {
   }
   function drawQuote() {
     const T = totals(), n = Q.lines.length;
-    $('q-title').textContent = n ? `The quote: ${moneyK(T.rev)} a year${costsVisible() && T.pc != null ? `, ${moneyK(T.margin)} margin ◇` : ''}` : 'The quote';
+    $('q-title').textContent = n ? `The quote: ${moneyK(T.rev)} a year${costsVisible() && T.pc != null ? `, ${moneyK(T.margin)} margin est.` : ''}` : 'The quote';
     if (!n) { $('q-body').innerHTML = `<p class="hint">Price a service above, then add it. Add as many lines as the deal has: storage, bins, shredding, delivery. The quote totals the revenue${costsVisible() ? ' and the margin' : ''} a year.</p>${savedHtml()}`; return; }
     const dec = l => l.code === 'STO' ? 3 : 2;
     $('q-body').innerHTML = `
       ${!Q.level1 ? `<label class="q-who">Prospect<input id="q-prospect" value="${esc(Q.prospect || '')}" placeholder="Company name"></label>` : `<p class="hint">For ${esc(nameOf(Q.level1))}${Q.postcode ? ` · ${esc(Q.postcode)}` : ''}</p>`}
-      <table class="q-t"><thead><tr><th>Line</th><th class="v">A year</th><th class="v">Price</th><th class="v">Revenue</th>${costsVisible() ? '<th class="v">Margin ◇</th>' : ''}<th></th></tr></thead><tbody>
+      <table class="q-t"><thead><tr><th>Line</th><th class="v">A year</th><th class="v">Price</th><th class="v">Revenue</th>${costsVisible() ? '<th class="v">Margin est.</th>' : ''}<th></th></tr></thead><tbody>
       ${Q.lines.map((l, i) => { const r = l.price * l.units, m = l.cost == null ? null : r - l.cost; return `<tr>
         <td>${esc(l.name)}${!costsVisible() ? '' : l.basis === 'average' ? '<small>route cost under review</small>' : l.basis === 'account' || l.basis === 'postcode' ? '<small>from real route days</small>' : l.basis === 'none' ? '<small>a fee: not costed</small>' : ''}</td>
         <td class="v">${Math.round(l.units).toLocaleString('en-US')} ${esc(l.unit)}s</td><td class="v">$${l.price.toFixed(dec(l))}</td><td class="v">${money0(r)}</td>
         ${!costsVisible() ? '' : `<td class="v ${m != null && m < 0 && l.basis !== 'average' ? 'is-bad' : ''}">${m == null ? '—' : (m < 0 ? '−' : '') + money0(Math.abs(m))}${m != null && r > 0 ? `<small>${Math.round(m / r * 100)}%</small>` : ''}</td>`}
         <td><button class="q-x" type="button" data-i="${i}" aria-label="Remove ${esc(l.name)}">×</button></td></tr>`; }).join('')}
       </tbody><tfoot><tr><td>Total</td><td></td><td></td><td class="v">${money0(T.rev)}</td>${!costsVisible() ? '' : `<td class="v ${T.margin < 0 && !T.review ? 'is-bad' : ''}">${T.pc == null ? '—' : (T.margin < 0 ? '−' : '') + money0(Math.abs(T.margin))}<small>${T.pc == null ? '' : Math.round(T.pc * 100) + '%'}</small></td>`}<td></td></tr></tfoot></table>
-      ${!costsVisible() ? '' : `<p class="src">Margin is revenue less the cost to serve from the cost model ◇${T.uncosted ? `, on the ${n - T.uncosted} costed line${n - T.uncosted === 1 ? '' : 's'}` : ''}${T.review ? '; bin lines without route days use the average visit, under review' : ''}.</p>`}
+      ${!costsVisible() ? '' : `<p class="src">Margin is revenue less the cost to serve from the cost model est.${T.uncosted ? `, on the ${n - T.uncosted} costed line${n - T.uncosted === 1 ? '' : 's'}` : ''}${T.review ? '; bin lines without route days use the average visit, under review' : ''}.</p>`}
       <div class="q-acts"><button type="button" id="q-save" class="q-add">Save the quote</button><button type="button" id="q-copy">Copy as text</button><button type="button" id="q-clear">Start again</button><span id="q-msg" class="hint"></span></div>
       ${savedHtml()}`;
     const pr = $('q-prospect'); if (pr) pr.addEventListener('input', () => { Q.prospect = pr.value; keepQ(); });
@@ -370,5 +370,5 @@ function track(el, { price, cost, s, f, cls, medName, of }) {
     ${ticks.map((t, i) => `<div class="tk ${t.c}" style="left:${x(t.v)}%"></div><div class="tl ${t.c} ${i % 2 ? 'up' : 'dn'}" style="left:${x(t.v)}%">${esc(t.t)}</div>`).join('')}
     <div class="pin ${cls}" style="left:${x(price)}%"><b>${f(price)}</b><i></i></div>
   </div>
-  <div class="sub" style="margin-top:var(--sp-1)">The grey band is where the middle half of ${of} sit, ${f(s.p25)} to ${f(s.p75)}.${cost != null ? ' The striped red stretch is below the cost to serve ◇.' : ''} ${price < s.median ? `Cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.` : price > s.median ? `Dearer than ${Math.round(s.below(price) * 100)}% of ${of}.` : `At the ${medName}.`}</div>`;
+  <div class="sub" style="margin-top:var(--sp-1)">The grey band is where the middle half of ${of} sit, ${f(s.p25)} to ${f(s.p75)}.${cost != null ? ' The striped red stretch is below the cost to serve est.' : ''} ${price < s.median ? `Cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.` : price > s.median ? `Dearer than ${Math.round(s.below(price) * 100)}% of ${of}.` : `At the ${medName}.`}</div>`;
 }

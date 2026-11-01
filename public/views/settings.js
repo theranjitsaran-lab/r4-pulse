@@ -30,9 +30,9 @@ export async function render(main, S) {
 function draw(main, S) {
   const ref = S.reference || {};
   const refHtml = `<section class="h2-kpis four" data-rv>
-    <div class="h2-kpi lead"><span>A route day</span><b>${money0(ref.routeDay || 0)}</b><small>drivers, vehicles and route software ÷ route days ◇</small></div>
-    <div class="h2-kpi"><span>Ingalls, on the road</span><b>${ref.ingalls ? '$' + ref.ingalls.perService.toFixed(2) : '—'}</b><small>${ref.ingalls ? `a bin service, over its ${ref.ingalls.days} route days ◇` : 'no route days'}</small></div>
-    <div class="h2-kpi"><span>The book, on the road</span><b>${ref.book ? '$' + ref.book.perService.toFixed(2) : '—'}</b><small>${ref.book ? `a service, ${ref.book.services.toLocaleString('en-US')} services on ${ref.days} route days ◇` : ''}</small></div>
+    <div class="h2-kpi lead"><span>A route day</span><b>${money0(ref.routeDay || 0)}</b><small>drivers, vehicles and route software ÷ route days est.</small></div>
+    <div class="h2-kpi"><span>Ingalls, on the road</span><b>${ref.ingalls ? '$' + ref.ingalls.perService.toFixed(2) : '—'}</b><small>${ref.ingalls ? `a bin service, over its ${ref.ingalls.days} route days est.` : 'no route days'}</small></div>
+    <div class="h2-kpi"><span>The book, on the road</span><b>${ref.book ? '$' + ref.book.perService.toFixed(2) : '—'}</b><small>${ref.book ? `a service, ${ref.book.services.toLocaleString('en-US')} services on ${ref.days} route days est.` : ''}</small></div>
     <div class="h2-kpi"><span>The day as the model sees it</span><b>${ref.avgRoundHours ? ref.avgRoundHours.toFixed(1) + ' hours' : '—'}</b><small>drive plus stops; a real route day runs about 8 to 9, so a short figure means the minutes are low</small></div>
   </section>`;
   const row = (k, unit, q) => {

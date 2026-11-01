@@ -232,3 +232,13 @@ button.h2-seg:hover { background: var(--tint-brand); }
   .h2-kpis.bills { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .h2-kpis.bills .gap { grid-column: auto; flex-direction: column; flex-wrap: nowrap; }
 }
+
+/* the tie-out, and an account's invoices */
+.h2-tie { display: block; margin: var(--sp-2) 0 0; font-size: var(--fs-tiny); color: var(--ink-3); }
+.h2-tie.late { color: var(--warn); font-weight: 600; }
+.inv-l { list-style: none; margin: 0 0 var(--sp-3); padding: 0; display: grid; gap: var(--sp-3); }
+.inv-h { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-2); align-items: baseline; font-size: var(--fs-sm); padding-bottom: var(--sp-1); }
+.inv-h span { color: var(--ink-3); }
+.cp-inv { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin: var(--sp-2) 0 var(--sp-4); font-size: var(--fs-label); color: var(--ink-3); }
+.cp-inv button { border: var(--hair) solid var(--rule-3); background: var(--surface); color: var(--brand); border-radius: var(--r-pill); padding: 0 var(--sp-3); font: inherit; cursor: pointer; }
+[data-inv-id] { cursor: pointer; }

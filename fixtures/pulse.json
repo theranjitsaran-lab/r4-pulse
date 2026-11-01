@@ -1,5 +1,5 @@
 {
- "snapshotAt": "2026-11-01T19:55:16.677Z",
+ "snapshotAt": "2026-11-01T20:19:06.946Z",
  "data": {
   "monthly": [
    {
@@ -3231,6 +3231,40 @@
     "date": "2026-10-30",
     "done": 49,
     "booked": 68
+   }
+  ],
+  "tieout": [
+   {
+    "month": "2026-07-01",
+    "invoices": 3899,
+    "storage": 380879.31,
+    "service": 313976.78,
+    "citadel": 71147.38,
+    "latest": "2026-07-31"
+   },
+   {
+    "month": "2026-08-01",
+    "invoices": 3945,
+    "storage": 387477.1,
+    "service": 364052.27,
+    "citadel": 89565.09,
+    "latest": "2026-08-31"
+   },
+   {
+    "month": "2026-09-01",
+    "invoices": 3969,
+    "storage": 388813.48,
+    "service": 244391.15,
+    "citadel": 22277.77,
+    "latest": "2026-09-30"
+   },
+   {
+    "month": "2026-10-01",
+    "invoices": 3967,
+    "storage": 387101.22,
+    "service": 275471.45,
+    "citadel": 24351.77,
+    "latest": "2026-10-29"
    }
   ]
  }

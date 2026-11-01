@@ -8,6 +8,7 @@ import { getJson } from '/components/data.js';
 import { playIntro } from '/components/intro.js';
 import { loadAccess, costsVisible, isAdmin } from '/components/access.js';
 import { freshStamp } from '/components/metrics.js';
+import { wireInvoices } from '/components/invoices.js';
 import { openAsk } from '/components/ask.js';
 
 const ROUTES = {
@@ -100,6 +101,8 @@ const ask = (q) => {
   const who = name === 'customer' && document.querySelector('#main h1') ? document.querySelector('#main h1').textContent.trim() : null;
   openAsk({ ask: q || null, suggestions: who ? [`How is ${who} doing, and why?`, `Is ${who} priced right against the book?`, `What else could ${who} buy?`] : (SUGGEST[nav] || SUGGEST.pulse).filter(q => costsVisible() || !/cost|margin|save most/i.test(q)) });
 };
+wireInvoices();
+
 // one Ask, in the header
 document.getElementById('mast-ask').addEventListener('click', () => ask());
 

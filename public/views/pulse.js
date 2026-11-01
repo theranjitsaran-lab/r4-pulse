@@ -42,7 +42,7 @@ export async function render(main, P) {
   const workMonth = A.latestDone.slice(0, 8) + '01';              // the month being worked now
   const daily = dailyFrom(P, A);
   const doneIn = m => daily.filter(r => r.date.startsWith(m.slice(0, 7))).reduce((t, r) => t + r.done, 0);
-  // the bill's work is last month's: its value per done service prices this month's work ◇
+  // the bill's work is last month's: its value per done service prices this month's work est.
   const perService = BN.perService;
   const X = project({ daily, latest: A.latestDone, perService, storage: BN.storage, routeDays: A.routeDays });
   const nextBill = X.bill ? X.bill.central : null;
@@ -77,9 +77,9 @@ export async function render(main, P) {
     age > 2 && { key: 'stale', line: `The data stops on ${dayMonth(A.latestDone)}, ${age} days ago; the daily refresh has not run since` },
     runCore != null && { key: 'bill', line: `${mon(billMonth)}'s bill, already known: ${moneyK(runCore)} core, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target, ${pct(runCore / last.core - 1).replace('▲ ', 'up ').replace('▼ ', 'down ')} on ${mon(last.month)}'s ${moneyK(last.core)}`,
       say: `${mon(billMonth)} bills ${moneyK(runCore)}, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target.` },
-    X.bill && { key: 'next', line: `${mon(nb)}'s bill, building from ${mon(workMonth)}'s work: about ${moneyK(X.bill.central)} ◇ (likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}), ${moneyK(TARGET - X.bill.central)} short of $1.0M; ${X.elapsed} of ${X.workdays} working days in`,
-      say: `${mon(nb)} is heading for about ${moneyK(X.bill.central)} ◇, likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}.` },
-    top2.length && { key: 'levers', line: `Biggest levers to $1.0M from existing customers: ${top2.map(x => `${x.t.toLowerCase()}, ${x.modelled ? 'up to ' : ''}${moneyK(x.v)} a month${x.modelled ? ' (a ceiling ◇)' : ''}`).join('; ')}; new business must find ${moneyK(B.newBusiness)} a month`,
+    X.bill && { key: 'next', line: `${mon(nb)}'s bill, building from ${mon(workMonth)}'s work: about ${moneyK(X.bill.central)} est. (likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}), ${moneyK(TARGET - X.bill.central)} short of $1.0M; ${X.elapsed} of ${X.workdays} working days in`,
+      say: `${mon(nb)} is heading for about ${moneyK(X.bill.central)} est., likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}.` },
+    top2.length && { key: 'levers', line: `Biggest levers to $1.0M from existing customers: ${top2.map(x => `${x.t.toLowerCase()}, ${x.modelled ? 'up to ' : ''}${moneyK(x.v)} a month${x.modelled ? ' (a ceiling est.)' : ''}`).join('; ')}; new business must find ${moneyK(B.newBusiness)} a month`,
       say: `The biggest levers: ${top2.map(x => `${x.t.charAt(0).toLowerCase() + x.t.slice(1)} (${x.modelled ? 'up to ' : ''}${moneyK(x.v)} a month)`).join(' and ')}.` },
     top && { key: 'slipping', line: `${mv.slipping} accounts are slipping; the largest is ${titleCase(top.customer)}, ${top.why}, ${moneyK(-top.d)} a month below its own run`,
       say: `${mv.slipping} accounts are slipping; the largest is ${titleCase(top.customer)}, ${top.why}.` },
@@ -104,7 +104,7 @@ export async function render(main, P) {
   const dBill = runCore != null ? runCore / last.core - 1 : null;
   const strip = `<section class="strip" data-rv>
       <a href="#customers?view=main"><span class="lab">${mon(billMonth)}'s bill</span><b>${runCore != null ? moneyK(runCore) : 'posted'}</b><small>${dBill != null ? `${pct(dBill)} on ${mon(last.month)}` : BN.source === 'pending' ? 'total with the next rebuild' : 'run not started'}</small></a>
-      <div><span class="lab">${mon(nb)}'s, building ◇</span><b>${nextBill != null ? '≈ ' + moneyK(nextBill) : '—'}</b><small>${X.bill ? `${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)} · day ${X.elapsed} of ${X.workdays}` : 'no priced month yet'}</small></div>
+      <div><span class="lab">${mon(nb)}'s, building est.</span><b>${nextBill != null ? '≈ ' + moneyK(nextBill) : '—'}</b><small>${X.bill ? `${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)} · day ${X.elapsed} of ${X.workdays}` : 'no priced month yet'}</small></div>
       <div><span class="lab">Gap to $1.0M</span><b>${moneyK(TARGET - (nextBill || B.today))}</b><small>a month, ${nextBill != null ? `at ${mon(nb)}'s pace` : 'on the six-month average'}</small></div>
       <a href="#customers?view=slipping"><span class="lab">Slipping ›</span><b>${mv.slipping}</b><small>accounts down 10% on their own run</small></a>
     </section>`;
@@ -140,17 +140,17 @@ export async function render(main, P) {
   const more = `<details class="card more" data-rv><summary><span>The route to $1.0M: existing customers could close ${moneyK(B.levers)} of the ${moneyK(gapAll)} gap</span><span class="go">›</span></summary>
       <p class="sec-s">From today's ${moneyK(B.today)} a month, the average of ${mon(B.sixFrom)} to ${mon(B.sixTo)}. Tap a lever for its accounts.</p>
       ${gapHtml(B)}
-      <div class="src">◇ cross-sell is a ceiling · prices and slipping counted halfway · ${B.stopped.accounts} stopped accounts (${moneyK(B.stopped.lost)} a month) left out, <a href="#customers?view=slipping">listed with Slipping</a></div>
+      <div class="src">est. cross-sell is a ceiling · prices and slipping counted halfway · ${B.stopped.accounts} stopped accounts (${moneyK(B.stopped.lost)} a month) left out, <a href="#customers?view=slipping">listed with Slipping</a></div>
     </details>
     <div class="also" data-rv>
-      <a href="#customers?view=margin"><b>Margin ◇</b> ${Math.round(solidPc * 100)}% on costs we are sure of; ${sure.length} account${sure.length === 1 ? '' : 's'} below cost, ${unsure.length} more under review ›</a>
+      <a href="#customers?view=margin"><b>Margin est.</b> ${Math.round(solidPc * 100)}% on costs we are sure of; ${sure.length} account${sure.length === 1 ? '' : 's'} below cost, ${unsure.length} more under review ›</a>
       <a href="#activity?tab=warehouse"><b>Warehouse</b> ${Math.round(B.overdue.boxes / 1000)}K boxes past retention review across ${B.overdue.accounts} accounts ›</a>
     </div>`;
 
   main.innerHTML = `<div class="h">${staleNote}${briefCard}${strip}${teamCard}
     <div class="split">${landCard}${moveCard}</div>
     ${more}
-    <div class="foot">Posted through ${mon(P.monthly[P.monthly.length - 1].month)} · work done through ${dayMonth(A.latestDone)} · ◇ modelled · Citadel held apart</div>
+    <div class="foot">Posted through ${mon(P.monthly[P.monthly.length - 1].month)} · work done through ${dayMonth(A.latestDone)} · est. means modelled · Citadel held apart</div>
   </div>`;
 
   // feedback on a line: useful · knew · not right; a knew or wrong line is held back for 30 days
@@ -192,7 +192,7 @@ export async function render(main, P) {
   const landTitle = vsLast != null ? `${mon(nb)}'s bill is ${word(vsLast)} ${mon(billMonth)}'s at working day ${dNow}${vsYear != null ? `, ${word(vsYear)} last year's` : ''}` : 'Where the month lands';
   landing(main.querySelector('#home-land'), {
     title: landTitle,
-    sub: `Each bill building by working day: its storage, then each day's work at ${perService ? '$' + perService.toFixed(2) : "last month's value"} a service ◇`,
+    sub: `Each bill building by working day: its storage, then each day's work at ${perService ? '$' + perService.toFixed(2) : "last month's value"} a service est.`,
     series: [
       { name: `${mon(addMonths(lyMonth, 1))} ${addMonths(lyMonth, 1).slice(0, 4)}'s bill`, cls: 'neutral faint', points: lastYear },
       { name: `${mon(billMonth)}'s bill`, cls: 'neutral', points: lastMonth },
@@ -224,7 +224,7 @@ function landing(el, o) {
     const f = o.cone.from;
     g += `<polygon class="c-area service" style="opacity:.16" points="${fx(f.day)},${fy(f.y)} ${fx(o.cone.to)},${fy(o.cone.hi)} ${fx(o.cone.to)},${fy(o.cone.lo)}"/>`;
     g += `<line class="c-line service" style="stroke-dasharray:4 4" x1="${fx(f.day)}" y1="${fy(f.y)}" x2="${fx(o.cone.to)}" y2="${fy(o.cone.c)}"/>`;
-    if (!compact) g += `<text class="c-note" x="${fx(o.cone.to) + 6}" y="${fy(o.cone.c) + 4}">≈ ${moneyK(o.cone.c)} ◇</text>`;
+    if (!compact) g += `<text class="c-note" x="${fx(o.cone.to) + 6}" y="${fy(o.cone.c) + 4}">≈ ${moneyK(o.cone.c)} est.</text>`;
   }
   for (const x of o.series) {
     g += `<polyline class="c-line ${x.cls}" points="${x.points.map(p => `${fx(p.day)},${fy(p.y)}`).join(' ')}"/>`;
@@ -232,7 +232,7 @@ function landing(el, o) {
     g += `<circle class="c-end ${x.cls}" cx="${fx(e.day)}" cy="${fy(e.y)}" r="${x.cls === 'service' ? 4 : 3}"/>`;
   }
   g += `<line class="c-cross" x1="0" x2="0" y1="${T}" y2="${H - B}" visibility="hidden"/><rect class="c-hit" x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent"/>`;
-  const key = `<div class="chart-key">${o.series.map(x => `<span><i class="k ${x.cls}"></i>${esc(x.name)}</span>`).join('')}${o.cone ? '<span><i class="k service" style="opacity:.35"></i>likely landing ◇</span>' : ''}</div>`;
+  const key = `<div class="chart-key">${o.series.map(x => `<span><i class="k ${x.cls}"></i>${esc(x.name)}</span>`).join('')}${o.cone ? '<span><i class="k service" style="opacity:.35"></i>likely landing est.</span>' : ''}</div>`;
   el.classList.add('chart');
   el.innerHTML = `<div class="chart-head"><div><h3 class="chart-title">${esc(o.title)}</h3><p class="chart-sub">${esc(o.sub)}</p></div></div>${key}
     <div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.title)}">${g}</svg><div class="c-tip" hidden></div></div><div class="src">${esc(o.source)}</div>`;
@@ -243,7 +243,7 @@ function landing(el, o) {
     const d = Math.max(1, Math.min(o.days, Math.round(((pt.clientX - r.left) * (W / r.width) - L) / (W - L - R) * (o.days - 1)) + 1));
     cross.setAttribute('x1', fx(d)); cross.setAttribute('x2', fx(d)); cross.setAttribute('visibility', 'visible');
     const rows = o.series.map(x => { const p = x.points.find(q => q.day === d); return p ? `<span><i class="k ${x.cls}"></i>${esc(x.name)} <b>${money0(p.y)}</b></span>` : null; }).filter(Boolean);
-    if (o.cone && d > o.cone.from.day) { const t = (d - o.cone.from.day) / (o.cone.to - o.cone.from.day), at = v => o.cone.from.y + (v - o.cone.from.y) * t; rows.push(`<span><i class="k service" style="opacity:.35"></i>likely ◇ <b>${moneyK(at(o.cone.lo))} to ${moneyK(at(o.cone.hi))}</b></span>`); }
+    if (o.cone && d > o.cone.from.day) { const t = (d - o.cone.from.day) / (o.cone.to - o.cone.from.day), at = v => o.cone.from.y + (v - o.cone.from.y) * t; rows.push(`<span><i class="k service" style="opacity:.35"></i>likely est. <b>${moneyK(at(o.cone.lo))} to ${moneyK(at(o.cone.hi))}</b></span>`); }
     tip.innerHTML = `<b>Working day ${d}</b>${rows.join('')}`;
     tip.style.left = Math.max(90, Math.min(r.width - 90, fx(d) / W * r.width)) + 'px'; tip.hidden = false;
   };

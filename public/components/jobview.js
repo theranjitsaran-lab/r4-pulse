@@ -62,14 +62,14 @@ export function jobHtml({ o, items, c, svcName, ctx, A }) {
   return `<div class="jv">
     <div class="jv-bars">
       <span class="lab">Billed</span><div class="jv-bar"><i class="p-rev" style="width:${rev / total * 100}%">${rev / total > 0.12 ? money0(rev) : ''}</i></div>
-      <span class="lab">Cost to serve ◇</span><div class="jv-bar">${PARTS.map(p => seg(parts[p[0]], PART_CLS[p[0]], p[1])).join('')}</div>
+      <span class="lab">Cost to serve est.</span><div class="jv-bar">${PARTS.map(p => seg(parts[p[0]], PART_CLS[p[0]], p[1])).join('')}</div>
       <span class="lab">${left >= 0 ? 'Left' : 'Short'}</span><div class="jv-bar"><i class="${left >= 0 ? 'p-left' : 'p-loss'}" style="width:${Math.abs(left) / total * 100}%">${Math.abs(left) / total > 0.12 ? money0(left) : ''}</i></div>
     </div>
     <div class="jv-key">${PARTS.filter(p => parts[p[0]] > 0.5).map(p => `<span><i class="${PART_CLS[p[0]]}"></i>${p[1]}</span>`).join('')}</div>
     <p class="jv-say">${esc(what)}${esc(basis)}</p>
     <table class="jv-tab"><tbody>
       <tr class="rev"><td>Billed</td><td class="why">${inv || '—'}</td><td class="num">${money0(rev)}</td></tr>
-      ${c.lines.map(l => `<tr><td><i class="dot ${PART_CLS[(PARTS.find(p => p[2].includes(l[0])) || [''])[0]] || ''}"></i>${esc(l[0])}${l[3] ? ' ◇' : ''}</td><td class="why">${esc(l[2])}</td><td class="num">${money0(l[1])}</td></tr>`).join('')}
+      ${c.lines.map(l => `<tr><td><i class="dot ${PART_CLS[(PARTS.find(p => p[2].includes(l[0])) || [''])[0]] || ''}"></i>${esc(l[0])}${l[3] ? ' est.' : ''}</td><td class="why">${esc(l[2])}</td><td class="num">${money0(l[1])}</td></tr>`).join('')}
       <tr class="tot"><td>${left >= 0 ? 'Left' : 'Short'}</td><td class="why"></td><td class="num ${left < 0 ? (c.real || !c.route ? 'is-bad' : 'is-warn') : ''}">${money0(left)}</td></tr>
     </tbody></table>
     <div class="jv-route"></div>
@@ -85,11 +85,11 @@ export function drawRouteBlock(el, ctx, { R, A, Z }) {
   const { day, alloc: a } = ctx;
   const c = cheaper(day, a, A.routeHistory && A.routeHistory.length ? A.routeHistory : A.routeDays, Z, A.postcodes);
   const me = a.me, nm = s => esc(title(s || '')), dens = c.density;
-  el.innerHTML = `${head(`The route that day: ${esc(routeName(day.route))} on ${dayFmt(day.date)}, ${a.stops} stop${a.stops === 1 ? '' : 's'} for ${a.visits} customer${a.visits === 1 ? '' : 's'}, about ${Math.round(a.dayMiles)} ${a.road ? 'road ' : ''}miles ◇`)}
+  el.innerHTML = `${head(`The route that day: ${esc(routeName(day.route))} on ${dayFmt(day.date)}, ${a.stops} stop${a.stops === 1 ? '' : 's'} for ${a.visits} customer${a.visits === 1 ? '' : 's'}, about ${Math.round(a.dayMiles)} ${a.road ? 'road ' : ''}miles est.`)}
     <div class="rm-grid"><div class="rm-wrap"><div class="c-tip" hidden></div></div>
       <ol class="rm-list">${day.stops.map((s, i) => `<li class="${s.mine ? 'me' : ''}" data-i="${i}"><span>${nm(s.company)}<small>${esc(s.postcode || 'no postcode')} · ${s.services} service${s.services === 1 ? '' : 's'}</small></span><span class="num">${money0(s.cost)}</span></li>`).join('')}</ol></div>
-    <p class="jv-say">The account's share of the day: <b>${money0(me.cost)}</b> ◇, ${money0(me.travel)} of travel and ${money0(me.onsite)} on site. ${a.visits < a.model.visitsDay ? `The route made ${a.visits} visit${a.visits === 1 ? '' : 's'}, fewer than the usual ${a.model.visitsDay.toFixed(2)} a day, so each carried more of it.` : `The route made ${a.visits} visits, more than the usual ${a.model.visitsDay.toFixed(2)} a day, so each carried less than the model's ${money0(a.model.perVisit)}.`}${me.services ? ` That is ${money0(me.cost / me.services)} a service for its ${me.services}.` : ''}</p>
-    ${head('What would have made it cheaper ◇')}
+    <p class="jv-say">The account's share of the day: <b>${money0(me.cost)}</b> est., ${money0(me.travel)} of travel and ${money0(me.onsite)} on site. ${a.visits < a.model.visitsDay ? `The route made ${a.visits} visit${a.visits === 1 ? '' : 's'}, fewer than the usual ${a.model.visitsDay.toFixed(2)} a day, so each carried more of it.` : `The route made ${a.visits} visits, more than the usual ${a.model.visitsDay.toFixed(2)} a day, so each carried less than the model's ${money0(a.model.perVisit)}.`}${me.services ? ` That is ${money0(me.cost / me.services)} a service for its ${me.services}.` : ''}</p>
+    ${head('What would have made it cheaper est.')}
     <ul class="rm-why">
       ${day.stops.filter(s => s.mine).length > 1 ? `<li>Its costliest stop was number ${c.n}, at ${esc(c.stop.postcode || 'an unplaced address')} (${money0(c.stop.cost)}); the rest is about that stop.</li>` : ''}
       ${c.nearby.length ? c.nearby.slice(0, 3).map(n => `<li>${esc(routeName(n.route))} was at ${esc(n.postcode)} on ${dayFmt(n.date)}, ${n.miles < 0.1 ? 'the same postcode' : `${n.miles.toFixed(1)} miles away`}: carrying the stop on that route would have saved about <b>${money0(n.saving)}</b>.</li>`).join('') : `<li>No other route came within ${NEAR_MILES} miles within ${NEAR_DAYS} days either side.</li>`}
@@ -106,7 +106,7 @@ export function drawRouteBlock(el, ctx, { R, A, Z }) {
     const g = el.querySelector(`.rm-stop[data-i="${i}"]`);
     if (!g) { tip.hidden = true; return; }
     const r = g.getBoundingClientRect(), w = wrap.getBoundingClientRect();
-    tip.innerHTML = `<b>${i + 1}. ${nm(s.company)}</b><span>${esc(s.postcode || '')} · ${s.services} service${s.services === 1 ? '' : 's'}${s.pounds ? ` · ${n0(s.pounds)} lb` : ''}</span><span>share of the day <b>${money0(s.cost)}</b> ◇</span><span>${money0(s.travel)} travel · ${money0(s.onsite)} on site</span>`;
+    tip.innerHTML = `<b>${i + 1}. ${nm(s.company)}</b><span>${esc(s.postcode || '')} · ${s.services} service${s.services === 1 ? '' : 's'}${s.pounds ? ` · ${n0(s.pounds)} lb` : ''}</span><span>share of the day <b>${money0(s.cost)}</b> est.</span><span>${money0(s.travel)} travel · ${money0(s.onsite)} on site</span>`;
     tip.style.left = Math.max(90, Math.min(w.width - 90, r.left - w.left + r.width / 2)) + 'px';
     tip.hidden = false;
     const below = r.top - w.top < w.height / 2;

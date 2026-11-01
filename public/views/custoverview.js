@@ -30,8 +30,8 @@ const ALL_COLS = [
   { k: 'last', l: 'Last month', sort: r => r.last, x: 'sales' },
   { k: 'd', l: '3 months vs own run', sort: r => r.d, x: 'sales' },
   { k: 'ytdPct', l: 'Year to date', sort: r => r.ytdPct, x: 'sales' },
-  { k: 'pc', l: 'Margin ◇', sort: r => r.pc, x: 'margin' },
-  { k: 'opp', l: 'Cross-sell ◇, a month', sort: r => r.opp, x: 'opp' },
+  { k: 'pc', l: 'Margin est.', sort: r => r.pc, x: 'margin' },
+  { k: 'opp', l: 'Cross-sell est., a month', sort: r => r.opp, x: 'opp' },
   { k: 'gap', l: 'Under the book, a year', sort: r => r.gap, x: 'gap' },
 ];
 const famCols = key => [
@@ -39,8 +39,8 @@ const famCols = key => [
   { k: 'frev', l: 'Revenue, 12 months', sort: r => r.fam[key].revenue, x: 'margin' },
   { k: 'units', l: 'Units', sort: r => r.fam[key].units },
   { k: 'price', l: 'Price a unit', sort: r => r.fam[key].price, x: 'price' },
-  { k: 'costPer', l: 'Cost a unit ◇', sort: r => r.fam[key].costPer, x: 'price' },
-  { k: 'fmargin', l: 'Margin ◇', sort: r => r.fam[key].revenue - r.fam[key].cost, x: 'margin' },
+  { k: 'costPer', l: 'Cost a unit est.', sort: r => r.fam[key].costPer, x: 'price' },
+  { k: 'fmargin', l: 'Margin est.', sort: r => r.fam[key].revenue - r.fam[key].cost, x: 'margin' },
   { k: 'fpc', l: 'Margin %', sort: r => r.fam[key].revenue > 0 ? (r.fam[key].revenue - r.fam[key].cost) / r.fam[key].revenue : null, x: 'margin' },
 ];
 
@@ -56,10 +56,10 @@ export async function render(main, C, params, tabs) {
   const crossV = B.ws.total / 12;
 
   const kpis = `<section class="h2-kpis four" data-rv>
-      <div class="h2-kpi lead"><span>${esc(mon(last.month))} billed, core</span><b>${moneyK(last.core)}</b><small>${chip(last.core / prev.core - 1)} on ${esc(mon(prev.month))}${ly ? ` · ${chip(last.core / ly.core - 1)} on a year ago` : ''}</small></div>
+      <div class="h2-kpi lead"><span>${esc(LABELS.invoiced)}, ${esc(mon(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${chip(last.core / prev.core - 1)} on ${esc(mon(prev.month))}${ly ? ` · ${chip(last.core / ly.core - 1)} on a year ago` : ''}</small></div>
       <div class="h2-kpi"><span>${LABELS.invoicedThisMonth}</span><b>${active}</b><small>${chip(active / activePrev - 1)} on the month before</small></div>
       <a class="h2-kpi" href="#customers?view=opportunities&kind=slip"><span>Slipping ›</span><b>${slip.length}</b><small>${moneyK(slipV)} a month below their own run</small></a>
-      <a class="h2-kpi" href="#customers?view=whitespace"><span>Cross-sell ◇ ›</span><b>${moneyK(crossV)}</b><small>a month, if each bought like its peers</small></a>
+      <a class="h2-kpi" href="#customers?view=whitespace"><span>Cross-sell est. ›</span><b>${moneyK(crossV)}</b><small>a month, if each bought like its peers</small></a>
     </section>`;
 
   // the book by line: one bar, each line's share of last month, with its change
@@ -92,7 +92,7 @@ export async function render(main, C, params, tabs) {
       <p class="c2-say" id="c2-say"></p>
       <div class="c2-scroll"><table class="c2-t" id="c2-t"></table></div>
       <div class="c2-more" id="c2-more"></div>
-      <div class="src">Sales as invoiced, Citadel held apart from totals ${costsVisible() ? '· margin and cost a unit ◇ are modelled; route-based costs are under review ' : ''}· price a unit is the line's revenue over the units that drive it · tap any figure for why</div>
+      <div class="src">Sales as invoiced, Citadel held apart from totals ${costsVisible() ? '· margin and cost a unit est. are modelled; route-based costs are under review ' : ''}· price a unit is the line's revenue over the units that drive it · tap any figure for why</div>
     </section>
   </div>`;
 
@@ -110,11 +110,11 @@ export async function render(main, C, params, tabs) {
     rows.sort((a, b) => { const x = val(a), y = val(b); if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; const c = col.text ? String(x).localeCompare(String(y)) : x - y; return dir === 1 ? c : -c; });
     const fname = line === 'all' ? '' : FAMS.find(f => f.key === line).name;
     const say = main.querySelector('#c2-say');
-    if (line === 'all') say.textContent = `${rows.length} ${LABELS.activeAccounts}. Sorted by ${col.l.replace(' ◇', '').toLowerCase()}.`;
+    if (line === 'all') say.textContent = `${rows.length} ${LABELS.activeAccounts}. Sorted by ${col.l.replace(' est.', '').toLowerCase()}.`;
     else {
       const units = rows[0] ? rows[0].fam[line].unit : '', withPrice = rows.filter(r => r.fam[line].price > 0);
       const below = costsVisible() ? withPrice.filter(r => r.fam[line].costPer > r.fam[line].price).length : 0;
-      say.textContent = `${rows.length} accounts buy ${fname.toLowerCase()}, priced a ${units}. ${below ? `${below} pay less than it costs to serve them ◇.` : ''} Tap a price to see it against similar accounts.`;
+      say.textContent = `${rows.length} accounts buy ${fname.toLowerCase()}, priced a ${units}. ${below ? `${below} pay less than it costs to serve them est.` : ''} Tap a price to see it against similar accounts.`;
     }
     const head = `<thead><tr>${C2.map(c => `<th class="${c.text ? 'tl' : ''}${c.k === col.k ? ' on' : ''}${c.k === 'spark' ? ' sp' : ''}" ${c.sort ? `data-sort="${c.k}" tabindex="0"` : ''}>${esc(c.l)}${c.k === col.k ? (dir === 1 ? ' ▲' : ' ▼') : ''}</th>`).join('')}</tr></thead>`;
     const cell = (r, c) => {
@@ -178,7 +178,8 @@ export async function explain(kind, r, { B, PR, line, R }) {
         ${m ? `<p class="p2-lede">The last three months averaged <b>${moneyK(m.last3)}</b> a month against its own <b>${moneyK(m.run)}</b> the year before: <b class="${m.d < 0 ? 'is-bad' : 'is-good'}">${signedK(m.d)}</b> a month${m.pct != null ? ` (${m.pct > 0 ? 'up' : 'down'} ${pct(m.pct)})` : ''}. Storage moved ${signedK(m.dStorage)}, service ${signedK(m.dService)}.</p>` : ''}
         ${peers.n && peers.move != null && m && m.pct != null ? `<p>Accounts of a similar size (${peers.n}) moved a median <b>${peers.move > 0 ? '+' : '−'}${pct(peers.move)}</b> over the same months, so this one is ${Math.abs(m.pct - peers.move) < .05 ? 'moving with the book' : m.pct < peers.move ? 'doing worse than its peers' : 'doing better than its peers'}.</p>` : ''}
         <h3>What it buys, last twelve months</h3>${bars(fam.map(([k, v]) => ({ name: FAMILY_NAMES[k] || k, v: v.revenue, label: moneyK(v.revenue) })), max)}
-        ${missing.length ? `<h3>Not bought yet ◇</h3><ul class="p2-list">${missing.map(x => `<li><b>${esc(x.name)}</b>: about ${moneyK(r.oppRow.cells[x.key].opp)} a year at ${esc(r.oppRow.cells[x.key].basis)}.</li>`).join('')}</ul>` : ''}
+        ${missing.length ? `<h3>Not bought yet est.</h3><ul class="p2-list">${missing.map(x => `<li><b>${esc(x.name)}</b>: about ${moneyK(r.oppRow.cells[x.key].opp)} a year at ${esc(r.oppRow.cells[x.key].basis)}.</li>`).join('')}</ul>` : ''}
+        ${B.months.length ? `<p class="p2-go"><a href="#" data-inv-id="${r.level1}" data-inv-m="${B.months[B.months.length - 1]}" data-inv-name="${esc(r.customer)}">See its invoices for ${esc(mon(B.months[B.months.length - 1]))} ›</a></p>` : ''}
         <p class="p2-go"><a href="#customer/${r.level1}">Open ${esc(name)} ›</a></p>`,
     });
   }
@@ -194,17 +195,17 @@ export async function explain(kind, r, { B, PR, line, R }) {
       const p = pricePosition(B, r, f.key);
       if (p && p.toMedian > 250 && p.pct < .4) todo.push(`<li><b>${esc(f.name)}</b>: pays ${unitMoney(r.fam[f.key].price, p.unit)} a ${esc(p.unit)} where ${p.n} similar accounts pay a median ${unitMoney(p.med, p.unit)}. At the median: <b>+${moneyK(p.toMedian)} a year</b>.</li>`);
     }
-    if (r.cost > 0 && travel / r.cost > .35) todo.push(`<li><b>Getting there</b> is ${pct(travel / r.cost)} of its cost ◇ (${r.visits} visits a year). Fewer, fuller visits, or a day when a route is already nearby, cuts it more than any price.</li>`);
+    if (r.cost > 0 && travel / r.cost > .35) todo.push(`<li><b>Getting there</b> is ${pct(travel / r.cost)} of its cost est. (${r.visits} visits a year). Fewer, fuller visits, or a day when a route is already nearby, cuts it more than any price.</li>`);
     if (r.revenue < 5000 && r.pc < .15) todo.push('<li><b>Small</b>: under $5,000 a year. A minimum charge is the usual fix.</li>');
     return openPop({
-      title: name, sub: `Margin ◇ ${Math.round((r.pc || 0) * 100)}%: ${money0(r.revenue)} of revenue, ${money0(r.cost)} to serve`, ask: `Why is ${name}'s margin ${Math.round((r.pc || 0) * 100)}%, and how do we improve it?`,
+      title: name, sub: `Margin est. ${Math.round((r.pc || 0) * 100)}%: ${money0(r.revenue)} of revenue, ${money0(r.cost)} to serve`, ask: `Why is ${name}'s margin ${Math.round((r.pc || 0) * 100)}%, and how do we improve it?`,
       html: `<p class="p2-verdict ${act.cls}"><b>${esc(act.tag)}</b> ${esc(act.why)}</p>
-        ${peers.pc != null ? `<p>Similar-sized accounts keep a median <b>${Math.round(peers.pc * 100)}%</b> ◇.</p>` : ''}
-        <h3>By line, last twelve months ◇</h3>
+        ${peers.pc != null ? `<p>Similar-sized accounts keep a median <b>${Math.round(peers.pc * 100)}%</b> est.</p>` : ''}
+        <h3>By line, last twelve months est.</h3>
         <table class="p2-t"><thead><tr><th class="tl">Line</th><th>Revenue</th><th>Cost</th><th>Margin</th></tr></thead><tbody>${fam.map(([k, v]) => `<tr><td class="tl">${esc(FAMILY_NAMES[k] || k)}</td><td>${money0(v.revenue)}</td><td>${money0(v.cost)}</td><td class="${v.revenue - v.cost < 0 ? 'is-bad' : ''}">${signedK(v.revenue - v.cost)}</td></tr>`).join('')}</tbody></table>
-        <h3>Where the cost goes ◇</h3>${bars(PARTS.filter(p => parts[p[0]] > 0).map(p => ({ name: p[1], v: parts[p[0]], label: moneyK(parts[p[0]]), cls: p[0] === 'route' ? 'warn' : '' })), pmax)}
+        <h3>Where the cost goes est.</h3>${bars(PARTS.filter(p => parts[p[0]] > 0).map(p => ({ name: p[1], v: parts[p[0]], label: moneyK(parts[p[0]]), cls: p[0] === 'route' ? 'warn' : '' })), pmax)}
         ${todo.length ? `<h3>What would move it</h3><ul class="p2-list">${todo.join('')}</ul>` : ''}
-        <p class="src">◇ Costs from the cost model: GL pools over twelve months of volumes, provisional; route costs under review until delivery routes are in the data.</p>
+        <p class="src">Estimates: Costs from the cost model: GL pools over twelve months of volumes, provisional; route costs under review until delivery routes are in the data.</p>
         <p class="p2-go"><a href="#customer/${r.level1}">Open ${esc(name)} ›</a></p>`,
     });
   }
@@ -224,22 +225,22 @@ export async function explain(kind, r, { B, PR, line, R }) {
         <text x="${x(f.price)}" y="50" text-anchor="${anchor}">this account, ${unitMoney(f.price, f.unit)}</text></svg>`;
     }
     return openPop({
-      title: `${name} · ${fname}`, sub: `${unitMoney(f.price, f.unit)} a ${f.unit}${f.costPer ? `; costs ${unitMoney(f.costPer, f.unit)} to serve ◇` : ''}`, ask: `Is ${name} priced right for ${fname.toLowerCase()} against similar accounts?`,
+      title: `${name} · ${fname}`, sub: `${unitMoney(f.price, f.unit)} a ${f.unit}${f.costPer ? `; costs ${unitMoney(f.costPer, f.unit)} to serve est.` : ''}`, ask: `Is ${name} priced right for ${fname.toLowerCase()} against similar accounts?`,
       html: `${p ? `<p class="p2-lede">${p.widened ? `Few accounts buy ${fname.toLowerCase()} at ${esc(name)}'s volume, so this is the whole book (${p.n}), mostly smaller accounts that pay more a unit.` : `Against ${p.n} accounts buying ${fname.toLowerCase()} at a similar volume, it pays more than <b>${pct(p.pct)}</b> of them. Their middle half pays ${unitMoney(p.p25, p.unit)} to ${unitMoney(p.p75, p.unit)}, median ${unitMoney(p.med, p.unit)}.`}</p>${strip}` : '<p>Too few accounts buy this line in the same unit to compare.</p>'}
-        <p>${f.costPer ? `It costs about <b>${unitMoney(f.costPer, f.unit)}</b> a ${esc(f.unit)} to serve ◇, so each one ${f.price >= f.costPer ? `leaves <b>${unitMoney(f.price - f.costPer, f.unit)}</b>` : `<b class="is-bad">loses ${unitMoney(f.costPer - f.price, f.unit)}</b>`}.` : ''}
+        <p>${f.costPer ? `It costs about <b>${unitMoney(f.costPer, f.unit)}</b> a ${esc(f.unit)} to serve est., so each one ${f.price >= f.costPer ? `leaves <b>${unitMoney(f.price - f.costPer, f.unit)}</b>` : `<b class="is-bad">loses ${unitMoney(f.costPer - f.price, f.unit)}</b>`}.` : ''}
         ${p && p.toMedian > 0 ? ` At its peers' median it would bill <b>+${moneyK(p.toMedian)} a year</b>.` : ''}</p>
-        ${f.lines && f.lines.length ? `<h3>The cost working ◇</h3><table class="p2-t"><tbody>${f.lines.map(l => `<tr><td class="tl">${esc(l[0])}<small>${esc(String(l[2] || '').split(/(?<=\.)\s/)[0])}</small></td><td>${money0(l[1])}</td></tr>`).join('')}</tbody></table>` : ''}
+        ${f.lines && f.lines.length ? `<h3>The cost working est.</h3><table class="p2-t"><tbody>${f.lines.map(l => `<tr><td class="tl">${esc(l[0])}<small>${esc(String(l[2] || '').split(/(?<=\.)\s/)[0])}</small></td><td>${money0(l[1])}</td></tr>`).join('')}</tbody></table>` : ''}
         ${p && !p.widened ? `<h3>Closest in volume</h3><ul class="p2-list">${p.names.map(n => `<li><a href="#customer/${n.level1}">${esc(titleCase(n.customer))}</a>: ${unitMoney(n.price, p.unit)} on ${Math.round(n.units).toLocaleString('en-US')}</li>`).join('')}</ul>` : ''}`,
     });
   }
   if (kind === 'opp') {
     const row = r.oppRow, missing = LINES.filter(x => !row.cells[x.key].have && row.cells[x.key].opp > 0);
     return openPop({
-      title: name, sub: `Could add about ${moneyK(row.opp / 12)} a month ◇`, ask: `What should we sell ${name} next, and how?`,
+      title: name, sub: `Could add about ${moneyK(row.opp / 12)} a month est.`, ask: `What should we sell ${name} next, and how?`,
       html: `<p class="p2-lede">${esc(name)} buys ${LINES.filter(x => row.cells[x.key].have).map(x => x.name.toLowerCase()).join(', ') || 'little'} today. Accounts like it also buy:</p>
         ${bars(missing.map(x => ({ name: x.name, v: row.cells[x.key].opp, label: moneyK(row.cells[x.key].opp), cls: 'opp' })), Math.max(...missing.map(x => row.cells[x.key].opp)))}
         <ul class="p2-list">${missing.map(x => `<li><b>${esc(x.name)}</b>: ${esc(row.cells[x.key].basis)}.</li>`).join('')}</ul>
-        <p class="src">◇ A ceiling at what the median comparable spends, not a forecast. <a href="#customers?view=whitespace">Every gap on the Cross-sell grid ›</a></p>`,
+        <p class="src">Estimates: A ceiling at what the median comparable spends, not a forecast. <a href="#customers?view=whitespace">Every gap on the Cross-sell grid ›</a></p>`,
     });
   }
   if (kind === 'gap') {

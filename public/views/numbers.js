@@ -3,7 +3,7 @@
 //   2. the EBITDA bridge from the QuickBooks P&L (model.gl_month, scripts/load_gl.js): revenue, cost to
 //      serve, contribution, sales, management, overheads, EBITDA before and after the owner-related
 //      and discretionary lines; an honest empty state until the first month is loaded
-//   3. gross margin by line of business ◇ from the cost model (components/margin.js)
+//   3. gross margin by line of business est. from the cost model (components/margin.js)
 // Worked out on the server (/api/view/numbers); the customer-level margin stays at contribution:
 // overheads are never spread by revenue.
 import { esc } from '/components/data.js';
@@ -23,9 +23,9 @@ export async function render(main, V) {
   const G = V.gl;
 
   const kpis = `<section class="h2-kpis four" data-rv>
-    <div class="h2-kpi lead"><span>${esc(monY(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${ly ? (Math.abs(last.core / ly.core - 1) < 0.005 ? 'level with a year ago' : `${last.core >= ly.core ? '▲' : '▼'} ${pc(Math.abs(last.core / ly.core - 1))} on a year ago`) : 'posted invoices'}</small></div>
+    <div class="h2-kpi lead"><span>Invoiced in VCK, ${esc(monY(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${ly ? (Math.abs(last.core / ly.core - 1) < 0.005 ? 'level with a year ago' : `${last.core >= ly.core ? '▲' : '▼'} ${pc(Math.abs(last.core / ly.core - 1))} on a year ago`) : 'posted invoices'}</small></div>
     <div class="h2-kpi"><span>Twelve-month average</span><b>${moneyK(avg12)}</b><small>a month, ${esc(mon(l12[0].month))} to ${esc(mon(last.month))}</small></div>
-    <a class="h2-kpi" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(V.gap.gap)}</b><small>${V.gap.next ? `on ${esc(mon(V.gap.next, { month: 'long' }))}'s bill building ◇` : 'on the latest bill'}</small></a>
+    <a class="h2-kpi" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(V.gap.gap)}</b><small>${V.gap.next ? `on ${esc(mon(V.gap.next, { month: 'long' }))}'s bill building est.` : 'on the latest bill'}</small></a>
     <div class="h2-kpi"><span>${G ? 'EBITDA, twelve months' : 'Best month of the twelve'}</span><b>${G ? moneyK(G.last12.ebitda_after) : moneyK(best.core)}</b><small>${G ? `${G.last12.revenue > 0 ? pc(G.last12.ebitda_after / G.last12.revenue) : '—'} of revenue, after discretionary` : esc(monY(best.month))}</small></div>
   </section>`;
 
@@ -33,11 +33,20 @@ export async function render(main, V) {
     <h1>Numbers</h1>
     ${kpis}
     <section class="h2-card" data-rv>
-      <div class="h2-ch"><h2>${esc(coreTitle(l12, V.target))}</h2><small>core by month, storage and service, against $1.0M</small></div>
-      <div id="nb-core"></div>
+      <div class="h2-ch"><h2>${esc(coreTitle(l12, V.target))}</h2><small>invoiced in VCK by month, core: storage and service, against $1.0M</small></div>
+      <div id="nb-core"></div>${V.tie ? `<p class="h2-tie ${V.tie.ok ? '' : 'late'}">${V.tie.ok ? `✓ ${V.tie.invoices.toLocaleString('en-US')} VCK invoices add up to ${esc(monY(V.tie.month))}` : `VCK now holds ${moneyK(V.tie.core)} on ${V.tie.invoices.toLocaleString('en-US')} invoices for ${esc(monY(V.tie.month))}: ${moneyK(Math.abs(V.tie.moved))} ${V.tie.moved > 0 ? 'posted' : 'removed'} since this was built`}</p>` : ''}
       <div class="src">Posted invoices on invoice date, storage plus service, Citadel held apart, from VCK · storage bills a month ahead, service a month behind</div>
     </section>
     <section class="h2-card" data-rv id="nb-ebitda"></section>
+    <details class="h2-card fold" data-rv><summary><h3>Why this isn't the P&amp;L</h3><span class="sub">open</span></summary>
+      <p>These figures are what was invoiced in VCK. QuickBooks' top line will not match them, and it isn't meant to. What separates the two:</p>
+      <div class="c2-scroll"><table class="q-t nb-t"><thead><tr><th>Between the two</th><th>Which is higher</th><th class="v">Amount</th></tr></thead><tbody>
+        <tr><td>Citadel, held apart from core</td><td>QuickBooks</td><td class="v">${V.citadelBridge ? `${money0(V.citadelBridge.citadel)} in ${esc(mon(V.citadelBridge.month, { month: 'long' }))}` : 'to confirm'}</td></tr>
+        <tr><td>ITAD / ARCOA settlement</td><td>QuickBooks</td><td class="v">to confirm</td></tr>
+        <tr><td>Timing: storage billed a month ahead, service a month behind</td><td>Either</td><td class="v">to confirm</td></tr>
+        <tr><td>Credits, write-offs and journals posted only in QuickBooks</td><td>VCK</td><td class="v">to confirm</td></tr>
+        <tr><td>Income outside VCK (rent, sundry)</td><td>QuickBooks</td><td class="v">to confirm</td></tr>
+      </tbody></table></div></details>
     <section class="h2-card" data-rv id="nb-margin"></section>
   </div>`;
 
@@ -114,12 +123,12 @@ function marginHtml(Mg) {
   const tot = sure.reduce((a, l) => ({ revenue: a.revenue + l.revenue, cost: a.cost + l.cost }), { revenue: 0, cost: 0 });
   const rows = Mg.lines.map(l => {
     const costed = l.cost > 0, review = ROUTE_FAMILIES.includes(l.family), m = l.revenue - l.cost;
-    return `<tr><td>${esc(l.name)}${l.family === 'bin' ? `<small>${Mg.binReal.accounts} accounts from real route days</small>` : l.family === 'movement' && Mg.deliveriesOn ? `<small>${Mg.moveReal} accounts from the route days their deliveries were placed on ◇; the rest at the average visit, under review</small>` : review ? '<small>route cost under review</small>' : !costed ? '<small>not costed</small>' : ''}</td>
+    return `<tr><td>${esc(l.name)}${l.family === 'bin' ? `<small>${Mg.binReal.accounts} accounts from real route days</small>` : l.family === 'movement' && Mg.deliveriesOn ? `<small>${Mg.moveReal} accounts from the route days their deliveries were placed on est.; the rest at the average visit, under review</small>` : review ? '<small>route cost under review</small>' : !costed ? '<small>not costed</small>' : ''}</td>
       <td class="v">${money0(l.revenue)}</td><td class="v">${costed ? money0(l.cost) : '—'}</td>
       <td class="v ${costed && m < 0 && !review ? 'is-bad' : ''}">${costed ? (m < 0 ? '−' : '') + money0(Math.abs(m)) : '—'}</td><td class="v">${costed && l.revenue > 0 ? pc(m / l.revenue) : '—'}</td></tr>`;
   }).join('');
-  return `<div class="h2-ch"><h2>Gross margin by line of business ◇</h2><small>the last twelve months, revenue less the cost to serve, every account, Citadel apart</small></div>
-    <div class="c2-scroll"><table class="q-t nb-t"><thead><tr><th>Line</th><th class="v">Revenue</th><th class="v">Cost to serve ◇</th><th class="v">Margin ◇</th><th class="v">Kept</th></tr></thead><tbody>${rows}</tbody>
+  return `<div class="h2-ch"><h2>Gross margin by line of business est.</h2><small>the last twelve months, revenue less the cost to serve, every account, Citadel apart</small></div>
+    <div class="c2-scroll"><table class="q-t nb-t"><thead><tr><th>Line</th><th class="v">Revenue</th><th class="v">Cost to serve est.</th><th class="v">Margin est.</th><th class="v">Kept</th></tr></thead><tbody>${rows}</tbody>
     <tfoot><tr><td>The costed lines<small>leaving out the lines under review and the fees</small></td><td class="v">${money0(tot.revenue)}</td><td class="v">${money0(tot.cost)}</td><td class="v">${money0(tot.revenue - tot.cost)}</td><td class="v">${pc((tot.revenue - tot.cost) / tot.revenue)}</td></tr></tfoot></table></div>
-    <div class="src">Cost to serve from the cost model (GL pools over the database's volumes, provisional) ◇ · bins from ${Mg.binReal.routeDays} real route days, ${esc(String(Mg.binReal.from))} to ${esc(String(Mg.binReal.to))}, shared by minutes, where the account has them; elsewhere the average visit · sales, management and overheads sit above this line, in the bridge, never spread across customers</div>`;
+    <div class="src">Cost to serve from the cost model (GL pools over the database's volumes, provisional) est. · bins from ${Mg.binReal.routeDays} real route days, ${esc(String(Mg.binReal.from))} to ${esc(String(Mg.binReal.to))}, shared by minutes, where the account has them; elsewhere the average visit · sales, management and overheads sit above this line, in the bridge, never spread across customers</div>`;
 }

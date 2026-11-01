@@ -58,7 +58,7 @@ export function openExplainer({ row, key, call, H, names }) {
   const d = document.createElement('dialog');
   d.className = 'xpl';
   d.innerHTML = `<div class="in">
-    <div class="top"><h2>${esc(name)} doesn't buy ${esc(lname)}. Comparable accounts would spend about ${moneyK(c.opp)} a year ◇</h2><button class="x" aria-label="Close">×</button></div>
+    <div class="top"><h2>${esc(name)} doesn't buy ${esc(lname)}. Comparable accounts would spend about ${moneyK(c.opp)} a year est.</h2><button class="x" aria-label="Close">×</button></div>
     <h3>Where the figure comes from</h3>
     <p>${esc(c.basis)}. It is the median comparable, not the best one, and never more than the account spends today.</p>
     ${peers.length ? `<table class="peers"><thead><tr><th>Comparable accounts that buy it (${c.peerCount} in all, largest shown)</th>${byBoxes ? '<th>Boxes</th><th>Spend a year</th><th>Per 1,000 boxes</th>' : '<th>Other spend</th><th>Spend a year</th><th>Per $ of other</th>'}</tr></thead><tbody>

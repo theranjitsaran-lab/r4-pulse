@@ -1,6 +1,6 @@
 // Customers › Opportunities: one ranked list of the next conversations, merging what the separate
 // lists used to show, each sized by the same function as its own list so the figures agree:
-//   cross   a line the account doesn't buy, at what comparable accounts spend (whitespace.js) ◇
+//   cross   a line the account doesn't buy, at what comparable accounts spend (whitespace.js) est.
 //   price   a service or storage under the book's median, the gap at the median (levers.js)
 //   slip    down on its own run over three months: the monthly drop, a year (levers.js)
 //   round   no rate moved in two years: the typical 8% on its service (lists.js)

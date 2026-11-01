@@ -211,7 +211,7 @@ function costToServe(family, units, opts) {
 
   const lines = [];
   let total = 0;
-  // a fourth element marks a line resting on an estimate, for the ◇ mark
+  // a fourth element marks a line resting on an estimate, for the "est." word
   const add = (name, amount, why, flag) => { lines.push(flag ? [name, amount, why, flag] : [name, amount, why]); total += amount; };
   const tpv = travelPerVisit(o.miles), opv = onSitePerVisit();
   const routeLines = (what) => {
@@ -299,7 +299,7 @@ function familyOf(name) {
   return 'movement';
 }
 
-/** Which rates are modelled rather than measured — for the ◇ mark. */
+/** Which rates are modelled rather than measured — for the "est." word. */
 function isModelled(family) {
   return family === 'bin' || family === 'itad' || family === 'movement' || family === 'shred';
 }

@@ -1,7 +1,7 @@
 // The customer table: each account's last posted month against the month before and the same month
 // last year, its year to date against last year's, and this month so far.
 //   Posted months are exact (kpi.customer_monthly, invoice date, Citadel apart).
-//   This month so far is modelled ◇: VCK prices work only at the month-end run, so it is the
+//   This month so far is modelled est.: VCK prices work only at the month-end run, so it is the
 //   account's done services this month (Veri-Shred) × its own value per done service in the weeks
 //   before (priced work ÷ done services, same days), against its done services at the same working
 //   day last month. Accounts with no priced work in those weeks take the book's value per service.
@@ -99,7 +99,7 @@ export const COLUMNS = [
 
 export function tableHtml(T, rows, { sort, dir } = {}) {
   const th = (key, label, cls = '') => `<th class="${cls}"${key ? ` data-sort="${key}" aria-sort="${sort === key ? (dir > 0 ? 'ascending' : 'descending') : 'none'}" tabindex="0"` : ''}>${label}${key && sort === key ? (dir > 0 ? ' ↑' : ' ↓') : ''}</th>`;
-  const so = `${mon(T.month)} so far ◇`;
+  const so = `${mon(T.month)} so far est.`;
   return `<table class="ctab"><thead><tr>
     ${th(null, 'Customer', 'nm')}${th('last', mon(T.last), 'n')}${th('lastPct', 'vs ' + mon(T.before), 'n')}${th('lyPct', 'vs ' + mon(T.lyMonth, 1), 'n x')}
     ${th('ytd', 'Year to date', 'n x')}${th('ytdPct', 'vs last year', 'n x')}${th('mtd', so, 'n xm')}${th('mtdPct', `vs ${mon(T.prev)}, day ${T.k}`, 'n x')}<th class="sp">13 months</th>

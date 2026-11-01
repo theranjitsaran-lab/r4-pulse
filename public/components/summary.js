@@ -31,14 +31,14 @@ export const SYSTEM = `You write the opening paragraph of R4 Pulse, a management
 
 From the facts you are given, write three to five plain sentences: where this month's bill stands, where next month's is heading, the two levers that matter most, and the one account to worry about. Lead with what changed or matters most, not with a greeting.
 
-Use only numbers that appear in the facts, written exactly as they appear there ($632K, 63%, 24). Do not calculate new figures, round differently or write numbers as words. Keep the ◇ mark after a modelled figure. British spelling, US dollars, no bullet points, no headings, no markdown. If the data is stale, say so in the first sentence.`;
+Use only numbers that appear in the facts, written exactly as they appear there ($632K, 63%, 24). Do not calculate new figures, round differently or write numbers as words. Keep the word "est." after an estimated figure. British spelling, US dollars, no bullet points, no headings, no markdown. If the data is stale, say so in the first sentence.`;
 
 // The morning email's opening: yesterday, not the month. Same rules on numbers.
 export const BRIEF_SYSTEM = `You write the first lines of a morning email for R4 Services, a Chicago records-management and shredding firm. The reader is busy and has run the business for thirty years: never tell them what they already know.
 
 From the facts you are given, write two or three plain sentences about yesterday: what was not normal, and the one thing worth doing about it today. If the facts say nothing was unusual, say so in one sentence and stop.
 
-Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures or write numbers as words. Keep the ◇ mark after a modelled figure. British spelling, US dollars, no bullet points, no headings, no markdown.`;
+Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures or write numbers as words. Keep the word "est." after an estimated figure. British spelling, US dollars, no bullet points, no headings, no markdown.`;
 
 // The new Home's summary (views/home2.js): one headline and three bullets, each bullet naming the
 // fact it comes from, so a tap opens that fact's list. Claude's reply, one item a line:
@@ -52,7 +52,7 @@ From the facts you are given (each starts with its key in square brackets), writ
 the headline: one sentence of at most 16 words saying what the month's work will bill, naming the month of the work and the month it bills in, as the month fact does. Do not mention the target or the gap to it.
 each other line: one or two short sentences, at most 30 words, starting with its key in square brackets, keeping every customer, line of business and postcode its fact names, e.g. [customer] City of Chicago is down $35K a month on its own run, driven by labour.
 
-Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. Keep the ◇ mark after a modelled figure. If the data is stale, say so in the headline. British spelling, US dollars, no markdown, no bullet characters.`;
+Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. Keep the word "est." after an estimated figure. If the data is stale, say so in the headline. British spelling, US dollars, no markdown, no bullet characters.`;
 
 export function home2SheetText(sheet) { return sheet.map(f => `- [${f.key}] ${f.line}`).join('\n'); }
 
@@ -70,4 +70,4 @@ export function templateHome2(sheet) {
 }
 
 // A line of business in one month, for its pop-out (views/home2.js): the note above the figures.
-export const LINE_SYSTEM = `You write a short note for the CEO of R4 Services, a Chicago records-management and shredding firm, about one line of business in one month. From the facts, in two or three plain sentences, say how the month compares with the month before and the trend, and name the customers driving it up and down. Use only numbers that appear in the facts, written exactly as they appear. Do not calculate new figures. Keep the ◇ mark after a modelled figure. British spelling, US dollars, no bullet points, no headings, no markdown.`;
+export const LINE_SYSTEM = `You write a short note for the CEO of R4 Services, a Chicago records-management and shredding firm, about one line of business in one month. From the facts, in two or three plain sentences, say how the month compares with the month before and the trend, and name the customers driving it up and down. Use only numbers that appear in the facts, written exactly as they appear. Do not calculate new figures. Keep the word "est." after an estimated figure. British spelling, US dollars, no bullet points, no headings, no markdown.`;

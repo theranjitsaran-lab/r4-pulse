@@ -4,7 +4,7 @@
 //   D = { P: pulse, A: activity, C: customers, M: margin, PR: pricing, CA: calls, S: storage,
 //         SG: segments, R: model/rates.js, Z: postcode centres (may be {}) }
 //
-// The month and the weeks are work done, priced ◇: Veri-Shred done services × the value of a done
+// The month and the weeks are work done, priced est.: Veri-Shred done services × the value of a done
 // service in that month (pricer, below): its own priced lines once complete, else its posted bill.
 // The month in progress is priced at last month's value per service. Invoiced revenue is never charted by week:
 // it lands when a billing run posts, not when the work is done.
@@ -22,7 +22,7 @@ const ch = (a, b) => b > 0 ? a / b - 1 : null;
 
 // The value of a done service in a month of work: its own priced lines (P.pace, by work date) when
 // the month is complete and priced from its first days; else the following month's posted core
-// service ÷ the month's done services; else the current bill's value per service ◇.
+// service ÷ the month's done services; else the current bill's value per service est.
 function pricer(P, A) {
   const BN = billNow(P, A), daily = dailyFrom(P, A), work = monthStart(A.latestDone);
   const doneIn = m => sum(daily.filter(r => r.date.startsWith(m.slice(0, 7))), r => r.done);
@@ -47,7 +47,7 @@ export function monthView(D) {
   const BN = billNow(P, A);
   const daily = dailyFrom(P, A);
   const workMonth = monthStart(A.latestDone), prevMonth = addMonths(workMonth, -1);
-  // this month's work at last month's value a service ◇; last month at its own, priced
+  // this month's work at last month's value a service est.; last month at its own, priced
   const price = pricer(P, A), perPrev = price(prevMonth), per = perPrev.v || BN.perService;
   // the next bill: this month's work as the lines price it (components/linework.js), large jobs held apart,
   // so when the month ends the bill's figure is storage plus the lines exactly. The curves below stay on
@@ -70,12 +70,12 @@ export function monthView(D) {
   };
 }
 
-// ── weeks: work done each week, priced ◇, the last n weeks to the latest done day ──
+// ── weeks: work done each week, priced est., the last n weeks to the latest done day ──
 export function weekView(D, n = 13) {
   const { P, A } = D;
   const daily = dailyFrom(P, A);
   const price = pricer(P, A), work = monthStart(A.latestDone);
-  // the month in progress at last month's value a service ◇, as the month view prices it
+  // the month in progress at last month's value a service est., as the month view prices it
   const per = m => m >= work ? { ...price(addMonths(work, -1)), own: false } : price(m);
   const monday = d => { const x = new Date(d + 'T00:00:00Z'), w = (x.getUTCDay() + 6) % 7; x.setUTCDate(x.getUTCDate() - w); return x.toISOString().slice(0, 10); };
   const weeks = new Map();
@@ -147,7 +147,7 @@ export function customerView(D) {
   return { top, rising: risingAccounts(D.C).slice(0, 5).map(row), falling: slip.slice(0, 5).map(row), slipping: slip.length };
 }
 
-// ── cross-sell: the accounts with most to buy, and which lines they don't buy yet ◇ ──
+// ── cross-sell: the accounts with most to buy, and which lines they don't buy yet est. ──
 export function crossSellView(D, n = 6) {
   const ws = buildWhitespace(D.M, { exclude: [CITADEL], top: CROSS_SELL_DEPTH });
   const rows = ws.rows.filter(r => r.opp > 0).sort((a, b) => b.opp - a.opp).slice(0, n).map(r => ({
@@ -161,7 +161,7 @@ export function crossSellView(D, n = 6) {
 }
 
 // ── route density, the sales layer: every postcode R4 visits, and where one more customer on the
-// visits already made would save most ◇ (components/jobview.js) ──
+// visits already made would save most est. (components/jobview.js) ──
 export function densityView(D, top = 8) {
   const { A, R, Z } = D;
   if (!Z || !Object.keys(Z).length) return null;
@@ -173,7 +173,7 @@ export function densityView(D, top = 8) {
   return { points, save: save.rows, saving: sum(save.rows, r => r.saving), single: single.length, days: save.days };
 }
 
-// ── destruction: what can be shredded, and what it does to the P&L ◇ ──
+// ── destruction: what can be shredded, and what it does to the P&L est. ──
 //   not refilled: the one-off fee, then the storage lost every month after;
 //   refilled: the fee, and the space taken by new boxes at the book's median rate.
 export function destructionView(D, n = 5) {
@@ -214,7 +214,7 @@ export function pointsView(D, { month: m, cust, cross, dens, lines }) {
     const dir = d == null || Math.abs(d) < 0.01 ? `level with ${mon(prev)}` : `${pc(d)} ${d > 0 ? 'ahead of' : 'behind'} ${mon(prev)}`;
     const parts = [up && `${up.name} up ${pc(up.pct)}`, down && `${down.name} down ${pc(down.pct)}`].filter(Boolean).join(', ');
     const jobs = m.next.jobCount ? ` ${m.next.jobCount} job${m.next.jobCount === 1 ? '' : 's'} (${money(m.next.jobs)}) to check.` : '';
-    const say = `${LABELS.value}: ${mon(L)} is ${dir}${at} ◇${parts ? `, ${parts}` : ''}. ${LABELS.volume}: ${m.vsLast == null ? '' : `${Math.abs(m.vsLast) < 0.02 ? 'level' : `${pc(m.vsLast)} ${m.vsLast > 0 ? 'ahead' : 'behind'}`}.`}${jobs}`;
+    const say = `${LABELS.value}: ${mon(L)} is ${dir}${at} est.${parts ? `, ${parts}` : ''}. ${LABELS.volume}: ${m.vsLast == null ? '' : `${Math.abs(m.vsLast) < 0.02 ? 'level' : `${pc(m.vsLast)} ${m.vsLast > 0 ? 'ahead' : 'behind'}`}.`}${jobs}`;
     out.push({ key: 'activity', title: 'Activity', href: '#h2-lines', bullet: true, line: say, say });
   }
   const fall = cust.falling[0];
@@ -222,19 +222,19 @@ export function pointsView(D, { month: m, cust, cross, dens, lines }) {
     const drv = D.LW ? driverOf(D, fall.level1) : null;
     const fresh = D.LW ? newestFall(D, new Set([...slippingAccounts(D.C), ...risingAccounts(D.C)].map(s => s.level1))) : null;
     const say = `${title(fall.customer)} is down ${money(fall.d)} a month in total on its own run${drv ? `, driven by ${drv.name.toLowerCase()}` : ''}.` +
-      (fresh ? ` New in ${mon(fresh.month)}: ${title(fresh.customer)} fell ${money(fresh.d)}${fresh.est ? ' ◇' : ''}${fresh.driver ? `, driven by ${fresh.driver.toLowerCase()}` : ''}.` : '');
+      (fresh ? ` New in ${mon(fresh.month)}: ${title(fresh.customer)} fell ${money(fresh.d)}${fresh.est ? ' est.' : ''}${fresh.driver ? `, driven by ${fresh.driver.toLowerCase()}` : ''}.` : '');
     out.push({ key: 'customer', title: 'Customer', href: `#customer/${fall.level1}`, bullet: true, line: say, say });
   }
   const c0 = cross.rows[0];
   if (c0) {
     const ls = c0.lines.filter(l => !l.have && l.opp > 0).map(l => l.name);
-    const say = `Cross-sell is worth up to ${money(cross.totalMonth)} a month ◇. ${title(c0.customer)} is the largest to explore: ${money(c0.opp / 12)} a month in ${ls.join(' and ')}.`;
+    const say = `Cross-sell is worth up to ${money(cross.totalMonth)} a month est. ${title(c0.customer)} is the largest to explore: ${money(c0.opp / 12)} a month in ${ls.join(' and ')}.`;
     out.push({ key: 'cross', title: 'Cross-sell opportunities', href: '#customers?view=opportunities', bullet: true, line: say, say });
   }
   // a briefing item has to be worth about $25K a year; smaller ones stay on their own screen
   const p0 = dens && dens.save[0];
   if (p0 && p0.saving >= 25000) {
-    const say = `One more bin customer in ${p0.postcode}, already on ${p0.visits} visits a year, saves about ${money(p0.saving)} a year ◇.`;
+    const say = `One more bin customer in ${p0.postcode}, already on ${p0.visits} visits a year, saves about ${money(p0.saving)} a year est.`;
     out.push({ key: 'location', title: 'Location', href: '#activity', bullet: true, line: say, say });
   }
   return out;
