@@ -1,4 +1,4 @@
-// Lines of business by month, by account, with the months VCK has not priced yet estimated ◇. No DOM:
+// Lines of business by month, by account, with the months VCK has not priced yet estimated est. No DOM:
 // Home, its pop-outs and Ask read the same figures.
 //
 // Service bills in arrears, so a month's work has no prices until the next month's run. Its work orders

@@ -77,7 +77,7 @@ export function overdueBoxes(CA, PR) {
 //            from v_monthly_storage_service)
 //   pending  posted, and not yet in this snapshot either: the total is not shown; storage carries
 //            from the latest month known
-// perService prices this month's work ◇: the bill's work (core service) ÷ the services done in its
+// perService prices this month's work est.: the bill's work (core service) ÷ the services done in its
 // work month (the month before the bill), from Veri-Shred.
 //   billNow(P, A?) → { month, source, run: { storage, service, citadel } | null, core, storage, perService }
 export function billNow(P, A) {

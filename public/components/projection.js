@@ -1,6 +1,6 @@
 // Where the month lands. The work done this month becomes next month's bill (service bills in
 // arrears; storage in advance), so the projection is in services done, priced at last month's value
-// per done service ◇:
+// per done service est.:
 //   done to date (Veri-Shred done orders)
 //   + the working days left × the median daily pace of the last six complete months
 //   = the month's services; × value per service, + the storage carried forward = next month's bill.

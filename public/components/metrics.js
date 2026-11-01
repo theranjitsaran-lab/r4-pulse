@@ -4,6 +4,7 @@ import { quantile } from './strip.js';
 
 export const LABELS = {
   invoiced: 'Invoiced in VCK',
+  veriShred: 'Done is what drivers confirmed in Veri-Shred.',
   normalDay: d => `normal for a ${d}`,
   normalRoute: 'normal for this route',
   slipping: 'still invoicing, the last 3 months at least 10% and $250 a month below the account\'s own prior 12',
@@ -55,4 +56,13 @@ export function freshStamp(h, today) {
   const late = h.done_work < lastWorkingDay(today);
   const at = h.updated ? ` · last update ${dayShort(h.updated.slice(0, 10))} ${h.updated.slice(11, 16)}` : '';
   return { late, text: `Data to ${dayShort(h.done_work)}${at}${late ? ` · late: Veri-Shred has sent no finished work since then` : ''}` };
+}
+
+// The tie-out: the latest invoiced month on screen against VCK's own invoices for that month. It holds
+// unless an invoice has been posted, changed or removed since the month's figures were built.
+export function tieOut(P) {
+  const last = P.monthly[P.monthly.length - 1], r = (P.tieout || []).find(x => x.month === last.month);
+  if (!r) return null;
+  const core = r.storage + r.service - r.citadel, moved = core - last.core;
+  return { month: last.month, invoices: r.invoices, core, shown: last.core, moved, ok: Math.abs(moved) < 1 };
 }

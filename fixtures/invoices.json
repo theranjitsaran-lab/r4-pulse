@@ -1,0 +1,3766 @@
+{
+ "snapshotAt": "2026-11-01T20:19:09.061Z",
+ "data": {
+  "rows": [
+   {
+    "level1": 6714,
+    "month": "2026-10-01",
+    "total": 24351.77,
+    "invoices": [
+     {
+      "invoice_no": "A425988",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 24351.77,
+      "total": 24351.77,
+      "lines": [
+       {
+        "invoice_no": "A425988",
+        "servcode": "S4",
+        "service": "CERTIFIED DESTRUCTION ELECTRONIC MEDIA",
+        "units": 2035,
+        "amount": 16280
+       },
+       {
+        "invoice_no": "A425988",
+        "servcode": "SR",
+        "service": "HARD DRIVE REMOVAL",
+        "units": 289,
+        "amount": 5780
+       },
+       {
+        "invoice_no": "A425988",
+        "servcode": "S6",
+        "service": "CERTIFIED DESTRUCTION PER COMPUTER HARD DRIVE",
+        "units": 289,
+        "amount": 2291.77
+       }
+      ]
+     },
+     {
+      "invoice_no": "A425987",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A425989",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A425990",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 6714,
+    "month": "2026-09-01",
+    "total": 22277.77,
+    "invoices": [
+     {
+      "invoice_no": "A422020",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 11216.15,
+      "total": 11216.15,
+      "lines": [
+       {
+        "invoice_no": "A422020",
+        "servcode": "S4",
+        "service": "CERTIFIED DESTRUCTION ELECTRONIC MEDIA",
+        "units": 1210,
+        "amount": 9680
+       },
+       {
+        "invoice_no": "A422020",
+        "servcode": "SR",
+        "service": "HARD DRIVE REMOVAL",
+        "units": 55,
+        "amount": 1100
+       },
+       {
+        "invoice_no": "A422020",
+        "servcode": "S6",
+        "service": "CERTIFIED DESTRUCTION PER COMPUTER HARD DRIVE",
+        "units": 55,
+        "amount": 436.15
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422022",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 11061.62,
+      "total": 11061.62,
+      "lines": [
+       {
+        "invoice_no": "A422022",
+        "servcode": "S4",
+        "service": "CERTIFIED DESTRUCTION ELECTRONIC MEDIA",
+        "units": 1274,
+        "amount": 10192
+       },
+       {
+        "invoice_no": "A422022",
+        "servcode": "SR",
+        "service": "HARD DRIVE REMOVAL",
+        "units": 30,
+        "amount": 600
+       },
+       {
+        "invoice_no": "A422022",
+        "servcode": "S6",
+        "service": "CERTIFIED DESTRUCTION PER COMPUTER HARD DRIVE",
+        "units": 34,
+        "amount": 269.62
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422019",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A422021",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 6714,
+    "month": "2026-08-01",
+    "total": 89565.09,
+    "invoices": [
+     {
+      "invoice_no": "A418074",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 63119.05,
+      "total": 63119.05,
+      "lines": [
+       {
+        "invoice_no": "A418074",
+        "servcode": "S4",
+        "service": "CERTIFIED DESTRUCTION ELECTRONIC MEDIA",
+        "units": 7244,
+        "amount": 57952
+       },
+       {
+        "invoice_no": "A418074",
+        "servcode": "SR",
+        "service": "HARD DRIVE REMOVAL",
+        "units": 185,
+        "amount": 3700
+       },
+       {
+        "invoice_no": "A418074",
+        "servcode": "S6",
+        "service": "CERTIFIED DESTRUCTION PER COMPUTER HARD DRIVE",
+        "units": 185,
+        "amount": 1467.05
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418072",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 25038.04,
+      "total": 25038.04,
+      "lines": [
+       {
+        "invoice_no": "A418072",
+        "servcode": "S4",
+        "service": "CERTIFIED DESTRUCTION ELECTRONIC MEDIA",
+        "units": 3032,
+        "amount": 24256
+       },
+       {
+        "invoice_no": "A418072",
+        "servcode": "SR",
+        "service": "HARD DRIVE REMOVAL",
+        "units": 28,
+        "amount": 560
+       },
+       {
+        "invoice_no": "A418072",
+        "servcode": "S6",
+        "service": "CERTIFIED DESTRUCTION PER COMPUTER HARD DRIVE",
+        "units": 28,
+        "amount": 222.04
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418073",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 1408,
+      "total": 1408,
+      "lines": [
+       {
+        "invoice_no": "A418073",
+        "servcode": "S4",
+        "service": "CERTIFIED DESTRUCTION ELECTRONIC MEDIA",
+        "units": 176,
+        "amount": 1408
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418071",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 8153,
+    "month": "2026-10-01",
+    "total": 39405.99,
+    "invoices": [
+     {
+      "invoice_no": "A426061",
+      "date": "2026-10-01",
+      "storage": 32350.89,
+      "service": 6895.01,
+      "total": 39245.9,
+      "lines": [
+       {
+        "invoice_no": "A426061",
+        "servcode": "53",
+        "service": "CUSTOMER SUPPORT/KM/COC",
+        "units": 100,
+        "amount": 4131
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "02",
+        "service": "ADDITIONAL BOXES",
+        "units": 374,
+        "amount": 800.36
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 37,
+        "amount": 425.5
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "78",
+        "service": "VCKWEB.NET STORAGE",
+        "units": 1,
+        "amount": 380
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 137,
+        "amount": 293.18
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 4,
+        "amount": 228
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 85,
+        "amount": 181.9
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "10",
+        "service": "NEW CARTON PROCESSING",
+        "units": 188,
+        "amount": 156.04
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 25,
+        "amount": 95
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "B5",
+        "service": "ROTATE 175 GALLON DESTRUCTION BIN",
+        "units": 1,
+        "amount": 80.75
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "90",
+        "service": "RUSH DELIVERY",
+        "units": 1,
+        "amount": 47.56
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 22,
+        "amount": 40.7
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 22,
+        "amount": 13.64
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "62",
+        "service": "LEGAL TRANSFER CASE BODY",
+        "units": 3,
+        "amount": 11.25
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "61",
+        "service": "LEGAL TRANSFER CASE LID",
+        "units": 3,
+        "amount": 3.57
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "29",
+        "service": "RUSH RETRIEVAL BOX IFK",
+        "units": 1,
+        "amount": 2.28
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "P2",
+        "service": "RETRIEVAL PERMANENT WITHDRAWAL",
+        "units": 1,
+        "amount": 2.14
+       },
+       {
+        "invoice_no": "A426061",
+        "servcode": "P3",
+        "service": "PERMANENT WITHDRAWAL FEE",
+        "units": 1,
+        "amount": 2.14
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426062",
+      "date": "2026-10-01",
+      "storage": 160.09,
+      "service": 0,
+      "total": 160.09,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 8153,
+    "month": "2026-09-01",
+    "total": 39690.259999999995,
+    "invoices": [
+     {
+      "invoice_no": "A422093",
+      "date": "2026-09-01",
+      "storage": 32526.44,
+      "service": 7003.73,
+      "total": 39530.17,
+      "lines": [
+       {
+        "invoice_no": "A422093",
+        "servcode": "53",
+        "service": "CUSTOMER SUPPORT/KM/COC",
+        "units": 100,
+        "amount": 4131
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "02",
+        "service": "ADDITIONAL BOXES",
+        "units": 385,
+        "amount": 823.9
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "78",
+        "service": "VCKWEB.NET STORAGE",
+        "units": 1,
+        "amount": 380
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 29,
+        "amount": 333.5
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 135,
+        "amount": 288.9
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 90,
+        "amount": 192.6
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "90",
+        "service": "RUSH DELIVERY",
+        "units": 4,
+        "amount": 190.24
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "B3",
+        "service": "ROTATE EXECUTIVE DESTRUCTION BIN",
+        "units": 4,
+        "amount": 171
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "10",
+        "service": "NEW CARTON PROCESSING",
+        "units": 206,
+        "amount": 170.98
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 36,
+        "amount": 136.8
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 25,
+        "amount": 46.25
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "62",
+        "service": "LEGAL TRANSFER CASE BODY",
+        "units": 11,
+        "amount": 41.25
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "29",
+        "service": "RUSH RETRIEVAL BOX IFK",
+        "units": 17,
+        "amount": 38.76
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "91",
+        "service": "RUSH ADDITIONAL",
+        "units": 14,
+        "amount": 29.96
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 25,
+        "amount": 15.5
+       },
+       {
+        "invoice_no": "A422093",
+        "servcode": "61",
+        "service": "LEGAL TRANSFER CASE LID",
+        "units": 11,
+        "amount": 13.09
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422094",
+      "date": "2026-09-01",
+      "storage": 160.09,
+      "service": 0,
+      "total": 160.09,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 8153,
+    "month": "2026-08-01",
+    "total": 40459.88,
+    "invoices": [
+     {
+      "invoice_no": "A418146",
+      "date": "2026-08-01",
+      "storage": 32502.23,
+      "service": 7797.56,
+      "total": 40299.79,
+      "lines": [
+       {
+        "invoice_no": "A418146",
+        "servcode": "53",
+        "service": "CUSTOMER SUPPORT/KM/COC",
+        "units": 100,
+        "amount": 4131
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "02",
+        "service": "ADDITIONAL BOXES",
+        "units": 485,
+        "amount": 1037.9
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 134,
+        "amount": 509.2
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 37.999,
+        "amount": 436.99
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "78",
+        "service": "VCKWEB.NET STORAGE",
+        "units": 1,
+        "amount": 380
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "10",
+        "service": "NEW CARTON PROCESSING",
+        "units": 416,
+        "amount": 345.28
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "90",
+        "service": "RUSH DELIVERY",
+        "units": 5,
+        "amount": 237.8
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 124,
+        "amount": 229.4
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 74,
+        "amount": 158.36
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 50,
+        "amount": 107
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 124,
+        "amount": 76.88
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "B3",
+        "service": "ROTATE EXECUTIVE DESTRUCTION BIN",
+        "units": 1,
+        "amount": 42.75
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "62",
+        "service": "LEGAL TRANSFER CASE BODY",
+        "units": 10,
+        "amount": 37.5
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "29",
+        "service": "RUSH RETRIEVAL BOX IFK",
+        "units": 15,
+        "amount": 34.2
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "91",
+        "service": "RUSH ADDITIONAL",
+        "units": 10,
+        "amount": 21.4
+       },
+       {
+        "invoice_no": "A418146",
+        "servcode": "61",
+        "service": "LEGAL TRANSFER CASE LID",
+        "units": 10,
+        "amount": 11.9
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418147",
+      "date": "2026-08-01",
+      "storage": 160.09,
+      "service": 0,
+      "total": 160.09,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 947,
+    "month": "2026-10-01",
+    "total": 41932.47,
+    "invoices": [
+     {
+      "invoice_no": "A425524",
+      "date": "2026-10-01",
+      "storage": 39583.41,
+      "service": 2349.06,
+      "total": 41932.47,
+      "lines": [
+       {
+        "invoice_no": "A425524",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 55078,
+        "amount": 1101.56
+       },
+       {
+        "invoice_no": "A425524",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 28,
+        "amount": 503.9
+       },
+       {
+        "invoice_no": "A425524",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 3,
+        "amount": 435.69
+       },
+       {
+        "invoice_no": "A425524",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 30,
+        "amount": 189
+       },
+       {
+        "invoice_no": "A425524",
+        "servcode": "90",
+        "service": "RUSH DELIVERY",
+        "units": 4,
+        "amount": 77.02
+       },
+       {
+        "invoice_no": "A425524",
+        "servcode": "02",
+        "service": "ADDITIONAL BOXES",
+        "units": 5,
+        "amount": 35.44
+       },
+       {
+        "invoice_no": "A425524",
+        "servcode": "29",
+        "service": "RUSH RETRIEVAL BOX IFK",
+        "units": 3,
+        "amount": 6.45
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 947,
+    "month": "2026-09-01",
+    "total": 42637.56,
+    "invoices": [
+     {
+      "invoice_no": "A421557",
+      "date": "2026-09-01",
+      "storage": 39569.59,
+      "service": 3067.97,
+      "total": 42637.56,
+      "lines": [
+       {
+        "invoice_no": "A421557",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 55078,
+        "amount": 1101.56
+       },
+       {
+        "invoice_no": "A421557",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 77,
+        "amount": 878.88
+       },
+       {
+        "invoice_no": "A421557",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 3,
+        "amount": 433.75
+       },
+       {
+        "invoice_no": "A421557",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 52,
+        "amount": 327.6
+       },
+       {
+        "invoice_no": "A421557",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 30,
+        "amount": 189
+       },
+       {
+        "invoice_no": "A421557",
+        "servcode": "02",
+        "service": "ADDITIONAL BOXES",
+        "units": 13,
+        "amount": 91.73
+       },
+       {
+        "invoice_no": "A421557",
+        "servcode": "P3",
+        "service": "PERMANENT WITHDRAWAL FEE",
+        "units": 5,
+        "amount": 42.8
+       },
+       {
+        "invoice_no": "A421557",
+        "servcode": "10",
+        "service": "NEW CARTON PROCESSING",
+        "units": 1,
+        "amount": 2.65
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 947,
+    "month": "2026-08-01",
+    "total": 43336.38,
+    "invoices": [
+     {
+      "invoice_no": "A417609",
+      "date": "2026-08-01",
+      "storage": 39587.18,
+      "service": 3749.2,
+      "total": 43336.38,
+      "lines": [
+       {
+        "invoice_no": "A417609",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 55078,
+        "amount": 1101.56
+       },
+       {
+        "invoice_no": "A417609",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 75,
+        "amount": 818.46
+       },
+       {
+        "invoice_no": "A417609",
+        "servcode": "S3",
+        "service": "CERTIFIED SHREDDING FEE PER LB",
+        "units": 2133,
+        "amount": 661.23
+       },
+       {
+        "invoice_no": "A417609",
+        "servcode": "S2",
+        "service": "RETRIEVAL SHREDDING",
+        "units": 100,
+        "amount": 630
+       },
+       {
+        "invoice_no": "A417609",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 40,
+        "amount": 252
+       },
+       {
+        "invoice_no": "A417609",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 24,
+        "amount": 151.2
+       },
+       {
+        "invoice_no": "A417609",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 6,
+        "amount": 38.46
+       },
+       {
+        "invoice_no": "A417609",
+        "servcode": "02",
+        "service": "ADDITIONAL BOXES",
+        "units": 4,
+        "amount": 27.72
+       },
+       {
+        "invoice_no": "A417609",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 6,
+        "amount": 24
+       },
+       {
+        "invoice_no": "A417609",
+        "servcode": "10",
+        "service": "NEW CARTON PROCESSING",
+        "units": 9,
+        "amount": 23.85
+       },
+       {
+        "invoice_no": "A417609",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 6,
+        "amount": 16.56
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 3507,
+    "month": "2026-10-01",
+    "total": 15295.67,
+    "invoices": [
+     {
+      "invoice_no": "A425650",
+      "date": "2026-10-01",
+      "storage": 2711.68,
+      "service": 12583.99,
+      "total": 15295.67,
+      "lines": [
+       {
+        "invoice_no": "A425650",
+        "servcode": "B3",
+        "service": "ROTATE EXECUTIVE DESTRUCTION BIN",
+        "units": 69,
+        "amount": 5668.88
+       },
+       {
+        "invoice_no": "A425650",
+        "servcode": "B6",
+        "service": "EXECUTIVE BIN - UNDER DESK",
+        "units": 66,
+        "amount": 4802.54
+       },
+       {
+        "invoice_no": "A425650",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 64072,
+        "amount": 1281.44
+       },
+       {
+        "invoice_no": "A425650",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 6,
+        "amount": 751.13
+       },
+       {
+        "invoice_no": "A425650",
+        "servcode": "B4",
+        "service": "ROTATE 65  GALLON DESTRUCTION BIN",
+        "units": 1,
+        "amount": 80
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 3507,
+    "month": "2026-09-01",
+    "total": 14767.1,
+    "invoices": [
+     {
+      "invoice_no": "A421683",
+      "date": "2026-09-01",
+      "storage": 2712.06,
+      "service": 12055.04,
+      "total": 14767.1,
+      "lines": [
+       {
+        "invoice_no": "A421683",
+        "servcode": "B3",
+        "service": "ROTATE EXECUTIVE DESTRUCTION BIN",
+        "units": 65,
+        "amount": 5317.14
+       },
+       {
+        "invoice_no": "A421683",
+        "servcode": "B6",
+        "service": "EXECUTIVE BIN - UNDER DESK",
+        "units": 65,
+        "amount": 4708.67
+       },
+       {
+        "invoice_no": "A421683",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 64072,
+        "amount": 1281.44
+       },
+       {
+        "invoice_no": "A421683",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 6,
+        "amount": 747.79
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 3507,
+    "month": "2026-08-01",
+    "total": 14052.5,
+    "invoices": [
+     {
+      "invoice_no": "A417734",
+      "date": "2026-08-01",
+      "storage": 2706.12,
+      "service": 11346.38,
+      "total": 14052.5,
+      "lines": [
+       {
+        "invoice_no": "A417734",
+        "servcode": "B3",
+        "service": "ROTATE EXECUTIVE DESTRUCTION BIN",
+        "units": 59,
+        "amount": 4777.03
+       },
+       {
+        "invoice_no": "A417734",
+        "servcode": "B6",
+        "service": "EXECUTIVE BIN - UNDER DESK",
+        "units": 64,
+        "amount": 4553.47
+       },
+       {
+        "invoice_no": "A417734",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 64072,
+        "amount": 1281.44
+       },
+       {
+        "invoice_no": "A417734",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 6,
+        "amount": 734.44
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 9703,
+    "month": "2026-10-01",
+    "total": 39988.48,
+    "invoices": [
+     {
+      "invoice_no": "A426216",
+      "date": "2026-10-01",
+      "storage": 7367.83,
+      "service": 32620.65,
+      "total": 39988.48,
+      "lines": [
+       {
+        "invoice_no": "A426216",
+        "servcode": "S3",
+        "service": "CERTIFIED SHREDDING FEE PER LB",
+        "units": 90890,
+        "amount": 22722.5
+       },
+       {
+        "invoice_no": "A426216",
+        "servcode": "S2",
+        "service": "RETRIEVAL SHREDDING",
+        "units": 2990,
+        "amount": 9867
+       },
+       {
+        "invoice_no": "A426216",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 1,
+        "amount": 31.15
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 9703,
+    "month": "2026-09-01",
+    "total": 7527.5,
+    "invoices": [
+     {
+      "invoice_no": "A422249",
+      "date": "2026-09-01",
+      "storage": 7527.5,
+      "service": 0,
+      "total": 7527.5,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 9703,
+    "month": "2026-08-01",
+    "total": 30256.92,
+    "invoices": [
+     {
+      "invoice_no": "A418302",
+      "date": "2026-08-01",
+      "storage": 6755.19,
+      "service": 23501.73,
+      "total": 30256.92,
+      "lines": [
+       {
+        "invoice_no": "A418302",
+        "servcode": "S3",
+        "service": "CERTIFIED SHREDDING FEE PER LB",
+        "units": 64892,
+        "amount": 16223
+       },
+       {
+        "invoice_no": "A418302",
+        "servcode": "S2",
+        "service": "RETRIEVAL SHREDDING",
+        "units": 2103,
+        "amount": 6939.9
+       },
+       {
+        "invoice_no": "A418302",
+        "servcode": "Z4",
+        "service": "IMAGE DOCUMENT SCAN",
+        "units": 1468,
+        "amount": 190.84
+       },
+       {
+        "invoice_no": "A418302",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 20,
+        "amount": 87.49
+       },
+       {
+        "invoice_no": "A418302",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 19,
+        "amount": 46.55
+       },
+       {
+        "invoice_no": "A418302",
+        "servcode": "33",
+        "service": "RETURN/BOX",
+        "units": 3,
+        "amount": 7.35
+       },
+       {
+        "invoice_no": "A418302",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 2,
+        "amount": 6.6
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 1,
+    "month": "2026-10-01",
+    "total": 16464.33,
+    "invoices": [
+     {
+      "invoice_no": "A425490",
+      "date": "2026-10-01",
+      "storage": 15364.68,
+      "service": 1099.65,
+      "total": 16464.33,
+      "lines": [
+       {
+        "invoice_no": "A425490",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 23047,
+        "amount": 460.94
+       },
+       {
+        "invoice_no": "A425490",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 100,
+        "amount": 389.11
+       },
+       {
+        "invoice_no": "A425490",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 73,
+        "amount": 147.46
+       },
+       {
+        "invoice_no": "A425490",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 18,
+        "amount": 36.36
+       },
+       {
+        "invoice_no": "A425490",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 5,
+        "amount": 25.35
+       },
+       {
+        "invoice_no": "A425490",
+        "servcode": "10",
+        "service": "NEW CARTON PROCESSING",
+        "units": 9,
+        "amount": 15.21
+       },
+       {
+        "invoice_no": "A425490",
+        "servcode": "02",
+        "service": "ADDITIONAL BOXES",
+        "units": 4,
+        "amount": 11.38
+       },
+       {
+        "invoice_no": "A425490",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 5,
+        "amount": 7.6
+       },
+       {
+        "invoice_no": "A425490",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 5,
+        "amount": 4.95
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 1,
+    "month": "2026-09-01",
+    "total": 16360.88,
+    "invoices": [
+     {
+      "invoice_no": "A421523",
+      "date": "2026-09-01",
+      "storage": 15362.62,
+      "service": 998.26,
+      "total": 16360.88,
+      "lines": [
+       {
+        "invoice_no": "A421523",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 23047,
+        "amount": 460.94
+       },
+       {
+        "invoice_no": "A421523",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 75,
+        "amount": 300.16
+       },
+       {
+        "invoice_no": "A421523",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 61,
+        "amount": 123.22
+       },
+       {
+        "invoice_no": "A421523",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 3,
+        "amount": 68.21
+       },
+       {
+        "invoice_no": "A421523",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 11,
+        "amount": 22.22
+       },
+       {
+        "invoice_no": "A421523",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 3,
+        "amount": 15.21
+       },
+       {
+        "invoice_no": "A421523",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 3,
+        "amount": 4.56
+       },
+       {
+        "invoice_no": "A421523",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 3,
+        "amount": 2.97
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 1,
+    "month": "2026-08-01",
+    "total": 16297.65,
+    "invoices": [
+     {
+      "invoice_no": "A417575",
+      "date": "2026-08-01",
+      "storage": 15362.2,
+      "service": 935.45,
+      "total": 16297.65,
+      "lines": [
+       {
+        "invoice_no": "A417575",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 23047,
+        "amount": 460.94
+       },
+       {
+        "invoice_no": "A417575",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 35,
+        "amount": 177.45
+       },
+       {
+        "invoice_no": "A417575",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 6,
+        "amount": 133.98
+       },
+       {
+        "invoice_no": "A417575",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 34,
+        "amount": 51.68
+       },
+       {
+        "invoice_no": "A417575",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 10,
+        "amount": 43.93
+       },
+       {
+        "invoice_no": "A417575",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 34,
+        "amount": 33.66
+       },
+       {
+        "invoice_no": "A417575",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 9,
+        "amount": 18.18
+       },
+       {
+        "invoice_no": "A417575",
+        "servcode": "62",
+        "service": "LEGAL TRANSFER CASE BODY",
+        "units": 1,
+        "amount": 4.63
+       },
+       {
+        "invoice_no": "A417575",
+        "servcode": "61",
+        "service": "LEGAL TRANSFER CASE LID",
+        "units": 1,
+        "amount": 1.61
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 9993,
+    "month": "2026-10-01",
+    "total": 18092.34,
+    "invoices": [
+     {
+      "invoice_no": "A427949",
+      "date": "2026-10-01",
+      "storage": 14579.13,
+      "service": 3513.21,
+      "total": 18092.34,
+      "lines": [
+       {
+        "invoice_no": "A427949",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 900,
+        "amount": 1656
+       },
+       {
+        "invoice_no": "A427949",
+        "servcode": "FU",
+        "service": "MONTHLY FUEL SURCHARGE",
+        "units": 1,
+        "amount": 639.63
+       },
+       {
+        "invoice_no": "A427949",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 900,
+        "amount": 567
+       },
+       {
+        "invoice_no": "A427949",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 21,
+        "amount": 282.04
+       },
+       {
+        "invoice_no": "A427949",
+        "servcode": "10",
+        "service": "NEW CARTON PROCESSING",
+        "units": 240,
+        "amount": 220.8
+       },
+       {
+        "invoice_no": "A427949",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 50,
+        "amount": 83
+       },
+       {
+        "invoice_no": "A427949",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 47,
+        "amount": 78.02
+       },
+       {
+        "invoice_no": "A427949",
+        "servcode": "33",
+        "service": "RETURN/BOX",
+        "units": -8,
+        "amount": -13.28
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 9993,
+    "month": "2026-09-01",
+    "total": 15348.04,
+    "invoices": [
+     {
+      "invoice_no": "A423982",
+      "date": "2026-09-01",
+      "storage": 14527.78,
+      "service": 820.26,
+      "total": 15348.04,
+      "lines": [
+       {
+        "invoice_no": "A423982",
+        "servcode": "FU",
+        "service": "MONTHLY FUEL SURCHARGE",
+        "units": 1,
+        "amount": 639.63
+       },
+       {
+        "invoice_no": "A423982",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 9,
+        "amount": 120.87
+       },
+       {
+        "invoice_no": "A423982",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 33,
+        "amount": 54.78
+       },
+       {
+        "invoice_no": "A423982",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 3,
+        "amount": 4.98
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 9993,
+    "month": "2026-08-01",
+    "total": 15555.5,
+    "invoices": [
+     {
+      "invoice_no": "A420032",
+      "date": "2026-08-01",
+      "storage": 14528.35,
+      "service": 1027.15,
+      "total": 15555.5,
+      "lines": [
+       {
+        "invoice_no": "A420032",
+        "servcode": "FU",
+        "service": "MONTHLY FUEL SURCHARGE",
+        "units": 1,
+        "amount": 639.63
+       },
+       {
+        "invoice_no": "A420032",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 13,
+        "amount": 174.6
+       },
+       {
+        "invoice_no": "A420032",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 72,
+        "amount": 119.52
+       },
+       {
+        "invoice_no": "A420032",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 47,
+        "amount": 78.02
+       },
+       {
+        "invoice_no": "A420032",
+        "servcode": "P3",
+        "service": "PERMANENT WITHDRAWAL FEE",
+        "units": 2,
+        "amount": 8.02
+       },
+       {
+        "invoice_no": "A420032",
+        "servcode": "10",
+        "service": "NEW CARTON PROCESSING",
+        "units": 8,
+        "amount": 7.36
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 2948,
+    "month": "2026-10-01",
+    "total": 12094.55,
+    "invoices": [
+     {
+      "invoice_no": "A425622",
+      "date": "2026-10-01",
+      "storage": 1969.29,
+      "service": 10125.26,
+      "total": 12094.55,
+      "lines": [
+       {
+        "invoice_no": "A425622",
+        "servcode": "B3",
+        "service": "ROTATE EXECUTIVE DESTRUCTION BIN",
+        "units": 94,
+        "amount": 9743.2
+       },
+       {
+        "invoice_no": "A425622",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 1,
+        "amount": 186.28
+       },
+       {
+        "invoice_no": "A425622",
+        "servcode": "78",
+        "service": "VCKWEB.NET STORAGE",
+        "units": 5592,
+        "amount": 111.84
+       },
+       {
+        "invoice_no": "A425622",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 4,
+        "amount": 73.98
+       },
+       {
+        "invoice_no": "A425622",
+        "servcode": "10",
+        "service": "NEW CARTON PROCESSING",
+        "units": 3,
+        "amount": 9.96
+       }
+      ]
+     },
+     {
+      "invoice_no": "A425623",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 2948,
+    "month": "2026-09-01",
+    "total": 12334.75,
+    "invoices": [
+     {
+      "invoice_no": "A421655",
+      "date": "2026-09-01",
+      "storage": 1966.71,
+      "service": 10368.04,
+      "total": 12334.75,
+      "lines": [
+       {
+        "invoice_no": "A421655",
+        "servcode": "B3",
+        "service": "ROTATE EXECUTIVE DESTRUCTION BIN",
+        "units": 95,
+        "amount": 9869.47
+       },
+       {
+        "invoice_no": "A421655",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 2,
+        "amount": 347.74
+       },
+       {
+        "invoice_no": "A421655",
+        "servcode": "78",
+        "service": "VCKWEB.NET STORAGE",
+        "units": 5592,
+        "amount": 111.84
+       },
+       {
+        "invoice_no": "A421655",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 4,
+        "amount": 22
+       },
+       {
+        "invoice_no": "A421655",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 4,
+        "amount": 13.36
+       }
+      ]
+     },
+     {
+      "invoice_no": "A421656",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 2948,
+    "month": "2026-08-01",
+    "total": 38761.75,
+    "invoices": [
+     {
+      "invoice_no": "A417706",
+      "date": "2026-08-01",
+      "storage": 1966.07,
+      "service": 36795.68,
+      "total": 38761.75,
+      "lines": [
+       {
+        "invoice_no": "A417706",
+        "servcode": "S3",
+        "service": "CERTIFIED SHREDDING FEE PER LB",
+        "units": 27852,
+        "amount": 13090.44
+       },
+       {
+        "invoice_no": "A417706",
+        "servcode": "S1",
+        "service": "DESTRUCTION PULL - SHREDDING",
+        "units": 809,
+        "amount": 11714.98
+       },
+       {
+        "invoice_no": "A417706",
+        "servcode": "B3",
+        "service": "ROTATE EXECUTIVE DESTRUCTION BIN",
+        "units": 115,
+        "amount": 11657.2
+       },
+       {
+        "invoice_no": "A417706",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 1,
+        "amount": 182.14
+       },
+       {
+        "invoice_no": "A417706",
+        "servcode": "78",
+        "service": "VCKWEB.NET STORAGE",
+        "units": 5592,
+        "amount": 111.84
+       },
+       {
+        "invoice_no": "A417706",
+        "servcode": "62",
+        "service": "LEGAL TRANSFER CASE BODY",
+        "units": 2,
+        "amount": 16.04
+       },
+       {
+        "invoice_no": "A417706",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 2,
+        "amount": 13.4
+       },
+       {
+        "invoice_no": "A417706",
+        "servcode": "61",
+        "service": "LEGAL TRANSFER CASE LID",
+        "units": 2,
+        "amount": 7.26
+       }
+      ]
+     },
+     {
+      "invoice_no": "A417707",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 6382,
+    "month": "2026-10-01",
+    "total": 12863.22,
+    "invoices": [
+     {
+      "invoice_no": "A425973",
+      "date": "2026-10-01",
+      "storage": 11430.5,
+      "service": 1432.72,
+      "total": 12863.22,
+      "lines": [
+       {
+        "invoice_no": "A425973",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 10,
+        "amount": 424.4
+       },
+       {
+        "invoice_no": "A425973",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 7,
+        "amount": 408.45
+       },
+       {
+        "invoice_no": "A425973",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 14,
+        "amount": 297.08
+       },
+       {
+        "invoice_no": "A425973",
+        "servcode": "90",
+        "service": "RUSH DELIVERY",
+        "units": 2,
+        "amount": 159.14
+       },
+       {
+        "invoice_no": "A425973",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 33,
+        "amount": 122.43
+       },
+       {
+        "invoice_no": "A425973",
+        "servcode": "22",
+        "service": "RETRIEVAL/BOX RUSH",
+        "units": 1,
+        "amount": 21.22
+       }
+      ]
+     },
+     {
+      "invoice_no": "A429448",
+      "date": "2026-10-29",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 6382,
+    "month": "2026-09-01",
+    "total": 12867.12,
+    "invoices": [
+     {
+      "invoice_no": "A422005",
+      "date": "2026-09-01",
+      "storage": 11437.02,
+      "service": 1430.1,
+      "total": 12867.12,
+      "lines": [
+       {
+        "invoice_no": "A422005",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 12,
+        "amount": 509.28
+       },
+       {
+        "invoice_no": "A422005",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 22,
+        "amount": 466.84
+       },
+       {
+        "invoice_no": "A422005",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 6,
+        "amount": 350.1
+       },
+       {
+        "invoice_no": "A422005",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 28,
+        "amount": 103.88
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 6382,
+    "month": "2026-08-01",
+    "total": 12842.79,
+    "invoices": [
+     {
+      "invoice_no": "A418057",
+      "date": "2026-08-01",
+      "storage": 11069.91,
+      "service": 1772.88,
+      "total": 12842.79,
+      "lines": [
+       {
+        "invoice_no": "A418057",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 11,
+        "amount": 453.2
+       },
+       {
+        "invoice_no": "A418057",
+        "servcode": "62",
+        "service": "LEGAL TRANSFER CASE BODY",
+        "units": 75,
+        "amount": 425.25
+       },
+       {
+        "invoice_no": "A418057",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 16,
+        "amount": 329.6
+       },
+       {
+        "invoice_no": "A418057",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 5,
+        "amount": 283.25
+       },
+       {
+        "invoice_no": "A418057",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 78,
+        "amount": 281.58
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 6008,
+    "month": "2026-10-01",
+    "total": 35610.12,
+    "invoices": [
+     {
+      "invoice_no": "A425783",
+      "date": "2026-10-01",
+      "storage": 3446.9,
+      "service": 32163.22,
+      "total": 35610.12,
+      "lines": [
+       {
+        "invoice_no": "A425783",
+        "servcode": "S3",
+        "service": "CERTIFIED SHREDDING FEE PER LB",
+        "units": 61208,
+        "amount": 21422.8
+       },
+       {
+        "invoice_no": "A425783",
+        "servcode": "S2",
+        "service": "RETRIEVAL SHREDDING",
+        "units": 2186,
+        "amount": 8153.78
+       },
+       {
+        "invoice_no": "A425783",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 122,
+        "amount": 696.86
+       },
+       {
+        "invoice_no": "A425783",
+        "servcode": "B3",
+        "service": "ROTATE EXECUTIVE DESTRUCTION BIN",
+        "units": 9,
+        "amount": 681.47
+       },
+       {
+        "invoice_no": "A425783",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 18461,
+        "amount": 369.22
+       },
+       {
+        "invoice_no": "A425783",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 60,
+        "amount": 336.6
+       },
+       {
+        "invoice_no": "A425783",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 2,
+        "amount": 274.24
+       },
+       {
+        "invoice_no": "A425783",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 58,
+        "amount": 216.34
+       },
+       {
+        "invoice_no": "A425783",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 1,
+        "amount": 5.61
+       },
+       {
+        "invoice_no": "A425783",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 1,
+        "amount": 2.9
+       },
+       {
+        "invoice_no": "A425783",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 1,
+        "amount": 2.81
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 6008,
+    "month": "2026-09-01",
+    "total": 10457.07,
+    "invoices": [
+     {
+      "invoice_no": "A421815",
+      "date": "2026-09-01",
+      "storage": 4924.94,
+      "service": 5532.13,
+      "total": 10457.07,
+      "lines": [
+       {
+        "invoice_no": "A421815",
+        "servcode": "S3",
+        "service": "CERTIFIED SHREDDING FEE PER LB",
+        "units": 7560,
+        "amount": 2646
+       },
+       {
+        "invoice_no": "A421815",
+        "servcode": "S2",
+        "service": "RETRIEVAL SHREDDING",
+        "units": 270,
+        "amount": 1007.1
+       },
+       {
+        "invoice_no": "A421815",
+        "servcode": "B3",
+        "service": "ROTATE EXECUTIVE DESTRUCTION BIN",
+        "units": 7,
+        "amount": 532.49
+       },
+       {
+        "invoice_no": "A421815",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 18461,
+        "amount": 369.22
+       },
+       {
+        "invoice_no": "A421815",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 108,
+        "amount": 303.48
+       },
+       {
+        "invoice_no": "A421815",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 101,
+        "amount": 292.9
+       },
+       {
+        "invoice_no": "A421815",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 1,
+        "amount": 146.85
+       },
+       {
+        "invoice_no": "A421815",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 13,
+        "amount": 126.31
+       },
+       {
+        "invoice_no": "A421815",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 11,
+        "amount": 41.03
+       },
+       {
+        "invoice_no": "A421815",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 1,
+        "amount": 5.61
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 6008,
+    "month": "2026-08-01",
+    "total": 8787.78,
+    "invoices": [
+     {
+      "invoice_no": "A417867",
+      "date": "2026-08-01",
+      "storage": 5041.93,
+      "service": 3745.85,
+      "total": 8787.78,
+      "lines": [
+       {
+        "invoice_no": "A417867",
+        "servcode": "B3",
+        "service": "ROTATE EXECUTIVE DESTRUCTION BIN",
+        "units": 18,
+        "amount": 1332.65
+       },
+       {
+        "invoice_no": "A417867",
+        "servcode": "B2",
+        "service": "ROTATE  95 GALLON DESTRUCTION BIN",
+        "units": 4,
+        "amount": 536.3
+       },
+       {
+        "invoice_no": "A417867",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 95,
+        "amount": 527.13
+       },
+       {
+        "invoice_no": "A417867",
+        "servcode": "S3",
+        "service": "CERTIFIED SHREDDING FEE PER LB",
+        "units": 1380,
+        "amount": 483
+       },
+       {
+        "invoice_no": "A417867",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 18461,
+        "amount": 369.22
+       },
+       {
+        "invoice_no": "A417867",
+        "servcode": "S2",
+        "service": "RETRIEVAL SHREDDING",
+        "units": 53,
+        "amount": 197.69
+       },
+       {
+        "invoice_no": "A417867",
+        "servcode": "10",
+        "service": "NEW CARTON PROCESSING",
+        "units": 73,
+        "amount": 170.09
+       },
+       {
+        "invoice_no": "A417867",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 13,
+        "amount": 48.49
+       },
+       {
+        "invoice_no": "A417867",
+        "servcode": "30",
+        "service": "RETURN/BOX",
+        "units": 6,
+        "amount": 33.66
+       },
+       {
+        "invoice_no": "A417867",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 4,
+        "amount": 22.44
+       },
+       {
+        "invoice_no": "A417867",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 4,
+        "amount": 11.6
+       },
+       {
+        "invoice_no": "A417867",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 4,
+        "amount": 11.24
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "level1": 1891,
+    "month": "2026-10-01",
+    "total": 9831.93,
+    "invoices": [
+     {
+      "invoice_no": "A425582",
+      "date": "2026-10-01",
+      "storage": 4434.68,
+      "service": 5397.25,
+      "total": 9831.93,
+      "lines": [
+       {
+        "invoice_no": "A425582",
+        "servcode": "S3",
+        "service": "CERTIFIED SHREDDING FEE PER LB",
+        "units": 8393,
+        "amount": 2517.9
+       },
+       {
+        "invoice_no": "A425582",
+        "servcode": "S2",
+        "service": "RETRIEVAL SHREDDING",
+        "units": 351,
+        "amount": 1639.17
+       },
+       {
+        "invoice_no": "A425582",
+        "servcode": "03",
+        "service": "DELIVERY/PICK UP OVER 80 BOXES",
+        "units": 96,
+        "amount": 480.6
+       },
+       {
+        "invoice_no": "A425582",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 18012,
+        "amount": 180.12
+       },
+       {
+        "invoice_no": "A425582",
+        "servcode": "10",
+        "service": "NEW CARTON PROCESSING",
+        "units": 96,
+        "amount": 164.16
+       },
+       {
+        "invoice_no": "A425582",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 5,
+        "amount": 145.6
+       },
+       {
+        "invoice_no": "A425582",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 51,
+        "amount": 128.01
+       },
+       {
+        "invoice_no": "A425582",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 51,
+        "amount": 57.63
+       },
+       {
+        "invoice_no": "A425582",
+        "servcode": "21",
+        "service": "RETRIEVAL/FILE",
+        "units": 12,
+        "amount": 56.04
+       },
+       {
+        "invoice_no": "A425582",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 1,
+        "amount": 4.67
+       },
+       {
+        "invoice_no": "A425582",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 1,
+        "amount": 4.32
+       }
+      ]
+     },
+     {
+      "invoice_no": "A425583",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 1891,
+    "month": "2026-09-01",
+    "total": 8653.87,
+    "invoices": [
+     {
+      "invoice_no": "A421615",
+      "date": "2026-09-01",
+      "storage": 4457.4,
+      "service": 4196.47,
+      "total": 8653.87,
+      "lines": [
+       {
+        "invoice_no": "A421615",
+        "servcode": "S3",
+        "service": "CERTIFIED SHREDDING FEE PER LB",
+        "units": 7494,
+        "amount": 2248.2
+       },
+       {
+        "invoice_no": "A421615",
+        "servcode": "S2",
+        "service": "RETRIEVAL SHREDDING",
+        "units": 321,
+        "amount": 1499.07
+       },
+       {
+        "invoice_no": "A421615",
+        "servcode": "P3",
+        "service": "PERMANENT WITHDRAWAL FEE",
+        "units": 24,
+        "amount": 184.08
+       },
+       {
+        "invoice_no": "A421615",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 18012,
+        "amount": 180.12
+       },
+       {
+        "invoice_no": "A421615",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 2,
+        "amount": 57.98
+       },
+       {
+        "invoice_no": "A421615",
+        "servcode": "21",
+        "service": "RETRIEVAL/FILE",
+        "units": 2,
+        "amount": 9.34
+       },
+       {
+        "invoice_no": "A421615",
+        "servcode": "20",
+        "service": "RETRIEVAL/BOX",
+        "units": 2,
+        "amount": 9.34
+       },
+       {
+        "invoice_no": "A421615",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 1,
+        "amount": 4.32
+       },
+       {
+        "invoice_no": "A421615",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 1,
+        "amount": 2.51
+       },
+       {
+        "invoice_no": "A421615",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 1,
+        "amount": 1.13
+       }
+      ]
+     },
+     {
+      "invoice_no": "A421616",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 1891,
+    "month": "2026-08-01",
+    "total": 11840.35,
+    "invoices": [
+     {
+      "invoice_no": "A417666",
+      "date": "2026-08-01",
+      "storage": 4631.31,
+      "service": 7209.04,
+      "total": 11840.35,
+      "lines": [
+       {
+        "invoice_no": "A417666",
+        "servcode": "S3",
+        "service": "CERTIFIED SHREDDING FEE PER LB",
+        "units": 12616,
+        "amount": 3784.8
+       },
+       {
+        "invoice_no": "A417666",
+        "servcode": "S2",
+        "service": "RETRIEVAL SHREDDING",
+        "units": 529,
+        "amount": 2470.43
+       },
+       {
+        "invoice_no": "A417666",
+        "servcode": "60",
+        "service": "STANDARD 15X12X10 BOX BODY",
+        "units": 101,
+        "amount": 253.51
+       },
+       {
+        "invoice_no": "A417666",
+        "servcode": "21",
+        "service": "RETRIEVAL/FILE",
+        "units": 47,
+        "amount": 219.49
+       },
+       {
+        "invoice_no": "A417666",
+        "servcode": "79",
+        "service": "INFOKEEPR STORAGE",
+        "units": 18012,
+        "amount": 180.12
+       },
+       {
+        "invoice_no": "A417666",
+        "servcode": "59",
+        "service": "*STANDARD 15X12X10 BOX LID",
+        "units": 101,
+        "amount": 114.13
+       },
+       {
+        "invoice_no": "A417666",
+        "servcode": "01",
+        "service": "DELIVERY/PICK-UP  CHARGE",
+        "units": 4,
+        "amount": 113.88
+       },
+       {
+        "invoice_no": "A417666",
+        "servcode": "P3",
+        "service": "PERMANENT WITHDRAWAL FEE",
+        "units": 4,
+        "amount": 30.68
+       },
+       {
+        "invoice_no": "A417666",
+        "servcode": "75",
+        "service": "REBOX CHARGE PER BOX",
+        "units": 1,
+        "amount": 4.32
+       }
+      ]
+     },
+     {
+      "invoice_no": "A417667",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 12601,
+    "month": "2026-10-01",
+    "total": 12931.98,
+    "invoices": [
+     {
+      "invoice_no": "A426487",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 11233.92,
+      "total": 11233.92,
+      "lines": [
+       {
+        "invoice_no": "A426487",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 11178.57,
+        "amount": 11178.57
+       },
+       {
+        "invoice_no": "A426487",
+        "servcode": "S4",
+        "service": "CERTIFIED DESTRUCTION ELECTRONIC MEDIA",
+        "units": 27,
+        "amount": 55.35
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426480",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 605.52,
+      "total": 605.52,
+      "lines": [
+       {
+        "invoice_no": "A426480",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 605.52,
+        "amount": 605.52
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426489",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 318.67,
+      "total": 318.67,
+      "lines": [
+       {
+        "invoice_no": "A426489",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 318.67,
+        "amount": 318.67
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426499",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 161.54,
+      "total": 161.54,
+      "lines": [
+       {
+        "invoice_no": "A426499",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 161.54,
+        "amount": 161.54
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426488",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 104.38,
+      "total": 104.38,
+      "lines": [
+       {
+        "invoice_no": "A426488",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 104.38,
+        "amount": 104.38
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426500",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 67.66,
+      "total": 67.66,
+      "lines": [
+       {
+        "invoice_no": "A426500",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 67.66,
+        "amount": 67.66
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426492",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 51.14,
+      "total": 51.14,
+      "lines": [
+       {
+        "invoice_no": "A426492",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 51.14,
+        "amount": 51.14
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426490",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 40.39,
+      "total": 40.39,
+      "lines": [
+       {
+        "invoice_no": "A426490",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 40.39,
+        "amount": 40.39
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426494",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 40.39,
+      "total": 40.39,
+      "lines": [
+       {
+        "invoice_no": "A426494",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 40.39,
+        "amount": 40.39
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426502",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 35.88,
+      "total": 35.88,
+      "lines": [
+       {
+        "invoice_no": "A426502",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 35.88,
+        "amount": 35.88
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426495",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 35.01,
+      "total": 35.01,
+      "lines": [
+       {
+        "invoice_no": "A426495",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 35.01,
+        "amount": 35.01
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426483",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 33.32,
+      "total": 33.32,
+      "lines": [
+       {
+        "invoice_no": "A426483",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 33.32,
+        "amount": 33.32
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426506",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 30.75,
+      "total": 30.75,
+      "lines": [
+       {
+        "invoice_no": "A426506",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 30.75,
+        "amount": 30.75
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426504",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 26.97,
+      "total": 26.97,
+      "lines": [
+       {
+        "invoice_no": "A426504",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 26.97,
+        "amount": 26.97
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426493",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 24.23,
+      "total": 24.23,
+      "lines": [
+       {
+        "invoice_no": "A426493",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 24.23,
+        "amount": 24.23
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426491",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 22.37,
+      "total": 22.37,
+      "lines": [
+       {
+        "invoice_no": "A426491",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 22.37,
+        "amount": 22.37
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426497",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 20.19,
+      "total": 20.19,
+      "lines": [
+       {
+        "invoice_no": "A426497",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 20.19,
+        "amount": 20.19
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426481",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 19.48,
+      "total": 19.48,
+      "lines": [
+       {
+        "invoice_no": "A426481",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 19.48,
+        "amount": 19.48
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426505",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 16.56,
+      "total": 16.56,
+      "lines": [
+       {
+        "invoice_no": "A426505",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 16.56,
+        "amount": 16.56
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426485",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 12.12,
+      "total": 12.12,
+      "lines": [
+       {
+        "invoice_no": "A426485",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 12.12,
+        "amount": 12.12
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426484",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 11.84,
+      "total": 11.84,
+      "lines": [
+       {
+        "invoice_no": "A426484",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 11.84,
+        "amount": 11.84
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426482",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 8.2,
+      "total": 8.2,
+      "lines": [
+       {
+        "invoice_no": "A426482",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 8.2,
+        "amount": 8.2
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426496",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 8.08,
+      "total": 8.08,
+      "lines": [
+       {
+        "invoice_no": "A426496",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 8.08,
+        "amount": 8.08
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426486",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 3.37,
+      "total": 3.37,
+      "lines": [
+       {
+        "invoice_no": "A426486",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 3.37,
+        "amount": 3.37
+       }
+      ]
+     },
+     {
+      "invoice_no": "A426479",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A426498",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A426501",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A426503",
+      "date": "2026-10-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 12601,
+    "month": "2026-09-01",
+    "total": 12962.73,
+    "invoices": [
+     {
+      "invoice_no": "A422519",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 11178.57,
+      "total": 11178.57,
+      "lines": [
+       {
+        "invoice_no": "A422519",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 11178.57,
+        "amount": 11178.57
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422512",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 605.52,
+      "total": 605.52,
+      "lines": [
+       {
+        "invoice_no": "A422512",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 605.52,
+        "amount": 605.52
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422521",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 318.67,
+      "total": 318.67,
+      "lines": [
+       {
+        "invoice_no": "A422521",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 318.67,
+        "amount": 318.67
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422531",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 161.54,
+      "total": 161.54,
+      "lines": [
+       {
+        "invoice_no": "A422531",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 161.54,
+        "amount": 161.54
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422520",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 104.38,
+      "total": 104.38,
+      "lines": [
+       {
+        "invoice_no": "A422520",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 104.38,
+        "amount": 104.38
+       }
+      ]
+     },
+     {
+      "invoice_no": "A425475",
+      "date": "2026-09-29",
+      "storage": 0,
+      "service": 86.1,
+      "total": 86.1,
+      "lines": [
+       {
+        "invoice_no": "A425475",
+        "servcode": "IP",
+        "service": "SHRED BINS PURGE",
+        "units": 6,
+        "amount": 86.1
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422532",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 67.66,
+      "total": 67.66,
+      "lines": [
+       {
+        "invoice_no": "A422532",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 67.66,
+        "amount": 67.66
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422524",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 51.14,
+      "total": 51.14,
+      "lines": [
+       {
+        "invoice_no": "A422524",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 51.14,
+        "amount": 51.14
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422522",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 40.39,
+      "total": 40.39,
+      "lines": [
+       {
+        "invoice_no": "A422522",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 40.39,
+        "amount": 40.39
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422526",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 40.39,
+      "total": 40.39,
+      "lines": [
+       {
+        "invoice_no": "A422526",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 40.39,
+        "amount": 40.39
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422534",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 35.88,
+      "total": 35.88,
+      "lines": [
+       {
+        "invoice_no": "A422534",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 35.88,
+        "amount": 35.88
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422527",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 35.01,
+      "total": 35.01,
+      "lines": [
+       {
+        "invoice_no": "A422527",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 35.01,
+        "amount": 35.01
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422515",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 33.32,
+      "total": 33.32,
+      "lines": [
+       {
+        "invoice_no": "A422515",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 33.32,
+        "amount": 33.32
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422538",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 30.75,
+      "total": 30.75,
+      "lines": [
+       {
+        "invoice_no": "A422538",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 30.75,
+        "amount": 30.75
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422536",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 26.97,
+      "total": 26.97,
+      "lines": [
+       {
+        "invoice_no": "A422536",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 26.97,
+        "amount": 26.97
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422525",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 24.23,
+      "total": 24.23,
+      "lines": [
+       {
+        "invoice_no": "A422525",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 24.23,
+        "amount": 24.23
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422523",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 22.37,
+      "total": 22.37,
+      "lines": [
+       {
+        "invoice_no": "A422523",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 22.37,
+        "amount": 22.37
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422529",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 20.19,
+      "total": 20.19,
+      "lines": [
+       {
+        "invoice_no": "A422529",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 20.19,
+        "amount": 20.19
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422513",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 19.48,
+      "total": 19.48,
+      "lines": [
+       {
+        "invoice_no": "A422513",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 19.48,
+        "amount": 19.48
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422537",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 16.56,
+      "total": 16.56,
+      "lines": [
+       {
+        "invoice_no": "A422537",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 16.56,
+        "amount": 16.56
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422517",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 12.12,
+      "total": 12.12,
+      "lines": [
+       {
+        "invoice_no": "A422517",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 12.12,
+        "amount": 12.12
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422516",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 11.84,
+      "total": 11.84,
+      "lines": [
+       {
+        "invoice_no": "A422516",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 11.84,
+        "amount": 11.84
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422514",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 8.2,
+      "total": 8.2,
+      "lines": [
+       {
+        "invoice_no": "A422514",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 8.2,
+        "amount": 8.2
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422528",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 8.08,
+      "total": 8.08,
+      "lines": [
+       {
+        "invoice_no": "A422528",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 8.08,
+        "amount": 8.08
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422518",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 3.37,
+      "total": 3.37,
+      "lines": [
+       {
+        "invoice_no": "A422518",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 3.37,
+        "amount": 3.37
+       }
+      ]
+     },
+     {
+      "invoice_no": "A422511",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A422530",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A422533",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A422535",
+      "date": "2026-09-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   },
+   {
+    "level1": 12601,
+    "month": "2026-08-01",
+    "total": 12824.5,
+    "invoices": [
+     {
+      "invoice_no": "A418573",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 11178.57,
+      "total": 11178.57,
+      "lines": [
+       {
+        "invoice_no": "A418573",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 11178.57,
+        "amount": 11178.57
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418566",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 605.52,
+      "total": 605.52,
+      "lines": [
+       {
+        "invoice_no": "A418566",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 605.52,
+        "amount": 605.52
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418575",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 266.54,
+      "total": 266.54,
+      "lines": [
+       {
+        "invoice_no": "A418575",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 266.54,
+        "amount": 266.54
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418585",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 161.54,
+      "total": 161.54,
+      "lines": [
+       {
+        "invoice_no": "A418585",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 161.54,
+        "amount": 161.54
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418574",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 104.38,
+      "total": 104.38,
+      "lines": [
+       {
+        "invoice_no": "A418574",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 104.38,
+        "amount": 104.38
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418586",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 67.66,
+      "total": 67.66,
+      "lines": [
+       {
+        "invoice_no": "A418586",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 67.66,
+        "amount": 67.66
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418578",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 51.14,
+      "total": 51.14,
+      "lines": [
+       {
+        "invoice_no": "A418578",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 51.14,
+        "amount": 51.14
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418576",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 40.39,
+      "total": 40.39,
+      "lines": [
+       {
+        "invoice_no": "A418576",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 40.39,
+        "amount": 40.39
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418580",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 40.39,
+      "total": 40.39,
+      "lines": [
+       {
+        "invoice_no": "A418580",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 40.39,
+        "amount": 40.39
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418588",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 35.88,
+      "total": 35.88,
+      "lines": [
+       {
+        "invoice_no": "A418588",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 35.88,
+        "amount": 35.88
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418581",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 35.01,
+      "total": 35.01,
+      "lines": [
+       {
+        "invoice_no": "A418581",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 35.01,
+        "amount": 35.01
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418569",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 33.32,
+      "total": 33.32,
+      "lines": [
+       {
+        "invoice_no": "A418569",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 33.32,
+        "amount": 33.32
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418592",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 30.75,
+      "total": 30.75,
+      "lines": [
+       {
+        "invoice_no": "A418592",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 30.75,
+        "amount": 30.75
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418590",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 26.97,
+      "total": 26.97,
+      "lines": [
+       {
+        "invoice_no": "A418590",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 26.97,
+        "amount": 26.97
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418579",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 24.23,
+      "total": 24.23,
+      "lines": [
+       {
+        "invoice_no": "A418579",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 24.23,
+        "amount": 24.23
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418577",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 22.37,
+      "total": 22.37,
+      "lines": [
+       {
+        "invoice_no": "A418577",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 22.37,
+        "amount": 22.37
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418583",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 20.19,
+      "total": 20.19,
+      "lines": [
+       {
+        "invoice_no": "A418583",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 20.19,
+        "amount": 20.19
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418567",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 19.48,
+      "total": 19.48,
+      "lines": [
+       {
+        "invoice_no": "A418567",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 19.48,
+        "amount": 19.48
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418591",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 16.56,
+      "total": 16.56,
+      "lines": [
+       {
+        "invoice_no": "A418591",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 16.56,
+        "amount": 16.56
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418571",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 12.12,
+      "total": 12.12,
+      "lines": [
+       {
+        "invoice_no": "A418571",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 12.12,
+        "amount": 12.12
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418570",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 11.84,
+      "total": 11.84,
+      "lines": [
+       {
+        "invoice_no": "A418570",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 11.84,
+        "amount": 11.84
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418568",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 8.2,
+      "total": 8.2,
+      "lines": [
+       {
+        "invoice_no": "A418568",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 8.2,
+        "amount": 8.2
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418582",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 8.08,
+      "total": 8.08,
+      "lines": [
+       {
+        "invoice_no": "A418582",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 8.08,
+        "amount": 8.08
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418572",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 3.37,
+      "total": 3.37,
+      "lines": [
+       {
+        "invoice_no": "A418572",
+        "servcode": "IR",
+        "service": "SHRED BINS MONTHLY ROTATIONS",
+        "units": 3.37,
+        "amount": 3.37
+       }
+      ]
+     },
+     {
+      "invoice_no": "A418565",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A418584",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A418587",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     },
+     {
+      "invoice_no": "A418589",
+      "date": "2026-08-01",
+      "storage": 0,
+      "service": 0,
+      "total": 0,
+      "lines": []
+     }
+    ]
+   }
+  ]
+ }
+}

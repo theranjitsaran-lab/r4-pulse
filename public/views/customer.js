@@ -48,9 +48,9 @@ export async function render(main, C, params) {
   const share = k => s ? Math.round(s[k].slice(-12).reduce((t, v) => t + v, 0) / Math.max(1, s.ltm) * 100) : null;
   const n0 = v => Math.round(v || 0).toLocaleString('en-US');
   const lede = [];
-  lede.push(`<b>${moneyK(ltm)}</b> billed in the last twelve months${s ? `, ${share('storage')}% storage and ${share('service')}% service` : ''}.`);
+  lede.push(`<b>${moneyK(ltm)}</b> invoiced in the last twelve months${s ? `, ${share('storage')}% storage and ${share('service')}% service` : ''}.`);
   if (s && s.move) lede.push(`Over the last three months it ran at ${moneyK(s.move.last3)} a month against its own ${moneyK(s.move.run)} before${Math.abs(s.move.pct || 0) >= 0.05 ? `: ${moveReason(s.move, moneyK)}` : ', about level'}.`);
-  if (costsVisible() && m && m.cost > 0) lede.push(`About ${moneyK(m.cost)} a year to serve ◇ ${m.margin >= 0 ? `leaves ${moneyK(m.margin)}${pc != null ? ` (${Math.round(pc * 100)}%)` : ''}` : `is ${moneyK(-m.margin)} more than it pays`}${routeHeavy ? ', with route costs under review' : R.routeFor && R.routeFor(id) && m.fam.bin ? ', its bins costed from its own route days' : ''}.`);
+  if (costsVisible() && m && m.cost > 0) lede.push(`About ${moneyK(m.cost)} a year to serve est. ${m.margin >= 0 ? `leaves ${moneyK(m.margin)}${pc != null ? ` (${Math.round(pc * 100)}%)` : ''}` : `is ${moneyK(-m.margin)} more than it pays`}${routeHeavy ? ', with route costs under review' : R.routeFor && R.routeFor(id) && m.fam.bin ? ', its bins costed from its own route days' : ''}.`);
   if (acct && (acct.boxes >= 1 || acct.bins)) lede.push([acct.boxes >= 1 ? `It stores ${n0(acct.boxes)} boxes` : '', acct.bins ? `${acct.boxes >= 1 ? 'and had' : 'It had'} ${n0(acct.bins)} bin services on ${n0(acct.visits)} visits` : ''].filter(Boolean).join(' ') + '.');
   if (id === CITADEL) lede.push('Citadel\'s settlements land in lumps, so it is held apart from core.');
   const summary = lede.join(' ');
@@ -96,14 +96,15 @@ export async function render(main, C, params) {
     </div>
     <p class="cp-lede">${summary}</p>
     <div class="card" id="cp-chart"></div>
+    ${s ? `<div class="cp-inv"><span>Invoices</span>${s.months.slice(-6).reverse().map(x => `<button type="button" class="chip" data-inv-id="${id}" data-inv-m="${x}" data-inv-name="${esc(s.customer)}">${new Date(x + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })}</button>`).join('')}</div>` : ''}
     <section class="card cp-opps" id="cp-opps"><div class="card-head"><h3>Open opportunities</h3><a href="#customers?view=opportunities">All opportunities ›</a></div><p class="sub">Loading…</p></section>
     <div class="grid one">
       <div class="card">
         ${!costsVisible() ? `<div class="card-head"><h3>What it buys, the last twelve months</h3></div><div id="cp-fams"><ul class="h2-pl">${fams.filter(x => x.revenue > 0).map(x => `<li class="rest"><span>${esc(FAMILY_NAMES[x.f] || x.f)}</span><b>${money0(x.revenue)}</b></li>`).join('') || '<li class="rest"><span>No priced lines in the last twelve months.</span></li>'}</ul></div>` : `<div class="card-head"><h3>Margin by line of business</h3><a href="#customers?view=margin&id=${id}">The margin drill: line, job, route ›</a></div>
-        ${fams.length ? `<div class="famhead"><span>Line</span><span>Revenue</span><span class="cost">Cost ◇</span><span>Margin</span><span></span></div>` : ''}
+        ${fams.length ? `<div class="famhead"><span>Line</span><span>Revenue</span><span class="cost">Cost est.</span><span>Margin</span><span></span></div>` : ''}
         <div id="cp-fams">${fams.map(x => {
           const p = x.revenue > 0 ? 1 - x.cost / x.revenue : null, rev = review(x.f);
-          return `<div class="fam" data-f="${x.f}"><span>${esc(FAMILY_NAMES[x.f] || x.f)}${rev ? ' <span class="chip review">under review</span>' : ''}</span><span class="r">${money0(x.revenue)}</span><span class="r cost">${x.f === 'other' ? '—' : money0(x.cost)}</span><span class="r ${p != null && p < 0 && !rev ? 'is-bad' : ''}">${x.f === 'other' || p == null ? '—' : rev ? '◇' : Math.round(p * 100) + '%'}</span><span class="go">›</span></div><div class="lines" data-for="${x.f}" hidden></div>`;
+          return `<div class="fam" data-f="${x.f}"><span>${esc(FAMILY_NAMES[x.f] || x.f)}${rev ? ' <span class="chip review">under review</span>' : ''}</span><span class="r">${money0(x.revenue)}</span><span class="r cost">${x.f === 'other' ? '—' : money0(x.cost)}</span><span class="r ${p != null && p < 0 && !rev ? 'is-bad' : ''}">${x.f === 'other' || p == null ? '—' : rev ? 'est.' : Math.round(p * 100) + '%'}</span><span class="go">›</span></div><div class="lines" data-for="${x.f}" hidden></div>`;
         }).join('') || '<p class="sub">No priced lines in the last twelve months.</p>'}</div>`}
       </div>
     </div>
@@ -135,7 +136,7 @@ export async function render(main, C, params) {
     const box = main.querySelector('#cp-opps'); if (!box) return;
     const open = V.rows.filter(r => r.status !== 'won' && r.status !== 'lost').slice(0, 5);
     const KIND = { cross: 'Cross-sell', price: 'Price gap', slip: 'Win back', round: 'Rate round', overdue: 'Overdue boxes' };
-    box.querySelector('p').outerHTML = open.length ? `<ul class="cp-opp">${open.map(r => `<li><span><b>${esc(KIND[r.kind] || r.kind)}</b>${r.owner ? ` · ${esc(r.owner)}` : ''}${r.status !== 'open' ? ` · ${esc(r.status)}` : ''}<small>${esc(r.reason)}</small></span><em>${moneyK(r.value)}${r.once ? ' once' : ''}${r.modelled ? ' ◇' : ''}</em></li>`).join('')}</ul>` : '<p class="sub">Nothing open for this customer.</p>';
+    box.querySelector('p').outerHTML = open.length ? `<ul class="cp-opp">${open.map(r => `<li><span><b>${esc(KIND[r.kind] || r.kind)}</b>${r.owner ? ` · ${esc(r.owner)}` : ''}${r.status !== 'open' ? ` · ${esc(r.status)}` : ''}<small>${esc(r.reason)}</small></span><em>${moneyK(r.value)}${r.once ? ' once' : ''}${r.modelled ? ' est.' : ''}</em></li>`).join('')}</ul>` : '<p class="sub">Nothing open for this customer.</p>';
   }).catch(() => { const box = main.querySelector('#cp-opps'); if (box) box.remove(); });
 
   if (s) {
@@ -184,8 +185,8 @@ export async function render(main, C, params) {
     const working = costs.flatMap(c => c.lines);
     box.innerHTML = `
       <div class="lp-crumb">${esc(name)} › ${esc(famName)}</div>
-      <div class="lab" style="margin:var(--sp-2) 0 var(--sp-1)">How the cost is worked out ◇</div>
-      <div class="lp-cost">${working.length ? working.map(l => `<details class="ob-row"><summary><span>${esc(l[0])}${l[3] ? ' ◇' : ''}</span><span class="num">${money0(l[1])}</span></summary><p class="sub">${esc(l[2])}</p></details>`).join('') + `<div class="ob-row" style="border-top:var(--hair) solid var(--rule-ink);margin-top:var(--sp-1);padding-top:var(--sp-2);font-weight:600"><span>A year</span><span class="num">${money0(working.reduce((t, l) => t + l[1], 0))}</span></div>` : '<p class="sub">No modelled cost on this line: fees and charges with no volume behind them.</p>'}</div>
+      <div class="lab" style="margin:var(--sp-2) 0 var(--sp-1)">How the cost is worked out est.</div>
+      <div class="lp-cost">${working.length ? working.map(l => `<details class="ob-row"><summary><span>${esc(l[0])}${l[3] ? ' est.' : ''}</span><span class="num">${money0(l[1])}</span></summary><p class="sub">${esc(l[2])}</p></details>`).join('') + `<div class="ob-row" style="border-top:var(--hair) solid var(--rule-ink);margin-top:var(--sp-1);padding-top:var(--sp-2);font-weight:600"><span>A year</span><span class="num">${money0(working.reduce((t, l) => t + l[1], 0))}</span></div>` : '<p class="sub">No modelled cost on this line: fees and charges with no volume behind them.</p>'}</div>
       ${fam === 'storage' ? '' : '<div class="lab" style="margin:var(--sp-4) 0 var(--sp-1)">On the invoices, twelve months</div><div class="lp-lines"></div>'}
       ${fam === 'storage' ? '' : '<div class="lab" style="margin:var(--sp-4) 0 var(--sp-1)">Its orders, last six months</div><div class="lp-orders"><p class="sub">Loading…</p></div>'}`;
     if (fam === 'storage') return;
@@ -202,7 +203,7 @@ export async function render(main, C, params) {
     const mine = d.orders.filter(o => o.items.some(i => { const f = (meta.get(i.code) || {}).family; return (f && f !== 'none' ? f : 'other') === fam || (fam === 'bin' && /^B\d$/.test(i.code)); }));
     if (!mine.length) { ob.innerHTML = '<p class="sub">No orders on this line in the last six months.</p>'; return; }
     const lost = mine.filter(o => o.cost.total && o.margin < 0).length;
-    ob.insertAdjacentHTML('beforebegin', `<p class="sub" style="margin:0 0 var(--sp-2)">${mine.length}${mine.length >= 200 ? '+' : ''} orders; ${lost} cost more to serve than they billed ◇.</p>`);
+    ob.insertAdjacentHTML('beforebegin', `<p class="sub" style="margin:0 0 var(--sp-2)">${mine.length}${mine.length >= 200 ? '+' : ''} orders; ${lost} cost more to serve than they billed est.</p>`);
     ordersTable(ob, mine.slice(0, 12), svcName, name, famName);
     if (mine.length > 12) {
       const b = document.createElement('button');
@@ -241,7 +242,7 @@ function ordersTable(el, rows, svcName, name, famName) {
       { key: 'date', label: 'Date', fmt: v => dayFmt(v) },
       { key: 'woid', label: 'Order', fmt: v => `<span class="sub" style="display:inline">${esc(v)}</span>` },
       { key: 'revenue', label: 'Value', num: true, fmt: v => money0(v) },
-      ...(costsVisible() ? [{ key: 'cost', label: 'Cost ◇', num: true, fmt: v => v.total ? money0(v.total) : '—' },
+      ...(costsVisible() ? [{ key: 'cost', label: 'Cost est.', num: true, fmt: v => v.total ? money0(v.total) : '—' },
       { key: 'margin', label: 'Left', num: true, fmt: (v, r) => r.cost.total ? `<span class="${v < 0 ? (r.cost.route ? 'is-warn' : 'is-bad') : ''}">${money0(v)}</span>` : '—' }] : []),
     ],
     rows,
@@ -264,7 +265,7 @@ async function drawDrill(el, drillP, svcName) {
   const ordRev = d.orders.reduce((t, o) => t + o.revenue, 0);
   const lbs = d.visits.reduce((t, v) => t + (v.pounds || 0), 0);
   el.innerHTML = `
-    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? (d.orders.length >= 200 ? `the latest 200 orders, ${money0(ordRev)}` : `${n0(d.orders.length)} in six months, ${money0(ordRev)}`) : 'last six months'}</small></div><div id="cp-orders"></div><div class="pending" style="margin-top:var(--sp-3)">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · cost ◇ from the cost model, one visit shared between the day's orders · tap an order for its cost build</div></div>
+    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? (d.orders.length >= 200 ? `the latest 200 orders, ${money0(ordRev)}` : `${n0(d.orders.length)} in six months, ${money0(ordRev)}`) : 'last six months'}</small></div><div id="cp-orders"></div><div class="pending" style="margin-top:var(--sp-3)">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · cost est. from the cost model, one visit shared between the day's orders · tap an order for its cost build</div></div>
     <div class="card"><div class="card-head"><h3>Shredding visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} days on a route · ${n0(lbs)} lb` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Bin and shredding stops drivers marked done in Veri-Shred, one row per day and route. Box deliveries and retrievals are on the work orders, not here. Executive-bin weights are a set figure, not weighed.</div></div>`;
   const oBox = el.querySelector('#cp-orders'), vBox = el.querySelector('#cp-visits');
   drawWhere(el, d);
@@ -297,9 +298,9 @@ function wsCard(r, pitch) {
   const lines = LINES.map(x => ({ x, c: r.cells[x.key] }));
   const missing = lines.filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp);
   return `<div class="card">
-    <div class="card-head"><h3>${missing.length ? `Not bought yet: about ${moneyK(r.opp / 12)} a month ◇` : lines.every(o => o.c.have) ? 'Buys every line we sell' : 'Not bought yet: too small to size'}</h3><a href="#customers?view=whitespace">Cross-sell ›</a></div>
+    <div class="card-head"><h3>${missing.length ? `Not bought yet: about ${moneyK(r.opp / 12)} a month est.` : lines.every(o => o.c.have) ? 'Buys every line we sell' : 'Not bought yet: too small to size'}</h3><a href="#customers?view=whitespace">Cross-sell ›</a></div>
     ${!missing.length && !lines.every(o => o.c.have) ? '<p class="sub" style="margin:0 0 var(--sp-2)">It doesn\'t buy every line, but it has too few boxes or too little other spend to size what comparable accounts would spend.</p>' : ''}
-    ${lines.map(({ x, c }) => `<div class="ws1"><span>${esc(x.name)}</span>${c.have ? `<span class="num">${moneyK(c.spend)} <span class="sub" style="display:inline">a year</span></span>` : c.opp > 0 ? `<button class="num opp" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)} ◇</button>` : '<span class="sub">—</span>'}</div>${!c.have && x.key === 'shred' && pitch ? `<div class="ws1p">${esc(pitch)}</div>` : ''}${!c.have && c.opp > 0 ? `<div class="sub ws1b">${esc(c.basis)}</div>` : ''}`).join('')}
+    ${lines.map(({ x, c }) => `<div class="ws1"><span>${esc(x.name)}</span>${c.have ? `<span class="num">${moneyK(c.spend)} <span class="sub" style="display:inline">a year</span></span>` : c.opp > 0 ? `<button class="num opp" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)} est.</button>` : '<span class="sub">—</span>'}</div>${!c.have && x.key === 'shred' && pitch ? `<div class="ws1p">${esc(pitch)}</div>` : ''}${!c.have && c.opp > 0 ? `<div class="sub ws1b">${esc(c.basis)}</div>` : ''}`).join('')}
   </div>`;
 }
 

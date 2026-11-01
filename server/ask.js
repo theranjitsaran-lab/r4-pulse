@@ -40,19 +40,19 @@ function tools(L, D, X = {}) {
 
   const T = {
     overview: {
-      description: "Trisha's number: this month's bill, next month's building ◇, the gap to $1.0M a month, this month's work against last month's at the same working day, last week's work, and the levers to $1.0M.",
+      description: "Trisha's number: this month's bill, next month's building est., the gap to $1.0M a month, this month's work against last month's at the same working day, last week's work, and the levers to $1.0M.",
       input: { type: 'object', properties: {}, required: [], additionalProperties: false },
       run: () => {
         const m = L.home2data.monthView(D), w = L.home2data.weekView(D), B = L.levers.bridge(D);
         return {
           latest_work_done: m.latestDone,
           last_posted_bill: `${mon(m.bill.lastMonth)}: ${moneyK(m.bill.lastCore)} core (storage plus service, Citadel apart)`,
-          next_bill_building: m.next ? `${mon(m.next.month)}: about ${moneyK(m.next.central)} ◇, likely ${moneyK(m.next.lo)} to ${moneyK(m.next.hi)}, day ${m.next.day} of ${m.next.workdays}${m.next.jobCount ? `, plus up to ${moneyK(m.next.jobs)} in ${m.next.jobCount} jobs to check` : ''}` : 'not yet priced',
+          next_bill_building: m.next ? `${mon(m.next.month)}: about ${moneyK(m.next.central)} est., likely ${moneyK(m.next.lo)} to ${moneyK(m.next.hi)}, day ${m.next.day} of ${m.next.workdays}${m.next.jobCount ? `, plus up to ${moneyK(m.next.jobs)} in ${m.next.jobCount} jobs to check` : ''}` : 'not yet priced',
           gap_to_target: `${moneyK(m.gap)} a month short of $1.0M`,
-          work_this_month: m.vsLast != null ? `${mon(m.workMonth)}'s work at working day ${m.day}: ${moneyK(m.now)} ◇, ${pc(m.vsLast)} on ${mon(m.prevMonth)} at the same day` : 'not enough days yet',
-          last_full_week: w.lastFull ? `week of ${w.lastFull.week}: ${moneyK(w.lastFull.value)} of work ◇ (${w.lastFull.done} services), ${pc(w.vsAvg)} on the average of the weeks before` : null,
+          work_this_month: m.vsLast != null ? `${mon(m.workMonth)}'s work at working day ${m.day}: ${moneyK(m.now)} est., ${pc(m.vsLast)} on ${mon(m.prevMonth)} at the same day` : 'not enough days yet',
+          last_full_week: w.lastFull ? `week of ${w.lastFull.week}: ${moneyK(w.lastFull.value)} of work est. (${w.lastFull.done} services), ${pc(w.vsAvg)} on the average of the weeks before` : null,
           six_month_average: `${moneyK(B.today)} a month, ${mon(B.sixFrom)} to ${mon(B.sixTo)}`,
-          levers: B.steps.map(s => `${s.t}: ${s.modelled ? 'up to ' : ''}${moneyK(s.v)} a month${s.modelled ? ' ◇ (a ceiling)' : ''} (${s.brief})`),
+          levers: B.steps.map(s => `${s.t}: ${s.modelled ? 'up to ' : ''}${moneyK(s.v)} a month${s.modelled ? ' est. (a ceiling)' : ''} (${s.brief})`),
           new_business_needed: `${moneyK(B.newBusiness)} a month`,
         };
       },
@@ -85,7 +85,7 @@ function tools(L, D, X = {}) {
       },
     },
     customer: {
-      description: "One account: its last 13 months, its movement against its own run, its margin by line ◇, what it doesn't buy yet and what comparable accounts spend on it ◇, and its prices against the book's median.",
+      description: "One account: its last 13 months, its movement against its own run, its margin by line est., what it doesn't buy yet and what comparable accounts spend on it est., and its prices against the book's median.",
       input: { type: 'object', properties: { level1: { type: 'integer' } }, required: ['level1'], additionalProperties: false },
       run: ({ level1 }) => {
         const s = ser.get(level1), m = marginOf.get(level1);
@@ -98,21 +98,21 @@ function tools(L, D, X = {}) {
           customer: title((s || m).customer), level1,
           months: s ? s.months.slice(-13).map((mm, i, a) => `${mm.slice(0, 7)}: ${moneyK(s.total[s.total.length - a.length + i])}`) : [],
           movement: s && s.move ? `last three months ${moneyK(s.move.last3)} a month against its own run of ${moneyK(s.move.run)}: ${signed(s.move.d)} a month` : null,
-          margin_last_12_months: costs && m ? { revenue: money0(m.revenue), cost: `${money0(m.cost)} ◇`, margin: `${m.margin < 0 ? '−' : '+'}${money0(Math.abs(m.margin)).replace('−', '')} ◇`,
-            by_line: Object.entries(m.fam).map(([f, v]) => `${f}: revenue ${money0(v.revenue)}, cost ${money0(v.cost)} ◇`) } : null,
-          not_bought_yet: ws ? ws.lines.filter(l => !l.have && l.opp > 0).map(l => `${l.name}: about ${moneyK(l.opp)} a year ◇ at what comparable accounts spend`) : [],
+          margin_last_12_months: costs && m ? { revenue: money0(m.revenue), cost: `${money0(m.cost)} est.`, margin: `${m.margin < 0 ? '−' : '+'}${money0(Math.abs(m.margin)).replace('−', '')} est.`,
+            by_line: Object.entries(m.fam).map(([f, v]) => `${f}: revenue ${money0(v.revenue)}, cost ${money0(v.cost)} est.`) } : null,
+          not_bought_yet: ws ? ws.lines.filter(l => !l.have && l.opp > 0).map(l => `${l.name}: about ${moneyK(l.opp)} a year est. at what comparable accounts spend`) : [],
           prices: D.PR.rates.filter(r => r.level1 === level1 && r.modal_rate > 0).slice(0, 12).map(r => `${r.servcode} ${String(r.service).trim()}: $${r.modal_rate.toFixed(2)}${med(r.servcode) ? `, book median $${med(r.servcode).toFixed(2)}` : ''}${r.last_changed ? `, last changed ${r.last_changed}` : ''}`),
         };
       },
     },
     cross_sell: {
-      description: "Cross-sell: the accounts with most to buy and which lines they don't buy yet ◇, and which line is missed most across the book.",
+      description: "Cross-sell: the accounts with most to buy and which lines they don't buy yet est., and which line is missed most across the book.",
       input: { type: 'object', properties: {}, required: [], additionalProperties: false },
       run: () => {
         const c = L.home2data.crossSellView(D, 10);
-        return { ceiling: `${moneyK(c.totalMonth)} a month ◇ if every account bought like its peers`, accounts: c.accounts,
-          by_line: c.byLine.map(l => `${l.name}: ${moneyK(l.opp)} a year ◇ across ${l.accounts} accounts`),
-          rows: c.rows.map(r => ({ level1: r.level1, customer: title(r.customer), spends: `${moneyK(r.total)} a year`, could_add: `${moneyK(r.opp)} a year ◇`, lines: r.lines.filter(l => !l.have && l.opp > 0).map(l => l.name) })) };
+        return { ceiling: `${moneyK(c.totalMonth)} a month est. if every account bought like its peers`, accounts: c.accounts,
+          by_line: c.byLine.map(l => `${l.name}: ${moneyK(l.opp)} a year est. across ${l.accounts} accounts`),
+          rows: c.rows.map(r => ({ level1: r.level1, customer: title(r.customer), spends: `${moneyK(r.total)} a year`, could_add: `${moneyK(r.opp)} a year est.`, lines: r.lines.filter(l => !l.have && l.opp > 0).map(l => l.name) })) };
       },
     },
     destruction: {
@@ -121,23 +121,23 @@ function tools(L, D, X = {}) {
       run: () => {
         const x = L.home2data.destructionView(D);
         return { boxes_held: x.boxes.toLocaleString('en-US'), eligible: x.eligible.toLocaleString('en-US'), share: Math.round(x.share * 100) + '%',
-          fee_once: `${moneyK(x.fee)} at the book's median $${x.perBox.toFixed(2)} a box ◇`, storage_lost: `${moneyK(x.lostYear / 12)} a month, ${moneyK(x.lostYear)} a year`,
+          fee_once: `${moneyK(x.fee)} at the book's median $${x.perBox.toFixed(2)} a box est.`, storage_lost: `${moneyK(x.lostYear / 12)} a month, ${moneyK(x.lostYear)} a year`,
           fee_covers: `${Math.round(x.fee / (x.lostYear / 12))} months of the lost storage`,
           largest: x.rows.map(r => `${title(r.customer)}: ${r.eligible.toLocaleString('en-US')} boxes, ${moneyK(r.fee)} once, ${moneyK(r.lostYear)} a year of storage`) };
       },
     },
     route_density: {
-      description: 'Where one more customer on the route visits R4 already makes would save most travel cost ◇, by postcode.',
+      description: 'Where one more customer on the route visits R4 already makes would save most travel cost est., by postcode.',
       input: { type: 'object', properties: {}, required: [], additionalProperties: false },
       run: () => {
         const x = L.home2data.densityView(D);
         if (!x) return { note: 'postcode centres are not loaded' };
-        return { postcodes_visited: x.points.length, with_one_customer: x.single, saving_top: `${moneyK(x.saving)} a year ◇ across the postcodes below`,
-          postcodes: x.save.map(r => `${r.postcode}: ${r.visits} visits a year, ${Math.round(r.miles)} miles out, one more customer saves about ${moneyK(r.saving)} a year ◇ (${title(r.names)})`) };
+        return { postcodes_visited: x.points.length, with_one_customer: x.single, saving_top: `${moneyK(x.saving)} a year est. across the postcodes below`,
+          postcodes: x.save.map(r => `${r.postcode}: ${r.visits} visits a year, ${Math.round(r.miles)} miles out, one more customer saves about ${moneyK(r.saving)} a year est. (${title(r.names)})`) };
       },
     },
     opportunities: {
-      description: "Customers › Opportunities: the next conversations ranked by dollars a year (cross-sell ◇, price gaps, win-back, rate rounds, overdue boxes), each with its reason, owner and status (open, contacted, quoted, won, lost); what was won this month and what is in play.",
+      description: "Customers › Opportunities: the next conversations ranked by dollars a year (cross-sell est., price gaps, win-back, rate rounds, overdue boxes), each with its reason, owner and status (open, contacted, quoted, won, lost); what was won this month and what is in play.",
       input: { type: 'object', properties: { kind: { type: 'string', enum: ['all', 'cross', 'price', 'slip', 'round', 'overdue'] }, status: { type: 'string', enum: ['active', 'open', 'contacted', 'quoted', 'won', 'lost'] }, level1: { type: 'integer' } }, required: [], additionalProperties: false },
       run: ({ kind = 'all', status = 'active', level1 } = {}) => {
         const O = L.opps.opportunities({ C: D.C, PR: D.PR, CA: D.CA, M: D.M }, X.statuses || {});
@@ -148,12 +148,12 @@ function tools(L, D, X = {}) {
           won_this_month: `${moneyK(O.won.value)} across ${O.won.n} opportunities marked won`,
           in_play: `${play.length} contacted or quoted, ${moneyK(play.reduce((t, r) => t + r.value, 0))} a year`,
           matching: rows.length,
-          rows: rows.slice(0, 12).map(r => ({ level1: r.level1, customer: r.name, kind: L.opps.KINDS[r.kind], value: `${moneyK(r.value)}${r.once ? ' once' : ' a year'}${r.modelled ? ' ◇' : ''}`, reason: r.reason, status: r.status, owner: r.owner || 'nobody yet', opener: r.opener })),
+          rows: rows.slice(0, 12).map(r => ({ level1: r.level1, customer: r.name, kind: L.opps.KINDS[r.kind], value: `${moneyK(r.value)}${r.once ? ' once' : ' a year'}${r.modelled ? ' est.' : ''}`, reason: r.reason, status: r.status, owner: r.owner || 'nobody yet', opener: r.opener })),
         };
       },
     },
     quote: {
-      description: "Price one line for a customer or a prospect as Pricing does: revenue a year, cost to serve ◇ line by line, and margin. Bins are costed from the account's own route days, else route days in the postcode given, else the average visit (under review). Codes: B2 95-gallon bin, B3 executive bin, B4 65-gallon, B6 35-gallon, STO storage a box a month, R3 shred box, S3 shred lb, 01 delivery trip, 20 retrieval, 30 refile, 55 driver hour.",
+      description: "Price one line for a customer or a prospect as Pricing does: revenue a year, cost to serve est. line by line, and margin. Bins are costed from the account's own route days, else route days in the postcode given, else the average visit (under review). Codes: B2 95-gallon bin, B3 executive bin, B4 65-gallon, B6 35-gallon, STO storage a box a month, R3 shred box, S3 shred lb, 01 delivery trip, 20 retrieval, 30 refile, 55 driver hour.",
       input: { type: 'object', properties: { code: { type: 'string' }, units_a_year: { type: 'number' }, price: { type: 'number' }, visits_a_year: { type: 'number' }, postcode: { type: 'string' }, level1: { type: 'integer' } }, required: ['code', 'units_a_year', 'price'], additionalProperties: false },
       run: ({ code, units_a_year, price, visits_a_year, postcode, level1 }) => {
         if (!L.quote.SERVICES[code]) return { error: `the cost model does not price ${code}` };
@@ -164,16 +164,16 @@ function tools(L, D, X = {}) {
         const c = L.quote.lineCost(R, st, { acct, lines, Z: D.Z });
         const rev = price * units_a_year;
         return {
-          revenue_a_year: money0(rev), cost_a_year: `${money0(c.total)} ◇`, margin_a_year: `${rev - c.total < 0 ? '−' : '+'}${money0(Math.abs(rev - c.total)).replace('−', '')} ◇`,
-          margin_share: rev > 0 ? `${Math.round((rev - c.total) / rev * 100)}% of revenue kept ◇` : null,
-          cost_a_unit: `$${c.perUnit.toFixed(2)} ◇`,
+          revenue_a_year: money0(rev), cost_a_year: `${money0(c.total)} est.`, margin_a_year: `${rev - c.total < 0 ? '−' : '+'}${money0(Math.abs(rev - c.total)).replace('−', '')} est.`,
+          margin_share: rev > 0 ? `${Math.round((rev - c.total) / rev * 100)}% of revenue kept est.` : null,
+          cost_a_unit: `$${c.perUnit.toFixed(2)} est.`,
           route_cost_basis: bin ? { account: "the account's own route days", postcode: `real route days in and around ${st.postcode}`, average: 'the average visit, under review until delivery routes are in the data' }[c.routeBasis] : 'no route cost',
           lines: c.lines.map(l => `${l[0]}: ${money0(l[1])} (${String(l[2]).split('. ')[0]})`),
         };
       },
     },
     bin_route_cost: {
-      description: "What an account's bins really cost on the road ◇: its route days, its stops' share of each day by minutes (drive time from its road-mile detour, plus minutes on site), a service, against the model's average visit. Also the three assumptions it rests on.",
+      description: "What an account's bins really cost on the road est.: its route days, its stops' share of each day by minutes (drive time from its road-mile detour, plus minutes on site), a service, against the model's average visit. Also the three assumptions it rests on.",
       input: { type: 'object', properties: { level1: { type: 'integer' } }, required: ['level1'], additionalProperties: false },
       run: ({ level1 }) => {
         const rc = R.routeCostsNow(), r = rc.accounts[level1];
@@ -183,8 +183,8 @@ function tools(L, D, X = {}) {
         const avgRoute = avg ? avg.lines.filter(l => /Travel|on site/.test(l[0])).reduce((t, l) => t + l[1], 0) / a.bins : null;
         return {
           route_days: r.days, from: r.from, to: r.to, services: r.services.toLocaleString('en-US'), stops: r.stops,
-          route_cost: `${money0(r.cost)} ◇ over those days: ${money0(r.travel)} drive time, ${money0(r.onsite)} on site`,
-          a_service: `$${(r.cost / r.services).toFixed(2)} ◇ a bin service on the road`,
+          route_cost: `${money0(r.cost)} est. over those days: ${money0(r.travel)} drive time, ${money0(r.onsite)} on site`,
+          a_service: `$${(r.cost / r.services).toFixed(2)} est. a bin service on the road`,
           average_visit_model: avgRoute != null ? `$${avgRoute.toFixed(2)} a bin service on the road at the model's average visit` : null,
           assumptions: `${R.SETTINGS.mph} mph between stops, ${R.SETTINGS.stopMin} minutes a stop, ${R.SETTINGS.serviceMin} minutes a service; a route day costs ${money0(R.RATES.routeDay.v)}; days that also delivered boxes are not in the route data, so these read high`,
           book: `${rc.days} route days costed, ${rc.from} to ${rc.to}`,
@@ -205,11 +205,11 @@ function tools(L, D, X = {}) {
       },
     },
     margin_by_line: {
-      description: 'Gross margin by line of business over the last twelve months ◇: revenue, cost to serve and margin for storage, bins, shredding, handling, delivery, ITAD, labour. Citadel apart.',
+      description: 'Gross margin by line of business over the last twelve months est.: revenue, cost to serve and margin for storage, bins, shredding, handling, delivery, ITAD, labour. Citadel apart.',
       input: { type: 'object', properties: {}, required: [], additionalProperties: false },
       run: () => {
         const b = L.margin.buildMargins(D.R, D.M, { exclude: [6714] });
-        return { lines: Object.entries(b.families).filter(([, v]) => v.revenue > 0).sort((x, y) => y[1].revenue - x[1].revenue).map(([f, v]) => `${L.margin.FAMILY_NAMES[f] || f}: revenue ${money0(v.revenue)}, cost ${v.cost > 0 ? money0(v.cost) + ' ◇' : 'not costed'}${v.cost > 0 ? `, margin ${Math.round((v.revenue - v.cost) / v.revenue * 100)}% ◇` : ''}${['handling', 'movement'].includes(f) ? ' (route cost under review)' : ''}`) };
+        return { lines: Object.entries(b.families).filter(([, v]) => v.revenue > 0).sort((x, y) => y[1].revenue - x[1].revenue).map(([f, v]) => `${L.margin.FAMILY_NAMES[f] || f}: revenue ${money0(v.revenue)}, cost ${v.cost > 0 ? money0(v.cost) + ' est.' : 'not costed'}${v.cost > 0 ? `, margin ${Math.round((v.revenue - v.cost) / v.revenue * 100)}% est.` : ''}${['handling', 'movement'].includes(f) ? ' (route cost under review)' : ''}`) };
       },
     },
     saved_quotes: {
@@ -224,7 +224,7 @@ function tools(L, D, X = {}) {
 
 const SYSTEM = `You answer questions about R4 Services, a Chicago records-management and shredding firm, for its CEO and managers, from the R4 Pulse app's own figures. Use the tools; never answer a figure from memory or arithmetic of your own. If no tool covers the question, say in one sentence that the app does not hold that yet and where it would come from (VCK billing, Veri-Shred operations, the GL).
 
-Write two to five short plain sentences, or a short list when comparing several things. Quote every figure exactly as a tool wrote it ($38K, 14%, −$35K): do not recompute, round differently or write numbers as words. Keep the ◇ mark after modelled figures. Citadel is held apart from every total. British spelling, US dollars, no headings, no markdown other than a dash list.`;
+Write two to five short plain sentences, or a short list when comparing several things. Quote every figure exactly as a tool wrote it ($38K, 14%, −$35K): do not recompute, round differently or write numbers as words. Keep the "est." word after modelled figures. Citadel is held apart from every total. British spelling, US dollars, no headings, no markdown other than a dash list.`;
 
 // numbers that must come from the tools: anything with $, %, K or M, and any figure over 31
 const NUM = /[−-]?\$?\d[\d,]*(?:\.\d+)?\s?[KM%]?/g;

@@ -35,6 +35,7 @@ const SCREENS = [
   [{ name: 'explainer', hash: '#customers?view=whitespace', click: 'button.opp', extra: true },
    { name: 'pop-labour', hash: '#pulse', click: '.h2-seg[data-k="labour"]', extra: true },
    { name: 'pop-line', hash: '#pulse', click: '.h2-seg[data-k="bin"]', extra: true },
+   { name: 'pop-invoice', hash: '#customers?view=grid', click: 'tbody tr:first-child td.cl:nth-last-child(2) [data-inv-id]', extra: true },
    { name: 'pop-margin', hash: '#customers', click: '.c2-x[data-x="margin"]', extra: true },
    { name: 'pop-price', hash: '#customers?view=overview&line=bin', click: '.c2-x[data-x="price"]', extra: true },
    { name: 'customers-bins', hash: '#customers?view=overview&line=bin', extra: true }],

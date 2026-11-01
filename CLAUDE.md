@@ -130,7 +130,7 @@ Copy is part of the product. Plain English. British spelling in prose; US dollar
 - Sentences where a sentence explains more: "Larabida pays $991 a year for 356 bin services that cost $4,108 to serve" beats "Margin: −314%".
 - Every chart is titled by its conclusion, not a label, and carries its source line.
 - Every number carries its comparison: last year, the account's own six-month run, or the book's median.
-- **Measured and modelled look different.** Modelled figures carry the ◇ mark and the assumption named once nearby.
+- **Measured and modelled look different.** Estimated figures carry the word "est." and the assumption named once nearby; charts hatch them. No other mark.
 - **Not yet calculable is an honest empty state** — dashed border, one-line reason — never an invented figure. Today: retention rate, book-wide service gross margin, book-wide bin and ITAD margins.
 - No invented data, ever. If it isn't in the database, the panel says where it will come from.
 
@@ -164,7 +164,7 @@ amber below median, green only for a delta that is up. Sound is ink. A delta wea
 or more (±20%); smaller moves keep the arrow in ink, and sparklines are ink with only the latest point coloured.
 
 **Copy.** One idea per row: a number and one line; detail on tap. Show what changed, not what Anne
-and Mike already know. Modelled figures carry ◇. Route-based costs (bins, handling, delivery) show
+and Mike already know. Estimated figures carry "est.". Route-based costs (bins, handling, delivery) show
 "under review" until delivery routes are in the route volumes.
 
 **Never on screen:** a dual axis, a pie chart, a gauge or dial, count-ups, invented figures.

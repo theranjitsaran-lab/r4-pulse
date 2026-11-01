@@ -55,7 +55,7 @@ export async function render(main, tabs) {
   const m = S.months, last = m[m.length - 1], yearAgo = m[m.length - 13];
   const yoy = yearAgo ? last.boxes / yearAgo.boxes - 1 : null;
   const top = acc[0];
-  const say = `${n0(T.boxes)} boxes in storage${yoy != null ? `; the storage bill carried ${yoy >= 0 ? 'up' : 'down'} ${pc(Math.abs(yoy))} on a year ago` : ''}. At least <b>${n0(T.eligible)}</b> (${pc(T.eligible / T.boxes)}) are past their retention review and could be shredded today ◇, and ${pc(T.ten / T.boxes)} of the building is over ten years old. ${esc(titleCase(top.customer))} alone holds ${pc(top.boxes / T.boxes)}.`;
+  const say = `${n0(T.boxes)} boxes in storage${yoy != null ? `; the storage bill carried ${yoy >= 0 ? 'up' : 'down'} ${pc(Math.abs(yoy))} on a year ago` : ''}. At least <b>${n0(T.eligible)}</b> (${pc(T.eligible / T.boxes)}) are past their retention review and could be shredded today est., and ${pc(T.ten / T.boxes)} of the building is over ten years old. ${esc(titleCase(top.customer))} alone holds ${pc(top.boxes / T.boxes)}.`;
 
   main.innerHTML = `
   <div class="rt wh">
@@ -65,11 +65,11 @@ export async function render(main, tabs) {
       <div class="card-head"><h3>The building by who fills it: one square for every ${G.per.toLocaleString('en-US')} boxes</h3><small>hover or tap a group</small></div>
       <div class="gwrap"><div id="wh-grid"></div><div class="c-tip" hidden></div></div>
       <div class="wkey">${STATES.map(([k, l]) => `<span><i style="background:${k === 'inuse' ? 'color-mix(in srgb, var(--s-storage) 28%, var(--surface))' : k === 'old' ? 'var(--s-storage)' : k === 'eligible' ? 'var(--s-service)' : 'var(--ink-4)'}"></i>${l} ${k0(T[k])}</span>`).join('')}</div>
-      <div class="src">VCK boxes in storage, all at one location (Chicago) · accounts largest first, those under ${G.per.toLocaleString('en-US')} boxes together at the end · eligible is review overdue less permanent and legal hold, at least ◇ · rack capacity is not in the data, so this shows what is held, not how full the building is</div>
+      <div class="src">VCK boxes in storage, all at one location (Chicago) · accounts largest first, those under ${G.per.toLocaleString('en-US')} boxes together at the end · eligible is review overdue less permanent and legal hold, at least est. · rack capacity is not in the data, so this shows what is held, not how full the building is</div>
     </div>
     <div class="cols">
       <div class="card">
-        <div class="card-head"><h3>Shredding the eligible boxes would bill about ${moneyK(E.once)} once and end ${moneyK(E.lost)} a month of storage ◇</h3></div>
+        <div class="card-head"><h3>Shredding the eligible boxes would bill about ${moneyK(E.once)} once and end ${moneyK(E.lost)} a month of storage est.</h3></div>
         <div class="hd"><span>Account</span><span>Eligible</span><span>Billed once</span><span>Storage ends</span><span>Pays back</span><span>Of building</span><span></span></div>
         <div id="wh-elig"></div>
         <div class="src">Destruction at the book's median fee, $${(E.perBox || 0).toFixed(2)} a box; storage at each account's own rate per box (else the book's median) · "pays back" is the months of lost storage the destruction bill covers · <a href="#customers?view=destruction" style="color:var(--brand)">Overdue boxes by account ›</a></div>
@@ -92,7 +92,7 @@ export async function render(main, tabs) {
   const show = (bi, ev) => {
     const b = G.blocks[bi]; if (!b) return;
     gEl.querySelectorAll('.wc').forEach(c => c.classList.toggle('dim', +c.dataset.b !== bi));
-    tip.innerHTML = `<b>${esc(titleCase(b.customer))}</b><span>${n0(b.boxes)} boxes, ${pc(b.boxes / T.boxes)} of the building</span><span>eligible to shred <b>${n0(b.eligible)}</b> ◇</span><span>over ten years, review not due ${n0(b.old)} · protected ${n0(b.protected)}</span>${b.oldest ? `<span>oldest box received ${esc(b.oldest.slice(0, 4))}</span>` : ''}`;
+    tip.innerHTML = `<b>${esc(titleCase(b.customer))}</b><span>${n0(b.boxes)} boxes, ${pc(b.boxes / T.boxes)} of the building</span><span>eligible to shred <b>${n0(b.eligible)}</b> est.</span><span>over ten years, review not due ${n0(b.old)} · protected ${n0(b.protected)}</span>${b.oldest ? `<span>oldest box received ${esc(b.oldest.slice(0, 4))}</span>` : ''}`;
     const r = wrap.getBoundingClientRect(), x = (ev.touches ? ev.touches[0] : ev).clientX - r.left, y = (ev.touches ? ev.touches[0] : ev).clientY - r.top;
     tip.hidden = false;
     tip.style.left = Math.max(110, Math.min(r.width - 110, x)) + 'px';

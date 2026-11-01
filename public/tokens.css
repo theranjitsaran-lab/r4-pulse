@@ -185,7 +185,7 @@
 .num, .fig { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .src { font-size: var(--fs-source); color: var(--ink-4); padding: 10px 0 0; }
 /* a figure that is modelled rather than measured */
-.modelled::after { content: " ◇"; color: var(--ink-5); font-weight: 400; }
+.modelled::after { content: " est."; color: var(--ink-5); font-weight: 400; }
 /* an honest empty state */
 .pending { border: 1px dashed var(--ink-5); border-radius: var(--r-sm); padding: 8px 10px; font-size: var(--fs-label); color: var(--ink-3); }
 /* status, exceptions only */

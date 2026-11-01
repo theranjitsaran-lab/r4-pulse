@@ -40,7 +40,7 @@ export async function render(main, params, tabs) {
       <p class="c2-say" id="op-say"></p>
       <ul class="op-list" id="op-list"></ul>
       <div class="c2-more" id="op-more"></div>
-      <div class="src">Cross-sell ◇ at what comparable accounts spend on the line (the Cross-sell grid) · price gaps at the book's median (Pricing) · win-back at the drop on the account's own run · rate rounds at the typical 8% · overdue boxes at the median destruction fee, once, ranked at a quarter of its value · owner and status are the team's, kept in R4 Pulse</div>
+      <div class="src">Cross-sell est. at what comparable accounts spend on the line (the Cross-sell grid) · price gaps at the book's median (Pricing) · win-back at the drop on the account's own run · rate rounds at the typical 8% · overdue boxes at the median destruction fee, once, ranked at a quarter of its value · owner and status are the team's, kept in R4 Pulse</div>
     </section>
   </div>`;
 
@@ -57,7 +57,7 @@ export async function render(main, params, tabs) {
     return r;
   }
   function row(r) {
-    const val = `${moneyK(r.value)}${r.once ? ' once' : ''}${r.modelled ? ' ◇' : ''}`;
+    const val = `${moneyK(r.value)}${r.once ? ' once' : ''}${r.modelled ? ' est.' : ''}`;
     const priceLink = r.kind === 'price' || (r.kind === 'cross' && r.line === 'bin') ? `<a href="#pricing?level1=${r.level1}${r.line === 'storage' ? '&code=STO' : ''}">Price it ›</a>` : '';
     return `<li class="op-row" data-key="${esc(r.key)}">
       <button class="op-head" type="button" aria-expanded="false">

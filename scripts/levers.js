@@ -216,7 +216,7 @@ section('3. BIN WORK BELOW COST — bin revenue against the model\'s cost to ser
   }
   const below = rows.filter(r => r.gap < 0).sort((a, b) => a.gap - b.gap);
   const all = rows.reduce((t, r) => t + r.bin_rev, 0), cost = rows.reduce((t, r) => t + r.cost, 0);
-  console.log(`  Bin accounts: ${rows.length}. Bin revenue ${money(all)} against modelled cost ${money(cost)} ◇ (split ${R.SETTINGS.split * 100}% travel)`);
+  console.log(`  Bin accounts: ${rows.length}. Bin revenue ${money(all)} against modelled cost ${money(cost)} est. (split ${R.SETTINGS.split * 100}% travel)`);
   console.log(`  Below cost: ${below.length} accounts, ${money(below.reduce((t, r) => t + r.bin_rev, 0))} revenue, gap ${money(below.reduce((t, r) => t + r.gap, 0))} a year`);
   console.log(`    of which with a flat monthly fee (IR or B7): ${below.filter(r => r.flat_fee_rev > 0).length} accounts, gap ${money(below.filter(r => r.flat_fee_rev > 0).reduce((t, r) => t + r.gap, 0))}`);
   table(below.slice(0, 15), [['level1', r => r.level1], ['customer', r => (r.customer || '').slice(0, 34)], ['bins', r => num(r.bins)], ['visits', r => num(r.visits)],
@@ -248,7 +248,7 @@ section('4. CITADEL — concentration and what it contributes', async (q) => {
   const contrib = r.ltm_service - itad - (r.direct || 0);
   console.log(`  LTM Citadel service ${money(r.ltm_service)} = ${pc(r.ltm_service / r.book_service)} of service, ${pc(r.ltm_service / r.book_total)} of all revenue`);
   console.log(`  Devices ${num(r.devices)} in ${num(r.collections)} collection days; rebate (CC) ${money(r.rebate)} inside that service figure`);
-  console.log(`  Modelled ITAD cost ${money(itad)} ◇ + direct temp labour ${money(r.direct)} → contribution ${money(contrib)} a year, ${money(contrib / 12)} a month`);
+  console.log(`  Modelled ITAD cost ${money(itad)} est. + direct temp labour ${money(r.direct)} → contribution ${money(contrib)} a year, ${money(contrib / 12)} a month`);
   console.log('  Monthly: ' + months.map(x => `${x.m} ${money(x.c)}`).join(' · '));
 });
 
@@ -291,7 +291,7 @@ section('5. SCHEDULING — the abandoned module and what route days carry', asyn
     FROM v_route_day WHERE services_done > 0 AND date >= '${LTM[0]}' AND date < '${LTM[1]}'`);
   const needed = Math.ceil(t.done / t.p75), saved = t.route_days - needed;
   console.log(`  If every route day carried today's 75th-percentile load (${num(t.p75)} done services): ${num(needed)} route days instead of ${num(t.route_days)},`);
-  console.log(`  ${num(saved)} fewer, worth ${money(saved * R.RATES.routeDay.v)} a year at ${money(R.RATES.routeDay.v)} a route day ◇ — a ceiling, not a forecast`);
+  console.log(`  ${num(saved)} fewer, worth ${money(saved * R.RATES.routeDay.v)} a year at ${money(R.RATES.routeDay.v)} a route day est. — a ceiling, not a forecast`);
 });
 
 // ── 6. Storage annuity ───────────────────────────────────────────────────────────────────
@@ -301,7 +301,7 @@ section('6. STORAGE ANNUITY — boxes, erosion and the retention backlog', async
   if (m.length) {
     const a = m[0], b = m[m.length - 1], yrs = (m.length - 1) / 12;
     console.log(`  Boxes ${a.m} ${num(a.boxes)} → ${b.m} ${num(b.boxes)}: ${pc(b.boxes / a.boxes - 1)} over ${m.length - 1} months, ${pc(Math.pow(b.boxes / a.boxes, 1 / yrs) - 1)} a year`);
-    console.log(`  Storage billed per box ${a.m} $${(a.billed / a.boxes).toFixed(4)} → ${b.m} $${(b.billed / b.boxes).toFixed(4)}; cost to house ${'$' + R.RATES.facilities.v.toFixed(4)} ◇`);
+    console.log(`  Storage billed per box ${a.m} $${(a.billed / a.boxes).toFixed(4)} → ${b.m} $${(b.billed / b.boxes).toFixed(4)}; cost to house ${'$' + R.RATES.facilities.v.toFixed(4)} est.`);
     console.log('  Monthly boxes: ' + m.map(x => `${x.m} ${num(x.boxes / 1000)}k`).join(' · '));
   }
   // status I = in storage (1,195,560 boxes on 24 October 2026, matching the ~1.2m billed); the

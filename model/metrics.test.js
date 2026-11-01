@@ -100,3 +100,26 @@ test('#25 a session is a signed cookie: it survives a restart, and a forged one 
   assert.equal(forged.status, 302);
   s2.close();
 });
+
+test('tie-out: holds when the invoices add up to the figure, and says so when they have moved', async () => {
+  const { tieOut } = await import('../public/components/metrics.js');
+  const row = { month: '2026-10-01', invoices: 3967, storage: 387101.22, service: 275471.45, citadel: 24351.77 };
+  const moved = tieOut({ monthly: [{ month: '2026-10-01', core: 632377.01 }], tieout: [row] });
+  assert.equal(moved.ok, false);
+  assert.ok(Math.abs(moved.moved - 5843.89) < 0.01);
+  assert.equal(tieOut({ monthly: [{ month: '2026-10-01', core: 638220.9 }], tieout: [row] }).ok, true);
+  assert.equal(tieOut({ monthly: [{ month: '2026-10-01', core: 1 }], tieout: [] }), null);
+});
+
+test('an account\'s invoices add up to the month shown for it', () => {
+  const { rows } = J('invoices'), C = J('customers');
+  let checked = 0;
+  for (const r of rows) {
+    const a = C.accounts.find(x => x.level1 === r.level1), i = C.months.indexOf(r.month);
+    if (!a || i < 0) continue;
+    const shown = a.storage[i] + a.service[i];
+    assert.ok(Math.abs(r.total - shown) < 1, `${a.customer} ${r.month}: invoices ${r.total}, shown ${shown}`);
+    checked++;
+  }
+  assert.ok(checked > 10, `only ${checked} checked`);
+});

@@ -7,7 +7,7 @@
 //   B.book: { family: { unit, price: { p25, med, p75, n }, costPer: { med } } }   the book's middle half
 //
 // Sales are as invoiced (customers fixture, 24 months; margin fixture for the rest of the book).
-// Cost is modelled ◇ from model/rates.js through margin.js. Price per unit is the line's revenue over
+// Cost is modelled est. from model/rates.js through margin.js. Price per unit is the line's revenue over
 // the units that drive it: storage a box a month, bins a service, ITAD a device, retrieval a box
 // moved, delivery a trip, labour an hour, destruction a pound (or a box where it is billed by the box).
 import { seriesOf } from './series.js';

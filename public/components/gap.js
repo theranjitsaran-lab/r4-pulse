@@ -1,6 +1,6 @@
 // The gap to $1.0m as one bar: today's six-month average is spent, so the bar is only what is left,
 // split by the levers that could close it (components/levers.js bridge()) and what new business must
-// find. Each part is a row that opens its accounts. The ceiling (cross-sell ◇) is hatched; new
+// find. Each part is a row that opens its accounts. The ceiling (cross-sell est.) is hatched; new
 // business is open, not filled.
 import { moneyK } from './chart.js';
 import { esc } from './data.js';
@@ -16,7 +16,7 @@ export function gapHtml(B, { rows = true } = {}) {
   if (!rows) return bar;
   return bar + `<div class="gap-head"><span></span><span></span><span>of the gap</span><span>a month</span><span></span></div><ul class="gap-rows">${parts.map(p => {
     const inner = `<i class="gap-sw ${p.cls}"></i><span class="gap-t">${esc(p.t)}<small>${esc(p.brief || p.s)}${p.note ? ' · ' + esc(p.note) : ''}${p.who ? ' · ' + esc(p.who) : ''}</small></span>
-      <span class="gap-pc">${pc(p.v)}%</span><span class="gap-v">+${moneyK(p.v)}${p.modelled ? ' ◇' : ''}</span>`;
+      <span class="gap-pc">${pc(p.v)}%</span><span class="gap-v">+${moneyK(p.v)}${p.modelled ? ' est.' : ''}</span>`;
     return `<li>${p.href ? `<a href="${p.href}">${inner}<span class="go">›</span></a>` : `<div>${inner}<span></span></div>`}</li>`;
   }).join('')}</ul>`;
 }

@@ -58,7 +58,7 @@ export function buildBriefs({ P, A, C, PR, CA, log = [], feedback = [], today, u
       const own = T.lines.filter(i => i.owner === 'trisha'), team = T.lines.filter(i => i.owner !== 'trisha');
       const BN = billNow(P, A), X = project({ daily: dailyFrom(P, A), latest: A.latestDone, perService: BN.perService, storage: BN.storage, routeDays: A.routeDays });
       const nb = new Date(Date.UTC(+BN.month.slice(0, 4), +BN.month.slice(5, 7), 1)).toISOString().slice(0, 10);
-      const month = X.bill ? `${mon(nb)}'s bill is heading for about ${moneyK(X.bill.central)} ◇ (${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}), ${moneyK(TARGET - X.bill.central)} short of $1.0M.` : '';
+      const month = X.bill ? `${mon(nb)}'s bill is heading for about ${moneyK(X.bill.central)} est. (${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}), ${moneyK(TARGET - X.bill.central)} short of $1.0M.` : '';
       const t = T.team;
       const teamSay = `Last 7 days: ${t.called} called, ${t.emailed} emailed, rates moved on ${t.ratesMoved} accounts in 30 days.`;
       const sheet = [{ key: 'day', line: daySay }, ...own.map(i => ({ key: i.key, line: i.text })), ...team.map(i => ({ key: i.key, line: `${i.owner === 'mike' ? 'Mike' : 'Anne'}: ${i.text}` })), month && { key: 'month', line: month }].filter(x => x && x.line);
