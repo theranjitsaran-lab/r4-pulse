@@ -64,6 +64,7 @@
   --f-brand:    "Average Sans", var(--f-sans);   /* the "Pulse" wordmark only (27 October 2026) */
   --f-body:     var(--f-sans);
   --f-narrow:   var(--f-sans);
+  --f-num:      ui-monospace, "SF Mono", SFMono-Regular, Consolas, Menlo, monospace;   /* the tables' figures; system, nothing fetched */
   --w-head:     600;       /* every title and figure; 400 for text, nothing else */
 
   --fs-source:  12px;
@@ -80,6 +81,7 @@
   --track-tight: -.02em;
 
   --fs-sm:      13px;      /* table cells, buttons */
+  --dt-row:     30px;      /* a row of the one table */
   --fs-lead:    17px;      /* a verdict, a lede */
   --fs-display-ph: 24px;   /* a screen title on a phone */
   --fs-mega:    40px;      /* Home's one hero figure, desktop */

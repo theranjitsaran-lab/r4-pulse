@@ -108,7 +108,7 @@ export async function render(main, tabs) {
   const open = r => { location.hash = '#customer/' + r.level1; };
   const size = { k: 'size', l: 'Boxes held', options: [['a', 'Under 1,000'], ['b', '1,000 to 10,000'], ['c', 'Over 10,000']], test: (r, v) => { const b = r.boxes != null ? r.boxes : r.held; return v === 'a' ? b < 1000 : v === 'b' ? b >= 1000 && b < 10000 : b >= 10000; } };
   const nm = { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` };
-  dataTable(main.querySelector('#wh-elig'), { key: 'eligible', ns: 'e_', noun: 'accounts', who: whoAmI(), rows: E.rows, page: 15, filters: [size], search: r => r.customer, placeholder: 'Find an account', onRow: open,
+  dataTable(main.querySelector('#wh-elig'), { key: 'eligible', ns: 'e_', noun: 'accounts', who: whoAmI(), rows: E.rows, filters: [size], search: r => r.customer, placeholder: 'Find an account', onRow: open,
     cols: [nm,
       { k: 'eligible', l: 'Eligible boxes', short: 'Eligible', def: true, sorted: true, get: r => r.eligible, total: 'sum', fmt: r => n0(r.eligible) },
       { k: 'once', l: 'Bill once est.', def: true, get: r => r.once, total: 'sum', totalFmt: v => money0(v), fmt: r => money0(r.once) },
@@ -117,7 +117,7 @@ export async function render(main, tabs) {
       { k: 'months', l: 'Pays back, months', get: r => r.months, fmt: r => r.months != null ? Math.round(r.months) : '—' },
       { k: 'share', l: 'Of the building', get: r => r.share, fmt: r => (r.share * 100).toFixed(1) + '%' },
     ] });
-  dataTable(main.querySelector('#wh-nb'), { key: 'notbilled', ns: 'n_', noun: 'accounts', who: whoAmI(), rows: nbRows, page: 15, defaults: { status: 'current' }, filters: [{ k: 'status', l: 'Status', options: [['current', 'Current accounts'], ['dormant', 'Dormant accounts']], test: (r, v) => v === 'dormant' ? r.dormant : !r.dormant }, size], search: r => r.customer, placeholder: 'Find an account', onRow: open,
+  dataTable(main.querySelector('#wh-nb'), { key: 'notbilled', ns: 'n_', noun: 'accounts', who: whoAmI(), rows: nbRows, defaults: { status: 'current' }, filters: [{ k: 'status', l: 'Status', options: [['current', 'Current accounts'], ['dormant', 'Dormant accounts']], test: (r, v) => v === 'dormant' ? r.dormant : !r.dormant }, size], search: r => r.customer, placeholder: 'Find an account', onRow: open,
     cols: [nm,
       { k: 'gap', l: 'Boxes not billed', def: true, sorted: true, get: r => r.gap, total: 'sum', fmt: r => n0(r.gap) },
       { k: 'held', l: 'Held', get: r => r.held, total: 'sum', fmt: r => n0(r.held) },

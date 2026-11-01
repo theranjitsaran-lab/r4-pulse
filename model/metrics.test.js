@@ -185,7 +185,7 @@ test('one table: filters and search narrow the rows, the total follows them, and
   const csv = toCsv(rows, [{ l: 'Name', get: r => r.n }, col]);
   assert.match(csv, /"Delta, Inc",/, 'a comma is quoted');
   assert.equal(csv.split('\r\n').length, 5);
-  const st = { q: 'alp', f: { b: 'y' }, sort: 'v', dir: 1, cols: ['v'] };
+  const st = { q: 'alp', f: { b: 'y' }, sort: 'v', dir: 1, cols: ['v'], span: 3 };
   const back = readState(Object.fromEntries(new URLSearchParams(stateQuery(st))), o);
   assert.deepEqual(back, st, 'the link carries it all');
   // two tables on one page keep to their own part of the link, and the rest of it stands
@@ -194,6 +194,23 @@ test('one table: filters and search narrow the rows, the total follows them, and
   assert.equal(one, '#activity?tab=warehouse&n_q=old&e_q=new');
   assert.equal(withState(one, { q: '', f: {}, sort: null, dir: -1, cols: null }, 'e_'), '#activity?tab=warehouse&n_q=old');
   assert.equal(withState('#customers?view=overview&f_line=bin', { q: '', f: {}, sort: null, dir: -1, cols: null }), '#customers?view=overview', 'a removed filter leaves the link');
+});
+
+test('Step 2: months are the latest on the right, and YTD and 12 months hold whatever the switch shows', async () => {
+  const { monthCols, sumOf, kOnly } = await import('../public/components/datatable.js');
+  const list = []; for (let y = 2025, m = 1, i = 0; i < 22; i++) { list.push(`${y}-${String(m).padStart(2, '0')}-01`); m++; if (m > 12) { m = 1; y++; } }
+  const rows = [{ v: 100 }, { v: 2000 }];
+  const M = { list, est: [list[list.length - 1]], get: r => r.v };
+  for (const span of [3, 12]) {
+    const cols = monthCols(M, span), mons = cols.filter(c => c.month), ytd = cols.find(c => c.k === 'ytd'), l12 = cols.find(c => c.k === 'l12');
+    assert.equal(mons.length, span);
+    assert.equal(mons[mons.length - 1].month, list[list.length - 1], 'the latest on the right');
+    assert.ok(mons[mons.length - 1].est, 'in progress is marked');
+    assert.equal(sumOf(rows, l12), 2100 * 12);
+    assert.equal(sumOf(rows, ytd), 2100 * 10, 'January to October');
+  }
+  assert.equal(kOnly(-1499), '−1');
+  assert.equal(kOnly(12400), '12');
 });
 
 test('#38 not billed: internal out, dormant apart by invoices rather than by name', async () => {

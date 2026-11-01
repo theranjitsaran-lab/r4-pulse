@@ -37,7 +37,7 @@ DECISIONS.md "The route to $1.0m and cross-sell" holds what was settled.*
 | **Routes** | `#activity` | Mike | The day in a sentence, thin routes named · by route against its norm · the map on tap: the day's routes from the yard, or where to add customers · the week · booked ahead · distance from the yard and the long way round |
 
 Every figure shown in two places comes from one function (`components/levers.js`, `margin.js`,
-`whitespace.js`) and `model/levers.test.js` holds them together. Tokens are in `public/tokens.css`.
+`whitespace.js`) and `model/levers.test.js` holds them together. Every list is `components/datatable.js`: 13px figures in the system monospace on 30px rows, months with YTD and 12 months, 50 rows then Show all, and `npm run footing` reads what it draws. Tokens are in `public/tokens.css`.
 
 ## Stack
 

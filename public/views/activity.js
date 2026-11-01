@@ -260,7 +260,7 @@ export async function render(main, A, params) {
       <div class="card-head" style="margin-top:var(--sp-2)"><h3>The long way round</h3><small>${costsVisible() ? 'visit cost est. per service' : 'by visits a year'}</small></div>
       <div id="rt-far-t"></div>
       <div class="src"><a class="how-link" href="#how">How it's calculated ›</a> · Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles in a straight line from the yard, by postcode${costsVisible() ? " · route time from the cost model: a route day's travel share scaled for distance, plus time on site est. · route costs under review" : ''}</div>`;
-    dataTable(el.querySelector('#rt-far-t'), { key: 'longway', ns: 'far_', noun: 'areas', who: whoAmI(), rows, page: 12, placeholder: 'Find a postcode or customer', search: p => p.pc + ' ' + p.names,
+    dataTable(el.querySelector('#rt-far-t'), { key: 'longway', ns: 'far_', noun: 'areas', who: whoAmI(), rows, placeholder: 'Find a postcode or customer', search: p => p.pc + ' ' + p.names,
       defaults: { band: 'far' },
       filters: [{ k: 'band', l: 'Distance', options: [['near', 'Within 10 miles'], ['mid', '10 to 20 miles'], ['far', '20 miles or more']], test: (p, v) => v === 'near' ? p.mi < 10 : v === 'mid' ? p.mi >= 10 && p.mi < 20 : p.mi >= 20 }],
       cols: [

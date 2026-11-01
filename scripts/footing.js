@@ -7,6 +7,7 @@ const { spawn } = require('child_process');
 const crypto = require('crypto');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const { chromium } = require('playwright');
 
 const ROOT = path.join(__dirname, '..');
 const K = v => '$' + Math.round(v / 1000).toLocaleString('en-US') + 'K';
@@ -14,6 +15,52 @@ const D = v => '$' + Math.round(v).toLocaleString('en-US');
 const close = (a, b, tol = 1) => Math.abs(a - b) <= tol;
 let fails = 0;
 const say = (state, n, text) => { if (state === 'FAIL') fails++; console.log(`${state.padEnd(8)} ${n}  ${text}`); };
+
+// every table as drawn: each column adds to the total row, unfiltered and searched; with months, each row's
+// and the total's YTD and 12 months equal their months
+const TABLES = [['All accounts', '#customers?view=overview', 'chicago'], ['Month grid', '#customers?view=grid&span=12', 'chicago'], ['Cross-sell', '#customers?view=whitespace', 'chicago'],
+  ['Warehouse', '#numbers?tab=warehouse', 'west'], ['Long way round', '#activity', '60'], ['Price gaps', '#pricing', 'box']];
+const readTable = t => {
+  const n = x => Number(x.dataset.v);
+  const head = [...t.querySelectorAll('thead th')], rows = [...t.querySelectorAll('tbody tr[data-i]')];
+  const foot = [...t.querySelectorAll('tfoot td')], counted = rows.filter(r => !r.dataset.out), wrong = [];
+  head.forEach((h, i) => {
+    if (!foot[i] || foot[i].dataset.v === undefined) return;
+    const s = counted.reduce((a, r) => a + (r.children[i].dataset.v ? n(r.children[i]) : 0), 0);
+    if (Math.abs(s - n(foot[i])) > 0.5) wrong.push(h.dataset.k + ': rows ' + Math.round(s) + ', total ' + Math.round(n(foot[i])));
+  });
+  const months = head.map((h, i) => [h.dataset.m, i]).filter(x => x[0]);
+  if (months.length === 12) {
+    const year = months[11][0].slice(0, 4), yi = head.findIndex(h => h.dataset.k === 'ytd'), li = head.findIndex(h => h.dataset.k === 'l12');
+    for (const tr of [...counted, t.querySelector('tfoot tr')]) {
+      const c = i => n(tr.children[i]) || 0, all = months.reduce((a, x) => a + c(x[1]), 0), ytd = months.filter(x => x[0].startsWith(year)).reduce((a, x) => a + c(x[1]), 0);
+      if (Math.abs(all - c(li)) > 0.5) wrong.push('12 months in ' + tr.children[0].innerText + ': ' + Math.round(all) + ' against ' + Math.round(c(li)));
+      if (Math.abs(ytd - c(yi)) > 0.5) wrong.push('YTD in ' + tr.children[0].innerText + ': ' + Math.round(ytd) + ' against ' + Math.round(c(yi)));
+    }
+  }
+  return { rows: rows.length, cols: foot.filter(x => x.dataset.v !== undefined).length, months: months.length, wrong };
+};
+async function tables(base, pass) {
+  const browser = await chromium.launch();
+  try {
+    const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+    await page.goto(base + '/login'); await page.fill('input[name=name]', 'foot'); await page.fill('input[name=password]', pass);
+    await Promise.all([page.waitForNavigation(), page.click('button')]);
+    for (const [name, hash, term] of TABLES) {
+      await page.goto('about:blank'); await page.goto(base + '/' + hash);
+      await page.waitForSelector('.dt-t tbody tr', { timeout: 30000 }); await page.waitForTimeout(400);
+      for (const stage of ['all', 'searched']) {
+        const dts = await page.$$('.dt');
+        for (const d of dts) {
+          if (stage === 'searched') { await (await d.$('.dt-find')).fill(term); await page.waitForTimeout(100); }
+          const more = await d.$('.dt-more button'); if (more) { await more.click(); await page.waitForTimeout(100); }
+          const r = await d.$eval('.dt-t', readTable);
+          say(r.wrong.length ? 'FAIL' : 'PASS', '1 ', `${name}, ${stage}: ${r.rows} rows, ${r.cols} columns foot${r.months ? ', YTD and 12 months equal their months' : ''}${r.wrong.length ? ': ' + r.wrong.slice(0, 3).join('; ') : ''}`);
+        }
+      }
+    }
+  } finally { await browser.close(); }
+}
 
 async function main() {
   const port = 3400 + Math.floor(Math.random() * 90), pass = crypto.randomBytes(9).toString('hex');
@@ -33,7 +80,7 @@ async function main() {
     if (months.length) say(bad.length ? 'FAIL' : 'PASS', '1a', `Today's lines add to their total in ${months.length - bad.length} of ${months.length} months${bad.length ? ': not ' + bad.join(', ') : ''}`);
     const rows = cust.rows.filter(r => !r.citadel), sum = k => rows.reduce((t, r) => t + (r[k] || 0), 0);
     say('UNIT', '1b', `All accounts: the total row adds the filtered rows, held by the unit test: last month ${K(sum('last'))}, cross-sell est. ${K(sum('opp') / 12)} a month`);
-    say('TO BUILD', '1c', 'Month columns with YTD and 12-month totals do not exist yet; Step 2 builds them, and the Month grid has no total row');
+    await tables(base, pass);
 
     // 2. Money's October against Today's headline
     const m = home.month, oct = m.workMonth, lineOct = LV.totals[oct];
