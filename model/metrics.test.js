@@ -196,6 +196,23 @@ test('one table: filters and search narrow the rows, the total follows them, and
   assert.equal(withState('#customers?view=overview&f_line=bin', { q: '', f: {}, sort: null, dir: -1, cols: null }), '#customers?view=overview', 'a removed filter leaves the link');
 });
 
+test('#38 not billed: internal out, dormant apart by invoices rather than by name', async () => {
+  const { splitNotBilled } = await import('../public/components/storage.js');
+  const { isInternal } = await import('../public/components/metrics.js');
+  const rows = [{ level1: 1, customer: 'West Suburban Hospital', gap: 100 }, { level1: 2, customer: 'R4 Services, Inc.', gap: 50 }, { level1: 3, customer: 'Bear Stearns', gap: 30 }, { level1: 0, customer: 'Account 0', gap: 20 }];
+  const S = splitNotBilled(rows, new Map([[1, 39000], [3, 0]]), isInternal);
+  assert.deepEqual(S.active.map(r => r.level1), [1]);
+  assert.deepEqual(S.dormant.map(r => r.customer), ['Bear Stearns']);
+  assert.deepEqual([S.activeBoxes, S.dormantBoxes, S.internalBoxes], [100, 30, 70]);
+});
+
+test('rule 3: a small base or a line that swings by nature reads in dollars', async () => {
+  const { isLumpy } = await import('../public/components/metrics.js');
+  assert.ok(isLumpy('itad', 500000));
+  assert.ok(isLumpy('labour', 9000));
+  assert.ok(!isLumpy('bin', 90000));
+});
+
 test('#36 internal and placeholder accounts are not customers', async () => {
   const { isInternal } = await import('../public/components/metrics.js');
   for (const n of ['R4 Services INC', 'R4 Services LLC', 'Single Invoice Customer', 'Account 0']) assert.ok(isInternal(n), n);

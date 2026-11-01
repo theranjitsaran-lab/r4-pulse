@@ -4,7 +4,7 @@
 // Every box is at one location (CHI) and rack capacity is not in the data: no percent full.
 import { lineChart, money0, moneyK } from '/components/chart.js';
 import { getJson, titleCase, esc } from '/components/data.js';
-import { byAccount, totals, cells, eligibleList, heldNotBilled, gridSvg, STATES } from '/components/storage.js';
+import { byAccount, totals, cells, eligibleList, heldNotBilled, splitNotBilled, gridSvg, STATES } from '/components/storage.js';
 import { dataTable } from '/components/datatable.js';
 import { isInternal, SIZE_BANDS, inBand } from '/components/metrics.js';
 import { whoAmI } from '/components/access.js';
@@ -47,15 +47,16 @@ const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month:
 export async function render(main, tabs) {
   if (!main) return;
   if (!document.getElementById('wh-css')) { const s = document.createElement('style'); s.id = 'wh-css'; s.textContent = CSS; document.head.appendChild(s); }
-  let S, PR;
-  try { [S, PR] = await Promise.all([getJson('storage'), getJson('pricing')]); }
+  let S, PR, MG;
+  try { [S, PR, MG] = await Promise.all([getJson('storage'), getJson('pricing'), getJson('margin')]); }
   catch (e) {
     main.innerHTML = `<div class="rt wh">${tabs}<div class="empty" style="border:1px dashed var(--rule-3);border-radius:var(--r);padding:18px"><b>Warehouse data is not in this snapshot yet.</b> It arrives with the next refresh.</div></div>`;
     return;
   }
   const acc = byAccount(S), T = totals(acc), G = cells(acc, 1000);
   const E = eligibleList(acc, PR, T.boxes), NB = heldNotBilled(acc, PR);
-  const nbRows = NB.rows.filter(r => !isInternal(r.customer)), nbOut = NB.rows.filter(r => isInternal(r.customer)).reduce((t, r) => t + r.gap, 0);
+  const SP = splitNotBilled(NB.rows, new Map(MG.accounts.map(a => [a.level1, (a.storage_revenue || 0) + (a.service_revenue || 0)])), isInternal), nbRows = SP.rows;
+  const nbTop = SP.active[0] && SP.active[0].gap >= SP.activeBoxes * .4 ? SP.active[0] : null;
   const m = S.months, last = m[m.length - 1], yearAgo = m[m.length - 13];
   const yoy = yearAgo ? last.boxes / yearAgo.boxes - 1 : null;
   const top = acc[0];
@@ -78,14 +79,14 @@ export async function render(main, tabs) {
         <div class="src">Destruction at the book's median fee, $${(E.perBox || 0).toFixed(2)} a box; storage at each account's own rate per box (else the book's median) · "pays back" is the months of lost storage the destruction bill covers · <a href="#customers?view=destruction" style="color:var(--brand)">Overdue boxes by account ›</a></div>
       </div>
       <div class="card nb">
-        <div class="card-head"><h3>${n0(nbRows.reduce((t, r) => t + r.gap, 0))} boxes are in storage but not on the ${NB.month ? mon(NB.month) : 'latest'} storage bill</h3></div>
-        <p class="sub" style="margin:0 0 8px">${nbRows.filter(r => r.none).length} accounts with ${n0(nbRows.filter(r => r.none).reduce((t, r) => t + r.gap, 0))} boxes had no storage bill at all.${nbOut ? ` R4's own and placeholder accounts (${n0(nbOut)} boxes) are left out.` : ''} It may be timing or prepaid storage; Anne to confirm before anyone calls.</p>
+        <div class="card-head"><h3>${n0(SP.activeBoxes)} boxes at ${SP.active.length} current accounts are not on the ${NB.month ? mon(NB.month) : 'latest'} storage bill</h3></div>
+        <p class="sub" style="margin:0 0 8px">${nbTop ? `${esc(titleCase(nbTop.customer))} alone has ${n0(nbTop.gap)}. ` : ''}Current means invoiced in the last twelve months. Another ${SP.dormant.length} dormant accounts hold ${n0(SP.dormantBoxes)} boxes; the filter shows them.${SP.internalBoxes ? ` R4's own and placeholder accounts (${n0(SP.internalBoxes)} boxes) are left out.` : ''} It may be timing or prepaid storage; Anne to confirm before anyone calls.</p>
         <div id="wh-nb"></div>
         <div class="src">Held: boxes in storage · billed: boxes on the latest month's storage bill</div>
       </div>
     </div>
     <div class="card" id="wh-trend" style="margin-top:14px"></div>
-    <p class="foot">Box types: ${Object.entries(acc.reduce((t, a) => { for (const [k, v] of Object.entries(a.types)) t[k] = (t[k] || 0) + v; return t; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => `${esc(k)} ${pc(v / T.boxes)}`).join(' · ')} (codes to confirm with Anne). Boxes out, withdrawn or destroyed carry other status codes and are not drawn until their meaning is confirmed.</p>
+    <p class="foot"><a class="how-link" href="#how">How it's calculated ›</a></p>
   </div>`;
 
   // the grid, drawn at its width, with a hover per account block
@@ -116,7 +117,7 @@ export async function render(main, tabs) {
       { k: 'months', l: 'Pays back, months', get: r => r.months, fmt: r => r.months != null ? Math.round(r.months) : '—' },
       { k: 'share', l: 'Of the building', get: r => r.share, fmt: r => (r.share * 100).toFixed(1) + '%' },
     ] });
-  dataTable(main.querySelector('#wh-nb'), { key: 'notbilled', ns: 'n_', noun: 'accounts', who: whoAmI(), rows: nbRows, page: 15, filters: [size], search: r => r.customer, placeholder: 'Find an account', onRow: open,
+  dataTable(main.querySelector('#wh-nb'), { key: 'notbilled', ns: 'n_', noun: 'accounts', who: whoAmI(), rows: nbRows, page: 15, defaults: { status: 'current' }, filters: [{ k: 'status', l: 'Status', options: [['current', 'Current accounts'], ['dormant', 'Dormant accounts']], test: (r, v) => v === 'dormant' ? r.dormant : !r.dormant }, size], search: r => r.customer, placeholder: 'Find an account', onRow: open,
     cols: [nm,
       { k: 'gap', l: 'Boxes not billed', def: true, sorted: true, get: r => r.gap, total: 'sum', fmt: r => n0(r.gap) },
       { k: 'held', l: 'Held', get: r => r.held, total: 'sum', fmt: r => n0(r.held) },

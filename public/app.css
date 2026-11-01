@@ -26,7 +26,14 @@ button{font:inherit}
 .crumb span{color:var(--ink-4)}
 .empty{margin: calc(var(--u) * 15) auto;max-width: calc(var(--u) * 130);background:var(--surface);border-radius:var(--r-lg);padding: var(--sp-6) calc(var(--u) * 7);color:var(--ink-3);box-shadow:var(--shadow)}
 .empty h2{font-size: var(--fs-title);color:var(--ink);margin: 0 0 var(--sp-2);letter-spacing:var(--track-tight)}
-.loading{color:var(--ink-4);text-align:center;padding: calc(var(--u) * 15) 0}
+.sk { display: grid; gap: var(--sp-4); padding-top: var(--sp-4); }
+.sk i { display: block; border-radius: var(--r); background: var(--well); animation: sk 1.4s ease-in-out infinite; }
+.sk .sk-h { width: 30%; height: var(--sp-8); }
+.sk-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(calc(var(--u) * 35), 1fr)); gap: var(--sp-2); }
+.sk-tiles i { height: calc(var(--u) * 20); }
+.sk .sk-c { height: calc(var(--u) * 50); }
+@keyframes sk { 50% { opacity: .5; } }
+@media (prefers-reduced-motion: reduce) { .sk i { animation: none; } }
 
 @media(max-width:700px){
   /* a backdrop filter would make the header the containing block of the fixed tab bar */

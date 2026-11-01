@@ -13,13 +13,15 @@ import { LINES } from '/components/whitespace.js';
 import { openPop } from '/components/pop.js';
 import { dataTable } from '/components/datatable.js';
 import { costsVisible, whoAmI, myRole } from '/components/access.js';
-import { LABELS, changeWord, SIZE_BANDS, inBand } from '/components/metrics.js';
+import { LABELS, changeWord, isLumpy, SIZE_BANDS, inBand } from '/components/metrics.js';
 import { reveal } from '/components/motion.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const pct = v => `${Math.abs(Math.round(v * 100))}%`;
-const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : v > 0.02 ? 'up' : v < -0.02 ? 'down' : 'flat'}">${changeWord(v)}</span>`;
+const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat'}">${changeWord(v)}</span>`;
 const signedK = v => v == null ? '—' : (v < 0 ? '−' : '+') + moneyK(Math.abs(v));
+// a lumpy line's move reads in dollars, not a percentage
+const move = (key, v, pct) => pct == null || pct <= -1 || !isLumpy(key, v / (1 + pct)) ? chip(pct) : `<span class="h2-d quiet">${signedK(v - v / (1 + pct))}</span>`;
 const unitMoney = (v, unit) => v == null ? '—' : '$' + (unit === 'box a month' || unit === 'lb' ? v.toFixed(3) : v.toFixed(2));
 
 export async function render(main, C, params, tabs) {
@@ -44,7 +46,7 @@ export async function render(main, C, params, tabs) {
   // the book by line: one bar, each line's share of last month, with its change
   const segCard = seg ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>${esc(mon(seg.month))} by line of business</h2><small>${moneyK(seg.total)} · tap a line to see its customers' prices and costs</small></div>
       <div class="c2-stack">${seg.rows.map((s, i) => `<i class="s${i}" style="--w:${(s.lm / seg.total * 100).toFixed(2)}%" title="${esc(s.name)} ${moneyK(s.lm)}"></i>`).join('')}</div>
-      <div class="c2-legend">${seg.rows.map((s, i) => { const f = FAMS.find(x => x.key === s.key); return `<${f ? `a href="#customers?view=overview&f_line=${s.key}"` : 'span'} class="c2-li"><i class="k s${i}"></i><span>${esc(s.name)}</span><b>${moneyK(s.lm)}</b>${chip(s.lmPct)}</${f ? 'a' : 'span'}>`; }).join('')}</div></section>` : '';
+      <div class="c2-legend">${seg.rows.map((s, i) => { const f = FAMS.find(x => x.key === s.key); return `<${f ? `a href="#customers?view=overview&f_line=${s.key}"` : 'span'} class="c2-li"><i class="k s${i}"></i><span>${esc(s.name)}</span><b>${moneyK(s.lm)}</b>${move(s.key, s.lm, s.lmPct)}</${f ? 'a' : 'span'}>`; }).join('')}</div></section>` : '';
 
   const custRow = (r, kind) => `<li><a href="#customer/${r.level1}"><span class="h2-cn">${esc(titleCase(r.customer))}</span>${sparkline(r.spark, { w: 72, h: 22, cls: 'service' })}
       <span class="h2-cv ${kind === 'top' ? '' : kind === 'rising' ? 'up' : 'down'}">${kind === 'top' ? moneyK(r.last3) : signedK(r.d)}<small>a month</small></span></a></li>`;
@@ -78,7 +80,7 @@ export async function render(main, C, params, tabs) {
   const kFmt = v => moneyK(v);
   const allCols = [name,
     { k: 'last', l: 'Last month', def: true, sorted: true, get: r => r.last, total: 'sum', totalFmt: kFmt, fmt: r => r.last == null ? '—' : `${cellBtn(r, moneyK(r.last), 'sales')}` },
-    { k: 'd', l: 'Against its own run, a month', short: 'Own run', def: true, get: r => r.d, total: 'sum', totalFmt: signedK, fmt: r => r.d == null ? '—' : cellBtn(r, `<span class="h2-cv ${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${signedK(r.d)}</span>`, 'sales') },
+    { k: 'd', l: 'Against its own run, a month', short: 'Own run', def: true, get: r => r.d, total: 'sum', totalFmt: signedK, fmt: r => r.d == null ? '—' : cellBtn(r, `<span class="h2-cv ${r.movePct >= .2 ? 'up' : r.movePct <= -.2 ? 'down' : ''}">${signedK(r.d)}</span>`, 'sales') },
     { k: 'opp', l: 'Cross-sell est., a month', short: 'Cross-sell est.', def: true, get: r => r.opp ? r.opp / 12 : 0, total: 'sum', totalFmt: kFmt, fmt: r => r.opp > 0 ? cellBtn(r, moneyK(r.opp / 12), 'opp') : '—' },
     { k: 'gap', l: 'Under the book, a year', get: r => r.gap, total: 'sum', totalFmt: kFmt, fmt: r => r.gap > 0 ? cellBtn(r, moneyK(r.gap), 'gap') : '—' },
     { k: 'lastPct', l: 'On the month before', get: r => r.lastPct, fmt: r => r.lastPct == null ? '—' : `<span class="h2-d quiet">${changeWord(r.lastPct, r.last / (1 + r.lastPct))}</span>` },

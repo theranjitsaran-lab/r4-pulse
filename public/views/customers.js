@@ -405,7 +405,7 @@ async function marginList(main, R, M, MS, params) {
       <div class="card-head"><h3>Where more volume would cut cost: ${esc(D.rows[0].postcode)} first, about ${money0(D.rows[0].saving)} a year est.</h3></div>
       <p class="sub" style="margin:0 0 var(--sp-2)">Travel to a postcode is shared by the customers on the visit. Where visits carry one customer, one more on the same visits takes this much a year off the cost of serving the ones already there.</p>
       ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${d.miles.toFixed(0)} miles out<small>${n0(d.visits)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${d.perVisit.toFixed(1)} customers each`} · ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
-      <div class="src">Route visits from ${D.days > 120 ? 'six months of route days' : `the ${D.days} days of routes held offline, scaled to a year`} · customers a visit from the twelve-month postcode book · travel a visit from the cost model at the postcode's distance (model/rates.js, provisional) est.</div>
+      <div class="src">Route visits from ${D.days > 120 ? 'six months of route days' : `the ${D.days} days of routes held offline, scaled to a year`} · customers a visit from the twelve-month postcode book</div>
     </div>` : ''}
     <p class="foot">Twelve months. Cost to serve est. from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Actions: Drop under $5,000 and under 15% · Re-route under 15% with travel over 40% of cost · Renegotiate under 15% · Reprice 15–50% · Hold 50% and over · Check routes where most of the cost is route cost under review.</p>
   </div>`;
@@ -442,7 +442,7 @@ async function marginAccount(main, R, M, MS, id) {
         <span class="nm">${esc(FAMILY_NAMES[f] || f)}${pc != null && pc < 0 ? ' <span class="tag bad">below cost</span>' : ''}</span><span class="r u">${f === 'storage' || v.cost > 0 ? esc(units(f)) : ''}</span>
         <span class="r rv">${money0(v.revenue)}</span><span class="r cs">${v.cost ? money0(v.cost) : '—'}</span><span class="r lf ${l < 0 ? 'is-bad' : ''}">${money0(l)}</span>
         <span class="r pc">${pcText(pc)}</span><span class="go">›</span></a>`; }).join('')}
-      <div class="src">Twelve months, posted invoices · cost est. from the cost model (model/rates.js) · tap a line for its jobs</div>
+      <div class="src">Twelve months, posted invoices · cost est. from the cost model · tap a line for its jobs</div>
     </div>
   </div>`;
 }
@@ -473,7 +473,7 @@ async function marginLine(main, R, M, MS, id, f) {
   const working = (AC[f] || []).flatMap(r => r.lines);
   const workHtml = working.length ? `<table class="jv-tab working"><tbody>${working.map(l => `<tr><td>${esc(l[0])}${l[3] ? ' est.' : ''}</td><td class="why">${esc(l[2])}</td><td class="num">${money0(l[1])}</td></tr>`).join('')}</tbody></table>` : '';
   main.innerHTML = `<div class="cust mv2">${crumb}<h2 class="t">${esc(fname)}: ${money0(v.revenue)} a year against about ${money0(v.cost)} to serve est.</h2><div id="mv-jobs"><p class="sub">Loading the jobs…</p></div>
-    <div class="card" style="margin-top:var(--sp-4)"><div class="card-head"><h3>The year's cost, worked out est.</h3></div>${workHtml || '<p class="sub">No modelled cost on this line: fees and charges with no volume behind them.</p>'}<div class="src">Twelve months of volume at the cost model's rates (model/rates.js); the jobs above are costed one by one on their own route days</div></div></div>`;
+    <div class="card" style="margin-top:var(--sp-4)"><div class="card-head"><h3>The year's cost, worked out est.</h3></div>${workHtml || '<p class="sub">No modelled cost on this line: fees and charges with no volume behind them.</p>'}<div class="src">Twelve months of volume at the cost model's rates ; the jobs above are costed one by one on their own route days</div></div></div>`;
   const box = main.querySelector('#mv-jobs');
   if (['storage', 'other'].includes(f)) { box.innerHTML = `<p class="note">${f === 'storage' ? 'Storage bills every month for the boxes held, so it has no jobs: its cost is the warehouse space below.' : 'Fees and charges carry no volume, so there are no jobs to cost.'}</p>`; return; }
   const J = await accountJobs(R, M, id);

@@ -144,7 +144,7 @@ export async function render(main, P) {
     </details>
     <div class="also" data-rv>
       <a href="#customers?view=margin"><b>Margin est.</b> ${Math.round(solidPc * 100)}% on costs we are sure of; ${sure.length} account${sure.length === 1 ? '' : 's'} below cost, ${unsure.length} more under review ›</a>
-      <a href="#activity?tab=warehouse"><b>Warehouse</b> ${Math.round(B.overdue.boxes / 1000)}K boxes past retention review across ${B.overdue.accounts} accounts ›</a>
+      <a href="#numbers?tab=warehouse"><b>Warehouse</b> ${Math.round(B.overdue.boxes / 1000)}K boxes past retention review across ${B.overdue.accounts} accounts ›</a>
     </div>`;
 
   main.innerHTML = `<div class="h">${staleNote}${briefCard}${strip}${teamCard}

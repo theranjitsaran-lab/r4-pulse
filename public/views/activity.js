@@ -33,9 +33,8 @@ const dcls = v => v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat';
 
 export async function render(main, A, params) {
   if (!main) return;
-  // two tabs: the routes, and the warehouse (views/storage.js)
-  const tabs = `<div class="top"><div><h1>Operations</h1></div><div class="seg rt-tabs"><a href="#activity" class="${params.tab === 'warehouse' ? '' : 'on'}">Routes</a><a href="#activity?tab=warehouse" class="${params.tab === 'warehouse' ? 'on' : ''}">Warehouse</a></div></div>`;
-  if (params.tab === 'warehouse') return (await import('/views/storage.js')).render(main, tabs);
+  // Warehouse moved to Money; old links follow it
+  if (params.tab === 'warehouse') { location.replace('#numbers?tab=warehouse'); return; }
   const [R, Z, base] = await Promise.all([loadRates(), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
     loadBasemap(), loadRoadnet()]);
   const real = A.routeDays.filter(r => r.route && r.route !== '--');
@@ -53,18 +52,17 @@ export async function render(main, A, params) {
       <div class="day"><button id="rt-prev" aria-label="Previous day">‹</button><b id="rt-day"></b><button id="rt-next" aria-label="Next day">›</button></div>
     </div>
     <p class="rt-say" id="rt-say"></p>
-    <section class="h2-card rt-mapcard">
+    <div class="sum" id="rt-sum"></div>
+    <div class="card"><div class="card-head"><h3 id="rt-routes-h">By route</h3><small>against ${LABELS.normalRoute} (its 8-week median)</small></div><div id="rt-routes"></div></div>
+    <details class="h2-card rt-mapcard" id="rt-mapd"><summary class="rt-mapsum">Show the map</summary>
       <div class="rt-maphead"><div class="h2-ch"><h2 id="rt-map-t"></h2><small id="rt-map-s"></small></div>
         <div class="seg" id="rt-layer"><button data-l="day" class="on">The day's routes</button><button data-l="add">Where to add customers</button></div></div>
       <div id="rt-map"></div><div class="h2-key" id="rt-map-key"></div>
-    </section>
-    <div class="sum" id="rt-sum"></div>
-    <div class="card"><div class="card-head"><h3 id="rt-routes-h">By route</h3><small>against ${LABELS.normalRoute} (its 8-week median)</small></div><div id="rt-routes"></div></div>
+    </details>
     <div class="two">
       <div class="card"><div class="card-head"><h3 id="rt-week-h">The week</h3></div><div id="rt-week"></div></div>
       <div class="stack">
         <div class="card"><div class="card-head"><h3 id="rt-ahead-h">Booked after the latest day</h3></div><div id="rt-ahead"></div></div>
-        <div class="card" ${costsVisible() ? '' : 'style="display:none"'}><div class="card-head"><h3>Margin per route day</h3></div><div class="pending">Starts when driver pay rates by person are loaded: the day's invoiced work less driver pay and the vehicle share of a route day.</div></div>
       </div>
     </div>
     <div class="card" style="margin-top:var(--sp-4)" id="rt-far"></div>
@@ -118,8 +116,8 @@ export async function render(main, A, params) {
     return [...new Set(list)].filter(p => Z[p]);
   }
   function drawMap() {
-    const el = $('rt-map'); if (!el) return;
-    if (!pts.length) { el.innerHTML = '<div class="pending">The map needs the postcode centres (public/data/zcta.json).</div>'; return; }
+    const el = $('rt-map'), box = $('rt-mapd'); if (!el || !box || !box.open) return;
+    if (!pts.length) { el.innerHTML = '<div class="pending">The map is not available: the postcode centres did not load.</div>'; return; }
     const W = Math.max(300, Math.min(1100, el.clientWidth || 700)), H = Math.round(W < 500 ? W * 1.0 : W * 0.52);
     const F = areaFrame(pts.map(p => p.pt), W, H);
     let g = landLayer(base, F) + postcodeLayer(pts, F);
@@ -261,7 +259,7 @@ export async function render(main, A, params) {
       <div class="bands">${bands.map(b => `<span>${b.l}</span><span class="bar"><i style="width:${b.share * 100}%"></i></span><span class="v">${b.sv.toLocaleString('en-US')}</span><span class="v sub">${Math.round(b.share * 100)}%</span>`).join('')}</div>
       <div class="card-head" style="margin-top:var(--sp-2)"><h3>The long way round</h3><small>${costsVisible() ? 'visit cost est. per service' : 'by visits a year'}</small></div>
       <div id="rt-far-t"></div>
-      <div class="src">Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles in a straight line from the yard, by postcode${costsVisible() ? " · route time from the cost model: a route day's travel share scaled for distance, plus time on site est. · route costs under review" : ''}</div>`;
+      <div class="src"><a class="how-link" href="#how">How it's calculated ›</a> · Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles in a straight line from the yard, by postcode${costsVisible() ? " · route time from the cost model: a route day's travel share scaled for distance, plus time on site est. · route costs under review" : ''}</div>`;
     dataTable(el.querySelector('#rt-far-t'), { key: 'longway', ns: 'far_', noun: 'areas', who: whoAmI(), rows, page: 12, placeholder: 'Find a postcode or customer', search: p => p.pc + ' ' + p.names,
       defaults: { band: 'far' },
       filters: [{ k: 'band', l: 'Distance', options: [['near', 'Within 10 miles'], ['mid', '10 to 20 miles'], ['far', '20 miles or more']], test: (p, v) => v === 'near' ? p.mi < 10 : v === 'mid' ? p.mi >= 10 && p.mi < 20 : p.mi >= 20 }],
@@ -275,6 +273,7 @@ export async function render(main, A, params) {
       ] });
   }
 
+  $('rt-mapd').addEventListener('toggle', ev => { ev.target.querySelector('summary').textContent = ev.target.open ? 'Hide the map' : 'Show the map'; drawMap(); });
   function redraw() { hl = null; drawDay(); drawWeek(); drawMap(); history.replaceState(null, '', `#activity?date=${day}`); }
   $('rt-layer').addEventListener('click', ev => { const b = ev.target.closest('button[data-l]'); if (!b) return; layer = b.dataset.l; main.querySelectorAll('#rt-layer button').forEach(x => x.classList.toggle('on', x === b)); drawMap(); });
   $('rt-prev').addEventListener('click', () => { const i = doneDays.indexOf(day); if (i > 0) { day = doneDays[i - 1]; redraw(); } });

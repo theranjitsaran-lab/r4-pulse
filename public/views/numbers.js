@@ -16,8 +16,11 @@ const monY = d => mon(d, { month: 'long', year: 'numeric' });
 const pc = v => Math.round(v * 100) + '%';
 const ROUTE_FAMILIES = ['handling', 'movement'];
 
-export async function render(main, V) {
+const tabsHtml = on => `<div class="top"><div><h1>Money</h1></div><div class="seg rt-tabs"><a href="#numbers" class="${on === 'warehouse' ? '' : 'on'}">Numbers</a><a href="#numbers?tab=warehouse" class="${on === 'warehouse' ? 'on' : ''}">Warehouse</a></div></div>`;
+
+export async function render(main, V, params = {}) {
   if (!main) return;
+  if (params.tab === 'warehouse') return (await import('/views/storage.js')).render(main, tabsHtml('warehouse'));
   const M = V.monthly, last = M[M.length - 1], l12 = M.slice(-12), avg12 = l12.reduce((t, m) => t + m.core, 0) / l12.length;
   const ly = M.find(m => m.month.slice(5, 7) === last.month.slice(5, 7) && +m.month.slice(0, 4) === +last.month.slice(0, 4) - 1);
   const best = l12.reduce((a, m) => m.core > a.core ? m : a, l12[0]);
@@ -31,7 +34,7 @@ export async function render(main, V) {
   </section>`;
 
   main.innerHTML = `<div class="nb">
-    <h1>Money</h1>
+    ${tabsHtml('numbers')}
     ${kpis}
     <section class="h2-card" data-rv>
       <div class="h2-ch"><h2>${esc(coreTitle(l12, V.target))}</h2><small>invoiced in VCK by month, core: storage and service, against $1.0M</small></div>
@@ -51,6 +54,7 @@ export async function render(main, V) {
         <tr><td>Income outside VCK (rent, sundry)</td><td>QuickBooks</td><td class="v">to confirm</td></tr>
       </tbody></table></div></details>
     <section class="h2-card" data-rv id="nb-margin"></section>
+    <p class="foot"><a class="how-link" href="#how">How it's calculated ›</a></p>
   </div>`;
 
   coreChart(main.querySelector('#nb-core'), M.slice(-13), V.target);
@@ -135,5 +139,5 @@ function marginHtml(Mg) {
   return `<div class="h2-ch"><h2>Gross margin by line of business est.</h2><small>the last twelve months, revenue less the cost to serve, every account, Citadel apart</small></div>
     <div class="c2-scroll"><table class="q-t nb-t"><thead><tr><th>Line</th><th class="v">Revenue</th><th class="v">Cost to serve est.</th><th class="v">Margin est.</th><th class="v">Kept</th></tr></thead><tbody>${rows}</tbody>
     <tfoot><tr><td>The costed lines<small>leaving out the lines under review and the fees</small></td><td class="v">${money0(tot.revenue)}</td><td class="v">${money0(tot.cost)}</td><td class="v">${money0(tot.revenue - tot.cost)}</td><td class="v">${pc((tot.revenue - tot.cost) / tot.revenue)}</td></tr></tfoot></table></div>
-    <div class="src">Cost to serve from the cost model (GL pools over the database's volumes, provisional) est. · bins from ${Mg.binReal.routeDays} real route days, ${esc(String(Mg.binReal.from))} to ${esc(String(Mg.binReal.to))}, shared by minutes, where the account has them; elsewhere the average visit · sales, management and overheads sit above this line, in the bridge, never spread across customers</div>`;
+    <div class="src">Cost to serve from the cost model (ledger costs over twelve months' volumes, provisional) est. · bins from ${Mg.binReal.routeDays} real route days, ${esc(String(Mg.binReal.from))} to ${esc(String(Mg.binReal.to))}, shared by minutes, where the account has them; elsewhere the average visit · sales, management and overheads sit above this line, in the bridge, never spread across customers</div>`;
 }
