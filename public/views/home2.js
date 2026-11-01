@@ -295,8 +295,8 @@ const nmL = s => esc(titleCase(s));
 // why a job is left out, in a line: its size against what the account has bought, or no price of its own
 const whyHeld = j => {
   const u = Math.round(j.units).toLocaleString('en-US'), at = '$' + j.rate.toFixed(2);
-  if (j.reason === 'check') return `${u} hours at its own ${at}, against ${Math.round(j.maxUnits).toLocaleString('en-US')} at most before (last ${dm(j.lastDate)}). May be a keying error.`;
-  return `${u} units, never bought before. Priced at the book's ${at}, usually what a first-time buyer pays.`;
+  if (j.reason === 'check') return `${u} hours at its own ${at}, against ${Math.round(j.maxUnits).toLocaleString('en-US')} at most before (last ${dm(j.lastDate)} ${j.lastDate.slice(0, 4)}). May be a keying error.`;
+  return `${u} ${j.family === 'labour' ? 'hours' : 'units'}, never bought before. Priced at the book's ${at}, usually what a first-time buyer pays.`;
 };
 async function openLine(key, month, LV) {
   const r = LV.rows.find(x => x.key === key), k = r.by[month], meta = LV.meta[month];
