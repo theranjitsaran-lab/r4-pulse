@@ -15,12 +15,11 @@ const GROUPS = [
   { title: 'Where there are no route days', sub: 'a new account with no postcode, a line with no route days', keys: [
     ['split', 'share', 'Of a typical route day, how much is driving rather than at customers?'],
   ] },
-  { title: 'Box deliveries', sub: 'delivery work orders are in VCK with a date and a customer, but no route or truck', keys: [
-    ['deliverySeparate', 'yes/no', 'Do box deliveries go out on different trucks from the shred routes?'],
-    ['deliveryStops', 'deliveries', 'How many deliveries does a delivery truck make in a day?'],
+  { title: 'Box deliveries', sub: 'they ride the shred trucks; VCK has the date and customer but not the route', keys: [
+    ['deliveryMatch', 'on/off', 'Are there days a delivery goes out on its own, not on a shred route?'],
   ] },
 ];
-const fmt = (k, v) => k === 'split' ? Math.round(v * 100) + '%' : k === 'deliverySeparate' ? (v ? 'Yes' : 'No') : String(+Number(v).toFixed(2));
+const fmt = (k, v) => k === 'split' ? Math.round(v * 100) + '%' : k === 'deliveryMatch' ? (v ? 'On' : 'Off') : String(+Number(v).toFixed(2));
 const when = s => s ? new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 
 export async function render(main, S) {
@@ -31,20 +30,20 @@ export async function render(main, S) {
 function draw(main, S) {
   const ref = S.reference || {};
   const refHtml = `<section class="h2-kpis four" data-rv>
-    <div class="h2-kpi lead"><span>A route day</span><b>${money0(ref.deliveries && ref.deliveries.on ? ref.deliveries.dayCost : ref.routeDay || 0)}</b><small>drivers, vehicles and route software ÷ ${ref.deliveries && ref.deliveries.on ? 'shred and delivery days' : 'shred route days'} ◇</small></div>
+    <div class="h2-kpi lead"><span>A route day</span><b>${money0(ref.routeDay || 0)}</b><small>drivers, vehicles and route software ÷ route days ◇</small></div>
     <div class="h2-kpi"><span>Ingalls, on the road</span><b>${ref.ingalls ? '$' + ref.ingalls.perService.toFixed(2) : '—'}</b><small>${ref.ingalls ? `a bin service, over its ${ref.ingalls.days} route days ◇` : 'no route days'}</small></div>
     <div class="h2-kpi"><span>The book, on the road</span><b>${ref.book ? '$' + ref.book.perService.toFixed(2) : '—'}</b><small>${ref.book ? `a service, ${ref.book.services.toLocaleString('en-US')} services on ${ref.days} route days ◇` : ''}</small></div>
     <div class="h2-kpi"><span>The day as the model sees it</span><b>${ref.avgRoundHours ? ref.avgRoundHours.toFixed(1) + ' hours' : '—'}</b><small>drive plus stops; a real route day runs about 8 to 9, so a short figure means the minutes are low</small></div>
   </section>`;
   const row = (k, unit, q) => {
     const v = S.values[k], d = S.defaults[k], b = S.bounds[k], n = S.notes[k] || [k, 'assumed', ''], last = S.latest && S.latest[k];
-    const input = k === 'deliverySeparate'
-      ? `<select data-k="${k}" ${S.canEdit ? '' : 'disabled'}><option value="0" ${v ? '' : 'selected'}>No</option><option value="1" ${v ? 'selected' : ''}>Yes</option></select>`
+    const input = k === 'deliveryMatch'
+      ? `<select data-k="${k}" ${S.canEdit ? '' : 'disabled'}><option value="1" ${v ? 'selected' : ''}>On: placed on the closest route</option><option value="0" ${v ? '' : 'selected'}>Off: left out of the route days</option></select>`
       : `<input data-k="${k}" inputmode="decimal" value="${k === 'split' ? Math.round(v * 100) : +Number(v).toFixed(2)}" ${S.canEdit ? '' : 'disabled'}><span class="st-unit">${k === 'split' ? '%' : esc(unit)}</span>`;
     return `<li class="st-row">
       <div class="st-what"><b>${esc(n[0])}</b><span>${esc(n[2])}</span><span class="st-q">For Mike: ${esc(q)}</span></div>
       <div class="st-val">${input}${S.canEdit ? `<button type="button" class="st-save" data-k="${k}">Save</button>` : ''}
-        <small>${esc(n[1])} · default ${esc(fmt(k, d))}${k !== 'deliverySeparate' ? ` · ${esc(fmt(k, b[0]))} to ${esc(fmt(k, b[1]))}` : ''}${last ? ` · set by ${esc(last.who)} on ${esc(when(last.at))}` : ''}</small>
+        <small>${esc(n[1])} · default ${esc(fmt(k, d))}${k !== 'deliveryMatch' ? ` · ${esc(fmt(k, b[0]))} to ${esc(fmt(k, b[1]))}` : ''}${last ? ` · set by ${esc(last.who)} on ${esc(when(last.at))}` : ''}</small>
         <span class="st-msg hint" data-for="${k}"></span></div>
     </li>`;
   };
@@ -55,7 +54,7 @@ function draw(main, S) {
     ${refHtml}
     ${GROUPS.map(g => `<section class="h2-card" data-rv><div class="h2-ch"><h2>${esc(g.title)}</h2><small>${esc(g.sub)}</small></div>
       <ul class="st-list">${g.keys.map(([k, u, q]) => row(k, u, q)).join('')}</ul>
-      ${g.title === 'Box deliveries' && del ? `<p class="src">${del.days.toLocaleString('en-US')} days with deliveries, ${del.orders.toLocaleString('en-US')} delivery work orders${del.truckDaysYear ? `, about ${del.truckDaysYear.toLocaleString('en-US')} delivery truck days a year at ${S.values.deliveryStops} deliveries a day` : ''}, ${esc(String(del.from))} to ${esc(String(del.to))} (VCK)${del.on ? ` · the drivers, vehicles and route software are shared across ${del.shredDays.toLocaleString('en-US')} shred route days and those delivery days, so a day costs ${money0(del.dayCost)} rather than ${money0(del.routeDay)}; delivery and pickup are costed from their own days` : ' · switched off: delivery and pickup stay at the average visit, under review'}</p>` : ''}
+      ${g.title === 'Box deliveries' && del && del.customerDays ? `<p class="src">${del.on ? `${del.placed.toLocaleString('en-US')} of ${del.customerDays.toLocaleString('en-US')} customer delivery days placed on a shred route that day, ${del.accounts} accounts, ${esc(String(del.from))} to ${esc(String(del.to))} (VCK code 01). ${del.noPostcode ? `${del.noPostcode.toLocaleString('en-US')} could not be placed for want of a postcode (the customer has no Veri-Shred address; VCK holds none)` : ''}${del.noPostcode && del.noRoute ? '; ' : ''}${del.noRoute ? `${del.noRoute.toLocaleString('en-US')} fell on a date no route ran` : ''}${del.noPostcode || del.noRoute ? ': those stay at the average visit, under review.' : ''}` : 'Off: deliveries are left out of the route days, and delivery and pickup stay at the average visit, under review.'}</p>` : ''}
     </section>`).join('')}
     ${S.history && S.history.length ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Changes</h2><small>newest first</small></div><ul class="st-hist">${S.history.map(h => `<li><span>${esc((S.notes[h.key] || [h.key])[0])}: <b>${esc(fmt(h.key, h.value))}</b></span><span>${esc(h.who)} · ${esc(when(h.at))}</span></li>`).join('')}</ul></section>` : ''}
     <section class="h2-card" data-rv><details class="fold"><summary><h3>The rates</h3><span class="sub">model/rates.js · GL pools over the database's volumes · open</span></summary>

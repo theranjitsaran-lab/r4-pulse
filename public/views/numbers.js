@@ -114,7 +114,7 @@ function marginHtml(Mg) {
   const tot = sure.reduce((a, l) => ({ revenue: a.revenue + l.revenue, cost: a.cost + l.cost }), { revenue: 0, cost: 0 });
   const rows = Mg.lines.map(l => {
     const costed = l.cost > 0, review = ROUTE_FAMILIES.includes(l.family), m = l.revenue - l.cost;
-    return `<tr><td>${esc(l.name)}${l.family === 'bin' ? `<small>${Mg.binReal.accounts} accounts from real route days</small>` : l.family === 'movement' && Mg.deliveriesOn ? `<small>${Mg.moveReal} accounts from delivery truck days ◇; the rest at the average visit, under review</small>` : review ? '<small>route cost under review</small>' : !costed ? '<small>not costed</small>' : ''}</td>
+    return `<tr><td>${esc(l.name)}${l.family === 'bin' ? `<small>${Mg.binReal.accounts} accounts from real route days</small>` : l.family === 'movement' && Mg.deliveriesOn ? `<small>${Mg.moveReal} accounts from the route days their deliveries were placed on ◇; the rest at the average visit, under review</small>` : review ? '<small>route cost under review</small>' : !costed ? '<small>not costed</small>' : ''}</td>
       <td class="v">${money0(l.revenue)}</td><td class="v">${costed ? money0(l.cost) : '—'}</td>
       <td class="v ${costed && m < 0 && !review ? 'is-bad' : ''}">${costed ? (m < 0 ? '−' : '') + money0(Math.abs(m)) : '—'}</td><td class="v">${costed && l.revenue > 0 ? pc(m / l.revenue) : '—'}</td></tr>`;
   }).join('');

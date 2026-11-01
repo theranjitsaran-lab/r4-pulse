@@ -36,7 +36,7 @@ const ensure = () => ready ? Promise.resolve() : load();
 function clean(b) {
   const key = String(b.key || ''), B = R.SETTING_BOUNDS[key], v = Number(b.value);
   if (!B || !Number.isFinite(v)) return null;
-  if (key === 'deliverySeparate') return { key, value: v ? 1 : 0 };
+  if (key === 'deliveryMatch') return { key, value: v ? 1 : 0 };
   return { key, value: Math.min(B[1], Math.max(B[0], v)) };
 }
 async function save(row) {

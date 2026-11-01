@@ -238,27 +238,32 @@ test('route cost: every day shares its cost exactly; an account is the sum of it
   assert.ok((q4.travel + q4.onsite) / 208 < (q1.travel + q1.onsite) / 52, 'four bins a visit cost less a bin than one');
 });
 
-test('delivery days: off changes nothing; on, shred and delivery days share the pool exactly', async () => {
+test('deliveries: placed on the closest route; days still share the route day exactly; never in bin costs', async () => {
   const R = require('./rates.js');
-  const { routeCosts } = await import('../public/components/routecost.js');
+  const { routeCosts, placeDeliveries } = await import('../public/components/routecost.js');
   const Z = require('../public/data/zcta.json');
+  // two routes on one day, one north and one south: a north delivery joins the north route
+  const north = { date: '2026-09-01', route: 'N', stops: [{ level1: 10, postcode: '60614', pt: Z['60614'], services: 2 }, { level1: 11, postcode: '60657', pt: Z['60657'], services: 1 }] };
+  const south = { date: '2026-09-01', route: 'S', stops: [{ level1: 12, postcode: '60619', pt: Z['60619'], services: 2 }, { level1: 13, postcode: '60628', pt: Z['60628'], services: 1 }] };
+  const P = placeDeliveries([north, south], [{ date: '2026-09-01', level1: 99, orders: 1, trips: 2, postcode: '60613' }, { date: '2026-09-01', level1: 98, orders: 1, trips: 1, postcode: null }, { date: '2026-09-02', level1: 97, orders: 1, trips: 1, postcode: '60619' }], Z);
+  assert.equal(P.placed, 1); assert.equal(P.noPostcode, 1); assert.equal(P.noRoute, 1);
+  assert.ok(north.stops.some(s => s.delivery && s.level1 === 99) && !south.stops.some(s => s.delivery), 'the north delivery rides the north route');
+  // on the drill's real days: every day's shares, deliveries included, still sum to the route day
   const rows = Object.values(J('drill')).flat().flatMap(a => a.routes || []);
-  const dels = [{ date: '2026-09-01', level1: 1, orders: 1, trips: 2, postcode: '60601' }, { date: '2026-09-01', level1: 2, orders: 2, trips: 3, postcode: '60616' },
-    { date: '2026-09-02', level1: 1, orders: 1, trips: 1, postcode: '60601' }];
+  const D = Object.values(J('drill')).flat().flatMap(a => (a.orders || []).filter(o => o.items.some(i => i.code === '01')).map(o => ({ date: o.date, level1: a.level1, orders: 1, trips: 1, postcode: ((a.routes || []).find(r => r.level1 === a.level1) || {}).postcode })));
   const keep = { ...R.SETTINGS };
   try {
-    R.SETTINGS.deliverySeparate = 0;
-    const plain = routeCosts(R, rows, Z), off = routeCosts(R, rows, Z, dels);
-    assert.deepEqual(off.accounts, plain.accounts, 'switched off, the deliveries change no account');
-    assert.equal(Object.keys(off.movement).length, 0);
-    R.SETTINGS.deliverySeparate = 1; R.SETTINGS.deliveryStops = 12;
-    const on = routeCosts(R, rows, Z, dels);
-    assert.equal(on.deliveries.truckDays, 2, 'one truck a day for two small days');
-    assert.ok(on.deliveries.dayCost < R.RATES.routeDay.v, 'the pool is shared across more days');
+    R.SETTINGS.deliveryMatch = 0;
+    const plain = routeCosts(R, rows, Z), off = routeCosts(R, rows, Z, D);
+    assert.deepEqual(off.accounts, plain.accounts, 'switched off, the deliveries change nothing');
+    R.SETTINGS.deliveryMatch = 1;
+    const on = routeCosts(R, rows, Z, D);
+    assert.ok(on.deliveries.placed > 0, 'some deliveries placed');
     const shred = Object.values(on.accounts).reduce((t, a) => t + a.cost, 0), move = Object.values(on.movement).reduce((t, a) => t + a.cost, 0);
-    near(shred, on.days * on.deliveries.dayCost, 0.01 * on.days + 1, 'shred days at the shared day cost');
-    near(move, on.deliveries.truckDays * on.deliveries.dayCost, 0.05, 'delivery days at the shared day cost');
-    assert.equal(on.movement[1].services, 3); assert.equal(on.movement[1].days, 2);
+    near(shred + move, on.days * R.RATES.routeDay.v, 0.01 * on.days + 1, 'shred and delivery shares fill the route days exactly');
+    const ing = id => on.accounts[id].cost / on.accounts[id].services, was = id => plain.accounts[id].cost / plain.accounts[id].services;
+    assert.ok(Object.keys(on.accounts).every(id => on.accounts[id].services === plain.accounts[id].services), 'deliveries add no bin services');
+    assert.ok(ing(12530) <= was(12530) + 1e-9, 'sharing a day with deliveries never makes bins dearer');
   } finally { Object.assign(R.SETTINGS, keep); }
 });
 

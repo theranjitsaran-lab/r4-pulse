@@ -151,17 +151,16 @@ async function loadFromDb(query) {
 // its day is by time instead: its drive minutes (its detour in road miles at mph) plus its drop
 // minutes (stopMin at each stop and serviceMin a service), scaled so a day's stops add up to the
 // route day. Three assumptions, all `assumed`, for Mike to check (31 October 2026).
-const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliverySeparate: 0, deliveryStops: 12 };
+const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliveryMatch: 1 };
 const TIME_NOTES = {
   mph: ['Average city speed between stops', 'assumed', 'Chicago streets with a box truck; the main roads give the miles, this turns them into minutes.'],
   stopMin: ['Minutes at each stop before any service', 'assumed', 'Park, walk in, sign, walk out.'],
   serviceMin: ['Minutes a service', 'assumed', 'Swap one bin, or one pickup or delivery line.'],
   split: ['Travel share of a route day, where there are no route days', 'assumed', 'Prices a visit at the book\'s average: a new account with no postcode, a line with no route days.'],
-  deliverySeparate: ['Box deliveries run on their own trucks', 'assumed', 'If yes, VCK delivery work orders become delivery truck days, and the route-day cost is shared across shred and delivery days.'],
-  deliveryStops: ['Deliveries a delivery truck makes in a day', 'assumed', 'Turns each day\'s delivery work orders into delivery truck days.'],
+  deliveryMatch: ['Box deliveries ride the shred routes, placed by location', 'observed', 'Deliveries go on the shred trucks (Theran, 1 November 2026). VCK does not say which route, so each is placed on the route that passed closest to it that day, and shares that day by minutes.'],
 };
 // Settings anyone can change on the Settings screen (server/settings.js): the bounds a value must sit in.
-const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], split: [0.1, 0.8], deliverySeparate: [0, 1], deliveryStops: [4, 40] };
+const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], split: [0.1, 0.8], deliveryMatch: [0, 1] };
 
 // The account's real route-day cost, set once the route days are costed (server: server/routecost.js;
 // browser: loadRates in components/data.js). { accounts: { level1: { cost, travel, onsite, services,
@@ -170,10 +169,10 @@ let ROUTE = { accounts: {}, postcodes: {}, days: 0 };
 function setRouteCosts(rc) { if (rc && rc.accounts) ROUTE = rc; }
 function routeFor(level1) { const r = ROUTE.accounts[level1]; return r && r.services >= 20 ? r : null; }   // 20 services or more: enough days to trust
 function routeCostsNow() { return ROUTE; }
-// delivery and pickup from delivery truck days, when Settings says deliveries run on their own trucks
+// delivery and pickup from the route days its deliveries were placed on (Settings: deliveryMatch)
 function movementFor(level1) { const r = ROUTE.movement && ROUTE.movement[level1]; return ROUTE.deliveries && ROUTE.deliveries.on && r && r.services > 0 ? r : null; }
-// the cost of a route day as the route costs were worked out (shared with delivery days when that is on)
-function routeDayNow() { return ROUTE.deliveries && ROUTE.deliveries.on && ROUTE.deliveries.dayCost ? ROUTE.deliveries.dayCost : RATES.routeDay.v; }
+// the cost of a route day (the same trucks carry deliveries, so it is never re-divided)
+function routeDayNow() { return RATES.routeDay.v; }
 
 const FAMILIES = ['storage', 'handling', 'movement', 'bin', 'itad', 'shred', 'labour'];
 
@@ -234,9 +233,9 @@ function costToServe(family, units, opts) {
       break;
     case 'movement':
       if (o.route && o.route.services > 0 && visits > 0) {
-        // the account's delivery truck days (VCK delivery work orders), a trip at a time
+        // the account's deliveries, placed on that day's shred routes by location, a trip at a time
         const r = o.route, ts = r.travel / r.services, os = r.onsite / r.services;
-        add('Travel to site', visits * ts, `${visits} ${visits === 1 ? 'trip' : 'trips'} at ${m2(ts)}, from its ${r.days} delivery day${r.days === 1 ? '' : 's'} (${r.from} to ${r.to}): each delivery truck day is ${m0(routeDayNow())}, shared between its stops by minutes.`, 'route');
+        add('Travel to site', visits * ts, `${visits} ${visits === 1 ? 'trip' : 'trips'} at ${m2(ts)}, from its ${r.days} delivery day${r.days === 1 ? '' : 's'} (${r.from} to ${r.to}): each delivery placed on the shred route that passed closest that day, sharing its ${m0(routeDayNow())} by minutes.`, 'route');
         add('Time on site', visits * os, `${visits} ${visits === 1 ? 'trip' : 'trips'} at ${m2(os)}: ${SETTINGS.stopMin} minutes a stop and ${SETTINGS.serviceMin} a trip.`, 'route');
       } else routeLines('visits');
       add('Box handling', units * RATES.handling.v,
