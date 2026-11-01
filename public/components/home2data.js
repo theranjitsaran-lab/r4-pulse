@@ -212,7 +212,7 @@ export function pointsView(D, { month: m, cust, cross, dens, lines }) {
     const at = lines.meta[L].partial ? ` at day ${m.day}` : '';
     const dir = d == null || Math.abs(d) < 0.01 ? `level with ${mon(prev)}` : `${pc(d)} ${d > 0 ? 'ahead of' : 'behind'} ${mon(prev)}`;
     const parts = [up && `${up.name} up ${pc(up.pct)}`, down && `${down.name} down ${pc(down.pct)}`].filter(Boolean).join(', ');
-    const jobs = m.next.jobCount ? ` ${m.next.jobCount} large jobs (${money(m.next.jobs)}) are not yet priced.` : '';
+    const jobs = m.next.jobCount ? ` ${m.next.jobCount} job${m.next.jobCount === 1 ? '' : 's'} (${money(m.next.jobs)}) to check.` : '';
     const say = `${mon(L)}'s service is ${dir}${at} ◇${parts ? `: ${parts}` : ''}.${jobs}`;
     out.push({ key: 'activity', title: 'Activity', href: '#h2-lines', bullet: true, line: say, say });
   }

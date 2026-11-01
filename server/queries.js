@@ -474,7 +474,8 @@ async function segments() {
 
 // ── Lines by account — Home's lines of business and their pop-outs ──────────────────────────────
 // Priced lines by month, account and service code, Citadel apart, fifteen months to the latest priced
-// work; and the finished work orders of recent months, which VCK has not priced yet, with their units.
+// work; the finished work orders of recent months, which VCK has not priced yet, with their units; and
+// each account and code's most recent price and largest line, across all of its history.
 // components/linework.js prices those. Family as in segments: no family, or 'none', is 'other'.
 async function linework() {
   const FAM = `CASE WHEN sf.family IN ('bin', 'shred', 'handling', 'movement', 'itad', 'labour') THEN sf.family ELSE 'other' END`;
@@ -494,7 +495,13 @@ async function linework() {
     LEFT JOIN model.service_family sf ON sf.servcode = s.servcode
     WHERE w.level1 <> 6714 AND w.serv_fin IS NOT NULL AND w.duedate >= to_char(current_date - interval '3 months', 'YYYY-MM')
     GROUP BY 1, 2, 3, 4, 5 ORDER BY 1, 2, 3`);
-  return { priced, orders };
+  const lastPrice = await query(`
+    SELECT DISTINCT ON (p.level1, s.servcode) p.level1, s.servcode, (p.totamt / p.units)::float AS rate, p.wodate::date::text AS date,
+           max(p.units) OVER (PARTITION BY p.level1, s.servcode)::float AS max_units
+    FROM priced_lines p JOIN servcode s USING (servcodeid)
+    WHERE p.level1 <> 6714 AND p.units > 0
+    ORDER BY p.level1, s.servcode, p.wodate DESC, p.woservid DESC`);
+  return { priced, orders, lastPrice };
 }
 
 module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, linework, routestops, deliverydays, gl };
