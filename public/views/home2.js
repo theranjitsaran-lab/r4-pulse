@@ -1,8 +1,8 @@
 // Home (#pulse; #home2 while it was on trial) — Trisha's morning on her phone. White ground, R4 green, few words.
-//   the summary: one headline and three bullets, each opening its list (Claude's, checked, or the template)
-//   the month: the bill known, the next one building ◇, the gap to $1.0M
+//   the summary: one headline and four headed points, each opening what is behind it (Claude's, checked, or the template)
+//   the month: the bill known and the next one building ◇, each by its top three lines; the gap to $1.0M
+//   lines of business: a month picker, each line's figure and thirteen monthly bars; a tap opens the customers behind it
 //   the pulse: this month's work against last month's at the same working day; the last thirteen weeks
-//   lines of business: last month, three months and the year, each against the period before
 //   customers: the largest, rising and slipping five
 //   where the money is: cross-sell ◇, route density ◇, what shredding the eligible boxes does to the P&L ◇
 // Every figure from components/home2data.js, which the Ask sheet (server/ask.js) reads too.
@@ -11,6 +11,7 @@ import { getJson, titleCase, esc } from '/components/data.js';
 import { reveal, drawIn } from '/components/motion.js';
 import { parseHome2, checkNumbers } from '/components/summary.js';
 import { areaFrame, landLayer, postcodeLayer, yardMark } from '/components/areamap.js';
+import { openPop } from '/components/pop.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const monS = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' });
@@ -35,33 +36,24 @@ export async function render(main, P) {
   const age = Math.round((Date.now() - Date.parse(A.latestDone + 'T12:00:00Z')) / 864e5);
   const dayLabel = new Date(A.latestDone + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
   const billShown = m.bill.core != null ? { month: m.bill.month, v: m.bill.core, d: m.bill.vsLast, vs: m.bill.lastMonth } : { month: m.bill.lastMonth, v: m.bill.lastCore, d: null };
-  const lastSeg = seg ? seg.rows.slice().sort((a, b) => Math.abs((b.lmPct || 0) * b.lm) - Math.abs((a.lmPct || 0) * a.lm))[0] : null;
-  const fall = cust.falling[0], rise = cust.rising[0];
-
-  // the sheet the summary is written from: one fact a line, the template's sentence, where it opens
+  const jobsNote = m.next && m.next.jobCount ? `, before ${m.next.jobCount} large jobs not yet priced` : '';
   const sheet = [
-    age > 2 && { key: 'stale', line: `The data stops on ${dm(A.latestDone)}, ${age} days ago`, say: `Data stops on ${dm(A.latestDone)}, ${age} days ago.`, href: '#pulse' },
-    m.next && { key: 'month', lead: true, href: '#pulse',
-      line: `${mon(m.next.month)}'s bill is building towards about ${moneyK(m.next.central)} ◇ (likely ${moneyK(m.next.lo)} to ${moneyK(m.next.hi)}), ${moneyK(m.gap)} short of the $1.0M target`,
-      say: `${mon(m.next.month)} is heading for about ${moneyK(m.next.central)} ◇, ${moneyK(m.gap)} short of $1.0M.` },
-    m.vsLast != null && { key: 'pace', bullet: true, href: '#pulse', line: `${mon(m.workMonth)}'s work is ${word(m.vsLast)} ${mon(m.prevMonth)}'s at working day ${m.day}`,
-      say: `${mon(m.workMonth)}'s work is ${word(m.vsLast)} ${mon(m.prevMonth)}'s at day ${m.day}.` },
-    fall && { key: 'slipping', bullet: true, href: `#customer/${fall.level1}`, line: `${titleCase(fall.customer)} is slipping most, ${moneyK(Math.abs(fall.d))} a month below its own run; ${cust.slipping} accounts are slipping`,
-      say: `${titleCase(fall.customer)} is down ${moneyK(Math.abs(fall.d))} a month on its own run.` },
-    w.lastFull && w.vsAvg != null && { key: 'week', href: '#activity', line: `Last full week's work was ${moneyK(w.lastFull.value)} ◇, ${pctW(w.vsAvg)} ${w.vsAvg >= 0 ? 'above' : 'below'} the weeks before` },
-    rise && { key: 'rising', href: `#customer/${rise.level1}`, line: `${titleCase(rise.customer)} is rising most, ${moneyK(rise.d)} a month above its own run` },
-    lastSeg && lastSeg.lmPct != null && { key: 'segment', href: '#pulse', line: `${lastSeg.name} billed ${moneyK(lastSeg.lm)} in ${mon(seg.month)}, ${lastSeg.lmPct > 0 ? 'up' : 'down'} ${pctW(lastSeg.lmPct)} on the month before` },
-    { key: 'cross', bullet: true, href: '#customers?view=whitespace', line: `Selling existing customers what they don't buy yet is worth up to ${moneyK(cross.totalMonth)} a month ◇; ${cross.byLine[0] ? `${cross.byLine[0].name} is missed most, by ${cross.byLine[0].accounts} accounts` : ''}`,
-      say: `Cross-sell is worth up to ${moneyK(cross.totalMonth)} a month ◇${cross.byLine[0] ? `, ${cross.byLine[0].name} most of all` : ''}.` },
-    dest && { key: 'shred', href: '#activity?tab=warehouse', line: `${Math.round(dest.eligible / 1000)}K boxes are eligible to shred: ${moneyK(dest.fee)} once ◇, then ${moneyK(dest.lostYear / 12)} a month of storage lost` },
+    m.next && { key: 'month', lead: true, href: '#pulse', line: `${mon(m.next.month)}'s bill is heading for about ${moneyK(m.next.central)} ◇${jobsNote}`, say: `${mon(m.next.month)}'s bill is heading for about ${moneyK(m.next.central)} ◇${jobsNote}.` },
+    ...(V.points || []).map(p => ({ key: p.key, bullet: true, href: p.href, title: p.title, line: p.line, say: p.say })),
   ].filter(Boolean);
-  const hrefOf = Object.fromEntries(sheet.map(f => [f.key, f.href]));
+  const hrefOf = Object.fromEntries(sheet.map(f => [f.key, f.href])), titleOf = Object.fromEntries(sheet.map(f => [f.key, f.title]));
 
-  const kpis = `<section class="h2-kpis" data-rv>
-      <div class="h2-kpi lead"><span>${m.next ? `${mon(m.next.month)}'s bill, building ◇` : 'Next bill'}</span><b>${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b><small>${m.next ? `${moneyK(m.next.lo)}–${moneyK(m.next.hi)} · day ${m.next.day} of ${m.next.workdays}` : ''}</small>
-        <i class="h2-track"><i style="--w:${Math.min(100, (m.next ? m.next.central : billShown.v) / 1e6 * 100).toFixed(1)}%"></i></i></div>
-      <a class="h2-kpi" href="#customers"><span>${mon(billShown.month)} billed</span><b>${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${mon(billShown.vs)}` : 'posted, core'}</small></a>
-      <a class="h2-kpi" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(m.gap)}</b><small>a month${V.sell ? ` · won this month ${moneyK(V.sell.won.value)}${V.sell.inPlay.n ? `, ${moneyK(V.sell.inPlay.value)} in play` : ''}` : ''}</small></a>
+  // a bill's top three lines and the rest, which add up to the figure above them
+  const billParts = (B, lead) => B ? `<ul class="h2-parts${lead ? ' lead' : ''}">${B.top.map(p => `<li><span>${esc(p.name)}</span><b>${moneyK(p.v)}</b></li>`).join('')}<li class="rest"><span>Other lines</span><b>${moneyK(B.rest)}</b></li></ul>` : '';
+  const B = V.bills || {};
+
+  const kpis = `<section class="h2-kpis bills" data-rv>
+      <div class="h2-kpi lead"><span>${m.next ? `${mon(m.next.month)}'s bill, building ◇` : 'Next bill'}</span><b>${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b>
+        <small>${m.next ? (m.next.jobCount ? `+ up to ${moneyK(m.next.jobs)}: ${m.next.jobCount} large jobs not yet priced` : `${moneyK(m.next.lo)}–${moneyK(m.next.hi)} · day ${m.next.day} of ${m.next.workdays}`) : ''}</small>
+        ${billParts(B.next, true)}</div>
+      <a class="h2-kpi" href="#customers"><span>${mon(billShown.month)} billed</span><b>${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${mon(billShown.vs)}` : 'posted, core'}</small>
+        ${billParts(B.billed)}</a>
+      <a class="h2-kpi gap" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(m.gap)}</b><small>a month${m.next && m.next.jobCount ? ', before large jobs' : ''}${V.sell ? ` · won this month ${moneyK(V.sell.won.value)}${V.sell.inPlay.n ? `, ${moneyK(V.sell.inPlay.value)} in play` : ''}` : ''}</small></a>
     </section>`;
 
   const sumCard = `<section class="h2-card h2-sum" data-rv>
@@ -72,15 +64,18 @@ export async function render(main, P) {
     </section>`;
 
   const pulse = `<div class="h2-row">
-      <section class="h2-card h2-wide" data-rv><div class="h2-ch"><h2>${m.vsLast != null ? `${esc(mon(m.workMonth))}'s work is ${word(m.vsLast)} ${esc(mon(m.prevMonth))}'s` : 'This month\'s work'}</h2><small>by working day, priced ◇</small></div><div id="h2-trend"></div></section>
+      <section class="h2-card h2-wide" data-rv><div class="h2-ch"><h2>${m.vsLast != null ? `${esc(mon(m.workMonth))}'s services done are ${word(m.vsLast)} ${esc(mon(m.prevMonth))}'s` : 'This month\'s services done'}</h2><small>the amount of work, by working day, at ${esc(mon(m.prevMonth))}'s value a service ◇</small></div><div id="h2-trend"></div></section>
       <section class="h2-card" data-rv><div class="h2-ch"><h2>${w.lastFull ? `Last week ${moneyK(w.lastFull.value)} ◇, ${w.vsAvg >= 0 ? 'up' : 'down'} ${pctW(w.vsAvg)}` : 'Weeks'}</h2><small>work done each week against the weeks before</small></div><div id="h2-weeks"></div></section>
     </div>`;
 
-  const segCard = seg ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>${esc(mon(seg.month))} by line of business</h2><small>${moneyK(seg.total)} · against the month, three months and year before</small></div>
-      <div class="h2-segs">${seg.rows.map(s => `<div class="h2-seg"><span class="h2-seg-n">${esc(s.name)}</span><b>${moneyK(s.lm)}</b>${chip(s.lmPct)}
-        ${sparkline(s.spark, { w: 120, h: 28, cls: s.key === 'storage' ? 'storage' : 'service' })}
-        <small>3M ${chip(s.l3mPct, true)} · YTD ${chip(s.ytdPct, true)}</small></div>`).join('')}</div>
-      <div class="src">Service by month of work, storage by month billed · VCK priced lines · Citadel apart</div></section>` :
+  const LV = V.lines;
+  let lineMonth = LV ? LV.latest : null;
+  const segCard = LV ? `<section class="h2-card" id="h2-lines" data-rv>
+      <div class="h2-ch"><h2 id="h2-lines-t"></h2><small id="h2-lines-s"></small></div>
+      <div class="seg h2-months" id="h2-months">${LV.pick.map(x => `<button data-m="${x}">${esc(monS(x))}${LV.meta[x].est ? ' ◇' : ''}</button>`).join('')}</div>
+      <div class="h2-segs" id="h2-tiles"></div>
+      <svg class="h2-defs" aria-hidden="true" width="0" height="0"><defs><pattern id="h2-est" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="4" class="h2-hatch"/></pattern></defs></svg>
+      <div class="src">Tap a line for the customers behind it · storage by the month it bills, service by the month of the work, Citadel apart · ◇ not yet billed: work orders at each account's own prices, charges added at the run carried from the last priced month</div></section>` :
     `<section class="h2-card pending" data-rv>Lines of business arrive with the next snapshot (npm run snapshot).</section>`;
 
   const custRow = (r, kind) => `<li><a href="#customer/${r.level1}"><span class="h2-cn">${esc(titleCase(r.customer))}</span>${sparkline(r.spark, { w: 72, h: 22, cls: 'service' })}
@@ -130,7 +125,7 @@ export async function render(main, P) {
       <p class="h2-by">Last 7 days: ${t.called} called · ${t.emailed} emailed · rates moved on ${t.ratesMoved} accounts in 30 days · lines marked useful ${t.useful}, already known ${t.knew}, not right ${t.wrong}</p>
     </section>`;
 
-  main.innerHTML = `<div class="h2">${sumCard}${kpis}${dayCard}${pulse}${segCard}${custCard}
+  main.innerHTML = `<div class="h2">${sumCard}${kpis}${segCard}${pulse}${dayCard}${custCard}
     <details class="h2-fold" id="h2-money" ${innerWidth > 700 ? 'open' : ''}><summary class="h2-sec" data-rv>Where the money is<small>route density, cross-sell, shredding · ${innerWidth > 700 ? '' : 'open'}</small></summary>
     <div class="h2-row">${mapCard}${crossCard}</div>
     ${destCard}</details>
@@ -142,16 +137,40 @@ export async function render(main, P) {
     const p = parseHome2(text, sheet);
     if (!p) return false;
     main.querySelector('#h2-head').textContent = p.headline;
-    main.querySelector('#h2-bul').innerHTML = p.bullets.map(b => `<li class="${esc(b.key)}"><a href="${esc(hrefOf[b.key] || '#pulse')}"><span>${esc(b.text)}</span><i>›</i></a></li>`).join('');
+    main.querySelector('#h2-bul').innerHTML = p.bullets.map(b => `<li class="${esc(b.key)}"><a href="${esc(hrefOf[b.key] || '#pulse')}"><span><b>${esc(titleOf[b.key] || '')}</b>${esc(b.text)}</span><i>›</i></a></li>`).join('');
     main.querySelector('#h2-by').textContent = by;
     return true;
   };
   const tmpl = [sheet.find(f => f.lead) || sheet[0], ...sheet.filter(f => f.bullet)];
-  draw([tmpl[0].say || tmpl[0].line, ...tmpl.slice(1, 4).map(f => `[${f.key}] ${f.say || f.line}`)].join('\n'), 'From the figures below');
+  draw([tmpl[0].say || tmpl[0].line, ...tmpl.slice(1, 5).map(f => `[${f.key}] ${f.say || f.line}`)].join('\n'), 'From the figures below');
   fetch('/api/summary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form: 'home2', sheet: sheet.map(({ key, line, say, lead, bullet }) => ({ key, line, say, lead, bullet })) }) })
     .then(r => r.ok ? r.json() : null)
     .then(j => { if (j && j.source === 'claude' && checkNumbers(j.text, sheet).ok && main.isConnected) draw(j.text, 'Written by Claude from these figures; every number checked'); })
     .catch(() => {});
+
+  // Activity scrolls to the lines rather than leaving the page
+  main.querySelector('#h2-bul').addEventListener('click', ev => {
+    const a = ev.target.closest('a[href="#h2-lines"]'); if (!a) return;
+    ev.preventDefault(); const t = main.querySelector('#h2-lines'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // the lines: a month picked, its figures and comparisons; a tap opens the customers behind a line
+  const drawLines = () => {
+    if (!LV) return;
+    const x = lineMonth, meta = LV.meta[x], work = mon(x), bill = mon(new Date(Date.UTC(+x.slice(0, 4), +x.slice(5, 7), 1)).toISOString().slice(0, 10));
+    main.querySelector('#h2-lines-t').textContent = `${work} by line of business${meta.est ? ' ◇' : ''}`;
+    main.querySelector('#h2-lines-s').textContent = `${moneyK(LV.totals[x])}${meta.est ? ` · work so far, estimated; on ${bill}'s bill` : ` · ${work}'s storage and work, on ${work}'s and ${bill}'s bills`}${meta.jobs ? ` · ${meta.jobCount} large jobs (${moneyK(meta.jobs)}) not yet priced` : ''}`;
+    main.querySelectorAll('#h2-months button').forEach(b => b.classList.toggle('on', b.dataset.m === x));
+    main.querySelector('#h2-tiles').innerHTML = LV.rows.map(r => { const k = r.by[x], jobs = r.jobs[x] || 0;
+      return `<button class="h2-seg" data-k="${r.key}" type="button"><span class="h2-seg-n">${esc(r.name)}</span><b>${moneyK(k.v)}</b>${jobs ? `<span class="h2-d flat">+${moneyK(jobs)} jobs</span>` : chip(k.pct)}
+        ${monthBars(r.bars, x, { w: 150, h: 40 })}
+        <small>${jobs ? 'large jobs not yet priced' : `3M ${chip(k.p3, true)} · YTD ${chip(k.ytd, true)}`}</small></button>`; }).join('');
+  };
+  if (LV) {
+    drawLines();
+    main.querySelector('#h2-months').addEventListener('click', ev => { const b = ev.target.closest('button[data-m]'); if (b) { lineMonth = b.dataset.m; drawLines(); } });
+    main.querySelector('#h2-tiles').addEventListener('click', ev => { const b = ev.target.closest('.h2-seg[data-k]'); if (b) openLine(b.dataset.k, lineMonth, LV); });
+  }
 
   // customers: three columns on a desk, tabs on a phone
   const tabs = main.querySelectorAll('.h2-tabs button'), cols = main.querySelectorAll('.h2-col');
@@ -257,4 +276,53 @@ function destChart(el, x) {
   g += `<text class="h2-lab" x="${W - Rr + 6}" y="${fy(full(N)) + 4}">${moneyK(full(N))}</text><text class="h2-lab" x="${W - Rr + 6}" y="${fy(empty(N)) + 4}">${moneyK(empty(N))}</text>`;
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="h2-svg" role="img" aria-label="Running effect on revenue of shredding the eligible boxes, over five years">${g}</svg>
     <div class="h2-key"><span><i class="k soft"></i>space refilled at the median</span><span><i class="k warn"></i>space left empty</span></div>`;
+}
+
+// ── thirteen monthly bars: the picked month dark, an estimated month hatched ──
+function monthBars(bars, on, { w = 150, h = 40, labels = false } = {}) {
+  const T = 2, B = labels ? 16 : 1, max = Math.max(...bars.map(b => b.v), 1), slot = w / bars.length, bw = Math.max(2, slot * .68);
+  const g = bars.map((b, i) => {
+    const bh = Math.max(b.v > 0 ? 1.5 : 0, Math.max(0, b.v) / max * (h - T - B)), x = slot * i + (slot - bw) / 2;
+    const lab = labels && (i % 3 === 0 || i === bars.length - 1) ? `<text class="c-axis" x="${(x + bw / 2).toFixed(1)}" y="${h - 3}" text-anchor="middle">${esc(monS(b.m))}</text>` : '';
+    return `<rect class="h2-mb${b.m === on ? ' on' : ''}${b.est ? ' est' : ''}" data-m="${b.m}" x="${x.toFixed(1)}" y="${(h - B - bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="1.5"><title>${esc(monS(b.m))}: ${moneyK(b.v)}${b.est ? ' ◇' : ''}</title></rect>${lab}`;
+  }).join('');
+  return `<svg class="h2-mbs" viewBox="0 0 ${w} ${h}" aria-hidden="true">${g}</svg>`;
+}
+
+// ── a line's pop-out: the note, the months, this month, the customers behind it, what rose and fell ──
+const nmL = s => esc(titleCase(s));
+async function openLine(key, month, LV) {
+  const r = LV.rows.find(x => x.key === key), k = r.by[month], meta = LV.meta[month];
+  const title = `${r.name} · ${mon(month)}${k.est ? ' ◇' : ''}`;
+  openPop({ title, sub: moneyK(k.v), html: '<p class="hint">Reading the customers behind it…</p>', ask: `What is driving ${r.name} in ${mon(month)}?` });
+  let d;
+  try { d = await getJson(`view/line?key=${encodeURIComponent(key)}&month=${encodeURIComponent(month)}`); }
+  catch (e) { openPop({ title, sub: moneyK(k.v), html: `<p>${esc(e.message)}</p>` }); return; }
+  const sgn = v => (v < 0 ? '−' : '+') + moneyK(Math.abs(v));
+  const row = (x, right) => `<li><a href="#customer/${x.level1}"><span>${nmL(x.customer)}</span>${right}</a></li>`;
+  const prevName = d.prevMonth ? mon(d.prevMonth) : 'the month before';
+  // the facts the note is written from: every figure as the panel shows it
+  const up = d.up[0], dn = d.down[0], jobsTxt = d.jobs.length ? `${d.jobs.length} large jobs (${moneyK(d.jobsValue)}) are not yet priced and not in this figure.` : '';
+  const facts = [
+    { key: 'total', line: `${r.name} in ${mon(month)}: ${moneyK(d.total)}${d.est ? ' ◇' : ''}${d.prev != null ? `, against ${moneyK(d.prev)} in ${prevName}` : ''}${k.pct != null ? (Math.abs(k.pct) < 0.005 ? ', level' : `, ${k.pct >= 0 ? 'up' : 'down'} ${pctW(k.pct)}`) + (d.partial ? ' at the same point in the month' : '') : ''}.` },
+    k.p3 != null && { key: 'p3', line: `The last three months are ${k.p3 >= 0 ? 'up' : 'down'} ${pctW(k.p3)} on the three before${k.ytd != null ? `, and the year to date is ${k.ytd >= 0 ? 'up' : 'down'} ${pctW(k.ytd)}` : ''}.` },
+    up && { key: 'up', line: `Largest rise: ${titleCase(up.customer)}, ${sgn(up.d)}.` },
+    dn && { key: 'down', line: `Largest fall: ${titleCase(dn.customer)}, ${sgn(dn.d)}.` },
+    jobsTxt && { key: 'jobs', line: jobsTxt },
+  ].filter(Boolean);
+  const tone2 = v => v == null ? '' : v > 0 ? 'up' : 'down';
+  const html = `<p class="p2-lede" id="h2-note">${esc(facts.map(f => f.line).join(' '))}</p><p class="h2-by" id="h2-note-by">From the figures below</p>
+    <div class="p2-mbs">${monthBars(d.bars, month, { w: 340, h: 92, labels: true })}</div>
+    <ul class="h2-stats"><li><span>This month</span><b>${moneyK(d.total)}${d.est ? ' ◇' : ''}</b></li><li><span>On ${esc(monS(d.prevMonth || month))}</span><b>${chip(k.pct)}</b></li><li><span>3 months</span><b>${chip(k.p3)}</b></li><li><span>Year to date</span><b>${chip(k.ytd)}</b></li></ul>
+    ${d.jobs.length ? `<h3>Large jobs, not yet priced ◇</h3><ul class="h2-pl">${d.jobs.slice(0, 6).map(j => row(j, `<small>${Math.round(j.units).toLocaleString('en-US')} ${esc(j.servcode)}</small><b>about ${moneyK(j.value)}</b>`)).join('')}</ul><p class="src">Held out of the figure: no recent price of its own, or $5,000 or more. Priced here at the book's rate where it has none.</p>` : ''}
+    <h3>Top 5 customers</h3><ul class="h2-pl">${d.top.map(x => row(x, `<small>${x.share != null ? Math.round(x.share * 100) + '%' : ''}</small><b>${moneyK(x.v)}</b>`)).join('')}<li class="rest"><span>All others</span><b>${moneyK(d.others)}</b></li></ul>
+    ${d.up.length ? `<h3>Rising on ${esc(prevName)}</h3><ul class="h2-pl">${d.up.map(x => row(x, `<b class="h2-cv up">${sgn(x.d)}</b>`)).join('')}</ul>` : ''}
+    ${d.down.length ? `<h3>Falling on ${esc(prevName)}</h3><ul class="h2-pl">${d.down.map(x => row(x, `<b class="h2-cv down">${sgn(x.d)}</b>`)).join('')}</ul>` : ''}
+    ${d.est ? '<p class="src">◇ Work orders priced at each account\'s own rates; charges added at the run carried from the last priced month. Replaced by the invoices when the run posts.</p>' : ''}`;
+  openPop({ title, sub: moneyK(d.total), html, ask: `What is driving ${r.name} in ${mon(month)}, and what should we do?` });
+  const note = document.querySelector('#h2-note'), by = document.querySelector('#h2-note-by');
+  fetch('/api/summary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form: 'line', sheet: facts }) })
+    .then(x => x.ok ? x.json() : null)
+    .then(j => { if (j && j.source === 'claude' && checkNumbers(j.text, facts).ok && note && note.isConnected) { note.textContent = j.text; by.textContent = 'Written by Claude from these figures; every number checked'; } })
+    .catch(() => {});
 }

@@ -14,7 +14,7 @@ const sales = require('./sales');
 
 const router = express.Router();
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
+const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
 
 async function callsLog() {
   if (USE_FIXTURES) { try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'calls_log.json'), 'utf8')); } catch { return []; } }
@@ -29,6 +29,7 @@ async function homeShared(D, L) {
   const V = L.home2data.homeView(D);
   const v = {
     month: V.month, weeks: V.weeks, seg: V.seg, cust: V.cust, cross: V.cross, dens: V.dens, dest: V.dest,
+    lines: V.lines, bills: V.bills, points: V.points,
     latestDone: D.A.latestDone, monthly: D.P.monthly.slice(-2),
     changes: L.changes.changesFor(D.P, D.A), day: L.changes.daySentence(D.P, D.A),
   };
@@ -112,6 +113,17 @@ router.get('/numbers', async (req, res) => {
       } };
     }
     send(req, res, numBase.v);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// One line of business in one month: the customers behind it, for Home's pop-out
+router.get('/line', async (req, res) => {
+  try {
+    const [D, L] = await Promise.all([data(), load()]);
+    if (!D.LW) return res.status(404).json({ error: 'lines by account are not in this snapshot' });
+    const d = L.linework.lineDetail(D, String(req.query.key || ''), String(req.query.month || ''));
+    if (!d) return res.status(404).json({ error: 'no such line or month' });
+    send(req, res, d);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

@@ -14,6 +14,7 @@ import { seriesOf } from './series.js';
 import { byAccount, totals, eligibleList } from './storage.js';
 import { densityByPostcode } from './jobview.js';
 import { buildWhitespace, LINES } from './whitespace.js';
+import { lineView, lineSeries, billBreakdown, driverOf, newestFall, estimateToDate, lineShort } from './linework.js';
 
 const sum = (a, f = x => x) => a.reduce((t, x) => t + (f(x) || 0), 0);
 const ch = (a, b) => b > 0 ? a / b - 1 : null;
@@ -47,7 +48,11 @@ export function monthView(D) {
   const workMonth = monthStart(A.latestDone), prevMonth = addMonths(workMonth, -1);
   // this month's work at last month's value a service ◇; last month at its own, priced
   const price = pricer(P, A), perPrev = price(prevMonth), per = perPrev.v || BN.perService;
-  const X = per ? project({ daily, latest: A.latestDone, perService: per, storage: BN.storage, routeDays: A.routeDays }) : {};
+  // the next bill: this month's work as the lines price it (components/linework.js), large jobs held apart,
+  // so when the month ends the bill's figure is storage plus the lines exactly. The curves below stay on
+  // last month's value a service, so they compare the work and not the prices.
+  const E = D.LW ? estimateToDate(D, workMonth) : null;
+  const X = per ? project({ daily, latest: A.latestDone, perService: E ? E.per : per, storage: BN.storage, routeDays: A.routeDays }) : {};
   // work only (storage is known and flat): the curves start at zero
   const thisMonth = per ? curve(daily, workMonth, per, 0, A.latestDone) : [];
   const lastMonth = per ? curve(daily, prevMonth, per, 0) : [];
@@ -57,7 +62,7 @@ export function monthView(D) {
   const last = P.monthly.find(m => m.month === addMonths(BN.month, -1)) || P.monthly[P.monthly.length - 1];
   return {
     bill: { month: BN.month, core: BN.core, source: BN.source, vsLast: BN.core != null ? ch(BN.core, last.core) : null, lastMonth: last.month, lastCore: last.core },
-    next: X.bill ? { month: addMonths(BN.month, 1), central: X.bill.central, lo: X.bill.lo, hi: X.bill.hi, day: X.elapsed, workdays: X.workdays } : null,
+    next: X.bill ? { month: addMonths(BN.month, 1), central: X.bill.central, lo: X.bill.lo, hi: X.bill.hi, day: X.elapsed, workdays: X.workdays, jobs: E ? E.jobs : 0, jobCount: E ? E.jobCount : 0 } : null,
     gap: TARGET - (X.bill ? X.bill.central : BN.core || 0),
     perService: per, perFrom: perPrev.from, workMonth, prevMonth, day, now, then, vsLast: now && then ? ch(now, then) : null,
     thisMonth, lastMonth, workdays: X.workdays || (lastMonth.length || 22), latestDone: A.latestDone,
@@ -187,9 +192,61 @@ export function destructionView(D, n = 5) {
 }
 
 // ── everything Home draws, and the figure sheet the summary is written from ──
+// ── the four points at the top of Home, each chosen by a rule and written as facts for the summary ──
+const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
+const money = v => { const a = Math.abs(v); return '$' + (a >= 1e6 ? (a / 1e6).toFixed(1) + 'M' : a >= 1000 ? Math.round(a / 1000) + 'K' : String(Math.round(a))); };
+const pc = v => Math.abs(Math.round(v * 100)) + '%';
+const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase()).replace(/(?!^)\b(Of|And|The|For|In|At|On|To)\b/g, w => w.toLowerCase()).replace(/\b(Llp|Llc|Pc|Inc|Icu|Itad)\b/g, w => w.toUpperCase());
+
+export function pointsView(D, { month: m, cust, cross, dens, lines }) {
+  const out = [];
+  if (lines && m.next) {
+    // service before large jobs: the lines with nothing held out, this month against last, like for like
+    const L = lines.latest, prev = lines.months[lines.months.length - 2];
+    const steady = lines.rows.filter(r => r.key !== 'storage' && !r.jobs[L] && r.by[L].pct != null);
+    const scale = lines.meta[L].frac || 1;
+    const now = steady.reduce((t, r) => t + r.by[L].v, 0), then = steady.reduce((t, r) => t + r.bars[r.bars.length - 2].v, 0) * scale;
+    const d = then > 0 ? now / then - 1 : null;
+    const moved = steady.map(r => ({ name: r.name, pct: r.by[L].pct, d: r.by[L].v - r.bars[r.bars.length - 2].v * scale }));
+    const up = moved.filter(x => x.d > 0).sort((a, b) => b.d - a.d)[0], down = moved.filter(x => x.d < 0).sort((a, b) => a.d - b.d)[0];
+    const at = lines.meta[L].partial ? ` at day ${m.day}` : '';
+    const dir = d == null || Math.abs(d) < 0.01 ? `level with ${mon(prev)}` : `${pc(d)} ${d > 0 ? 'ahead of' : 'behind'} ${mon(prev)}`;
+    const parts = [up && `${up.name} up ${pc(up.pct)}`, down && `${down.name} down ${pc(down.pct)}`].filter(Boolean).join(', ');
+    const jobs = m.next.jobCount ? ` ${m.next.jobCount} large jobs (${money(m.next.jobs)}) are not yet priced.` : '';
+    const say = `${mon(L)}'s service is ${dir}${at} ◇${parts ? `: ${parts}` : ''}.${jobs}`;
+    out.push({ key: 'activity', title: 'Activity', href: '#h2-lines', bullet: true, line: say, say });
+  }
+  const fall = cust.falling[0];
+  if (fall) {
+    const drv = D.LW ? driverOf(D, fall.level1) : null;
+    const fresh = D.LW ? newestFall(D, new Set(slippingAccounts(D.C).map(s => s.level1))) : null;
+    const say = `${title(fall.customer)} is down ${money(fall.d)} a month on its own run${drv ? `, driven by ${drv.name.toLowerCase()}` : ''}.` +
+      (fresh ? ` New: ${title(fresh.customer)} fell ${money(fresh.d)} in ${mon(fresh.month)}${fresh.driver ? `, driven by ${fresh.driver.toLowerCase()}` : ''}.` : '');
+    out.push({ key: 'customer', title: 'Customer', href: `#customer/${fall.level1}`, bullet: true, line: say, say });
+  }
+  const c0 = cross.rows[0];
+  if (c0) {
+    const ls = c0.lines.filter(l => !l.have && l.opp > 0).map(l => l.name);
+    const say = `Cross-sell is worth up to ${money(cross.totalMonth)} a month ◇. ${title(c0.customer)} is the largest to explore: ${money(c0.opp)} a year in ${ls.join(' and ')}.`;
+    out.push({ key: 'cross', title: 'Cross-sell opportunities', href: '#customers?view=opportunities', bullet: true, line: say, say });
+  }
+  const p0 = dens && dens.save[0];
+  if (p0) {
+    const say = `One more bin customer in ${p0.postcode}, already on ${Math.round(p0.visitsYear)} visits a year, saves about ${money(p0.saving)} a year ◇.`;
+    out.push({ key: 'location', title: 'Location', href: '#activity', bullet: true, line: say, say });
+  }
+  return out;
+}
+
 export function homeView(D) {
   const month = monthView(D), weeks = weekView(D), seg = segmentView(D), cust = customerView(D);
   const cross = crossSellView(D), dens = densityView(D), dest = destructionView(D);
   const B = bridge({ P: D.P, PR: D.PR, CA: D.CA, M: D.M, C: D.C });
-  return { month, weeks, seg, cust, cross, dens, dest, bridge: B };
+  const lines = D.LW ? lineView(D) : null;
+  const bills = D.LW ? {
+    billed: month.bill.core != null ? billBreakdown(D, month.bill.month, month.bill.core) : billBreakdown(D, month.bill.lastMonth, month.bill.lastCore),
+    next: month.next ? billBreakdown(D, month.next.month, month.next.central) : null,
+  } : null;
+  const points = pointsView(D, { month, cust, cross, dens, lines });
+  return { month, weeks, seg, cust, cross, dens, dest, bridge: B, lines, bills, points };
 }
