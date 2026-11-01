@@ -92,7 +92,7 @@ export async function render(main, C, params, tabs) {
       <p class="c2-say" id="c2-say"></p>
       <div class="c2-scroll"><table class="c2-t" id="c2-t"></table></div>
       <div class="c2-more" id="c2-more"></div>
-      <div class="src">Sales as invoiced, Citadel held apart from totals · margin and cost a unit ◇ are modelled from model/rates.js; route-based costs are under review · price a unit is the line's revenue over the units that drive it · tap any figure for why</div>
+      <div class="src">Sales as invoiced, Citadel held apart from totals ${costsVisible() ? '· margin and cost a unit ◇ are modelled; route-based costs are under review ' : ''}· price a unit is the line's revenue over the units that drive it · tap any figure for why</div>
     </section>
   </div>`;
 
@@ -204,7 +204,7 @@ export async function explain(kind, r, { B, PR, line, R }) {
         <table class="p2-t"><thead><tr><th class="tl">Line</th><th>Revenue</th><th>Cost</th><th>Margin</th></tr></thead><tbody>${fam.map(([k, v]) => `<tr><td class="tl">${esc(FAMILY_NAMES[k] || k)}</td><td>${money0(v.revenue)}</td><td>${money0(v.cost)}</td><td class="${v.revenue - v.cost < 0 ? 'is-bad' : ''}">${signedK(v.revenue - v.cost)}</td></tr>`).join('')}</tbody></table>
         <h3>Where the cost goes ◇</h3>${bars(PARTS.filter(p => parts[p[0]] > 0).map(p => ({ name: p[1], v: parts[p[0]], label: moneyK(parts[p[0]]), cls: p[0] === 'route' ? 'warn' : '' })), pmax)}
         ${todo.length ? `<h3>What would move it</h3><ul class="p2-list">${todo.join('')}</ul>` : ''}
-        <p class="src">◇ Costs from model/rates.js: GL pools over twelve months of volumes, provisional; route costs under review until delivery routes are in the data.</p>
+        <p class="src">◇ Costs from the cost model: GL pools over twelve months of volumes, provisional; route costs under review until delivery routes are in the data.</p>
         <p class="p2-go"><a href="#customer/${r.level1}">Open ${esc(name)} ›</a></p>`,
     });
   }

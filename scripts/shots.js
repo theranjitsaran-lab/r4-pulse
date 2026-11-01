@@ -28,6 +28,7 @@ const SCREENS = [
   { name: 'customer',  hash: `#customer/${drill[0].level1}` },
   { name: 'pricing',   hash: '#pricing' },
   { name: 'routes',    hash: '#activity' },
+  { name: 'numbers',   hash: '#numbers' },
   { name: 'styleguide', page: '/styleguide.html' },
 ].concat(
   // every Customers list, with --all or by name (customers-margin, ...)

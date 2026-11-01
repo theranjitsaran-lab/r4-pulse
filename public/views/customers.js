@@ -531,6 +531,6 @@ async function destructionView(main, C, params) {
       <div class="rw tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r bx">${Math.round(T('boxes')).toLocaleString('en-US')}</span><span class="r once">${moneyK(T('once'))}</span><span class="r lost">−${moneyK(T('lost'))}</span><span class="r mo">${Math.round(T('once') / T('lost'))}</span><span></span></div>
       ${rows.length > shown ? `<a style="display:inline-block;margin-top:var(--sp-3);color:var(--brand);font-weight:500;text-decoration:none" href="#customers?view=destruction&n=all">Show all ${rows.length}</a>` : ''}
     </div>
-    <p class="foot">Overdue: storage_retention status I with a review date passed. Destruction at the median R3 shredding fee per standard box; storage at the account's latest rate per box (storage_rate_hist), else the box-weighted median. Destruction needs the client's sign-off on the retention list. Citadel apart.</p>
+    <p class="foot">Overdue: boxes in storage with a review date passed, not on hold and not permanent. Destruction at the book's median fee per standard box; storage at the account's latest rate per box, else the box-weighted median. Destruction needs the client's sign-off on the retention list. Citadel apart.</p>
   </div>`;
 }

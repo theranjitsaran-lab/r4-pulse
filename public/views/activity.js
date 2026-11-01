@@ -263,7 +263,7 @@ export async function render(main, A, params) {
       <div class="sub" style="margin-bottom:var(--sp-2)">${farV} visits for ${farS} services${costsVisible() ? `, about ${money0(farC / (farS || 1))} a service in route time ◇` : ''}. Bundle them onto a planned run, or price the trip.</div>
       <table class="far"><thead><tr><th>Postcode</th><th>Miles</th><th class="hide-s">Visits</th><th class="hide-s">Services</th>${costsVisible() ? '<th>Route time ◇</th><th>Per service ◇</th>' : ''}</tr></thead><tbody>
       ${far.map(p => `<tr><td><b>${esc(p.pc)}</b> <span class="sub nm">${esc(p.names)}</span></td><td>${p.mi.toFixed(0)}</td><td class="hide-s">${p.visits}</td><td class="hide-s">${p.services}</td>${costsVisible() ? `<td>${money0(p.cost)}</td><td class="${p.per > 100 ? 'is-warn' : ''}">${money0(p.per)}</td>` : ''}</tr>`).join('')}</tbody></table>` : '<p class="sub">No work 20 miles or more out in this window.</p>'}
-      <div class="src">Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles from US Census ZCTA centroids${costsVisible() ? " · route time from the cost model: a route day's travel share scaled for distance, plus time on site ◇ · route costs under review" : ''}</div>`;
+      <div class="src">Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles in a straight line from the yard, by postcode${costsVisible() ? " · route time from the cost model: a route day's travel share scaled for distance, plus time on site ◇ · route costs under review" : ''}</div>`;
   }
 
   function redraw() { hl = null; drawDay(); drawWeek(); drawMap(); history.replaceState(null, '', `#activity?date=${day}`); }

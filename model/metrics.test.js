@@ -69,3 +69,34 @@ test('#37 a postcode\'s visits are the twelve-month count on every screen', asyn
   const d = D(), v = densityView(d), book = new Map(d.A.postcodes.map(p => [p.postcode, p.visits]));
   for (const r of v.save) assert.equal(r.visits, book.get(r.postcode), r.postcode);
 });
+
+test('#10 the stamp turns amber when the feed is held back a working day, and not over a weekend', async () => {
+  const { freshStamp } = await import('../public/components/metrics.js');
+  assert.equal(freshStamp({ done_work: '2026-10-30' }, '2026-11-01').late, false, 'Sunday: Friday is the last working day');
+  assert.equal(freshStamp({ done_work: '2026-10-30' }, '2026-11-02').late, false, 'Monday: Friday is the last working day');
+  const held = freshStamp({ done_work: '2026-10-30' }, '2026-11-03');
+  assert.equal(held.late, true, 'Tuesday: Monday is missing');
+  assert.match(held.text, /Veri-Shred/);
+});
+
+test('#19 a briefing point has to be worth about $25K a year', async () => {
+  const { pointsView, monthView, customerView, crossSellView, densityView } = await import('../public/components/home2data.js');
+  const d = D(), dens = densityView(d), args = { month: monthView(d), cust: customerView(d), cross: crossSellView(d), lines: null };
+  assert.ok(pointsView(d, { ...args, dens: { ...dens, save: [{ ...dens.save[0], saving: 4000 }] } }).every(p => p.key !== 'location'));
+  assert.ok(pointsView(d, { ...args, dens: { ...dens, save: [{ ...dens.save[0], saving: 30000 }] } }).some(p => p.key === 'location'));
+});
+
+test('#25 a session is a signed cookie: it survives a restart, and a forged one is refused', async () => {
+  process.env.SESSION_SECRET = 'test-secret'; process.env.AUTH_USERS = `a:${require('bcryptjs').hashSync('p', 4)}:owner`;
+  const express = require('express'), auth = require('../server/auth');
+  const start = () => new Promise(ok => { const app = express(); app.use(express.urlencoded({ extended: false })); auth.install(app); app.get('/who', (q, r) => r.json(q.session.user)); const s = app.listen(0, () => ok(s)); });
+  const s1 = await start(), url = s => `http://localhost:${s.address().port}`;
+  const login = await fetch(url(s1) + '/login', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'name=a&password=p' });
+  const cookie = login.headers.get('set-cookie').split(';')[0];
+  s1.close();
+  const s2 = await start();   // a restart: nothing kept on the server
+  assert.equal((await (await fetch(url(s2) + '/who', { headers: { cookie } })).json()).role, 'owner');
+  const forged = await fetch(url(s2) + '/who', { redirect: 'manual', headers: { cookie: cookie.slice(0, -3) + 'abc' } });
+  assert.equal(forged.status, 302);
+  s2.close();
+});

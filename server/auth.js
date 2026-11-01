@@ -3,7 +3,7 @@
 // visible to every role for now; the role is recorded so that can change later.
 'use strict';
 const bcrypt = require('bcryptjs');
-const session = require('express-session');
+const crypto = require('crypto');
 
 function parseUsers(raw) {
   return (raw || '')
@@ -47,13 +47,27 @@ function install(app) {
   if (!process.env.SESSION_SECRET) throw new Error('SESSION_SECRET is not set');
 
   app.set('trust proxy', 1);
-  app.use(session({
-    secret: process.env.SESSION_SECRET,
-    name: 'r4pulse',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 12 * 60 * 60 * 1000 },
-  }));
+  // The session is a signed cookie, not memory on the server, so a restart, a deploy or a sleeping preview
+  // does not sign anyone out. Twelve hours, renewed as it is used.
+  const COOKIE = 'r4pulse', LIFE = 12 * 60 * 60 * 1000, RENEW = 60 * 60 * 1000;
+  const mac = body => crypto.createHmac('sha256', process.env.SESSION_SECRET).update(body).digest('base64url');
+  const cookieOpts = { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: LIFE, path: '/' };
+  const issue = (res, user) => { const body = Buffer.from(JSON.stringify({ ...user, exp: Date.now() + LIFE })).toString('base64url'); res.cookie(COOKIE, body + '.' + mac(body), cookieOpts); };
+  const read = req => {
+    const m = (req.headers.cookie || '').split(/;\s*/).find(c => c.startsWith(COOKIE + '='));
+    if (!m) return null;
+    const [body, sig] = m.slice(COOKIE.length + 1).split('.');
+    if (!body || !sig) return null;
+    const want = Buffer.from(mac(body)), got = Buffer.from(sig);
+    if (want.length !== got.length || !crypto.timingSafeEqual(want, got)) return null;
+    try { const u = JSON.parse(Buffer.from(body, 'base64url').toString()); return u.exp > Date.now() ? u : null; } catch { return null; }
+  };
+  app.use((req, res, next) => {
+    const u = read(req);
+    req.session = { user: u ? { name: u.name, role: u.role } : null, destroy: cb => { res.clearCookie(COOKIE, { path: '/' }); cb(); } };
+    if (u && u.exp - Date.now() < LIFE - RENEW) issue(res, req.session.user);
+    next();
+  });
 
   app.get('/login', (req, res) => res.type('html').send(LOGIN_PAGE(null)));
   app.post('/login', (req, res) => {
@@ -62,7 +76,7 @@ function install(app) {
     if (!u || !bcrypt.compareSync(String(password), u.hash)) {
       return res.status(401).type('html').send(LOGIN_PAGE('That name and password do not match.'));
     }
-    req.session.user = { name: u.name, role: u.role };
+    issue(res, { name: u.name, role: u.role });
     res.redirect('/');
   });
   app.post('/logout', (req, res) => req.session.destroy(() => res.redirect('/login')));

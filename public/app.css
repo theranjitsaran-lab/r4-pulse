@@ -41,3 +41,7 @@ button{font:inherit}
   #main{padding: var(--sp-4) var(--sp-4) calc(var(--u) * 24)}
 }
 html,body{overflow-x:hidden}
+.stamp{padding: var(--sp-1) var(--sp-4);font-size: var(--fs-tiny);color:var(--ink-3);text-align:center;border-top: var(--hair) solid var(--rule)}
+.stamp.late{background:var(--warn-bg);color:var(--warn);font-weight:600}
+.mast-right button.mast-ask{display:inline-flex;align-items:center;gap: var(--sp-1);padding: var(--sp-1) var(--sp-3);border-radius: var(--r-pill);background:var(--tint-brand);color:var(--brand);font-weight:600}
+.mast-ask svg{width: var(--sp-4);height: var(--sp-4);fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}

@@ -23,7 +23,7 @@ export async function render(main, V) {
   const G = V.gl;
 
   const kpis = `<section class="h2-kpis four" data-rv>
-    <div class="h2-kpi lead"><span>${esc(monY(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${ly ? `${last.core >= ly.core ? '▲' : '▼'} ${pc(Math.abs(last.core / ly.core - 1))} on a year ago` : 'posted invoices'}</small></div>
+    <div class="h2-kpi lead"><span>${esc(monY(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${ly ? (Math.abs(last.core / ly.core - 1) < 0.005 ? 'level with a year ago' : `${last.core >= ly.core ? '▲' : '▼'} ${pc(Math.abs(last.core / ly.core - 1))} on a year ago`) : 'posted invoices'}</small></div>
     <div class="h2-kpi"><span>Twelve-month average</span><b>${moneyK(avg12)}</b><small>a month, ${esc(mon(l12[0].month))} to ${esc(mon(last.month))}</small></div>
     <a class="h2-kpi" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(V.gap.gap)}</b><small>${V.gap.next ? `on ${esc(mon(V.gap.next, { month: 'long' }))}'s bill building ◇` : 'on the latest bill'}</small></a>
     <div class="h2-kpi"><span>${G ? 'EBITDA, twelve months' : 'Best month of the twelve'}</span><b>${G ? moneyK(G.last12.ebitda_after) : moneyK(best.core)}</b><small>${G ? `${G.last12.revenue > 0 ? pc(G.last12.ebitda_after / G.last12.revenue) : '—'} of revenue, after discretionary` : esc(monY(best.month))}</small></div>
@@ -35,7 +35,7 @@ export async function render(main, V) {
     <section class="h2-card" data-rv>
       <div class="h2-ch"><h2>${esc(coreTitle(l12, V.target))}</h2><small>core by month, storage and service, against $1.0M</small></div>
       <div id="nb-core"></div>
-      <div class="src">Posted invoices on invoice date, storage plus service, Citadel held apart (kpi.monthly from VCK) · storage bills a month ahead, service a month behind</div>
+      <div class="src">Posted invoices on invoice date, storage plus service, Citadel held apart, from VCK · storage bills a month ahead, service a month behind</div>
     </section>
     <section class="h2-card" data-rv id="nb-ebitda"></section>
     <section class="h2-card" data-rv id="nb-margin"></section>
@@ -43,7 +43,7 @@ export async function render(main, V) {
 
   coreChart(main.querySelector('#nb-core'), M.slice(-13), V.target);
   main.querySelector('#nb-ebitda').innerHTML = G ? ebitdaHtml(G) : `<div class="h2-ch"><h2>The EBITDA bridge</h2><small>revenue to EBITDA, by month</small></div>
-    <div class="pending">Not loaded yet: it comes from the monthly QuickBooks Profit and Loss by Month export. Run <code>node scripts/load_gl.js &lt;the CSV&gt;</code> on the PC once a month after the books close; this panel fills from <code>model.gl_month</code>.</div>`;
+    <div class="pending">Arrives after the month's books close.</div>`;
   main.querySelector('#nb-margin').innerHTML = V.margin ? marginHtml(V.margin) : `<div class="h2-ch"><h2>Gross margin by line of business</h2></div><div class="pending">Not costed yet: margins arrive once the cost model is signed off.</div>`;
   if (G) monthBars(main.querySelector('#nb-ebitda-months'), G.months.slice(-13));
   reveal(main.querySelector('.nb'));
@@ -121,5 +121,5 @@ function marginHtml(Mg) {
   return `<div class="h2-ch"><h2>Gross margin by line of business ◇</h2><small>the last twelve months, revenue less the cost to serve, every account, Citadel apart</small></div>
     <div class="c2-scroll"><table class="q-t nb-t"><thead><tr><th>Line</th><th class="v">Revenue</th><th class="v">Cost to serve ◇</th><th class="v">Margin ◇</th><th class="v">Kept</th></tr></thead><tbody>${rows}</tbody>
     <tfoot><tr><td>The costed lines<small>leaving out the lines under review and the fees</small></td><td class="v">${money0(tot.revenue)}</td><td class="v">${money0(tot.cost)}</td><td class="v">${money0(tot.revenue - tot.cost)}</td><td class="v">${pc((tot.revenue - tot.cost) / tot.revenue)}</td></tr></tfoot></table></div>
-    <div class="src">Cost to serve from model/rates.js (GL pools over the database's volumes, provisional) ◇ · bins from ${Mg.binReal.routeDays} real route days, ${esc(String(Mg.binReal.from))} to ${esc(String(Mg.binReal.to))}, shared by minutes, where the account has them; elsewhere the average visit · sales, management and overheads sit above this line, in the bridge, never spread across customers</div>`;
+    <div class="src">Cost to serve from the cost model (GL pools over the database's volumes, provisional) ◇ · bins from ${Mg.binReal.routeDays} real route days, ${esc(String(Mg.binReal.from))} to ${esc(String(Mg.binReal.to))}, shared by minutes, where the account has them; elsewhere the average visit · sales, management and overheads sit above this line, in the bridge, never spread across customers</div>`;
 }

@@ -47,7 +47,7 @@ export async function render(main, tabs) {
   let S, PR;
   try { [S, PR] = await Promise.all([getJson('storage'), getJson('pricing')]); }
   catch (e) {
-    main.innerHTML = `<div class="rt wh">${tabs}<div class="empty" style="border:1px dashed var(--rule-3);border-radius:var(--r);padding:18px"><b>Warehouse data is not in this snapshot yet.</b> It arrives with the next <code>npm run snapshot</code> on the PC (storage_retention, boxes in storage by account and state).</div></div>`;
+    main.innerHTML = `<div class="rt wh">${tabs}<div class="empty" style="border:1px dashed var(--rule-3);border-radius:var(--r);padding:18px"><b>Warehouse data is not in this snapshot yet.</b> It arrives with the next refresh.</div></div>`;
     return;
   }
   const acc = byAccount(S), T = totals(acc), G = cells(acc, 1000);
@@ -65,21 +65,21 @@ export async function render(main, tabs) {
       <div class="card-head"><h3>The building by who fills it: one square for every ${G.per.toLocaleString('en-US')} boxes</h3><small>hover or tap a group</small></div>
       <div class="gwrap"><div id="wh-grid"></div><div class="c-tip" hidden></div></div>
       <div class="wkey">${STATES.map(([k, l]) => `<span><i style="background:${k === 'inuse' ? 'color-mix(in srgb, var(--s-storage) 28%, var(--surface))' : k === 'old' ? 'var(--s-storage)' : k === 'eligible' ? 'var(--s-service)' : 'var(--ink-4)'}"></i>${l} ${k0(T[k])}</span>`).join('')}</div>
-      <div class="src">VCK storage_retention, boxes in storage (status I), all at one location (CHI) · accounts largest first, those under ${G.per.toLocaleString('en-US')} boxes together at the end · eligible is review overdue less permanent and legal hold, at least ◇ · rack capacity is not in the data, so this shows what is held, not how full the building is</div>
+      <div class="src">VCK boxes in storage, all at one location (Chicago) · accounts largest first, those under ${G.per.toLocaleString('en-US')} boxes together at the end · eligible is review overdue less permanent and legal hold, at least ◇ · rack capacity is not in the data, so this shows what is held, not how full the building is</div>
     </div>
     <div class="cols">
       <div class="card">
         <div class="card-head"><h3>Shredding the eligible boxes would bill about ${moneyK(E.once)} once and end ${moneyK(E.lost)} a month of storage ◇</h3></div>
         <div class="hd"><span>Account</span><span>Eligible</span><span>Billed once</span><span>Storage ends</span><span>Pays back</span><span>Of building</span><span></span></div>
         <div id="wh-elig"></div>
-        <div class="src">Destruction at the book's median R3, $${(E.perBox || 0).toFixed(2)} a box; storage at each account's own rate per box (else the book's median) · "pays back" is the months of lost storage the destruction bill covers · <a href="#customers?view=destruction" style="color:var(--brand)">Overdue boxes by account ›</a></div>
+        <div class="src">Destruction at the book's median fee, $${(E.perBox || 0).toFixed(2)} a box; storage at each account's own rate per box (else the book's median) · "pays back" is the months of lost storage the destruction bill covers · <a href="#customers?view=destruction" style="color:var(--brand)">Overdue boxes by account ›</a></div>
       </div>
       <div class="card nb">
         <div class="card-head"><h3>${n0(NB.gap)} boxes are in storage but not on the ${NB.month ? mon(NB.month) : 'latest'} storage bill</h3></div>
         <p class="sub" style="margin:0 0 8px">${NB.none.length} accounts with ${n0(NB.none.reduce((t, r) => t + r.gap, 0))} boxes had no storage bill at all. It may be timing or prepaid storage; Anne to confirm before anyone calls.</p>
         <div class="hd"><span>Account</span><span>Held</span><span>Billed</span><span>Not billed</span><span></span></div>
         <div id="wh-nb"></div>
-        <div class="src">Held: storage_retention, status I · billed: storage_rate_hist, boxes on the latest month's storage bill</div>
+        <div class="src">Held: boxes in storage · billed: boxes on the latest month's storage bill</div>
       </div>
     </div>
     <div class="card" id="wh-trend" style="margin-top:14px"></div>
@@ -116,6 +116,6 @@ export async function render(main, tabs) {
     title: yoy != null ? `The storage bill carried ${n0(last.boxes)} boxes in ${mon(last.month)}, ${yoy >= 0 ? 'up' : 'down'} ${(Math.abs(yoy) * 100).toFixed(1)}% on a year ago` : 'Boxes on the storage bill',
     series: [{ name: 'Boxes billed', cls: 'storage', points: m.map(x => ({ x: x.month, y: x.boxes })) }],
     yFormat: v => Math.round(v / 1000).toLocaleString('en-US') + 'K', height: 220,
-    source: 'VCK storage_rate_hist · boxes on each month\'s storage bill',
+    source: 'VCK · boxes on each month\'s storage bill',
   });
 }

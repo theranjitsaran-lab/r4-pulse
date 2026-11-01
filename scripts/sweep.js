@@ -43,6 +43,7 @@ async function main() {
       await page.waitForFunction(() => !document.querySelector('#main .loading'), null, { timeout: 20000 }).catch(() => {});
       await page.waitForTimeout(400);
       // folded sections count: a phone user can open them
+      if (hash.startsWith('#pricing')) await page.click('#q-add').catch(() => {});   // a quote line, which once showed its margin
       await page.evaluate(() => document.querySelectorAll('details').forEach(d => { d.open = true; }));
       await page.waitForTimeout(150);
       const text = await page.evaluate(() => document.body.innerText);
