@@ -2,6 +2,8 @@
 // the customer page. Each row: name and why it is listed, a 24-month sparkline, twelve-month
 // revenue, change on the twelve months before, and gross margin (est. means modelled).
 import { customerTable, falling, rising, tableHtml, sortRows, COLUMNS } from '/components/custtable.js';
+import { dataTable, kOnly } from '/components/datatable.js';
+import { accountFilters, carryHash } from '/components/acctfilters.js';
 import { dailyFrom, addMonths } from '/components/projection.js';
 import { sparkline, money0, moneyK } from '/components/chart.js';
 import { buildMargins, marginSummary, marginAction, accountLines, accountCosts, costParts, PARTS, FAMILY_NAMES } from '/components/margin.js';
@@ -13,15 +15,13 @@ import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 import { conversationCandidates } from '/components/lists.js';
 import { LABELS } from '/components/metrics.js';
-import { costsVisible } from '/components/access.js';
+import { costsVisible, whoAmI } from '/components/access.js';
 
 const CITADEL = 6714;
 const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under review: delivery days not yet in the volumes
 
 export const VIEWS = {
-  opportunities: { label: 'Opportunities', blurb: 'Every next conversation, each account once.' },
   overview:      { label: 'All accounts', blurb: 'Last month, who moved, and every account: sort any column, filter to a line, tap a figure for why.' },
-  opportunities: { label: 'Opportunities', blurb: 'Every next conversation in one list: cross-sell, price gaps, win-back, rate rounds and overdue boxes, each with an owner and a status.' },
   conversations: { label: 'This week', hidden: true, blurb: 'Ten conversations worth having, ranked by what is at stake. Log what you did; the list learns.' },
   main:          { label: 'Up and down', hidden: true, blurb: 'Last month against the month before and a year ago, the year to date, and this month so far.' },
   grid:          { label: 'Month grid', blurb: 'The 30 largest accounts, month by month, each against its own run.' },
@@ -30,7 +30,7 @@ export const VIEWS = {
   gaps:          { hidden: true, label: 'Price gaps', blurb: 'Paying under the book\'s median for storage or a service, sized by their volume. Home counts half of each gap.' },
   rounds:        { hidden: true, label: 'Missed rate rounds', blurb: 'No rate has moved in two years.' },
   destruction:   { hidden: true, label: 'Overdue boxes', blurb: 'Boxes past their retention review, by account: what destruction bills once, and the storage it ends.' },
-  margin:        { label: 'Margin', blurb: 'Every account: revenue less what it costs to serve, worst first.' },
+  margin:        { hidden: true, label: 'Margin', blurb: 'Every account: revenue less what it costs to serve, worst first.' },
   all:           { label: 'All', hidden: true, blurb: 'Every account with revenue in the last twelve months.' },
 };
 
@@ -82,9 +82,9 @@ async function rowsFor(view, ser, book, C) {
 
 export async function render(main, C, params) {
   if (!main) return;
-  const view = VIEWS[params.view] && (params.view !== 'margin' || costsVisible()) ? params.view : 'opportunities';
+  const view = VIEWS[params.view] && (params.view !== 'margin' || costsVisible()) || params.view === 'opportunities' ? params.view : 'overview';
   if (view === 'overview') return (await import('/views/custoverview.js')).render(main, C, params, tabsHtml('overview'));
-  if (view === 'opportunities') return (await import('/views/opps.js')).render(main, params, tabsHtml('opportunities'));
+  if (view === 'opportunities') return (await import('/views/opps.js')).render(main, params, C);
   if (view === 'conversations') return conversations(main, C);
   if (view === 'whitespace') return whitespace(main, C, params);
   if (view === 'main') return upDown(main, C, params);
@@ -120,15 +120,15 @@ export async function render(main, C, params) {
 }
 
 // the view tabs, the same on every Customers view; Up and down and All are kept for old links only
-// the search carries across the tabs, as it stands when the tab is tapped
-const goView = v => { const q = new URLSearchParams(location.hash.split('?')[1] || '').get('q'); location.hash = '#customers?view=' + v + (q ? '&q=' + encodeURIComponent(q) : ''); };
+// search, filters and the months switch carry across the tabs, as they stand when the tab is tapped
+const goView = v => { location.hash = carryHash('#customers?view=' + v, location.hash); };
 if (typeof document !== 'undefined') {
   document.addEventListener('click', e => { const a = e.target.closest('.bar .views a[href^="#customers?view="]'); if (a) { e.preventDefault(); goView(new URLSearchParams(a.getAttribute('href').split('?')[1]).get('view')); } });
   document.addEventListener('change', e => { if (e.target.matches('.c2-viewpick')) goView(e.target.value); });
 }
 
 export function tabsHtml(on) {
-  const views = Object.entries(VIEWS).filter(([k, v]) => (!v.hidden || k === on) && (k !== 'margin' || costsVisible()));
+  const views = Object.entries(VIEWS).filter(([k, v]) => (!v.hidden || (k === on && k !== 'margin')));
   // a dropdown on a phone, so no tab is ever scrolled off the screen
   return `<div class="bar"><div class="views on-desk"><div class="seg">${views.map(([k, v]) => `<a href="#customers?view=${k}" class="${k === on ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
     <select class="on-phone c2-viewpick" aria-label="View">${views.map(([k, v]) => `<option value="${k}" ${k === on ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select></div>`;
@@ -205,15 +205,14 @@ async function whitespace(main, C, params) {
     return `${titleCase(r.customer)} (${lc(best.x.name)}, about ${moneyK(best.c.opp / 12)} a month)`;
   });
   const byLine = LINES.map(x => ({ x, v: rows.reduce((t, r) => t + (r.cells[x.key].have ? 0 : r.cells[x.key].opp), 0) })).sort((a, b) => b.v - a.v);
-  const shown = params.all ? rows.length : 40;
   const pace = crossSellPace(M.history), names = new Map(M.accounts.map(a => [a.level1, a.customer]));
   const paceLine = pace ? ` <span style="display:block;margin-top:var(--sp-2)">That is the ceiling. R4's own record: in the last twelve months ${pace.count} existing accounts added a line (${pace.prevCount} the year before), worth about ${moneyK(pace.value)} in their first year so far. The biggest: ${pace.best.map(f => `${esc(titleCase(names.get(f.level1) || 'Account ' + f.level1))} (${lc((LINES.find(x => x.key === f.family) || { name: f.family }).name)}, ${moneyK(f.first_year)})`).join(', ')}.</span>` : '';
 
   const cell = (r, x) => {
     const c = r.cells[x.key];
-    if (c.have) { const a = Math.round(8 + 72 * Math.sqrt(c.spend / maxHave)); return `<div class="c" data-l="${esc(x.short || x.name)}"><span class="have ${a > 55 ? 'dark' : ''}" style="--a:${a}%" title="${esc(x.name)}: ${money0(c.spend)} in the last twelve months">${moneyK(c.spend)}</span></div>`; }
-    if (c.opp > 0) return `<div class="c" data-l="${esc(x.short || x.name)}"><button class="opp" data-id="${r.level1}" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)}</button></div>`;
-    return `<div class="c nobuy" data-l="${esc(x.short || x.name)}"><span class="none">—</span></div>`;
+    if (c.have) return `<span title="${esc(x.name)}: ${money0(c.spend)} in the last twelve months">${moneyK(c.spend)}</span>`;
+    if (c.opp > 0) return `<button class="opp" data-id="${r.level1}" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)}</button>`;
+    return '<span class="none">—</span>';
   };
 
   main.innerHTML = `
@@ -221,21 +220,23 @@ async function whitespace(main, C, params) {
     <h1>Accounts</h1>
     ${tabsHtml('whitespace')}
     <p class="lede">If the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do, they would spend about <b>${moneyK(W.total / 12)} a month more</b> (${moneyK(W.total / 12)} a month est.). Most of it is ${lc(byLine[0].x.name)} and ${lc(byLine[1].x.name)}. Start with ${top3.join(', ')}.${paceLine}</p>
-    <div class="key"><span><span style="background:color-mix(in srgb, var(--ink) 30%, var(--surface))"></span>buys it: twelve-month spend, darker is more</span><span><span style="border:var(--hair) dashed var(--ink-5)"></span>doesn't buy it yet: what comparable accounts spend est.</span><span>— not sized</span></div>
+    <div class="key"><span>A plain figure: buys it, twelve-month spend</span><span><span style="border:var(--hair) dashed var(--ink-5)"></span>doesn't buy it yet: what comparable accounts spend a year est.</span><span>— not sized</span></div>
     <div class="card">
-      <div class="grid">
-        <div class="gh">Customer</div>${LINES.map(x => `<div class="gh">${esc(x.short || x.name)}</div>`).join('')}<div class="gh">Not bought yet</div>
-        ${rows.slice(0, shown).map(r => `<div class="wr">
-          <a class="nm" href="#customer/${r.level1}">${esc(titleCase(r.customer))}<small>${moneyK(r.total)} a year${r.boxes >= 500 ? ` · ${Math.round(r.boxes).toLocaleString('en-US')} boxes` : ''}</small></a>
-          ${LINES.map(x => cell(r, x)).join('')}
-          <div class="tot">+${moneyK(r.opp)}</div></div>`).join('')}
-      </div>
-      ${rows.length > shown ? `<a class="more" href="#customers?view=whitespace&all=1">Show all ${rows.length} accounts</a>` : ''}
+      <div id="ws-t"></div>
     </div>
     <p class="foot">Tap a dashed figure to see how it was worked out, the comparable accounts behind it, and how it is usually sold. Sized from the last twelve months. Retrieval, delivery and destruction for a storer: the median spend per 1,000 boxes among storers that buy the line. Storage, bins and ITAD: the median share of spend among similar-sized accounts that buy the line as an add-on. Never more than the account spends today. Citadel apart.</p>
   </div>`;
   const calls = new Map(CA.map(c => [c.level1, c]));
-  main.querySelector('.ws .grid').addEventListener('click', ev => {
+  const opp = (r, x) => { const c = r.cells[x.key]; return !c.have && c.opp > 0 ? c.opp : 0; };
+  dataTable(main.querySelector('#ws-t'), { key: 'crosssell', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows, noun: 'accounts', placeholder: 'Find an account', search: r => r.customer, totalLabel: 'Not bought yet, total',
+    cols: [
+      { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` },
+      ...LINES.map(x => ({ k: x.key, l: x.short || x.name, fixed: true, get: r => opp(r, x), fmt: r => cell(r, x), total: 'sum', totalFmt: v => '+' + moneyK(v) })),
+      { k: 'opp', l: 'Not bought yet', fixed: true, first: true, sorted: true, get: r => r.opp, fmt: r => '+' + moneyK(r.opp), total: 'sum', totalFmt: v => '+' + moneyK(v) },
+    ],
+    onRow: (r, e) => { if (!e.target.closest('button.opp')) location.hash = '#customer/' + r.level1; },
+  });
+  main.querySelector('#ws-t').addEventListener('click', ev => {
     const b = ev.target.closest('button.opp'); if (!b) return;
     const row = W.rows.find(r => r.level1 === Number(b.dataset.id));
     if (row) openExplainer({ row, key: b.dataset.key, call: calls.get(row.level1), H: M.history, names: new Map(M.accounts.map(a => [a.level1, a.customer])) });
@@ -303,33 +304,27 @@ async function monthGrid(main, C, params) {
   const lastM = months[months.length - 1], lastName = new Date(lastM + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
   const top = lastMoves[0];
 
-  const shade = d => {
-    if (d == null) return { tone: 'var(--ink)', a: 4, strong: false };
-    const mag = Math.min(1, Math.abs(d) / 0.6);
-    if (Math.abs(d) < 0.1) return { tone: 'var(--ink)', a: 5, strong: false };
-    return { tone: d < 0 ? 'var(--bad)' : 'var(--good)', a: Math.round(14 + 66 * mag), strong: mag > 0.62 };
-  };
   const link = sv => `#customers?view=grid${sv !== 'total' ? '&series=' + sv : ''}`;
   main.innerHTML = `
   <div class="cust mg">
     <h1>Accounts</h1>
     ${tabsHtml('grid')}
-    <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (${LABELS.slipping}) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} Each cell below is one month against the six before it.</p>
+    <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (${LABELS.slipping}) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} A coloured cell is more than 25% and $5K from the account's own 12-month average.</p>
     <div class="tools">
       <div class="seg">${[['total', 'Storage and service'], ['storage', 'Storage'], ['service', 'Service']].map(([k, l]) => `<a href="${link(k)}" class="${k === which ? 'on' : ''}">${l}</a>`).join('')}</div>
-      <div class="key"><i style="background:color-mix(in srgb, var(--bad) 70%, var(--surface))"></i>down<i style="background:color-mix(in srgb, var(--bad) 25%, var(--surface));margin-left:var(--sp-2)"></i><i style="background:color-mix(in srgb, var(--ink) 5%, var(--surface))"></i>within 10%<i style="background:color-mix(in srgb, var(--good) 25%, var(--surface))"></i><i style="background:color-mix(in srgb, var(--good) 70%, var(--surface));margin-left:var(--sp-2)"></i>up · ${LABELS.gridColours.toLowerCase()}</div>
     </div>
-    <div class="card">
-      <table>
-        <thead><tr><th class="nmh">Customer</th>${months.slice(first).map((m, j) => `<th class="${j < N - 5 ? 'old' : ''}">${mlab(m, j)}</th>`).join('')}<th class="tt">12 months</th></tr></thead>
-        <tbody>${grid.map(g => `<tr>
-          <td class="nm"><a href="#customer/${g.s.level1}">${esc(titleCase(g.s.customer))}</a></td>
-          ${g.c.map((c, j) => { const sh = shade(c.d); return `<td class="cl ${j < N - 5 ? 'old' : ''}"><span data-inv-id="${g.s.level1}" data-inv-m="${c.m}" data-inv-name="${esc(g.s.customer)}" class="${sh.strong ? 'strong' : ''}" style="--tone:${sh.tone};--a:${sh.a}%" title="${esc(titleCase(g.s.customer))}, ${mlab(c.m, 1)}: ${money0(c.v)} against its own ${money0(c.run)}">${moneyK(c.v)}</span></td>`; }).join('')}
-          <td class="tt">${moneyK(g.s[which].slice(-12).reduce((t, x) => t + x, 0))}</td></tr>`).join('')}</tbody>
-      </table>
-    </div>
-    <p class="foot">Invoice month, posted runs. Storage bills in advance, so a month's storage is that month's boxes; service is the month before's work. Citadel apart. Tap a name for the customer, a month for its invoices.</p>
+    <div class="card"><div id="mg-t"></div></div>
+    <p class="foot">Invoice month, posted runs. Storage bills in advance, so a month's storage is that month's boxes; service is the month before's work. Citadel apart. Figures in $K. Tap a row for the customer, a month for its invoices.</p>
   </div>`;
+  const byId = new Map(grid.map(g => [g.s.level1, g.s]));
+  const cellOf = (r, m) => { const i = months.indexOf(m), v = r[which], run = i >= 6 ? v.slice(i - 6, i).reduce((t, x) => t + x, 0) / 6 : 0; return { v: v[i], run, d: run > 0 ? v[i] / run - 1 : null }; };
+  dataTable(main.querySelector('#mg-t'), { key: 'monthgrid', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows: grid.map(g => g.s), noun: 'of the largest accounts', placeholder: 'Find an account', search: r => r.customer,
+    cols: [{ k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` }],
+    months: { list: months, get: (r, m) => r[which][months.indexOf(m)],
+      cell: (r, m) => { const c = cellOf(r, m); return `<span data-inv-id="${r.level1}" data-inv-m="${m}" data-inv-name="${esc(r.customer)}" title="${esc(titleCase(r.customer))}: ${money0(c.v)} against its own ${money0(c.run)}">${kOnly(c.v)}</span>`; },
+    },
+    onRow: (r, e) => { if (!e.target.closest('[data-inv-id]') && byId.has(r.level1)) location.hash = '#customer/' + r.level1; },
+  });
 }
 
 // ── Margin: every account, revenue less what it costs to serve, worst first ──────────────────

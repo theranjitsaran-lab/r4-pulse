@@ -32,6 +32,7 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
     if (c.have || !(c.opp > 0)) continue;
     const name = titleCase(a.customer);
     push({ key: `cross:${a.level1}:${line}`, kind: 'cross', level1: a.level1, name, line, value: c.opp, modelled: true,
+      short: `Doesn't buy ${lc(lineName[line])} yet`,
       reason: `Doesn't buy ${lc(lineName[line])} yet: ${c.basis}.`,
       opener: line === 'shred' ? OPENERS.nodestroy(name) : `We look after your ${a.cells.storage && a.cells.storage.have ? 'records' : 'shredding'} already. Could we take ${lc(lineName[line])} off your hands too, on the same visits?` });
   }
@@ -42,12 +43,14 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
   for (const a of sg.values()) {
     const name = titleCase(a.customer);
     push({ key: `price:${a.level1}:svc`, kind: 'price', level1: a.level1, name, line: 'service', value: a.worth * 12,
+      short: `${titleCase(a.top.service)} at $${a.top.rate.toFixed(2)} against a $${a.top.med.toFixed(2)} median`,
       reason: `${titleCase(a.top.service)} at $${a.top.rate.toFixed(2)} against a $${a.top.med.toFixed(2)} median${a.worth * 12 > a.top.worth * 12 + 1 ? `, with other lines under too` : ''}: ${k$(a.worth * 12)} a year at the median.`,
       opener: OPENERS.gap(name, { service: titleCase(a.top.service).toLowerCase() }) });
   }
   for (const r of storageGaps(PR).rows) {
     const name = titleCase(r.customer);
     push({ key: `price:${r.level1}:storage`, kind: 'price', level1: r.level1, name, line: 'storage', value: r.worth * 12,
+      short: `Storage at $${r.rate.toFixed(3)} a box against a $${r.med.toFixed(3)} median`,
       reason: `Storage at $${r.rate.toFixed(3)} a box against $${r.med.toFixed(3)} on ${Math.round(r.boxes).toLocaleString('en-US')} boxes: ${k$(r.worth * 12)} a year at the median.`,
       opener: OPENERS.gap(name, { service: 'storage' }) });
   }
@@ -55,12 +58,14 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
   for (const d of slippingAccounts(C)) {
     const name = titleCase(d.customer);
     push({ key: `slip:${d.level1}`, kind: 'slip', level1: d.level1, name, value: -d.move.d * 12,
+      short: (s => s[0].toUpperCase() + s.slice(1))(moveReason(d.move, k$)),
       reason: `${k$(d.move.last3)} a month over the last three months against its own ${k$(d.move.run)}: ${moveReason(d.move, k$)}.`, opener: OPENERS.slipping(name) });
   }
   // rate rounds: no rate moved in two years and no price gap already listed
   for (const c of CA) if (c.not_raised_2y && !sg.has(c.level1)) {
     const name = titleCase(c.customer);
     push({ key: `round:${c.level1}`, kind: 'round', level1: c.level1, name, value: c.service * 0.08,
+      short: 'No rate moved in two years',
       reason: `No rate moved in two years on ${k$(c.service)} of service a year: ${k$(c.service * 0.08)} at the typical 8% rise.`, opener: OPENERS.rounds(name) });
   }
   // overdue boxes: destruction once, and the storage it ends (said, not counted)
@@ -68,7 +73,8 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
   for (const r of ob.rows) if (r.boxes >= 50 && r.once > 0) {
     const name = titleCase(r.customer);
     push({ key: `overdue:${r.level1}`, kind: 'overdue', level1: r.level1, name, value: r.once, once: true,
-      reason: `${Math.round(r.boxes).toLocaleString('en-US')} boxes past their retention review: ${k$(r.once)} of destruction once, ending ${k$(r.lost * 12)} a year of storage. Ranked at 25%: one-off, needs client sign-off.`,
+      short: `${Math.round(r.boxes).toLocaleString('en-US')} boxes past their review; needs client sign-off`,
+      reason: `${Math.round(r.boxes).toLocaleString('en-US')} boxes past their retention review: ${k$(r.once)} of destruction once, ending ${k$(r.lost * 12)} a year of storage. A one-off, and it needs the client's sign-off.`,
       opener: OPENERS.overdue(name, { boxes: Math.round(r.boxes) }) });
   }
   // what the team has said about each
@@ -102,6 +108,17 @@ export function byAccount(rows) {
     return a;
   }).sort((x, y) => y.rank - x.rank);
   return { rows: out, accounts: out.length, largest: out.reduce((t, a) => t + a.largest, 0), once: out.reduce((t, a) => t + a.once, 0) };
+}
+
+// An account's best move: the largest a year; if it has none, its largest one-off.
+export function bestMove(items) {
+  const by = list => list.slice().sort((a, b) => b.value - a.value)[0];
+  return by(items.filter(r => !r.once)) || by(items);
+}
+// what its row shows, from the moves left after any filter
+export function accountRow(items) {
+  const yearly = items.filter(r => !r.once).map(r => r.value);
+  return { best: bestMove(items), year: yearly.length ? Math.max(...yearly) : 0, once: items.filter(r => r.once).reduce((t, r) => t + r.value, 0), count: items.length };
 }
 
 // what was won, by month the status was set: the value as it stood when it was won

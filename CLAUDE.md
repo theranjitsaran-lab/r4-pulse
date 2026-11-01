@@ -27,16 +27,17 @@ DECISIONS.md "The route to $1.0m and cross-sell" holds what was settled.*
 | Screen | Route | Owner | What it is |
 |---|---|---|---|
 | **Home** | `#pulse` | Trisha | A headline and three tappable bullets · next month's bill building, last bill, gap · this month's work against last month's, the last 13 weeks · lines of business (month, 3 months, YTD) · largest, rising, slipping five · cross-sell, the density map, shredding's effect on revenue (`views/home2.js`; the 26 October Home is at `#classic`) |
-| **Customers** | `#customers?view=` | Anne, Trisha | Overview (KPI band, the book by line, who moved, every account sortable and filterable by line, each figure opening a pop-out that explains it against peers) · Opportunities (one ranked list of cross-sell, price gaps, win-back, rate rounds and overdue boxes, each with an opener, an owner and a status in `app.opportunity`; `views/opps.js`, `components/opps.js`) · Month grid · Cross-sell · Margin. The old Slipping, Price gaps, Rate rounds, Overdue boxes and This week lists are folded into Opportunities, kept for old links |
+| **Customers** | `#customers?view=` | Anne, Trisha | Overview (KPI band, the book by line, who moved, then every account by month billed: the 50 largest and all the others, adding to invoiced core, each row opening to its lines; `accountmonths` and `accountlines` queries) · Month grid · Cross-sell. The Margin sub-tab is retired: its route stays for the admin drill and old links, and Drop and Renegotiate become a Reprice opportunity once costs are signed off |
+| **Opportunities** | `#opportunities` (the last tab) | Anne, Trisha | One row per account, largest first: its best move with one reason, $ a year, one-off, owner, status; a tap opens its other moves, each with an opener, an owner and a status in `app.opportunity` (`views/opps.js`, `components/opps.js`). The old Slipping, Price gaps, Rate rounds, Overdue boxes and This week lists are folded into it, kept for old links |
 | **Customer page** | `#customer/<id>` | Anne | Headline figures · 24-month chart · its open opportunities · margin by line → its cost, invoices and orders → one order's cost build; folded below: not bought yet, prices against the book, signals; work orders and visits |
 | **Pricing** | `#pricing` | Anne | A compact bar with a price slider and a postcode · the quote builder (lines, deal total and margin, saved to `app.quote`) · the verdict · the price's own P&L and the levers that would improve it · the price on one track (cost, middle half, median) · what it is worth a year · the cost working · invoiced against the book |
-| **Numbers** | `#numbers` (Warehouse at `#numbers?tab=warehouse`) | Trisha, Theran | Core against $1.0M by month · the EBITDA bridge from the monthly QuickBooks export (`scripts/load_gl.js` → `model.gl_month`, sorted in `components/gl.js`) · gross margin by line (`views/numbers.js`) |
+| **Numbers** | `#numbers` (Warehouse at `#numbers?tab=warehouse`) | Trisha, Theran | Core against $1.0M by month · lines of business by month, a Storage / service toggle and a Revenue | Margin switch, margin for admins only (`components/linegrid.js`) · the EBITDA bridge from the monthly QuickBooks export (`scripts/load_gl.js` → `model.gl_month`, sorted in `components/gl.js`) · gross margin by line (`views/numbers.js`) |
 | **How it's calculated** | `#how` | Everyone | Where the figures come from, in plain words; the working stays off the screens (`views/how.js`) |
 | **Settings** | `#settings` (gear in the masthead) | Theran, Mike | The cost model's assumptions, editable by admins with who and when (`app.setting`, `server/settings.js`): speed, minutes a stop and a service, the travel share, whether box deliveries are placed on the shred routes by location · the rates, read-only |
 | **Routes** | `#activity` | Mike | The day in a sentence, thin routes named · by route against its norm · the map on tap: the day's routes from the yard, or where to add customers · the week · booked ahead · distance from the yard and the long way round |
 
 Every figure shown in two places comes from one function (`components/levers.js`, `margin.js`,
-`whitespace.js`) and `model/levers.test.js` holds them together. Tokens are in `public/tokens.css`.
+`whitespace.js`) and `model/levers.test.js` holds them together. Every list is `components/datatable.js`: 13px figures in the system monospace on 30px rows, months with YTD and 12 months, 50 rows then Show all, and `npm run footing` reads what it draws. Tokens are in `public/tokens.css`.
 
 ## Stack
 
@@ -139,8 +140,8 @@ Copy is part of the product. Plain English. British spelling in prose; US dollar
 
 **The customer is the centre.** Home → a customer list (`#customers?view=…`) → one customer page
 (`#customer/<level1>`) → lines → visits → boxes. Every number on Home opens a list; every list row
-opens the customer page. Nothing is a dead end. Nav: Today · Accounts · Quote · Money · Operations (routes stay #pulse, #customers, #pricing, #numbers, #activity); on a
-phone it is a tab bar at the bottom. Accounts opens on Opportunities, each account once; Anne signs in there.
+opens the customer page. Nothing is a dead end. Nav: Today · Accounts · Quote · Money · Operations · Opportunities (routes #pulse, #customers, #pricing, #numbers, #activity, #opportunities); on a
+phone it is a tab bar at the bottom. Accounts opens on All accounts; Anne signs in on Opportunities.
 
 **Brand, type and tokens.** R4 Services' own branding, from r4services.com (26 October 2026): the barcode
 logo `public/brand/r4-logo.png` (always on white: its bars are black), the icon `r4-icon-192.png`, green
@@ -161,8 +162,10 @@ series; crosshair tooltip; drawn at their on-screen width. Colour follows the en
 series colour. Real sparklines on customer rows.
 
 **Status colour** marks exceptions only and always comes with a word: red below cost and down,
-amber below median, green only for a delta that is up. Sound is ink. A delta wears colour only at a fifth
-or more (±20%); smaller moves keep the arrow in ink, and sparklines are ink with only the latest point coloured.
+amber below median, blue for a delta that is up. Green is the brand and never on a number. Sound is ink. A delta wears
+colour only at a fifth or more (±20%); smaller moves keep the arrow in ink, no arrow under 1%, "new" or "stopped" past
+300%. In a month table a cell is coloured only when more than 25% and $5K from its row's own 12-month average: red below,
+blue above. Sparklines are ink with only the latest point coloured.
 
 **Copy.** One idea per row: a number and one line; detail on tap. Show what changed, not what Anne
 and Mike already know. Estimated figures carry "est.". Route-based costs (bins, handling, delivery) show

@@ -97,7 +97,7 @@ export async function render(main, C, params) {
     <p class="cp-lede">${summary}</p>
     <div class="card" id="cp-chart"></div>
     ${s ? `<div class="cp-inv"><span>Invoices</span>${s.months.slice(-6).reverse().map(x => `<button type="button" class="chip" data-inv-id="${id}" data-inv-m="${x}" data-inv-name="${esc(s.customer)}">${new Date(x + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })}</button>`).join('')}</div>` : ''}
-    <section class="card cp-opps" id="cp-opps"><div class="card-head"><h3>Open opportunities</h3><a href="#customers?view=opportunities">All opportunities ›</a></div><p class="sub">Loading…</p></section>
+    <section class="card cp-opps" id="cp-opps"><div class="card-head"><h3>Open opportunities</h3><a href="#opportunities">All opportunities ›</a></div><p class="sub">Loading…</p></section>
     <div class="grid one">
       <div class="card">
         ${!costsVisible() ? `<div class="card-head"><h3>What it buys, the last twelve months</h3></div><div id="cp-fams"><ul class="h2-pl">${fams.filter(x => x.revenue > 0).map(x => `<li class="rest"><span>${esc(FAMILY_NAMES[x.f] || x.f)}</span><b>${money0(x.revenue)}</b></li>`).join('') || '<li class="rest"><span>No priced lines in the last twelve months.</span></li>'}</ul></div>` : `<div class="card-head"><h3>Margin by line of business</h3><a href="#customers?view=margin&id=${id}">The margin drill: line, job, route ›</a></div>

@@ -52,7 +52,11 @@
   --baseline:   #c7c7cc;
 
   /* ── status: exceptions only, always with a word or icon ── */
-  --good:       #0a7d0a;   /* delta up, as text */
+  --good:       #1a5a8a;   /* a move up, as text: blue, because green is the brand and never on a number */
+  --flag-dn:    #a8231c;   /* a month well below its row's own 12-month average */
+  --flag-dn-bg: #fbe4e1;
+  --flag-up:    #1a5a8a;   /* a month well above it */
+  --flag-up-bg: #e1edf6;
   --warn:       #9a5c00;   /* below median; the thin day (text-safe amber) */
   --bad:        #c62f2f;   /* below cost; down */
   --bad-bg:     #fdecec;
@@ -64,6 +68,7 @@
   --f-brand:    "Average Sans", var(--f-sans);   /* the "Pulse" wordmark only (27 October 2026) */
   --f-body:     var(--f-sans);
   --f-narrow:   var(--f-sans);
+  --f-num:      ui-monospace, "SF Mono", SFMono-Regular, Consolas, Menlo, monospace;   /* the tables' figures; system, nothing fetched */
   --w-head:     600;       /* every title and figure; 400 for text, nothing else */
 
   --fs-source:  12px;
@@ -80,6 +85,7 @@
   --track-tight: -.02em;
 
   --fs-sm:      13px;      /* table cells, buttons */
+  --dt-row:     30px;      /* a row of the one table */
   --fs-lead:    17px;      /* a verdict, a lede */
   --fs-display-ph: 24px;   /* a screen title on a phone */
   --fs-mega:    40px;      /* Home's one hero figure, desktop */

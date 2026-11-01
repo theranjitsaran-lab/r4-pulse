@@ -6,7 +6,7 @@
 const [, , base = 'http://localhost:3001', name = process.env.SPEED_USER || 'theran', pass = process.env.SPEED_PASS || ''] = process.argv;
 let chromium;
 try { ({ chromium } = require('playwright')); } catch { ({ chromium } = require('playwright-core')); }
-const SCREENS = ['pulse', 'customers', 'customers?view=opportunities', 'customer/3507', 'pricing', 'numbers', 'activity', 'settings'];
+const SCREENS = ['pulse', 'customers', 'opportunities', 'customer/3507', 'pricing', 'numbers', 'activity', 'settings'];
 const PROFILES = [['4G', 60, 9e6, 2], ['poor', 150, 1.6e6, 4]];
 
 (async () => {

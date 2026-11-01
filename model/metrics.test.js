@@ -164,7 +164,7 @@ test('#29 ITAD keeps its capitals; a huge multiple reads as new; #30 a one-off s
   const { changeWord } = await import('../public/components/metrics.js');
   const { rows } = opportunities(D(), {});
   assert.ok(!rows.some(r => /\bitad\b/.test(r.reason + r.opener)));
-  assert.ok(rows.filter(r => r.kind === 'overdue').every(r => /Ranked at 25%/.test(r.reason)));
+  assert.ok(rows.filter(r => r.kind === 'overdue').every(r => /needs the client's sign-off/.test(r.reason)));
   assert.equal(changeWord(90), 'new');
   assert.equal(changeWord(0.5, 200), 'new');
   assert.equal(changeWord(1.93), '▲ 193%');
@@ -185,7 +185,7 @@ test('one table: filters and search narrow the rows, the total follows them, and
   const csv = toCsv(rows, [{ l: 'Name', get: r => r.n }, col]);
   assert.match(csv, /"Delta, Inc",/, 'a comma is quoted');
   assert.equal(csv.split('\r\n').length, 5);
-  const st = { q: 'alp', f: { b: 'y' }, sort: 'v', dir: 1, cols: ['v'] };
+  const st = { q: 'alp', f: { b: 'y' }, sort: 'v', dir: 1, cols: ['v'], span: 3 };
   const back = readState(Object.fromEntries(new URLSearchParams(stateQuery(st))), o);
   assert.deepEqual(back, st, 'the link carries it all');
   // two tables on one page keep to their own part of the link, and the rest of it stands
@@ -194,6 +194,83 @@ test('one table: filters and search narrow the rows, the total follows them, and
   assert.equal(one, '#activity?tab=warehouse&n_q=old&e_q=new');
   assert.equal(withState(one, { q: '', f: {}, sort: null, dir: -1, cols: null }, 'e_'), '#activity?tab=warehouse&n_q=old');
   assert.equal(withState('#customers?view=overview&f_line=bin', { q: '', f: {}, sort: null, dir: -1, cols: null }), '#customers?view=overview', 'a removed filter leaves the link');
+});
+
+test('Step 2: months are the latest on the right, and YTD and 12 months hold whatever the switch shows', async () => {
+  const { monthCols, sumOf, kOnly } = await import('../public/components/datatable.js');
+  const list = []; for (let y = 2025, m = 1, i = 0; i < 22; i++) { list.push(`${y}-${String(m).padStart(2, '0')}-01`); m++; if (m > 12) { m = 1; y++; } }
+  const rows = [{ v: 100 }, { v: 2000 }];
+  const M = { list, est: [list[list.length - 1]], get: r => r.v };
+  for (const span of [3, 12]) {
+    const cols = monthCols(M, span), mons = cols.filter(c => c.month), ytd = cols.find(c => c.k === 'ytd'), l12 = cols.find(c => c.k === 'l12');
+    assert.equal(mons.length, span);
+    assert.equal(mons[mons.length - 1].month, list[list.length - 1], 'the latest on the right');
+    assert.ok(mons[mons.length - 1].est, 'in progress is marked');
+    assert.equal(sumOf(rows, l12), 2100 * 12);
+    assert.equal(sumOf(rows, ytd), 2100 * 10, 'January to October');
+  }
+  assert.equal(kOnly(-1499), '−1');
+  assert.equal(kOnly(12400), '12');
+});
+
+test('Step 3: margin adds dollars, not percentages, and leaves out what has no cost', async () => {
+  const { gridRows, marginOver } = await import('../public/components/linegrid.js');
+  const grid = { months: ['a', 'b'], est: ['b'], rows: [{ key: 'storage', name: 'Storage', rev: [100, 100] }, { key: 'bin', name: 'Bins', rev: [50, 60] }, { key: 'other', name: 'Fees', rev: [10, 10] }] };
+  const C = { priced: [true, false], costs: { storage: [20, 0], bin: [40, 0], other: [0, 0] } };
+  const rows = gridRows(grid, C, 'lines');
+  assert.deepEqual(marginOver(rows, [0, 1], C.priced), { rev: 150, cost: 60, margin: 90, pct: .6 }, 'fees and the unpriced month are out');
+  const ss = gridRows(grid, C, 'ss');
+  assert.deepEqual(ss.map(r => r.name), ['Storage', 'Service']);
+  assert.deepEqual(ss[1].rev, [60, 70], 'revenue keeps the fees');
+  assert.equal(marginOver([ss[1]], [0], C.priced).rev, 50, 'margin counts only what has a cost');
+  assert.equal(gridRows(grid, null, 'lines')[0].costed, false, 'no costs, no margin');
+});
+
+test('Step 4: an account\'s lines add to its row, whatever is on no priced line kept as its own', async () => {
+  const { accountLines } = await import('../public/components/linegrid.js');
+  const AM = { months: ['2026-09-01', '2026-10-01'], accounts: [{ level1: 1, storage: [100, 100], service: [50, 80] }, { level1: 2, storage: [0, 0], service: [10, 10] }] };
+  const AL = { rows: [{ level1: 1, month: '2026-09-01', family: 'bin', revenue: 45 }, { level1: 1, month: '2026-10-01', family: 'bin', revenue: 40 }, { level1: 1, month: '2026-10-01', family: 'itad', revenue: 40 }, { level1: 2, month: '2026-10-01', family: 'bin', revenue: 10 }] };
+  const v = accountLines(AM, AL, 1);
+  assert.deepEqual(v.rows.map(r => r.key), ['storage', 'bin', 'itad', 'rest']);
+  assert.deepEqual(v.rows.find(r => r.key === 'rest').values, [5, 0]);
+  v.months.forEach((m, i) => assert.equal(v.rows.reduce((t, r) => t + r.values[i], 0), AM.accounts[0].storage[i] + AM.accounts[0].service[i]));
+  assert.ok(!accountLines(AM, AL, 2).rows.some(r => r.key === 'storage'), 'no storage, no storage line');
+  assert.equal(accountLines(AM, AL, 9), null);
+});
+
+test('Step 5: colour only past 25% and $5K of the row\'s own year; arrows and words', async () => {
+  const { monthFlag } = await import('../public/components/datatable.js');
+  const { changeWord } = await import('../public/components/metrics.js');
+  const { deltaText } = await import('../public/components/series.js');
+  const flat = v => Array(12).fill(v);
+  assert.equal(monthFlag(14000, flat(10000)), '', '40% but only $4K');
+  assert.equal(monthFlag(106000, flat(100000)), '', '$6K but only 6%');
+  assert.equal(monthFlag(70000, flat(100000)), 'dn');
+  assert.equal(monthFlag(130000, flat(100000)), 'upx');
+  assert.equal(monthFlag(125000, flat(100000)), '', 'exactly 25% is not more than 25%');
+  for (const f of [changeWord, deltaText]) {
+    assert.equal(f(0.004), '0%'); assert.equal(f(-0.009), '1%', 'no arrow under 1%');
+    assert.equal(f(0.05), '▲ 5%'); assert.equal(f(-0.2), '▼ 20%');
+    assert.equal(f(3.5), 'new'); assert.equal(f(-1.18), 'stopped');
+  }
+});
+
+test('Step 5: filters carry between the account lists; the months switch wherever there are months', async () => {
+  const { carryHash } = await import('../public/components/acctfilters.js');
+  assert.equal(carryHash('#customers?view=grid', '#customers?view=overview&q=city&f_line=bin&span=3&sort=l12'), '#customers?view=grid&q=city&f_line=bin&span=3');
+  assert.equal(carryHash('#opportunities', '#customers?view=overview&q=city&f_size=m&span=3'), '#opportunities?q=city&f_size=m');
+  assert.equal(carryHash('#numbers', '#customers?view=overview&q=city&f_line=bin&span=3'), '#numbers?span=3');
+  assert.equal(carryHash('#pulse', '#customers?view=overview&q=city&span=3'), '#pulse');
+  assert.equal(carryHash('#customers', '#numbers?span=12&group=ss'), '#customers?span=12');
+});
+
+test('Step 6: one row per account: the best move is the largest a year, a one-off never adds to it', async () => {
+  const { bestMove, accountRow } = await import('../public/components/opps.js');
+  const items = [{ key: 'a', value: 1486000, once: true }, { key: 'b', value: 420000 }, { key: 'c', value: 50000 }, { key: 'd', value: 10000, once: true }];
+  assert.equal(bestMove(items).key, 'b');
+  assert.deepEqual((({ year, once, count }) => ({ year, once, count }))(accountRow(items)), { year: 420000, once: 1496000, count: 4 });
+  const onlyOnce = accountRow([{ key: 'x', value: 5, once: true }, { key: 'y', value: 9, once: true }]);
+  assert.equal(onlyOnce.best.key, 'y'); assert.equal(onlyOnce.year, 0);
 });
 
 test('#38 not billed: internal out, dormant apart by invoices rather than by name', async () => {

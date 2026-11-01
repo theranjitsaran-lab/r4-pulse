@@ -15,7 +15,7 @@ const { seesCosts } = require('./settings');
 
 const router = express.Router();
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework', 'metrics'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
+const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework', 'linegrid', 'metrics'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
 
 async function callsLog() {
   if (USE_FIXTURES) { try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'calls_log.json'), 'utf8')); } catch { return []; } }
@@ -61,7 +61,8 @@ router.get('/customers', async (req, res) => {
       });
       // the same rows with every cost taken out, for people who do not see costs yet
       const plain = rows.map(({ cost, margin, pc, review, routeCost, ...r }) => ({ ...r, fam: Object.fromEntries(Object.entries(r.fam).map(([k, { cost: c, costPer, lines, ...f }]) => [k, f])), mfam: Object.fromEntries(Object.entries(r.mfam).map(([k, v]) => [k, { revenue: v.revenue }])) }));
-      custBase = { stamp: st, plain, v: { rows, book: B.book, months: B.months, ws: { total: B.ws.total }, seg: L.home2data.segmentView({ P: D.P, A: D.A, SG: D.SG }) } };
+      custBase = { stamp: st, plain, v: { rows, book: B.book, months: B.months, ws: { total: B.ws.total }, seg: L.home2data.segmentView({ P: D.P, A: D.A, SG: D.SG }),
+        am: D.AM ? { months: D.AM.months, rows: D.AM.accounts.map(a => ({ level1: a.level1, customer: a.customer, m: a.storage.map((s, i) => s + a.service[i]) })) } : null } };
     }
     send(req, res, seesCosts(req) ? custBase.v : { ...custBase.v, rows: custBase.plain, book: Object.fromEntries(Object.entries(custBase.v.book).map(([k, u]) => [k, Object.fromEntries(Object.entries(u).map(([n, b]) => [n, { price: b.price }]))])) });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -107,14 +108,28 @@ router.get('/numbers', async (req, res) => {
         .filter(x => x.revenue > 0).sort((a, b) => b.revenue - a.revenue);
       const rc = D.R.routeCostsNow();
       const realBins = book.accounts.filter(a => a.fam.bin && D.R.routeFor(a.level1));
+      const lineGrid = L.linegrid.lineGrid(D);
       numBase = { stamp: st, v: {
         monthly, target: 1e6, month: L.home2data.monthView(D), dest: L.home2data.destructionView(D), tie: L.metrics.tieOut(D.P), citadelBridge: (D.P.tieout || []).slice(-2)[0] || null,
         gap: (() => { const m = L.home2data.monthView(D); return { gap: m.gap, next: m.next ? m.next.month : null }; })(),   // the same gap as Home
+        lineGrid, lineCosts: L.linegrid.lineCosts(D, lineGrid),
         gl: G ? { months: G.months, last12: L.gl.sumMonths(G.months, 12), overheadLines: G.overheadLines, loadedAt: D.G.loadedAt, source: D.G.source } : null,
         margin: { lines, accounts: book.accounts.length, deliveriesOn: !!(rc.deliveries && rc.deliveries.on), moveReal: book.accounts.filter(a => a.fam.movement && D.R.movementFor(a.level1)).length, binReal: { accounts: realBins.length, revenue: realBins.reduce((t, a) => t + a.fam.bin.revenue, 0), routeDays: rc.days, from: rc.from, to: rc.to } },
       } };
     }
-    send(req, res, seesCosts(req) ? numBase.v : { ...numBase.v, margin: null });
+    send(req, res, seesCosts(req) ? numBase.v : { ...numBase.v, margin: null, lineCosts: null });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// One account's lines by month billed, for its row on Accounts
+router.get('/account-lines', async (req, res) => {
+  try {
+    const level1 = Number(req.query.level1);
+    if (!Number.isInteger(level1)) return res.status(400).json({ error: 'level1' });
+    const [D, L] = await Promise.all([data(), load()]);
+    const v = D.AM && D.AL ? L.linegrid.accountLines(D.AM, D.AL, level1) : null;
+    if (!v) return res.status(404).json({ error: 'no such account' });
+    send(req, res, v);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

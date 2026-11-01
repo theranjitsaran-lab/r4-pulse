@@ -142,9 +142,13 @@ select.on-phone { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2) v
   .op-ahead .op-kinds { grid-column: 1 / -1; grid-row: 2; }
 }
 
+.op-how { margin: 0 0 var(--sp-3); font-size: var(--fs-sm); color: var(--ink-3); }
+
 /* The one table and filter bar (components/datatable.js) */
 .dt-tools { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; margin-bottom: var(--sp-2); }
 .dt-find { flex: 1 1 calc(var(--u) * 40); min-width: 0; padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); font: inherit; font-size: var(--fs-sm); background: var(--surface); color: var(--ink); }
+.dt-f { border-radius: var(--r-pill) !important; }
+.dt-f.on { border-color: var(--brand) !important; background: var(--tint-brand) !important; color: var(--ink) !important; font-weight: 600; }
 .dt-f, .dt-views { font: inherit; font-size: var(--fs-label); padding: var(--sp-1) var(--sp-2); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); background: var(--surface); color: var(--ink-2); max-width: calc(var(--u) * 40); }
 .dt-csv, .dt-cols summary { font: inherit; font-size: var(--fs-label); padding: var(--sp-1) var(--sp-2); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); background: var(--surface); color: var(--brand); font-weight: 600; cursor: pointer; }
 .dt-cols { position: relative; }
@@ -155,35 +159,59 @@ select.on-phone { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2) v
 .dt-chips { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); align-items: center; margin-bottom: var(--sp-2); font-size: var(--fs-label); color: var(--ink-3); }
 .dt-chips b { color: var(--ink); }
 .dt-chip { border: 0; border-radius: var(--r-pill); padding: 0 var(--sp-2); background: var(--tint-brand); color: var(--brand); font: inherit; font-size: var(--fs-tiny); font-weight: 600; cursor: pointer; }
-.dt-scroll { overflow: auto; max-height: 72vh; }
-.dt-t { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
-.dt-t th { position: sticky; top: 0; z-index: 2; background: var(--surface); text-align: right; font-size: var(--fs-tiny); font-weight: 600; color: var(--ink-3); padding: var(--sp-2); border-bottom: var(--hair) solid var(--rule-3); white-space: nowrap; cursor: pointer; user-select: none; }
-.dt-t th.on { color: var(--brand); }
-.dt-t td { text-align: right; padding: var(--sp-2); border-bottom: var(--hair) solid var(--rule); white-space: nowrap; }
-.dt-t .tl { text-align: left; }
-.dt-t tbody tr[data-i] { cursor: pointer; }
-.dt-t tbody tr:hover, .dt-t tbody tr:hover td:first-child { background: var(--well); }
-.dt-t th:first-child, .dt-t td:first-child { position: sticky; left: 0; background: var(--surface); }
-.dt-t th:first-child { z-index: 3; }
-.dt-t td.tl { white-space: normal; min-width: calc(var(--u) * 45); }
-.dt-t td.tl a { color: var(--ink); font-weight: 500; text-decoration: none; }
+.dt { min-width: 0; }
+.dt-scroll { overflow: auto; max-height: 72vh; border: var(--hair) solid var(--rule-2); border-radius: var(--r-sm); }
+.dt-t { width: 100%; min-width: max-content; border-collapse: separate; border-spacing: 0; font-size: var(--fs-sm); font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+.dt-t th, .dt-t td { height: var(--dt-row); padding: 0 var(--sp-2); text-align: right; white-space: nowrap; border-bottom: var(--hair) solid var(--rule); }
+.dt-t thead th { position: sticky; top: 0; z-index: 2; background: var(--well); font-family: var(--f-sans); font-size: var(--fs-tiny); font-weight: 600; color: var(--ink-3); cursor: pointer; user-select: none; }
+.dt-t thead th.on { color: var(--brand); }
+.dt-t th.tl, .dt-t td.tl { text-align: left; font-family: var(--f-sans); }
+.dt-t th:first-child, .dt-t td:first-child { position: sticky; left: 0; z-index: 1; max-width: calc(var(--u) * 55); overflow: hidden; text-overflow: ellipsis; background: var(--surface); border-right: var(--hair) solid var(--rule); }
+.dt-t thead th:first-child { z-index: 4; background: var(--well); }
+.dt-t td a { color: var(--ink); font-weight: 500; text-decoration: none; }
 .dt-t td small { color: var(--ink-4); font-size: var(--fs-tiny); }
-.dt-t tfoot td, .dt-t tfoot td:first-child { position: sticky; bottom: 0; background: var(--well); font-weight: 650; border-top: var(--hair) solid var(--rule-3); }
-.dt-t .c2-x { text-decoration: none; }
+.dt-t tbody tr[data-i] { cursor: pointer; }
+.dt-t tbody tr:hover td { background: var(--well); }
+.dt-t tfoot td { position: sticky; bottom: 0; z-index: 1; background: var(--well); font-weight: 650; border-top: var(--hair-2) solid var(--ink-3); border-bottom: 0; }
+.dt-t tfoot td:first-child { z-index: 3; background: var(--well); }
+.dt-t tfoot tr:not(:last-child) td { bottom: var(--dt-row); }
+.dt-t tr.dt-ref td { font-weight: 400; color: var(--ink-3); border-top: 0; background: var(--surface); }
+.dt-t tr.dt-rest td { color: var(--ink-3); }
+.dt-t tr.dt-child td { font-size: var(--fs-tiny); color: var(--ink-3); background: var(--well); }
+.dt-t tr.dt-child td:first-child { padding-left: var(--sp-6); }
+.dt-caret { display: inline-block; width: var(--sp-3); color: var(--ink-4); }
+.dt-t td.dn { background-color: var(--flag-dn-bg); color: var(--flag-dn); font-weight: 600; }
+.dt-t td.upx { background-color: var(--flag-up-bg); color: var(--flag-up); font-weight: 600; }
+.dt-t td.dn a, .dt-t td.upx a { color: inherit; }
+.dt-legend { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); margin-top: var(--sp-2); font-size: var(--fs-tiny); color: var(--ink-3); }
+.dt-legend i { display: inline-block; width: var(--sp-4); height: var(--sp-3); margin-right: var(--sp-1); vertical-align: -1px; border-radius: var(--r-xs); border: var(--hair) solid var(--rule-3); }
+.dt-legend i.dn { background: var(--flag-dn-bg); border-color: var(--flag-dn); }
+.dt-legend i.upx { background: var(--flag-up-bg); border-color: var(--flag-up); }
+.dt-legend i.est { background-image: repeating-linear-gradient(135deg, transparent 0 var(--hatch), color-mix(in srgb, var(--ink) 25%, transparent) var(--hatch) calc(var(--hatch) * 2)); }
+.dt-types { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.dt-type { font: inherit; font-size: var(--fs-label); padding: var(--sp-1) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.dt-type.on { border-color: var(--brand); background: var(--tint-brand); color: var(--ink); font-weight: 600; }
+.dt-t tr.dt-detail > td { position: static; max-width: none; height: auto; padding: var(--sp-2) var(--sp-3) var(--sp-3); white-space: normal; text-align: left; font-family: var(--f-sans); background: var(--well); }
+.dt-t td .op-pill { display: inline-block; margin-right: var(--sp-2); padding: 0 var(--sp-2); border-radius: var(--r-pill); background: var(--well-2); color: var(--ink-2); font-size: var(--fs-tiny); font-weight: 600; }
+.dt-t td.op-best { max-width: calc(var(--u) * 115); overflow: hidden; text-overflow: ellipsis; font-size: var(--fs-tiny); color: var(--ink-3); }
+.op-detail { max-width: calc(var(--u) * 200); }
+.op-detail .op-list li:last-child { border-bottom: 0; }
+.dt-t .dt-sum { border-left: var(--hair) solid var(--rule-4); }
+.dt-t th.est, .dt-t td.est { background-image: repeating-linear-gradient(135deg, transparent 0 calc(var(--hatch) * 2), color-mix(in srgb, var(--ink) 9%, transparent) calc(var(--hatch) * 2) calc(var(--hatch) * 3)); }
+.dt-est { font-weight: 600; color: var(--ink-3); }
+.dt-t .c2-x { padding: 0; font: inherit; }
+.dt-p { display: none; }
+.seg button:disabled { color: var(--ink-4); cursor: not-allowed; }
+.dt-span button.on { background: var(--surface); color: var(--ink); font-weight: 600; }
 .dt-ftoggle { display: none; font: inherit; font-size: var(--fs-label); padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); background: var(--surface); color: var(--brand); font-weight: 600; cursor: pointer; }
 .dt-more { text-align: center; padding-top: var(--sp-2); }
 .cols .dt-t td.tl { min-width: calc(var(--u) * 30); }
 @media (max-width: 700px) {
-  .dt-scroll { max-height: none; overflow: visible; }
   .dt-f, .dt-views { flex: 1 1 40%; max-width: none; }
   .dt-ftoggle { display: block; }
-  .dt:not(.dt-open) .dt-f, .dt:not(.dt-open) .dt-cols, .dt:not(.dt-open) .dt-views, .dt:not(.dt-open) .dt-csv { display: none; }
-  .dt-t thead { display: none; }
-  .dt-t, .dt-t tbody, .dt-t tfoot { display: block; }
-  .dt-t tr { display: flex; flex-wrap: wrap; gap: 0 var(--sp-3); padding: var(--sp-2) 0; border-bottom: var(--hair) solid var(--rule); }
-  .dt-t td { display: block; position: static !important; padding: 0; border: 0; background: none !important; text-align: left; white-space: nowrap; font-size: var(--fs-label); }
-  .dt-t td:first-child { flex-basis: 100%; font-size: var(--fs-sm); white-space: normal; }
-  .dt-t td[data-l]:not(:first-child)::before { content: attr(data-l) ": "; color: var(--ink-4); font-size: var(--fs-tiny); }
-  .dt-t td[colspan] { white-space: normal; }
-  .dt-t tfoot tr { background: var(--well); padding: var(--sp-2); }
+  .dt:not(.dt-open) .dt-cols, .dt:not(.dt-open) .dt-views, .dt:not(.dt-open) .dt-csv { display: none; }
+  .dt-t th:first-child, .dt-t td:first-child { max-width: calc(var(--u) * 38); }
+  .dt-t td.op-best .op-short { display: none; }
+  .dt-l { display: none; }
+  .dt-p { display: inline; }
 }

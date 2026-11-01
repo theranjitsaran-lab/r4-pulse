@@ -284,7 +284,7 @@ export async function render(main, PR, params) {
     return { code, name: code === 'STO' ? book[code].name : titleCase(book[code].name), n: rs.length, med: st2.median, share: vol ? uvol / vol : 0, gap, under: under.length };
   }).filter(r => r.n >= 20 && r.gap > 0).sort((a, b) => b.gap - a.gap);
   $('b-title').textContent = bookRows.length ? `${bookRows[0].name} carries the biggest gap to the book: ${moneyK(bookRows[0].gap)} a year` : 'Invoiced against the book';
-  dataTable($('b-rows'), { key: 'pricegaps', ns: 'g_', noun: 'services', who: whoAmI(), rows: bookRows, page: 14, placeholder: 'Find a service', search: r => r.name,
+  dataTable($('b-rows'), { key: 'pricegaps', ns: 'g_', noun: 'services', who: whoAmI(), rows: bookRows, placeholder: 'Find a service', search: r => r.name,
     onRow: r => {
       st.code = r.code; showCode(); prefill(); draw();
       history.replaceState(null, '', `#pricing?${st.level1 ? 'level1=' + st.level1 + '&' : ''}code=${st.code}`);
