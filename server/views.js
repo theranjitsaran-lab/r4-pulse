@@ -61,7 +61,8 @@ router.get('/customers', async (req, res) => {
       });
       // the same rows with every cost taken out, for people who do not see costs yet
       const plain = rows.map(({ cost, margin, pc, review, routeCost, ...r }) => ({ ...r, fam: Object.fromEntries(Object.entries(r.fam).map(([k, { cost: c, costPer, lines, ...f }]) => [k, f])), mfam: Object.fromEntries(Object.entries(r.mfam).map(([k, v]) => [k, { revenue: v.revenue }])) }));
-      custBase = { stamp: st, plain, v: { rows, book: B.book, months: B.months, ws: { total: B.ws.total }, seg: L.home2data.segmentView({ P: D.P, A: D.A, SG: D.SG }) } };
+      custBase = { stamp: st, plain, v: { rows, book: B.book, months: B.months, ws: { total: B.ws.total }, seg: L.home2data.segmentView({ P: D.P, A: D.A, SG: D.SG }),
+        am: D.AM ? { months: D.AM.months, rows: D.AM.accounts.map(a => ({ level1: a.level1, customer: a.customer, m: a.storage.map((s, i) => s + a.service[i]) })) } : null } };
     }
     send(req, res, seesCosts(req) ? custBase.v : { ...custBase.v, rows: custBase.plain, book: Object.fromEntries(Object.entries(custBase.v.book).map(([k, u]) => [k, Object.fromEntries(Object.entries(u).map(([n, b]) => [n, { price: b.price }]))])) });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -117,6 +118,18 @@ router.get('/numbers', async (req, res) => {
       } };
     }
     send(req, res, seesCosts(req) ? numBase.v : { ...numBase.v, margin: null, lineCosts: null });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// One account's lines by month billed, for its row on Accounts
+router.get('/account-lines', async (req, res) => {
+  try {
+    const level1 = Number(req.query.level1);
+    if (!Number.isInteger(level1)) return res.status(400).json({ error: 'level1' });
+    const [D, L] = await Promise.all([data(), load()]);
+    const v = D.AM && D.AL ? L.linegrid.accountLines(D.AM, D.AL, level1) : null;
+    if (!v) return res.status(404).json({ error: 'no such account' });
+    send(req, res, v);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

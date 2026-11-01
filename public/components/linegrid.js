@@ -64,6 +64,24 @@ export function lineCosts(D, grid) {
   return { priced, costs };
 }
 
+// One account's lines by month billed: storage, each line on its invoices, and whatever on the invoices is on no
+// priced line (tax and surcharges), so the lines add to the account's row.
+export function accountLines(AM, AL, level1) {
+  const a = AM.accounts.find(x => x.level1 === level1);
+  if (!a) return null;
+  const at = new Map(AM.months.map((m, i) => [m, i])), lines = new Map();
+  for (const r of AL.rows) {
+    if (r.level1 !== level1 || !at.has(r.month)) continue;
+    (lines.get(r.family) || lines.set(r.family, AM.months.map(() => 0)).get(r.family))[at.get(r.month)] += r.revenue;
+  }
+  const rows = [];
+  if (a.storage.some(Boolean)) rows.push({ key: 'storage', name: LINE_NAMES.storage, values: a.storage });
+  for (const k of Object.keys(LINE_NAMES)) if (lines.has(k) && lines.get(k).some(Boolean)) rows.push({ key: k, name: LINE_NAMES[k], values: lines.get(k) });
+  const left = AM.months.map((m, i) => a.service[i] - [...lines.values()].reduce((t, v) => t + v[i], 0));
+  if (left.some(v => Math.abs(v) >= 1)) rows.push({ key: 'rest', name: 'Tax and other, not itemised', values: left });
+  return { months: AM.months, rows };
+}
+
 // ── what the table reads ──
 export const STORAGE_KEY = 'storage';
 export function gridRows(grid, C, group) {

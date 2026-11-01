@@ -517,6 +517,36 @@ async function linework() {
   return { priced, orders, lastPrice };
 }
 
+// ── Every account by month billed, and by line ──────────────────────────────────────────────
+// The whole book, so the Accounts table adds to invoiced core. kpi.customer_monthly less Citadel is
+// kpi.monthly's core to the cent. Its lines are the priced lines of the invoices in each month.
+async function accountmonths() {
+  const rows = await query(`
+    WITH ${BOUNDS}
+    SELECT cm.level1, cm.month::text, cm.storage::float, cm.service::float FROM kpi.customer_monthly cm, b
+    WHERE cm.month > b.latest - interval '13 months' AND cm.month <= b.latest ORDER BY cm.level1, cm.month`);
+  const [{ latest }] = await query(`SELECT max(month)::text AS latest FROM kpi.monthly`);
+  const months = [];
+  for (let i = 12; i >= 0; i--) { const d = new Date(latest + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() - i); months.push(d.toISOString().slice(0, 10)); }
+  const ids = [...new Set(rows.map(r => r.level1))];
+  const names = await query(`SELECT x.level1, ${NAME('x.level1')} AS customer FROM unnest($1::int[]) AS x(level1)`, [ids]);
+  const nameOf = new Map(names.map(n => [n.level1, n.customer]));
+  const by = new Map(ids.map(id => [id, { level1: id, customer: nameOf.get(id) || `Account ${id}`, storage: months.map(() => 0), service: months.map(() => 0) }]));
+  for (const r of rows) { const a = by.get(r.level1), i = months.indexOf(r.month); if (i >= 0) { a.storage[i] = r.storage; a.service[i] = r.service; } }
+  return { months, accounts: [...by.values()] };
+}
+async function accountlines() {
+  const FAM = `CASE WHEN sf.family IN ('bin', 'shred', 'handling', 'movement', 'itad', 'labour') THEN sf.family ELSE 'other' END`;
+  const rows = await query(`
+    WITH ${BOUNDS}
+    SELECT p.level1, date_trunc('month', COALESCE(i.invdate, i.billdate))::date::text AS month, ${FAM} AS family, sum(p.totamt)::float AS revenue
+    FROM priced_lines p JOIN invoices i USING (invoice_no) JOIN servcode s USING (servcodeid)
+    LEFT JOIN model.service_family sf ON sf.servcode = s.servcode, b
+    WHERE i.level1 <> 6714 AND COALESCE(i.invdate, i.billdate) > b.latest - interval '13 months' AND COALESCE(i.invdate, i.billdate) < b.t
+    GROUP BY 1, 2, 3 ORDER BY 1, 2, 3`);
+  return { rows };
+}
+
 // ── One account's invoices in a month ──────────────────────────────────────────────────────────
 // By invoice date, posted invoices; what was on each from its priced lines, by service. Storage has no
 // priced lines: it is the invoice's ret_tot.
@@ -547,4 +577,4 @@ async function invoices() {
   return { rows };
 }
 
-module.exports = { invoices, customerInvoices, pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, linework, routestops, deliverydays, gl };
+module.exports = { invoices, customerInvoices, pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, linework, routestops, deliverydays, gl, accountmonths, accountlines };

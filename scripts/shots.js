@@ -38,7 +38,7 @@ const SCREENS = [
    { name: 'pop-line', hash: '#pulse', click: '.h2-lr[data-k="bin"]', extra: true },
    { name: 'pop-invoice', hash: '#customers?view=grid', click: 'tbody tr:first-child td.cl:nth-last-child(2) [data-inv-id]', extra: true },
    { name: 'overview', hash: '#customers?view=overview', extra: true },
-   { name: 'pop-margin', hash: '#customers?view=overview', click: '.c2-x[data-x="margin"]', extra: true },
+   { name: 'pop-margin', hash: '#customers?view=overview&cols=pc', click: '.c2-x[data-x="margin"]', extra: true },
    { name: 'opp-open', hash: '#opportunities', click: '.op-ahead', extra: true },
    { name: 'pop-price', hash: '#customers?view=overview&f_line=bin', click: '.c2-x[data-x="price"]', extra: true },
    { name: 'customers-bins', hash: '#customers?view=overview&f_line=bin', extra: true }],

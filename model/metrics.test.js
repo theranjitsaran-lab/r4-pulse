@@ -226,6 +226,18 @@ test('Step 3: margin adds dollars, not percentages, and leaves out what has no c
   assert.equal(gridRows(grid, null, 'lines')[0].costed, false, 'no costs, no margin');
 });
 
+test('Step 4: an account\'s lines add to its row, whatever is on no priced line kept as its own', async () => {
+  const { accountLines } = await import('../public/components/linegrid.js');
+  const AM = { months: ['2026-09-01', '2026-10-01'], accounts: [{ level1: 1, storage: [100, 100], service: [50, 80] }, { level1: 2, storage: [0, 0], service: [10, 10] }] };
+  const AL = { rows: [{ level1: 1, month: '2026-09-01', family: 'bin', revenue: 45 }, { level1: 1, month: '2026-10-01', family: 'bin', revenue: 40 }, { level1: 1, month: '2026-10-01', family: 'itad', revenue: 40 }, { level1: 2, month: '2026-10-01', family: 'bin', revenue: 10 }] };
+  const v = accountLines(AM, AL, 1);
+  assert.deepEqual(v.rows.map(r => r.key), ['storage', 'bin', 'itad', 'rest']);
+  assert.deepEqual(v.rows.find(r => r.key === 'rest').values, [5, 0]);
+  v.months.forEach((m, i) => assert.equal(v.rows.reduce((t, r) => t + r.values[i], 0), AM.accounts[0].storage[i] + AM.accounts[0].service[i]));
+  assert.ok(!accountLines(AM, AL, 2).rows.some(r => r.key === 'storage'), 'no storage, no storage line');
+  assert.equal(accountLines(AM, AL, 9), null);
+});
+
 test('#38 not billed: internal out, dormant apart by invoices rather than by name', async () => {
   const { splitNotBilled } = await import('../public/components/storage.js');
   const { isInternal } = await import('../public/components/metrics.js');

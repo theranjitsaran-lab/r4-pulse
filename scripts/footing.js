@@ -11,19 +11,19 @@ const { chromium } = require('playwright');
 
 const ROOT = path.join(__dirname, '..');
 const K = v => '$' + Math.round(v / 1000).toLocaleString('en-US') + 'K';
-const D = v => '$' + Math.round(v).toLocaleString('en-US');
+const D = v => (Math.round(v) < 0 ? '−' : '') + '$' + Math.abs(Math.round(v)).toLocaleString('en-US');
 const close = (a, b, tol = 1) => Math.abs(a - b) <= tol;
 let fails = 0;
 const say = (state, n, text) => { if (state === 'FAIL') fails++; console.log(`${state.padEnd(8)} ${n}  ${text}`); };
 
 // every table as drawn: each column adds to the total row, unfiltered and searched; with months, each row's
 // and the total's YTD and 12 months equal their months
-const TABLES = [['Money', '#numbers?span=12', 'bin'], ['Money, storage / service', '#numbers?span=12&group=ss', 'serv'], ['All accounts', '#customers?view=overview', 'chicago'], ['Month grid', '#customers?view=grid&span=12', 'chicago'], ['Cross-sell', '#customers?view=whitespace', 'chicago'],
+const TABLES = [['Money', '#numbers?span=12', 'bin'], ['Money, storage / service', '#numbers?span=12&group=ss', 'serv'], ['Accounts', '#customers?view=overview&span=12', 'chicago'], ['Month grid', '#customers?view=grid&span=12', 'chicago'], ['Cross-sell', '#customers?view=whitespace', 'chicago'],
   ['Warehouse', '#numbers?tab=warehouse', 'west'], ['Long way round', '#activity', '60'], ['Price gaps', '#pricing', 'box']];
 const readTable = t => {
   const n = x => Number(x.dataset.v);
-  const head = [...t.querySelectorAll('thead th')], rows = [...t.querySelectorAll('tbody tr[data-i]')];
-  const foot = [...t.querySelectorAll('tfoot td')], counted = rows.filter(r => !r.dataset.out), wrong = [];
+  const head = [...t.querySelectorAll('thead th')], rows = [...t.querySelectorAll('tbody tr[data-i], tbody tr[data-rest]')];
+  const foot = [...t.querySelectorAll('tfoot tr:first-child td')], counted = rows.filter(r => !r.dataset.out), wrong = [];
   head.forEach((h, i) => {
     if (!foot[i] || foot[i].dataset.v === undefined) return;
     const s = counted.reduce((a, r) => a + (r.children[i].dataset.v ? n(r.children[i]) : 0), 0);
@@ -39,7 +39,14 @@ const readTable = t => {
     }
   }
   const lastFoot = months.length ? n(foot[months[months.length - 1][1]]) : null;
-  return { rows: rows.length, cols: foot.filter(x => x.dataset.v !== undefined).length, months: months.length, wrong, lastFoot };
+  // the rows that open: their own rows add to them
+  const opened = [...t.querySelectorAll('tbody tr[aria-expanded="true"]')];
+  for (const tr of opened) {
+    const kids = []; for (let k = tr.nextElementSibling; k && k.classList.contains('dt-child'); k = k.nextElementSibling) kids.push(k);
+    months.forEach(([, i]) => { const s = kids.reduce((a, k) => a + (Number(k.children[i].dataset.v) || 0), 0), v = Number(tr.children[i].dataset.v) || 0; if (Math.abs(s - v) > 1) wrong.push('lines of ' + tr.children[0].innerText + ': ' + Math.round(s) + ' against ' + Math.round(v)); });
+  }
+  const ref = t.querySelector('tr.dt-ref'), refLast = ref && months.length ? n(ref.children[months[months.length - 1][1]]) : null;
+  return { rows: rows.length, cols: foot.filter(x => x.dataset.v !== undefined).length, months: months.length, wrong, lastFoot, refLast, opened: opened.length };
 };
 async function tables(base, pass) {
   const browser = await chromium.launch();
@@ -55,7 +62,14 @@ async function tables(base, pass) {
         const dts = await page.$$('.dt');
         for (const d of dts) {
           if (stage === 'searched') { await (await d.$('.dt-find')).fill(term); await page.waitForTimeout(100); }
-          const more = await d.$('.dt-more button'); if (more) { await more.click(); await page.waitForTimeout(100); }
+          const hasRest = await d.$('tr[data-rest]');
+          if (hasRest) {
+            for (const i of [0, 1, 2]) { const trs = await d.$$('tbody tr[aria-expanded]'); if (trs[i]) { await (await trs[i].$('.dt-caret')).click(); await page.waitForTimeout(250); } }
+            const f = await d.$eval('.dt-t', readTable);
+            if (name === 'Accounts' && stage === 'all') { found.accountsLast = f.lastFoot; found.refLast = f.refLast; }
+            say(f.wrong.length ? 'FAIL' : 'PASS', '1 ', `${name}, ${stage}, with all other accounts: ${f.rows} rows, ${f.cols} columns foot, ${f.opened} opened rows add to their lines${f.wrong.length ? ': ' + f.wrong.slice(0, 3).join('; ') : ''}`);
+          }
+          const more = await d.$('.dt-more button'); if (more) { const t0 = Date.now(); await more.click(); await page.waitForTimeout(100); if (name === 'Accounts') found.showAll = Date.now() - t0; }
           const r = await d.$eval('.dt-t', readTable);
           if (name === 'Money' && stage === 'all') found.moneyLast = r.lastFoot;
           say(r.wrong.length ? 'FAIL' : 'PASS', '1 ', `${name}, ${stage}: ${r.rows} rows, ${r.cols} columns foot${r.months ? ', YTD and 12 months equal their months' : ''}${r.wrong.length ? ': ' + r.wrong.slice(0, 3).join('; ') : ''}`);
@@ -82,8 +96,6 @@ async function main() {
     const LV = home.lines, months = Object.keys(LV.totals || {}).sort();
     const bad = months.filter(m => !close(LV.rows.reduce((t, r) => t + ((r.by && r.by[m] && r.by[m].v) || 0), 0), LV.totals[m]));
     if (months.length) say(bad.length ? 'FAIL' : 'PASS', '1a', `Today's lines add to their total in ${months.length - bad.length} of ${months.length} months${bad.length ? ': not ' + bad.join(', ') : ''}`);
-    const rows = cust.rows.filter(r => !r.citadel), sum = k => rows.reduce((t, r) => t + (r[k] || 0), 0);
-    say('UNIT', '1b', `All accounts: the total row adds the filtered rows, held by the unit test: last month ${K(sum('last'))}, cross-sell est. ${K(sum('opp') / 12)} a month`);
     const drawn = await tables(base, pass);
 
     // 2. Money's October against Today's headline
@@ -102,8 +114,9 @@ async function main() {
     }
 
     // 3. Accounts' October against invoiced core
-    const last = pulse.monthly[pulse.monthly.length - 1], listed = rows.reduce((t, r) => t + (r.last || 0), 0), gap = last.core - listed;
-    say(close(listed, last.core) ? 'PASS' : 'OPEN', '3 ', `Accounts' October ${K(listed)} (${D(listed)}) against invoiced core ${K(last.core)} (${D(last.core)}): gap ${D(gap)}, stated in the note under the table; its own row comes in Step 4`);
+    const last = pulse.monthly[pulse.monthly.length - 1], listed = drawn.accountsLast, gap = last.core - listed;
+    say(close(listed, last.core) && close(drawn.refLast, last.core) ? 'PASS' : 'FAIL', '3 ', `Accounts' October as drawn ${D(listed)}; its reference row ${D(drawn.refLast)}; invoiced core ${D(last.core)}: difference ${D(gap)}`);
+    console.log(`   info    Accounts, Show all took about ${drawn.showAll}ms to the next step`);
 
     // 4. the tie-out to VCK's register
     const T = numbers.tie;

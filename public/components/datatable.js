@@ -12,6 +12,9 @@
 //     months   { list: [every month, oldest first], est: [months in progress], get: (row, month) => value,
 //                cell?: (row, month) => html, cellCls?, cellStyle? (row, month) => string,
 //                sumCell?: (row, months) => html, totalCell?: (rows, months) => html }
+//     rest     true: what Show all would add is one 'All other' row, so the columns foot from the start
+//     ref      { label, get: month => value }: a reference row under the total
+//     expand   async row => [{ name, values: { month: value } }]: a tap opens the row's own rows
 //     ns       a prefix for the table's link state, where a page has more than one table
 //     inTotal  which rows the total counts, where one is held apart
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -26,7 +29,7 @@ const kCell = v => v ? kOnly(v) : '—';
 export function monthCols(M, span) {
   const last12 = M.list.slice(-12), year = M.list[M.list.length - 1].slice(0, 4), ytd = M.list.filter(m => m.startsWith(year));
   const over = (r, ms) => ms.reduce((t, m) => t + (Number(M.get(r, m)) || 0), 0);
-  const sum = (k, l, ms, extra) => ({ k, l, fixed: true, sum: true, get: r => over(r, ms), fmt: r => M.sumCell ? M.sumCell(r, ms) : kCell(over(r, ms)), total: 'sum', totalFmt: kOnly, totalHtml: M.totalCell ? rows => M.totalCell(rows, ms) : null, ...extra });
+  const sum = (k, l, ms, extra) => ({ k, l, ms, fixed: true, sum: true, get: r => over(r, ms), fmt: r => M.sumCell ? M.sumCell(r, ms) : kCell(over(r, ms)), total: 'sum', totalFmt: kOnly, totalHtml: M.totalCell ? rows => M.totalCell(rows, ms) : null, ...extra });
   return [
     ...M.list.slice(-span).map(m => ({
       k: m, l: monthName(m), month: m, fixed: true, est: !!(M.est && M.est.includes(m)), get: r => M.get(r, m), total: 'sum', totalFmt: kOnly, totalHtml: M.totalCell ? rows => M.totalCell(rows, [m]) : null,
@@ -93,7 +96,7 @@ export function dataTable(el, o) {
   const ns = o.ns || '';
   const st = readState(Object.fromEntries(new URLSearchParams(location.hash.split('?')[1] || '')), o);
   if (!Object.keys(st.f).length && !st.q && o.defaults) Object.assign(st.f, o.defaults);
-  const PAGE = o.page || 50;
+  const PAGE = o.page || 50, index = new Map(o.rows.map((r, i) => [r, i])), opened = new Map();
   let shown = PAGE;
   const spanNow = () => st.span || (typeof matchMedia === 'function' && matchMedia('(max-width: 700px)').matches ? 3 : 12);
   const colsAll = () => [...(typeof o.cols === 'function' ? o.cols(st) : o.cols), ...(o.months ? monthCols(o.months, spanNow()) : [])];
@@ -135,10 +138,16 @@ export function dataTable(el, o) {
     const label = c => c.short ? `<span class="dt-l">${esc(c.l)}</span><span class="dt-p">${esc(c.short)}</span>` : esc(c.l);
     const head = cols.map(c => `<th class="${tdCls(c)}${c === col ? ' on' : ''}" data-k="${esc(c.k)}" ${c.month ? `data-m="${c.month}"` : ''} ${c.get ? `data-s="${c.k}" tabindex="0"` : ''}>${label(c)}${c.est ? ' <span class="dt-est">est.</span>' : ''}${c === col ? ((st.sort ? st.dir : col.text ? 1 : -1) === 1 ? ' ▲' : ' ▼') : ''}</th>`).join('');
     const num = v => v == null || v === '' || isNaN(v) ? '' : ` data-v="${Number(v)}"`;
-    const body = sorted.slice(0, shown).map(r => `<tr data-i="${o.rows.indexOf(r)}"${o.inTotal && !o.inTotal(r) ? ' data-out="1"' : ''}>${cols.map(c => `<td class="${tdCls(c)}${c.cellCls ? ' ' + c.cellCls(r) : ''}"${c.cellStyle ? ` style="${c.cellStyle(r)}"` : ''}${c.name && c.get ? ` title="${esc(c.get(r))}"` : ''}${c.total === 'sum' ? num(c.get(r)) : ''}>${c.fmt ? c.fmt(r) : esc(c.get ? c.get(r) ?? '—' : '')}</td>`).join('')}</tr>`).join('');
+    const childCell = (c, ch) => { const v = c.month ? ch.values[c.month] || 0 : c.ms ? c.ms.reduce((t, m) => t + (ch.values[m] || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(ch.name) : v == null ? '' : v ? kOnly(v) : '—'}</td>`; };
+    const body = sorted.slice(0, shown).map(r => {
+      const open = opened.get(r), kids = Array.isArray(open) ? open.map(ch => `<tr class="dt-child">${cols.map(c => childCell(c, ch)).join('')}</tr>`).join('') : '';
+      return `<tr data-i="${index.get(r)}"${o.inTotal && !o.inTotal(r) ? ' data-out="1"' : ''}${o.expand ? ` tabindex="0" aria-expanded="${!!open}"` : ''}>${cols.map(c => `<td class="${tdCls(c)}${c.cellCls ? ' ' + c.cellCls(r) : ''}"${c.cellStyle ? ` style="${c.cellStyle(r)}"` : ''}${c.name && c.get ? ` title="${esc(c.get(r))}"` : ''}${c.total === 'sum' ? num(c.get(r)) : ''}>${c.name && o.expand ? `<span class="dt-caret">${open ? '▾' : '▸'}</span>` : ''}${c.fmt ? c.fmt(r) : esc(c.get ? c.get(r) ?? '—' : '')}</td>`).join('')}</tr>${kids}`;
+    }).join('');
+    const restRows = o.rest ? sorted.slice(shown) : [], restCounted = o.inTotal ? restRows.filter(o.inTotal) : restRows;
+    const rest = restRows.length ? `<tr class="dt-rest" data-rest="1">${cols.map(c => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(restCounted, c)) : ''}>${c.name ? `All other ${esc(o.noun || 'rows')} (${restRows.length.toLocaleString('en-US')})` : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(restCounted, c)) : sumOf(restCounted, c).toLocaleString('en-US')) : ''}</td>`).join('')}</tr>` : '';
     const hasTotal = cols.some(c => c.total), counted = o.inTotal ? rows.filter(o.inTotal) : rows;
-    const foot = hasTotal ? `<tfoot><tr>${cols.map((c, i) => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(counted, c)) : ''}>${i === 0 ? esc(o.totalLabel || 'Total') : c.totalHtml ? c.totalHtml(counted) : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(counted, c)) : sumOf(counted, c).toLocaleString('en-US')) : typeof c.total === 'function' ? c.total(counted) : ''}</td>`).join('')}</tr></tfoot>` : '';
-    table.innerHTML = `<thead><tr>${head}</tr></thead><tbody>${body || `<tr><td class="tl" colspan="${cols.length}">Nothing matches these filters.</td></tr>`}</tbody>${foot}`;
+    const foot = hasTotal ? `<tfoot><tr>${cols.map((c, i) => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(counted, c)) : ''}>${i === 0 ? esc(o.totalLabel || 'Total') : c.totalHtml ? c.totalHtml(counted) : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(counted, c)) : sumOf(counted, c).toLocaleString('en-US')) : typeof c.total === 'function' ? c.total(counted) : ''}</td>`).join('')}</tr>${o.ref ? `<tr class="dt-ref">${cols.map(c => { const v = c.month ? o.ref.get(c.month) : c.ms ? c.ms.reduce((t, m) => t + (o.ref.get(m) || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(o.ref.label) : v == null ? '' : kOnly(v)}</td>`; }).join('')}</tr>` : ''}</tfoot>` : '';
+    table.innerHTML = `<thead><tr>${head}</tr></thead><tbody>${body ? body + rest : `<tr><td class="tl" colspan="${cols.length}">Nothing matches these filters.</td></tr>`}</tbody>${foot}`;
     $('.dt-more').innerHTML = rows.length > shown ? `<button type="button" class="linkbtn">Show all ${rows.length.toLocaleString('en-US')} ›</button>` : '';
     if (o.onDraw) o.onDraw(st, rows);
   }
@@ -173,14 +182,26 @@ export function dataTable(el, o) {
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   });
   $('.dt-more').addEventListener('click', e => { if (e.target.closest('button')) { shown = Infinity; draw(); } });
+  // a row that opens: tap to show its own rows, fetched once
+  const toggle = async tr => {
+    const r = o.rows[+tr.dataset.i], open = opened.get(r);
+    if (open) { opened.delete(r); draw(); return; }
+    opened.set(r, true); draw();
+    const kids = await o.expand(r).catch(() => []);
+    if (opened.get(r)) { opened.set(r, kids); draw(); }
+  };
   table.addEventListener('click', e => {
     const th = e.target.closest('th[data-s]');
     if (th) { const k = th.dataset.s; st.dir = st.sort === k ? -st.dir : -1; st.sort = k; keep(); draw(); return; }
     const tr = e.target.closest('tbody tr[data-i]');
-    if (!tr || (e.target.closest('a') && !e.target.closest('[data-x]')) || !o.onRow) return;
-    o.onRow(o.rows[+tr.dataset.i], e);
+    if (!tr || (e.target.closest('a') && !e.target.closest('[data-x]'))) return;
+    if (o.expand && !e.target.closest('button, [data-inv-id]')) { toggle(tr); return; }
+    if (o.onRow) o.onRow(o.rows[+tr.dataset.i], e);
   });
-  table.addEventListener('keydown', e => { const th = e.target.closest('th[data-s]'); if (th && e.key === 'Enter') th.click(); });
+  table.addEventListener('keydown', e => {
+    const th = e.target.closest('th[data-s]'); if (th && e.key === 'Enter') th.click();
+    const tr = e.target.closest && e.target.closest('tbody tr[data-i]'); if (o.expand && tr && e.target === tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(tr); }
+  });
   draw();
   return { state: st, draw };
 }

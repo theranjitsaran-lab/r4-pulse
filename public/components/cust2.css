@@ -172,6 +172,12 @@ select.on-phone { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2) v
 .dt-t tbody tr:hover td { background: var(--well); }
 .dt-t tfoot td { position: sticky; bottom: 0; z-index: 1; background: var(--well); font-weight: 650; border-top: var(--hair-2) solid var(--ink-3); border-bottom: 0; }
 .dt-t tfoot td:first-child { z-index: 3; background: var(--well); }
+.dt-t tfoot tr:not(:last-child) td { bottom: var(--dt-row); }
+.dt-t tr.dt-ref td { font-weight: 400; color: var(--ink-3); border-top: 0; background: var(--surface); }
+.dt-t tr.dt-rest td { color: var(--ink-3); }
+.dt-t tr.dt-child td { font-size: var(--fs-tiny); color: var(--ink-3); background: var(--well); }
+.dt-t tr.dt-child td:first-child { padding-left: var(--sp-6); }
+.dt-caret { display: inline-block; width: var(--sp-3); color: var(--ink-4); }
 .dt-t .dt-sum { border-left: var(--hair) solid var(--rule-4); }
 .dt-t th.est, .dt-t td.est { background-image: repeating-linear-gradient(135deg, transparent 0 calc(var(--hatch) * 2), color-mix(in srgb, var(--ink) 9%, transparent) calc(var(--hatch) * 2) calc(var(--hatch) * 3)); }
 .dt-est { font-weight: 600; color: var(--ink-3); }
