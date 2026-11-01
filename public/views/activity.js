@@ -13,7 +13,8 @@ const miles = (a, b) => { const r = Math.PI / 180, R = 3958.8, dp = (b[0] - a[0]
 import { money0, moneyK } from '/components/chart.js';
 import { titleCase, esc, loadRates } from '/components/data.js';
 import { routeNorms, LABELS, THIN } from '/components/metrics.js';
-import { costsVisible } from '/components/access.js';
+import { costsVisible, whoAmI } from '/components/access.js';
+import { dataTable } from '/components/datatable.js';
 import { areaFrame, landLayer, postcodeLayer, yardMark, scaleBar } from '/components/areamap.js';
 import { densityByPostcode } from '/components/jobview.js';
 import { allocate, mapSvg, loadBasemap, basemapNow, loadRoadnet, roadPath } from '/components/routemap.js';
@@ -24,6 +25,7 @@ const dlabel = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { wee
 const dshort = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' });
 const addDays = (d, n) => new Date(new Date(d + 'T00:00:00Z').getTime() + n * 864e5).toISOString().slice(0, 10);
 const dow = d => new Date(d + 'T00:00:00Z').getUTCDay();   // 0 Sun … 6 Sat
+const n0 = v => Math.round(v || 0).toLocaleString('en-US');
 const pl = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 const pct = v => (v > 0 ? '▲ ' : v < 0 ? '▼ ' : '') + Math.abs(Math.round(v * 100)) + '%';
 // colour for a fifth or more against the norm, as everywhere else; thin routes carry their own word
@@ -251,18 +253,26 @@ export async function render(main, A, params) {
     });
     // ranked by what the trips cost in route time, not by distance: a far postcode visited once is
     // cheaper in total than a nearer one visited every week
-    const far = by.filter(p => p.mi >= 20 && !p.billing).sort((a, b) => costsVisible() ? b.cost - a.cost : b.visits - a.visits).slice(0, 12);
+    const rows = by.filter(p => !p.billing);
     const near10 = (bands[0].sv + bands[1].sv) / (total || 1);
-    const farV = far.reduce((t, p) => t + p.visits, 0), farS = far.reduce((t, p) => t + p.services, 0), farC = far.reduce((t, p) => t + p.cost, 0);
     const window = pts ? 'twelve months' : `the ${Math.round((new Date(A.latestDone) - new Date(A.orders.map(o => o.date).sort()[0])) / 864e5) + 1} days to ${dshort(A.latestDone)}`;
     el.innerHTML = `<div class="card-head"><h3>${Math.round(near10 * 100)}% of the work is within ten miles of the yard</h3><small>${esc(window)}</small></div>
       <div class="sub">Done services by distance from 1301 W 35th St, as the crow flies.${pts ? '' : ' Three weeks of stops for now; the next snapshot brings a full year.'}</div>
       <div class="bands">${bands.map(b => `<span>${b.l}</span><span class="bar"><i style="width:${b.share * 100}%"></i></span><span class="v">${b.sv.toLocaleString('en-US')}</span><span class="v sub">${Math.round(b.share * 100)}%</span>`).join('')}</div>
-      ${far.length ? `<div class="card-head" style="margin-top:var(--sp-2)"><h3>The long way round: ${far.length} postcodes 20 miles or more out</h3><small>${costsVisible() ? 'visit cost est. per service' : 'by visits a year'}</small></div>
-      <div class="sub" style="margin-bottom:var(--sp-2)">${farV} visits for ${farS} services${costsVisible() ? `, about ${money0(farC / (farS || 1))} a service in route time est.` : ''}. Bundle them onto a planned run, or price the trip.</div>
-      <table class="far"><thead><tr><th>Postcode</th><th>Miles</th><th class="hide-s">Visits</th><th class="hide-s">Services</th>${costsVisible() ? '<th>Route time est.</th><th>Per service est.</th>' : ''}</tr></thead><tbody>
-      ${far.map(p => `<tr><td><b>${esc(p.pc)}</b> <span class="sub nm">${esc(p.names)}</span></td><td>${p.mi.toFixed(0)}</td><td class="hide-s">${p.visits}</td><td class="hide-s">${p.services}</td>${costsVisible() ? `<td>${money0(p.cost)}</td><td class="${p.per > 100 ? 'is-warn' : ''}">${money0(p.per)}</td>` : ''}</tr>`).join('')}</tbody></table>` : '<p class="sub">No work 20 miles or more out in this window.</p>'}
+      <div class="card-head" style="margin-top:var(--sp-2)"><h3>The long way round</h3><small>${costsVisible() ? 'visit cost est. per service' : 'by visits a year'}</small></div>
+      <div id="rt-far-t"></div>
       <div class="src">Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles in a straight line from the yard, by postcode${costsVisible() ? " · route time from the cost model: a route day's travel share scaled for distance, plus time on site est. · route costs under review" : ''}</div>`;
+    dataTable(el.querySelector('#rt-far-t'), { key: 'longway', ns: 'far_', noun: 'areas', who: whoAmI(), rows, page: 12, placeholder: 'Find a postcode or customer', search: p => p.pc + ' ' + p.names,
+      defaults: { band: 'far' },
+      filters: [{ k: 'band', l: 'Distance', options: [['near', 'Within 10 miles'], ['mid', '10 to 20 miles'], ['far', '20 miles or more']], test: (p, v) => v === 'near' ? p.mi < 10 : v === 'mid' ? p.mi >= 10 && p.mi < 20 : p.mi >= 20 }],
+      cols: [
+        { k: 'pc', l: 'Area', name: true, text: true, get: p => p.pc, fmt: p => `<b>${esc(p.pc)}</b> <small>${esc(p.names)}</small>` },
+        { k: 'visits', l: 'Visits', def: true, sorted: !costsVisible(), get: p => p.visits, total: 'sum', fmt: p => n0(p.visits) },
+        ...(costsVisible() ? [{ k: 'per', l: 'A service, est.', def: true, get: p => p.per, fmt: p => `<span class="${p.per > 100 ? 'is-warn' : ''}">${money0(p.per)}</span>` }, { k: 'cost', l: 'Route time est.', def: true, sorted: true, get: p => p.cost, total: 'sum', totalFmt: v => money0(v), fmt: p => money0(p.cost) }] : []),
+        { k: 'services', l: 'Services', def: !costsVisible(), get: p => p.services, total: 'sum', fmt: p => n0(p.services) },
+        { k: 'mi', l: 'Miles', def: !costsVisible(), get: p => p.mi, fmt: p => p.mi.toFixed(0) },
+        { k: 'customers', l: 'Customers', get: p => p.customers, fmt: p => n0(p.customers) },
+      ] });
   }
 
   function redraw() { hl = null; drawDay(); drawWeek(); drawMap(); history.replaceState(null, '', `#activity?date=${day}`); }

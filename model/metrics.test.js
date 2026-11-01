@@ -171,3 +171,33 @@ test('#29 ITAD keeps its capitals; a huge multiple reads as new; #30 a one-off s
   assert.equal(changeWord(-0.16), '▼ 16%');
   assert.equal(changeWord(0), '0%');
 });
+
+test('one table: filters and search narrow the rows, the total follows them, and the state survives the link', async () => {
+  const { filterRows, sortRows, sumOf, toCsv, readState, stateQuery } = await import('../public/components/datatable.js');
+  const rows = [{ n: 'Alpha', v: 10, big: false }, { n: 'Beta', v: 30, big: true }, { n: 'Gamma', v: 20, big: true }, { n: 'Delta, Inc', v: null, big: false }];
+  const o = { search: r => r.n, filters: [{ k: 'b', test: (r, v) => r.big === (v === 'y') }] };
+  const col = { k: 'v', l: 'Value', get: r => r.v };
+  const big = filterRows(rows, o, { q: '', f: { b: 'y' } });
+  assert.equal(big.length, 2);
+  assert.equal(sumOf(big, col), 50, 'the total is the filtered rows, not all of them');
+  assert.equal(filterRows(rows, o, { q: 'alp', f: {} }).length, 1);
+  assert.deepEqual(sortRows(rows, col, -1).map(r => r.n), ['Beta', 'Gamma', 'Alpha', 'Delta, Inc'], 'empty values last');
+  const csv = toCsv(rows, [{ l: 'Name', get: r => r.n }, col]);
+  assert.match(csv, /"Delta, Inc",/, 'a comma is quoted');
+  assert.equal(csv.split('\r\n').length, 5);
+  const st = { q: 'alp', f: { b: 'y' }, sort: 'v', dir: 1, cols: ['v'] };
+  const back = readState(Object.fromEntries(new URLSearchParams(stateQuery(st))), o);
+  assert.deepEqual(back, st, 'the link carries it all');
+  // two tables on one page keep to their own part of the link, and the rest of it stands
+  const { withState } = await import('../public/components/datatable.js');
+  const one = withState('#activity?tab=warehouse&n_q=old', { q: 'new', f: {}, sort: null, dir: -1, cols: null }, 'e_');
+  assert.equal(one, '#activity?tab=warehouse&n_q=old&e_q=new');
+  assert.equal(withState(one, { q: '', f: {}, sort: null, dir: -1, cols: null }, 'e_'), '#activity?tab=warehouse&n_q=old');
+  assert.equal(withState('#customers?view=overview&f_line=bin', { q: '', f: {}, sort: null, dir: -1, cols: null }), '#customers?view=overview', 'a removed filter leaves the link');
+});
+
+test('#36 internal and placeholder accounts are not customers', async () => {
+  const { isInternal } = await import('../public/components/metrics.js');
+  for (const n of ['R4 Services INC', 'R4 Services LLC', 'Single Invoice Customer', 'Account 0']) assert.ok(isInternal(n), n);
+  for (const n of ['City of Chicago', 'R5 Holdings', 'Chapman & Cutler']) assert.ok(!isInternal(n), n);
+});

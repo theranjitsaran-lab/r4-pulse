@@ -120,11 +120,18 @@ export async function render(main, C, params) {
 }
 
 // the view tabs, the same on every Customers view; Up and down and All are kept for old links only
+// the search carries across the tabs, as it stands when the tab is tapped
+const goView = v => { const q = new URLSearchParams(location.hash.split('?')[1] || '').get('q'); location.hash = '#customers?view=' + v + (q ? '&q=' + encodeURIComponent(q) : ''); };
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', e => { const a = e.target.closest('.bar .views a[href^="#customers?view="]'); if (a) { e.preventDefault(); goView(new URLSearchParams(a.getAttribute('href').split('?')[1]).get('view')); } });
+  document.addEventListener('change', e => { if (e.target.matches('.c2-viewpick')) goView(e.target.value); });
+}
+
 export function tabsHtml(on) {
   const views = Object.entries(VIEWS).filter(([k, v]) => (!v.hidden || k === on) && (k !== 'margin' || costsVisible()));
   // a dropdown on a phone, so no tab is ever scrolled off the screen
   return `<div class="bar"><div class="views on-desk"><div class="seg">${views.map(([k, v]) => `<a href="#customers?view=${k}" class="${k === on ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
-    <select class="on-phone c2-viewpick" aria-label="View" onchange="location.hash='#customers?view='+this.value">${views.map(([k, v]) => `<option value="${k}" ${k === on ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select></div>`;
+    <select class="on-phone c2-viewpick" aria-label="View">${views.map(([k, v]) => `<option value="${k}" ${k === on ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select></div>`;
 }
 
 const mvPc = s => s && s.move ? s.move.pct : null;
