@@ -5,6 +5,7 @@
 import { getJson, esc } from '/components/data.js';
 import { moneyK } from '/components/chart.js';
 import { reveal } from '/components/motion.js';
+import { toCsv } from '/components/datatable.js';
 import { KINDS, STATUSES, byAccount } from '/components/opps.js';
 
 const STATUS_NAMES = { open: 'Open', contacted: 'Contacted', quoted: 'Quoted', won: 'Won', lost: 'Lost' };
@@ -15,7 +16,7 @@ export async function render(main, params, tabs) {
   if (!main) return;
   const V = await getJson('view/opportunities');
   const rows = V.rows, me = V.me;
-  let kind = KINDS[params.kind] ? params.kind : 'all', state = ['active', 'open', 'play', 'won', 'lost', 'mine'].includes(params.state) ? params.state : 'active', q = '', all = false;
+  let kind = KINDS[params.kind] ? params.kind : 'all', state = ['active', 'open', 'play', 'won', 'lost', 'mine'].includes(params.state) ? params.state : 'active', q = (params.q || '').toLowerCase(), all = false;
 
   const isOpen = r => r.status !== 'won' && r.status !== 'lost';
   const openRows = rows.filter(isOpen);
@@ -39,7 +40,8 @@ export async function render(main, params, tabs) {
         <div class="seg c2-lines on-desk" id="op-kinds">${[['all', 'Everything'], ...Object.entries(KINDS)].map(([k, n]) => `<button data-kind="${k}">${esc(n)}</button>`).join('')}</div>
         <select class="on-phone" id="op-kinds-p" aria-label="Kind of opportunity">${[['all', 'Everything'], ...Object.entries(KINDS)].map(([k, n]) => `<option value="${k}">${esc(n)}</option>`).join('')}</select>
         <select class="on-phone" id="op-states-p" aria-label="Status">${STATES.map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select>
-        <input class="c2-find" type="search" placeholder="Find a customer" aria-label="Find a customer">
+        <input class="c2-find" type="search" placeholder="Find an account" aria-label="Find an account" value="${esc(params.q || '')}">
+        <button type="button" class="dt-csv" id="op-csv">Download CSV</button>
       </div>
       <div class="seg op-states on-desk" id="op-states">${STATES.map(([k, n]) => `<button data-state="${k}">${n}</button>`).join('')}</div>
       <p class="c2-say" id="op-say"></p>
@@ -130,7 +132,14 @@ export async function render(main, params, tabs) {
   main.querySelectorAll('[data-state]').forEach(b => b.addEventListener('click', () => { state = b.dataset.state; all = false; draw(); }));
   $('#op-kinds-p').addEventListener('change', e => { kind = e.target.value; all = false; draw(); });
   $('#op-states-p').addEventListener('change', e => { state = e.target.value; all = false; draw(); });
-  $('.c2-find').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); draw(); });
+  $('.c2-find').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); const u = new URLSearchParams(location.hash.split('?')[1] || ''); if (q) u.set('q', q); else u.delete('q'); history.replaceState(null, '', '#customers?' + u); draw(); });
+  $('#op-csv').addEventListener('click', () => {
+    const cols = [{ l: 'Account', get: r => r.name }, { l: 'Type', get: r => KINDS[r.kind] }, { l: '$ a year', get: r => r.once ? null : Math.round(r.value) }, { l: '$ once', get: r => r.once ? Math.round(r.value) : null }, { l: 'Estimate', get: r => r.modelled ? 'est.' : '' }, { l: 'Owner', get: r => r.owner || '' }, { l: 'Status', get: r => STATUS_NAMES[r.status] }, { l: 'Why', get: r => r.reason }];
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([toCsv(filtered(), cols)], { type: 'text/csv' }));
+    a.download = `r4-pulse-opportunities-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  });
   $('#op-more').addEventListener('click', e => { if (e.target.closest('.more')) { all = true; draw(); } });
   draw();
   reveal(main.querySelector('.op'));

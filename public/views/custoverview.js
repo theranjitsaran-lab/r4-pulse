@@ -8,11 +8,12 @@ import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { pricePosition, sizePeers, FAMS } from '/components/custbook.js';
 import { customerView } from '/components/home2data.js';
 import { costParts, PARTS, marginAction, FAMILY_NAMES } from '/components/margin.js';
-import { serviceMedians, slippingAccounts, CITADEL } from '/components/levers.js';
+import { serviceMedians, slippingAccounts, risingAccounts, CITADEL } from '/components/levers.js';
 import { LINES } from '/components/whitespace.js';
 import { openPop } from '/components/pop.js';
-import { costsVisible } from '/components/access.js';
-import { LABELS, changeWord } from '/components/metrics.js';
+import { dataTable } from '/components/datatable.js';
+import { costsVisible, whoAmI, myRole } from '/components/access.js';
+import { LABELS, changeWord, SIZE_BANDS, inBand } from '/components/metrics.js';
 import { reveal } from '/components/motion.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
@@ -20,29 +21,6 @@ const pct = v => `${Math.abs(Math.round(v * 100))}%`;
 const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : v > 0.02 ? 'up' : v < -0.02 ? 'down' : 'flat'}">${changeWord(v)}</span>`;
 const signedK = v => v == null ? '—' : (v < 0 ? '−' : '+') + moneyK(Math.abs(v));
 const unitMoney = (v, unit) => v == null ? '—' : '$' + (unit === 'box a month' || unit === 'lb' ? v.toFixed(3) : v.toFixed(2));
-const PAGE = 60;
-const COST_COLS = new Set(['pc', 'costPer', 'fmargin', 'fpc']);
-
-// the table's columns: the whole account, or one line of business
-const ALL_COLS = [
-  { k: 'customer', l: 'Customer', sort: r => r.customer, text: true },
-  { k: 'spark', l: '13 months', sort: null },
-  { k: 'last', l: 'Last month', sort: r => r.last, x: 'sales' },
-  { k: 'd', l: '3 months vs own run', sort: r => r.d, x: 'sales' },
-  { k: 'ytdPct', l: 'Year to date', sort: r => r.ytdPct, x: 'sales' },
-  { k: 'pc', l: 'Margin est.', sort: r => r.pc, x: 'margin' },
-  { k: 'opp', l: 'Cross-sell est., a month', sort: r => r.opp, x: 'opp' },
-  { k: 'gap', l: 'Under the book, a year', sort: r => r.gap, x: 'gap' },
-];
-const famCols = key => [
-  { k: 'customer', l: 'Customer', sort: r => r.customer, text: true },
-  { k: 'frev', l: 'Revenue, 12 months', sort: r => r.fam[key].revenue, x: 'margin' },
-  { k: 'units', l: 'Units', sort: r => r.fam[key].units },
-  { k: 'price', l: 'Price a unit', sort: r => r.fam[key].price, x: 'price' },
-  { k: 'costPer', l: 'Cost a unit est.', sort: r => r.fam[key].costPer, x: 'price' },
-  { k: 'fmargin', l: 'Margin est.', sort: r => r.fam[key].revenue - r.fam[key].cost, x: 'margin' },
-  { k: 'fpc', l: 'Margin %', sort: r => r.fam[key].revenue > 0 ? (r.fam[key].revenue - r.fam[key].cost) / r.fam[key].revenue : null, x: 'margin' },
-];
 
 export async function render(main, C, params, tabs) {
   // the customer book and the book by line, worked out on the server (server/views.js); pricing loads only
@@ -54,6 +32,7 @@ export async function render(main, C, params, tabs) {
   const active = B.rows.filter(r => r.last > 0 && !r.citadel).length, activePrev = C.accounts.filter(a => a.level1 !== CITADEL && (a.storage[a.storage.length - 2] + a.service[a.service.length - 2]) > 0).length;
   const slip = slippingAccounts(C), slipV = slip.reduce((t, s) => t - s.move.d, 0);
   const crossV = B.ws.total / 12;
+  const unlisted = last.core - B.rows.filter(r => !r.citadel).reduce((t, r) => t + (r.last || 0), 0);
 
   const kpis = `<section class="h2-kpis four" data-rv>
       <div class="h2-kpi lead"><span>${esc(LABELS.invoiced)}, ${esc(mon(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${chip(last.core / prev.core - 1)} on ${esc(mon(prev.month))}${ly ? ` · ${chip(last.core / ly.core - 1)} on a year ago` : ''}</small></div>
@@ -65,7 +44,7 @@ export async function render(main, C, params, tabs) {
   // the book by line: one bar, each line's share of last month, with its change
   const segCard = seg ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>${esc(mon(seg.month))} by line of business</h2><small>${moneyK(seg.total)} · tap a line to see its customers' prices and costs</small></div>
       <div class="c2-stack">${seg.rows.map((s, i) => `<i class="s${i}" style="--w:${(s.lm / seg.total * 100).toFixed(2)}%" title="${esc(s.name)} ${moneyK(s.lm)}"></i>`).join('')}</div>
-      <div class="c2-legend">${seg.rows.map((s, i) => { const f = FAMS.find(x => x.key === s.key); return `<${f ? `a href="#customers?view=overview&line=${s.key}"` : 'span'} class="c2-li"><i class="k s${i}"></i><span>${esc(s.name)}</span><b>${moneyK(s.lm)}</b>${chip(s.lmPct)}</${f ? 'a' : 'span'}>`; }).join('')}</div></section>` : '';
+      <div class="c2-legend">${seg.rows.map((s, i) => { const f = FAMS.find(x => x.key === s.key); return `<${f ? `a href="#customers?view=overview&f_line=${s.key}"` : 'span'} class="c2-li"><i class="k s${i}"></i><span>${esc(s.name)}</span><b>${moneyK(s.lm)}</b>${chip(s.lmPct)}</${f ? 'a' : 'span'}>`; }).join('')}</div></section>` : '';
 
   const custRow = (r, kind) => `<li><a href="#customer/${r.level1}"><span class="h2-cn">${esc(titleCase(r.customer))}</span>${sparkline(r.spark, { w: 72, h: 22, cls: 'service' })}
       <span class="h2-cv ${kind === 'top' ? '' : kind === 'rising' ? 'up' : 'down'}">${kind === 'top' ? moneyK(r.last3) : signedK(r.d)}<small>a month</small></span></a></li>`;
@@ -77,22 +56,14 @@ export async function render(main, C, params, tabs) {
         <div class="h2-col" data-k="falling"><h3>Slipping <a href="#customers?view=slipping">all ${cust.slipping} ›</a></h3><ul class="h2-cl">${cust.falling.map(r => custRow(r, 'falling')).join('')}</ul></div>
       </div></section>`;
 
-  let line = FAMS.some(f => f.key === params.line) ? params.line : 'all';
-  let sort = params.sort || null, dir = params.dir === 'up' ? 1 : -1, shown = PAGE, q = '';
   main.innerHTML = `<div class="cust c2">
     <h1>Accounts</h1>
     ${tabs}
     ${kpis}
     <div class="h2-row">${segCard}${fives}</div>
     <section class="h2-card c2-tablecard" data-rv>
-      <div class="c2-tools">
-        <div class="seg c2-lines">${[{ key: 'all', name: 'All lines' }, ...FAMS].map(f => `<button data-line="${f.key}">${esc(f.name)}</button>`).join('')}</div>
-        <input class="c2-find" type="search" placeholder="Find a customer" aria-label="Find a customer">
-      </div>
-      <p class="c2-say" id="c2-say"></p>
-      <div class="c2-scroll"><table class="c2-t" id="c2-t"></table></div>
-      <div class="c2-more" id="c2-more"></div>
-      <div class="src">Sales as invoiced, Citadel held apart from totals ${costsVisible() ? '· margin and cost a unit est. are modelled; route-based costs are under review ' : ''}· price a unit is the line's revenue over the units that drive it · tap any figure for why</div>
+      <div id="c2-dt"></div>
+      <div class="src">Sales as invoiced, Citadel held apart from totals${unlisted >= 1000 ? `; ${esc(mon(last.month))}'s ${moneyK(last.core)} also holds ${moneyK(unlisted)} from smaller accounts not listed here` : ''} ${costsVisible() ? '· margin and cost a unit est. are modelled; route-based costs are under review ' : ''}· price a unit is the line's revenue over the units that drive it · tap any figure for why</div>
     </section>
   </div>`;
 
@@ -100,62 +71,52 @@ export async function render(main, C, params, tabs) {
   const pick = k => { tabsEl.forEach(b => b.classList.toggle('on', b.dataset.k === k)); cols.forEach(c => c.classList.toggle('on', c.dataset.k === k)); };
   tabsEl.forEach(b => b.addEventListener('click', () => pick(b.dataset.k))); pick('top');
 
-  const table = main.querySelector('#c2-t');
-  const draw = () => {
-    const C2 = (line === 'all' ? ALL_COLS : famCols(line)).filter(c => costsVisible() || !COST_COLS.has(c.k));
-    let rows = B.rows.filter(r => line === 'all' || r.fam[line]);
-    if (q) rows = rows.filter(r => r.customer.toLowerCase().includes(q));
-    const col = C2.find(c => c.k === sort && c.sort) || (line === 'all' ? C2[2] : C2[1]);
-    const val = r => col.sort(r);
-    rows.sort((a, b) => { const x = val(a), y = val(b); if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; const c = col.text ? String(x).localeCompare(String(y)) : x - y; return dir === 1 ? c : -c; });
-    const fname = line === 'all' ? '' : FAMS.find(f => f.key === line).name;
-    const say = main.querySelector('#c2-say');
-    if (line === 'all') say.textContent = `${rows.length} ${LABELS.activeAccounts}. Sorted by ${col.l.replace(' est.', '').toLowerCase()}.`;
-    else {
-      const units = rows[0] ? rows[0].fam[line].unit : '', withPrice = rows.filter(r => r.fam[line].price > 0);
-      const below = costsVisible() ? withPrice.filter(r => r.fam[line].costPer > r.fam[line].price).length : 0;
-      say.textContent = `${rows.length} accounts buy ${fname.toLowerCase()}, priced a ${units}. ${below ? `${below} pay less than it costs to serve them est.` : ''} Tap a price to see it against similar accounts.`;
-    }
-    const head = `<thead><tr>${C2.map(c => `<th class="${c.text ? 'tl' : ''}${c.k === col.k ? ' on' : ''}${c.k === 'spark' ? ' sp' : ''}" ${c.sort ? `data-sort="${c.k}" tabindex="0"` : ''}>${esc(c.l)}${c.k === col.k ? (dir === 1 ? ' ▲' : ' ▼') : ''}</th>`).join('')}</tr></thead>`;
-    const cell = (r, c) => {
-      const btn = (inner, x) => `<button class="c2-x" data-x="${x}" data-id="${r.level1}">${inner}</button>`;
-      const f = line === 'all' ? null : r.fam[line];
-      switch (c.k) {
-        case 'customer': return `<td class="tl"><a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>${r.citadel ? ' <small>held apart</small>' : ''}</td>`;
-        case 'spark': return `<td class="sp">${r.spark ? sparkline(r.spark, { w: 84, h: 22, cls: 'service' }) : ''}</td>`;
-        case 'last': return `<td>${r.last == null ? '—' : btn(`${moneyK(r.last)} <span class="h2-d quiet">${r.lastPct == null ? '—' : changeWord(r.lastPct, r.last / (1 + r.lastPct))}</span>`, 'sales')}</td>`;
-        case 'd': return `<td>${r.d == null ? '—' : btn(`<span class="h2-cv ${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${signedK(r.d)}</span> ${chip(r.movePct)}`, 'sales')}</td>`;
-        case 'ytdPct': return `<td>${r.ytdPct == null ? '—' : btn(chip(r.ytdPct, true), 'sales')}</td>`;
-        case 'pc': return `<td>${r.pc == null ? '—' : btn(`<span class="${r.margin < 0 ? 'is-bad' : r.pc < .15 ? 'is-warn' : ''}">${Math.round(r.pc * 100)}%</span>${r.review ? '<small> review</small>' : ''}`, 'margin')}</td>`;
-        case 'opp': return `<td>${r.opp > 0 ? btn(moneyK(r.opp / 12), 'opp') : '—'}</td>`;
-        case 'gap': return `<td>${r.gap > 0 ? btn(moneyK(r.gap), 'gap') : '—'}</td>`;
-        case 'frev': return `<td>${costsVisible() ? btn(moneyK(f.revenue), 'margin') : moneyK(f.revenue)}</td>`;
-        case 'units': return `<td>${Math.round(f.units).toLocaleString('en-US')}</td>`;
-        case 'price': { const p = pricePosition(B, r, line); return `<td>${f.price ? btn(`${unitMoney(f.price, f.unit)}${p && !p.widened ? ` <span class="c2-pct ${p.pct < .25 ? 'lo' : p.pct > .75 ? 'hi' : ''}">${p.pct < .25 ? 'low' : p.pct > .75 ? 'high' : 'mid'}</span>` : ''}`, 'price') : '—'}</td>`; }
-        case 'costPer': return `<td>${f.costPer ? btn(unitMoney(f.costPer, f.unit), 'price') : '—'}</td>`;
-        case 'fmargin': { const v = f.revenue - f.cost; return `<td>${btn(`<span class="${v < 0 ? 'is-bad' : ''}">${signedK(v)}</span>`, 'margin')}</td>`; }
-        case 'fpc': { const v = f.revenue > 0 ? (f.revenue - f.cost) / f.revenue : null; return `<td>${v == null ? '—' : `<span class="${v < 0 ? 'is-bad' : v < .15 ? 'is-warn' : ''}">${Math.round(v * 100)}%</span>`}</td>`; }
-      }
-      return '<td></td>';
-    };
-    table.innerHTML = head + `<tbody>${rows.slice(0, shown).map(r => `<tr>${C2.map(c => cell(r, c)).join('')}</tr>`).join('')}</tbody>`;
-    main.querySelector('#c2-more').innerHTML = rows.length > shown ? `<button class="linkbtn" id="c2-all">Show all ${rows.length} ›</button>` : '';
-    const all = main.querySelector('#c2-all'); if (all) all.addEventListener('click', () => { shown = Infinity; draw(); });
-    main.querySelectorAll('.c2-lines button').forEach(b => b.classList.toggle('on', b.dataset.line === line));
-    table.querySelectorAll('th[data-sort]').forEach(th => {
-      const go = () => { const k = th.dataset.sort; dir = sort === k ? -dir : -1; sort = k; keep(); draw(); };
-      th.addEventListener('click', go); th.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
-    });
-  };
-  const keep = () => history.replaceState(null, '', `#customers?view=overview${line !== 'all' ? '&line=' + line : ''}${sort ? `&sort=${sort}${dir === 1 ? '&dir=up' : ''}` : ''}`);
-  main.querySelectorAll('.c2-lines button').forEach(b => b.addEventListener('click', () => { line = b.dataset.line; sort = null; dir = -1; shown = PAGE; keep(); draw(); }));
-  main.querySelector('.c2-find').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); shown = PAGE; draw(); });
-  table.addEventListener('click', e => {
-    const b = e.target.closest('.c2-x'); if (!b) return;
-    const r = B.rows.find(x => x.level1 === Number(b.dataset.id));
-    explain(b.dataset.x, r, { B, PR, line, R });
+  // every account, on the one table. Line of business is a filter that also changes the columns to price and
+  // cost a unit; tapping a row opens why its figures are what they are.
+  const cellBtn = (r, inner, x) => `<button class="c2-x" data-x="${x}" data-id="${r.level1}">${inner}</button>`;
+  const name = { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>${r.citadel ? ' <small>held apart</small>' : ''}` };
+  const kFmt = v => moneyK(v);
+  const allCols = [name,
+    { k: 'last', l: 'Last month', def: true, sorted: true, get: r => r.last, total: 'sum', totalFmt: kFmt, fmt: r => r.last == null ? '—' : `${cellBtn(r, moneyK(r.last), 'sales')}` },
+    { k: 'd', l: 'Against its own run, a month', short: 'Own run', def: true, get: r => r.d, total: 'sum', totalFmt: signedK, fmt: r => r.d == null ? '—' : cellBtn(r, `<span class="h2-cv ${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${signedK(r.d)}</span>`, 'sales') },
+    { k: 'opp', l: 'Cross-sell est., a month', short: 'Cross-sell est.', def: true, get: r => r.opp ? r.opp / 12 : 0, total: 'sum', totalFmt: kFmt, fmt: r => r.opp > 0 ? cellBtn(r, moneyK(r.opp / 12), 'opp') : '—' },
+    { k: 'gap', l: 'Under the book, a year', get: r => r.gap, total: 'sum', totalFmt: kFmt, fmt: r => r.gap > 0 ? cellBtn(r, moneyK(r.gap), 'gap') : '—' },
+    { k: 'lastPct', l: 'On the month before', get: r => r.lastPct, fmt: r => r.lastPct == null ? '—' : `<span class="h2-d quiet">${changeWord(r.lastPct, r.last / (1 + r.lastPct))}</span>` },
+    { k: 'ytdPct', l: 'Year to date', get: r => r.ytdPct, fmt: r => chip(r.ytdPct, true) },
+    { k: 'ltm', l: 'Twelve months', get: r => r.ltm, total: 'sum', totalFmt: kFmt, fmt: r => moneyK(r.ltm) },
+    { k: 'spark', l: '13 months', csv: () => '', fmt: r => r.spark ? sparkline(r.spark, { w: 84, h: 22, cls: 'service' }) : '' },
+    ...(costsVisible() ? [{ k: 'pc', l: 'Margin est.', get: r => r.pc, fmt: r => r.pc == null ? '—' : cellBtn(r, `<span class="${r.margin < 0 ? 'is-bad' : r.pc < .15 ? 'is-warn' : ''}">${Math.round(r.pc * 100)}%</span>${r.review ? '<small> review</small>' : ''}`, 'margin') }] : []),
+  ];
+  const famCols = key => [name,
+    { k: 'frev', l: 'Twelve months', def: true, sorted: true, get: r => r.fam[key] && r.fam[key].revenue, total: 'sum', totalFmt: kFmt, fmt: r => { const v = r.fam[key].revenue; return costsVisible() ? cellBtn(r, moneyK(v), 'margin') : moneyK(v); } },
+    { k: 'price', l: 'Price a unit', def: true, get: r => r.fam[key] && r.fam[key].price, fmt: r => { const f = r.fam[key], p = f.price ? pricePosition(B, r, key) : null; return f.price ? cellBtn(r, `${unitMoney(f.price, f.unit)}${p && !p.widened ? ` <span class="c2-pct ${p.pct < .25 ? 'lo' : p.pct > .75 ? 'hi' : ''}">${p.pct < .25 ? 'low' : p.pct > .75 ? 'high' : 'mid'}</span>` : ''}`, 'price') : '—'; } },
+    { k: 'units', l: 'Units', def: true, get: r => r.fam[key] && r.fam[key].units, total: 'sum', fmt: r => Math.round(r.fam[key].units).toLocaleString('en-US') },
+    ...(costsVisible() ? [
+      { k: 'costPer', l: 'Cost a unit est.', get: r => r.fam[key] && r.fam[key].costPer, fmt: r => { const f = r.fam[key]; return f.costPer ? cellBtn(r, unitMoney(f.costPer, f.unit), 'price') : '—'; } },
+      { k: 'fmargin', l: 'Margin est.', get: r => r.fam[key] && r.fam[key].revenue - r.fam[key].cost, total: 'sum', totalFmt: signedK, fmt: r => { const v = r.fam[key].revenue - r.fam[key].cost; return cellBtn(r, `<span class="${v < 0 ? 'is-bad' : ''}">${signedK(v)}</span>`, 'margin'); } },
+    ] : []),
+  ];
+  const slipIds = new Set(slip.map(s => s.level1)), rising = new Set(risingAccounts(C).map(s => s.level1));
+  const trend = (r, v) => v === 'slip2k' ? slipIds.has(r.level1) && r.d <= -2000 : v === 'slip' ? slipIds.has(r.level1) : v === 'rise' ? rising.has(r.level1) : !slipIds.has(r.level1) && !rising.has(r.level1);
+  const filters = [
+    { k: 'line', l: 'Line of business', options: FAMS.map(f => [f.key, f.name]), test: (r, v) => !!r.fam[v] },
+    { k: 'size', l: 'Account size', options: SIZE_BANDS.map(b => [b[0], b[1]]), test: (r, v) => inBand(v, r.ltm) },
+    { k: 'trend', l: 'Trend', options: [['slip', 'Slipping'], ['slip2k', 'Slipping over $2K a month'], ['rise', 'Rising'], ['steady', 'Neither']], test: trend },
+    { k: 'book', l: 'Against the book', options: [['under', 'Under the book']], test: r => r.gap > 0 },
+  ];
+  const role = myRole();
+  const views = [
+    ...(role === 'owner' || role === 'admin' ? [{ name: 'Slipping over $2K a month', q: 'f_trend=slip2k' }] : []),
+    ...(role === 'billing' || role === 'admin' ? [{ name: 'Storage under book', q: 'f_line=storage&f_book=under' }] : []),
+  ];
+  if (params.line) history.replaceState(null, '', location.hash.replace(/([?&])line=/, '$1f_line='));   // links saved before the filter bar
+  const host = main.querySelector('#c2-dt');
+  dataTable(host, { key: 'accounts', who: whoAmI(), rows: B.rows, filters, views, placeholder: 'Find an account',
+    inTotal: r => !r.citadel, totalLabel: 'Total, Citadel apart',
+    search: r => r.customer, cols: st => st.f.line ? famCols(st.f.line) : allCols,
+    say: (st, rows) => st.f.line ? `${FAMS.find(f => f.key === st.f.line).name}, priced a ${rows[0] && rows[0].fam[st.f.line] ? rows[0].fam[st.f.line].unit : 'unit'}` : LABELS.activeAccounts,
+    onRow: (r, e) => { const b = e.target.closest('.c2-x'); explain(b ? b.dataset.x : 'sales', r, { B, PR, line: (new URLSearchParams(location.hash.split('?')[1] || '')).get('f_line'), R }); },
   });
-  draw();
   reveal(main.querySelector('.c2'));
 }
 

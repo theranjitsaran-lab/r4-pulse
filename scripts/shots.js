@@ -39,8 +39,8 @@ const SCREENS = [
    { name: 'overview', hash: '#customers?view=overview', extra: true },
    { name: 'pop-margin', hash: '#customers?view=overview', click: '.c2-x[data-x="margin"]', extra: true },
    { name: 'opp-open', hash: '#customers', click: '.op-ahead', extra: true },
-   { name: 'pop-price', hash: '#customers?view=overview&line=bin', click: '.c2-x[data-x="price"]', extra: true },
-   { name: 'customers-bins', hash: '#customers?view=overview&line=bin', extra: true }],
+   { name: 'pop-price', hash: '#customers?view=overview&f_line=bin', click: '.c2-x[data-x="price"]', extra: true },
+   { name: 'customers-bins', hash: '#customers?view=overview&f_line=bin', extra: true }],
   ['conversations', 'grid', 'whitespace', 'slipping', 'gaps', 'rounds', 'destruction', 'margin', 'all'].map(v => ({ name: 'customers-' + v, hash: '#customers?view=' + v, extra: true })),
 ).filter(s => only.length ? only.includes(s.name) : !s.extra || args.includes('--all'));
 // --only=intro takes just the opening, mid-flight

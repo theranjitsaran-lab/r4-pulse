@@ -96,3 +96,9 @@ export function changeWord(v, base = null) {
   if ((base != null && base < 500) || v >= 5) return 'new';
   return `${v > 0.005 ? '▲ ' : v < -0.005 ? '▼ ' : ''}${Math.abs(Math.round(v * 100))}%`;
 }
+
+// R4's own accounts and placeholders, which are not customers to quote or chase
+export const isInternal = name => /^r4\b|\br4 services\b|single invoice|^account \d+$|bear stearns/i.test(String(name || '').trim());
+// account size, by twelve months' revenue; one set of bands everywhere
+export const SIZE_BANDS = [['s', 'Under $10K a year', 0, 1e4], ['m', '$10K to $50K', 1e4, 5e4], ['l', '$50K to $250K', 5e4, 25e4], ['x', 'Over $250K', 25e4, Infinity]];
+export const inBand = (k, v) => { const b = SIZE_BANDS.find(x => x[0] === k); return !!b && v >= b[2] && v < b[3]; };

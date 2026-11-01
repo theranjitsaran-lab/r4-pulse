@@ -10,7 +10,9 @@ import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { unitSuspect } from '/components/levers.js';
 import { reveal } from '/components/motion.js';
 import { SERVICES, lineCost } from '/components/quote.js';
-import { costsVisible, NOT_READY } from '/components/access.js';
+import { costsVisible, NOT_READY, whoAmI } from '/components/access.js';
+import { dataTable } from '/components/datatable.js';
+import { isInternal } from '/components/metrics.js';
 import { YARD, dist, loadRoadnet } from '/components/routemap.js';
 
 const CITADEL = 6714;
@@ -37,7 +39,16 @@ export async function render(main, PR, params) {
   book.STO = { name: 'Carton storage, per box a month', rows: PR.storage.map(s => ({ level1: s.level1, name: titleCase(s.customer), v: s.rate_per_box, units: s.boxes * 12, revenue: s.storage_billed * 12 })) };
   const codes = Object.keys(book).filter(c => book[c].rows.length >= 10)
     .sort((a, b) => (SERVICES[b] ? 1 : 0) - (SERVICES[a] ? 1 : 0) || book[b].rows.length - book[a].rows.length);
-  const customers = [...new Map(PR.rates.map(r => [r.level1, titleCase(r.customer)])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  // who can be quoted: R4's own accounts and placeholders out, one entry per name (the account with the most on it)
+  const spend = new Map();
+  for (const r of PR.rates) spend.set(r.level1, (spend.get(r.level1) || 0) + (r.revenue || 0));
+  const byName = new Map();
+  for (const r of PR.rates) { const n = titleCase(r.customer); if (isInternal(n)) continue; const cur = byName.get(n); if (cur == null || spend.get(r.level1) > spend.get(cur)) byName.set(n, r.level1); }
+  const customers = [...byName.entries()].map(([n, id]) => [id, n]).sort((a, b) => a[1].localeCompare(b[1]));
+  // what can be quoted: services the cost model prices, one entry per name
+  const svcName = c => c === 'STO' ? book[c].name : titleCase(book[c].name).replace(/\s+/g, ' ');
+  const svcByName = new Map();
+  for (const c of codes) { if (!SERVICES[c]) continue; const n = svcName(c), cur = svcByName.get(n); if (cur == null || book[c].rows.length > book[cur].rows.length) svcByName.set(n, c); }
 
   const acctOf = new Map(M.accounts.map(a => [a.level1, a]));
   const linesOf = id => M.lines.filter(l => l.level1 === id);
@@ -49,8 +60,8 @@ export async function render(main, PR, params) {
     <h1>Quote</h1>
     <section class="h2-card pr2-bar" data-rv>
       <div class="pr2-pick">
-        <label>Customer<select id="p-cust"><option value="">New customer or a quote</option>${customers.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')}</select></label>
-        <label>Service<select id="p-code">${codes.map(c => `<option value="${c}">${esc(c === 'STO' ? book[c].name : titleCase(book[c].name))}${SERVICES[c] || !costsVisible() ? '' : ' · no cost to serve'}</option>`).join('')}</select></label>
+        <label>Customer<input id="p-cust" list="p-cust-l" type="search" placeholder="Type a name, or leave blank for a quote" autocomplete="off"><datalist id="p-cust-l">${customers.map(([, n]) => `<option value="${esc(n)}"></option>`).join('')}</datalist></label>
+        <label>Service<input id="p-code" list="p-code-l" type="search" placeholder="Type a service" autocomplete="off"><datalist id="p-code-l">${[...svcByName.keys()].map(n => `<option value="${esc(n)}"></option>`).join('')}</datalist></label>
       </div>
       <div class="pr2-price"><label for="p-price">Price</label><input id="p-price" inputmode="decimal"><input id="p-slide" type="range" aria-label="Price" step="any"><small id="p-slide-lab"></small></div>
       <details class="pr2-vol"><summary id="p-vol-sum">Volume</summary>
@@ -85,8 +96,10 @@ export async function render(main, PR, params) {
   </div>`;
 
   const $ = id => main.querySelector('#' + id);
-  $('p-cust').value = st.level1 || '';
-  $('p-code').value = st.code;
+  $('p-cust').value = st.level1 ? (customers.find(x => x[0] === st.level1) || [0, ''])[1] : '';
+  const showCode = () => { $('p-code').value = svcName(st.code); };
+  showCode();
+  for (const id of ['p-cust', 'p-code']) $(id).addEventListener('focus', e => e.target.select());
 
   // defaults from the account's own data, or the book's median account for a quote
   function prefill() {
@@ -228,8 +241,8 @@ export async function render(main, PR, params) {
   }
 
   const num = el => { const v = parseFloat(String(el.value).replace(/[$,\s]/g, '')); return Number.isFinite(v) ? v : null; };
-  $('p-cust').addEventListener('change', () => { st.level1 = $('p-cust').value ? Number($('p-cust').value) : null; prefill(); draw(); history.replaceState(null, '', `#pricing?${st.level1 ? 'level1=' + st.level1 + '&' : ''}code=${st.code}`); });
-  $('p-code').addEventListener('change', () => { st.code = $('p-code').value; prefill(); draw(); history.replaceState(null, '', `#pricing?${st.level1 ? 'level1=' + st.level1 + '&' : ''}code=${st.code}`); });
+  $('p-cust').addEventListener('change', () => { const typed = $('p-cust').value.trim(); st.level1 = byName.get(typed) ?? null; prefill(); draw(); history.replaceState(null, '', `#pricing?${st.level1 ? 'level1=' + st.level1 + '&' : ''}code=${st.code}`); });
+  $('p-code').addEventListener('change', () => { const c = svcByName.get($('p-code').value.trim()); if (!c) { showCode(); return; } st.code = c; prefill(); draw(); history.replaceState(null, '', `#pricing?${st.level1 ? 'level1=' + st.level1 + '&' : ''}code=${st.code}`); });
   for (const [id, key] of [['p-units', 'units'], ['p-visits', 'visits'], ['p-miles', 'miles'], ['p-price', 'price']]) {
     $(id).addEventListener('input', () => {
       const v = num($(id)); if (v == null) return;
@@ -269,20 +282,23 @@ export async function render(main, PR, params) {
     const vol = rs.reduce((t, r) => t + r.units, 0), uvol = under.reduce((t, r) => t + r.units, 0);
     const gap = under.reduce((t, r) => t + (st2.median - r.v) * r.units, 0);
     return { code, name: code === 'STO' ? book[code].name : titleCase(book[code].name), n: rs.length, med: st2.median, share: vol ? uvol / vol : 0, gap, under: under.length };
-  }).filter(r => r.n >= 20 && r.gap > 0).sort((a, b) => b.gap - a.gap).slice(0, 14);
+  }).filter(r => r.n >= 20 && r.gap > 0).sort((a, b) => b.gap - a.gap);
   $('b-title').textContent = bookRows.length ? `${bookRows[0].name} carries the biggest gap to the book: ${moneyK(bookRows[0].gap)} a year` : 'Invoiced against the book';
-  $('b-rows').innerHTML = bookRows.map(r => `<div class="brow" data-code="${r.code}">
-    <span class="nm">${esc(r.name)}<small>${r.under} of ${r.n} accounts under the $${r.med.toFixed(r.code === 'STO' ? 3 : 2)} median</small></span>
-    <span class="bar" title="${Math.round(r.share * 100)}% of the volume billed under the median"><i style="width:${r.share * 100}%"></i></span>
-    <span class="v">+${moneyK(r.gap)}<small>${Math.round(r.share * 100)}% of volume under</small></span><span class="go">›</span></div>`).join('');
-  $('b-rows').addEventListener('click', ev => {
-    const row = ev.target.closest('.brow'); if (!row) return;
-    st.code = row.dataset.code; $('p-code').value = st.code; prefill(); draw();
-    history.replaceState(null, '', `#pricing?${st.level1 ? 'level1=' + st.level1 + '&' : ''}code=${st.code}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+  dataTable($('b-rows'), { key: 'pricegaps', ns: 'g_', noun: 'services', who: whoAmI(), rows: bookRows, page: 14, placeholder: 'Find a service', search: r => r.name,
+    onRow: r => {
+      st.code = r.code; showCode(); prefill(); draw();
+      history.replaceState(null, '', `#pricing?${st.level1 ? 'level1=' + st.level1 + '&' : ''}code=${st.code}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    cols: [
+      { k: 'name', l: 'Service', name: true, text: true, get: r => r.name, fmt: r => esc(r.name) },
+      { k: 'under', l: 'Accounts under', def: true, get: r => r.under, total: 'sum', fmt: r => r.under },
+      { k: 'gap', l: 'At the median, a year', def: true, sorted: true, get: r => r.gap, total: 'sum', totalFmt: v => '+' + moneyK(v), fmt: r => '+' + moneyK(r.gap) },
+      { k: 'med', l: 'Median', get: r => r.med, fmt: r => '$' + r.med.toFixed(r.code === 'STO' ? 3 : 2) },
+      { k: 'n', l: 'Accounts', get: r => r.n, fmt: r => r.n },
+      { k: 'share', l: 'Volume under', get: r => r.share, fmt: r => Math.round(r.share * 100) + '%' },
+    ] });
 
-  prefill();
   // ── the quote: several lines, each priced and costed as above, a deal total and its margin a year.
   // A draft is kept in this browser until saved; saving writes app.quote (server/sales.js).
   const QKEY = 'r4-quote-draft';

@@ -5,6 +5,9 @@
 import { lineChart, money0, moneyK } from '/components/chart.js';
 import { getJson, titleCase, esc } from '/components/data.js';
 import { byAccount, totals, cells, eligibleList, heldNotBilled, gridSvg, STATES } from '/components/storage.js';
+import { dataTable } from '/components/datatable.js';
+import { isInternal, SIZE_BANDS, inBand } from '/components/metrics.js';
+import { whoAmI } from '/components/access.js';
 
 const CSS = `
 .wh .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 14px; max-width: 940px; }
@@ -52,6 +55,7 @@ export async function render(main, tabs) {
   }
   const acc = byAccount(S), T = totals(acc), G = cells(acc, 1000);
   const E = eligibleList(acc, PR, T.boxes), NB = heldNotBilled(acc, PR);
+  const nbRows = NB.rows.filter(r => !isInternal(r.customer)), nbOut = NB.rows.filter(r => isInternal(r.customer)).reduce((t, r) => t + r.gap, 0);
   const m = S.months, last = m[m.length - 1], yearAgo = m[m.length - 13];
   const yoy = yearAgo ? last.boxes / yearAgo.boxes - 1 : null;
   const top = acc[0];
@@ -70,14 +74,12 @@ export async function render(main, tabs) {
     <div class="cols">
       <div class="card">
         <div class="card-head"><h3>Shredding the eligible boxes would bill about ${moneyK(E.once)} once and end ${moneyK(E.lost)} a month of storage est.</h3></div>
-        <div class="hd"><span>Account</span><span>Eligible</span><span>Billed once</span><span>Storage ends</span><span>Pays back</span><span>Of building</span><span></span></div>
         <div id="wh-elig"></div>
         <div class="src">Destruction at the book's median fee, $${(E.perBox || 0).toFixed(2)} a box; storage at each account's own rate per box (else the book's median) · "pays back" is the months of lost storage the destruction bill covers · <a href="#customers?view=destruction" style="color:var(--brand)">Overdue boxes by account ›</a></div>
       </div>
       <div class="card nb">
-        <div class="card-head"><h3>${n0(NB.gap)} boxes are in storage but not on the ${NB.month ? mon(NB.month) : 'latest'} storage bill</h3></div>
-        <p class="sub" style="margin:0 0 8px">${NB.none.length} accounts with ${n0(NB.none.reduce((t, r) => t + r.gap, 0))} boxes had no storage bill at all. It may be timing or prepaid storage; Anne to confirm before anyone calls.</p>
-        <div class="hd"><span>Account</span><span>Held</span><span>Billed</span><span>Not billed</span><span></span></div>
+        <div class="card-head"><h3>${n0(nbRows.reduce((t, r) => t + r.gap, 0))} boxes are in storage but not on the ${NB.month ? mon(NB.month) : 'latest'} storage bill</h3></div>
+        <p class="sub" style="margin:0 0 8px">${nbRows.filter(r => r.none).length} accounts with ${n0(nbRows.filter(r => r.none).reduce((t, r) => t + r.gap, 0))} boxes had no storage bill at all.${nbOut ? ` R4's own and placeholder accounts (${n0(nbOut)} boxes) are left out.` : ''} It may be timing or prepaid storage; Anne to confirm before anyone calls.</p>
         <div id="wh-nb"></div>
         <div class="src">Held: boxes in storage · billed: boxes on the latest month's storage bill</div>
       </div>
@@ -102,15 +104,24 @@ export async function render(main, tabs) {
   gEl.addEventListener('click', ev => { const c = ev.target.closest('.wc'); if (c) show(+c.dataset.b, ev); });
   gEl.addEventListener('mouseleave', () => { tip.hidden = true; gEl.querySelectorAll('.dim').forEach(c => c.classList.remove('dim')); });
 
-  const eRows = E.rows.slice(0, 25);
-  main.querySelector('#wh-elig').innerHTML = eRows.map(r => `<a class="rw" href="#customers?view=margin&id=${r.level1}">
-      <span class="nm">${esc(titleCase(r.customer))}<small>${n0(r.boxes)} boxes held</small></span>
-      <span class="v el">${n0(r.eligible)}</span><span class="v on">${money0(r.once)}</span><span class="v lo">${money0(r.lost)}/mo</span>
-      <span class="v mo">${r.months != null ? Math.round(r.months) + ' mo' : '—'}</span><span class="v sh">${(r.share * 100).toFixed(1)}%</span><span class="go">›</span></a>`).join('')
-    + `<div class="rw tot"><span class="nm">${E.rows.length} accounts</span><span class="v el">${n0(E.eligible)}</span><span class="v on">${money0(E.once)}</span><span class="v lo">${money0(E.lost)}/mo</span><span class="v mo"></span><span class="v sh">${(E.eligible / T.boxes * 100).toFixed(0)}%</span><span></span></div>`;
-  main.querySelector('#wh-nb').innerHTML = NB.rows.slice(0, 15).map(r => `<a class="rw" href="#customer/${r.level1}">
-      <span class="nm">${esc(titleCase(r.customer))}${r.none ? '<small>no storage bill at all</small>' : ''}</span>
-      <span class="v hl">${n0(r.held)}</span><span class="v bl">${r.billed ? n0(r.billed) + ' billed' : 'none billed'}</span><span class="v gp">${n0(r.gap)}</span><span class="go">›</span></a>`).join('');
+  const open = r => { location.hash = '#customer/' + r.level1; };
+  const size = { k: 'size', l: 'Boxes held', options: [['a', 'Under 1,000'], ['b', '1,000 to 10,000'], ['c', 'Over 10,000']], test: (r, v) => { const b = r.boxes != null ? r.boxes : r.held; return v === 'a' ? b < 1000 : v === 'b' ? b >= 1000 && b < 10000 : b >= 10000; } };
+  const nm = { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` };
+  dataTable(main.querySelector('#wh-elig'), { key: 'eligible', ns: 'e_', noun: 'accounts', who: whoAmI(), rows: E.rows, page: 15, filters: [size], search: r => r.customer, placeholder: 'Find an account', onRow: open,
+    cols: [nm,
+      { k: 'eligible', l: 'Eligible boxes', short: 'Eligible', def: true, sorted: true, get: r => r.eligible, total: 'sum', fmt: r => n0(r.eligible) },
+      { k: 'once', l: 'Bill once est.', def: true, get: r => r.once, total: 'sum', totalFmt: v => money0(v), fmt: r => money0(r.once) },
+      { k: 'lost', l: 'Storage lost, a month', short: 'Lost a month', def: true, get: r => r.lost, total: 'sum', totalFmt: v => money0(v), fmt: r => money0(r.lost) },
+      { k: 'boxes', l: 'Boxes held', get: r => r.boxes, total: 'sum', fmt: r => n0(r.boxes) },
+      { k: 'months', l: 'Pays back, months', get: r => r.months, fmt: r => r.months != null ? Math.round(r.months) : '—' },
+      { k: 'share', l: 'Of the building', get: r => r.share, fmt: r => (r.share * 100).toFixed(1) + '%' },
+    ] });
+  dataTable(main.querySelector('#wh-nb'), { key: 'notbilled', ns: 'n_', noun: 'accounts', who: whoAmI(), rows: nbRows, page: 15, filters: [size], search: r => r.customer, placeholder: 'Find an account', onRow: open,
+    cols: [nm,
+      { k: 'gap', l: 'Boxes not billed', def: true, sorted: true, get: r => r.gap, total: 'sum', fmt: r => n0(r.gap) },
+      { k: 'held', l: 'Held', get: r => r.held, total: 'sum', fmt: r => n0(r.held) },
+      { k: 'billed', l: 'Billed', get: r => r.billed, total: 'sum', fmt: r => r.billed ? n0(r.billed) : 'none' },
+    ] });
 
   if (m.length > 1) lineChart(main.querySelector('#wh-trend'), {
     title: yoy != null ? `The storage bill carried ${n0(last.boxes)} boxes in ${mon(last.month)}, ${yoy >= 0 ? 'up' : 'down'} ${(Math.abs(yoy) * 100).toFixed(1)}% on a year ago` : 'Boxes on the storage bill',

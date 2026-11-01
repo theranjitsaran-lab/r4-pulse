@@ -141,3 +141,49 @@ select.on-phone { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2) v
   .op-ahead { grid-template-columns: minmax(0, 1fr) auto; }
   .op-ahead .op-kinds { grid-column: 1 / -1; grid-row: 2; }
 }
+
+/* The one table and filter bar (components/datatable.js) */
+.dt-tools { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; margin-bottom: var(--sp-2); }
+.dt-find { flex: 1 1 calc(var(--u) * 40); min-width: 0; padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); font: inherit; font-size: var(--fs-sm); background: var(--surface); color: var(--ink); }
+.dt-f, .dt-views { font: inherit; font-size: var(--fs-label); padding: var(--sp-1) var(--sp-2); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); background: var(--surface); color: var(--ink-2); max-width: calc(var(--u) * 40); }
+.dt-csv, .dt-cols summary { font: inherit; font-size: var(--fs-label); padding: var(--sp-1) var(--sp-2); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); background: var(--surface); color: var(--brand); font-weight: 600; cursor: pointer; }
+.dt-cols { position: relative; }
+.dt-cols summary { list-style: none; }
+.dt-cols summary::-webkit-details-marker { display: none; }
+.dt-colbox { position: absolute; z-index: 6; display: grid; gap: var(--sp-1); margin-top: var(--sp-1); padding: var(--sp-3); min-width: calc(var(--u) * 50); background: var(--surface); border: var(--hair) solid var(--rule-3); border-radius: var(--r); box-shadow: var(--shadow-pop); }
+.dt-colbox label { display: flex; gap: var(--sp-2); align-items: center; font-size: var(--fs-label); font-weight: 400; color: var(--ink-2); }
+.dt-chips { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); align-items: center; margin-bottom: var(--sp-2); font-size: var(--fs-label); color: var(--ink-3); }
+.dt-chips b { color: var(--ink); }
+.dt-chip { border: 0; border-radius: var(--r-pill); padding: 0 var(--sp-2); background: var(--tint-brand); color: var(--brand); font: inherit; font-size: var(--fs-tiny); font-weight: 600; cursor: pointer; }
+.dt-scroll { overflow: auto; max-height: 72vh; }
+.dt-t { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.dt-t th { position: sticky; top: 0; z-index: 2; background: var(--surface); text-align: right; font-size: var(--fs-tiny); font-weight: 600; color: var(--ink-3); padding: var(--sp-2); border-bottom: var(--hair) solid var(--rule-3); white-space: nowrap; cursor: pointer; user-select: none; }
+.dt-t th.on { color: var(--brand); }
+.dt-t td { text-align: right; padding: var(--sp-2); border-bottom: var(--hair) solid var(--rule); white-space: nowrap; }
+.dt-t .tl { text-align: left; }
+.dt-t tbody tr[data-i] { cursor: pointer; }
+.dt-t tbody tr:hover, .dt-t tbody tr:hover td:first-child { background: var(--well); }
+.dt-t th:first-child, .dt-t td:first-child { position: sticky; left: 0; background: var(--surface); }
+.dt-t th:first-child { z-index: 3; }
+.dt-t td.tl { white-space: normal; min-width: calc(var(--u) * 45); }
+.dt-t td.tl a { color: var(--ink); font-weight: 500; text-decoration: none; }
+.dt-t td small { color: var(--ink-4); font-size: var(--fs-tiny); }
+.dt-t tfoot td, .dt-t tfoot td:first-child { position: sticky; bottom: 0; background: var(--well); font-weight: 650; border-top: var(--hair) solid var(--rule-3); }
+.dt-t .c2-x { text-decoration: none; }
+.dt-ftoggle { display: none; font: inherit; font-size: var(--fs-label); padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); background: var(--surface); color: var(--brand); font-weight: 600; cursor: pointer; }
+.dt-more { text-align: center; padding-top: var(--sp-2); }
+.cols .dt-t td.tl { min-width: calc(var(--u) * 30); }
+@media (max-width: 700px) {
+  .dt-scroll { max-height: none; overflow: visible; }
+  .dt-f, .dt-views { flex: 1 1 40%; max-width: none; }
+  .dt-ftoggle { display: block; }
+  .dt:not(.dt-open) .dt-f, .dt:not(.dt-open) .dt-cols, .dt:not(.dt-open) .dt-views, .dt:not(.dt-open) .dt-csv { display: none; }
+  .dt-t thead { display: none; }
+  .dt-t, .dt-t tbody, .dt-t tfoot { display: block; }
+  .dt-t tr { display: flex; flex-wrap: wrap; gap: 0 var(--sp-3); padding: var(--sp-2) 0; border-bottom: var(--hair) solid var(--rule); }
+  .dt-t td { display: block; position: static !important; padding: 0; border: 0; background: none !important; text-align: left; white-space: nowrap; font-size: var(--fs-label); }
+  .dt-t td:first-child { flex-basis: 100%; font-size: var(--fs-sm); white-space: normal; }
+  .dt-t td[data-l]:not(:first-child)::before { content: attr(data-l) ": "; color: var(--ink-4); font-size: var(--fs-tiny); }
+  .dt-t td[colspan] { white-space: normal; }
+  .dt-t tfoot tr { background: var(--well); padding: var(--sp-2); }
+}
