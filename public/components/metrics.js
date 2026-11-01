@@ -97,6 +97,9 @@ export function changeWord(v, base = null) {
   return `${v > 0.005 ? '▲ ' : v < -0.005 ? '▼ ' : ''}${Math.abs(Math.round(v * 100))}%`;
 }
 
+// a percentage misleads on a small base or on a line that swings by nature: show the dollars
+export const isLumpy = (key, base) => key === 'itad' || (base != null && base < 1e4);
+
 // R4's own accounts and placeholders, which are not customers to quote or chase
 export const isInternal = name => /^r4\b|\br4 services\b|single invoice|^account \d+$/i.test(String(name || '').trim());
 // account size, by twelve months' revenue; one set of bands everywhere

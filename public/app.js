@@ -21,6 +21,7 @@ const ROUTES = {
   numbers:   { view: 'numbers',   api: 'view/numbers', nav: 'numbers' },
   settings:  { view: 'settings',  api: 'settings',  nav: 'settings' },
   activity:  { view: 'activity',  api: 'activity',  nav: 'activity' },
+  how:       { view: 'how',       api: 'storage',   nav: 'how' },   // How it's calculated
   calls:     { view: 'customers', api: 'customers', nav: 'customers', params: { view: 'conversations' } },
 };
 const main = document.getElementById('main');
@@ -50,7 +51,7 @@ async function show() {
   const { name, params } = parse();
   const route = ROUTES[name];
   document.querySelectorAll('#nav a, .mast-gear').forEach(a => a.classList.toggle('on', a.dataset.screen === route.nav));
-  main.innerHTML = '<div class="loading">Loading…</div>';
+  main.innerHTML = '<div class="sk" role="status" aria-label="Loading"><i class="sk-h"></i><div class="sk-tiles"><i></i><i></i><i></i><i></i></div><i class="sk-c"></i><i class="sk-c"></i></div>';
   let data;
   try {
     const j = await getJson(route.api, { envelope: true });
@@ -58,7 +59,7 @@ async function show() {
   } catch (e) {
     if (e.status === 401) { location.href = '/login'; return; }
     if (my !== seq) return;
-    main.innerHTML = `<div class="empty"><h2>No data yet</h2>${e.message}. This screen reads <code>/api/${route.api}</code>; run <code>npm run snapshot</code>.</div>`;
+    main.innerHTML = '<div class="empty"><h2>This screen did not load</h2>Its figures are not available just now. Try again in a minute.</div>';
     intro.ready();
     return;
   }

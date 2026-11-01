@@ -8,7 +8,7 @@ import { reveal } from '/components/motion.js';
 import { parseHome2, checkNumbers } from '/components/summary.js';
 import { openPop } from '/components/pop.js';
 
-import { LABELS, changeWord } from '/components/metrics.js';
+import { LABELS, changeWord, isLumpy } from '/components/metrics.js';
 import { closedMonth } from '/components/linework.js';
 
 // one line under the figures: the invoiced month adds up to VCK's invoices, or it has moved and says by how much
@@ -20,9 +20,13 @@ const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month:
 const monS = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' });
 const dm = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const pctW = v => v == null ? '' : `${Math.abs(Math.round(v * 100))}%`;
-const tone = v => v == null ? 'flat' : v > 0.02 ? 'up' : v < -0.02 ? 'down' : 'flat';
-const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : v > 0.02 ? 'up' : v < -0.02 ? 'down' : 'flat'}">${changeWord(v)}</span>`;
+const tone = v => v == null ? 'flat' : v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat';
+const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat'}">${changeWord(v)}</span>`;
 const signedK = v => (v < 0 ? '−' : '+') + moneyK(Math.abs(v));
+// a lumpy line's move reads in dollars, not a percentage
+const move = (key, v, pct) => pct == null || pct <= -1 || !isLumpy(key, v / (1 + pct)) ? chip(pct) : `<span class="h2-d quiet">${signedK(v - v / (1 + pct))}</span>`;
+const ICON = { useful: '<path d="M7 11v9H4v-9zM7 11l4-8a2 2 0 0 1 2 2v4h6a1 1 0 0 1 1 1.2l-1.6 8a1 1 0 0 1-1 .8H7"/>', knew: '<path d="M4 12.5l5 5L20 6.5"/>', wrong: '<path d="M5 21V4h13l-3 4.5 3 4.5H5"/>' };
+const fbIcon = (v, label) => `<button type="button" data-v="${v}" title="${label}" aria-label="${label}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[v]}</svg></button>`;
 const word = v => Math.abs(v) < 0.02 ? 'level with' : v > 0 ? `${pctW(v)} ahead of` : `${pctW(v)} behind`;
 
 export async function render(main, P) {
@@ -70,7 +74,7 @@ export async function render(main, P) {
 
   // three things to act on, each with its owner
   const OWNER = { trisha: 'Trisha', anne: 'Anne', mike: 'Mike' };
-  const fbBtns = i => `<span class="fb" data-key="${esc(i.key)}" data-subject="${esc(i.subject)}"><button data-v="useful">Useful</button><button data-v="knew">Knew</button><button data-v="wrong">Not right</button></span>`;
+  const fbBtns = i => `<span class="fb" data-key="${esc(i.key)}" data-subject="${esc(i.subject)}">${fbIcon('useful', 'Useful')}${fbIcon('knew', 'I knew this')}${fbIcon('wrong', 'Not right')}</span>`;
   const acts = V.actions && V.actions.length ? `<section class="h2-card h2-acts" data-rv><div class="h2-ch"><h2>Three things to act on</h2></div><ul>${V.actions.map(i => `<li><a href="${esc(i.href)}"><b>${esc(OWNER[i.owner] || i.owner)}</b><span>${esc(i.text)}</span></a>${fbBtns(i)}</li>`).join('')}</ul></section>` : '';
 
   const weeks = `<section class="h2-card" data-rv><div class="h2-ch h2-chi"><div><h2>${w.lastFull ? `Last week ${moneyK(w.lastFull.value)} est., ${w.vsAvg >= 0 ? 'up' : 'down'} ${pctW(w.vsAvg)}` : 'Weeks'}</h2></div>${info(`${LABELS.veriShred} Work done each week, priced at that month's value a service, against the weeks before.`)}</div><div id="h2-weeks"></div></section>`;
@@ -108,7 +112,7 @@ export async function render(main, P) {
     main.querySelector('#h2-lines-s').textContent = meta.est ? `on ${bill}'s bill` : `${work}'s storage and work`;
     main.querySelectorAll('#h2-months button').forEach(b => b.classList.toggle('on', b.dataset.m === x));
     main.querySelector('#h2-tiles').innerHTML = LV.rows.map(r => { const k = r.by[x], jobs = r.jobs[x] || 0;
-      return `<li><button class="h2-lr" data-k="${r.key}" type="button"><span class="h2-lr-n">${esc(r.name)}${jobs ? `<small>+${moneyK(jobs)} to check</small>` : ''}</span><b>${moneyK(k.v)}</b>${chip(k.pct)}${monthBars(r.bars, x, { w: 72, h: 24 })}</button></li>`; }).join('')
+      return `<li><button class="h2-lr" data-k="${r.key}" type="button"><span class="h2-lr-n">${esc(r.name)}${jobs ? `<small>+${moneyK(jobs)} to check</small>` : ''}</span><b>${moneyK(k.v)}</b>${move(r.key, k.v, k.pct)}${monthBars(r.bars, x, { w: 72, h: 24 })}</button></li>`; }).join('')
       + `<li class="h2-lr-tot"><span>Total${meta.est ? ' (est.)' : ''}</span><b>${moneyK(LV.totals[x])}</b></li>`;
   };
   if (LV) {
@@ -124,11 +128,19 @@ export async function render(main, P) {
   if (actsEl) actsEl.addEventListener('click', async ev => {
     const b = ev.target.closest('.fb button'); if (!b) return;
     const box = b.closest('.fb'), li = b.closest('li');
+    // "Not right" asks one question first
+    if (b.dataset.v === 'wrong' && !b.classList.contains('fb-send')) {
+      box.innerHTML = '<label>What\'s wrong? <input type="text" maxlength="300"></label><button type="button" class="fb-send" data-v="wrong">Send</button>';
+      const inp = box.querySelector('input'); inp.focus();
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') box.querySelector('.fb-send').click(); });
+      return;
+    }
+    const note = box.querySelector('input') ? box.querySelector('input').value.trim() : '';
     box.querySelectorAll('button').forEach(x => x.disabled = true);
     try {
-      const r = await fetch('/api/feedback', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: box.dataset.key, subject: box.dataset.subject, verdict: b.dataset.v, brief_date: V.latestDone }) });
+      const r = await fetch('/api/feedback', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: box.dataset.key, subject: box.dataset.subject, verdict: b.dataset.v, note: note || undefined, brief_date: V.latestDone }) });
       if (!r.ok) throw new Error('not saved');
-      box.innerHTML = `<em>${b.dataset.v === 'useful' ? 'Noted: useful' : b.dataset.v === 'knew' ? 'Held back for 30 days' : 'Marked not right'}</em>`;
+      box.innerHTML = `<em>${b.dataset.v === 'useful' ? 'Noted: useful' : b.dataset.v === 'knew' ? 'Held back for 30 days' : 'Sent, thank you'}</em>`;
       if (b.dataset.v !== 'useful') li.classList.add('held');
     } catch (e) { box.querySelectorAll('button').forEach(x => x.disabled = false); }
   });

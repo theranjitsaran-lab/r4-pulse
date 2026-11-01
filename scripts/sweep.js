@@ -13,12 +13,12 @@ const role = (process.argv.find(a => a.startsWith('--role=')) || '--role=owner')
 const drill = require('../fixtures/drill.json').data.accounts.filter(a => a.level1 !== 6714).sort((a, b) => b.visits.length - a.visits.length);
 const SCREENS = ['#pulse', '#customers', '#customers?view=overview', '#customers?view=conversations', '#customers?view=opportunities', '#customers?view=grid', '#customers?view=whitespace', '#customers?view=margin',
   '#customers?view=slipping', '#customers?view=gaps', '#customers?view=rounds', '#customers?view=destruction', '#customers?view=overview&line=bin', `#customer/${drill[0].level1}`, '#customer/12530',
-  '#pricing', '#pricing?code=B3', '#numbers', '#activity', '#activity?tab=warehouse', '#settings', '#classic'];
+  '#pricing', '#pricing?code=B3', '#numbers', '#activity', '#numbers?tab=warehouse', '#how', '#settings', '#classic'];
 
 // what R4 users must not see while costs are not final
 const COSTS = [/\bMargin\b/, /Renegotiate/, /\bRe-route\b/, /\bDrop\b/, /below cost/i, /Cost est\./, /cost to serve(?! not ready)/i, /to serve est\./, /of revenue kept/, /Left, provisional/, /Gross margin(?! by line of business\s+Not costed)/, /How to improve the margin/, /saves about/, /Route time est\./];
 // what nobody at R4 should ever read
-const TEXT = [/rates\.js/, /\bnode scripts/, /load_gl/, /gl_month/, /\bClaude\b/, /kpi\.monthly/, /storage_rate_hist/, /storage_retention/, /status I\b/, /not built yet/i, /\bundefined\b/, /\bNaN\b/, /\$-/, /◇/, /est\.\./, /\best\. est\./];
+const TEXT = [/to confirm with Anne/, /ZCTA/, /median R3/, /centroid/i, /zcta\.json/, /npm run/, /rates\.js/, /\bnode scripts/, /load_gl/, /gl_month/, /\bClaude\b/, /kpi\.monthly/, /storage_rate_hist/, /storage_retention/, /status I\b/, /not built yet/i, /\bundefined\b/, /\bNaN\b/, /\$-/, /◇/, /est\.\./, /\best\. est\./];
 const ZEROS = [/▼ ?0%/, /▲ ?0%/, /\b0 services on 0 routes/, /won this month \$0/, /(\$[\d.]+[KM]?)[–-]\1\b/, /\b0 called/];
 
 async function main() {
@@ -44,6 +44,7 @@ async function main() {
       await page.waitForTimeout(400);
       // folded sections count: a phone user can open them
       if (hash === '#pulse') { const h = await page.evaluate(() => document.documentElement.scrollHeight); console.log(`     Home is ${h}px, ${(h / 844).toFixed(1)} phone screens`); if (h > 2 * 844) { hits++; console.log('HIT  Home is over two phone screens'); } }
+      if (hash === '#pulse') { const n = await page.evaluate(() => { const e = document.querySelector('#h2-head'); return e ? Math.round(e.getBoundingClientRect().height / parseFloat(getComputedStyle(e).lineHeight)) : 0; }); if (n > 2) { hits++; console.log(`HIT  the headline runs to ${n} lines`); } }
       if (hash.startsWith('#pricing')) await page.click('#q-add').catch(() => {});   // a quote line, which once showed its margin
       await page.evaluate(() => document.querySelectorAll('details').forEach(d => { d.open = true; }));
       await page.waitForTimeout(150);

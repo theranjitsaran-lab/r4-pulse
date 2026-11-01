@@ -6,7 +6,7 @@ import { YARD } from './routemap.js';
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 // a frame on the yard and the middle nine-tenths of the points, so one far stop never shrinks the city
-export function areaFrame(pts, W, H, { pad = 18, trim = .04 } = {}) {
+export function areaFrame(pts, W, H, { pad = 32, trim = .04 } = {}) {
   const lat = pts.map(p => p[0]).sort((a, b) => a - b), lon = pts.map(p => p[1]).sort((a, b) => a - b);
   const q = (a, f) => a[Math.min(a.length - 1, Math.max(0, Math.round(f * (a.length - 1))))];
   const box = [Math.min(q(lat, trim), YARD[0]), Math.max(q(lat, 1 - trim), YARD[0]), Math.min(q(lon, trim), YARD[1]), Math.max(q(lon, 1 - trim), YARD[1])];

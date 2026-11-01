@@ -97,6 +97,14 @@ export function heldNotBilled(accounts, PR) {
   return { rows, month: PR.storage.length ? PR.storage[0].month : null, gap: sum(rows, r => r.gap), none: rows.filter(r => r.none) };
 }
 
+// Not billed, split so the figure holds up: R4's own accounts and placeholders out, and an account with no
+// invoice in the last twelve months marked dormant. invoiced: level1 → twelve months' revenue.
+export function splitNotBilled(rows, invoiced, internal) {
+  const kept = rows.filter(r => !internal(r.customer)).map(r => ({ ...r, dormant: !(invoiced.get(r.level1) > 0) }));
+  const active = kept.filter(r => !r.dormant), dormant = kept.filter(r => r.dormant);
+  return { rows: kept, active, dormant, activeBoxes: sum(active, r => r.gap), dormantBoxes: sum(dormant, r => r.gap), internalBoxes: sum(rows.filter(r => internal(r.customer)), r => r.gap) };
+}
+
 // The grid as an SVG string: cells in reading order, each block's cells together and coloured by
 // state; data-b on each cell names its block for the hover.
 export function gridSvg(G, { width = 900, size = 9, gap = 2 } = {}) {

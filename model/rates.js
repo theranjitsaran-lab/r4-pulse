@@ -70,7 +70,7 @@ const FIXED = {
   centreHr:   { v: 25.05, u: '$ per hour', c: 'measured',
     d: 'ADP payroll, Service Centre, loaded. No hours volume in the database; not pool-derived' },
   avgMiles:   { v: 11.4,  u: 'miles from the yard', c: 'observed',
-    d: 'volume-weighted mean distance to 150 postcode centroids' },
+    d: 'volume-weighted mean distance to 150 postcode centres' },
   // Used only where an account has no S5 weight of its own. S5 lb ÷ bin services on work orders
   // carrying S5 and a single bin code, September 2025 to August 2026.
   lbPerBin:   { v: { B2: 219.3, B3: 34.9, B4: 121.7, B6: 15.7, all: 74.5 }, u: 'lb per bin service', c: 'estimate',

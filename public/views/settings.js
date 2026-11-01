@@ -61,7 +61,7 @@ function draw(main, S) {
     </section>`).join('')}
     ${pcCard(S)}
     ${S.history && S.history.length ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Changes</h2><small>newest first</small></div><ul class="st-hist">${S.history.map(h => `<li><span>${/^pc:/.test(h.key) ? `Postcode for account ${esc(h.key.slice(3))}: <b>${+h.value ? esc(String(Math.round(h.value)).padStart(5, '0')) : 'removed'}</b>` : `${esc((S.notes[h.key] || [h.key])[0])}: <b>${esc(fmt(h.key, h.value))}</b>`}</span><span>${esc(h.who)} · ${esc(when(h.at))}</span></li>`).join('')}</ul></section>` : ''}
-    <section class="h2-card" data-rv><details class="fold"><summary><h3>The rates</h3><span class="sub">model/rates.js · GL pools over the database's volumes · open</span></summary>
+    <section class="h2-card" data-rv><details class="fold"><summary><h3>The rates</h3><span class="sub">ledger costs over twelve months' volumes · open</span></summary>
       <ul class="st-rates">${S.rates.map(r => `<li><b>${esc(r.key)}</b><span class="v">${typeof r.value === 'number' ? esc(+r.value.toFixed(4) + '') : esc(Object.entries(r.value).map(([k, v]) => `${k} ${v}`).join(', '))} <small>${esc(r.unit || '')}</small></span><span class="fl">${esc(r.flag || '')}</span><span class="d">${esc(r.derivation || '')}</span></li>`).join('')}</ul></details></section>
   </div>`;
 
