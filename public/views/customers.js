@@ -3,6 +3,7 @@
 // revenue, change on the twelve months before, and gross margin (est. means modelled).
 import { customerTable, falling, rising, tableHtml, sortRows, COLUMNS } from '/components/custtable.js';
 import { dataTable, kOnly } from '/components/datatable.js';
+import { accountFilters, carryHash } from '/components/acctfilters.js';
 import { dailyFrom, addMonths } from '/components/projection.js';
 import { sparkline, money0, moneyK } from '/components/chart.js';
 import { buildMargins, marginSummary, marginAction, accountLines, accountCosts, costParts, PARTS, FAMILY_NAMES } from '/components/margin.js';
@@ -119,8 +120,8 @@ export async function render(main, C, params) {
 }
 
 // the view tabs, the same on every Customers view; Up and down and All are kept for old links only
-// the search carries across the tabs, as it stands when the tab is tapped
-const goView = v => { const q = new URLSearchParams(location.hash.split('?')[1] || '').get('q'); location.hash = '#customers?view=' + v + (q ? '&q=' + encodeURIComponent(q) : ''); };
+// search, filters and the months switch carry across the tabs, as they stand when the tab is tapped
+const goView = v => { location.hash = carryHash('#customers?view=' + v, location.hash); };
 if (typeof document !== 'undefined') {
   document.addEventListener('click', e => { const a = e.target.closest('.bar .views a[href^="#customers?view="]'); if (a) { e.preventDefault(); goView(new URLSearchParams(a.getAttribute('href').split('?')[1]).get('view')); } });
   document.addEventListener('change', e => { if (e.target.matches('.c2-viewpick')) goView(e.target.value); });
@@ -227,7 +228,7 @@ async function whitespace(main, C, params) {
   </div>`;
   const calls = new Map(CA.map(c => [c.level1, c]));
   const opp = (r, x) => { const c = r.cells[x.key]; return !c.have && c.opp > 0 ? c.opp : 0; };
-  dataTable(main.querySelector('#ws-t'), { key: 'crosssell', who: whoAmI(), rows, noun: 'accounts', placeholder: 'Find an account', search: r => r.customer, totalLabel: 'Not bought yet, total',
+  dataTable(main.querySelector('#ws-t'), { key: 'crosssell', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows, noun: 'accounts', placeholder: 'Find an account', search: r => r.customer, totalLabel: 'Not bought yet, total',
     cols: [
       { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` },
       ...LINES.map(x => ({ k: x.key, l: x.short || x.name, fixed: true, get: r => opp(r, x), fmt: r => cell(r, x), total: 'sum', totalFmt: v => '+' + moneyK(v) })),
@@ -303,33 +304,25 @@ async function monthGrid(main, C, params) {
   const lastM = months[months.length - 1], lastName = new Date(lastM + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
   const top = lastMoves[0];
 
-  const shade = d => {
-    if (d == null) return { tone: 'var(--ink)', a: 4, strong: false };
-    const mag = Math.min(1, Math.abs(d) / 0.6);
-    if (Math.abs(d) < 0.1) return { tone: 'var(--ink)', a: 5, strong: false };
-    return { tone: d < 0 ? 'var(--bad)' : 'var(--good)', a: Math.round(14 + 66 * mag), strong: mag > 0.62 };
-  };
   const link = sv => `#customers?view=grid${sv !== 'total' ? '&series=' + sv : ''}`;
   main.innerHTML = `
   <div class="cust mg">
     <h1>Accounts</h1>
     ${tabsHtml('grid')}
-    <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (${LABELS.slipping}) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} Each cell below is one month against the six before it.</p>
+    <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (${LABELS.slipping}) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} A coloured cell is more than 25% and $5K from the account's own 12-month average.</p>
     <div class="tools">
       <div class="seg">${[['total', 'Storage and service'], ['storage', 'Storage'], ['service', 'Service']].map(([k, l]) => `<a href="${link(k)}" class="${k === which ? 'on' : ''}">${l}</a>`).join('')}</div>
-      <div class="key"><i style="background:color-mix(in srgb, var(--bad) 70%, var(--surface))"></i>down<i style="background:color-mix(in srgb, var(--bad) 25%, var(--surface));margin-left:var(--sp-2)"></i><i style="background:color-mix(in srgb, var(--ink) 5%, var(--surface))"></i>within 10%<i style="background:color-mix(in srgb, var(--good) 25%, var(--surface))"></i><i style="background:color-mix(in srgb, var(--good) 70%, var(--surface));margin-left:var(--sp-2)"></i>up · ${LABELS.gridColours.toLowerCase()}</div>
     </div>
     <div class="card"><div id="mg-t"></div></div>
     <p class="foot">Invoice month, posted runs. Storage bills in advance, so a month's storage is that month's boxes; service is the month before's work. Citadel apart. Figures in $K. Tap a row for the customer, a month for its invoices.</p>
   </div>`;
   const byId = new Map(grid.map(g => [g.s.level1, g.s]));
   const cellOf = (r, m) => { const i = months.indexOf(m), v = r[which], run = i >= 6 ? v.slice(i - 6, i).reduce((t, x) => t + x, 0) / 6 : 0; return { v: v[i], run, d: run > 0 ? v[i] / run - 1 : null }; };
-  dataTable(main.querySelector('#mg-t'), { key: 'monthgrid', who: whoAmI(), rows: grid.map(g => g.s), noun: 'of the largest accounts', placeholder: 'Find an account', search: r => r.customer,
+  dataTable(main.querySelector('#mg-t'), { key: 'monthgrid', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows: grid.map(g => g.s), noun: 'of the largest accounts', placeholder: 'Find an account', search: r => r.customer,
     cols: [{ k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` }],
     months: { list: months, get: (r, m) => r[which][months.indexOf(m)],
       cell: (r, m) => { const c = cellOf(r, m); return `<span data-inv-id="${r.level1}" data-inv-m="${m}" data-inv-name="${esc(r.customer)}" title="${esc(titleCase(r.customer))}: ${money0(c.v)} against its own ${money0(c.run)}">${kOnly(c.v)}</span>`; },
-      cellCls: (r, m) => { const sh = shade(cellOf(r, m).d); return 'tone' + (sh.strong ? ' strong' : ''); },
-      cellStyle: (r, m) => { const sh = shade(cellOf(r, m).d); return `--tone:${sh.tone};--a:${sh.a}%`; } },
+    },
     onRow: (r, e) => { if (!e.target.closest('[data-inv-id]') && byId.has(r.level1)) location.hash = '#customer/' + r.level1; },
   });
 }

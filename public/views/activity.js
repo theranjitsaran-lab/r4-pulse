@@ -27,7 +27,7 @@ const addDays = (d, n) => new Date(new Date(d + 'T00:00:00Z').getTime() + n * 86
 const dow = d => new Date(d + 'T00:00:00Z').getUTCDay();   // 0 Sun … 6 Sat
 const n0 = v => Math.round(v || 0).toLocaleString('en-US');
 const pl = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-const pct = v => (v > 0 ? '▲ ' : v < 0 ? '▼ ' : '') + Math.abs(Math.round(v * 100)) + '%';
+const pct = v => v >= 3 ? 'new' : v <= -1 ? 'stopped' : (v >= 0.01 ? '▲ ' : v <= -0.01 ? '▼ ' : '') + Math.abs(Math.round(v * 100)) + '%';
 // colour for a fifth or more against the norm, as everywhere else; thin routes carry their own word
 const dcls = v => v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat';
 

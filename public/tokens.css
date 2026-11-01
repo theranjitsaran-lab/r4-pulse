@@ -52,7 +52,11 @@
   --baseline:   #c7c7cc;
 
   /* ── status: exceptions only, always with a word or icon ── */
-  --good:       #0a7d0a;   /* delta up, as text */
+  --good:       #1a5a8a;   /* a move up, as text: blue, because green is the brand and never on a number */
+  --flag-dn:    #a8231c;   /* a month well below its row's own 12-month average */
+  --flag-dn-bg: #fbe4e1;
+  --flag-up:    #1a5a8a;   /* a month well above it */
+  --flag-up-bg: #e1edf6;
   --warn:       #9a5c00;   /* below median; the thin day (text-safe amber) */
   --bad:        #c62f2f;   /* below cost; down */
   --bad-bg:     #fdecec;

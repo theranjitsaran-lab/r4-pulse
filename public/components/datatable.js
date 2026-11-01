@@ -10,7 +10,7 @@
 //              total: 'sum', or (rows) => html
 //     filters  [{ k, l, options: [[value, label]], test: (row, value) => boolean }]
 //     months   { list: [every month, oldest first], est: [months in progress], get: (row, month) => value,
-//                cell?: (row, month) => html, cellCls?, cellStyle? (row, month) => string,
+//                cell?: (row, month) => html, flag?: false for no colour,
 //                sumCell?: (row, months) => html, totalCell?: (rows, months) => html }
 //     rest     true: what Show all would add is one 'All other' row, so the columns foot from the start
 //     ref      { label, get: month => value }: a reference row under the total
@@ -25,6 +25,12 @@ const monthName = m => new Date(m + 'T00:00:00Z').toLocaleDateString('en-GB', { 
 const kCell = v => v ? kOnly(v) : '—';
 
 // ── what can be tested without a page ──
+// A month earns colour only when it is more than 25% and $5K from its row's own 12-month average.
+export function monthFlag(v, year) {
+  const base = year.reduce((t, x) => t + (Number(x) || 0), 0) / (year.length || 1), d = (Number(v) || 0) - base;
+  if (Math.abs(d) <= 5000 || Math.abs(d) <= Math.abs(base) * .25) return '';
+  return d < 0 ? 'dn' : 'upx';
+}
 // the months shown, then the year to date and the last twelve, whatever the switch shows
 export function monthCols(M, span) {
   const last12 = M.list.slice(-12), year = M.list[M.list.length - 1].slice(0, 4), ytd = M.list.filter(m => m.startsWith(year));
@@ -34,7 +40,7 @@ export function monthCols(M, span) {
     ...M.list.slice(-span).map(m => ({
       k: m, l: monthName(m), month: m, fixed: true, est: !!(M.est && M.est.includes(m)), get: r => M.get(r, m), total: 'sum', totalFmt: kOnly, totalHtml: M.totalCell ? rows => M.totalCell(rows, [m]) : null,
       fmt: r => M.cell ? M.cell(r, m) : kCell(M.get(r, m)),
-      cellCls: M.cellCls ? r => M.cellCls(r, m) : null, cellStyle: M.cellStyle ? r => M.cellStyle(r, m) : null,
+      cellCls: M.flag === false ? null : r => monthFlag(M.get(r, m), last12.map(x => M.get(r, x))),
     })),
     sum('ytd', 'YTD', ytd, { first: true }),
     sum('l12', '12 months', last12, { sorted: true }),
@@ -105,8 +111,8 @@ export function dataTable(el, o) {
   el.classList.add('dt');
   el.innerHTML = `<div class="dt-tools">
       ${o.search ? `<input class="dt-find" type="search" placeholder="${esc(o.placeholder || 'Find')}" aria-label="${esc(o.placeholder || 'Find')}" value="${esc(st.q)}">` : ''}
-      <button type="button" class="dt-ftoggle" aria-expanded="false">${(o.filters || []).length ? 'Filters' : 'Options'}</button>
-      ${(o.filters || []).map(f => `<select class="dt-f" data-k="${f.k}" aria-label="${esc(f.l)}"><option value="">${esc(f.l)}</option>${f.options.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>`).join('')}
+      <button type="button" class="dt-ftoggle" aria-expanded="false">More</button>
+      ${(o.filters || []).filter(f => !f.hidden).map(f => `<select class="dt-f" data-k="${f.k}" aria-label="${esc(f.l)}"><option value="">${esc(f.l)}</option>${f.options.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>`).join('')}
       ${o.months ? '<span class="seg dt-span" role="group" aria-label="Months shown"><button type="button" data-span="3">3 months</button><button type="button" data-span="12">12 months</button></span>' : ''}
       <details class="dt-cols"><summary>Columns</summary><div class="dt-colbox"></div></details>
       <select class="dt-views" aria-label="Saved views"></select>
@@ -114,7 +120,8 @@ export function dataTable(el, o) {
     </div>
     <div class="dt-chips"></div>
     <div class="dt-scroll"><table class="dt-t"></table></div>
-    <div class="dt-more"></div>`;
+    <div class="dt-more"></div>
+    ${o.months && o.months.flag !== false ? `<div class="dt-legend">${o.months.est && o.months.est.length ? '<span><i class="est"></i>est.: not billed yet</span>' : ''}<span><i class="dn"></i>more than 25% and $5K below the row\u2019s own 12-month average</span><span><i class="upx"></i>more than 25% and $5K above it</span></div>` : ''}`;
   const $ = s => el.querySelector(s), table = $('.dt-t');
   const keep = () => history.replaceState(null, '', withState(location.hash, st, ns));
 
@@ -124,7 +131,7 @@ export function dataTable(el, o) {
     const col = cols.find(c => c.k === st.sort && c.get) || cols.find(c => c.sorted) || cols.find(c => c.get && !c.name) || cols[0];
     const sorted = sortRows(rows, col, st.sort ? st.dir : col.text ? 1 : -1);
     // the filter bar: selects and chips say the same thing
-    el.querySelectorAll('.dt-f').forEach(s => { s.value = st.f[s.dataset.k] || ''; });
+    el.querySelectorAll('.dt-f').forEach(s => { s.value = st.f[s.dataset.k] || ''; s.classList.toggle('on', !!s.value); });
     const chips = (o.filters || []).filter(f => st.f[f.k]).map(f => { const lab = (f.options.find(([v]) => v === st.f[f.k]) || [])[1] || st.f[f.k]; return `<button type="button" class="dt-chip" data-k="${f.k}">${esc(lab)} ×</button>`; });
     if (st.q) chips.unshift(`<button type="button" class="dt-chip" data-k="__q">“${esc(st.q)}” ×</button>`);
     $('.dt-chips').innerHTML = `<b>${rows.length.toLocaleString('en-US')}${rows.length !== o.rows.length ? ` of ${o.rows.length.toLocaleString('en-US')}` : ''}</b>${o.say || o.noun ? ` <span>${esc(o.say ? o.say(st, rows) : o.noun)}</span>` : ''}${chips.join('')}`;

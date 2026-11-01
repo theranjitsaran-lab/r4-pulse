@@ -50,7 +50,7 @@ function drawLines(el, V) {
     const rows = gridRows(G, C, group), margin = show === 'margin';
     const name = { k: 'name', l: group === 'ss' ? 'Kind' : 'Line', name: true, text: true, get: r => r.name };
     const months = margin ? {
-      list: G.months, est: G.est,
+      list: G.months, est: G.est, flag: false,
       get: (r, m) => { const i = at(m); return r.costed && C.priced[i] ? marginOver([r], [i], C.priced).margin : 0; },
       cell: (r, m) => { const i = at(m); if (!r.costed || !C.priced[i]) return '—'; return `<span data-cost="${m}">${pctOf(marginOver([r], [i], C.priced).pct)}</span>`; },
       sumCell: (r, ms) => r.costed ? pctOf(marginOver([r], ms.map(at), C.priced).pct) : '—',
@@ -84,7 +84,7 @@ export async function render(main, V, params = {}) {
   const G = V.gl;
 
   const kpis = `<section class="h2-kpis four" data-rv>
-    <div class="h2-kpi lead"><span>Invoiced in VCK, ${esc(monY(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${ly ? (Math.abs(last.core / ly.core - 1) < 0.005 ? 'level with a year ago' : `${last.core >= ly.core ? '▲' : '▼'} ${pc(Math.abs(last.core / ly.core - 1))} on a year ago`) : 'posted invoices'}</small></div>
+    <div class="h2-kpi lead"><span>Invoiced in VCK, ${esc(monY(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${ly ? (Math.abs(last.core / ly.core - 1) < 0.01 ? 'level with a year ago' : `${last.core >= ly.core ? '▲' : '▼'} ${pc(Math.abs(last.core / ly.core - 1))} on a year ago`) : 'posted invoices'}</small></div>
     <div class="h2-kpi"><span>Twelve-month average</span><b>${moneyK(avg12)}</b><small>a month, ${esc(mon(l12[0].month))} to ${esc(mon(last.month))}</small></div>
     <a class="h2-kpi" href="#opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(V.gap.gap)}</b><small>${V.gap.next ? `on ${esc(mon(V.gap.next, { month: 'long' }))}'s bill building est.` : 'on the latest bill'}</small></a>
     <div class="h2-kpi"><span>${G ? 'EBITDA, twelve months' : 'Best month of the twelve'}</span><b>${G ? moneyK(G.last12.ebitda_after) : moneyK(best.core)}</b><small>${G ? `${G.last12.revenue > 0 ? pc(G.last12.ebitda_after / G.last12.revenue) : '—'} of revenue, after discretionary` : esc(monY(best.month))}</small></div>

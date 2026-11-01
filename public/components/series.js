@@ -30,7 +30,7 @@ export function seriesOf(C) {
   return map;
 }
 
-export function deltaText(c) { return c == null ? 'new' : (c > 0 ? '▲ ' : c < 0 ? '▼ ' : '') + Math.abs(Math.round(c * 100)) + '%'; }
+export function deltaText(c) { if (c == null || c >= 3) return 'new'; if (c <= -1) return 'stopped'; return (c >= 0.01 ? '▲ ' : c <= -0.01 ? '▼ ' : '') + Math.abs(Math.round(c * 100)) + '%'; }
 // colour for a move of a fifth or more only; a smaller one keeps its arrow in ink (status marks exceptions)
 export function deltaCls(c) { return c == null ? 'flat' : c >= 0.2 ? 'up' : c <= -0.2 ? 'down' : 'flat'; }
 

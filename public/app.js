@@ -5,6 +5,7 @@
 //   #customer/<level1>          one customer
 //   #pricing, #activity         the tools
 import { getJson } from '/components/data.js';
+import { carryHash } from '/components/acctfilters.js';
 import { playIntro } from '/components/intro.js';
 import { loadAccess, costsVisible, isAdmin, landing } from '/components/access.js';
 import { freshStamp } from '/components/metrics.js';
@@ -129,4 +130,11 @@ loadAccess().then(() => {
   document.querySelectorAll('[data-screen="settings"]').forEach(a => { a.hidden = !isAdmin(); });
   if (!location.hash && landing()) history.replaceState(null, '', landing());
   show();
+});
+
+// the top tabs keep search, filters and the months switch where they apply
+document.getElementById('nav')?.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="#"]'); if (!a) return;
+  const to = carryHash(a.getAttribute('href'), location.hash);
+  if (to !== a.getAttribute('href')) { e.preventDefault(); location.hash = to; }
 });

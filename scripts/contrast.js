@@ -17,7 +17,7 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
 const PAIRS = [
   ...['ink', 'ink-2', 'ink-3', 'ink-4'].flatMap(t => ['surface', 'ground', 'well'].map(g => [t, g, 4.5])),
   ['brand', 'surface', 4.5], ['brand', 'ground', 4.5],
-  ['good', 'surface', 4.5], ['warn', 'surface', 4.5], ['bad', 'surface', 4.5],
+  ['flag-dn', 'flag-dn-bg', 4.5], ['flag-up', 'flag-up-bg', 4.5], ['good', 'surface', 4.5], ['warn', 'surface', 4.5], ['bad', 'surface', 4.5],
   ['warn', 'warn-bg', 4.5], ['bad', 'bad-bg', 4.5],
   ['hero-ink', 'hero-bg', 4.5], ['hero-accent', 'hero-bg', 4.5], ['hero-accent', 'hero-bg-2', 4.5],
   ['hero-ink', 'lever-1', 4.5], ['hero-ink', 'lever-2', 4.5], ['ink-on-light', 'lever-3', 4.5], ['ink-on-light', 'lever-4', 4.5],

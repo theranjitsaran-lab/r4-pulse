@@ -42,16 +42,12 @@
 }
 
 /* MG_CSS */
-.mg .dt-t td.tone { background: color-mix(in srgb, var(--tone) var(--a), var(--surface)); }
-.mg .dt-t td.tone.strong { color: var(--surface); font-weight: 600; }
 .mg .dt-t td [data-inv-id] { cursor: pointer; }
 .ws .opp { border: var(--hair) dashed var(--ink-5); background: none; color: var(--ink-2); font: inherit; font-weight: 600; padding: 0 var(--sp-1); border-radius: var(--r-sm); cursor: pointer; }
 .ws .opp:hover { border-color: var(--brand); color: var(--brand); }
 .ws .none { color: var(--ink-5); }
 .mg .lede { font-size: var(--fs-head); line-height: 1.45; color: var(--ink-2); margin: 0 0 var(--sp-3); max-width: calc(var(--u) * 225); }
 .mg .tools { display: flex; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; align-items: center; margin-bottom: var(--sp-3); }
-.mg .key { display: flex; gap: var(--sp-2); align-items: center; font-size: var(--fs-source); color: var(--ink-3); }
-.mg .key i { display: inline-block; width: var(--sp-6); height: var(--sp-3); border-radius: var(--r-xs); }
 @media (max-width: 760px) {
 }
 

@@ -147,6 +147,8 @@ select.on-phone { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2) v
 /* The one table and filter bar (components/datatable.js) */
 .dt-tools { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; margin-bottom: var(--sp-2); }
 .dt-find { flex: 1 1 calc(var(--u) * 40); min-width: 0; padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); font: inherit; font-size: var(--fs-sm); background: var(--surface); color: var(--ink); }
+.dt-f { border-radius: var(--r-pill) !important; }
+.dt-f.on { border-color: var(--brand) !important; background: var(--tint-brand) !important; color: var(--ink) !important; font-weight: 600; }
 .dt-f, .dt-views { font: inherit; font-size: var(--fs-label); padding: var(--sp-1) var(--sp-2); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); background: var(--surface); color: var(--ink-2); max-width: calc(var(--u) * 40); }
 .dt-csv, .dt-cols summary { font: inherit; font-size: var(--fs-label); padding: var(--sp-1) var(--sp-2); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); background: var(--surface); color: var(--brand); font-weight: 600; cursor: pointer; }
 .dt-cols { position: relative; }
@@ -178,6 +180,14 @@ select.on-phone { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2) v
 .dt-t tr.dt-child td { font-size: var(--fs-tiny); color: var(--ink-3); background: var(--well); }
 .dt-t tr.dt-child td:first-child { padding-left: var(--sp-6); }
 .dt-caret { display: inline-block; width: var(--sp-3); color: var(--ink-4); }
+.dt-t td.dn { background-color: var(--flag-dn-bg); color: var(--flag-dn); font-weight: 600; }
+.dt-t td.upx { background-color: var(--flag-up-bg); color: var(--flag-up); font-weight: 600; }
+.dt-t td.dn a, .dt-t td.upx a { color: inherit; }
+.dt-legend { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); margin-top: var(--sp-2); font-size: var(--fs-tiny); color: var(--ink-3); }
+.dt-legend i { display: inline-block; width: var(--sp-4); height: var(--sp-3); margin-right: var(--sp-1); vertical-align: -1px; border-radius: var(--r-xs); border: var(--hair) solid var(--rule-3); }
+.dt-legend i.dn { background: var(--flag-dn-bg); border-color: var(--flag-dn); }
+.dt-legend i.upx { background: var(--flag-up-bg); border-color: var(--flag-up); }
+.dt-legend i.est { background-image: repeating-linear-gradient(135deg, transparent 0 var(--hatch), color-mix(in srgb, var(--ink) 25%, transparent) var(--hatch) calc(var(--hatch) * 2)); }
 .dt-t .dt-sum { border-left: var(--hair) solid var(--rule-4); }
 .dt-t th.est, .dt-t td.est { background-image: repeating-linear-gradient(135deg, transparent 0 calc(var(--hatch) * 2), color-mix(in srgb, var(--ink) 9%, transparent) calc(var(--hatch) * 2) calc(var(--hatch) * 3)); }
 .dt-est { font-weight: 600; color: var(--ink-3); }
@@ -191,7 +201,7 @@ select.on-phone { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2) v
 @media (max-width: 700px) {
   .dt-f, .dt-views { flex: 1 1 40%; max-width: none; }
   .dt-ftoggle { display: block; }
-  .dt:not(.dt-open) .dt-f, .dt:not(.dt-open) .dt-cols, .dt:not(.dt-open) .dt-views, .dt:not(.dt-open) .dt-csv { display: none; }
+  .dt:not(.dt-open) .dt-cols, .dt:not(.dt-open) .dt-views, .dt:not(.dt-open) .dt-csv { display: none; }
   .dt-t th:first-child, .dt-t td:first-child { max-width: calc(var(--u) * 38); }
   .dt-l { display: none; }
   .dt-p { display: inline; }

@@ -162,8 +162,10 @@ series; crosshair tooltip; drawn at their on-screen width. Colour follows the en
 series colour. Real sparklines on customer rows.
 
 **Status colour** marks exceptions only and always comes with a word: red below cost and down,
-amber below median, green only for a delta that is up. Sound is ink. A delta wears colour only at a fifth
-or more (±20%); smaller moves keep the arrow in ink, and sparklines are ink with only the latest point coloured.
+amber below median, blue for a delta that is up. Green is the brand and never on a number. Sound is ink. A delta wears
+colour only at a fifth or more (±20%); smaller moves keep the arrow in ink, no arrow under 1%, "new" or "stopped" past
+300%. In a month table a cell is coloured only when more than 25% and $5K from its row's own 12-month average: red below,
+blue above. Sparklines are ink with only the latest point coloured.
 
 **Copy.** One idea per row: a number and one line; detail on tap. Show what changed, not what Anne
 and Mike already know. Estimated figures carry "est.". Route-based costs (bins, handling, delivery) show

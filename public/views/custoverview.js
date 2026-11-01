@@ -8,12 +8,13 @@ import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { pricePosition, sizePeers, FAMS } from '/components/custbook.js';
 import { customerView } from '/components/home2data.js';
 import { costParts, PARTS, marginAction, FAMILY_NAMES } from '/components/margin.js';
-import { serviceMedians, slippingAccounts, risingAccounts, CITADEL } from '/components/levers.js';
+import { serviceMedians, slippingAccounts, CITADEL } from '/components/levers.js';
 import { LINES } from '/components/whitespace.js';
 import { openPop } from '/components/pop.js';
 import { dataTable, kOnly } from '/components/datatable.js';
 import { costsVisible, whoAmI, myRole } from '/components/access.js';
-import { LABELS, changeWord, isLumpy, SIZE_BANDS, inBand } from '/components/metrics.js';
+import { LABELS, changeWord, isLumpy } from '/components/metrics.js';
+import { accountFilters } from '/components/acctfilters.js';
 import { reveal } from '/components/motion.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
@@ -88,7 +89,7 @@ export async function render(main, C, params, tabs) {
     { k: 'opp', l: 'Cross-sell est., a month', short: 'Cross-sell est.', get: r => r.opp ? r.opp / 12 : 0, fmt: r => r.opp > 0 ? cellBtn(r, moneyK(r.opp / 12), 'opp') : '—' },
     { k: 'gap', l: 'Under the book, a year', short: 'Under book', get: r => r.gap, fmt: r => r.gap > 0 ? cellBtn(r, moneyK(r.gap), 'gap') : '—' },
     { k: 'spark', l: '13 months', csv: () => '', fmt: r => r.spark ? sparkline(r.spark, { w: 84, h: 22, cls: 'service' }) : '' },
-    ...(costsVisible() ? [{ k: 'pc', l: 'Margin est.', get: r => r.pc, fmt: r => r.pc == null ? '—' : cellBtn(r, `<span class="${r.margin < 0 ? 'is-bad' : r.pc < .15 ? 'is-warn' : ''}">${Math.round(r.pc * 100)}%</span>${r.review ? '<small> review</small>' : ''}`, 'margin') }] : []),
+    ...(costsVisible() ? [{ k: 'pc', l: 'Margin est.', def: true, get: r => r.pc, fmt: r => r.pc == null ? '—' : cellBtn(r, `<span class="${r.margin < 0 ? 'is-bad' : r.pc < .15 ? 'is-warn' : ''}">${Math.round(r.pc * 100)}%</span>${r.review ? '<small> review</small>' : ''}`, 'margin') }] : []),
   ];
   // a line of business chosen: who buys it, with its price and units beside the months
   const famCols = key => [name,
@@ -96,17 +97,10 @@ export async function render(main, C, params, tabs) {
     { k: 'units', l: 'Units, a year', short: 'Units', def: true, get: r => r.fam && r.fam[key] && r.fam[key].units, fmt: r => r.fam && r.fam[key] ? Math.round(r.fam[key].units).toLocaleString('en-US') : '—' },
     ...(costsVisible() ? [
       { k: 'costPer', l: 'Cost a unit est.', get: r => r.fam && r.fam[key] && r.fam[key].costPer, fmt: r => { const f = r.fam && r.fam[key]; return f && f.costPer ? cellBtn(r, unitMoney(f.costPer, f.unit), 'price') : '—'; } },
-      { k: 'fmargin', l: 'Margin est.', get: r => r.fam && r.fam[key] ? r.fam[key].revenue - r.fam[key].cost : null, fmt: r => { const f = r.fam && r.fam[key]; if (!f) return '—'; const v = f.revenue - f.cost; return cellBtn(r, `<span class="${v < 0 ? 'is-bad' : ''}">${signedK(v)}</span>`, 'margin'); } },
+      { k: 'fmargin', l: 'Margin est.', def: true, get: r => r.fam && r.fam[key] ? r.fam[key].revenue - r.fam[key].cost : null, fmt: r => { const f = r.fam && r.fam[key]; if (!f) return '—'; const v = f.revenue - f.cost; return cellBtn(r, `<span class="${v < 0 ? 'is-bad' : ''}">${signedK(v)}</span>`, 'margin'); } },
     ] : []),
   ];
-  const slipIds = new Set(slip.map(s => s.level1)), rising = new Set(risingAccounts(C).map(s => s.level1));
-  const trend = (r, v) => v === 'slip2k' ? slipIds.has(r.level1) && r.d <= -2000 : v === 'slip' ? slipIds.has(r.level1) : v === 'rise' ? rising.has(r.level1) : !slipIds.has(r.level1) && !rising.has(r.level1);
-  const filters = [
-    { k: 'line', l: 'Line of business', options: FAMS.map(f => [f.key, f.name]), test: (r, v) => !!(r.fam && r.fam[v]) },
-    { k: 'size', l: 'Account size', options: SIZE_BANDS.map(b => [b[0], b[1]]), test: (r, v) => inBand(v, r.ltm) },
-    { k: 'trend', l: 'Trend', options: [['slip', 'Slipping'], ['slip2k', 'Slipping over $2K a month'], ['rise', 'Rising'], ['steady', 'Neither']], test: trend },
-    { k: 'book', l: 'Against the book', options: [['under', 'Under the book']], test: r => r.gap > 0 },
-  ];
+  const filters = accountFilters(VW, C);
   const role = myRole();
   const views = [
     ...(role === 'owner' || role === 'admin' ? [{ name: 'Slipping over $2K a month', q: 'f_trend=slip2k' }] : []),

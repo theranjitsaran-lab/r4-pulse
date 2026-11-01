@@ -14,7 +14,6 @@ export const LABELS = {
   crossSell: 'a month if each account bought the lines its peers buy',
   volume: 'Work volume',
   value: 'Value of work',
-  gridColours: 'Colours: each month against the six months before it',
 };
 
 const WEEKS = 8;
@@ -93,8 +92,9 @@ export function topActions({ lines = [], calls = [] }, n = 3) {
 // A change as a word: a percentage, or "new" when the month before was too small for a percentage to mean anything
 export function changeWord(v, base = null) {
   if (v == null) return '—';
-  if ((base != null && base < 500) || v >= 5) return 'new';
-  return `${v > 0.005 ? '▲ ' : v < -0.005 ? '▼ ' : ''}${Math.abs(Math.round(v * 100))}%`;
+  if ((base != null && base < 500) || v >= 3) return 'new';
+  if (v <= -1) return 'stopped';
+  return `${v >= 0.01 ? '▲ ' : v <= -0.01 ? '▼ ' : ''}${Math.abs(Math.round(v * 100))}%`;
 }
 
 // a percentage misleads on a small base or on a line that swings by nature: show the dollars

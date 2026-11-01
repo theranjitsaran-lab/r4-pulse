@@ -238,6 +238,32 @@ test('Step 4: an account\'s lines add to its row, whatever is on no priced line 
   assert.equal(accountLines(AM, AL, 9), null);
 });
 
+test('Step 5: colour only past 25% and $5K of the row\'s own year; arrows and words', async () => {
+  const { monthFlag } = await import('../public/components/datatable.js');
+  const { changeWord } = await import('../public/components/metrics.js');
+  const { deltaText } = await import('../public/components/series.js');
+  const flat = v => Array(12).fill(v);
+  assert.equal(monthFlag(14000, flat(10000)), '', '40% but only $4K');
+  assert.equal(monthFlag(106000, flat(100000)), '', '$6K but only 6%');
+  assert.equal(monthFlag(70000, flat(100000)), 'dn');
+  assert.equal(monthFlag(130000, flat(100000)), 'upx');
+  assert.equal(monthFlag(125000, flat(100000)), '', 'exactly 25% is not more than 25%');
+  for (const f of [changeWord, deltaText]) {
+    assert.equal(f(0.004), '0%'); assert.equal(f(-0.009), '1%', 'no arrow under 1%');
+    assert.equal(f(0.05), '▲ 5%'); assert.equal(f(-0.2), '▼ 20%');
+    assert.equal(f(3.5), 'new'); assert.equal(f(-1.18), 'stopped');
+  }
+});
+
+test('Step 5: filters carry between the account lists; the months switch wherever there are months', async () => {
+  const { carryHash } = await import('../public/components/acctfilters.js');
+  assert.equal(carryHash('#customers?view=grid', '#customers?view=overview&q=city&f_line=bin&span=3&sort=l12'), '#customers?view=grid&q=city&f_line=bin&span=3');
+  assert.equal(carryHash('#opportunities', '#customers?view=overview&q=city&f_size=m&span=3'), '#opportunities?q=city&f_size=m');
+  assert.equal(carryHash('#numbers', '#customers?view=overview&q=city&f_line=bin&span=3'), '#numbers?span=3');
+  assert.equal(carryHash('#pulse', '#customers?view=overview&q=city&span=3'), '#pulse');
+  assert.equal(carryHash('#customers', '#numbers?span=12&group=ss'), '#customers?span=12');
+});
+
 test('#38 not billed: internal out, dormant apart by invoices rather than by name', async () => {
   const { splitNotBilled } = await import('../public/components/storage.js');
   const { isInternal } = await import('../public/components/metrics.js');
