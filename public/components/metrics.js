@@ -5,6 +5,7 @@ import { quantile } from './strip.js';
 export const LABELS = {
   invoiced: 'Invoiced in VCK',
   veriShred: 'Done is what drivers confirmed in Veri-Shred.',
+  estWord: 'est. means estimated',
   normalDay: d => `normal for a ${d}`,
   normalRoute: 'normal for this route',
   slipping: 'still invoicing, the last 3 months at least 10% and $250 a month below the account\'s own prior 12',
@@ -65,4 +66,26 @@ export function tieOut(P) {
   if (!r) return null;
   const core = r.storage + r.service - r.citadel, moved = core - last.core;
   return { month: last.month, invoices: r.invoices, core, shown: last.core, moved, ok: Math.abs(moved) < 1 };
+}
+
+// Yesterday in a line: services against normal for that day, and the routes that ran thin against their own.
+export const THIN = 0.6;
+const routeWord = r => /\d/.test(r || '') ? r : String(r || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase());
+export function yesterdayLine(P, A, date = A.latestDone) {
+  const rows = A.routeDays.filter(r => r.date === date && r.route && r.route !== '--' && r.services_done > 0);
+  if (!rows.length) return null;
+  const done = rows.reduce((t, r) => t + r.services_done, 0), name = new Date(date + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' });
+  const normal = normalForDay(P, A, date), norms = routeNorms(A, date);
+  const thin = rows.filter(r => norms[r.route] && r.services_done < THIN * norms[r.route].done).map(r => routeWord(r.route));
+  return { date, label: new Date(date + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' }), done, thin,
+    text: `${done.toLocaleString('en-US')} services on ${rows.length} route${rows.length === 1 ? '' : 's'}${normal != null ? `, ${Math.round(normal)} ${LABELS.normalDay(name)}` : ''}.${thin.length ? ` Thin: ${thin.join(', ')}.` : ''}` };
+}
+
+// Three things to act on: what changed first, then the calls most at stake; each with its owner and where it opens.
+const hrefOf = subject => { const s = String(subject || ''); return s.startsWith('account:') ? '#customer/' + s.slice(8) : s.startsWith('route:') || s === 'day' ? '#activity' : '#numbers'; };
+export function topActions({ lines = [], calls = [] }, n = 3) {
+  const short = t => String(t).replace(/ \(.*?\)/, '').replace(/ over the last three months.*$/, '').replace(/,? against its own run.*$/, '');
+  const a = lines.map(i => ({ owner: i.owner, text: i.text, key: i.key, subject: i.subject, href: hrefOf(i.subject) }));
+  const b = calls.map(c => ({ owner: 'anne', text: `${c.name}: ${short(c.ev)}`, key: 'call', subject: 'account:' + c.level1, href: '#customer/' + c.level1 }));
+  return [...a, ...b].slice(0, n);
 }

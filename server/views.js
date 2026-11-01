@@ -29,8 +29,7 @@ async function homeShared(D, L) {
   if (homeBase && homeBase.stamp === s) return homeBase.v;
   const V = L.home2data.homeView(D);
   const v = {
-    month: V.month, weeks: V.weeks, seg: V.seg, cust: V.cust, cross: V.cross, dens: V.dens, dest: V.dest,
-    lines: V.lines, bills: V.bills, points: V.points,
+    month: V.month, weeks: V.weeks, lines: V.lines, points: V.points, yesterday: L.metrics.yesterdayLine(D.P, D.A),
     latestDone: D.A.latestDone, monthly: D.P.monthly.slice(-2), tie: L.metrics.tieOut(D.P),
     changes: L.changes.changesFor(D.P, D.A), day: L.changes.daySentence(D.P, D.A),
   };
@@ -109,7 +108,7 @@ router.get('/numbers', async (req, res) => {
       const rc = D.R.routeCostsNow();
       const realBins = book.accounts.filter(a => a.fam.bin && D.R.routeFor(a.level1));
       numBase = { stamp: st, v: {
-        monthly, target: 1e6, tie: L.metrics.tieOut(D.P), citadelBridge: (D.P.tieout || []).slice(-2)[0] || null,
+        monthly, target: 1e6, month: L.home2data.monthView(D), dest: L.home2data.destructionView(D), tie: L.metrics.tieOut(D.P), citadelBridge: (D.P.tieout || []).slice(-2)[0] || null,
         gap: (() => { const m = L.home2data.monthView(D); return { gap: m.gap, next: m.next ? m.next.month : null }; })(),   // the same gap as Home
         gl: G ? { months: G.months, last12: L.gl.sumMonths(G.months, 12), overheadLines: G.overheadLines, loadedAt: D.G.loadedAt, source: D.G.source } : null,
         margin: { lines, accounts: book.accounts.length, deliveriesOn: !!(rc.deliveries && rc.deliveries.on), moveReal: book.accounts.filter(a => a.fam.movement && D.R.movementFor(a.level1)).length, binReal: { accounts: realBins.length, revenue: realBins.reduce((t, a) => t + a.fam.bin.revenue, 0), routeDays: rc.days, from: rc.from, to: rc.to } },
@@ -162,8 +161,9 @@ router.get('/home', async (req, res) => {
     const sell = { won: L.opps.wonIn(statuses), inPlay: { n: inPlay.length, value: inPlay.reduce((t, x) => t + (Number(x.value) || 0), 0) } };
     // what one more customer would save is a modelled route cost: not until costs are final
     const costs = seesCosts(req);
-    const plain = costs ? base : { ...base, points: base.points.filter(p => p.key !== 'location'), dens: base.dens ? { ...base.dens, saving: null, save: base.dens.save.map(({ saving, travel, ...r }) => r) } : null };
-    send(req, res, { ...plain, team, sell });
+    const plain = costs ? base : { ...base, points: base.points.filter(p => p.key !== 'location') };
+    const actions = L.metrics.topActions({ lines: team.trisha.lines, calls: team.anne.calls });
+    send(req, res, { ...plain, actions, sell });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

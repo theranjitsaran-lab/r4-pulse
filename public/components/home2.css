@@ -203,7 +203,7 @@ html.ask-open .h2-fab { display: none; }
 .h2-kpi .h2-parts span { color: inherit; }
 .h2-kpi .h2-parts b { font-family: var(--f-sans); font-size: var(--fs-tiny); font-weight: 600; letter-spacing: 0; }
 .h2-parts .rest { opacity: .75; }
-.h2-months { display: flex; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; margin-bottom: var(--sp-3); }
+.h2-months { display: flex; flex-wrap: nowrap; width: max-content; max-width: 100%; margin-bottom: var(--sp-2); }
 .h2-months button { white-space: nowrap; }
 button.h2-seg { border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
 button.h2-seg:hover { background: var(--tint-brand); }
@@ -242,3 +242,50 @@ button.h2-seg:hover { background: var(--tint-brand); }
 .cp-inv { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); margin: var(--sp-2) 0 var(--sp-4); font-size: var(--fs-label); color: var(--ink-3); }
 .cp-inv button { border: var(--hair) solid var(--rule-3); background: var(--surface); color: var(--brand); border-radius: var(--r-pill); padding: 0 var(--sp-3); font: inherit; cursor: pointer; }
 [data-inv-id] { cursor: pointer; }
+
+/* ── Home, compact: three figures in a row, lines as rows, yesterday, three things ── */
+.h2-kpis.bills, .h2-kpis.bills .gap { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.h2-kpis.bills .h2-kpi { padding: var(--sp-2); }
+.h2-kpis.bills .h2-kpi b { font-size: var(--fs-head); }
+.h2 .h2-tie { margin: calc(var(--sp-2) * -1) 0 0; padding: 0 var(--sp-1); }
+.h2-chi { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-2); }
+.h2-i { position: relative; flex: none; }
+.h2-i summary { list-style: none; cursor: pointer; color: var(--ink-4); font-size: var(--fs-head); line-height: 1; padding: var(--sp-1); }
+.h2-i summary::-webkit-details-marker { display: none; }
+.h2-i p { position: absolute; right: 0; top: 100%; z-index: 5; width: min(calc(var(--u) * 75), 76vw); margin: 0; padding: var(--sp-3); border-radius: var(--r); background: var(--surface); border: var(--hair) solid var(--rule-3); box-shadow: var(--shadow-pop); font-size: var(--fs-label); color: var(--ink-2); }
+.h2-rows { list-style: none; margin: 0; padding: 0; }
+.h2-lr { display: grid; grid-template-columns: minmax(0, 1fr) calc(var(--u) * 13) calc(var(--u) * 11) calc(var(--u) * 18); gap: var(--sp-2); align-items: center; width: 100%; padding: var(--sp-1) 0; min-height: var(--sp-10); border: 0; border-top: var(--hair) solid var(--rule); background: none; color: var(--ink); font: inherit; font-size: var(--fs-sm); text-align: left; cursor: pointer; }
+.h2-lr:hover { background: var(--tint-brand); }
+.h2-lr-n small { display: block; font-size: var(--fs-tiny); color: var(--warn); }
+.h2-lr b { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
+.h2-lr .h2-d { text-align: right; }
+.h2-lr .h2-mbs { grid-column: auto; margin: 0; width: calc(var(--u) * 18); height: var(--sp-6); }
+.h2-lr-tot { display: flex; justify-content: space-between; padding: var(--sp-2) 0 0; border-top: var(--hair) solid var(--rule-3); font-size: var(--fs-sm); font-weight: 650; font-variant-numeric: tabular-nums; }
+.h2-yest { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 var(--sp-2); color: var(--ink); text-decoration: none; font-size: var(--fs-body); }
+.h2-eyebrow { grid-column: 1 / -1; font-size: var(--fs-tiny); font-weight: 700; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--brand); }
+.h2-yest i { font-style: normal; color: var(--ink-5); }
+.h2-acts ul { list-style: none; margin: 0; padding: 0; display: grid; }
+.h2-acts li { padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); }
+.h2-acts li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+.h2-acts li a { display: block; color: var(--ink); text-decoration: none; font-size: var(--fs-sm); line-height: 1.3; }
+.h2-acts li b { display: inline-block; margin-right: var(--sp-1); font-size: var(--fs-tiny); font-weight: 700; color: var(--brand); text-transform: uppercase; letter-spacing: var(--track-label); }
+.h2-acts .fb { display: flex; gap: var(--sp-1); margin-top: 0; }
+.h2-acts .fb button { border: 0; background: none; padding: 0 var(--sp-2) 0 0; font: inherit; font-size: var(--fs-tiny); color: var(--ink-4); cursor: pointer; }
+.h2-acts .held { opacity: .5; }
+@media (max-width: 700px) {
+  .h2 { gap: var(--sp-3); padding-bottom: 0; }
+  .h2-card { padding: var(--sp-3); }
+  .h2-head { font-size: var(--fs-lead); margin: 0 0 var(--sp-2); }
+  .h2-bul a { font-size: var(--fs-sm); padding: var(--sp-1) 0; line-height: 1.3; }
+  .h2-ch { margin-bottom: var(--sp-1); }
+  .h2-lr { min-height: calc(var(--u) * 9); padding: 0; }
+  .h2-yest { font-size: var(--fs-sm); }
+  .h2-acts li { padding: var(--sp-1) 0; }
+  .h2-kpi small { line-height: 1.2; }
+  .h2-sum .h2-by { margin: 0 0 var(--sp-1); font-size: var(--fs-tiny); line-height: 1.2; }
+  .h2-kpis.bills .h2-kpi b { font-size: var(--fs-body-lg); }
+}
+@media (min-width: 900px) {
+  .h2-kpis.bills .h2-kpi { padding: var(--sp-3); }
+  .h2-kpis.bills .h2-kpi b { font-size: var(--fs-num-lg); }
+}

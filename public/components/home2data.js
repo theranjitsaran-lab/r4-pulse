@@ -213,8 +213,7 @@ export function pointsView(D, { month: m, cust, cross, dens, lines }) {
     const at = lines.meta[L].partial ? ` at day ${m.day}` : '';
     const dir = d == null || Math.abs(d) < 0.01 ? `level with ${mon(prev)}` : `${pc(d)} ${d > 0 ? 'ahead of' : 'behind'} ${mon(prev)}`;
     const parts = [up && `${up.name} up ${pc(up.pct)}`, down && `${down.name} down ${pc(down.pct)}`].filter(Boolean).join(', ');
-    const jobs = m.next.jobCount ? ` ${m.next.jobCount} job${m.next.jobCount === 1 ? '' : 's'} (${money(m.next.jobs)}) to check.` : '';
-    const say = `${LABELS.value}: ${mon(L)} is ${dir}${at} est.${parts ? `, ${parts}` : ''}. ${LABELS.volume}: ${m.vsLast == null ? '' : `${Math.abs(m.vsLast) < 0.02 ? 'level' : `${pc(m.vsLast)} ${m.vsLast > 0 ? 'ahead' : 'behind'}`}.`}${jobs}`;
+    const say = `${LABELS.value}: ${mon(L)} is ${dir}${at} est.${parts ? `, ${parts}` : ''}. ${LABELS.volume}: ${m.vsLast == null ? '' : `${Math.abs(m.vsLast) < 0.02 ? 'level' : `${pc(m.vsLast)} ${m.vsLast > 0 ? 'ahead' : 'behind'}`}.`}`;
     out.push({ key: 'activity', title: 'Activity', href: '#h2-lines', bullet: true, line: say, say });
   }
   const fall = cust.falling[0];
@@ -229,7 +228,7 @@ export function pointsView(D, { month: m, cust, cross, dens, lines }) {
   if (c0) {
     const ls = c0.lines.filter(l => !l.have && l.opp > 0).map(l => l.name);
     const say = `Cross-sell is worth up to ${money(cross.totalMonth)} a month est. ${title(c0.customer)} is the largest to explore: ${money(c0.opp / 12)} a month in ${ls.join(' and ')}.`;
-    out.push({ key: 'cross', title: 'Cross-sell opportunities', href: '#customers?view=opportunities', bullet: true, line: say, say });
+    out.push({ key: 'cross', title: 'Cross-sell opportunities', href: '#customers?view=opportunities&kind=cross', bullet: true, line: say, say });
   }
   // a briefing item has to be worth about $25K a year; smaller ones stay on their own screen
   const p0 = dens && dens.save[0];

@@ -167,6 +167,12 @@ export function lineView(D, n = 13) {
   return { months: shown, pick, latest, rows, totals, meta, lastPriced: W.lastPriced };
 }
 
+// The month the picker opens on: the latest closed one. A month in progress is there to pick, hatched, not the default.
+export function closedMonth(LV) {
+  const closed = LV.pick.filter(m => !LV.meta[m].partial);
+  return closed.length ? closed[closed.length - 1] : LV.latest;
+}
+
 // The bills, each by its top three lines plus the rest, so the parts add up to the figure shown.
 //   A bill = its month's storage + the month before's work.
 export function billBreakdown(D, billMonth, total, n = 3) {
