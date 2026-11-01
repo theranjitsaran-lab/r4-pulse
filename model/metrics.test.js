@@ -123,3 +123,26 @@ test('an account\'s invoices add up to the month shown for it', () => {
   }
   assert.ok(checked > 10, `only ${checked} checked`);
 });
+
+test('the row total is the headline for the month picked, and the picker opens on the latest closed month', async () => {
+  const { lineView, closedMonth } = await import('../public/components/linework.js');
+  const { monthView } = await import('../public/components/home2data.js');
+  const d = D(), L = lineView(d);
+  for (const m of L.pick) {
+    const sum = L.rows.reduce((t, r) => t + r.by[m].v, 0);
+    assert.ok(Math.abs(sum - L.totals[m]) < 0.5, m);
+  }
+  const open = closedMonth(L), mv = monthView(d);
+  assert.ok(!L.meta[open].partial, 'never opens on a month in progress');
+  if (open === mv.workMonth) assert.ok(Math.abs(L.totals[open] - mv.next.central) < 1, `${L.totals[open]} against ${mv.next.central}`);
+  assert.equal(closedMonth({ pick: ['2026-09-01', '2026-10-01', '2026-11-01'], latest: '2026-11-01', meta: { '2026-09-01': {}, '2026-10-01': {}, '2026-11-01': { partial: true } } }), '2026-10-01');
+});
+
+test('three things to act on: what changed first, each with its owner and where it opens', async () => {
+  const { topActions } = await import('../public/components/metrics.js');
+  const a = topActions({ lines: [{ owner: 'mike', text: 'x', key: 'route', subject: 'route:MARK' }], calls: [{ level1: 8153, name: 'City of Chicago', ev: 'down $35K a month in total (service down $33K) over the last three months, against its own run' }, { level1: 1, name: 'A', ev: 'y' }, { level1: 2, name: 'B', ev: 'z' }] });
+  assert.equal(a.length, 3);
+  assert.equal(a[0].href, '#activity');
+  assert.equal(a[1].text, 'City of Chicago: down $35K a month in total');
+  assert.equal(a[1].href, '#customer/8153');
+});

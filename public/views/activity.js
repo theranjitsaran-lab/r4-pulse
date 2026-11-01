@@ -8,12 +8,11 @@
 // miles as the crow flies from US Census ZCTA centroids (public/data/zcta.json), visit cost from
 // the cost model at that distance.
 const YARD = [41.8307, -87.6573];   // 1301 W 35th St
-const THIN = 0.6;                   // a route day under 60% of its own norm is thin
 const miles = (a, b) => { const r = Math.PI / 180, R = 3958.8, dp = (b[0] - a[0]) * r, dl = (b[1] - a[1]) * r;
   return 2 * R * Math.asin(Math.sqrt(Math.sin(dp / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dl / 2) ** 2)); };
 import { money0, moneyK } from '/components/chart.js';
 import { titleCase, esc, loadRates } from '/components/data.js';
-import { routeNorms, LABELS } from '/components/metrics.js';
+import { routeNorms, LABELS, THIN } from '/components/metrics.js';
 import { costsVisible } from '/components/access.js';
 import { areaFrame, landLayer, postcodeLayer, yardMark, scaleBar } from '/components/areamap.js';
 import { densityByPostcode } from '/components/jobview.js';

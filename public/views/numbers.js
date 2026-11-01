@@ -9,6 +9,7 @@
 import { esc } from '/components/data.js';
 import { money0, moneyK } from '/components/chart.js';
 import { reveal } from '/components/motion.js';
+import { trend, destChart } from '/components/homecharts.js';
 
 const mon = (d, o = { month: 'short' }) => new Date(String(d).slice(0, 10) + 'T00:00:00Z').toLocaleDateString('en-GB', { ...o, timeZone: 'UTC' });
 const monY = d => mon(d, { month: 'long', year: 'numeric' });
@@ -37,7 +38,9 @@ export async function render(main, V) {
       <div id="nb-core"></div>${V.tie ? `<p class="h2-tie ${V.tie.ok ? '' : 'late'}">${V.tie.ok ? `✓ ${V.tie.invoices.toLocaleString('en-US')} VCK invoices add up to ${esc(monY(V.tie.month))}` : `VCK now holds ${moneyK(V.tie.core)} on ${V.tie.invoices.toLocaleString('en-US')} invoices for ${esc(monY(V.tie.month))}: ${moneyK(Math.abs(V.tie.moved))} ${V.tie.moved > 0 ? 'posted' : 'removed'} since this was built`}</p>` : ''}
       <div class="src">Posted invoices on invoice date, storage plus service, Citadel held apart, from VCK · storage bills a month ahead, service a month behind</div>
     </section>
+    ${V.month && V.month.thisMonth.length ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Work volume: ${esc(mon(V.month.workMonth, { month: 'long' }))} is ${Math.abs(V.month.vsLast || 0) < 0.02 ? 'level with' : `${pc(Math.abs(V.month.vsLast))} ${V.month.vsLast > 0 ? 'ahead of' : 'behind'}`} ${esc(mon(V.month.prevMonth, { month: 'long' }))}</h2><small>Done is what drivers confirmed in Veri-Shred. By working day, at last month's value a service, est.</small></div><div id="nb-trend"></div></section>` : ''}
     <section class="h2-card" data-rv id="nb-ebitda"></section>
+    ${V.dest ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Shredding ${Math.round(V.dest.eligible / 1000)}K eligible boxes pays ${moneyK(V.dest.fee)} once est., then costs ${moneyK(V.dest.lostYear / 12)} a month</h2><small>${pc(V.dest.share)} of the building · the fee covers ${Math.round(V.dest.fee / (V.dest.lostYear / 12))} months of lost storage unless new boxes refill the space</small></div><div id="nb-dest"></div><div class="src">Retention review overdue, not on hold or permanent · the fee at the book's median · <a href="#activity?tab=warehouse">the Warehouse, by account ›</a></div></section>` : ''}
     <details class="h2-card fold" data-rv><summary><h3>Why this isn't the P&amp;L</h3><span class="sub">open</span></summary>
       <p>These figures are what was invoiced in VCK. QuickBooks' top line will not match them, and it isn't meant to. What separates the two:</p>
       <div class="c2-scroll"><table class="q-t nb-t"><thead><tr><th>Between the two</th><th>Which is higher</th><th class="v">Amount</th></tr></thead><tbody>
@@ -51,6 +54,8 @@ export async function render(main, V) {
   </div>`;
 
   coreChart(main.querySelector('#nb-core'), M.slice(-13), V.target);
+  trend(main.querySelector('#nb-trend'), V.month);
+  destChart(main.querySelector('#nb-dest'), V.dest);
   main.querySelector('#nb-ebitda').innerHTML = G ? ebitdaHtml(G) : `<div class="h2-ch"><h2>The EBITDA bridge</h2><small>revenue to EBITDA, by month</small></div>
     <div class="pending">Arrives after the month's books close.</div>`;
   main.querySelector('#nb-margin').innerHTML = V.margin ? marginHtml(V.margin) : `<div class="h2-ch"><h2>Gross margin by line of business</h2></div><div class="pending">Not costed yet: margins arrive once the cost model is signed off.</div>`;

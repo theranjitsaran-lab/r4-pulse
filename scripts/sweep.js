@@ -43,6 +43,7 @@ async function main() {
       await page.waitForFunction(() => !document.querySelector('#main .loading'), null, { timeout: 20000 }).catch(() => {});
       await page.waitForTimeout(400);
       // folded sections count: a phone user can open them
+      if (hash === '#pulse') { const h = await page.evaluate(() => document.documentElement.scrollHeight); console.log(`     Home is ${h}px, ${(h / 844).toFixed(1)} phone screens`); if (h > 2 * 844) { hits++; console.log('HIT  Home is over two phone screens'); } }
       if (hash.startsWith('#pricing')) await page.click('#q-add').catch(() => {});   // a quote line, which once showed its margin
       await page.evaluate(() => document.querySelectorAll('details').forEach(d => { d.open = true; }));
       await page.waitForTimeout(150);
