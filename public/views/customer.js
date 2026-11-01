@@ -34,7 +34,7 @@ export async function render(main, C, params) {
 
   // an account with nothing billed in twelve months gets one honest line, not a page of blanks
   const billed = (s ? s.total.some(v => v !== 0) : false) || (m ? m.revenue !== 0 || m.cost !== 0 : false);
-  if (!billed) { main.innerHTML = `<div class="crumb"><a href="#customers">Customers</a><span>›</span><span style="color:var(--ink-2)">${esc(name)}</span></div><div class="empty"><h2>${esc(name)}: nothing billed recently</h2>No storage, service or priced lines on its account in the last twelve months. If it is a live customer, its work is billed under another account number.</div>`; return; }
+  if (!billed) { main.innerHTML = `<div class="crumb"><a href="#customers">Accounts</a><span>›</span><span style="color:var(--ink-2)">${esc(name)}</span></div><div class="empty"><h2>${esc(name)}: nothing billed recently</h2>No storage, service or priced lines on its account in the last twelve months. If it is a live customer, its work is billed under another account number.</div>`; return; }
 
   const ltm = s ? s.ltm : m.revenue;
   const pc = m && m.revenue > 0 ? m.margin / m.revenue : null;

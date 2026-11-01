@@ -8,7 +8,7 @@ import { reveal } from '/components/motion.js';
 import { parseHome2, checkNumbers } from '/components/summary.js';
 import { openPop } from '/components/pop.js';
 
-import { LABELS } from '/components/metrics.js';
+import { LABELS, changeWord } from '/components/metrics.js';
 import { closedMonth } from '/components/linework.js';
 
 // one line under the figures: the invoiced month adds up to VCK's invoices, or it has moved and says by how much
@@ -21,7 +21,7 @@ const monS = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month
 const dm = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const pctW = v => v == null ? '' : `${Math.abs(Math.round(v * 100))}%`;
 const tone = v => v == null ? 'flat' : v > 0.02 ? 'up' : v < -0.02 ? 'down' : 'flat';
-const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : tone(v)}">${v > 0.005 ? '▲' : v < -0.005 ? '▼' : ''}${v >= 2 ? ' ' + Math.round(v + 1) + '×' : ' ' + pctW(v)}</span>`;
+const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : v > 0.02 ? 'up' : v < -0.02 ? 'down' : 'flat'}">${changeWord(v)}</span>`;
 const signedK = v => (v < 0 ? '−' : '+') + moneyK(Math.abs(v));
 const word = v => Math.abs(v) < 0.02 ? 'level with' : v > 0 ? `${pctW(v)} ahead of` : `${pctW(v)} behind`;
 

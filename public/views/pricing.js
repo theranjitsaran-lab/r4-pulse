@@ -46,7 +46,7 @@ export async function render(main, PR, params) {
 
   main.innerHTML = `
   <div class="pr pr2">
-    <h1>Pricing</h1>
+    <h1>Quote</h1>
     <section class="h2-card pr2-bar" data-rv>
       <div class="pr2-pick">
         <label>Customer<select id="p-cust"><option value="">New customer or a quote</option>${customers.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')}</select></label>

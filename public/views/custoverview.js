@@ -12,12 +12,12 @@ import { serviceMedians, slippingAccounts, CITADEL } from '/components/levers.js
 import { LINES } from '/components/whitespace.js';
 import { openPop } from '/components/pop.js';
 import { costsVisible } from '/components/access.js';
-import { LABELS } from '/components/metrics.js';
+import { LABELS, changeWord } from '/components/metrics.js';
 import { reveal } from '/components/motion.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const pct = v => `${Math.abs(Math.round(v * 100))}%`;
-const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : v > 0.02 ? 'up' : v < -0.02 ? 'down' : 'flat'}">${v > 0.005 ? '▲' : v < -0.005 ? '▼' : ''} ${v >= 2 ? Math.round(v + 1) + '×' : pct(v)}</span>`;
+const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : v > 0.02 ? 'up' : v < -0.02 ? 'down' : 'flat'}">${changeWord(v)}</span>`;
 const signedK = v => v == null ? '—' : (v < 0 ? '−' : '+') + moneyK(Math.abs(v));
 const unitMoney = (v, unit) => v == null ? '—' : '$' + (unit === 'box a month' || unit === 'lb' ? v.toFixed(3) : v.toFixed(2));
 const PAGE = 60;
@@ -80,7 +80,7 @@ export async function render(main, C, params, tabs) {
   let line = FAMS.some(f => f.key === params.line) ? params.line : 'all';
   let sort = params.sort || null, dir = params.dir === 'up' ? 1 : -1, shown = PAGE, q = '';
   main.innerHTML = `<div class="cust c2">
-    <h1>Customers</h1>
+    <h1>Accounts</h1>
     ${tabs}
     ${kpis}
     <div class="h2-row">${segCard}${fives}</div>
@@ -123,7 +123,7 @@ export async function render(main, C, params, tabs) {
       switch (c.k) {
         case 'customer': return `<td class="tl"><a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>${r.citadel ? ' <small>held apart</small>' : ''}</td>`;
         case 'spark': return `<td class="sp">${r.spark ? sparkline(r.spark, { w: 84, h: 22, cls: 'service' }) : ''}</td>`;
-        case 'last': return `<td>${r.last == null ? '—' : btn(`${moneyK(r.last)} ${chip(r.lastPct, true)}`, 'sales')}</td>`;
+        case 'last': return `<td>${r.last == null ? '—' : btn(`${moneyK(r.last)} <span class="h2-d quiet">${r.lastPct == null ? '—' : changeWord(r.lastPct, r.last / (1 + r.lastPct))}</span>`, 'sales')}</td>`;
         case 'd': return `<td>${r.d == null ? '—' : btn(`<span class="h2-cv ${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${signedK(r.d)}</span> ${chip(r.movePct)}`, 'sales')}</td>`;
         case 'ytdPct': return `<td>${r.ytdPct == null ? '—' : btn(chip(r.ytdPct, true), 'sales')}</td>`;
         case 'pc': return `<td>${r.pc == null ? '—' : btn(`<span class="${r.margin < 0 ? 'is-bad' : r.pc < .15 ? 'is-warn' : ''}">${Math.round(r.pc * 100)}%</span>${r.review ? '<small> review</small>' : ''}`, 'margin')}</td>`;

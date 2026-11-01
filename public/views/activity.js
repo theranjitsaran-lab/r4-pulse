@@ -32,7 +32,7 @@ const dcls = v => v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat';
 export async function render(main, A, params) {
   if (!main) return;
   // two tabs: the routes, and the warehouse (views/storage.js)
-  const tabs = `<div class="top"><div><h1>${params.tab === 'warehouse' ? 'Warehouse' : 'Routes'}</h1></div><div class="seg rt-tabs"><a href="#activity" class="${params.tab === 'warehouse' ? '' : 'on'}">Routes</a><a href="#activity?tab=warehouse" class="${params.tab === 'warehouse' ? 'on' : ''}">Warehouse</a></div></div>`;
+  const tabs = `<div class="top"><div><h1>Operations</h1></div><div class="seg rt-tabs"><a href="#activity" class="${params.tab === 'warehouse' ? '' : 'on'}">Routes</a><a href="#activity?tab=warehouse" class="${params.tab === 'warehouse' ? 'on' : ''}">Warehouse</a></div></div>`;
   if (params.tab === 'warehouse') return (await import('/views/storage.js')).render(main, tabs);
   const [R, Z, base] = await Promise.all([loadRates(), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
     loadBasemap(), loadRoadnet()]);
@@ -47,7 +47,7 @@ export async function render(main, A, params) {
   main.innerHTML = `
   <div class="rt">
     <div class="top">
-      <div><h1>Routes</h1><div class="sub">Done is what drivers confirmed in Veri-Shred; booked includes work not yet done.</div><div class="seg rt-tabs" style="margin-top:10px"><a href="#activity" class="on">Routes</a><a href="#activity?tab=warehouse">Warehouse</a></div></div>
+      <div><h1>Operations</h1><div class="sub">Done is what drivers confirmed in Veri-Shred; booked includes work not yet done.</div><div class="seg rt-tabs" style="margin-top:10px"><a href="#activity" class="on">Routes</a><a href="#activity?tab=warehouse">Warehouse</a></div></div>
       <div class="day"><button id="rt-prev" aria-label="Previous day">‹</button><b id="rt-day"></b><button id="rt-next" aria-label="Next day">›</button></div>
     </div>
     <p class="rt-say" id="rt-say"></p>

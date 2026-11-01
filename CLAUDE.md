@@ -138,8 +138,8 @@ Copy is part of the product. Plain English. British spelling in prose; US dollar
 
 **The customer is the centre.** Home → a customer list (`#customers?view=…`) → one customer page
 (`#customer/<level1>`) → lines → visits → boxes. Every number on Home opens a list; every list row
-opens the customer page. Nothing is a dead end. Nav: Home · Customers · Pricing · Routes; on a
-phone it is a tab bar at the bottom.
+opens the customer page. Nothing is a dead end. Nav: Today · Accounts · Quote · Money · Operations (routes stay #pulse, #customers, #pricing, #numbers, #activity); on a
+phone it is a tab bar at the bottom. Accounts opens on Opportunities, each account once; Anne signs in there.
 
 **Brand, type and tokens.** R4 Services' own branding, from r4services.com (26 October 2026): the barcode
 logo `public/brand/r4-logo.png` (always on white: its bars are black), the icon `r4-icon-192.png`, green

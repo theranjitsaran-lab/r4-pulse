@@ -21,6 +21,7 @@ export const KINDS = {
 export const STATUSES = ['open', 'contacted', 'quoted', 'won', 'lost'];
 const k$ = v => '$' + (Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : Math.abs(v) >= 1e3 ? Math.round(v / 1e3) + 'K' : Math.round(v));
 const lineName = Object.fromEntries(LINES.map(l => [l.key, l.name]));
+const lc = n => n === 'ITAD' ? n : n.toLowerCase();
 
 export function opportunities({ C, PR, CA, M }, statuses = {}) {
   const rows = [];
@@ -31,8 +32,8 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
     if (c.have || !(c.opp > 0)) continue;
     const name = titleCase(a.customer);
     push({ key: `cross:${a.level1}:${line}`, kind: 'cross', level1: a.level1, name, line, value: c.opp, modelled: true,
-      reason: `Doesn't buy ${lineName[line].toLowerCase()} yet: ${c.basis}.`,
-      opener: line === 'shred' ? OPENERS.nodestroy(name) : `We look after your ${a.cells.storage && a.cells.storage.have ? 'records' : 'shredding'} already. Could we take ${lineName[line].toLowerCase()} off your hands too, on the same visits?` });
+      reason: `Doesn't buy ${lc(lineName[line])} yet: ${c.basis}.`,
+      opener: line === 'shred' ? OPENERS.nodestroy(name) : `We look after your ${a.cells.storage && a.cells.storage.have ? 'records' : 'shredding'} already. Could we take ${lc(lineName[line])} off your hands too, on the same visits?` });
   }
   // price: each service line under the median, and storage under the box-weighted median
   const meds = new Map();
@@ -67,7 +68,7 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
   for (const r of ob.rows) if (r.boxes >= 50 && r.once > 0) {
     const name = titleCase(r.customer);
     push({ key: `overdue:${r.level1}`, kind: 'overdue', level1: r.level1, name, value: r.once, once: true,
-      reason: `${Math.round(r.boxes).toLocaleString('en-US')} boxes past their retention review: ${k$(r.once)} of destruction once, ending ${k$(r.lost * 12)} a year of storage.`,
+      reason: `${Math.round(r.boxes).toLocaleString('en-US')} boxes past their retention review: ${k$(r.once)} of destruction once, ending ${k$(r.lost * 12)} a year of storage. Ranked at 25%: one-off, needs client sign-off.`,
       opener: OPENERS.overdue(name, { boxes: Math.round(r.boxes) }) });
   }
   // what the team has said about each
@@ -82,6 +83,25 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
   const totals = Object.fromEntries(Object.keys(KINDS).map(k => [k, { n: 0, value: 0 }]));
   for (const r of rows) if (r.status !== 'won' && r.status !== 'lost') { totals[r.kind].n++; totals[r.kind].value += r.value; }
   return { rows, totals, won: wonIn(statuses) };
+}
+
+// The list by account: each account once, its opportunities inside it, ranked by its largest. An account's
+// opportunities overlap (winning back what slipped, and pricing the same work up, are not two sums of money), so
+// the total counts each account's largest once a year, and one-off destruction apart.
+export function byAccount(rows) {
+  const m = new Map();
+  for (const r of rows) (m.get(r.level1) || m.set(r.level1, { level1: r.level1, name: r.name, items: [] }).get(r.level1)).items.push(r);
+  const out = [...m.values()].map(a => {
+    a.items.sort((x, y) => y.rank - x.rank);
+    const yearly = a.items.filter(r => !r.once).map(r => r.value), once = a.items.filter(r => r.once);
+    a.largest = yearly.length ? Math.max(...yearly) : 0;
+    a.once = once.reduce((t, r) => t + r.value, 0);
+    a.rank = a.items[0].rank;
+    a.kinds = [...new Set(a.items.map(r => r.kind))];
+    a.owner = (a.items.find(r => r.owner) || {}).owner || null;
+    return a;
+  }).sort((x, y) => y.rank - x.rank);
+  return { rows: out, accounts: out.length, largest: out.reduce((t, a) => t + a.largest, 0), once: out.reduce((t, a) => t + a.once, 0) };
 }
 
 // what was won, by month the status was set: the value as it stood when it was won

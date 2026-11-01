@@ -89,3 +89,10 @@ export function topActions({ lines = [], calls = [] }, n = 3) {
   const b = calls.map(c => ({ owner: 'anne', text: `${c.name}: ${short(c.ev)}`, key: 'call', subject: 'account:' + c.level1, href: '#customer/' + c.level1 }));
   return [...a, ...b].slice(0, n);
 }
+
+// A change as a word: a percentage, or "new" when the month before was too small for a percentage to mean anything
+export function changeWord(v, base = null) {
+  if (v == null) return '—';
+  if ((base != null && base < 500) || v >= 5) return 'new';
+  return `${v > 0.005 ? '▲ ' : v < -0.005 ? '▼ ' : ''}${Math.abs(Math.round(v * 100))}%`;
+}

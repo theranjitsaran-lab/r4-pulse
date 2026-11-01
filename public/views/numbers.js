@@ -31,7 +31,7 @@ export async function render(main, V) {
   </section>`;
 
   main.innerHTML = `<div class="nb">
-    <h1>Numbers</h1>
+    <h1>Money</h1>
     ${kpis}
     <section class="h2-card" data-rv>
       <div class="h2-ch"><h2>${esc(coreTitle(l12, V.target))}</h2><small>invoiced in VCK by month, core: storage and service, against $1.0M</small></div>
