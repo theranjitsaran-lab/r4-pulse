@@ -188,3 +188,44 @@ html.ask-open .h2-fab { display: none; }
 .h2-fold > summary::-webkit-details-marker { display: none; }
 .h2-fold > summary small { font-family: var(--f-sans); font-size: var(--fs-label); color: var(--ink-3); }
 @media (max-width: 700px) { .h2-fold:not([open]) > summary { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-lg); padding: var(--sp-4); margin-bottom: var(--sp-4); } .h2-fold > summary::before { content: '›'; color: var(--ink-5); margin-right: var(--sp-2); } .h2-fold[open] > summary::before { content: '⌄'; } }
+
+/* ── Home, 1 November 2026: headed points, bills by line, lines by month ── */
+.h2-bul a span b { display: block; font-size: var(--fs-tiny); font-weight: 700; letter-spacing: var(--track-label); text-transform: uppercase; color: var(--brand); margin-bottom: var(--hair-2); }
+.h2-bul a { align-items: flex-start; }
+.h2-bul a::before { margin-top: var(--sp-1); }
+.h2-bul .customer a::before { background: var(--bad); }
+.h2-bul a i { align-self: center; }
+.h2-kpis.bills { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.h2-kpis.bills .gap { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: var(--sp-1) var(--sp-3); }
+.h2-parts { list-style: none; margin: var(--sp-2) 0 0; padding: var(--sp-2) 0 0; border-top: var(--hair) solid var(--rule-2); display: grid; gap: var(--hair-2); }
+.h2-parts.lead { border-top-color: var(--hero-track); }
+.h2-parts li { display: flex; justify-content: space-between; gap: var(--sp-2); font-size: var(--fs-tiny); }
+.h2-kpi .h2-parts span { color: inherit; }
+.h2-kpi .h2-parts b { font-family: var(--f-sans); font-size: var(--fs-tiny); font-weight: 600; letter-spacing: 0; }
+.h2-parts .rest { opacity: .75; }
+.h2-months { display: flex; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; margin-bottom: var(--sp-3); }
+.h2-months button { white-space: nowrap; }
+button.h2-seg { border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
+button.h2-seg:hover { background: var(--tint-brand); }
+.h2-mbs { grid-column: 1 / -1; display: block; width: 100%; height: auto; margin: var(--sp-1) 0; }
+.h2-mb { fill: var(--lever-4); }
+.h2-mb.on { fill: var(--brand); }
+.h2-mb.est { fill: url(#h2-est); }
+.h2-mb.est.on { fill: url(#h2-est); stroke: var(--brand); stroke-width: 1; }
+.h2-defs { position: absolute; }
+.p2-mbs { margin: var(--sp-3) 0; }
+.h2-stats { list-style: none; margin: 0 0 var(--sp-2); padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); }
+.h2-stats li { padding: var(--sp-2); border-radius: var(--r-sm); background: var(--well); }
+.h2-stats span { display: block; font-size: var(--fs-tiny); color: var(--ink-3); }
+.h2-stats b { font-size: var(--fs-sm); white-space: nowrap; }
+.h2-pl { list-style: none; margin: 0; padding: 0; }
+.h2-pl li > a, .h2-pl li.rest { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--sp-3); align-items: baseline; padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); font-size: var(--fs-sm); color: var(--ink); font-weight: 400; }
+.pop-b .h2-pl a { color: var(--ink); font-weight: 400; }
+.h2-pl li.rest { grid-template-columns: minmax(0, 1fr) auto; color: var(--ink-3); }
+.h2-pl span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.h2-pl small { font-size: var(--fs-tiny); color: var(--ink-4); }
+.h2-pl b { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (min-width: 900px) {
+  .h2-kpis.bills { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .h2-kpis.bills .gap { grid-column: auto; flex-direction: column; flex-wrap: nowrap; }
+}

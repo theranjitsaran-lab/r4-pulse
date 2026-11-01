@@ -472,4 +472,29 @@ async function segments() {
   return { rows };
 }
 
-module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, routestops, deliverydays, gl };
+// ── Lines by account — Home's lines of business and their pop-outs ──────────────────────────────
+// Priced lines by month, account and service code, Citadel apart, fifteen months to the latest priced
+// work; and the finished work orders of recent months, which VCK has not priced yet, with their units.
+// components/linework.js prices those. Family as in segments: no family, or 'none', is 'other'.
+async function linework() {
+  const FAM = `CASE WHEN sf.family IN ('bin', 'shred', 'handling', 'movement', 'itad', 'labour') THEN sf.family ELSE 'other' END`;
+  const priced = await query(`
+    WITH b AS (SELECT (date_trunc('month', m) - interval '17 months')::date AS f, (m::date + 1) AS t
+               FROM (SELECT greatest((SELECT max(wodate) FROM priced_lines), (SELECT max(wodate) FROM priced_lines_current)) AS m) x),
+    ${PL}
+    SELECT date_trunc('month', l.d)::date::text AS month, l.level1, l.servcode, ${FAM} AS family,
+           sum(l.totamt)::float AS revenue, sum(l.units)::float AS units, count(*)::int AS lines
+    FROM l LEFT JOIN model.service_family sf ON sf.servcode = l.servcode
+    WHERE l.level1 <> 6714 GROUP BY 1, 2, 3, 4 ORDER BY 1, 2, 3`);
+  const orders = await query(`
+    SELECT (left(w.duedate, 7) || '-01') AS month, w.level1, s.servcode, s.description, ${FAM} AS family,
+           count(*)::int AS orders, coalesce(sum(u.units), 0)::float AS units
+    FROM work_orders w JOIN servcode s USING (servcodeid)
+    LEFT JOIN work_order_units u USING (woservid, woid)
+    LEFT JOIN model.service_family sf ON sf.servcode = s.servcode
+    WHERE w.level1 <> 6714 AND w.serv_fin IS NOT NULL AND w.duedate >= to_char(current_date - interval '3 months', 'YYYY-MM')
+    GROUP BY 1, 2, 3, 4, 5 ORDER BY 1, 2, 3`);
+  return { priced, orders };
+}
+
+module.exports = { pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, linework, routestops, deliverydays, gl };

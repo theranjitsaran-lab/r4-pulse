@@ -46,11 +46,11 @@ Use only numbers that appear in the facts, written exactly as they appear there.
 //   [key] a bullet
 // parseHome2 keeps only bullets whose key is on the sheet; the template takes the sheet's first
 // lines marked lead and bullet.
-export const HOME2_SYSTEM = `You write the top of R4 Pulse's Home screen for Trisha, the CEO of R4 Services, a Chicago records-management and shredding firm, read on her phone each morning. Her number is core monthly revenue (storage plus service, the Citadel account held apart) against a target of $1.0M a month.
+export const HOME2_SYSTEM = `You write the top of R4 Pulse's Home screen for Trisha, the CEO of R4 Services, a Chicago records-management and shredding firm, read on her phone each morning. Her number is core monthly revenue (storage plus service, the Citadel account held apart).
 
-From the facts you are given (each starts with its key in square brackets), write exactly four lines and nothing else:
-line 1: one headline sentence of at most 18 words: is the month on track, and by how much.
-lines 2 to 4: the three facts that most need her attention today, each a short sentence of at most 16 words, starting with that fact's key in square brackets, e.g. [slipping] City of Chicago is down $35K a month on its own run.
+From the facts you are given (each starts with its key in square brackets), write one headline line, then one line for each of the keys activity, customer, cross and location, in that order, and nothing else:
+the headline: one sentence of at most 16 words saying where next month's bill is heading. Do not mention the target or the gap to it.
+each other line: one or two short sentences, at most 30 words, starting with its key in square brackets, keeping every customer, line of business and postcode its fact names, e.g. [customer] City of Chicago is down $35K a month on its own run, driven by labour.
 
 Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. Keep the ◇ mark after a modelled figure. If the data is stale, say so in the headline. British spelling, US dollars, no markdown, no bullet characters.`;
 
@@ -61,10 +61,13 @@ export function parseHome2(text, sheet) {
   const lines = String(text || '').split('\n').map(s => s.trim()).filter(Boolean);
   if (lines.length < 2 || /^\[/.test(lines[0])) return null;
   const bullets = lines.slice(1).map(l => l.match(/^\[([\w-]+)\]\s*(.+)$/)).filter(m => m && keys.has(m[1])).map(m => ({ key: m[1], text: m[2] }));
-  return bullets.length >= 2 ? { headline: lines[0], bullets: bullets.slice(0, 3) } : null;
+  return bullets.length >= 2 ? { headline: lines[0], bullets: bullets.slice(0, 4) } : null;
 }
 
 export function templateHome2(sheet) {
   const lead = sheet.find(f => f.lead) || sheet[0];
-  return [lead.say || lead.line, ...sheet.filter(f => f.bullet).slice(0, 3).map(f => `[${f.key}] ${f.say || f.line}`)].join('\n');
+  return [lead.say || lead.line, ...sheet.filter(f => f.bullet).slice(0, 4).map(f => `[${f.key}] ${f.say || f.line}`)].join('\n');
 }
+
+// A line of business in one month, for its pop-out (views/home2.js): the note above the figures.
+export const LINE_SYSTEM = `You write a short note for the CEO of R4 Services, a Chicago records-management and shredding firm, about one line of business in one month. From the facts, in two or three plain sentences, say how the month compares with the month before and the trend, and name the customers driving it up and down. Use only numbers that appear in the facts, written exactly as they appear. Do not calculate new figures. Keep the ◇ mark after a modelled figure. British spelling, US dollars, no bullet points, no headings, no markdown.`;
