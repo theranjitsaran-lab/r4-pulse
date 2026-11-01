@@ -84,7 +84,7 @@ export async function render(main, C, params) {
   if (!main) return;
   const view = VIEWS[params.view] && (params.view !== 'margin' || costsVisible()) || params.view === 'opportunities' ? params.view : 'overview';
   if (view === 'overview') return (await import('/views/custoverview.js')).render(main, C, params, tabsHtml('overview'));
-  if (view === 'opportunities') return (await import('/views/opps.js')).render(main, params);
+  if (view === 'opportunities') return (await import('/views/opps.js')).render(main, params, C);
   if (view === 'conversations') return conversations(main, C);
   if (view === 'whitespace') return whitespace(main, C, params);
   if (view === 'main') return upDown(main, C, params);

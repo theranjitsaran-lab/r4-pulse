@@ -18,7 +18,7 @@ const say = (state, n, text) => { if (state === 'FAIL') fails++; console.log(`${
 
 // every table as drawn: each column adds to the total row, unfiltered and searched; with months, each row's
 // and the total's YTD and 12 months equal their months
-const TABLES = [['Money', '#numbers?span=12', 'bin'], ['Money, storage / service', '#numbers?span=12&group=ss', 'serv'], ['Accounts', '#customers?view=overview&span=12', 'chicago'], ['Month grid', '#customers?view=grid&span=12', 'chicago'], ['Cross-sell', '#customers?view=whitespace', 'chicago'],
+const TABLES = [['Money', '#numbers?span=12', 'bin'], ['Money, storage / service', '#numbers?span=12&group=ss', 'serv'], ['Accounts', '#customers?view=overview&span=12', 'chicago'], ['Opportunities', '#opportunities', 'chicago'], ['Month grid', '#customers?view=grid&span=12', 'chicago'], ['Cross-sell', '#customers?view=whitespace', 'chicago'],
   ['Warehouse', '#numbers?tab=warehouse', 'west'], ['Long way round', '#activity', '60'], ['Price gaps', '#pricing', 'box']];
 const readTable = t => {
   const n = x => Number(x.dataset.v);
@@ -72,6 +72,7 @@ async function tables(base, pass) {
           const more = await d.$('.dt-more button'); if (more) { const t0 = Date.now(); await more.click(); await page.waitForTimeout(100); if (name === 'Accounts') found.showAll = Date.now() - t0; }
           const r = await d.$eval('.dt-t', readTable);
           if (name === 'Money' && stage === 'all') found.moneyLast = r.lastFoot;
+          if (name === 'Opportunities' && stage === 'all') found.opps = await d.$$eval('.dt-t tfoot td[data-v]', e => e.map(x => Number(x.dataset.v)));
           say(r.wrong.length ? 'FAIL' : 'PASS', '1 ', `${name}, ${stage}: ${r.rows} rows, ${r.cols} columns foot${r.months ? ', YTD and 12 months equal their months' : ''}${r.wrong.length ? ': ' + r.wrong.slice(0, 3).join('; ') : ''}`);
         }
       }
@@ -112,6 +113,12 @@ async function main() {
       const months = pricedI.reduce((t, i) => t + c[i], 0), off = months / l.cost - 1;
       say(Math.abs(off) <= .02 ? 'PASS' : 'FAIL', 'C ', `${l.family}: the months' cost ${K(months)} against the year's ${K(l.cost)}`);
     }
+
+    // Opportunities: each account's largest once, as drawn against the list itself
+    const oppV = await get('view/opportunities'), byA = new Map();
+    for (const r of oppV.rows) { if (r.status === 'won' || r.status === 'lost') continue; const a = byA.get(r.level1) || { year: 0, once: 0 }; if (r.once) a.once += r.value; else a.year = Math.max(a.year, r.value); byA.set(r.level1, a); }
+    const oy = [...byA.values()].reduce((t, a) => t + a.year, 0), oo = [...byA.values()].reduce((t, a) => t + a.once, 0);
+    say(close(drawn.opps[0], oy) && close(drawn.opps[1], oo) ? 'PASS' : 'FAIL', 'O ', `Opportunities' total as drawn ${D(drawn.opps[0])} a year and ${D(drawn.opps[1])} once; the list, each account's largest once: ${D(oy)} and ${D(oo)}`);
 
     // 3. Accounts' October against invoiced core
     const last = pulse.monthly[pulse.monthly.length - 1], listed = drawn.accountsLast, gap = last.core - listed;

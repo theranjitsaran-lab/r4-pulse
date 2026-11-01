@@ -188,6 +188,14 @@ select.on-phone { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2) v
 .dt-legend i.dn { background: var(--flag-dn-bg); border-color: var(--flag-dn); }
 .dt-legend i.upx { background: var(--flag-up-bg); border-color: var(--flag-up); }
 .dt-legend i.est { background-image: repeating-linear-gradient(135deg, transparent 0 var(--hatch), color-mix(in srgb, var(--ink) 25%, transparent) var(--hatch) calc(var(--hatch) * 2)); }
+.dt-types { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.dt-type { font: inherit; font-size: var(--fs-label); padding: var(--sp-1) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.dt-type.on { border-color: var(--brand); background: var(--tint-brand); color: var(--ink); font-weight: 600; }
+.dt-t tr.dt-detail > td { position: static; max-width: none; height: auto; padding: var(--sp-2) var(--sp-3) var(--sp-3); white-space: normal; text-align: left; font-family: var(--f-sans); background: var(--well); }
+.dt-t td .op-pill { display: inline-block; margin-right: var(--sp-2); padding: 0 var(--sp-2); border-radius: var(--r-pill); background: var(--well-2); color: var(--ink-2); font-size: var(--fs-tiny); font-weight: 600; }
+.dt-t td.op-best { max-width: calc(var(--u) * 115); overflow: hidden; text-overflow: ellipsis; font-size: var(--fs-tiny); color: var(--ink-3); }
+.op-detail { max-width: calc(var(--u) * 200); }
+.op-detail .op-list li:last-child { border-bottom: 0; }
 .dt-t .dt-sum { border-left: var(--hair) solid var(--rule-4); }
 .dt-t th.est, .dt-t td.est { background-image: repeating-linear-gradient(135deg, transparent 0 calc(var(--hatch) * 2), color-mix(in srgb, var(--ink) 9%, transparent) calc(var(--hatch) * 2) calc(var(--hatch) * 3)); }
 .dt-est { font-weight: 600; color: var(--ink-3); }
@@ -203,6 +211,7 @@ select.on-phone { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2) v
   .dt-ftoggle { display: block; }
   .dt:not(.dt-open) .dt-cols, .dt:not(.dt-open) .dt-views, .dt:not(.dt-open) .dt-csv { display: none; }
   .dt-t th:first-child, .dt-t td:first-child { max-width: calc(var(--u) * 38); }
+  .dt-t td.op-best .op-short { display: none; }
   .dt-l { display: none; }
   .dt-p { display: inline; }
 }

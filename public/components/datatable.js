@@ -8,13 +8,15 @@
 //   dataTable(el, { key, ns, noun, rows, cols, months, filters, search, onRow, views, say, page, inTotal, totalLabel })
 //     cols     [{ k, l, short?, get, fmt?, csv?, def?, name?, text?, total? }], or (state) => that list; short is the phone's label
 //              total: 'sum', or (rows) => html
-//     filters  [{ k, l, options: [[value, label]], test: (row, value) => boolean }]
+//     filters  [{ k, l, options: [[value, label]], test: (row, value, state) => boolean, hidden?, chips? }]
+//              chips: a row of buttons, not a select; hidden: in the link and the chips below, not the bar
 //     months   { list: [every month, oldest first], est: [months in progress], get: (row, month) => value,
 //                cell?: (row, month) => html, flag?: false for no colour,
 //                sumCell?: (row, months) => html, totalCell?: (rows, months) => html }
 //     rest     true: what Show all would add is one 'All other' row, so the columns foot from the start
 //     ref      { label, get: month => value }: a reference row under the total
 //     expand   async row => [{ name, values: { month: value } }]: a tap opens the row's own rows
+//     detail   row => html: a tap opens it under the row
 //     ns       a prefix for the table's link state, where a page has more than one table
 //     inTotal  which rows the total counts, where one is held apart
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -49,7 +51,7 @@ export function monthCols(M, span) {
 export function filterRows(rows, o, st) {
   const q = (st.q || '').trim().toLowerCase();
   return rows.filter(r => (!q || !o.search || o.search(r).toLowerCase().includes(q))
-    && (o.filters || []).every(f => !st.f[f.k] || f.test(r, st.f[f.k])));
+    && (o.filters || []).every(f => !st.f[f.k] || f.test(r, st.f[f.k], st)));
 }
 export function sortRows(rows, col, dir) {
   if (!col || !col.get) return rows;
@@ -101,7 +103,7 @@ export function dataTable(el, o) {
   if (!el) return;
   const ns = o.ns || '';
   const st = readState(Object.fromEntries(new URLSearchParams(location.hash.split('?')[1] || '')), o);
-  if (!Object.keys(st.f).length && !st.q && o.defaults) Object.assign(st.f, o.defaults);
+  for (const [k, v] of Object.entries(o.defaults || {})) if (!st.f[k]) st.f[k] = v;
   const PAGE = o.page || 50, index = new Map(o.rows.map((r, i) => [r, i])), opened = new Map();
   let shown = PAGE;
   const spanNow = () => st.span || (typeof matchMedia === 'function' && matchMedia('(max-width: 700px)').matches ? 3 : 12);
@@ -112,7 +114,8 @@ export function dataTable(el, o) {
   el.innerHTML = `<div class="dt-tools">
       ${o.search ? `<input class="dt-find" type="search" placeholder="${esc(o.placeholder || 'Find')}" aria-label="${esc(o.placeholder || 'Find')}" value="${esc(st.q)}">` : ''}
       <button type="button" class="dt-ftoggle" aria-expanded="false">More</button>
-      ${(o.filters || []).filter(f => !f.hidden).map(f => `<select class="dt-f" data-k="${f.k}" aria-label="${esc(f.l)}"><option value="">${esc(f.l)}</option>${f.options.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>`).join('')}
+      ${(o.filters || []).filter(f => !f.hidden && f.chips).map(f => `<span class="dt-types" role="group" aria-label="${esc(f.l)}">${f.options.map(([v, l]) => `<button type="button" class="dt-type" data-k="${f.k}" data-v="${esc(v)}">${esc(l)}</button>`).join('')}</span>`).join('')}
+      ${(o.filters || []).filter(f => !f.hidden && !f.chips).map(f => `<select class="dt-f" data-k="${f.k}" aria-label="${esc(f.l)}"><option value="">${esc(f.l)}</option>${f.options.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>`).join('')}
       ${o.months ? '<span class="seg dt-span" role="group" aria-label="Months shown"><button type="button" data-span="3">3 months</button><button type="button" data-span="12">12 months</button></span>' : ''}
       <details class="dt-cols"><summary>Columns</summary><div class="dt-colbox"></div></details>
       <select class="dt-views" aria-label="Saved views"></select>
@@ -136,19 +139,20 @@ export function dataTable(el, o) {
     if (st.q) chips.unshift(`<button type="button" class="dt-chip" data-k="__q">“${esc(st.q)}” ×</button>`);
     $('.dt-chips').innerHTML = `<b>${rows.length.toLocaleString('en-US')}${rows.length !== o.rows.length ? ` of ${o.rows.length.toLocaleString('en-US')}` : ''}</b>${o.say || o.noun ? ` <span>${esc(o.say ? o.say(st, rows) : o.noun)}</span>` : ''}${chips.join('')}`;
     el.querySelectorAll('.dt-span button').forEach(b => b.classList.toggle('on', +b.dataset.span === spanNow()));
+    el.querySelectorAll('.dt-type').forEach(b => { const on = st.f[b.dataset.k] === b.dataset.v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
     $('.dt-cols').hidden = !all.some(c => !c.name && !c.fixed);
     $('.dt-colbox').innerHTML = all.filter(c => !c.name && !c.fixed).map(c => `<label><input type="checkbox" data-c="${c.k}" ${cols.some(x => x.k === c.k) ? 'checked' : ''}> ${esc(c.l)}</label>`).join('');
     const vs = views(), cur = stateQuery({ ...st, cols: null, sort: null }, ns);
     $('.dt-views').innerHTML = `<option value="">Saved views</option>${vs.map((v, i) => `<option value="${i}" ${v.q === cur && cur ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}${(o.filters || []).length || st.q ? '<option value="save">Save this view…</option>' : ''}`;
     // the table
-    const tdCls = c => `${c.text || c.name ? 'tl' : ''}${c.est ? ' est' : ''}${c.first ? ' dt-sum' : ''}`;
+    const tdCls = c => `${c.text || c.name ? 'tl' : ''}${c.est ? ' est' : ''}${c.first ? ' dt-sum' : ''}${c.cls ? ' ' + c.cls : ''}`;
     const label = c => c.short ? `<span class="dt-l">${esc(c.l)}</span><span class="dt-p">${esc(c.short)}</span>` : esc(c.l);
     const head = cols.map(c => `<th class="${tdCls(c)}${c === col ? ' on' : ''}" data-k="${esc(c.k)}" ${c.month ? `data-m="${c.month}"` : ''} ${c.get ? `data-s="${c.k}" tabindex="0"` : ''}>${label(c)}${c.est ? ' <span class="dt-est">est.</span>' : ''}${c === col ? ((st.sort ? st.dir : col.text ? 1 : -1) === 1 ? ' ▲' : ' ▼') : ''}</th>`).join('');
     const num = v => v == null || v === '' || isNaN(v) ? '' : ` data-v="${Number(v)}"`;
     const childCell = (c, ch) => { const v = c.month ? ch.values[c.month] || 0 : c.ms ? c.ms.reduce((t, m) => t + (ch.values[m] || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(ch.name) : v == null ? '' : v ? kOnly(v) : '—'}</td>`; };
     const body = sorted.slice(0, shown).map(r => {
-      const open = opened.get(r), kids = Array.isArray(open) ? open.map(ch => `<tr class="dt-child">${cols.map(c => childCell(c, ch)).join('')}</tr>`).join('') : '';
-      return `<tr data-i="${index.get(r)}"${o.inTotal && !o.inTotal(r) ? ' data-out="1"' : ''}${o.expand ? ` tabindex="0" aria-expanded="${!!open}"` : ''}>${cols.map(c => `<td class="${tdCls(c)}${c.cellCls ? ' ' + c.cellCls(r) : ''}"${c.cellStyle ? ` style="${c.cellStyle(r)}"` : ''}${c.name && c.get ? ` title="${esc(c.get(r))}"` : ''}${c.total === 'sum' ? num(c.get(r)) : ''}>${c.name && o.expand ? `<span class="dt-caret">${open ? '▾' : '▸'}</span>` : ''}${c.fmt ? c.fmt(r) : esc(c.get ? c.get(r) ?? '—' : '')}</td>`).join('')}</tr>${kids}`;
+      const open = opened.get(r), kids = open && o.detail ? `<tr class="dt-detail"><td colspan="${cols.length}">${o.detail(r, st)}</td></tr>` : Array.isArray(open) ? open.map(ch => `<tr class="dt-child">${cols.map(c => childCell(c, ch)).join('')}</tr>`).join('') : '';
+      return `<tr data-i="${index.get(r)}"${o.inTotal && !o.inTotal(r) ? ' data-out="1"' : ''}${o.expand || o.detail ? ` tabindex="0" aria-expanded="${!!open}"` : ''}>${cols.map(c => `<td class="${tdCls(c)}${c.cellCls ? ' ' + c.cellCls(r) : ''}"${c.cellStyle ? ` style="${c.cellStyle(r)}"` : ''}${c.name && c.get ? ` title="${esc(c.get(r))}"` : ''}${c.total === 'sum' ? num(c.get(r)) : ''}>${c.name && (o.expand || o.detail) ? `<span class="dt-caret">${open ? '▾' : '▸'}</span>` : ''}${c.fmt ? c.fmt(r) : esc(c.get ? c.get(r) ?? '—' : '')}</td>`).join('')}</tr>${kids}`;
     }).join('');
     const restRows = o.rest ? sorted.slice(shown) : [], restCounted = o.inTotal ? restRows.filter(o.inTotal) : restRows;
     const rest = restRows.length ? `<tr class="dt-rest" data-rest="1">${cols.map(c => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(restCounted, c)) : ''}>${c.name ? `All other ${esc(o.noun || 'rows')} (${restRows.length.toLocaleString('en-US')})` : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(restCounted, c)) : sumOf(restCounted, c).toLocaleString('en-US')) : ''}</td>`).join('')}</tr>` : '';
@@ -160,6 +164,7 @@ export function dataTable(el, o) {
   }
 
   el.querySelectorAll('.dt-span button').forEach(b => b.addEventListener('click', () => { st.span = +b.dataset.span; if (st.sort && !colsAll().some(c => c.k === st.sort)) st.sort = null; keep(); draw(); }));
+  el.querySelectorAll('.dt-type').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; st.f[k] = st.f[k] === b.dataset.v ? '' : b.dataset.v; shown = PAGE; keep(); draw(); }));
   const find = $('.dt-find');
   $('.dt-ftoggle').addEventListener('click', e => e.target.setAttribute('aria-expanded', String(el.classList.toggle('dt-open'))));
   if (find) find.addEventListener('input', () => { st.q = find.value.trim(); shown = PAGE; keep(); draw(); });
@@ -194,6 +199,7 @@ export function dataTable(el, o) {
     const r = o.rows[+tr.dataset.i], open = opened.get(r);
     if (open) { opened.delete(r); draw(); return; }
     opened.set(r, true); draw();
+    if (o.detail) return;
     const kids = await o.expand(r).catch(() => []);
     if (opened.get(r)) { opened.set(r, kids); draw(); }
   };
@@ -202,13 +208,13 @@ export function dataTable(el, o) {
     if (th) { const k = th.dataset.s; st.dir = st.sort === k ? -st.dir : -1; st.sort = k; keep(); draw(); return; }
     const tr = e.target.closest('tbody tr[data-i]');
     if (!tr || (e.target.closest('a') && !e.target.closest('[data-x]'))) return;
-    if (o.expand && !e.target.closest('button, [data-inv-id]')) { toggle(tr); return; }
+    if ((o.expand || o.detail) && !e.target.closest('button, [data-inv-id]')) { toggle(tr); return; }
     if (o.onRow) o.onRow(o.rows[+tr.dataset.i], e);
   });
   table.addEventListener('keydown', e => {
     const th = e.target.closest('th[data-s]'); if (th && e.key === 'Enter') th.click();
-    const tr = e.target.closest && e.target.closest('tbody tr[data-i]'); if (o.expand && tr && e.target === tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(tr); }
+    const tr = e.target.closest && e.target.closest('tbody tr[data-i]'); if ((o.expand || o.detail) && tr && e.target === tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(tr); }
   });
   draw();
-  return { state: st, draw };
+  return { state: st, draw, set: (k, v) => { st.f[k] = v; shown = PAGE; keep(); draw(); } };
 }

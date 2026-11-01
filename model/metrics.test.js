@@ -164,7 +164,7 @@ test('#29 ITAD keeps its capitals; a huge multiple reads as new; #30 a one-off s
   const { changeWord } = await import('../public/components/metrics.js');
   const { rows } = opportunities(D(), {});
   assert.ok(!rows.some(r => /\bitad\b/.test(r.reason + r.opener)));
-  assert.ok(rows.filter(r => r.kind === 'overdue').every(r => /Ranked at 25%/.test(r.reason)));
+  assert.ok(rows.filter(r => r.kind === 'overdue').every(r => /needs the client's sign-off/.test(r.reason)));
   assert.equal(changeWord(90), 'new');
   assert.equal(changeWord(0.5, 200), 'new');
   assert.equal(changeWord(1.93), '▲ 193%');
@@ -262,6 +262,15 @@ test('Step 5: filters carry between the account lists; the months switch whereve
   assert.equal(carryHash('#numbers', '#customers?view=overview&q=city&f_line=bin&span=3'), '#numbers?span=3');
   assert.equal(carryHash('#pulse', '#customers?view=overview&q=city&span=3'), '#pulse');
   assert.equal(carryHash('#customers', '#numbers?span=12&group=ss'), '#customers?span=12');
+});
+
+test('Step 6: one row per account: the best move is the largest a year, a one-off never adds to it', async () => {
+  const { bestMove, accountRow } = await import('../public/components/opps.js');
+  const items = [{ key: 'a', value: 1486000, once: true }, { key: 'b', value: 420000 }, { key: 'c', value: 50000 }, { key: 'd', value: 10000, once: true }];
+  assert.equal(bestMove(items).key, 'b');
+  assert.deepEqual((({ year, once, count }) => ({ year, once, count }))(accountRow(items)), { year: 420000, once: 1496000, count: 4 });
+  const onlyOnce = accountRow([{ key: 'x', value: 5, once: true }, { key: 'y', value: 9, once: true }]);
+  assert.equal(onlyOnce.best.key, 'y'); assert.equal(onlyOnce.year, 0);
 });
 
 test('#38 not billed: internal out, dormant apart by invoices rather than by name', async () => {
