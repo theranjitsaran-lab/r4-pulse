@@ -121,6 +121,8 @@ model is wrong.
 10. **Citadel is `ser_tot` where `custno = '00870'`, on posted invoices.** September 2026 is $22,278 against $233,411 of total service. The $233,100 once quoted as Citadel's September was not a Citadel figure, and the smooth Citadel series in the first addendum (168,900 → 233,100) did not come from the database and is withdrawn. Citadel runs from −$432,637 (November 2025 credit run) to $470,279 (April 2026); carry negatives, never clip them.
 11. **Driver payroll is $510,098 from GL `7335700`**, not the $256,429 ADP figure. **`7400 Transportation` is air travel**, not vehicles.
 
+12. **A month's work has no prices until the next month's run, but `work_orders` already holds it.** Finished orders × each account's own price: bins within 1%, the total within 3.6% on average over May to September 2026 (June missed by 12%). Prices are the account's own, however old; a first-time buyer pays about list whatever the volume (S4 at $8.00 on 235 and on 1,991 units), so never price one from similar-sized accounts. Flat-fee accounts have $0 on their rotation lines: their own rate is $0. Retrievals (20, 30) have orders with blank units. Flat bin fees (IR), deliveries (01) and pound shredding (S3) only appear at the run. `components/linework.js` holds it.
+
 ## Writing rules
 
 Copy is part of the product. Plain English. British spelling in prose; US dollar figures.

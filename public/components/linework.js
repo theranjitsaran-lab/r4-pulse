@@ -6,8 +6,14 @@
 //   measured  units on the order × the account's own price over the last six priced months (else the book's)
 //   counted   an order with blank units (retrievals, returns) × the account's own revenue a line
 //   carried   charges only added at the run (flat bin fees, deliveries, system fees): last month's, by account
-//   job       ITAD and labour: priced at the account's own price; one with no own price, or of $5,000 or
-//             more, is held out of the estimate and listed, so one job cannot swing the line
+//   job       ITAD and labour, priced the same way as measured work
+// The price of a unit, in order: the account's own over the last six priced months; else its most recent
+// price, however old; else the book's median. A first-time buyer pays about list whatever the volume (S4 at
+// $8.00 on 235 units and on 1,991, 2026), so a price from similar-sized accounts, who have negotiated, runs low.
+// An account's price barely moves, so a job's size is no reason to hold it out. Only two kinds are:
+//   check     hours far above anything the account has bought: more than five times its largest line and
+//             $10,000 or more. Hours are typed in; device counts are counted, and a big one is a big job
+//   noprice   $5,000 or more from an account that has never bought the service
 // Tested on July to September 2026: pricing real units this way came within 0% to +1% on bins and +1.6% to
 // +9% in total. Units are only tested when the run posts.
 import { dailyFrom, weekdaysOf, addMonths, monthStart } from './projection.js';
@@ -18,7 +24,7 @@ const SHORT = { handling: 'Retrieval', other: 'Fees' };
 export const lineShort = k => SHORT[k] || LINE_NAMES[k] || k;
 const SERVICE = ['bin', 'shred', 'itad', 'handling', 'labour', 'movement', 'other'];
 const JOB = new Set(['itad', 'labour']);
-const LARGE = 5000;
+const LARGE = 5000, CHECK_VALUE = 10000, CHECK_TIMES = 5;
 const AT_THE_RUN = new Set(['S3']);   // shredding by the pound: weighed and added at the run (six lines in September, one order in October)
 const RATE_MONTHS = 6;
 const COMPLETE = 0.5;       // a month with under half the usual priced work is not priced yet
@@ -59,6 +65,9 @@ export function workEstimate(LW, A, P) {
     if (x.lines > 0 && x.rev > 0) b.line.push(x.rev / x.lines);
     bookOf.set(code, b);
   }
+  // every account's latest price by code, however old
+  const last = new Map();
+  for (const r of LW.lastPrice || []) last.set(r.level1 + '|' + r.servcode, r);
   const latest = monthStart(A.latestDone), wd = weekdaysOf(latest), f = wd.filter(d => d <= A.latestDone).length / (wd.length || 1);
   const out = new Map();
   for (const m of est) {
@@ -74,12 +83,15 @@ export function workEstimate(LW, A, P) {
       seen.add(o.servcode);
       const x = own.get(o.level1 + '|' + o.servcode), b = bookOf.get(o.servcode);
       // an account with history at $0 is on a flat fee (carried below): its own rate is $0, never the book's
-      const ownRate = x && x.units > 0 ? x.rev / x.units : null, bookRate = b ? med(b.rate) : null;
+      const hist = last.get(o.level1 + '|' + o.servcode);
+      const ownRate = x && x.units > 0 ? x.rev / x.units : hist ? hist.rate : null, bookRate = b ? med(b.rate) : null;
+      const rate = ownRate != null ? ownRate : bookRate ?? 0;
       if (JOB.has(o.family)) {
-        const v = o.units * (ownRate != null ? ownRate : bookRate || 0);
-        if (ownRate == null || v >= LARGE) e.jobs.push({ level1: o.level1, family: o.family, servcode: o.servcode, description: o.description, units: o.units, value: v, own: ownRate != null });
+        const v = o.units * rate;
+        const reason = ownRate == null ? (v >= LARGE ? 'noprice' : null) : (o.family === 'labour' && v >= CHECK_VALUE && hist && o.units > CHECK_TIMES * hist.max_units ? 'check' : null);
+        if (reason) e.jobs.push({ level1: o.level1, family: o.family, servcode: o.servcode, description: o.description, units: o.units, value: v, rate, reason, lastDate: hist ? hist.date : null, maxUnits: hist ? hist.max_units : null });
         else put(o.family, o.level1, v, 'job');
-      } else if (o.units > 0) put(o.family, o.level1, o.units * (ownRate != null ? ownRate : bookRate || 0), 'measured');
+      } else if (o.units > 0) put(o.family, o.level1, o.units * rate, 'measured');
       else {
         const perLine = x && x.lines > 0 ? x.rev / x.lines : (b ? med(b.line) : 0);
         put(o.family, o.level1, o.orders * (perLine || 0), 'counted');
@@ -134,8 +146,8 @@ export function lineView(D, n = 13) {
     const span = (from, to) => sum(months.slice(Math.max(0, from), to + 1), x => val(k, x));
     const y = m.slice(0, 4), yi = months.findIndex(x => x.startsWith(y)), ly = months.indexOf(addMonths(m, -12));
     const lyStart = months.indexOf(`${+y - 1}-01-01`);
-    // with large jobs still unpriced, a line's comparison would only measure the jobs held out
-    const waiting = e && !storage && e.jobs.some(j => j.family === k);
+    // a comparison stands unless what is held out is a real part of the line
+    const waiting = e && !storage && sum(e.jobs.filter(j => j.family === k), j => j.value) > 0.25 * Math.max(v, 1);
     return {
       v, est: !!e && !storage, pct: !waiting && prev != null ? ch(v, prev * scale) : null,
       p3: !waiting && i >= 5 ? ch(span(i - 2, i), span(i - 5, i - 3)) : null,

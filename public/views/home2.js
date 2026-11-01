@@ -36,7 +36,8 @@ export async function render(main, P) {
   const age = Math.round((Date.now() - Date.parse(A.latestDone + 'T12:00:00Z')) / 864e5);
   const dayLabel = new Date(A.latestDone + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
   const billShown = m.bill.core != null ? { month: m.bill.month, v: m.bill.core, d: m.bill.vsLast, vs: m.bill.lastMonth } : { month: m.bill.lastMonth, v: m.bill.lastCore, d: null };
-  const jobsNote = m.next && m.next.jobCount ? `, before ${m.next.jobCount} large jobs not yet priced` : '';
+  const jobWord = n => `${n} job${n === 1 ? '' : 's'} to check`;
+  const jobsNote = m.next && m.next.jobCount ? `, before ${jobWord(m.next.jobCount)}` : '';
   const sheet = [
     m.next && { key: 'month', lead: true, href: '#pulse', line: `${mon(m.next.month)}'s bill is heading for about ${moneyK(m.next.central)} ◇${jobsNote}`, say: `${mon(m.next.month)}'s bill is heading for about ${moneyK(m.next.central)} ◇${jobsNote}.` },
     ...(V.points || []).map(p => ({ key: p.key, bullet: true, href: p.href, title: p.title, line: p.line, say: p.say })),
@@ -49,11 +50,11 @@ export async function render(main, P) {
 
   const kpis = `<section class="h2-kpis bills" data-rv>
       <div class="h2-kpi lead"><span>${m.next ? `${mon(m.next.month)}'s bill, building ◇` : 'Next bill'}</span><b>${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b>
-        <small>${m.next ? (m.next.jobCount ? `+ up to ${moneyK(m.next.jobs)}: ${m.next.jobCount} large jobs not yet priced` : `${moneyK(m.next.lo)}–${moneyK(m.next.hi)} · day ${m.next.day} of ${m.next.workdays}`) : ''}</small>
+        <small>${m.next ? (m.next.jobCount ? `+ up to ${moneyK(m.next.jobs)}: ${jobWord(m.next.jobCount)}` : `${moneyK(m.next.lo)}–${moneyK(m.next.hi)} · day ${m.next.day} of ${m.next.workdays}`) : ''}</small>
         ${billParts(B.next, true)}</div>
       <a class="h2-kpi" href="#customers"><span>${mon(billShown.month)} billed</span><b>${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${mon(billShown.vs)}` : 'posted, core'}</small>
         ${billParts(B.billed)}</a>
-      <a class="h2-kpi gap" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(m.gap)}</b><small>a month${m.next && m.next.jobCount ? ', before large jobs' : ''}${V.sell ? ` · won this month ${moneyK(V.sell.won.value)}${V.sell.inPlay.n ? `, ${moneyK(V.sell.inPlay.value)} in play` : ''}` : ''}</small></a>
+      <a class="h2-kpi gap" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(m.gap)}</b><small>a month${m.next && m.next.jobCount ? ', before jobs to check' : ''}${V.sell ? ` · won this month ${moneyK(V.sell.won.value)}${V.sell.inPlay.n ? `, ${moneyK(V.sell.inPlay.value)} in play` : ''}` : ''}</small></a>
     </section>`;
 
   const sumCard = `<section class="h2-card h2-sum" data-rv>
@@ -75,7 +76,7 @@ export async function render(main, P) {
       <div class="seg h2-months" id="h2-months">${LV.pick.map(x => `<button data-m="${x}">${esc(monS(x))}${LV.meta[x].est ? ' ◇' : ''}</button>`).join('')}</div>
       <div class="h2-segs" id="h2-tiles"></div>
       <svg class="h2-defs" aria-hidden="true" width="0" height="0"><defs><pattern id="h2-est" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="4" class="h2-hatch"/></pattern></defs></svg>
-      <div class="src">Tap a line for the customers behind it · storage by the month it bills, service by the month of the work, Citadel apart · ◇ not yet billed: work orders at each account's own prices, charges added at the run carried from the last priced month</div></section>` :
+      <div class="src">Tap a line for the customers behind it · storage by the month it bills, service by the month of the work, Citadel apart · ◇ not yet billed: work orders at each account's own prices, charges added at the run carried from the last priced month; a job to check is left out until someone has looked at it</div></section>` :
     `<section class="h2-card pending" data-rv>Lines of business arrive with the next snapshot (npm run snapshot).</section>`;
 
   const custRow = (r, kind) => `<li><a href="#customer/${r.level1}"><span class="h2-cn">${esc(titleCase(r.customer))}</span>${sparkline(r.spark, { w: 72, h: 22, cls: 'service' })}
@@ -159,12 +160,12 @@ export async function render(main, P) {
     if (!LV) return;
     const x = lineMonth, meta = LV.meta[x], work = mon(x), bill = mon(new Date(Date.UTC(+x.slice(0, 4), +x.slice(5, 7), 1)).toISOString().slice(0, 10));
     main.querySelector('#h2-lines-t').textContent = `${work} by line of business${meta.est ? ' ◇' : ''}`;
-    main.querySelector('#h2-lines-s').textContent = `${moneyK(LV.totals[x])}${meta.est ? ` · work so far, estimated; on ${bill}'s bill` : ` · ${work}'s storage and work, on ${work}'s and ${bill}'s bills`}${meta.jobs ? ` · ${meta.jobCount} large jobs (${moneyK(meta.jobs)}) not yet priced` : ''}`;
+    main.querySelector('#h2-lines-s').textContent = `${moneyK(LV.totals[x])}${meta.est ? ` · work so far, estimated; on ${bill}'s bill` : ` · ${work}'s storage and work, on ${work}'s and ${bill}'s bills`}${meta.jobs ? ` · ${jobWord(meta.jobCount)} (${moneyK(meta.jobs)})` : ''}`;
     main.querySelectorAll('#h2-months button').forEach(b => b.classList.toggle('on', b.dataset.m === x));
     main.querySelector('#h2-tiles').innerHTML = LV.rows.map(r => { const k = r.by[x], jobs = r.jobs[x] || 0;
-      return `<button class="h2-seg" data-k="${r.key}" type="button"><span class="h2-seg-n">${esc(r.name)}</span><b>${moneyK(k.v)}</b>${jobs ? `<span class="h2-d flat">+${moneyK(jobs)} jobs</span>` : chip(k.pct)}
+      return `<button class="h2-seg" data-k="${r.key}" type="button"><span class="h2-seg-n">${esc(r.name)}</span><b>${moneyK(k.v)}</b>${chip(k.pct)}
         ${monthBars(r.bars, x, { w: 150, h: 40 })}
-        <small>${jobs ? 'large jobs not yet priced' : `3M ${chip(k.p3, true)} · YTD ${chip(k.ytd, true)}`}</small></button>`; }).join('');
+        <small>${jobs ? `+${moneyK(jobs)} to check` : `3M ${chip(k.p3, true)} · YTD ${chip(k.ytd, true)}`}</small></button>`; }).join('');
   };
   if (LV) {
     drawLines();
@@ -291,6 +292,12 @@ function monthBars(bars, on, { w = 150, h = 40, labels = false } = {}) {
 
 // ── a line's pop-out: the note, the months, this month, the customers behind it, what rose and fell ──
 const nmL = s => esc(titleCase(s));
+// why a job is left out, in a line: its size against what the account has bought, or no price of its own
+const whyHeld = j => {
+  const u = Math.round(j.units).toLocaleString('en-US'), at = '$' + j.rate.toFixed(2);
+  if (j.reason === 'check') return `${u} hours at its own ${at}, against ${Math.round(j.maxUnits).toLocaleString('en-US')} at most before (last ${dm(j.lastDate)} ${j.lastDate.slice(0, 4)}). May be a keying error.`;
+  return `${u} ${j.family === 'labour' ? 'hours' : 'units'}, never bought before. Priced at the book's ${at}, usually what a first-time buyer pays.`;
+};
 async function openLine(key, month, LV) {
   const r = LV.rows.find(x => x.key === key), k = r.by[month], meta = LV.meta[month];
   const title = `${r.name} · ${mon(month)}${k.est ? ' ◇' : ''}`;
@@ -302,7 +309,7 @@ async function openLine(key, month, LV) {
   const row = (x, right) => `<li><a href="#customer/${x.level1}"><span>${nmL(x.customer)}</span>${right}</a></li>`;
   const prevName = d.prevMonth ? mon(d.prevMonth) : 'the month before';
   // the facts the note is written from: every figure as the panel shows it
-  const up = d.up[0], dn = d.down[0], jobsTxt = d.jobs.length ? `${d.jobs.length} large jobs (${moneyK(d.jobsValue)}) are not yet priced and not in this figure.` : '';
+  const up = d.up[0], dn = d.down[0], jobsTxt = d.jobs.length ? `${d.jobs.length} job${d.jobs.length === 1 ? '' : 's'} (${moneyK(d.jobsValue)}) to check, not in this figure.` : '';
   const facts = [
     { key: 'total', line: `${r.name} in ${mon(month)}: ${moneyK(d.total)}${d.est ? ' ◇' : ''}${d.prev != null ? `, against ${moneyK(d.prev)} in ${prevName}` : ''}${k.pct != null ? (Math.abs(k.pct) < 0.005 ? ', level' : `, ${k.pct >= 0 ? 'up' : 'down'} ${pctW(k.pct)}`) + (d.partial ? ' at the same point in the month' : '') : ''}.` },
     k.p3 != null && { key: 'p3', line: `The last three months are ${k.p3 >= 0 ? 'up' : 'down'} ${pctW(k.p3)} on the three before${k.ytd != null ? `, and the year to date is ${k.ytd >= 0 ? 'up' : 'down'} ${pctW(k.ytd)}` : ''}.` },
@@ -314,7 +321,7 @@ async function openLine(key, month, LV) {
   const html = `<p class="p2-lede" id="h2-note">${esc(facts.map(f => f.line).join(' '))}</p><p class="h2-by" id="h2-note-by">From the figures below</p>
     <div class="p2-mbs">${monthBars(d.bars, month, { w: 340, h: 92, labels: true })}</div>
     <ul class="h2-stats"><li><span>This month</span><b>${moneyK(d.total)}${d.est ? ' ◇' : ''}</b></li><li><span>On ${esc(monS(d.prevMonth || month))}</span><b>${chip(k.pct)}</b></li><li><span>3 months</span><b>${chip(k.p3)}</b></li><li><span>Year to date</span><b>${chip(k.ytd)}</b></li></ul>
-    ${d.jobs.length ? `<h3>Large jobs, not yet priced ◇</h3><ul class="h2-pl">${d.jobs.slice(0, 6).map(j => row(j, `<small>${Math.round(j.units).toLocaleString('en-US')} ${esc(j.servcode)}</small><b>about ${moneyK(j.value)}</b>`)).join('')}</ul><p class="src">Held out of the figure: no recent price of its own, or $5,000 or more. Priced here at the book's rate where it has none.</p>` : ''}
+    ${d.jobs.length ? `<h3>To check, not in the figure ◇</h3><ul class="h2-pl job">${d.jobs.map(j => `<li><a href="#customer/${j.level1}"><span>${nmL(j.customer)}<em>${esc(whyHeld(j))}</em></span><b>about ${moneyK(j.value)}</b></a></li>`).join('')}</ul>` : ''}
     <h3>Top 5 customers</h3><ul class="h2-pl">${d.top.map(x => row(x, `<small>${x.share != null ? Math.round(x.share * 100) + '%' : ''}</small><b>${moneyK(x.v)}</b>`)).join('')}<li class="rest"><span>All others</span><b>${moneyK(d.others)}</b></li></ul>
     ${d.up.length ? `<h3>Rising on ${esc(prevName)}</h3><ul class="h2-pl">${d.up.map(x => row(x, `<b class="h2-cv up">${sgn(x.d)}</b>`)).join('')}</ul>` : ''}
     ${d.down.length ? `<h3>Falling on ${esc(prevName)}</h3><ul class="h2-pl">${d.down.map(x => row(x, `<b class="h2-cv down">${sgn(x.d)}</b>`)).join('')}</ul>` : ''}

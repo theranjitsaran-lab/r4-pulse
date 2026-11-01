@@ -224,6 +224,9 @@ button.h2-seg:hover { background: var(--tint-brand); }
 .h2-pl li.rest { grid-template-columns: minmax(0, 1fr) auto; color: var(--ink-3); }
 .h2-pl span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .h2-pl small { font-size: var(--fs-tiny); color: var(--ink-4); }
+.h2-pl.job li > a { grid-template-columns: minmax(0, 1fr) auto; }
+.h2-pl.job span { white-space: normal; }
+.h2-pl em { display: block; font-style: normal; font-size: var(--fs-tiny); color: var(--ink-3); margin-top: var(--hair-2); }
 .h2-pl b { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
 @media (min-width: 900px) {
   .h2-kpis.bills { grid-template-columns: repeat(3, minmax(0, 1fr)); }

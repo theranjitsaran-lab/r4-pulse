@@ -45,7 +45,7 @@ function tools(L, D, X = {}) {
         return {
           latest_work_done: m.latestDone,
           last_posted_bill: `${mon(m.bill.lastMonth)}: ${moneyK(m.bill.lastCore)} core (storage plus service, Citadel apart)`,
-          next_bill_building: m.next ? `${mon(m.next.month)}: about ${moneyK(m.next.central)} ◇, likely ${moneyK(m.next.lo)} to ${moneyK(m.next.hi)}, day ${m.next.day} of ${m.next.workdays}` : 'not yet priced',
+          next_bill_building: m.next ? `${mon(m.next.month)}: about ${moneyK(m.next.central)} ◇, likely ${moneyK(m.next.lo)} to ${moneyK(m.next.hi)}, day ${m.next.day} of ${m.next.workdays}${m.next.jobCount ? `, plus up to ${moneyK(m.next.jobs)} in ${m.next.jobCount} jobs to check` : ''}` : 'not yet priced',
           gap_to_target: `${moneyK(m.gap)} a month short of $1.0M`,
           work_this_month: m.vsLast != null ? `${mon(m.workMonth)}'s work at working day ${m.day}: ${moneyK(m.now)} ◇, ${pc(m.vsLast)} on ${mon(m.prevMonth)} at the same day` : 'not enough days yet',
           last_full_week: w.lastFull ? `week of ${w.lastFull.week}: ${moneyK(w.lastFull.value)} of work ◇ (${w.lastFull.done} services), ${pc(w.vsAvg)} on the average of the weeks before` : null,
