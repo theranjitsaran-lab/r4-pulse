@@ -143,7 +143,7 @@ async function activity() {
     SELECT date::text, route, routeid, driver, services::int, services_done::int, customers::int, stops::int,
            stops_done::int, postcodes::int, postcode_list, pounds::float, pounds_exec_default::float
     FROM v_route_day
-    WHERE date >= least($1::date - 34, (date_trunc('month', $1::date) - interval '1 month')::date) AND date <= $1::date + 14
+    WHERE date >= least($1::date - 56, (date_trunc('month', $1::date) - interval '1 month')::date) AND date <= $1::date + 14
     ORDER BY date, route NULLS LAST`, [anchor.latest_done]);
   const orders = await query(`
     SELECT NULLIF(date, '')::date::text AS date, NULLIF(route, '') AS route, NULLIF(driver, '') AS driver,
@@ -231,7 +231,12 @@ async function calls() {
     rc AS (SELECT level1, max(last_changed) AS last_changed, min(month) AS first_month, max(month) AS last_month,
                   count(DISTINCT servcodeid) AS codes
            FROM v_rate_by_customer_service, b WHERE month >= b.latest - interval '23 months' GROUP BY level1),
-    overdue AS (SELECT level1, sum(review_overdue) AS boxes FROM storage_retention WHERE status = 'I' GROUP BY level1),
+    -- eligible to shred, the same rule as components/storage.js rowStates: overdue, not on hold, not permanent
+    overdue AS (SELECT level1, sum(LEAST(boxes - LEAST(boxes, hold + perm), GREATEST(0, od - hold - perm))) AS boxes
+                FROM (SELECT level1, sum(boxes) AS boxes, coalesce(sum(review_overdue), 0) AS od, coalesce(sum(legal_hold), 0) AS hold, coalesce(sum(permanent), 0) AS perm
+                      FROM storage_retention WHERE status = 'I'
+                      GROUP BY level1, coalesce(NULLIF(home_loc, ''), '—'), coalesce(NULLIF(boxtype, ''), '—')) x
+                GROUP BY level1),
     a AS (
       SELECT ltm.level1, ltm.storage, ltm.service, ltm.revenue,
              latest.revenue AS month_revenue, latest.trailing6_mean, latest.deviation_pct,

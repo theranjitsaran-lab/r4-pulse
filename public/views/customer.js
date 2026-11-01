@@ -296,7 +296,7 @@ function wsCard(r, pitch) {
   const lines = LINES.map(x => ({ x, c: r.cells[x.key] }));
   const missing = lines.filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp);
   return `<div class="card">
-    <div class="card-head"><h3>${missing.length ? `Not bought yet: about ${moneyK(r.opp)} a year ◇` : lines.every(o => o.c.have) ? 'Buys every line we sell' : 'Not bought yet: too small to size'}</h3><a href="#customers?view=whitespace">Cross-sell ›</a></div>
+    <div class="card-head"><h3>${missing.length ? `Not bought yet: about ${moneyK(r.opp / 12)} a month ◇` : lines.every(o => o.c.have) ? 'Buys every line we sell' : 'Not bought yet: too small to size'}</h3><a href="#customers?view=whitespace">Cross-sell ›</a></div>
     ${!missing.length && !lines.every(o => o.c.have) ? '<p class="sub" style="margin:0 0 var(--sp-2)">It doesn\'t buy every line, but it has too few boxes or too little other spend to size what comparable accounts would spend.</p>' : ''}
     ${lines.map(({ x, c }) => `<div class="ws1"><span>${esc(x.name)}</span>${c.have ? `<span class="num">${moneyK(c.spend)} <span class="sub" style="display:inline">a year</span></span>` : c.opp > 0 ? `<button class="num opp" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)} ◇</button>` : '<span class="sub">—</span>'}</div>${!c.have && x.key === 'shred' && pitch ? `<div class="ws1p">${esc(pitch)}</div>` : ''}${!c.have && c.opp > 0 ? `<div class="sub ws1b">${esc(c.basis)}</div>` : ''}`).join('')}
   </div>`;

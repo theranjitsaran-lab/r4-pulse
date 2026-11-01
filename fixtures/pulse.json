@@ -1,5 +1,5 @@
 {
- "snapshotAt": "2026-10-26T22:10:24.535Z",
+ "snapshotAt": "2026-11-01T19:55:16.677Z",
  "data": {
   "monthly": [
    {
@@ -12,7 +12,7 @@
     "storage_share_pct": 56,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1164304,
+    "storage_boxes": 1161129,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -37,7 +37,7 @@
     "storage_share_pct": 61.1,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1178867,
+    "storage_boxes": 1175702,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -62,7 +62,7 @@
     "storage_share_pct": 63.2,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1182295,
+    "storage_boxes": 1179137,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -87,7 +87,7 @@
     "storage_share_pct": 42.9,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1136916,
+    "storage_boxes": 1133742,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -112,7 +112,7 @@
     "storage_share_pct": 61.2,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1136565,
+    "storage_boxes": 1133391,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -137,7 +137,7 @@
     "storage_share_pct": 53.5,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1136835,
+    "storage_boxes": 1133661,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -162,7 +162,7 @@
     "storage_share_pct": 55.3,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1136779,
+    "storage_boxes": 1133605,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -187,7 +187,7 @@
     "storage_share_pct": 52.7,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1136594,
+    "storage_boxes": 1133420,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -212,7 +212,7 @@
     "storage_share_pct": 50.9,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1138384,
+    "storage_boxes": 1135210,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -237,7 +237,7 @@
     "storage_share_pct": 40.8,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1136918,
+    "storage_boxes": 1133744,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -262,7 +262,7 @@
     "storage_share_pct": 50.8,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1136745,
+    "storage_boxes": 1133571,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -287,7 +287,7 @@
     "storage_share_pct": 60.3,
     "storage_growth_yoy_pct": null,
     "core_service_growth_yoy_pct": null,
-    "storage_boxes": 1137142,
+    "storage_boxes": 1133968,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -312,7 +312,7 @@
     "storage_share_pct": 50.6,
     "storage_growth_yoy_pct": -8.5,
     "core_service_growth_yoy_pct": 13.4,
-    "storage_boxes": 1136895,
+    "storage_boxes": 1133721,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -337,7 +337,7 @@
     "storage_share_pct": 55.2,
     "storage_growth_yoy_pct": -6.1,
     "core_service_growth_yoy_pct": 19.7,
-    "storage_boxes": 1136912,
+    "storage_boxes": 1133738,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -362,7 +362,7 @@
     "storage_share_pct": 53.1,
     "storage_growth_yoy_pct": -5.8,
     "core_service_growth_yoy_pct": 43.2,
-    "storage_boxes": 1140093,
+    "storage_boxes": 1136926,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -387,7 +387,7 @@
     "storage_share_pct": 57.4,
     "storage_growth_yoy_pct": -3.4,
     "core_service_growth_yoy_pct": -46.2,
-    "storage_boxes": 1136959,
+    "storage_boxes": 1133785,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -412,7 +412,7 @@
     "storage_share_pct": 64.6,
     "storage_growth_yoy_pct": -5.9,
     "core_service_growth_yoy_pct": -18.4,
-    "storage_boxes": 1136708,
+    "storage_boxes": 1133534,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -437,7 +437,7 @@
     "storage_share_pct": 55.2,
     "storage_growth_yoy_pct": -8,
     "core_service_growth_yoy_pct": -14.1,
-    "storage_boxes": 1124812,
+    "storage_boxes": 1121638,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -462,7 +462,7 @@
     "storage_share_pct": 57,
     "storage_growth_yoy_pct": -8.1,
     "core_service_growth_yoy_pct": -14,
-    "storage_boxes": 1124822,
+    "storage_boxes": 1121648,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -487,7 +487,7 @@
     "storage_share_pct": 61.8,
     "storage_growth_yoy_pct": -8.5,
     "core_service_growth_yoy_pct": -37,
-    "storage_boxes": 1124602,
+    "storage_boxes": 1121428,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -512,7 +512,7 @@
     "storage_share_pct": 61.1,
     "storage_growth_yoy_pct": -0.7,
     "core_service_growth_yoy_pct": -34.4,
-    "storage_boxes": 1126477,
+    "storage_boxes": 1123303,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -537,7 +537,7 @@
     "storage_share_pct": 58.5,
     "storage_growth_yoy_pct": 0.5,
     "core_service_growth_yoy_pct": -50.9,
-    "storage_boxes": 1167311,
+    "storage_boxes": 1164146,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -555,14 +555,14 @@
    {
     "month": "2026-09-01",
     "storage": 388813.48,
-    "service": 233411.02,
+    "service": 244391.15,
     "citadel": 22277.77,
-    "core": 599946.73,
-    "core_service": 211133.25,
-    "storage_share_pct": 64.8,
+    "core": 610926.86,
+    "core_service": 222113.38,
+    "storage_share_pct": 63.6,
     "storage_growth_yoy_pct": 1.1,
-    "core_service_growth_yoy_pct": -43.3,
-    "storage_boxes": 1167184,
+    "core_service_growth_yoy_pct": -40.3,
+    "storage_boxes": 1164019,
     "retention_rate": null,
     "storage_gross_margin_pct": null,
     "service_gross_margin_pct": null,
@@ -576,124 +576,120 @@
     "route_day_margin": null,
     "pounds_per_route_day": 1314,
     "pounds_exec_default_pct": 67.2
+   },
+   {
+    "month": "2026-10-01",
+    "storage": 387101.22,
+    "service": 269627.56,
+    "citadel": 24351.77,
+    "core": 632377.01,
+    "core_service": 245275.79,
+    "storage_share_pct": 61.2,
+    "storage_growth_yoy_pct": 1.4,
+    "core_service_growth_yoy_pct": -2.4,
+    "storage_boxes": 1164605,
+    "retention_rate": null,
+    "storage_gross_margin_pct": null,
+    "service_gross_margin_pct": null,
+    "revenue_per_sqft": null,
+    "utilisation_pct": null,
+    "perm_withdrawal_fees": 851.33,
+    "route_days": 86,
+    "stops_per_route_day": 6.5,
+    "revenue_per_stop": 9.86,
+    "revenue_per_route_hour": null,
+    "route_day_margin": null,
+    "pounds_per_route_day": 1553,
+    "pounds_exec_default_pct": 65
    }
   ],
+  "posted": [],
   "currentRun": [
    {
     "part": "pending",
     "storage": 0,
-    "service": 5843.89,
+    "service": 7994.58,
     "citadel": 0,
-    "invoices": 24,
-    "earliest_work_date": "2026-10-01",
-    "latest_work_date": "2026-10-20",
-    "earliest_invdate": "2026-10-21",
-    "latest_invdate": "2026-10-21"
+    "invoices": 13,
+    "earliest_work_date": "2026-10-21",
+    "latest_work_date": "2026-10-30",
+    "earliest_invdate": "2026-10-29",
+    "latest_invdate": "2026-10-30"
    }
   ],
   "customers": {
-   "storage_ltm": 308,
-   "service_ltm": 867,
-   "storage_prior": 308,
-   "service_prior": 673,
-   "ltm_from": "2025-10-01",
-   "ltm_to": "2026-09-01"
+   "storage_ltm": 309,
+   "service_ltm": 839,
+   "storage_prior": 312,
+   "service_prior": 716,
+   "ltm_from": "2025-11-01",
+   "ltm_to": "2026-10-01"
   },
   "downTwoMonths": [
    {
     "level1": 6714,
     "customer": "CITADEL",
-    "month": "2026-09-01",
+    "month": "2026-10-01",
     "storage": 0,
-    "service": 22277.77,
-    "revenue": 22277.77,
-    "trailing6_mean": 211652.47,
-    "deviation_pct": -89.5
+    "service": 24351.77,
+    "revenue": 24351.77,
+    "trailing6_mean": 202579.76,
+    "deviation_pct": -88
    },
    {
     "level1": 1732,
     "customer": "SOLOMON CORDWELL BUENZ",
-    "month": "2026-09-01",
+    "month": "2026-10-01",
     "storage": 1512.32,
     "service": 290.36,
     "revenue": 1802.68,
-    "trailing6_mean": 10128.47,
-    "deviation_pct": -82.2
+    "trailing6_mean": 10294.42,
+    "deviation_pct": -82.5
    },
    {
     "level1": 7997,
     "customer": "AFTER SCHOOL MATTERS",
-    "month": "2026-09-01",
+    "month": "2026-10-01",
     "storage": 0,
-    "service": 0,
-    "revenue": 0,
+    "service": 88.23,
+    "revenue": 88.23,
     "trailing6_mean": 5753.91,
-    "deviation_pct": -100
+    "deviation_pct": -98.5
    },
    {
-    "level1": 6782,
-    "customer": "GROSVENOR CAPITAL MANAGEMENT IT/DISASTER RECOVERY",
-    "month": "2026-09-01",
-    "storage": 1542.44,
-    "service": 14.48,
-    "revenue": 1556.92,
-    "trailing6_mean": 6820.7,
-    "deviation_pct": -77.2
+    "level1": 2948,
+    "customer": "WALSH GROUP",
+    "month": "2026-10-01",
+    "storage": 1969.29,
+    "service": 10125.26,
+    "revenue": 12094.55,
+    "trailing6_mean": 16956.26,
+    "deviation_pct": -28.7
    },
    {
     "level1": 2023,
     "customer": "MCDONNELL BOEHNEN & HULBERT BERGHOFFLLP",
-    "month": "2026-09-01",
+    "month": "2026-10-01",
     "storage": 0,
     "service": 0,
     "revenue": 0,
-    "trailing6_mean": 4729.59,
+    "trailing6_mean": 4129.05,
     "deviation_pct": -100
-   },
-   {
-    "level1": 1891,
-    "customer": "MUCH SHELIST, P.C.",
-    "month": "2026-09-01",
-    "storage": 4457.4,
-    "service": 4196.47,
-    "revenue": 8653.87,
-    "trailing6_mean": 12656.86,
-    "deviation_pct": -31.6
    },
    {
     "level1": 8389,
     "customer": "UNITED AIRLINES",
-    "month": "2026-09-01",
-    "storage": 3356.12,
-    "service": 595.91,
-    "revenue": 3952.03,
-    "trailing6_mean": 7663.82,
-    "deviation_pct": -48.4
-   },
-   {
-    "level1": 8153,
-    "customer": "CITY OF CHICAGO",
-    "month": "2026-09-01",
-    "storage": 32686.53,
-    "service": 7003.73,
-    "revenue": 39690.26,
-    "trailing6_mean": 42981.54,
-    "deviation_pct": -7.7
-   },
-   {
-    "level1": 6526,
-    "customer": "CHICAGO HOUSING AUTHORITY",
-    "month": "2026-09-01",
-    "storage": 6861.93,
-    "service": 136.85,
-    "revenue": 6998.78,
-    "trailing6_mean": 9650.55,
-    "deviation_pct": -27.5
+    "month": "2026-10-01",
+    "storage": 3356.2,
+    "service": 585.99,
+    "revenue": 3942.19,
+    "trailing6_mean": 7653.78,
+    "deviation_pct": -48.5
    },
    {
     "level1": 1888,
     "customer": "BRANCA, INC.",
-    "month": "2026-09-01",
+    "month": "2026-10-01",
     "storage": 567.92,
     "service": 70.4,
     "revenue": 638.32,
@@ -701,49 +697,69 @@
     "deviation_pct": -77.7
    },
    {
+    "level1": 1891,
+    "customer": "MUCH SHELIST, P.C.",
+    "month": "2026-10-01",
+    "storage": 4434.68,
+    "service": 5397.25,
+    "revenue": 9831.93,
+    "trailing6_mean": 12010.9,
+    "deviation_pct": -18.1
+   },
+   {
+    "level1": 6526,
+    "customer": "CHICAGO HOUSING AUTHORITY",
+    "month": "2026-10-01",
+    "storage": 6879.3,
+    "service": 417.18,
+    "revenue": 7296.48,
+    "trailing6_mean": 9438.27,
+    "deviation_pct": -22.7
+   },
+   {
+    "level1": 8153,
+    "customer": "CITY OF CHICAGO",
+    "month": "2026-10-01",
+    "storage": 32510.98,
+    "service": 6895.01,
+    "revenue": 39405.99,
+    "trailing6_mean": 41394.51,
+    "deviation_pct": -4.8
+   },
+   {
     "level1": 10720,
     "customer": "CHICAGO PARK DISTRICT RECORDS",
-    "month": "2026-09-01",
-    "storage": 2160.51,
-    "service": 823.45,
-    "revenue": 2983.96,
-    "trailing6_mean": 4812.41,
-    "deviation_pct": -38
+    "month": "2026-10-01",
+    "storage": 2158.22,
+    "service": 657.66,
+    "revenue": 2815.88,
+    "trailing6_mean": 4253.36,
+    "deviation_pct": -33.8
    },
    {
-    "level1": 3507,
-    "customer": "ACCESS COMMUNITY HEALTH NETWORK",
-    "month": "2026-09-01",
-    "storage": 2712.06,
-    "service": 12055.04,
-    "revenue": 14767.1,
-    "trailing6_mean": 16205.74,
-    "deviation_pct": -8.9
+    "level1": 3849,
+    "customer": "VI CHICAGO",
+    "month": "2026-10-01",
+    "storage": 1348.47,
+    "service": 108.06,
+    "revenue": 1456.53,
+    "trailing6_mean": 2820.49,
+    "deviation_pct": -48.4
    },
    {
-    "level1": 3201,
-    "customer": "WEST SUBURBAN HOSPITAL",
-    "month": "2026-09-01",
+    "level1": 6479,
+    "customer": "EAST LAKE MANAGEMENT & DEVELOPMENT",
+    "month": "2026-10-01",
     "storage": 0,
     "service": 0,
     "revenue": 0,
-    "trailing6_mean": 1368.2,
+    "trailing6_mean": 1357.38,
     "deviation_pct": -100
-   },
-   {
-    "level1": 5687,
-    "customer": "SINGLE INVOICE CUSTOMER",
-    "month": "2026-09-01",
-    "storage": 0,
-    "service": 93.39,
-    "revenue": 93.39,
-    "trailing6_mean": 1400.15,
-    "deviation_pct": -93.3
    },
    {
     "level1": 1771,
     "customer": "SECURATEX",
-    "month": "2026-09-01",
+    "month": "2026-10-01",
     "storage": 22.63,
     "service": 70.4,
     "revenue": 93.03,
@@ -751,49 +767,59 @@
     "deviation_pct": -93.2
    },
    {
-    "level1": 7908,
-    "customer": "THE JEL SERT COMPANY",
-    "month": "2026-09-01",
-    "storage": 0,
-    "service": 1558.08,
-    "revenue": 1558.08,
-    "trailing6_mean": 2666.87,
-    "deviation_pct": -41.6
+    "level1": 6382,
+    "customer": "METRA",
+    "month": "2026-10-01",
+    "storage": 11430.5,
+    "service": 1432.72,
+    "revenue": 12863.22,
+    "trailing6_mean": 14034.95,
+    "deviation_pct": -8.3
+   },
+   {
+    "level1": 5280,
+    "customer": "IMPERIAL MOTORS",
+    "month": "2026-10-01",
+    "storage": 50,
+    "service": 85,
+    "revenue": 135,
+    "trailing6_mean": 1274.61,
+    "deviation_pct": -89.4
    },
    {
     "level1": 1078,
     "customer": "MOLEX, LLC",
-    "month": "2026-09-01",
+    "month": "2026-10-01",
     "storage": 3538.67,
-    "service": 912.61,
-    "revenue": 4451.28,
-    "trailing6_mean": 5452.45,
-    "deviation_pct": -18.4
+    "service": 875.58,
+    "revenue": 4414.25,
+    "trailing6_mean": 5417.73,
+    "deviation_pct": -18.5
    },
    {
-    "level1": 6382,
-    "customer": "METRA",
-    "month": "2026-09-01",
-    "storage": 11437.02,
-    "service": 1430.1,
-    "revenue": 12867.12,
-    "trailing6_mean": 13856.83,
-    "deviation_pct": -7.1
+    "level1": 5687,
+    "customer": "SINGLE INVOICE CUSTOMER",
+    "month": "2026-10-01",
+    "storage": 0,
+    "service": 0,
+    "revenue": 0,
+    "trailing6_mean": 991.29,
+    "deviation_pct": -100
    },
    {
     "level1": 14518,
     "customer": "NATIONAL COMMUNITY INVESTMENT FUND SCANNING",
-    "month": "2026-09-01",
+    "month": "2026-10-01",
     "storage": 0,
     "service": 0,
     "revenue": 0,
-    "trailing6_mean": 977.36,
+    "trailing6_mean": 973.67,
     "deviation_pct": -100
    },
    {
     "level1": 12456,
     "customer": "MTD FANANCIAL",
-    "month": "2026-09-01",
+    "month": "2026-10-01",
     "storage": 0,
     "service": 0,
     "revenue": 0,
@@ -801,356 +827,356 @@
     "deviation_pct": -100
    },
    {
-    "level1": 8689,
-    "customer": "METROPOLITAN WATER RECLAMATION DISTRICT OF CHICAGO",
-    "month": "2026-09-01",
-    "storage": 3884.61,
-    "service": 509,
-    "revenue": 4393.61,
-    "trailing6_mean": 5332.28,
-    "deviation_pct": -17.6
+    "level1": 8493,
+    "customer": "MISERICORDIA HOME",
+    "month": "2026-10-01",
+    "storage": 176.46,
+    "service": 0.74,
+    "revenue": 177.2,
+    "trailing6_mean": 1110.48,
+    "deviation_pct": -84
    },
    {
-    "level1": 12626,
-    "customer": "UNIVERSITY OF CHICAGO SCHOOL",
-    "month": "2026-09-01",
-    "storage": 0,
-    "service": 1035.25,
-    "revenue": 1035.25,
-    "trailing6_mean": 1953.97,
-    "deviation_pct": -47
+    "level1": 8689,
+    "customer": "METROPOLITAN WATER RECLAMATION DISTRICT OF CHICAGO",
+    "month": "2026-10-01",
+    "storage": 3885.01,
+    "service": 155,
+    "revenue": 4040.01,
+    "trailing6_mean": 4952.24,
+    "deviation_pct": -18.4
+   },
+   {
+    "level1": 1758,
+    "customer": "NATIONAL FUTURES ASSOCIATION",
+    "month": "2026-10-01",
+    "storage": 455.22,
+    "service": 1067.44,
+    "revenue": 1522.66,
+    "trailing6_mean": 2367.57,
+    "deviation_pct": -35.7
    },
    {
     "level1": 13542,
     "customer": "CANTWELL AND CANTWELL",
-    "month": "2026-09-01",
+    "month": "2026-10-01",
     "storage": 80,
     "service": 0,
     "revenue": 80,
-    "trailing6_mean": 861.39,
-    "deviation_pct": -90.7
+    "trailing6_mean": 841.97,
+    "deviation_pct": -90.5
    },
    {
-    "level1": 5244,
-    "customer": "UNITED SCRAP",
-    "month": "2026-09-01",
+    "level1": 12626,
+    "customer": "UNIVERSITY OF CHICAGO SCHOOL",
+    "month": "2026-10-01",
     "storage": 0,
-    "service": 199.58,
-    "revenue": 199.58,
-    "trailing6_mean": 963.18,
-    "deviation_pct": -79.3
-   },
-   {
-    "level1": 70,
-    "customer": "FNBC BANK AND TRUST",
-    "month": "2026-09-01",
-    "storage": 1178.94,
-    "service": 506.7,
-    "revenue": 1685.64,
-    "trailing6_mean": 2390.46,
-    "deviation_pct": -29.5
+    "service": 1174.95,
+    "revenue": 1174.95,
+    "trailing6_mean": 1929.68,
+    "deviation_pct": -39.1
    }
   ],
   "concentration": [
    {
     "level1": 6714,
     "customer": "CITADEL",
-    "ltm": 1636479.54,
-    "share": 0.16890695079246956
+    "ltm": 1241167.31,
+    "share": 0.13340694404743045
    },
    {
     "level1": 8153,
     "customer": "CITY OF CHICAGO",
-    "ltm": 723629.69,
-    "share": 0.0746884280880163
+    "ltm": 718761.88,
+    "share": 0.07725616452836316
    },
    {
     "level1": 947,
     "customer": "CHAPMAN & CUTLER",
-    "ltm": 500334.95,
-    "share": 0.05164137327338826
+    "ltm": 503217.26,
+    "share": 0.054088337895816206
    },
    {
     "level1": 3507,
     "customer": "ACCESS COMMUNITY HEALTH NETWORK",
-    "ltm": 281960.4,
-    "share": 0.02910214899981275
+    "ltm": 254817.41,
+    "share": 0.02738906486199765
    },
    {
     "level1": 9703,
     "customer": "ICU MEDICAL",
-    "ltm": 203114.75,
-    "share": 0.02096420532301599
+    "ltm": 225344.24,
+    "share": 0.024221139386188587
    },
    {
     "level1": 1,
     "customer": "K&L GATES LLP",
-    "ltm": 190094.75,
-    "share": 0.01962036420214383
+    "ltm": 191537.11,
+    "share": 0.020587377955335072
    },
    {
     "level1": 9993,
     "customer": "CHICAGO PUBLIC SCHOOLS",
-    "ltm": 186210.97,
-    "share": 0.01921950527215759
+    "ltm": 189213.23,
+    "share": 0.02033759557173931
    },
    {
     "level1": 2948,
     "customer": "WALSH GROUP",
-    "ltm": 170999.72,
-    "share": 0.017649497342060307
+    "ltm": 171531.23,
+    "share": 0.018437044722839923
    },
    {
     "level1": 6382,
     "customer": "METRA",
-    "ltm": 161035.57,
-    "share": 0.016621061512218652
-   },
-   {
-    "level1": 1891,
-    "customer": "MUCH SHELIST, P.C.",
-    "ltm": 156779.01,
-    "share": 0.016181726615025135
-   },
-   {
-    "level1": 12601,
-    "customer": "UNIVERSITY OF CHICAGO MEDICINE",
-    "ltm": 151613.39,
-    "share": 0.01564856435920335
-   },
-   {
-    "level1": 50,
-    "customer": "PEDERSEN AND HOUPT",
-    "ltm": 147223.79,
-    "share": 0.015195497924166454
-   },
-   {
-    "level1": 5369,
-    "customer": "ACCESS COMMUNITY LEASED PROPERTY",
-    "ltm": 138240,
-    "share": 0.014268248582900702
+    "ltm": 162444.6,
+    "share": 0.017460367742852673
    },
    {
     "level1": 6008,
     "customer": "CBOE EXCHANGE INC",
-    "ltm": 129603.65,
-    "share": 0.013376859776123108
+    "ltm": 158007.44,
+    "share": 0.016983439329511286
+   },
+   {
+    "level1": 1891,
+    "customer": "MUCH SHELIST, P.C.",
+    "ltm": 152355.02,
+    "share": 0.0163758886209186
+   },
+   {
+    "level1": 12601,
+    "customer": "UNIVERSITY OF CHICAGO MEDICINE",
+    "ltm": 152087.47,
+    "share": 0.01634713099284355
+   },
+   {
+    "level1": 50,
+    "customer": "PEDERSEN AND HOUPT",
+    "ltm": 148662.21,
+    "share": 0.015978966712745082
+   },
+   {
+    "level1": 5369,
+    "customer": "ACCESS COMMUNITY LEASED PROPERTY",
+    "ltm": 139320,
+    "share": 0.014974818700863151
    },
    {
     "level1": 1977,
     "customer": "SG AMERICAS SECURITIES LLC",
-    "ltm": 121929.15,
-    "share": 0.012584746974115936
+    "ltm": 117502.28,
+    "share": 0.01262973973541529
    },
    {
     "level1": 1754,
     "customer": "LATHAM & WATKINS",
-    "ltm": 118081.19,
-    "share": 0.01218758515541615
+    "ltm": 116948.32,
+    "share": 0.012570197311014412
    },
    {
     "level1": 2972,
     "customer": "ATTORNEY GENERAL'S OFFICE",
-    "ltm": 115065.39,
-    "share": 0.011876313569215976
+    "ltm": 114613.63,
+    "share": 0.012319253013909057
    },
    {
     "level1": 10720,
     "customer": "CHICAGO PARK DISTRICT RECORDS",
-    "ltm": 107671.44,
-    "share": 0.011113157343741882
+    "ltm": 105769.89,
+    "share": 0.011368683080392178
    },
    {
     "level1": 2345,
     "customer": "MCANDREWS, HELD & MALLOY",
-    "ltm": 102237.49,
-    "share": 0.01055229978162489
+    "ltm": 102343.01,
+    "share": 0.011000344674494863
    },
    {
     "level1": 6526,
     "customer": "CHICAGO HOUSING AUTHORITY",
-    "ltm": 101988.74,
-    "share": 0.010526625397691175
+    "ltm": 101825.92,
+    "share": 0.010944765224293678
    },
    {
     "level1": 5201,
     "customer": "KILPATRICK, TOWNSEND AND STOCKTON LLP",
-    "ltm": 98115.08,
-    "share": 0.01012681098937492
+    "ltm": 99948.23,
+    "share": 0.010742941600073008
    },
    {
     "level1": 4418,
     "customer": "TURNER CONSTRUCTION",
-    "ltm": 94822.72,
-    "share": 0.009786994648920645
-   },
-   {
-    "level1": 8389,
-    "customer": "UNITED AIRLINES",
-    "ltm": 84540.64,
-    "share": 0.008725744118037605
+    "ltm": 95185.43,
+    "share": 0.010231011751462104
    },
    {
     "level1": 4089,
     "customer": "JOHNSON & BELL",
-    "ltm": 83054.7,
-    "share": 0.008572374895675947
+    "ltm": 84054.18,
+    "share": 0.009034568666018643
    },
    {
     "level1": 1732,
     "customer": "SOLOMON CORDWELL BUENZ",
-    "ltm": 82664.24,
-    "share": 0.008532074111954308
+    "ltm": 81067.48,
+    "share": 0.008713543034279712
    },
    {
     "level1": 8107,
     "customer": "CITY COLLEGES OF CHICAGO",
-    "ltm": 78718.2,
-    "share": 0.008124789102998365
+    "ltm": 78940.19,
+    "share": 0.008484891138829245
    },
    {
     "level1": 6782,
     "customer": "GROSVENOR CAPITAL MANAGEMENT IT/DISASTER RECOVERY",
-    "ltm": 78551.55,
-    "share": 0.008107588555932825
+    "ltm": 77101.74,
+    "share": 0.008287285228402875
+   },
+   {
+    "level1": 8389,
+    "customer": "UNITED AIRLINES",
+    "ltm": 73275.66,
+    "share": 0.007876038786147645
    },
    {
     "level1": 5236,
     "customer": "MERCY",
-    "ltm": 67523.3,
-    "share": 0.006969323130336943
+    "ltm": 67825.65,
+    "share": 0.007290244128755374
    },
    {
     "level1": 3337,
     "customer": "MCHUGH CONSTRUCTION",
-    "ltm": 66630.51,
-    "share": 0.0068771750570417465
-   },
-   {
-    "level1": 8689,
-    "customer": "METROPOLITAN WATER RECLAMATION DISTRICT OF CHICAGO",
-    "ltm": 63147.42,
-    "share": 0.006517672785943543
+    "ltm": 66483.05,
+    "share": 0.007145934685834194
    },
    {
     "level1": 1607,
     "customer": "PUBLIC BUILDING COMMISSION",
-    "ltm": 62889.65,
-    "share": 0.006491067415303972
+    "ltm": 63322.81,
+    "share": 0.0068062560966064035
+   },
+   {
+    "level1": 8689,
+    "customer": "METROPOLITAN WATER RECLAMATION DISTRICT OF CHICAGO",
+    "ltm": 61702.35,
+    "share": 0.00663208085463109
    },
    {
     "level1": 1078,
     "customer": "MOLEX, LLC",
-    "ltm": 61797.43,
-    "share": 0.006378335453012191
+    "ltm": 61522.91,
+    "share": 0.006612793735282231
    },
    {
     "level1": 1138,
     "customer": "WOLTERS KLUWER",
-    "ltm": 55472.19,
-    "share": 0.005725484638005631
+    "ltm": 55698.1,
+    "share": 0.005986713677020857
    },
    {
     "level1": 62,
     "customer": "WIGHT AND COMPANY",
-    "ltm": 53657.55,
-    "share": 0.005538189104090159
+    "ltm": 54053.66,
+    "share": 0.0058099609432823605
    },
    {
     "level1": 1003,
     "customer": "NEAL & LEROY, LLC",
-    "ltm": 53572.08,
-    "share": 0.005529367437377337
+    "ltm": 53894.39,
+    "share": 0.005792841797614212
    },
    {
     "level1": 10165,
     "customer": "COMED CLOUD MANAGEMENT",
     "ltm": 51744.33,
-    "share": 0.005340718773116654
+    "share": 0.005561742467324391
    },
    {
     "level1": 8006,
     "customer": "WISCONSIN ENERGY GROUP PO#4510519019",
-    "ltm": 49556.33,
-    "share": 0.005114887408103729
-   },
-   {
-    "level1": 6872,
-    "customer": "REYES HOLDINGS",
-    "ltm": 48134.61,
-    "share": 0.00496814656337513
-   },
-   {
-    "level1": 5682,
-    "customer": "ASSURANT",
-    "ltm": 48120.3,
-    "share": 0.004966669576705415
+    "ltm": 50832.06,
+    "share": 0.005463687070710578
    },
    {
     "level1": 8700,
     "customer": "CHICAGO PUBLIC LIBRARY FOUNDATION",
-    "ltm": 48093.59,
-    "share": 0.0049639127413491566
+    "ltm": 50802.87,
+    "share": 0.005460549581779497
    },
    {
-    "level1": 3201,
-    "customer": "WEST SUBURBAN HOSPITAL",
-    "ltm": 47224.29,
-    "share": 0.004874189155606132
+    "level1": 6872,
+    "customer": "REYES HOLDINGS",
+    "ltm": 49308.22,
+    "share": 0.005299897035330709
+   },
+   {
+    "level1": 5682,
+    "customer": "ASSURANT",
+    "ltm": 48094.7,
+    "share": 0.00516946176408558
    },
    {
     "level1": 6778,
     "customer": "GROSVENOR CAPITAL MANAGEMENT, LP. MAIN",
-    "ltm": 44380.06,
-    "share": 0.004580625927401968
+    "ltm": 44502.37,
+    "share": 0.004783339954843032
    },
    {
     "level1": 1042,
     "customer": "SCHNEIDER ELECTRIC",
-    "ltm": 41085.3,
-    "share": 0.004240561874298685
+    "ltm": 41014.34,
+    "share": 0.0044084288374645385
+   },
+   {
+    "level1": 3201,
+    "customer": "WEST SUBURBAN HOSPITAL",
+    "ltm": 39642.45,
+    "share": 0.004260971157106176
    },
    {
     "level1": 359,
     "customer": "ENCYCLOPEDIA BRITANNICA",
-    "ltm": 39055.92,
-    "share": 0.00403110225111316
+    "ltm": 39202.05,
+    "share": 0.0042136347362343686
    },
    {
     "level1": 3197,
     "customer": "NATIONAL EQUITY FUND",
-    "ltm": 38907.89,
-    "share": 0.004015823541349511
+    "ltm": 39072.07,
+    "share": 0.004199663828003403
    },
    {
     "level1": 12530,
     "customer": "INGALLS HOSPITAL",
-    "ltm": 38488.25,
-    "share": 0.003972510984670341
+    "ltm": 38790.54,
+    "share": 0.004169403558775338
    },
    {
     "level1": 1758,
     "customer": "NATIONAL FUTURES ASSOCIATION",
-    "ltm": 37356.5,
-    "share": 0.003855698988622179
+    "ltm": 37506.72,
+    "share": 0.004031412087740726
    },
    {
     "level1": 1779,
     "customer": "AMERICAN HOSPITAL ASSOCIATION",
-    "ltm": 37149.81,
-    "share": 0.0038343657688623433
-   },
-   {
-    "level1": 3849,
-    "customer": "VI CHICAGO",
-    "ltm": 36936.85,
-    "share": 0.003812385399806972
+    "ltm": 37172.91,
+    "share": 0.003995532499522702
    },
    {
     "level1": 7010,
     "customer": "DEPAUL UNIVERSITY LIBRARIES",
-    "ltm": 35815.44,
-    "share": 0.0036966406324216226
+    "ltm": 36017.72,
+    "share": 0.0038713668318866835
+   },
+   {
+    "level1": 5035,
+    "customer": "GONNELLA BAKING CO.",
+    "ltm": 35993.51,
+    "share": 0.003868764618559466
    }
   ],
   "pace": [
@@ -1443,39 +1469,44 @@
     "date": "2026-10-20",
     "value": 390.63,
     "lines": 8
+   },
+   {
+    "date": "2026-10-21",
+    "value": 1190.55,
+    "lines": 12
+   },
+   {
+    "date": "2026-10-22",
+    "value": 1105,
+    "lines": 8
+   },
+   {
+    "date": "2026-10-23",
+    "value": 300,
+    "lines": 6
+   },
+   {
+    "date": "2026-10-26",
+    "value": 195,
+    "lines": 3
+   },
+   {
+    "date": "2026-10-27",
+    "value": 390,
+    "lines": 3
+   },
+   {
+    "date": "2026-10-28",
+    "value": 110,
+    "lines": 3
+   },
+   {
+    "date": "2026-10-30",
+    "value": 4704.03,
+    "lines": 2
    }
   ],
   "dailyDone": [
-   {
-    "date": "2025-07-23",
-    "done": 167,
-    "booked": 278
-   },
-   {
-    "date": "2025-07-24",
-    "done": 68,
-    "booked": 145
-   },
-   {
-    "date": "2025-07-25",
-    "done": 73,
-    "booked": 145
-   },
-   {
-    "date": "2025-07-28",
-    "done": 76,
-    "booked": 130
-   },
-   {
-    "date": "2025-07-29",
-    "done": 97,
-    "booked": 248
-   },
-   {
-    "date": "2025-07-30",
-    "done": 136,
-    "booked": 239
-   },
    {
     "date": "2025-07-31",
     "done": 168,
@@ -3165,6 +3196,41 @@
     "date": "2026-10-22",
     "done": 84,
     "booked": 143
+   },
+   {
+    "date": "2026-10-23",
+    "done": 86,
+    "booked": 108
+   },
+   {
+    "date": "2026-10-24",
+    "done": 1,
+    "booked": 4
+   },
+   {
+    "date": "2026-10-26",
+    "done": 134,
+    "booked": 204
+   },
+   {
+    "date": "2026-10-27",
+    "done": 154,
+    "booked": 237
+   },
+   {
+    "date": "2026-10-28",
+    "done": 127,
+    "booked": 201
+   },
+   {
+    "date": "2026-10-29",
+    "done": 137,
+    "booked": 189
+   },
+   {
+    "date": "2026-10-30",
+    "done": 49,
+    "booked": 68
    }
   ]
  }

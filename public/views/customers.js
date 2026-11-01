@@ -12,6 +12,7 @@ import { billNow, serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippin
 import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 import { conversationCandidates } from '/components/lists.js';
+import { LABELS } from '/components/metrics.js';
 
 const CITADEL = 6714;
 const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under review: delivery days not yet in the volumes
@@ -189,7 +190,7 @@ async function whitespace(main, C, params) {
   const maxHave = Math.max(...W.rows.flatMap(r => LINES.map(x => r.cells[x.key].have ? r.cells[x.key].spend : 0)));
   const top3 = rows.slice(0, 3).map(r => {
     const best = LINES.map(x => ({ x, c: r.cells[x.key] })).filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp)[0];
-    return `${titleCase(r.customer)} (${lc(best.x.name)}, about ${moneyK(best.c.opp)} a year)`;
+    return `${titleCase(r.customer)} (${lc(best.x.name)}, about ${moneyK(best.c.opp / 12)} a month)`;
   });
   const byLine = LINES.map(x => ({ x, v: rows.reduce((t, r) => t + (r.cells[x.key].have ? 0 : r.cells[x.key].opp), 0) })).sort((a, b) => b.v - a.v);
   const shown = params.all ? rows.length : 40;
@@ -207,7 +208,7 @@ async function whitespace(main, C, params) {
   <div class="cust ws">
     <h1>Customers</h1>
     ${tabsHtml('whitespace')}
-    <p class="lede">If the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do, they would spend about <b>${moneyK(W.total)} a year more</b> (${moneyK(W.total / 12)} a month ◇). Most of it is ${lc(byLine[0].x.name)} and ${lc(byLine[1].x.name)}. Start with ${top3.join(', ')}.${paceLine}</p>
+    <p class="lede">If the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do, they would spend about <b>${moneyK(W.total / 12)} a month more</b> (${moneyK(W.total / 12)} a month ◇). Most of it is ${lc(byLine[0].x.name)} and ${lc(byLine[1].x.name)}. Start with ${top3.join(', ')}.${paceLine}</p>
     <div class="key"><span><span style="background:color-mix(in srgb, var(--ink) 30%, var(--surface))"></span>buys it: twelve-month spend, darker is more</span><span><span style="border:var(--hair) dashed var(--ink-5)"></span>doesn't buy it yet: what comparable accounts spend ◇</span><span>— not sized</span></div>
     <div class="card">
       <div class="grid">
@@ -301,10 +302,10 @@ async function monthGrid(main, C, params) {
   <div class="cust mg">
     <h1>Customers</h1>
     ${tabsHtml('grid')}
-    <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (10% or more below their own run) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} Each cell below is one month against the six before it.</p>
+    <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (${LABELS.slipping}) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} Each cell below is one month against the six before it.</p>
     <div class="tools">
       <div class="seg">${[['total', 'Storage and service'], ['storage', 'Storage'], ['service', 'Service']].map(([k, l]) => `<a href="${link(k)}" class="${k === which ? 'on' : ''}">${l}</a>`).join('')}</div>
-      <div class="key"><i style="background:color-mix(in srgb, var(--bad) 70%, var(--surface))"></i>down<i style="background:color-mix(in srgb, var(--bad) 25%, var(--surface));margin-left:var(--sp-2)"></i><i style="background:color-mix(in srgb, var(--ink) 5%, var(--surface))"></i>within 10%<i style="background:color-mix(in srgb, var(--good) 25%, var(--surface))"></i><i style="background:color-mix(in srgb, var(--good) 70%, var(--surface));margin-left:var(--sp-2)"></i>up · against its own last six months</div>
+      <div class="key"><i style="background:color-mix(in srgb, var(--bad) 70%, var(--surface))"></i>down<i style="background:color-mix(in srgb, var(--bad) 25%, var(--surface));margin-left:var(--sp-2)"></i><i style="background:color-mix(in srgb, var(--ink) 5%, var(--surface))"></i>within 10%<i style="background:color-mix(in srgb, var(--good) 25%, var(--surface))"></i><i style="background:color-mix(in srgb, var(--good) 70%, var(--surface));margin-left:var(--sp-2)"></i>up · ${LABELS.gridColours.toLowerCase()}</div>
     </div>
     <div class="card">
       <table>
@@ -391,7 +392,7 @@ async function marginList(main, R, M, MS, params) {
     ${D.rows.length ? `<div class="card dens" style="margin-top:var(--sp-4)">
       <div class="card-head"><h3>Where more volume would cut cost: ${esc(D.rows[0].postcode)} first, about ${money0(D.rows[0].saving)} a year ◇</h3></div>
       <p class="sub" style="margin:0 0 var(--sp-2)">Travel to a postcode is shared by the customers on the visit. Where visits carry one customer, one more on the same visits takes this much a year off the cost of serving the ones already there.</p>
-      ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${d.miles.toFixed(0)} miles out<small>about ${n0(d.visitsYear)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${d.perVisit.toFixed(1)} customers each`} · ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
+      ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${d.miles.toFixed(0)} miles out<small>${n0(d.visits)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${d.perVisit.toFixed(1)} customers each`} · ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
       <div class="src">Route visits from ${D.days > 120 ? 'six months of route days' : `the ${D.days} days of routes held offline, scaled to a year`} · customers a visit from the twelve-month postcode book · travel a visit from the cost model at the postcode's distance (model/rates.js, provisional) ◇</div>
     </div>` : ''}
     <p class="foot">Twelve months. Cost to serve ◇ from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Actions: Drop under $5,000 and under 15% · Re-route under 15% with travel over 40% of cost · Renegotiate under 15% · Reprice 15–50% · Hold 50% and over · Check routes where most of the cost is route cost under review.</p>

@@ -131,7 +131,7 @@ function tools(L, D, X = {}) {
         const x = L.home2data.densityView(D);
         if (!x) return { note: 'postcode centres are not loaded' };
         return { postcodes_visited: x.points.length, with_one_customer: x.single, saving_top: `${moneyK(x.saving)} a year ◇ across the postcodes below`,
-          postcodes: x.save.map(r => `${r.postcode}: ${Math.round(r.visitsYear)} visits a year, ${Math.round(r.miles)} miles out, one more customer saves about ${moneyK(r.saving)} a year ◇ (${title(r.names)})`) };
+          postcodes: x.save.map(r => `${r.postcode}: ${r.visits} visits a year, ${Math.round(r.miles)} miles out, one more customer saves about ${moneyK(r.saving)} a year ◇ (${title(r.names)})`) };
       },
     },
     opportunities: {

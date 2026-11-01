@@ -34,12 +34,14 @@ export function deltaText(c) { return c == null ? 'new' : (c > 0 ? '▲ ' : c < 
 // colour for a move of a fifth or more only; a smaller one keeps its arrow in ink (status marks exceptions)
 export function deltaCls(c) { return c == null ? 'flat' : c >= 0.2 ? 'up' : c <= -0.2 ? 'down' : 'flat'; }
 
-// Which part moved, in a few words: "service down $12K a month".
+// A move, always as the total first, then the part that moved: "down $35K a month in total (service down $33K)".
 export function moveReason(m, fmt) {
   if (!m) return '';
   const part = Math.abs(m.dService) >= Math.abs(m.dStorage) ? ['service', m.dService] : ['storage', m.dStorage];
   const other = part[0] === 'service' ? ['storage', m.dStorage] : ['service', m.dService];
   const word = v => v < 0 ? 'down' : 'up';
-  const main = `${part[0]} ${word(part[1])} ${fmt(Math.abs(part[1]))} a month`;
-  return Math.abs(other[1]) > 0.25 * Math.abs(part[1]) && Math.abs(other[1]) >= 250 ? `${main}, ${other[0]} ${word(other[1])} ${fmt(Math.abs(other[1]))}` : main;
+  const total = m.d != null ? m.d : part[1] + other[1];
+  const main = `${part[0]} ${word(part[1])} ${fmt(Math.abs(part[1]))}`;
+  const both = Math.abs(other[1]) > 0.25 * Math.abs(part[1]) && Math.abs(other[1]) >= 250 ? `${main}, ${other[0]} ${word(other[1])} ${fmt(Math.abs(other[1]))}` : main;
+  return `${word(total)} ${fmt(Math.abs(total))} a month in total (${both})`;
 }

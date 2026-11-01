@@ -138,7 +138,7 @@ export function densityByPostcode(R, A, Z, { top = 8 } = {}) {
     const visitsYear = n * 365 / span;
     const k = Math.max(1, Math.min(b.customers || 1, (b.visits || visitsYear) / visitsYear));
     const mi = miles(YARD, pt), tpv = R.travelPerVisit(mi);
-    rows.push({ postcode: p, miles: mi, visitsYear, perVisit: k, travel: tpv, saving: visitsYear * tpv / (Math.floor(k) + 1), customers: b.customers, names: b.names });
+    rows.push({ postcode: p, miles: mi, visits: b.visits, visitsYear, perVisit: k, travel: tpv, saving: visitsYear * tpv / (Math.floor(k) + 1), customers: b.customers, names: b.names });
   }
   rows.sort((a, b) => b.saving - a.saving);
   return { rows: rows.slice(0, top), days: Math.round(span), from: dates[0], to: dates[dates.length - 1] };

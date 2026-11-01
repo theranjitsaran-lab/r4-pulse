@@ -36,6 +36,8 @@ export async function render(main, P) {
   const age = Math.round((Date.now() - Date.parse(A.latestDone + 'T12:00:00Z')) / 864e5);
   const dayLabel = new Date(A.latestDone + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
   const billShown = m.bill.core != null ? { month: m.bill.month, v: m.bill.core, d: m.bill.vsLast, vs: m.bill.lastMonth } : { month: m.bill.lastMonth, v: m.bill.lastCore, d: null };
+  // a note on why the headline moved, for its first week
+  const changedNote = Date.now() < Date.UTC(2026, 10, 9) ? 'Changed 1 Nov: large jobs are now priced at each customer\'s own price, and only a few are left out to check.' : '';
   const jobWord = n => `${n} job${n === 1 ? '' : 's'} to check`;
   const jobsNote = m.next && m.next.jobCount ? `, before ${jobWord(m.next.jobCount)}` : '';
   const sheet = [
@@ -59,13 +61,13 @@ export async function render(main, P) {
 
   const sumCard = `<section class="h2-card h2-sum" data-rv>
       <div class="h2-sum-top"><span class="h2-date">${esc(dayLabel)}</span>${age > 2 ? `<span class="h2-stale">${age} days old</span>` : ''}<button class="h2-ask-inline" type="button">Ask ›</button></div>
-      <h1 class="h2-head" id="h2-head"></h1>
+      <h1 class="h2-head" id="h2-head"></h1>${changedNote ? `<p class="h2-by">${esc(changedNote)}</p>` : ''}
       <ul class="h2-bul" id="h2-bul"></ul>
       <p class="h2-by" id="h2-by">From the figures below</p>
     </section>`;
 
   const pulse = `<div class="h2-row">
-      <section class="h2-card h2-wide" data-rv><div class="h2-ch"><h2>${m.vsLast != null ? `${esc(mon(m.workMonth))}'s services done are ${word(m.vsLast)} ${esc(mon(m.prevMonth))}'s` : 'This month\'s services done'}</h2><small>the amount of work, by working day, at ${esc(mon(m.prevMonth))}'s value a service ◇</small></div><div id="h2-trend"></div></section>
+      <section class="h2-card h2-wide" data-rv><div class="h2-ch"><h2>${m.vsLast != null ? `Work volume: ${esc(mon(m.workMonth))} is ${word(m.vsLast)} ${esc(mon(m.prevMonth))}` : 'Work volume this month'}</h2><small>services done, by working day; the value of that work is on the lines above ◇</small></div><div id="h2-trend"></div></section>
       <section class="h2-card" data-rv><div class="h2-ch"><h2>${w.lastFull ? `Last week ${moneyK(w.lastFull.value)} ◇, ${w.vsAvg >= 0 ? 'up' : 'down'} ${pctW(w.vsAvg)}` : 'Weeks'}</h2><small>work done each week against the weeks before</small></div><div id="h2-weeks"></div></section>
     </div>`;
 
@@ -91,7 +93,7 @@ export async function render(main, P) {
 
   // ── where the money is ──
   const maxX = Math.max(...cross.rows.map(r => r.total + r.opp));
-  const crossCard = `<section class="h2-card" data-rv><div class="h2-ch"><h2>${cross.rows.length} accounts could add ${moneyK(cross.rows.reduce((t, r) => t + r.opp, 0))} a year ◇</h2><small>what they buy, and what comparable accounts also buy</small></div>
+  const crossCard = `<section class="h2-card" data-rv><div class="h2-ch"><h2>${cross.rows.length} accounts could add ${moneyK(cross.rows.reduce((t, r) => t + r.opp, 0) / 12)} a month ◇</h2><small>what they buy, and what comparable accounts also buy</small></div>
       <ul class="h2-xs">${cross.rows.map(r => `<li><a href="#customer/${r.level1}"><span class="h2-cn">${esc(titleCase(r.customer))}</span>
         <span class="h2-xbar"><i class="have" style="--w:${(r.total / maxX * 100).toFixed(1)}%"></i><i class="opp" style="--w:${(r.opp / maxX * 100).toFixed(1)}%"></i></span>
         <span class="h2-chips">${r.lines.filter(l => !l.have && l.opp > 0).map(l => `<em>${esc(l.name)}</em>`).join('')}</span></a></li>`).join('')}</ul>
@@ -100,7 +102,7 @@ export async function render(main, P) {
 
   const mapCard = dens ? `<section class="h2-card h2-wide" data-rv><div class="h2-ch"><h2>One more customer in these ${dens.save.length} postcodes saves ${moneyK(dens.saving)} a year ◇</h2><small>R4 already drives there; a second stop shares the trip</small></div>
       <div id="h2-map"></div>
-      <ol class="h2-pc">${dens.save.slice(0, 4).map((r, i) => `<li><b>${i + 1}</b><span>${esc(r.postcode)} · ${Math.round(r.visitsYear)} visits a year · ${Math.round(r.miles)} mi</span><em>${moneyK(r.saving)}</em></li>`).join('')}</ol>
+      <ol class="h2-pc">${dens.save.slice(0, 4).map((r, i) => `<li><b>${i + 1}</b><span>${esc(r.postcode)} · ${r.visits} visits a year · ${Math.round(r.miles)} mi</span><em>${moneyK(r.saving)}</em></li>`).join('')}</ol>
       <div class="src">${dens.points.length} postcodes visited · ${dens.single} with one customer · dot size is visits · straight-line miles from the yard (no GPS was ever captured)</div></section>` :
     `<section class="h2-card pending h2-wide" data-rv>The density map needs the postcode centres (public/data/zcta.json).</section>`;
 
@@ -120,7 +122,7 @@ export async function render(main, P) {
       <div class="h2-ch"><h2>${esc(dayLabel)}</h2><small>${DS ? esc(DS.text) : ''}</small></div>
       ${TV.lines.length ? lines(TV.lines.slice(0, 4)) : `<p class="quiet">Nothing unusual: the day's work and every route were within their usual range.</p>`}
       <div class="h2-team">
-        <div><h3>Anne · this week <a href="#customers?view=conversations">all ›</a></h3><ol class="calls">${AN.calls.map(c => `<li><a href="#customer/${c.level1}"><b>${esc(titleCase(c.name))}</b><small>${esc(c.ev)}</small></a><span>${c.stake ? moneyK(c.stake) : ''}</span></li>`).join('')}</ol></div>
+        <div><h3>Anne · this week <a href="#customers?view=conversations">all ›</a></h3><ol class="calls">${AN.calls.map(c => `<li><a href="#customer/${c.level1}"><b>${esc(titleCase(c.name))}</b><small>${esc(c.ev)}</small></a><span>${c.stake ? `${moneyK(c.stake)}<small>a year</small>` : ''}</span></li>`).join('')}</ol></div>
         <div><h3>Mike · next <a href="#activity">routes ›</a></h3>${MK.next ? `<p class="next">Booked for ${esc(MK.next.label)}: ${MK.next.services.toLocaleString('en-US')} services on ${MK.next.routes.length} routes${MK.next.routes.length ? ` (${MK.next.routes.slice(0, 4).map(r => `${esc(r.route)} ${r.services}`).join(', ')})` : ''}.</p>` : '<p class="quiet">Nothing booked ahead in the data.</p>'}</div>
       </div>
       <p class="h2-by">Last 7 days: ${t.called} called · ${t.emailed} emailed · rates moved on ${t.ratesMoved} accounts in 30 days · lines marked useful ${t.useful}, already known ${t.knew}, not right ${t.wrong}</p>

@@ -14,6 +14,7 @@ import { seriesOf } from './series.js';
 import { byAccount, totals, eligibleList } from './storage.js';
 import { densityByPostcode } from './jobview.js';
 import { buildWhitespace, LINES } from './whitespace.js';
+import { LABELS } from './metrics.js';
 import { lineView, lineSeries, billBreakdown, driverOf, newestFall, estimateToDate, lineShort } from './linework.js';
 
 const sum = (a, f = x => x) => a.reduce((t, x) => t + (f(x) || 0), 0);
@@ -213,26 +214,26 @@ export function pointsView(D, { month: m, cust, cross, dens, lines }) {
     const dir = d == null || Math.abs(d) < 0.01 ? `level with ${mon(prev)}` : `${pc(d)} ${d > 0 ? 'ahead of' : 'behind'} ${mon(prev)}`;
     const parts = [up && `${up.name} up ${pc(up.pct)}`, down && `${down.name} down ${pc(down.pct)}`].filter(Boolean).join(', ');
     const jobs = m.next.jobCount ? ` ${m.next.jobCount} job${m.next.jobCount === 1 ? '' : 's'} (${money(m.next.jobs)}) to check.` : '';
-    const say = `${mon(L)}'s service is ${dir}${at} ◇${parts ? `: ${parts}` : ''}.${jobs}`;
+    const say = `${LABELS.value}: ${mon(L)} is ${dir}${at} ◇${parts ? `, ${parts}` : ''}. ${LABELS.volume}: ${m.vsLast == null ? '' : `${Math.abs(m.vsLast) < 0.02 ? 'level' : `${pc(m.vsLast)} ${m.vsLast > 0 ? 'ahead' : 'behind'}`}.`}${jobs}`;
     out.push({ key: 'activity', title: 'Activity', href: '#h2-lines', bullet: true, line: say, say });
   }
   const fall = cust.falling[0];
   if (fall) {
     const drv = D.LW ? driverOf(D, fall.level1) : null;
-    const fresh = D.LW ? newestFall(D, new Set(slippingAccounts(D.C).map(s => s.level1))) : null;
-    const say = `${title(fall.customer)} is down ${money(fall.d)} a month on its own run${drv ? `, driven by ${drv.name.toLowerCase()}` : ''}.` +
-      (fresh ? ` New: ${title(fresh.customer)} fell ${money(fresh.d)} in ${mon(fresh.month)}${fresh.driver ? `, driven by ${fresh.driver.toLowerCase()}` : ''}.` : '');
+    const fresh = D.LW ? newestFall(D, new Set([...slippingAccounts(D.C), ...risingAccounts(D.C)].map(s => s.level1))) : null;
+    const say = `${title(fall.customer)} is down ${money(fall.d)} a month in total on its own run${drv ? `, driven by ${drv.name.toLowerCase()}` : ''}.` +
+      (fresh ? ` New in ${mon(fresh.month)}: ${title(fresh.customer)} fell ${money(fresh.d)}${fresh.est ? ' ◇' : ''}${fresh.driver ? `, driven by ${fresh.driver.toLowerCase()}` : ''}.` : '');
     out.push({ key: 'customer', title: 'Customer', href: `#customer/${fall.level1}`, bullet: true, line: say, say });
   }
   const c0 = cross.rows[0];
   if (c0) {
     const ls = c0.lines.filter(l => !l.have && l.opp > 0).map(l => l.name);
-    const say = `Cross-sell is worth up to ${money(cross.totalMonth)} a month ◇. ${title(c0.customer)} is the largest to explore: ${money(c0.opp)} a year in ${ls.join(' and ')}.`;
+    const say = `Cross-sell is worth up to ${money(cross.totalMonth)} a month ◇. ${title(c0.customer)} is the largest to explore: ${money(c0.opp / 12)} a month in ${ls.join(' and ')}.`;
     out.push({ key: 'cross', title: 'Cross-sell opportunities', href: '#customers?view=opportunities', bullet: true, line: say, say });
   }
   const p0 = dens && dens.save[0];
   if (p0) {
-    const say = `One more bin customer in ${p0.postcode}, already on ${Math.round(p0.visitsYear)} visits a year, saves about ${money(p0.saving)} a year ◇.`;
+    const say = `One more bin customer in ${p0.postcode}, already on ${p0.visits} visits a year, saves about ${money(p0.saving)} a year ◇.`;
     out.push({ key: 'location', title: 'Location', href: '#activity', bullet: true, line: say, say });
   }
   return out;

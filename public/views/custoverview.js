@@ -11,6 +11,7 @@ import { costParts, PARTS, marginAction, FAMILY_NAMES } from '/components/margin
 import { serviceMedians, slippingAccounts, CITADEL } from '/components/levers.js';
 import { LINES } from '/components/whitespace.js';
 import { openPop } from '/components/pop.js';
+import { LABELS } from '/components/metrics.js';
 import { reveal } from '/components/motion.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
@@ -28,8 +29,8 @@ const ALL_COLS = [
   { k: 'd', l: '3 months vs own run', sort: r => r.d, x: 'sales' },
   { k: 'ytdPct', l: 'Year to date', sort: r => r.ytdPct, x: 'sales' },
   { k: 'pc', l: 'Margin ◇', sort: r => r.pc, x: 'margin' },
-  { k: 'opp', l: 'Cross-sell ◇', sort: r => r.opp, x: 'opp' },
-  { k: 'gap', l: 'Under the book', sort: r => r.gap, x: 'gap' },
+  { k: 'opp', l: 'Cross-sell ◇, a month', sort: r => r.opp, x: 'opp' },
+  { k: 'gap', l: 'Under the book, a year', sort: r => r.gap, x: 'gap' },
 ];
 const famCols = key => [
   { k: 'customer', l: 'Customer', sort: r => r.customer, text: true },
@@ -54,7 +55,7 @@ export async function render(main, C, params, tabs) {
 
   const kpis = `<section class="h2-kpis four" data-rv>
       <div class="h2-kpi lead"><span>${esc(mon(last.month))} billed, core</span><b>${moneyK(last.core)}</b><small>${chip(last.core / prev.core - 1)} on ${esc(mon(prev.month))}${ly ? ` · ${chip(last.core / ly.core - 1)} on a year ago` : ''}</small></div>
-      <div class="h2-kpi"><span>Customers billing</span><b>${active}</b><small>${chip(active / activePrev - 1)} on the month before</small></div>
+      <div class="h2-kpi"><span>${LABELS.invoicedThisMonth}</span><b>${active}</b><small>${chip(active / activePrev - 1)} on the month before</small></div>
       <a class="h2-kpi" href="#customers?view=opportunities&kind=slip"><span>Slipping ›</span><b>${slip.length}</b><small>${moneyK(slipV)} a month below their own run</small></a>
       <a class="h2-kpi" href="#customers?view=whitespace"><span>Cross-sell ◇ ›</span><b>${moneyK(crossV)}</b><small>a month, if each bought like its peers</small></a>
     </section>`;
@@ -107,7 +108,7 @@ export async function render(main, C, params, tabs) {
     rows.sort((a, b) => { const x = val(a), y = val(b); if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; const c = col.text ? String(x).localeCompare(String(y)) : x - y; return dir === 1 ? c : -c; });
     const fname = line === 'all' ? '' : FAMS.find(f => f.key === line).name;
     const say = main.querySelector('#c2-say');
-    if (line === 'all') say.textContent = `${rows.length} accounts with more than $1,000 in the last twelve months. Sorted by ${col.l.replace(' ◇', '').toLowerCase()}.`;
+    if (line === 'all') say.textContent = `${rows.length} ${LABELS.activeAccounts}. Sorted by ${col.l.replace(' ◇', '').toLowerCase()}.`;
     else {
       const units = rows[0] ? rows[0].fam[line].unit : '', withPrice = rows.filter(r => r.fam[line].price > 0);
       const below = withPrice.filter(r => r.fam[line].costPer > r.fam[line].price).length;
@@ -124,7 +125,7 @@ export async function render(main, C, params, tabs) {
         case 'd': return `<td>${r.d == null ? '—' : btn(`<span class="h2-cv ${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${signedK(r.d)}</span> ${chip(r.movePct)}`, 'sales')}</td>`;
         case 'ytdPct': return `<td>${r.ytdPct == null ? '—' : btn(chip(r.ytdPct, true), 'sales')}</td>`;
         case 'pc': return `<td>${r.pc == null ? '—' : btn(`<span class="${r.margin < 0 ? 'is-bad' : r.pc < .15 ? 'is-warn' : ''}">${Math.round(r.pc * 100)}%</span>${r.review ? '<small> review</small>' : ''}`, 'margin')}</td>`;
-        case 'opp': return `<td>${r.opp > 0 ? btn(moneyK(r.opp), 'opp') : '—'}</td>`;
+        case 'opp': return `<td>${r.opp > 0 ? btn(moneyK(r.opp / 12), 'opp') : '—'}</td>`;
         case 'gap': return `<td>${r.gap > 0 ? btn(moneyK(r.gap), 'gap') : '—'}</td>`;
         case 'frev': return `<td>${btn(moneyK(f.revenue), 'margin')}</td>`;
         case 'units': return `<td>${Math.round(f.units).toLocaleString('en-US')}</td>`;
@@ -231,7 +232,7 @@ export async function explain(kind, r, { B, PR, line, R }) {
   if (kind === 'opp') {
     const row = r.oppRow, missing = LINES.filter(x => !row.cells[x.key].have && row.cells[x.key].opp > 0);
     return openPop({
-      title: name, sub: `Could add about ${moneyK(row.opp)} a year ◇`, ask: `What should we sell ${name} next, and how?`,
+      title: name, sub: `Could add about ${moneyK(row.opp / 12)} a month ◇`, ask: `What should we sell ${name} next, and how?`,
       html: `<p class="p2-lede">${esc(name)} buys ${LINES.filter(x => row.cells[x.key].have).map(x => x.name.toLowerCase()).join(', ') || 'little'} today. Accounts like it also buy:</p>
         ${bars(missing.map(x => ({ name: x.name, v: row.cells[x.key].opp, label: moneyK(row.cells[x.key].opp), cls: 'opp' })), Math.max(...missing.map(x => row.cells[x.key].opp)))}
         <ul class="p2-list">${missing.map(x => `<li><b>${esc(x.name)}</b>: ${esc(row.cells[x.key].basis)}.</li>`).join('')}</ul>

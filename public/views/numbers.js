@@ -25,7 +25,7 @@ export async function render(main, V) {
   const kpis = `<section class="h2-kpis four" data-rv>
     <div class="h2-kpi lead"><span>${esc(monY(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${ly ? `${last.core >= ly.core ? '▲' : '▼'} ${pc(Math.abs(last.core / ly.core - 1))} on a year ago` : 'posted invoices'}</small></div>
     <div class="h2-kpi"><span>Twelve-month average</span><b>${moneyK(avg12)}</b><small>a month, ${esc(mon(l12[0].month))} to ${esc(mon(last.month))}</small></div>
-    <a class="h2-kpi" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(V.gap.gap)}</b><small>${V.gap.next ? `on ${esc(mon(V.gap.next, { month: 'long' }))}'s bill building ◇, as on Home` : 'on the latest bill, as on Home'}</small></a>
+    <a class="h2-kpi" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(V.gap.gap)}</b><small>${V.gap.next ? `on ${esc(mon(V.gap.next, { month: 'long' }))}'s bill building ◇` : 'on the latest bill'}</small></a>
     <div class="h2-kpi"><span>${G ? 'EBITDA, twelve months' : 'Best month of the twelve'}</span><b>${G ? moneyK(G.last12.ebitda_after) : moneyK(best.core)}</b><small>${G ? `${G.last12.revenue > 0 ? pc(G.last12.ebitda_after / G.last12.revenue) : '—'} of revenue, after discretionary` : esc(monY(best.month))}</small></div>
   </section>`;
 
@@ -118,7 +118,7 @@ function marginHtml(Mg) {
       <td class="v">${money0(l.revenue)}</td><td class="v">${costed ? money0(l.cost) : '—'}</td>
       <td class="v ${costed && m < 0 && !review ? 'is-bad' : ''}">${costed ? (m < 0 ? '−' : '') + money0(Math.abs(m)) : '—'}</td><td class="v">${costed && l.revenue > 0 ? pc(m / l.revenue) : '—'}</td></tr>`;
   }).join('');
-  return `<div class="h2-ch"><h2>Gross margin by line of business ◇</h2><small>the last twelve months, revenue less the cost to serve, ${Mg.accounts} accounts, Citadel apart</small></div>
+  return `<div class="h2-ch"><h2>Gross margin by line of business ◇</h2><small>the last twelve months, revenue less the cost to serve, every account, Citadel apart</small></div>
     <div class="c2-scroll"><table class="q-t nb-t"><thead><tr><th>Line</th><th class="v">Revenue</th><th class="v">Cost to serve ◇</th><th class="v">Margin ◇</th><th class="v">Kept</th></tr></thead><tbody>${rows}</tbody>
     <tfoot><tr><td>The costed lines<small>leaving out the lines under review and the fees</small></td><td class="v">${money0(tot.revenue)}</td><td class="v">${money0(tot.cost)}</td><td class="v">${money0(tot.revenue - tot.cost)}</td><td class="v">${pc((tot.revenue - tot.cost) / tot.revenue)}</td></tr></tfoot></table></div>
     <div class="src">Cost to serve from model/rates.js (GL pools over the database's volumes, provisional) ◇ · bins from ${Mg.binReal.routeDays} real route days, ${esc(String(Mg.binReal.from))} to ${esc(String(Mg.binReal.to))}, shared by minutes, where the account has them; elsewhere the average visit · sales, management and overheads sit above this line, in the bridge, never spread across customers</div>`;
