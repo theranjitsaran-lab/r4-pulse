@@ -14,6 +14,7 @@ const ROOT = path.join(__dirname, '..');
 const args = process.argv.slice(2);
 const label = args.find(a => !a.startsWith('--')) || 'current';
 const only = (args.find(a => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
+const role = (args.find(a => a.startsWith('--role=')) || '--role=admin').slice(7);   // --role=owner: as Trisha sees it
 const design = args.includes('--design');           // draw the ?design=1 overlay on every shot
 const scheme = args.includes('--dark') ? 'dark' : 'light';   // --dark: the same shots in the dark theme
 
@@ -27,6 +28,7 @@ const SCREENS = [
   { name: 'customer',  hash: `#customer/${drill[0].level1}` },
   { name: 'pricing',   hash: '#pricing' },
   { name: 'routes',    hash: '#activity' },
+  { name: 'numbers',   hash: '#numbers' },
   { name: 'styleguide', page: '/styleguide.html' },
 ].concat(
   // every Customers list, with --all or by name (customers-margin, ...)
@@ -46,7 +48,7 @@ async function main() {
   const pass = crypto.randomBytes(9).toString('hex');
   const env = {
     ...process.env, PORT: String(port), USE_FIXTURES: '1', NODE_ENV: 'development',
-    AUTH_USERS: `shots:${bcrypt.hashSync(pass, 8)}:admin`, SESSION_SECRET: crypto.randomBytes(16).toString('hex'),
+    AUTH_USERS: `shots:${bcrypt.hashSync(pass, 8)}:${role}`, SESSION_SECRET: crypto.randomBytes(16).toString('hex'),
     ANTHROPIC_API_KEY: '', DATABASE_URL: '',           // the template paragraph, never a live call
   };
   const server = spawn(process.execPath, ['server/index.js'], { cwd: ROOT, env, stdio: ['ignore', 'pipe', 'inherit'] });

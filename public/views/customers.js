@@ -12,6 +12,8 @@ import { billNow, serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippin
 import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 import { conversationCandidates } from '/components/lists.js';
+import { LABELS } from '/components/metrics.js';
+import { costsVisible } from '/components/access.js';
 
 const CITADEL = 6714;
 const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under review: delivery days not yet in the volumes
@@ -79,7 +81,7 @@ async function rowsFor(view, ser, book, C) {
 
 export async function render(main, C, params) {
   if (!main) return;
-  const view = VIEWS[params.view] ? params.view : 'overview';
+  const view = VIEWS[params.view] && (params.view !== 'margin' || costsVisible()) ? params.view : 'overview';
   if (view === 'overview') return (await import('/views/custoverview.js')).render(main, C, params, tabsHtml('overview'));
   if (view === 'opportunities') return (await import('/views/opps.js')).render(main, params, tabsHtml('opportunities'));
   if (view === 'conversations') return conversations(main, C);
@@ -103,22 +105,22 @@ export async function render(main, C, params) {
     <h1>Customers</h1>
     <p class="blurb">${esc(VIEWS[view].blurb)}</p>
     <div class="bar">
-      <div class="views"><div class="seg">${Object.entries(VIEWS).filter(([k, v]) => !v.hidden || k === view).map(([k, v]) => `<a href="${link(k)}" class="${k === view ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
-      <div class="seg">${[['size', 'Size'], ['change', 'Change'], ['margin', 'Margin']].map(([k, l]) => `<a href="${link(view, k)}" class="${k === sort ? 'on' : ''}">${l}</a>`).join('')}</div>
+      <div class="views"><div class="seg">${Object.entries(VIEWS).filter(([k, v]) => (!v.hidden || k === view) && (k !== 'margin' || costsVisible())).map(([k, v]) => `<a href="${link(k)}" class="${k === view ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
+      <div class="seg">${[['size', 'Size'], ['change', 'Change'], ...(costsVisible() ? [['margin', 'Margin']] : [])].map(([k, l]) => `<a href="${link(view, k)}" class="${k === sort ? 'on' : ''}">${l}</a>`).join('')}</div>
     </div>
     ${view === 'all' ? '<input class="find" id="c-find" type="search" placeholder="Find a customer by name" aria-label="Find a customer by name">' : ''}
     <div class="card">
-      <div class="head"><span>Customer</span><span>24 months</span><span>Last 12 months</span><span>Last 3 months</span><span>Margin</span><span></span></div>
+      <div class="head"><span>Customer</span><span>24 months</span><span>Last 12 months</span><span>Last 3 months</span><span>${costsVisible() ? 'Margin' : ''}</span><span></span></div>
       <ul class="list">${rows.map(row).join('') || '<li style="padding:var(--sp-4);color:var(--ink-3)">No accounts in this view.</li>'}</ul>
     </div>
-    <p class="foot"><span id="c-count">${rows.length}</span> accounts · last 3 months is each account against its own twelve months before them, the same measure as Home and Slipping · margin ◇ is revenue less modelled cost to serve; route-based costs are under review.</p>
+    <p class="foot"><span id="c-count">${rows.length}</span> accounts · last 3 months is each account against its own twelve months before them, the same measure as Home and Slipping ${costsVisible() ? '· margin ◇ is revenue less modelled cost to serve; route-based costs are under review.' : ''}</p>
   </div>`;
   wireFind(main);
 }
 
 // the view tabs, the same on every Customers view; Up and down and All are kept for old links only
 export function tabsHtml(on) {
-  return `<div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).filter(([k, v]) => !v.hidden || k === on).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === on ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>`;
+  return `<div class="bar"><div class="views"><div class="seg">${Object.entries(VIEWS).filter(([k, v]) => (!v.hidden || k === on) && (k !== 'margin' || costsVisible())).map(([k, v]) => `<a href="#customers?view=${k}" class="${k === on ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div></div>`;
 }
 
 const mvPc = s => s && s.move ? s.move.pct : null;
@@ -142,7 +144,7 @@ function row(r) {
     <span class="sp">${s ? sparkline(s.total, { w: 130, h: 30, cls }) : ''}</span>
     <span class="r rv"><span class="rev">${s ? moneyK(s.ltm) : '—'}</span>${s ? (r.level1 === CITADEL ? '<small class="delta flat">lumpy</small>' : `<small class="delta ${deltaCls(c)}">${deltaText(c)}</small>`) : ''}</span>
     <span class="r ch">${r.level1 === CITADEL ? '<span class="delta flat">lumpy</span>' : `<span class="delta ${deltaCls(c)}">${s && s.move ? deltaText(c) : '—'}</span>`}</span>
-    <span class="r mg">${pc == null ? '—' : `${Math.round(pc * 100)}%${routeHeavy ? '<span class="rvm" title="route costs under review">◇</span>' : ''}`}</span>
+    <span class="r mg">${!costsVisible() ? '' : pc == null ? '—' : `${Math.round(pc * 100)}%${routeHeavy ? '<span class="rvm" title="route costs under review">◇</span>' : ''}`}</span>
     <span class="go">›</span></a></li>`;
 }
 
@@ -189,7 +191,7 @@ async function whitespace(main, C, params) {
   const maxHave = Math.max(...W.rows.flatMap(r => LINES.map(x => r.cells[x.key].have ? r.cells[x.key].spend : 0)));
   const top3 = rows.slice(0, 3).map(r => {
     const best = LINES.map(x => ({ x, c: r.cells[x.key] })).filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp)[0];
-    return `${titleCase(r.customer)} (${lc(best.x.name)}, about ${moneyK(best.c.opp)} a year)`;
+    return `${titleCase(r.customer)} (${lc(best.x.name)}, about ${moneyK(best.c.opp / 12)} a month)`;
   });
   const byLine = LINES.map(x => ({ x, v: rows.reduce((t, r) => t + (r.cells[x.key].have ? 0 : r.cells[x.key].opp), 0) })).sort((a, b) => b.v - a.v);
   const shown = params.all ? rows.length : 40;
@@ -207,7 +209,7 @@ async function whitespace(main, C, params) {
   <div class="cust ws">
     <h1>Customers</h1>
     ${tabsHtml('whitespace')}
-    <p class="lede">If the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do, they would spend about <b>${moneyK(W.total)} a year more</b> (${moneyK(W.total / 12)} a month ◇). Most of it is ${lc(byLine[0].x.name)} and ${lc(byLine[1].x.name)}. Start with ${top3.join(', ')}.${paceLine}</p>
+    <p class="lede">If the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do, they would spend about <b>${moneyK(W.total / 12)} a month more</b> (${moneyK(W.total / 12)} a month ◇). Most of it is ${lc(byLine[0].x.name)} and ${lc(byLine[1].x.name)}. Start with ${top3.join(', ')}.${paceLine}</p>
     <div class="key"><span><span style="background:color-mix(in srgb, var(--ink) 30%, var(--surface))"></span>buys it: twelve-month spend, darker is more</span><span><span style="border:var(--hair) dashed var(--ink-5)"></span>doesn't buy it yet: what comparable accounts spend ◇</span><span>— not sized</span></div>
     <div class="card">
       <div class="grid">
@@ -301,10 +303,10 @@ async function monthGrid(main, C, params) {
   <div class="cust mg">
     <h1>Customers</h1>
     ${tabsHtml('grid')}
-    <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (10% or more below their own run) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} Each cell below is one month against the six before it.</p>
+    <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (${LABELS.slipping}) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} Each cell below is one month against the six before it.</p>
     <div class="tools">
       <div class="seg">${[['total', 'Storage and service'], ['storage', 'Storage'], ['service', 'Service']].map(([k, l]) => `<a href="${link(k)}" class="${k === which ? 'on' : ''}">${l}</a>`).join('')}</div>
-      <div class="key"><i style="background:color-mix(in srgb, var(--bad) 70%, var(--surface))"></i>down<i style="background:color-mix(in srgb, var(--bad) 25%, var(--surface));margin-left:var(--sp-2)"></i><i style="background:color-mix(in srgb, var(--ink) 5%, var(--surface))"></i>within 10%<i style="background:color-mix(in srgb, var(--good) 25%, var(--surface))"></i><i style="background:color-mix(in srgb, var(--good) 70%, var(--surface));margin-left:var(--sp-2)"></i>up · against its own last six months</div>
+      <div class="key"><i style="background:color-mix(in srgb, var(--bad) 70%, var(--surface))"></i>down<i style="background:color-mix(in srgb, var(--bad) 25%, var(--surface));margin-left:var(--sp-2)"></i><i style="background:color-mix(in srgb, var(--ink) 5%, var(--surface))"></i>within 10%<i style="background:color-mix(in srgb, var(--good) 25%, var(--surface))"></i><i style="background:color-mix(in srgb, var(--good) 70%, var(--surface));margin-left:var(--sp-2)"></i>up · ${LABELS.gridColours.toLowerCase()}</div>
     </div>
     <div class="card">
       <table>
@@ -391,7 +393,7 @@ async function marginList(main, R, M, MS, params) {
     ${D.rows.length ? `<div class="card dens" style="margin-top:var(--sp-4)">
       <div class="card-head"><h3>Where more volume would cut cost: ${esc(D.rows[0].postcode)} first, about ${money0(D.rows[0].saving)} a year ◇</h3></div>
       <p class="sub" style="margin:0 0 var(--sp-2)">Travel to a postcode is shared by the customers on the visit. Where visits carry one customer, one more on the same visits takes this much a year off the cost of serving the ones already there.</p>
-      ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${d.miles.toFixed(0)} miles out<small>about ${n0(d.visitsYear)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${d.perVisit.toFixed(1)} customers each`} · ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
+      ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${d.miles.toFixed(0)} miles out<small>${n0(d.visits)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${d.perVisit.toFixed(1)} customers each`} · ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
       <div class="src">Route visits from ${D.days > 120 ? 'six months of route days' : `the ${D.days} days of routes held offline, scaled to a year`} · customers a visit from the twelve-month postcode book · travel a visit from the cost model at the postcode's distance (model/rates.js, provisional) ◇</div>
     </div>` : ''}
     <p class="foot">Twelve months. Cost to serve ◇ from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Actions: Drop under $5,000 and under 15% · Re-route under 15% with travel over 40% of cost · Renegotiate under 15% · Reprice 15–50% · Hold 50% and over · Check routes where most of the cost is route cost under review.</p>
@@ -529,6 +531,6 @@ async function destructionView(main, C, params) {
       <div class="rw tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r bx">${Math.round(T('boxes')).toLocaleString('en-US')}</span><span class="r once">${moneyK(T('once'))}</span><span class="r lost">−${moneyK(T('lost'))}</span><span class="r mo">${Math.round(T('once') / T('lost'))}</span><span></span></div>
       ${rows.length > shown ? `<a style="display:inline-block;margin-top:var(--sp-3);color:var(--brand);font-weight:500;text-decoration:none" href="#customers?view=destruction&n=all">Show all ${rows.length}</a>` : ''}
     </div>
-    <p class="foot">Overdue: storage_retention status I with a review date passed. Destruction at the median R3 shredding fee per standard box; storage at the account's latest rate per box (storage_rate_hist), else the box-weighted median. Destruction needs the client's sign-off on the retention list. Citadel apart.</p>
+    <p class="foot">Overdue: boxes in storage with a review date passed, not on hold and not permanent. Destruction at the book's median fee per standard box; storage at the account's latest rate per box, else the box-weighted median. Destruction needs the client's sign-off on the retention list. Citadel apart.</p>
   </div>`;
 }

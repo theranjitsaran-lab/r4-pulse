@@ -45,7 +45,7 @@ function clean(b) {
   const key = String(b.key || ''), B = R.SETTING_BOUNDS[key], v = Number(b.value);
   if (/^pc:\d+$/.test(key)) return Number.isInteger(v) && (v === 0 || (v >= 501 && v <= 99950)) ? { key, value: v } : null;
   if (!B || !Number.isFinite(v)) return null;
-  if (key === 'deliveryMatch') return { key, value: v ? 1 : 0 };
+  if (key === 'deliveryMatch' || key === 'costsFinal') return { key, value: v ? 1 : 0 };
   return { key, value: Math.min(B[1], Math.max(B[0], v)) };
 }
 async function save(row) {
@@ -94,4 +94,7 @@ api.post('/', async (req, res) => {
   } catch (e) { res.status(500).json({ error: saveable ? e.message : 'Changes cannot be saved until the setup SQL has been applied on the PC.' }); }
 });
 
-module.exports = { api, load, ensure };
+// margins and advice built on them: admins, until the model is signed off and released here
+const seesCosts = req => !!(req.session && req.session.user && (req.session.user.role === 'admin' || R.SETTINGS.costsFinal));
+
+module.exports = { api, load, ensure, seesCosts };

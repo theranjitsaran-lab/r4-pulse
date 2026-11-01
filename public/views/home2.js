@@ -33,13 +33,14 @@ export async function render(main, P) {
   const { month: m, weeks: w, seg, cust, cross, dens, dest } = V;
   const A = { latestDone: V.latestDone };
 
-  const age = Math.round((Date.now() - Date.parse(A.latestDone + 'T12:00:00Z')) / 864e5);
   const dayLabel = new Date(A.latestDone + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
   const billShown = m.bill.core != null ? { month: m.bill.month, v: m.bill.core, d: m.bill.vsLast, vs: m.bill.lastMonth } : { month: m.bill.lastMonth, v: m.bill.lastCore, d: null };
+  // a note on why the headline moved, for its first week
+  const changedNote = Date.now() < Date.UTC(2026, 10, 9) ? 'Changed 1 Nov: large jobs are now priced at each customer\'s own price, and only a few are left out to check.' : '';
   const jobWord = n => `${n} job${n === 1 ? '' : 's'} to check`;
   const jobsNote = m.next && m.next.jobCount ? `, before ${jobWord(m.next.jobCount)}` : '';
   const sheet = [
-    m.next && { key: 'month', lead: true, href: '#pulse', line: `${mon(m.next.month)}'s bill is heading for about ${moneyK(m.next.central)} ◇${jobsNote}`, say: `${mon(m.next.month)}'s bill is heading for about ${moneyK(m.next.central)} ◇${jobsNote}.` },
+    m.next && { key: 'month', lead: true, href: '#pulse', line: `${mon(m.workMonth)}'s work bills about ${moneyK(m.next.central)} ◇ in ${mon(m.next.month)}${jobsNote}`, say: `${mon(m.workMonth)}'s work bills about ${moneyK(m.next.central)} ◇ in ${mon(m.next.month)}${jobsNote}.` },
     ...(V.points || []).map(p => ({ key: p.key, bullet: true, href: p.href, title: p.title, line: p.line, say: p.say })),
   ].filter(Boolean);
   const hrefOf = Object.fromEntries(sheet.map(f => [f.key, f.href])), titleOf = Object.fromEntries(sheet.map(f => [f.key, f.title]));
@@ -49,23 +50,21 @@ export async function render(main, P) {
   const B = V.bills || {};
 
   const kpis = `<section class="h2-kpis bills" data-rv>
-      <div class="h2-kpi lead"><span>${m.next ? `${mon(m.next.month)}'s bill, building ◇` : 'Next bill'}</span><b>${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b>
-        <small>${m.next ? (m.next.jobCount ? `+ up to ${moneyK(m.next.jobs)}: ${jobWord(m.next.jobCount)}` : `${moneyK(m.next.lo)}–${moneyK(m.next.hi)} · day ${m.next.day} of ${m.next.workdays}`) : ''}</small>
+      <div class="h2-kpi lead"><span>${m.next ? `${mon(m.workMonth)}'s work, billed in ${mon(m.next.month)} (est.)` : 'Next bill'}</span><b>${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b>
+        <small>${m.next ? (m.next.jobCount ? `+ up to ${moneyK(m.next.jobs)}: ${jobWord(m.next.jobCount)}` : (Math.round(m.next.lo / 1000) !== Math.round(m.next.hi / 1000) ? `${moneyK(m.next.lo)}–${moneyK(m.next.hi)}` : '') + (m.next.day < m.next.workdays ? ` · day ${m.next.day} of ${m.next.workdays}` : '')) : ''}</small>
         ${billParts(B.next, true)}</div>
       <a class="h2-kpi" href="#customers"><span>${mon(billShown.month)} billed</span><b>${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${mon(billShown.vs)}` : 'posted, core'}</small>
         ${billParts(B.billed)}</a>
-      <a class="h2-kpi gap" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(m.gap)}</b><small>a month${m.next && m.next.jobCount ? ', before jobs to check' : ''}${V.sell ? ` · won this month ${moneyK(V.sell.won.value)}${V.sell.inPlay.n ? `, ${moneyK(V.sell.inPlay.value)} in play` : ''}` : ''}</small></a>
+      <a class="h2-kpi gap" href="#customers?view=opportunities"><span>Gap to $1.0M ›</span><b>${moneyK(m.gap)}</b><small>a month${m.next && m.next.jobCount ? ', before jobs to check' : ''}${V.sell && V.sell.won.value > 0 ? ` · won this month ${moneyK(V.sell.won.value)}` : ''}${V.sell && V.sell.inPlay.n ? ` · ${moneyK(V.sell.inPlay.value)} in play` : ''}</small></a>
     </section>`;
 
   const sumCard = `<section class="h2-card h2-sum" data-rv>
-      <div class="h2-sum-top"><span class="h2-date">${esc(dayLabel)}</span>${age > 2 ? `<span class="h2-stale">${age} days old</span>` : ''}<button class="h2-ask-inline" type="button">Ask ›</button></div>
-      <h1 class="h2-head" id="h2-head"></h1>
+      <h1 class="h2-head" id="h2-head"></h1>${changedNote ? `<p class="h2-by">${esc(changedNote)}</p>` : ''}
       <ul class="h2-bul" id="h2-bul"></ul>
-      <p class="h2-by" id="h2-by">From the figures below</p>
     </section>`;
 
   const pulse = `<div class="h2-row">
-      <section class="h2-card h2-wide" data-rv><div class="h2-ch"><h2>${m.vsLast != null ? `${esc(mon(m.workMonth))}'s services done are ${word(m.vsLast)} ${esc(mon(m.prevMonth))}'s` : 'This month\'s services done'}</h2><small>the amount of work, by working day, at ${esc(mon(m.prevMonth))}'s value a service ◇</small></div><div id="h2-trend"></div></section>
+      <section class="h2-card h2-wide" data-rv><div class="h2-ch"><h2>${m.vsLast != null ? `Work volume: ${esc(mon(m.workMonth))} is ${word(m.vsLast)} ${esc(mon(m.prevMonth))}` : 'Work volume this month'}</h2><small>services done, by working day; the value of that work is on the lines above ◇</small></div><div id="h2-trend"></div></section>
       <section class="h2-card" data-rv><div class="h2-ch"><h2>${w.lastFull ? `Last week ${moneyK(w.lastFull.value)} ◇, ${w.vsAvg >= 0 ? 'up' : 'down'} ${pctW(w.vsAvg)}` : 'Weeks'}</h2><small>work done each week against the weeks before</small></div><div id="h2-weeks"></div></section>
     </div>`;
 
@@ -91,16 +90,16 @@ export async function render(main, P) {
 
   // ── where the money is ──
   const maxX = Math.max(...cross.rows.map(r => r.total + r.opp));
-  const crossCard = `<section class="h2-card" data-rv><div class="h2-ch"><h2>${cross.rows.length} accounts could add ${moneyK(cross.rows.reduce((t, r) => t + r.opp, 0))} a year ◇</h2><small>what they buy, and what comparable accounts also buy</small></div>
+  const crossCard = `<section class="h2-card" data-rv><div class="h2-ch"><h2>${cross.rows.length} accounts could add ${moneyK(cross.rows.reduce((t, r) => t + r.opp, 0) / 12)} a month ◇</h2><small>what they buy, and what comparable accounts also buy</small></div>
       <ul class="h2-xs">${cross.rows.map(r => `<li><a href="#customer/${r.level1}"><span class="h2-cn">${esc(titleCase(r.customer))}</span>
         <span class="h2-xbar"><i class="have" style="--w:${(r.total / maxX * 100).toFixed(1)}%"></i><i class="opp" style="--w:${(r.opp / maxX * 100).toFixed(1)}%"></i></span>
         <span class="h2-chips">${r.lines.filter(l => !l.have && l.opp > 0).map(l => `<em>${esc(l.name)}</em>`).join('')}</span></a></li>`).join('')}</ul>
       <div class="h2-key"><span><i class="k have"></i>buys today</span><span><i class="k opp"></i>could add ◇</span></div>
       <p class="h2-note">${cross.byLine[0] ? `${esc(cross.byLine[0].name)} is the line missed most: ${cross.byLine[0].accounts} accounts, ${moneyK(cross.byLine[0].opp / 12)} a month ◇ at the ceiling.` : ''} <a href="#customers?view=whitespace">Every gap ›</a></p></section>`;
 
-  const mapCard = dens ? `<section class="h2-card h2-wide" data-rv><div class="h2-ch"><h2>One more customer in these ${dens.save.length} postcodes saves ${moneyK(dens.saving)} a year ◇</h2><small>R4 already drives there; a second stop shares the trip</small></div>
+  const mapCard = dens ? `<section class="h2-card h2-wide" data-rv><div class="h2-ch"><h2>${dens.saving != null ? `One more customer in these ${dens.save.length} postcodes saves ${moneyK(dens.saving)} a year ◇` : `${dens.single} postcodes R4 visits have one customer`}</h2><small>R4 already drives there; a second stop shares the trip</small></div>
       <div id="h2-map"></div>
-      <ol class="h2-pc">${dens.save.slice(0, 4).map((r, i) => `<li><b>${i + 1}</b><span>${esc(r.postcode)} · ${Math.round(r.visitsYear)} visits a year · ${Math.round(r.miles)} mi</span><em>${moneyK(r.saving)}</em></li>`).join('')}</ol>
+      <ol class="h2-pc">${dens.save.slice(0, 4).map((r, i) => `<li><b>${i + 1}</b><span>${esc(r.postcode)} · ${r.visits} visits a year · ${Math.round(r.miles)} mi</span><em>${r.saving != null ? moneyK(r.saving) : ''}</em></li>`).join('')}</ol>
       <div class="src">${dens.points.length} postcodes visited · ${dens.single} with one customer · dot size is visits · straight-line miles from the yard (no GPS was ever captured)</div></section>` :
     `<section class="h2-card pending h2-wide" data-rv>The density map needs the postcode centres (public/data/zcta.json).</section>`;
 
@@ -120,17 +119,17 @@ export async function render(main, P) {
       <div class="h2-ch"><h2>${esc(dayLabel)}</h2><small>${DS ? esc(DS.text) : ''}</small></div>
       ${TV.lines.length ? lines(TV.lines.slice(0, 4)) : `<p class="quiet">Nothing unusual: the day's work and every route were within their usual range.</p>`}
       <div class="h2-team">
-        <div><h3>Anne · this week <a href="#customers?view=conversations">all ›</a></h3><ol class="calls">${AN.calls.map(c => `<li><a href="#customer/${c.level1}"><b>${esc(titleCase(c.name))}</b><small>${esc(c.ev)}</small></a><span>${c.stake ? moneyK(c.stake) : ''}</span></li>`).join('')}</ol></div>
-        <div><h3>Mike · next <a href="#activity">routes ›</a></h3>${MK.next ? `<p class="next">Booked for ${esc(MK.next.label)}: ${MK.next.services.toLocaleString('en-US')} services on ${MK.next.routes.length} routes${MK.next.routes.length ? ` (${MK.next.routes.slice(0, 4).map(r => `${esc(r.route)} ${r.services}`).join(', ')})` : ''}.</p>` : '<p class="quiet">Nothing booked ahead in the data.</p>'}</div>
+        <div><h3>Anne · this week <a href="#customers?view=conversations">all ›</a></h3><ol class="calls">${AN.calls.map(c => `<li><a href="#customer/${c.level1}"><b>${esc(titleCase(c.name))}</b><small>${esc(c.ev)}</small></a><span>${c.stake ? `${moneyK(c.stake)}<small>a year</small>` : ''}</span></li>`).join('')}</ol></div>
+        ${MK.next ? `<div><h3>Mike · next <a href="#activity">routes ›</a></h3>${`<p class="next">Booked for ${esc(MK.next.label)}: ${MK.next.services.toLocaleString('en-US')} services on ${MK.next.routes.length} routes${MK.next.routes.length ? ` (${MK.next.routes.slice(0, 4).map(r => `${esc(r.route)} ${r.services}`).join(', ')})` : ''}.</p>`}</div>` : ''}
       </div>
-      <p class="h2-by">Last 7 days: ${t.called} called · ${t.emailed} emailed · rates moved on ${t.ratesMoved} accounts in 30 days · lines marked useful ${t.useful}, already known ${t.knew}, not right ${t.wrong}</p>
+      ${t.called + t.emailed + t.ratesMoved + t.useful + t.knew + t.wrong ? `<p class="h2-by">Last 7 days: ${t.called} called · ${t.emailed} emailed · rates moved on ${t.ratesMoved} accounts in 30 days · lines marked useful ${t.useful}, already known ${t.knew}, not right ${t.wrong}</p>` : ''}
     </section>`;
 
   main.innerHTML = `<div class="h2">${sumCard}${kpis}${segCard}${pulse}${dayCard}${custCard}
     <details class="h2-fold" id="h2-money" ${innerWidth > 700 ? 'open' : ''}><summary class="h2-sec" data-rv>Where the money is<small>route density, cross-sell, shredding · ${innerWidth > 700 ? '' : 'open'}</small></summary>
     <div class="h2-row">${mapCard}${crossCard}</div>
     ${destCard}</details>
-    <div class="h2-foot">Posted through ${mon(P.monthly[P.monthly.length - 1].month)} · work done through ${dm(A.latestDone)} · ◇ modelled: work priced at last month's value a service, costs from model/rates.js · Citadel held apart</div>
+    <div class="h2-foot">Invoices posted through ${mon(P.monthly[P.monthly.length - 1].month)} · ◇ estimated · Citadel held apart</div>
   </div>`;
 
   // the summary: the template now, Claude's when it arrives and passes the checks
@@ -139,14 +138,13 @@ export async function render(main, P) {
     if (!p) return false;
     main.querySelector('#h2-head').textContent = p.headline;
     main.querySelector('#h2-bul').innerHTML = p.bullets.map(b => `<li class="${esc(b.key)}"><a href="${esc(hrefOf[b.key] || '#pulse')}"><span><b>${esc(titleOf[b.key] || '')}</b>${esc(b.text)}</span><i>›</i></a></li>`).join('');
-    main.querySelector('#h2-by').textContent = by;
     return true;
   };
   const tmpl = [sheet.find(f => f.lead) || sheet[0], ...sheet.filter(f => f.bullet)];
-  draw([tmpl[0].say || tmpl[0].line, ...tmpl.slice(1, 5).map(f => `[${f.key}] ${f.say || f.line}`)].join('\n'), 'From the figures below');
+  draw([tmpl[0].say || tmpl[0].line, ...tmpl.slice(1, 5).map(f => `[${f.key}] ${f.say || f.line}`)].join('\n'), '');
   fetch('/api/summary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form: 'home2', sheet: sheet.map(({ key, line, say, lead, bullet }) => ({ key, line, say, lead, bullet })) }) })
     .then(r => r.ok ? r.json() : null)
-    .then(j => { if (j && j.source === 'claude' && checkNumbers(j.text, sheet).ok && main.isConnected) draw(j.text, 'Written by Claude from these figures; every number checked'); })
+    .then(j => { if (j && j.source === 'claude' && checkNumbers(j.text, sheet).ok && main.isConnected) draw(j.text, ''); })
     .catch(() => {});
 
   // Activity scrolls to the lines rather than leaving the page
@@ -199,8 +197,6 @@ export async function render(main, P) {
     } catch (e) { box.querySelectorAll('button').forEach(x => x.disabled = false); }
   });
 
-  // the Ask button lives in the app shell (app.js); this one opens the same sheet
-  main.querySelectorAll('.h2-ask-inline').forEach(b => b.addEventListener('click', () => dispatchEvent(new Event('open-ask'))));
   reveal(main.querySelector('.h2'));
 }
 
@@ -253,10 +249,10 @@ function densityMap(el, d, base) {
   d.save.forEach((r, i) => {
     const pt = d.points.find(p => p.postcode === r.postcode); if (!pt) return;
     const [x, y] = F.P(pt.pt);
-    g += `<g class="h2-best" transform="translate(${Math.max(10, Math.min(W - 10, x)).toFixed(1)},${Math.max(10, Math.min(H - 10, y)).toFixed(1)})"><circle r="10"/><text y="4" text-anchor="middle">${i + 1}</text><title>${esc(r.postcode)}: one more customer saves about ${money0(r.saving)} a year ◇</title></g>`;
+    g += `<g class="h2-best" transform="translate(${Math.max(10, Math.min(W - 10, x)).toFixed(1)},${Math.max(10, Math.min(H - 10, y)).toFixed(1)})"><circle r="10"/><text y="4" text-anchor="middle">${i + 1}</text><title>${esc(r.postcode)}${r.saving != null ? `: one more customer saves about ${money0(r.saving)} a year ◇` : ''}</title></g>`;
   });
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="h2-map" role="img" aria-label="Postcodes R4 visits, sized by visits, with the best places for one more customer numbered">${g}</svg>
-    <div class="h2-key"><span><i class="k best"></i>one more customer saves most</span><span><i class="k pt"></i>visited, by visits a year</span><span><i class="k single"></i>one customer only</span></div>`;
+    <div class="h2-key"><span><i class="k best"></i>${d.saving != null ? 'one more customer saves most' : 'a second stop would share the most trips'}</span><span><i class="k pt"></i>visited, by visits a year</span><span><i class="k single"></i>one customer only</span></div>`;
 }
 
 // ── shredding the eligible boxes, over five years ◇: the fee once, then the storage lost each month
@@ -318,7 +314,7 @@ async function openLine(key, month, LV) {
     jobsTxt && { key: 'jobs', line: jobsTxt },
   ].filter(Boolean);
   const tone2 = v => v == null ? '' : v > 0 ? 'up' : 'down';
-  const html = `<p class="p2-lede" id="h2-note">${esc(facts.map(f => f.line).join(' '))}</p><p class="h2-by" id="h2-note-by">From the figures below</p>
+  const html = `<p class="p2-lede" id="h2-note">${esc(facts.map(f => f.line).join(' '))}</p><p class="h2-by" id="h2-note-by"></p>
     <div class="p2-mbs">${monthBars(d.bars, month, { w: 340, h: 92, labels: true })}</div>
     <ul class="h2-stats"><li><span>This month</span><b>${moneyK(d.total)}${d.est ? ' ◇' : ''}</b></li><li><span>On ${esc(monS(d.prevMonth || month))}</span><b>${chip(k.pct)}</b></li><li><span>3 months</span><b>${chip(k.p3)}</b></li><li><span>Year to date</span><b>${chip(k.ytd)}</b></li></ul>
     ${d.jobs.length ? `<h3>To check, not in the figure ◇</h3><ul class="h2-pl job">${d.jobs.map(j => `<li><a href="#customer/${j.level1}"><span>${nmL(j.customer)}<em>${esc(whyHeld(j))}</em></span><b>about ${moneyK(j.value)}</b></a></li>`).join('')}</ul>` : ''}
@@ -330,6 +326,6 @@ async function openLine(key, month, LV) {
   const note = document.querySelector('#h2-note'), by = document.querySelector('#h2-note-by');
   fetch('/api/summary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form: 'line', sheet: facts }) })
     .then(x => x.ok ? x.json() : null)
-    .then(j => { if (j && j.source === 'claude' && checkNumbers(j.text, facts).ok && note && note.isConnected) { note.textContent = j.text; by.textContent = 'Written by Claude from these figures; every number checked'; } })
+    .then(j => { if (j && j.source === 'claude' && checkNumbers(j.text, facts).ok && note && note.isConnected) { note.textContent = j.text; by.textContent = ''; } })
     .catch(() => {});
 }

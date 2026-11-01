@@ -151,7 +151,7 @@ async function loadFromDb(query) {
 // its day is by time instead: its drive minutes (its detour in road miles at mph) plus its drop
 // minutes (stopMin at each stop and serviceMin a service), scaled so a day's stops add up to the
 // route day. Three assumptions, all `assumed`, for Mike to check (31 October 2026).
-const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliveryMatch: 1, postcodes: {} };
+const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliveryMatch: 1, costsFinal: 0, postcodes: {} };
 const TIME_NOTES = {
   mph: ['Average city speed between stops', 'assumed', 'Chicago streets with a box truck; the main roads give the miles, this turns them into minutes.'],
   stopMin: ['Minutes at each stop before any service', 'assumed', 'Park, walk in, sign, walk out.'],
@@ -160,7 +160,7 @@ const TIME_NOTES = {
   deliveryMatch: ['Box deliveries ride the shred routes, placed by location', 'observed', 'Deliveries go on the shred trucks (Theran, 1 November 2026). VCK does not say which route, so each is placed on the route that passed closest to it that day, and shares that day by minutes.'],
 };
 // Settings anyone can change on the Settings screen (server/settings.js): the bounds a value must sit in.
-const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], split: [0.1, 0.8], deliveryMatch: [0, 1] };
+const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], split: [0.1, 0.8], deliveryMatch: [0, 1], costsFinal: [0, 1] };
 
 // The account's real route-day cost, set once the route days are costed (server: server/routecost.js;
 // browser: loadRates in components/data.js). { accounts: { level1: { cost, travel, onsite, services,

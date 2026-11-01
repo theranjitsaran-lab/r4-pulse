@@ -13,6 +13,7 @@
 //   pace       month to date against last month at the same working day, beyond ±10%, said on Mondays
 import { quantile } from './strip.js';
 import { weekdaysOf } from './projection.js';
+import { normalForDay, routeNorms, LABELS } from './metrics.js';
 
 const wd = d => new Date(d + 'T00:00:00Z').getUTCDay();
 const isWork = d => { const w = wd(d); return w > 0 && w < 6; };
@@ -43,7 +44,7 @@ export function changesFor(P, A, date = A.latestDone, opts = {}) {
   if (today && same.length >= 4) {
     const s = sorted(same.map(r => r.done)), lo = quantile(s, R.lo), hi = quantile(s, R.hi), med = quantile(s, 0.5);
     if (today.done < lo || today.done > hi) items.push({ key: 'day', owner: 'mike', level: today.done < lo ? 'down' : 'up', subject: 'day',
-      text: `${dayName(date)}: ${n0(today.done)} services done, ${today.done < lo ? 'fewer' : 'more'} than a usual ${dayName(date)} (${n0(med)}; ${n0(lo)} to ${n0(hi)} over the last ${same.length}).`,
+      text: `${dayName(date)}: ${n0(today.done)} services done, ${today.done < lo ? 'fewer' : 'more'} than ${LABELS.normalDay(dayName(date))} (${n0(med)}; ${n0(lo)} to ${n0(hi)} over the last ${same.length}).`,
       figures: { done: today.done, median: med, lo, hi } });
     // undone: booked but not done
     const shares = sorted(same.filter(r => r.booked > 0).map(r => 1 - r.done / r.booked));
@@ -57,13 +58,12 @@ export function changesFor(P, A, date = A.latestDone, opts = {}) {
 
   // route: under half its own usual day
   const real = A.routeDays.filter(r => r.route && r.route !== '--' && r.date <= A.latestDone);
-  const norm = {};
-  for (const r of real.filter(x => x.services_done > 0 && x.date < date)) { const n = norm[r.route] = norm[r.route] || { days: 0, done: 0 }; n.days++; n.done += r.services_done; }
+  const norm = routeNorms(A, date);
   for (const r of real.filter(x => x.date === date && x.services_done > 0)) {
     const n = norm[r.route]; if (!n || n.days < 4) continue;
-    const usual = n.done / n.days;
+    const usual = n.done;
     if (usual >= R.thinMin && r.services_done < R.thinShare * usual) items.push({ key: 'route', owner: 'mike', level: 'down', subject: 'route:' + r.route,
-      text: `${routeName(r.route)} did ${n0(r.services_done)} services against its usual ${n0(usual)}${r.customers ? `, ${r.customers} customer${r.customers === 1 ? '' : 's'}` : ''}.`,
+      text: `${routeName(r.route)} did ${n0(r.services_done)} services against ${n0(usual)} ${LABELS.normalRoute}${r.customers ? `, ${r.customers} customer${r.customers === 1 ? '' : 's'}` : ''}.`,
       figures: { route: r.route, done: r.services_done, usual } });
   }
 
@@ -121,14 +121,13 @@ export function daySentence(P, A, date = A.latestDone) {
   if (!daily.size) for (const r of A.routeDays) { const x = daily.get(r.date) || { date: r.date, done: 0 }; x.done += r.services_done || 0; daily.set(r.date, x); }
   const today = daily.get(date);
   if (!today) return null;
-  const same = [...daily.values()].filter(r => r.date < date && wd(r.date) === wd(date) && r.done > 0).sort((a, b) => b.date.localeCompare(a.date)).slice(0, RULES.weeks);
-  const med = same.length ? quantile(sorted(same.map(r => r.done)), 0.5) : null;
+  const med = normalForDay(P, A, date);
   const routes = new Set(A.routeDays.filter(r => r.date === date && r.services_done > 0 && r.route && r.route !== '--').map(r => r.route)).size;
   const m = date.slice(0, 8) + '01', prev = new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7) - 2, 1)).toISOString().slice(0, 10);
   const k = weekdaysOf(m).filter(d => d <= date).length, pw = weekdaysOf(prev), cut = pw[Math.min(k, pw.length) - 1];
   const sumTo = (from, to) => [...daily.values()].filter(r => r.date >= from && r.date <= to).reduce((t, r) => t + r.done, 0);
   const now = sumTo(m, date), then = sumTo(prev, cut), d = then ? now / then - 1 : null;
-  const vs = med == null ? '' : Math.abs(today.done / med - 1) < 0.1 ? `, about a usual ${dayName(date)} (${n0(med)})` : `, against a usual ${dayName(date)}'s ${n0(med)}`;
+  const vs = med == null ? '' : Math.abs(today.done / med - 1) < 0.1 ? `, about ${LABELS.normalDay(dayName(date))} (${n0(med)})` : `, against ${n0(med)} ${LABELS.normalDay(dayName(date))}`;
   const mtd = d == null ? '' : ` Month to date ${n0(now)}, ${Math.abs(d) < 0.02 ? 'level with' : `${Math.round(Math.abs(d) * 100)}% ${d > 0 ? 'ahead of' : 'behind'}`} last month at working day ${k}.`;
   return { text: `${n0(today.done)} services done on ${routes} route${routes === 1 ? '' : 's'}${vs}.${mtd}`, done: today.done, median: med, routes, mtd: now, mtdPrev: then };
 }

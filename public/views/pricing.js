@@ -10,6 +10,7 @@ import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { unitSuspect } from '/components/levers.js';
 import { reveal } from '/components/motion.js';
 import { SERVICES, lineCost } from '/components/quote.js';
+import { costsVisible, NOT_READY } from '/components/access.js';
 import { YARD, dist, loadRoadnet } from '/components/routemap.js';
 
 const CITADEL = 6714;
@@ -49,7 +50,7 @@ export async function render(main, PR, params) {
     <section class="h2-card pr2-bar" data-rv>
       <div class="pr2-pick">
         <label>Customer<select id="p-cust"><option value="">New customer or a quote</option>${customers.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')}</select></label>
-        <label>Service<select id="p-code">${codes.map(c => `<option value="${c}">${esc(c === 'STO' ? book[c].name : titleCase(book[c].name))}${SERVICES[c] ? '' : ' · no cost to serve'}</option>`).join('')}</select></label>
+        <label>Service<select id="p-code">${codes.map(c => `<option value="${c}">${esc(c === 'STO' ? book[c].name : titleCase(book[c].name))}${SERVICES[c] || !costsVisible() ? '' : ' · no cost to serve'}</option>`).join('')}</select></label>
       </div>
       <div class="pr2-price"><label for="p-price">Price</label><input id="p-price" inputmode="decimal"><input id="p-slide" type="range" aria-label="Price" step="any"><small id="p-slide-lab"></small></div>
       <details class="pr2-vol"><summary id="p-vol-sum">Volume</summary>
@@ -67,13 +68,13 @@ export async function render(main, PR, params) {
       <div class="h2-ch"><h2 id="q-title">The quote</h2><button class="q-add" type="button" id="q-add">Add this line to the quote</button></div>
       <div id="q-body"></div>
     </section>
-    <div class="pr2-grid">
+    <div class="pr2-grid" ${costsVisible() ? '' : 'style="display:none"'}>
       <section class="h2-card" data-rv><div class="h2-ch"><h2 id="p-pl-title">A year at this price</h2><small>the price's own P&amp;L ◇</small></div><div id="p-pl"></div></section>
-      <section class="h2-card" data-rv><div class="h2-ch"><h2>How to improve the margin</h2><small>each lever on its own, a year ◇</small></div><div id="p-levers"></div><button class="pop-ask pr2-ask" type="button" id="p-ask">Ask Claude about this price ›</button></section>
+      <section class="h2-card" data-rv><div class="h2-ch"><h2>How to improve the margin</h2><small>each lever on its own, a year ◇</small></div><div id="p-levers"></div><button class="pop-ask pr2-ask" type="button" id="p-ask">Ask about this price ›</button></section>
     </div>
     <section class="h2-card" data-rv><div class="h2-ch"><h2 id="p-track-title"></h2><small id="p-track-sub"></small></div><div id="p-track"></div><div class="src" id="p-strip-src"></div>
       <details class="fold"><summary><h3 id="p-strip-title">Every account on this service</h3><span class="sub" id="p-strip-sub"></span></summary><div id="p-strip" style="margin-top:var(--sp-3)"></div></details>
-      <details class="fold"><summary><h3 id="p-cost-title">How the cost is worked out</h3><span class="sub">◇ cost model · open</span></summary><div id="p-cost" style="margin-top:var(--sp-3)"></div></details>
+      <details class="fold" ${costsVisible() ? '' : 'style="display:none"'}><summary><h3 id="p-cost-title">How the cost is worked out</h3><span class="sub">◇ cost model · open</span></summary><div id="p-cost" style="margin-top:var(--sp-3)"></div></details>
       <div id="p-worth" hidden></div>
     </section>
     <section class="h2-card book" data-rv>
@@ -125,7 +126,7 @@ export async function render(main, PR, params) {
   function draw() {
     const rows = book[st.code].rows, svc = SERVICES[st.code];
     const dec = st.code === 'STO' ? 3 : 2, f = v => '$' + v.toFixed(dec);
-    const c = cost(), unitCost = c ? c.perUnit : null;
+    const c = costsVisible() ? cost() : null, unitCost = c ? c.perUnit : null;
     // storage compares box-weighted: monthly minimums make small accounts look dear per box
     const vals = rows.map(r => ({ v: r.v, name: r.name, w: st.code === 'STO' ? r.units : undefined }));
     const s = stripStats(vals), price = st.price || 0;
@@ -140,11 +141,13 @@ export async function render(main, PR, params) {
     // verdict. Where route costs are under review, the price is judged against the book only: a
     // "below cost" built on a cost the screen itself calls provisional would cost the tool its trust.
     const sure = review ? null : unitCost;
-    let cls = '', lab = 'Sound', text;
+    // the verdict is the price's position in the book; only someone who sees costs is told it is below cost
+    const near = Math.abs(price / (s.median || 1) - 1) < 0.02;
+    let cls = '', lab = near ? 'At book' : price < s.median ? 'Below book' : 'Above book', text;
     if (sure != null && price < sure) { cls = 'is-bad'; lab = 'Below cost'; text = `${f(price)} is below what this costs to serve. Cost to serve is ${f(unitCost)} a ${svc.unit}. Every one loses ${f(unitCost - price)}, and more volume makes it worse.`; }
-    else if (price < s.median) { cls = 'is-warn'; lab = 'Below the median'; text = `${f(price)} ${sure != null ? `earns ${f(price - sure)} a ${svc.unit} over cost, but ` : ''}sits below the ${f(s.median)} ${medName}: cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.`; }
-    else text = `${f(price)} is ${price > s.median ? 'above' : 'at'} the ${f(s.median)} ${medName}${sure != null ? ` and ${f(price - sure)} a ${svc.unit} over cost` : ''}.`;
-    $('p-verdict').innerHTML = `<section class="h2-card pr2-verdict ${cls}"><span class="pr2-tag">${lab}</span><p class="pr2-head">${esc(text)}</p>${review ? `<p class="hint">Judged against the book only: the cost of a visit is under review until delivery routes are in the data, so the margin below is provisional.${svc.fam === 'bin' && !st.level1 ? ' Enter the postcode under Volume to cost it from real route days there.' : ''}</p>` : real ? `<p class="hint">Route cost from ${c.routeBasis === 'account' ? `${esc(who)}'s own route days` : `real route days in and around ${esc(st.postcode)}`}, shared by minutes ◇. Days the truck also delivered boxes are not in the route data yet, so this reads a little high.</p>` : ''}</section>`;
+    else if (price < s.median && !near) { cls = 'is-warn'; text = `${f(price)} ${sure != null ? `earns ${f(price - sure)} a ${svc.unit} over cost, but ` : ''}sits below the ${f(s.median)} ${medName}: cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.`; }
+    else text = `${f(price)} is ${near ? 'at' : 'above'} the ${f(s.median)} ${medName}${sure != null ? ` and ${f(price - sure)} a ${svc.unit} over cost` : ''}.`;
+    $('p-verdict').innerHTML = `<section class="h2-card pr2-verdict ${cls}"><span class="pr2-tag">${lab}</span><p class="pr2-head">${esc(text)}</p>${!costsVisible() ? `<p class="hint">${money0(price * Math.max(0, st.units || 0))} a year at this volume. ${esc(NOT_READY)}</p>` : review ? `<p class="hint">Judged against the book only: the cost of a visit is under review until delivery routes are in the data, so the margin below is provisional.${svc.fam === 'bin' && !st.level1 ? ' Enter the postcode under Volume to cost it from real route days there.' : ''}</p>` : real ? `<p class="hint">Route cost from ${c.routeBasis === 'account' ? `${esc(who)}'s own route days` : `real route days in and around ${esc(st.postcode)}`}, shared by minutes ◇. Days the truck also delivered boxes are not in the route data yet, so this reads a little high.</p>` : ''}</section>`;
 
     // the track: cost to serve, the middle half of the book, its median, and the price
     $('p-track-title').textContent = `${who === 'A new customer' ? 'A quote' : who} at ${f(price)} a ${svc ? svc.unit : 'unit'}`;
@@ -155,7 +158,7 @@ export async function render(main, PR, params) {
     $('p-strip-title').textContent = `Every account on this service`;
     $('p-strip-sub').textContent = `${s.n} accounts · ${medName} ${f(s.median)} · open`;
     strip($('p-strip'), { values: vals, cost: sure, price, named, fmt: f });
-    $('p-strip-src').textContent = st.code === 'STO' ? 'Storage billed ÷ boxes in the latest month, weighted by boxes, from VCK · cost to serve from the cost model ◇' : 'Each account\'s usual invoiced rate over the last 13 months, from VCK · cost to serve from the cost model ◇';
+    $('p-strip-src').textContent = st.code === 'STO' ? 'Storage billed ÷ boxes in the latest month, weighted by boxes, from VCK' : 'Each account\'s usual invoiced rate over the last 13 months, from VCK';
 
     // cost to serve
     if (c) {
@@ -287,7 +290,7 @@ export async function render(main, PR, params) {
   const keepQ = () => { try { localStorage.setItem(QKEY, JSON.stringify(Q)); } catch {} };
   const nameOf = id => (customers.find(x => x[0] === id) || [0, ''])[1];
   function addLine() {
-    const svc = SERVICES[st.code], c = cost(), units = Math.max(0, st.units || 0);
+    const svc = SERVICES[st.code], c = costsVisible() ? cost() : null, units = Math.max(0, st.units || 0);
     if (!units || !(st.price > 0)) return;
     if (Q.level1 != null && st.level1 !== Q.level1 && Q.lines.length) Q.lines = [];   // a quote is for one customer
     Q.level1 = st.level1; Q.postcode = st.postcode || Q.postcode || null;
@@ -308,19 +311,19 @@ export async function render(main, PR, params) {
   }
   function drawQuote() {
     const T = totals(), n = Q.lines.length;
-    $('q-title').textContent = n ? `The quote: ${moneyK(T.rev)} a year${T.pc != null ? `, ${moneyK(T.margin)} margin ◇` : ''}` : 'The quote';
-    if (!n) { $('q-body').innerHTML = `<p class="hint">Price a service above, then add it. Add as many lines as the deal has: storage, bins, shredding, delivery. The quote totals the revenue and the margin a year.</p>${savedHtml()}`; return; }
+    $('q-title').textContent = n ? `The quote: ${moneyK(T.rev)} a year${costsVisible() && T.pc != null ? `, ${moneyK(T.margin)} margin ◇` : ''}` : 'The quote';
+    if (!n) { $('q-body').innerHTML = `<p class="hint">Price a service above, then add it. Add as many lines as the deal has: storage, bins, shredding, delivery. The quote totals the revenue${costsVisible() ? ' and the margin' : ''} a year.</p>${savedHtml()}`; return; }
     const dec = l => l.code === 'STO' ? 3 : 2;
     $('q-body').innerHTML = `
       ${!Q.level1 ? `<label class="q-who">Prospect<input id="q-prospect" value="${esc(Q.prospect || '')}" placeholder="Company name"></label>` : `<p class="hint">For ${esc(nameOf(Q.level1))}${Q.postcode ? ` · ${esc(Q.postcode)}` : ''}</p>`}
-      <table class="q-t"><thead><tr><th>Line</th><th class="v">A year</th><th class="v">Price</th><th class="v">Revenue</th><th class="v">Margin ◇</th><th></th></tr></thead><tbody>
+      <table class="q-t"><thead><tr><th>Line</th><th class="v">A year</th><th class="v">Price</th><th class="v">Revenue</th>${costsVisible() ? '<th class="v">Margin ◇</th>' : ''}<th></th></tr></thead><tbody>
       ${Q.lines.map((l, i) => { const r = l.price * l.units, m = l.cost == null ? null : r - l.cost; return `<tr>
-        <td>${esc(l.name)}${l.basis === 'average' ? '<small>route cost under review</small>' : l.basis === 'account' || l.basis === 'postcode' ? '<small>from real route days</small>' : l.basis === 'none' ? '<small>a fee: not costed</small>' : ''}</td>
+        <td>${esc(l.name)}${!costsVisible() ? '' : l.basis === 'average' ? '<small>route cost under review</small>' : l.basis === 'account' || l.basis === 'postcode' ? '<small>from real route days</small>' : l.basis === 'none' ? '<small>a fee: not costed</small>' : ''}</td>
         <td class="v">${Math.round(l.units).toLocaleString('en-US')} ${esc(l.unit)}s</td><td class="v">$${l.price.toFixed(dec(l))}</td><td class="v">${money0(r)}</td>
-        <td class="v ${m != null && m < 0 && l.basis !== 'average' ? 'is-bad' : ''}">${m == null ? '—' : (m < 0 ? '−' : '') + money0(Math.abs(m))}${m != null && r > 0 ? `<small>${Math.round(m / r * 100)}%</small>` : ''}</td>
+        ${!costsVisible() ? '' : `<td class="v ${m != null && m < 0 && l.basis !== 'average' ? 'is-bad' : ''}">${m == null ? '—' : (m < 0 ? '−' : '') + money0(Math.abs(m))}${m != null && r > 0 ? `<small>${Math.round(m / r * 100)}%</small>` : ''}</td>`}
         <td><button class="q-x" type="button" data-i="${i}" aria-label="Remove ${esc(l.name)}">×</button></td></tr>`; }).join('')}
-      </tbody><tfoot><tr><td>Total</td><td></td><td></td><td class="v">${money0(T.rev)}</td><td class="v ${T.margin < 0 && !T.review ? 'is-bad' : ''}">${T.pc == null ? '—' : (T.margin < 0 ? '−' : '') + money0(Math.abs(T.margin))}<small>${T.pc == null ? '' : Math.round(T.pc * 100) + '%'}</small></td><td></td></tr></tfoot></table>
-      <p class="src">Margin is revenue less the cost to serve from the cost model ◇${T.uncosted ? `, on the ${n - T.uncosted} costed line${n - T.uncosted === 1 ? '' : 's'}` : ''}${T.review ? '; bin lines without route days use the average visit, under review' : ''}.</p>
+      </tbody><tfoot><tr><td>Total</td><td></td><td></td><td class="v">${money0(T.rev)}</td>${!costsVisible() ? '' : `<td class="v ${T.margin < 0 && !T.review ? 'is-bad' : ''}">${T.pc == null ? '—' : (T.margin < 0 ? '−' : '') + money0(Math.abs(T.margin))}<small>${T.pc == null ? '' : Math.round(T.pc * 100) + '%'}</small></td>`}<td></td></tr></tfoot></table>
+      ${!costsVisible() ? '' : `<p class="src">Margin is revenue less the cost to serve from the cost model ◇${T.uncosted ? `, on the ${n - T.uncosted} costed line${n - T.uncosted === 1 ? '' : 's'}` : ''}${T.review ? '; bin lines without route days use the average visit, under review' : ''}.</p>`}
       <div class="q-acts"><button type="button" id="q-save" class="q-add">Save the quote</button><button type="button" id="q-copy">Copy as text</button><button type="button" id="q-clear">Start again</button><span id="q-msg" class="hint"></span></div>
       ${savedHtml()}`;
     const pr = $('q-prospect'); if (pr) pr.addEventListener('input', () => { Q.prospect = pr.value; keepQ(); });

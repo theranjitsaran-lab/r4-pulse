@@ -12,6 +12,7 @@ const express = require('express');
 const { cached, USE_FIXTURES } = require('./db');
 const queries = require('./queries');
 const R = require('../model/rates');
+const { seesCosts } = require('./settings');
 
 const router = express.Router();
 const MODEL = 'claude-opus-5-5';
@@ -28,6 +29,7 @@ const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month:
 
 // ── the tools: each returns plain facts with its figures already written as the screens write them ──
 function tools(L, D, X = {}) {
+  const costs = X.costs !== false;
   const { moneyK, money0 } = L.chart;
   const pc = v => v == null ? 'no comparison' : Math.abs(v) < 0.005 ? 'level' : (v > 0 ? 'up ' : 'down ') + Math.abs(Math.round(v * 100)) + '%';
   const signed = v => (v < 0 ? '−' : '+') + moneyK(Math.abs(v)).replace('−', '');
@@ -96,7 +98,7 @@ function tools(L, D, X = {}) {
           customer: title((s || m).customer), level1,
           months: s ? s.months.slice(-13).map((mm, i, a) => `${mm.slice(0, 7)}: ${moneyK(s.total[s.total.length - a.length + i])}`) : [],
           movement: s && s.move ? `last three months ${moneyK(s.move.last3)} a month against its own run of ${moneyK(s.move.run)}: ${signed(s.move.d)} a month` : null,
-          margin_last_12_months: m ? { revenue: money0(m.revenue), cost: `${money0(m.cost)} ◇`, margin: `${m.margin < 0 ? '−' : '+'}${money0(Math.abs(m.margin)).replace('−', '')} ◇`,
+          margin_last_12_months: costs && m ? { revenue: money0(m.revenue), cost: `${money0(m.cost)} ◇`, margin: `${m.margin < 0 ? '−' : '+'}${money0(Math.abs(m.margin)).replace('−', '')} ◇`,
             by_line: Object.entries(m.fam).map(([f, v]) => `${f}: revenue ${money0(v.revenue)}, cost ${money0(v.cost)} ◇`) } : null,
           not_bought_yet: ws ? ws.lines.filter(l => !l.have && l.opp > 0).map(l => `${l.name}: about ${moneyK(l.opp)} a year ◇ at what comparable accounts spend`) : [],
           prices: D.PR.rates.filter(r => r.level1 === level1 && r.modal_rate > 0).slice(0, 12).map(r => `${r.servcode} ${String(r.service).trim()}: $${r.modal_rate.toFixed(2)}${med(r.servcode) ? `, book median $${med(r.servcode).toFixed(2)}` : ''}${r.last_changed ? `, last changed ${r.last_changed}` : ''}`),
@@ -131,7 +133,7 @@ function tools(L, D, X = {}) {
         const x = L.home2data.densityView(D);
         if (!x) return { note: 'postcode centres are not loaded' };
         return { postcodes_visited: x.points.length, with_one_customer: x.single, saving_top: `${moneyK(x.saving)} a year ◇ across the postcodes below`,
-          postcodes: x.save.map(r => `${r.postcode}: ${Math.round(r.visitsYear)} visits a year, ${Math.round(r.miles)} miles out, one more customer saves about ${moneyK(r.saving)} a year ◇ (${title(r.names)})`) };
+          postcodes: x.save.map(r => `${r.postcode}: ${r.visits} visits a year, ${Math.round(r.miles)} miles out, one more customer saves about ${moneyK(r.saving)} a year ◇ (${title(r.names)})`) };
       },
     },
     opportunities: {
@@ -294,7 +296,9 @@ router.post('/', async (req, res) => {
   try {
     const sales = require('./sales');
     const [L, D, statuses, quotes] = await Promise.all([load(), data(), sales.opportunities().catch(() => ({})), sales.quotes().catch(() => [])]);
-    const T = tools(L, D, { statuses, quotes });
+    const T = tools(L, D, { statuses, quotes, costs: seesCosts(req) });
+    // modelled costs are for admins until they are final: no tool, so Ask says the app does not hold them
+    if (!seesCosts(req)) for (const k of ['quote', 'margin_by_line', 'route_density']) delete T[k];
     if (!process.env.ANTHROPIC_API_KEY) return res.json({ answer: template(question, T), source: 'template', tools: [] });
     res.json(await claude(question, history, T));
   } catch (e) {

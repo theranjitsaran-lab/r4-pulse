@@ -46,11 +46,12 @@ export function conversationCandidates({ C, PR, CA, log = [] }) {
   const handled = new Set(log.filter(l => l.kind === 'call' && Date.parse(l.logged_at) > week).map(l => l.level1));
   return [...cands.values()].filter(c => !handled.has(c.level1)).map(c => {
     c.sigs.sort((a, b) => b.stake - a.stake || (b.boxes || 0) - (a.boxes || 0));
-    c.stake = c.sigs.reduce((t, s) => t + s.stake, 0);
+    c.stake = c.sigs[0].stake;                                  // the figure its sentence quotes
+    c.total = c.sigs.reduce((t, s) => t + s.stake, 0);          // what the ranking uses
     c.name = title((ser.get(c.level1) || {}).customer || c.sigs[0].name);
     c.opener = OPENERS[c.sigs[0].key](c.name, c.sigs[0]);
     return c;
-  }).sort((a, b) => b.stake - a.stake || (b.sigs[0].boxes || 0) - (a.sigs[0].boxes || 0));
+  }).sort((a, b) => b.total - a.total || (b.sigs[0].boxes || 0) - (a.sigs[0].boxes || 0));
 }
 
 export function anneList({ C, PR, CA, log, feedback, changes, who = 'anne', n = 5 }) {
@@ -62,7 +63,9 @@ export function anneList({ C, PR, CA, log, feedback, changes, who = 'anne', n = 
 
 // what is booked for the next working day after the latest done day, by route
 export function bookedNext(A) {
-  const after = [...new Set(A.routeDays.filter(r => r.date > A.latestDone && r.services > 0).map(r => r.date))].sort()[0];
+  // the next weekday with real route work: a stray Saturday order is not the next working day
+  const wk = d => { const w = new Date(d + 'T00:00:00Z').getUTCDay(); return w > 0 && w < 6; };
+  const after = [...new Set(A.routeDays.filter(r => r.date > A.latestDone && r.services > 0 && r.route && r.route !== '--' && wk(r.date)).map(r => r.date))].sort()[0];
   if (!after) return null;
   const rows = A.routeDays.filter(r => r.date === after && r.route && r.route !== '--' && r.services > 0).sort((a, b) => b.services - a.services);
   return { date: after, label: dayName(after), services: rows.reduce((t, r) => t + r.services, 0), routes: rows.map(r => ({ route: routeName(r.route), services: r.services, customers: r.customers })) };

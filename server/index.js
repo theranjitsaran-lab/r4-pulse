@@ -19,12 +19,13 @@ app.use(express.json());
 // Both before auth.install: no login. /health/data carries dates only, never a figure.
 app.get('/health', (req, res) => res.json({ ok: true, fixtures: USE_FIXTURES, preview: PREVIEW }));
 app.get('/health/data', async (req, res) => {
-  if (USE_FIXTURES) return res.json({ fixtures: true });
+  if (USE_FIXTURES) { try { return res.json({ fixtures: true, done_work: require('../fixtures/activity.json').data.latestDone, today: new Date().toISOString().slice(0, 10) }); } catch { return res.json({ fixtures: true }); } }
   try {
     const [d] = await cached('health:data', () => query(`SELECT current_date::text AS today,
       (SELECT max(NULLIF(date, '')::date) FROM vs_service_orders WHERE billable = 'true' AND NULLIF(date, '')::date <= current_date)::text AS done_work,
       (SELECT max(wodate)::date FROM priced_lines_current)::text AS run_work,
       (SELECT max(invdate)::date FROM invoices)::text AS posted_invoice,
+      (SELECT max(NULLIF(tsaupdate, '')) FROM vs_service_orders) AS updated,
       (SELECT max(month)::date FROM kpi.monthly)::text AS kpi_month`));
     const age = Math.round((Date.parse(d.today) - Date.parse(d.done_work)) / 864e5);
     const reasons = [];

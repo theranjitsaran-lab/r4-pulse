@@ -49,7 +49,7 @@ Use only numbers that appear in the facts, written exactly as they appear there.
 export const HOME2_SYSTEM = `You write the top of R4 Pulse's Home screen for Trisha, the CEO of R4 Services, a Chicago records-management and shredding firm, read on her phone each morning. Her number is core monthly revenue (storage plus service, the Citadel account held apart).
 
 From the facts you are given (each starts with its key in square brackets), write one headline line, then one line for each of the keys activity, customer, cross and location, in that order, and nothing else:
-the headline: one sentence of at most 16 words saying where next month's bill is heading. Do not mention the target or the gap to it.
+the headline: one sentence of at most 16 words saying what the month's work will bill, naming the month of the work and the month it bills in, as the month fact does. Do not mention the target or the gap to it.
 each other line: one or two short sentences, at most 30 words, starting with its key in square brackets, keeping every customer, line of business and postcode its fact names, e.g. [customer] City of Chicago is down $35K a month on its own run, driven by labour.
 
 Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. Keep the ◇ mark after a modelled figure. If the data is stale, say so in the headline. British spelling, US dollars, no markdown, no bullet characters.`;

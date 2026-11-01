@@ -11,6 +11,7 @@ const { query, USE_FIXTURES } = require('./db');
 const { data, stamp } = require('./screendata');
 const feedback = require('./feedback');
 const sales = require('./sales');
+const { seesCosts } = require('./settings');
 
 const router = express.Router();
 let libs;
@@ -59,9 +60,11 @@ router.get('/customers', async (req, res) => {
         const { move, ...rest } = r;
         return { ...rest, oppRow: r.oppRow ? { opp: r.oppRow.opp, cells: Object.fromEntries(Object.entries(r.oppRow.cells).map(([k, c]) => [k, trimCell(c)])) } : null };
       });
-      custBase = { stamp: st, v: { rows, book: B.book, months: B.months, ws: { total: B.ws.total }, seg: L.home2data.segmentView({ P: D.P, A: D.A, SG: D.SG }) } };
+      // the same rows with every cost taken out, for people who do not see costs yet
+      const plain = rows.map(({ cost, margin, pc, review, routeCost, ...r }) => ({ ...r, fam: Object.fromEntries(Object.entries(r.fam).map(([k, { cost: c, costPer, lines, ...f }]) => [k, f])), mfam: Object.fromEntries(Object.entries(r.mfam).map(([k, v]) => [k, { revenue: v.revenue }])) }));
+      custBase = { stamp: st, plain, v: { rows, book: B.book, months: B.months, ws: { total: B.ws.total }, seg: L.home2data.segmentView({ P: D.P, A: D.A, SG: D.SG }) } };
     }
-    send(req, res, custBase.v);
+    send(req, res, seesCosts(req) ? custBase.v : { ...custBase.v, rows: custBase.plain, book: Object.fromEntries(Object.entries(custBase.v.book).map(([k, u]) => [k, Object.fromEntries(Object.entries(u).map(([n, b]) => [n, { price: b.price }]))])) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -112,7 +115,7 @@ router.get('/numbers', async (req, res) => {
         margin: { lines, accounts: book.accounts.length, deliveriesOn: !!(rc.deliveries && rc.deliveries.on), moveReal: book.accounts.filter(a => a.fam.movement && D.R.movementFor(a.level1)).length, binReal: { accounts: realBins.length, revenue: realBins.reduce((t, a) => t + a.fam.bin.revenue, 0), routeDays: rc.days, from: rc.from, to: rc.to } },
       } };
     }
-    send(req, res, numBase.v);
+    send(req, res, seesCosts(req) ? numBase.v : { ...numBase.v, margin: null });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -143,7 +146,10 @@ router.get('/home', async (req, res) => {
     // selling: what was won this month, and what is in play (contacted or quoted), from Opportunities
     const inPlay = Object.values(statuses).filter(x => x.status === 'contacted' || x.status === 'quoted');
     const sell = { won: L.opps.wonIn(statuses), inPlay: { n: inPlay.length, value: inPlay.reduce((t, x) => t + (Number(x.value) || 0), 0) } };
-    send(req, res, { ...base, team, sell });
+    // what one more customer would save is a modelled route cost: not until costs are final
+    const costs = seesCosts(req);
+    const plain = costs ? base : { ...base, points: base.points.filter(p => p.key !== 'location'), dens: base.dens ? { ...base.dens, saving: null, save: base.dens.save.map(({ saving, travel, ...r }) => r) } : null };
+    send(req, res, { ...plain, team, sell });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

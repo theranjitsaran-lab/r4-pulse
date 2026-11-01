@@ -114,7 +114,7 @@
 .pr2-pl .left.review i { background: var(--ink-5); } .pr2-pl .left.review b { color: var(--ink-3); }
 
 /* the quote (31 October 2026): lines, a deal total and its margin */
-.pr2-quote .h2-ch { align-items: center; }
+.pr2-quote .h2-ch { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--sp-2); }
 .q-add { background: var(--brand); color: #fff; border: 0; border-radius: var(--r-pill); padding: var(--sp-2) var(--sp-4); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
 .q-acts { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; margin-top: var(--sp-3); }
 .q-acts button:not(.q-add) { background: none; border: 1px solid var(--rule-4); border-radius: var(--r-pill); padding: var(--sp-2) var(--sp-4); font: inherit; font-size: var(--fs-sm); cursor: pointer; color: var(--ink); }

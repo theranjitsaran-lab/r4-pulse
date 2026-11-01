@@ -229,26 +229,27 @@ export function driverOf(D, level1, { sign = -1 } = {}) {
   return rows[0] || null;
 }
 
-// The newest fall: the largest drop in the last priced month against the account's own three before it,
-// among accounts not already on the Slipping list. $500 or more.
+// The newest fall: the largest drop in the latest month's work against the account's own three priced months
+// before it, on the steady lines (a job's lumps are not a fall), among accounts on neither the Slipping nor the
+// Rising list, so it cannot contradict them. $500 or more; a month in progress is compared at the same point.
 export function newestFall(D, skip = new Set()) {
   const { W } = lineSeries(D);
-  const c = W.complete, m = c[c.length - 1], before = c.slice(-4, -1);
-  const a = new Map();
+  const c = W.complete, m = W.est.length ? W.est[W.est.length - 1] : c[c.length - 1], e = W.byMonth.get(m), scale = e ? e.frac : 1;
+  const before = c.filter(x => x < m).slice(-3);
+  const a = new Map(), at = id => a.get(id) || a.set(id, { now: 0, was: 0, fam: {} }).get(id);
+  const add = (id, k, n, w) => { if (JOB.has(k)) return; const x = at(id), f = x.fam[k] = x.fam[k] || { n: 0, w: 0 }; x.now += n; x.was += w; f.n += n; f.w += w; };
   for (const r of D.LW.priced) {
-    if (r.month !== m && !before.includes(r.month)) continue;
-    const x = a.get(r.level1) || { now: 0, was: 0, fam: {} };
-    if (r.month === m) { x.now += r.revenue; (x.fam[r.family] = x.fam[r.family] || { n: 0, w: 0 }).n += r.revenue; }
-    else { x.was += r.revenue / before.length; (x.fam[r.family] = x.fam[r.family] || { n: 0, w: 0 }).w += r.revenue / before.length; }
-    a.set(r.level1, x);
+    if (before.includes(r.month)) add(r.level1, r.family, 0, r.revenue / before.length * scale);
+    else if (!e && r.month === m) add(r.level1, r.family, r.revenue, 0);
   }
+  if (e) for (const [id, fams] of e.byAcc) for (const [k, v] of Object.entries(fams)) add(id, k, v, 0);
   let best = null;
   for (const [id, x] of a) {
     if (skip.has(id) || id === 6714) continue;
     const d = x.now - x.was;
     if (d <= -500 && (!best || d < best.d)) {
       const drv = Object.entries(x.fam).map(([k, v]) => ({ k, d: v.n - v.w })).sort((p, q) => p.d - q.d)[0];
-      best = { level1: id, d, month: m, driver: drv ? lineShort(drv.k) : null };
+      best = { level1: id, d, month: m, driver: drv ? lineShort(drv.k) : null, est: !!e };
     }
   }
   if (!best) return null;

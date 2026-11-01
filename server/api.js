@@ -67,6 +67,10 @@ router.get('/customer/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.get('/me', (req, res) => res.json(req.session.user));
+router.get('/me', async (req, res) => {
+  const S = require('./settings');
+  await S.ensure().catch(() => {});
+  res.json({ ...req.session.user, costs: S.seesCosts(req) });
+});
 
 module.exports = router;

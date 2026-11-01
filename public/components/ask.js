@@ -57,7 +57,7 @@ function build(suggestions) {
       // plain text; a line starting with a dash becomes a list item
       const lines = String(j.answer).split('\n').map(s => s.trim()).filter(Boolean);
       a.innerHTML = lines.map(l => /^[-•]\s/.test(l) ? `<li>${esc(l.replace(/^[-•]\s/, ''))}</li>` : `<p>${esc(l)}</p>`).join('').replace(/(<li>.*?<\/li>)+/g, m => `<ul>${m}</ul>`)
-        + `<small>${j.source === 'claude' ? 'Claude, from the app’s figures; every number checked' : 'From the app’s figures'}</small>`;
+        + `<small>${j.source === 'claude' ? 'From the app’s figures; every number checked' : 'From the app’s figures'}</small>`;
       history.push({ role: 'user', content: q }, { role: 'assistant', content: j.answer });
     } catch (e) {
       a.classList.remove('is-wait'); a.classList.add('is-err'); a.textContent = `No answer: ${e.message}`;

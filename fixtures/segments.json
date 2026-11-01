@@ -1,5 +1,5 @@
 {
- "snapshotAt": "2026-10-30T21:10:36.671Z",
+ "snapshotAt": "2026-11-01T19:55:52.717Z",
  "data": {
   "rows": [
    {
@@ -306,7 +306,7 @@
     "month": "2025-06-01",
     "family": "handling",
     "revenue": 10792.65,
-    "accounts": 59
+    "accounts": 60
    },
    {
     "month": "2025-06-01",
@@ -971,8 +971,8 @@
    {
     "month": "2026-10-01",
     "family": "bin",
-    "revenue": 2247.58,
-    "accounts": 18
+    "revenue": 3786.48,
+    "accounts": 26
    },
    {
     "month": "2026-10-01",
@@ -983,20 +983,20 @@
    {
     "month": "2026-10-01",
     "family": "labour",
-    "revenue": 850,
-    "accounts": 3
+    "revenue": 1400,
+    "accounts": 5
    },
    {
     "month": "2026-10-01",
     "family": "other",
-    "revenue": 302.31,
-    "accounts": 7
+    "revenue": 5247.99,
+    "accounts": 13
    },
    {
     "month": "2026-10-01",
     "family": "shred",
-    "revenue": 1628,
-    "accounts": 23
+    "revenue": 2588,
+    "accounts": 35
    }
   ]
  }

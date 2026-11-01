@@ -6,6 +6,8 @@
 //   #pricing, #activity         the tools
 import { getJson } from '/components/data.js';
 import { playIntro } from '/components/intro.js';
+import { loadAccess, costsVisible, isAdmin } from '/components/access.js';
+import { freshStamp } from '/components/metrics.js';
 import { openAsk } from '/components/ask.js';
 
 const ROUTES = {
@@ -35,7 +37,8 @@ function parse() {
   const [name, id] = path.split('/');
   const params = Object.fromEntries(new URLSearchParams(qs || ''));
   if (id) params.id = decodeURIComponent(id);
-  return { name: ROUTES[name] ? name : 'pulse', params };
+  const hidden = (name === 'settings' && !isAdmin()) || (name === 'classic' && !costsVisible());
+  return { name: ROUTES[name] && !hidden ? name : 'pulse', params };
 }
 
 const intro = playIntro();   // the R4 mark, once a session; lifts when the first screen is drawn
@@ -51,8 +54,6 @@ async function show() {
   try {
     const j = await getJson(route.api, { envelope: true });
     data = j.data;
-    const asof = document.getElementById('asof');
-    if (asof && j.snapshotAt) asof.textContent = 'Read ' + new Date(j.snapshotAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   } catch (e) {
     if (e.status === 401) { location.href = '/login'; return; }
     if (my !== seq) return;
@@ -68,8 +69,9 @@ async function show() {
     if (my === seq) window.scrollTo(0, 0);
     intro.ready();
   } catch (e) {
+    if (e.status === 401 || /\b401\b/.test(e.message)) { location.href = '/login'; return; }
     if (my !== seq) return;
-    main.innerHTML = `<div class="empty"><h2>This screen is not built yet</h2>${e.message}</div>`;
+    main.innerHTML = `<div class="empty"><h2>This screen could not load</h2>Try again in a moment.</div>`;
     intro.ready();
   }
 }
@@ -93,18 +95,25 @@ const SUGGEST = {
   pricing: ['Which prices are furthest under the book?', 'Who has missed every rate round?', 'How are the lines of business doing?'],
   activity: ['Where would one more customer save most travel?', 'How busy was last week?', 'What happens if customers shred their eligible boxes?'],
 };
-const fab = document.createElement('button');
-fab.className = 'h2-fab'; fab.type = 'button'; fab.setAttribute('aria-label', 'Ask about the figures');
-fab.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/></svg><span>Ask</span>';
 const ask = (q) => {
   const { name } = parse(), nav = ROUTES[name].nav;
   const who = name === 'customer' && document.querySelector('#main h1') ? document.querySelector('#main h1').textContent.trim() : null;
-  openAsk({ ask: q || null, suggestions: who ? [`How is ${who} doing, and why?`, `Is ${who} priced right against the book?`, `What else could ${who} buy?`] : SUGGEST[nav] || SUGGEST.pulse });
+  openAsk({ ask: q || null, suggestions: who ? [`How is ${who} doing, and why?`, `Is ${who} priced right against the book?`, `What else could ${who} buy?`] : (SUGGEST[nav] || SUGGEST.pulse).filter(q => costsVisible() || !/cost|margin|save most/i.test(q)) });
 };
-fab.addEventListener('click', () => ask());
-document.body.appendChild(fab);
+// one Ask, in the header
+document.getElementById('mast-ask').addEventListener('click', () => ask());
+
+// the freshness stamp, on every screen
+fetch('/health/data').then(r => r.json()).then(h => {
+  const el = document.getElementById('stamp'), s = freshStamp(h, h.today || new Date().toISOString().slice(0, 10));
+  if (!el || !s) return;
+  el.textContent = s.text; el.classList.toggle('late', s.late); el.hidden = false;
+}).catch(() => {});
 // any screen can open it, with a question to send: dispatchEvent(new CustomEvent('open-ask', { detail: { ask } }))
 addEventListener('open-ask', e => ask(e.detail && e.detail.ask));
 
 addEventListener('hashchange', show);
-show();
+loadAccess().then(() => {
+  document.querySelectorAll('[data-screen="settings"]').forEach(a => { a.hidden = !isAdmin(); });
+  show();
+});

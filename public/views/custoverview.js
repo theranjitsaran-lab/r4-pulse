@@ -11,6 +11,8 @@ import { costParts, PARTS, marginAction, FAMILY_NAMES } from '/components/margin
 import { serviceMedians, slippingAccounts, CITADEL } from '/components/levers.js';
 import { LINES } from '/components/whitespace.js';
 import { openPop } from '/components/pop.js';
+import { costsVisible } from '/components/access.js';
+import { LABELS } from '/components/metrics.js';
 import { reveal } from '/components/motion.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
@@ -19,6 +21,7 @@ const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<
 const signedK = v => v == null ? '—' : (v < 0 ? '−' : '+') + moneyK(Math.abs(v));
 const unitMoney = (v, unit) => v == null ? '—' : '$' + (unit === 'box a month' || unit === 'lb' ? v.toFixed(3) : v.toFixed(2));
 const PAGE = 60;
+const COST_COLS = new Set(['pc', 'costPer', 'fmargin', 'fpc']);
 
 // the table's columns: the whole account, or one line of business
 const ALL_COLS = [
@@ -28,8 +31,8 @@ const ALL_COLS = [
   { k: 'd', l: '3 months vs own run', sort: r => r.d, x: 'sales' },
   { k: 'ytdPct', l: 'Year to date', sort: r => r.ytdPct, x: 'sales' },
   { k: 'pc', l: 'Margin ◇', sort: r => r.pc, x: 'margin' },
-  { k: 'opp', l: 'Cross-sell ◇', sort: r => r.opp, x: 'opp' },
-  { k: 'gap', l: 'Under the book', sort: r => r.gap, x: 'gap' },
+  { k: 'opp', l: 'Cross-sell ◇, a month', sort: r => r.opp, x: 'opp' },
+  { k: 'gap', l: 'Under the book, a year', sort: r => r.gap, x: 'gap' },
 ];
 const famCols = key => [
   { k: 'customer', l: 'Customer', sort: r => r.customer, text: true },
@@ -54,7 +57,7 @@ export async function render(main, C, params, tabs) {
 
   const kpis = `<section class="h2-kpis four" data-rv>
       <div class="h2-kpi lead"><span>${esc(mon(last.month))} billed, core</span><b>${moneyK(last.core)}</b><small>${chip(last.core / prev.core - 1)} on ${esc(mon(prev.month))}${ly ? ` · ${chip(last.core / ly.core - 1)} on a year ago` : ''}</small></div>
-      <div class="h2-kpi"><span>Customers billing</span><b>${active}</b><small>${chip(active / activePrev - 1)} on the month before</small></div>
+      <div class="h2-kpi"><span>${LABELS.invoicedThisMonth}</span><b>${active}</b><small>${chip(active / activePrev - 1)} on the month before</small></div>
       <a class="h2-kpi" href="#customers?view=opportunities&kind=slip"><span>Slipping ›</span><b>${slip.length}</b><small>${moneyK(slipV)} a month below their own run</small></a>
       <a class="h2-kpi" href="#customers?view=whitespace"><span>Cross-sell ◇ ›</span><b>${moneyK(crossV)}</b><small>a month, if each bought like its peers</small></a>
     </section>`;
@@ -89,7 +92,7 @@ export async function render(main, C, params, tabs) {
       <p class="c2-say" id="c2-say"></p>
       <div class="c2-scroll"><table class="c2-t" id="c2-t"></table></div>
       <div class="c2-more" id="c2-more"></div>
-      <div class="src">Sales as invoiced, Citadel held apart from totals · margin and cost a unit ◇ are modelled from model/rates.js; route-based costs are under review · price a unit is the line's revenue over the units that drive it · tap any figure for why</div>
+      <div class="src">Sales as invoiced, Citadel held apart from totals ${costsVisible() ? '· margin and cost a unit ◇ are modelled; route-based costs are under review ' : ''}· price a unit is the line's revenue over the units that drive it · tap any figure for why</div>
     </section>
   </div>`;
 
@@ -99,7 +102,7 @@ export async function render(main, C, params, tabs) {
 
   const table = main.querySelector('#c2-t');
   const draw = () => {
-    const C2 = line === 'all' ? ALL_COLS : famCols(line);
+    const C2 = (line === 'all' ? ALL_COLS : famCols(line)).filter(c => costsVisible() || !COST_COLS.has(c.k));
     let rows = B.rows.filter(r => line === 'all' || r.fam[line]);
     if (q) rows = rows.filter(r => r.customer.toLowerCase().includes(q));
     const col = C2.find(c => c.k === sort && c.sort) || (line === 'all' ? C2[2] : C2[1]);
@@ -107,10 +110,10 @@ export async function render(main, C, params, tabs) {
     rows.sort((a, b) => { const x = val(a), y = val(b); if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; const c = col.text ? String(x).localeCompare(String(y)) : x - y; return dir === 1 ? c : -c; });
     const fname = line === 'all' ? '' : FAMS.find(f => f.key === line).name;
     const say = main.querySelector('#c2-say');
-    if (line === 'all') say.textContent = `${rows.length} accounts with more than $1,000 in the last twelve months. Sorted by ${col.l.replace(' ◇', '').toLowerCase()}.`;
+    if (line === 'all') say.textContent = `${rows.length} ${LABELS.activeAccounts}. Sorted by ${col.l.replace(' ◇', '').toLowerCase()}.`;
     else {
       const units = rows[0] ? rows[0].fam[line].unit : '', withPrice = rows.filter(r => r.fam[line].price > 0);
-      const below = withPrice.filter(r => r.fam[line].costPer > r.fam[line].price).length;
+      const below = costsVisible() ? withPrice.filter(r => r.fam[line].costPer > r.fam[line].price).length : 0;
       say.textContent = `${rows.length} accounts buy ${fname.toLowerCase()}, priced a ${units}. ${below ? `${below} pay less than it costs to serve them ◇.` : ''} Tap a price to see it against similar accounts.`;
     }
     const head = `<thead><tr>${C2.map(c => `<th class="${c.text ? 'tl' : ''}${c.k === col.k ? ' on' : ''}${c.k === 'spark' ? ' sp' : ''}" ${c.sort ? `data-sort="${c.k}" tabindex="0"` : ''}>${esc(c.l)}${c.k === col.k ? (dir === 1 ? ' ▲' : ' ▼') : ''}</th>`).join('')}</tr></thead>`;
@@ -124,9 +127,9 @@ export async function render(main, C, params, tabs) {
         case 'd': return `<td>${r.d == null ? '—' : btn(`<span class="h2-cv ${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${signedK(r.d)}</span> ${chip(r.movePct)}`, 'sales')}</td>`;
         case 'ytdPct': return `<td>${r.ytdPct == null ? '—' : btn(chip(r.ytdPct, true), 'sales')}</td>`;
         case 'pc': return `<td>${r.pc == null ? '—' : btn(`<span class="${r.margin < 0 ? 'is-bad' : r.pc < .15 ? 'is-warn' : ''}">${Math.round(r.pc * 100)}%</span>${r.review ? '<small> review</small>' : ''}`, 'margin')}</td>`;
-        case 'opp': return `<td>${r.opp > 0 ? btn(moneyK(r.opp), 'opp') : '—'}</td>`;
+        case 'opp': return `<td>${r.opp > 0 ? btn(moneyK(r.opp / 12), 'opp') : '—'}</td>`;
         case 'gap': return `<td>${r.gap > 0 ? btn(moneyK(r.gap), 'gap') : '—'}</td>`;
-        case 'frev': return `<td>${btn(moneyK(f.revenue), 'margin')}</td>`;
+        case 'frev': return `<td>${costsVisible() ? btn(moneyK(f.revenue), 'margin') : moneyK(f.revenue)}</td>`;
         case 'units': return `<td>${Math.round(f.units).toLocaleString('en-US')}</td>`;
         case 'price': { const p = pricePosition(B, r, line); return `<td>${f.price ? btn(`${unitMoney(f.price, f.unit)}${p && !p.widened ? ` <span class="c2-pct ${p.pct < .25 ? 'lo' : p.pct > .75 ? 'hi' : ''}">${p.pct < .25 ? 'low' : p.pct > .75 ? 'high' : 'mid'}</span>` : ''}`, 'price') : '—'}</td>`; }
         case 'costPer': return `<td>${f.costPer ? btn(unitMoney(f.costPer, f.unit), 'price') : '—'}</td>`;
@@ -160,6 +163,7 @@ export async function render(main, C, params, tabs) {
 const bars = (items, max) => `<ul class="p2-bars">${items.map(i => `<li><span>${esc(i.name)}</span><i style="--w:${Math.max(1, i.v / max * 100).toFixed(1)}%" class="${i.cls || ''}"></i><b>${i.label}</b></li>`).join('')}</ul>`;
 
 export async function explain(kind, r, { B, PR, line, R }) {
+  if (kind === 'margin' && !costsVisible()) return;
   if (kind === 'gap' && !PR) PR = await getJson('pricing');
   const name = titleCase(r.customer);
   const peers = sizePeers(B, r);
@@ -200,7 +204,7 @@ export async function explain(kind, r, { B, PR, line, R }) {
         <table class="p2-t"><thead><tr><th class="tl">Line</th><th>Revenue</th><th>Cost</th><th>Margin</th></tr></thead><tbody>${fam.map(([k, v]) => `<tr><td class="tl">${esc(FAMILY_NAMES[k] || k)}</td><td>${money0(v.revenue)}</td><td>${money0(v.cost)}</td><td class="${v.revenue - v.cost < 0 ? 'is-bad' : ''}">${signedK(v.revenue - v.cost)}</td></tr>`).join('')}</tbody></table>
         <h3>Where the cost goes ◇</h3>${bars(PARTS.filter(p => parts[p[0]] > 0).map(p => ({ name: p[1], v: parts[p[0]], label: moneyK(parts[p[0]]), cls: p[0] === 'route' ? 'warn' : '' })), pmax)}
         ${todo.length ? `<h3>What would move it</h3><ul class="p2-list">${todo.join('')}</ul>` : ''}
-        <p class="src">◇ Costs from model/rates.js: GL pools over twelve months of volumes, provisional; route costs under review until delivery routes are in the data.</p>
+        <p class="src">◇ Costs from the cost model: GL pools over twelve months of volumes, provisional; route costs under review until delivery routes are in the data.</p>
         <p class="p2-go"><a href="#customer/${r.level1}">Open ${esc(name)} ›</a></p>`,
     });
   }
@@ -220,7 +224,7 @@ export async function explain(kind, r, { B, PR, line, R }) {
         <text x="${x(f.price)}" y="50" text-anchor="${anchor}">this account, ${unitMoney(f.price, f.unit)}</text></svg>`;
     }
     return openPop({
-      title: `${name} · ${fname}`, sub: `${unitMoney(f.price, f.unit)} a ${f.unit}; costs ${unitMoney(f.costPer, f.unit)} to serve ◇`, ask: `Is ${name} priced right for ${fname.toLowerCase()} against similar accounts?`,
+      title: `${name} · ${fname}`, sub: `${unitMoney(f.price, f.unit)} a ${f.unit}${f.costPer ? `; costs ${unitMoney(f.costPer, f.unit)} to serve ◇` : ''}`, ask: `Is ${name} priced right for ${fname.toLowerCase()} against similar accounts?`,
       html: `${p ? `<p class="p2-lede">${p.widened ? `Few accounts buy ${fname.toLowerCase()} at ${esc(name)}'s volume, so this is the whole book (${p.n}), mostly smaller accounts that pay more a unit.` : `Against ${p.n} accounts buying ${fname.toLowerCase()} at a similar volume, it pays more than <b>${pct(p.pct)}</b> of them. Their middle half pays ${unitMoney(p.p25, p.unit)} to ${unitMoney(p.p75, p.unit)}, median ${unitMoney(p.med, p.unit)}.`}</p>${strip}` : '<p>Too few accounts buy this line in the same unit to compare.</p>'}
         <p>${f.costPer ? `It costs about <b>${unitMoney(f.costPer, f.unit)}</b> a ${esc(f.unit)} to serve ◇, so each one ${f.price >= f.costPer ? `leaves <b>${unitMoney(f.price - f.costPer, f.unit)}</b>` : `<b class="is-bad">loses ${unitMoney(f.costPer - f.price, f.unit)}</b>`}.` : ''}
         ${p && p.toMedian > 0 ? ` At its peers' median it would bill <b>+${moneyK(p.toMedian)} a year</b>.` : ''}</p>
@@ -231,7 +235,7 @@ export async function explain(kind, r, { B, PR, line, R }) {
   if (kind === 'opp') {
     const row = r.oppRow, missing = LINES.filter(x => !row.cells[x.key].have && row.cells[x.key].opp > 0);
     return openPop({
-      title: name, sub: `Could add about ${moneyK(row.opp)} a year ◇`, ask: `What should we sell ${name} next, and how?`,
+      title: name, sub: `Could add about ${moneyK(row.opp / 12)} a month ◇`, ask: `What should we sell ${name} next, and how?`,
       html: `<p class="p2-lede">${esc(name)} buys ${LINES.filter(x => row.cells[x.key].have).map(x => x.name.toLowerCase()).join(', ') || 'little'} today. Accounts like it also buy:</p>
         ${bars(missing.map(x => ({ name: x.name, v: row.cells[x.key].opp, label: moneyK(row.cells[x.key].opp), cls: 'opp' })), Math.max(...missing.map(x => row.cells[x.key].opp)))}
         <ul class="p2-list">${missing.map(x => `<li><b>${esc(x.name)}</b>: ${esc(row.cells[x.key].basis)}.</li>`).join('')}</ul>
