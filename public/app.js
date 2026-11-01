@@ -6,7 +6,7 @@
 //   #pricing, #activity         the tools
 import { getJson } from '/components/data.js';
 import { playIntro } from '/components/intro.js';
-import { loadAccess, costsVisible, isAdmin } from '/components/access.js';
+import { loadAccess, costsVisible, isAdmin, landing } from '/components/access.js';
 import { freshStamp } from '/components/metrics.js';
 import { wireInvoices } from '/components/invoices.js';
 import { openAsk } from '/components/ask.js';
@@ -118,5 +118,6 @@ addEventListener('open-ask', e => ask(e.detail && e.detail.ask));
 addEventListener('hashchange', show);
 loadAccess().then(() => {
   document.querySelectorAll('[data-screen="settings"]').forEach(a => { a.hidden = !isAdmin(); });
+  if (!location.hash && landing()) history.replaceState(null, '', landing());
   show();
 });

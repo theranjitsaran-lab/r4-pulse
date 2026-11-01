@@ -146,3 +146,28 @@ test('three things to act on: what changed first, each with its owner and where 
   assert.equal(a[1].text, 'City of Chicago: down $35K a month in total');
   assert.equal(a[1].href, '#customer/8153');
 });
+
+test('#22 each account once: the total counts its largest, one-offs apart, and is believable', async () => {
+  const { opportunities, byAccount } = await import('../public/components/opps.js');
+  const d = D(), { rows } = opportunities(d, {}), G = byAccount(rows);
+  const ids = G.rows.map(a => a.level1);
+  assert.equal(new Set(ids).size, ids.length, 'no account twice');
+  assert.equal(G.rows.reduce((t, a) => t + a.items.length, 0), rows.length, 'nothing lost');
+  const summed = rows.filter(r => !r.once).reduce((t, r) => t + r.value, 0);
+  assert.ok(G.largest < summed, 'less than adding every row');
+  assert.ok(G.largest < 0.3 * d.P.monthly.slice(-12).reduce((t, m) => t + m.core, 0), 'under 30% of a year of core');
+  for (let i = 1; i < G.rows.length; i++) assert.ok(G.rows[i - 1].rank >= G.rows[i].rank, 'largest first');
+});
+
+test('#29 ITAD keeps its capitals; a huge multiple reads as new; #30 a one-off says how it ranks', async () => {
+  const { opportunities } = await import('../public/components/opps.js');
+  const { changeWord } = await import('../public/components/metrics.js');
+  const { rows } = opportunities(D(), {});
+  assert.ok(!rows.some(r => /\bitad\b/.test(r.reason + r.opener)));
+  assert.ok(rows.filter(r => r.kind === 'overdue').every(r => /Ranked at 25%/.test(r.reason)));
+  assert.equal(changeWord(90), 'new');
+  assert.equal(changeWord(0.5, 200), 'new');
+  assert.equal(changeWord(1.93), '▲ 193%');
+  assert.equal(changeWord(-0.16), '▼ 16%');
+  assert.equal(changeWord(0), '0%');
+});

@@ -1,14 +1,15 @@
-// Customers › Opportunities (#customers?view=opportunities): every next conversation in one ranked
-// list, each with its dollars a year, the reason, a draft opener, an owner and a status. The list is
+// Accounts › Opportunities (#customers, the default view): every next conversation, each account once, the
+// top twenty first, its opportunities inside it, each with its dollars a year, the reason, a draft opener, an owner and a status. The list is
 // worked out on the server (components/opps.js via /api/view/opportunities); a status change is
 // written to app.opportunity (server/sales.js) and feeds "won this month" on Home.
 import { getJson, esc } from '/components/data.js';
 import { moneyK } from '/components/chart.js';
 import { reveal } from '/components/motion.js';
-import { KINDS, STATUSES } from '/components/opps.js';
+import { KINDS, STATUSES, byAccount } from '/components/opps.js';
 
 const STATUS_NAMES = { open: 'Open', contacted: 'Contacted', quoted: 'Quoted', won: 'Won', lost: 'Lost' };
-const SHOW = () => innerWidth <= 700 ? 15 : 40;   // a phone shows fewer, then 'show all'
+const SHOW = 20;   // the top twenty accounts, then 'show all'
+const STATES = [['active', 'Open and in play'], ['open', 'Not started'], ['play', 'In play'], ['mine', 'Mine'], ['won', 'Won'], ['lost', 'Lost']];
 
 export async function render(main, params, tabs) {
   if (!main) return;
@@ -20,23 +21,27 @@ export async function render(main, params, tabs) {
   const openRows = rows.filter(isOpen);
   const sumOf = list => list.reduce((t, r) => t + r.value, 0);
   const play = rows.filter(r => r.status === 'contacted' || r.status === 'quoted');
+  const G0 = byAccount(openRows), mine = rows.filter(r => r.owner && r.owner === me && isOpen(r));
   const kpis = `<section class="h2-kpis four" data-rv>
-    <div class="h2-kpi lead"><span>Won this month</span><b>${moneyK(V.won.value)}</b><small>${V.won.n} opportunit${V.won.n === 1 ? 'y' : 'ies'} marked won${V.won.n ? '' : ': mark one won below when it lands'}</small></div>
-    <button class="h2-kpi" data-state="play"><span>In play ›</span><b>${moneyK(sumOf(play))}</b><small>${play.length} contacted or quoted, a year</small></button>
-    <button class="h2-kpi" data-state="open"><span>Not started ›</span><b>${rows.filter(r => r.status === 'open').length}</b><small>${moneyK(sumOf(rows.filter(r => r.status === 'open' && !r.once)))} a year, plus ${moneyK(sumOf(rows.filter(r => r.status === 'open' && r.once)))} once</small></button>
-    <button class="h2-kpi" data-state="mine"><span>Mine ›</span><b>${rows.filter(r => r.owner && r.owner === me && isOpen(r)).length}</b><small>open, with you as owner</small></button>
+    <div class="h2-kpi lead"><span>Open, each account once</span><b>${moneyK(G0.largest)}</b><small>a year, across ${G0.accounts} accounts</small></div>
+    <div class="h2-kpi"><span>Destruction, once</span><b>${moneyK(G0.once)}</b><small>boxes past their review; needs client sign-off</small></div>
+    ${play.length ? `<button class="h2-kpi" data-state="play"><span>In play ›</span><b>${moneyK(sumOf(play))}</b><small>${play.length} contacted or quoted</small></button>` : ''}
+    ${V.won.n ? `<div class="h2-kpi"><span>Won this month</span><b>${moneyK(V.won.value)}</b><small>${V.won.n} marked won</small></div>` : ''}
+    ${mine.length ? `<button class="h2-kpi" data-state="mine"><span>Mine ›</span><b>${mine.length}</b><small>open, with you as owner</small></button>` : ''}
   </section>`;
 
   main.innerHTML = `<div class="cust c2 op">
-    <h1>Customers</h1>
+    <h1>Accounts</h1>
     ${tabs}
     ${kpis}
     <section class="h2-card c2-tablecard" data-rv>
       <div class="c2-tools">
-        <div class="seg c2-lines" id="op-kinds">${[['all', 'Everything'], ...Object.entries(KINDS)].map(([k, n]) => `<button data-kind="${k}">${esc(n)}</button>`).join('')}</div>
+        <div class="seg c2-lines on-desk" id="op-kinds">${[['all', 'Everything'], ...Object.entries(KINDS)].map(([k, n]) => `<button data-kind="${k}">${esc(n)}</button>`).join('')}</div>
+        <select class="on-phone" id="op-kinds-p" aria-label="Kind of opportunity">${[['all', 'Everything'], ...Object.entries(KINDS)].map(([k, n]) => `<option value="${k}">${esc(n)}</option>`).join('')}</select>
+        <select class="on-phone" id="op-states-p" aria-label="Status">${STATES.map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select>
         <input class="c2-find" type="search" placeholder="Find a customer" aria-label="Find a customer">
       </div>
-      <div class="seg op-states" id="op-states">${[['active', 'Open and in play'], ['open', 'Not started'], ['play', 'In play'], ['mine', 'Mine'], ['won', 'Won'], ['lost', 'Lost']].map(([k, n]) => `<button data-state="${k}">${n}</button>`).join('')}</div>
+      <div class="seg op-states on-desk" id="op-states">${STATES.map(([k, n]) => `<button data-state="${k}">${n}</button>`).join('')}</div>
       <p class="c2-say" id="op-say"></p>
       <ul class="op-list" id="op-list"></ul>
       <div class="c2-more" id="op-more"></div>
@@ -61,7 +66,7 @@ export async function render(main, params, tabs) {
     const priceLink = r.kind === 'price' || (r.kind === 'cross' && r.line === 'bin') ? `<a href="#pricing?level1=${r.level1}${r.line === 'storage' ? '&code=STO' : ''}">Price it ›</a>` : '';
     return `<li class="op-row" data-key="${esc(r.key)}">
       <button class="op-head" type="button" aria-expanded="false">
-        <span class="op-who"><b>${esc(r.name)}</b><small>${esc(KINDS[r.kind])}${r.owner ? ` · ${esc(r.owner)}` : ''}</small></span>
+        <span class="op-who"><b>${esc(KINDS[r.kind])}</b><small>${r.owner ? esc(r.owner) : ''}</small></span>
         <span class="op-why">${esc(r.reason)}</span>
         <span class="op-val">${val}<small>${r.once ? '' : 'a year'}</small></span>
         <span class="op-st st-${r.status}">${STATUS_NAMES[r.status]}</span>
@@ -78,14 +83,23 @@ export async function render(main, params, tabs) {
       </div>
     </li>`;
   }
+  // one account: its largest, what kinds it holds; its opportunities open inside it
+  function account(a) {
+    const n = a.items.length;
+    return `<li class="op-acct"><button class="op-ahead" type="button" aria-expanded="false">
+        <span class="op-who"><b>${esc(a.name)}</b><small>${a.owner ? esc(a.owner) + ' · ' : ''}${n} opportunit${n === 1 ? 'y' : 'ies'}</small></span>
+        <span class="op-kinds">${a.kinds.map(k => `<em>${esc(KINDS[k])}</em>`).join('')}</span>
+        <span class="op-val">${a.largest ? moneyK(a.largest) : moneyK(a.once)}<small>${a.largest ? 'a year' : 'once'}${a.items.find(r => !r.once && r.value === a.largest && r.modelled) ? ' est.' : ''}${a.largest && a.once ? ` · ${moneyK(a.once)} once` : ''}</small></span>
+      </button><ul class="op-list" hidden>${a.items.map(row).join('')}</ul></li>`;
+  }
   function draw() {
     main.querySelectorAll('#op-kinds button').forEach(b => b.classList.toggle('on', b.dataset.kind === kind));
     main.querySelectorAll('#op-states button').forEach(b => b.classList.toggle('on', b.dataset.state === state));
-    const r = filtered(), shown = all ? r : r.slice(0, SHOW());
-    const rec = r.filter(x => !x.once), once = r.filter(x => x.once);
-    $('#op-say').textContent = r.length ? `${r.length} opportunit${r.length === 1 ? 'y' : 'ies'}: ${moneyK(sumOf(rec))} a year${once.length ? ` and ${moneyK(sumOf(once))} once` : ''}. Largest first; tap one for an opener, an owner and its status.` : 'Nothing here yet.';
-    list.innerHTML = shown.map(row).join('');
-    $('#op-more').innerHTML = r.length > shown.length ? `<button type="button" class="more">Show all ${r.length}</button>` : '';
+    $('#op-kinds-p').value = kind; $('#op-states-p').value = state;
+    const G = byAccount(filtered()), shown = all ? G.rows : G.rows.slice(0, SHOW);
+    $('#op-say').textContent = G.accounts ? `${G.accounts} account${G.accounts === 1 ? '' : 's'}: ${moneyK(G.largest)} a year counting each account's largest once${G.once ? `, and ${moneyK(G.once)} once` : ''}. Opportunities within an account overlap, so they do not add up. Largest first; tap an account for its openers.` : 'Nothing here yet.';
+    list.innerHTML = shown.map(account).join('');
+    $('#op-more').innerHTML = G.accounts > shown.length ? `<button type="button" class="more">Show all ${G.accounts}</button>` : '';
   }
   async function save(li, patch) {
     const r = rows.find(x => x.key === li.dataset.key); if (!r) return;
@@ -97,9 +111,11 @@ export async function render(main, params, tabs) {
     Object.assign(r, next, { at: new Date().toISOString() });
     msg.textContent = 'Saved.';
     const head = li.querySelector('.op-st'); head.className = `op-st st-${r.status}`; head.textContent = STATUS_NAMES[r.status];
-    li.querySelector('.op-who small').textContent = KINDS[r.kind] + (r.owner ? ` · ${r.owner}` : '');
+    li.querySelector('.op-who small').textContent = r.owner || '';
   }
   list.addEventListener('click', e => {
+    const ah = e.target.closest('.op-ahead');
+    if (ah) { const u = ah.nextElementSibling; u.hidden = !u.hidden; ah.setAttribute('aria-expanded', String(!u.hidden)); return; }
     const li = e.target.closest('.op-row'); if (!li) return;
     if (e.target.closest('.op-head')) { const b = li.querySelector('.op-body'), h = li.querySelector('.op-head'); b.hidden = !b.hidden; h.setAttribute('aria-expanded', String(!b.hidden)); }
     if (e.target.closest('.op-copy')) { const r = rows.find(x => x.key === li.dataset.key); navigator.clipboard && navigator.clipboard.writeText(r.opener).then(() => { li.querySelector('.op-msg').textContent = 'Opener copied.'; }); }
@@ -112,6 +128,8 @@ export async function render(main, params, tabs) {
   });
   main.querySelectorAll('[data-kind]').forEach(b => b.addEventListener('click', () => { kind = b.dataset.kind; all = false; draw(); }));
   main.querySelectorAll('[data-state]').forEach(b => b.addEventListener('click', () => { state = b.dataset.state; all = false; draw(); }));
+  $('#op-kinds-p').addEventListener('change', e => { kind = e.target.value; all = false; draw(); });
+  $('#op-states-p').addEventListener('change', e => { state = e.target.value; all = false; draw(); });
   $('.c2-find').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); draw(); });
   $('#op-more').addEventListener('click', e => { if (e.target.closest('.more')) { all = true; draw(); } });
   draw();

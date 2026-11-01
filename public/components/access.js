@@ -9,4 +9,6 @@ export async function loadAccess() {
 }
 export const costsVisible = () => !!me.costs;
 export const isAdmin = () => me.role === 'admin';
+// the first screen after sign-in, for someone who has not asked for one
+export const landing = () => me.role === 'billing' ? '#customers' : null;
 export const NOT_READY = 'Cost to serve not ready yet — price judged against the book only.';
