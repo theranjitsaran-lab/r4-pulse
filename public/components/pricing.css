@@ -184,3 +184,6 @@
 .st-rates .fl { color: var(--ink-3); font-size: var(--fs-tiny); } .st-rates .d { color: var(--ink-3); font-size: var(--fs-tiny); }
 @media (max-width: 700px) { .st-row { grid-template-columns: 1fr; gap: var(--sp-2); } .st-rates li { grid-template-columns: 1fr 1fr; } .st-rates .d { grid-column: 1 / -1; } }
 .st details.fold summary .sub, .nb details.fold summary .sub { font-size: var(--fs-label); color: var(--ink-3); }
+.st-pcrow { display: flex; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-2) 0; border-bottom: 1px solid var(--rule); font-size: var(--fs-sm); }
+.st-pcrow small { display: block; color: var(--ink-3); font-size: var(--fs-tiny); }
+.st-pcrow .st-val { flex-wrap: nowrap; }

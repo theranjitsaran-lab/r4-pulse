@@ -46,22 +46,30 @@ export function daysFrom(rows, Z) {
 //   pickup (movement), never to the account's bins. A delivery with no postcode (the customer has no
 //   Veri-Shred address; VCK holds none) or on a date no route ran is counted, not placed. Off,
 //   everything is exactly as before.
-export function placeDeliveries(days, deliveries, Z) {
+export function placeDeliveries(days, deliveries, Z, typed = {}) {
   const byDate = new Map();
   for (const d of days) (byDate.get(d.date) || byDate.set(d.date, []).get(d.date)).push(d);
-  const out = { placed: 0, noPostcode: 0, noRoute: 0, orders: 0, trips: 0 };
+  const out = { placed: 0, noPostcode: 0, noRoute: 0, orders: 0, trips: 0, basis: { site: 0, account: 0, typed: 0 }, missing: {} };
   // one stop per customer per day
   const merged = new Map();
   for (const d of deliveries || []) {
     if (!d.date || d.level1 == null) continue;
-    const k = d.date + '|' + d.level1, x = merged.get(k) || { date: d.date, level1: d.level1, postcode: pc5(d.postcode), orders: 0, trips: 0 };
-    x.orders += d.orders || 0; x.trips += d.trips || d.orders || 0; if (!x.postcode && d.postcode) x.postcode = pc5(d.postcode);
+    const k = d.date + '|' + d.level1, x = merged.get(k) || { date: d.date, level1: d.level1, postcode: pc5(d.postcode), basis: d.postcode ? (d.basis || 'account') : null, orders: 0, trips: 0, revenue: 0 };
+    x.orders += d.orders || 0; x.trips += d.trips || d.orders || 0; x.revenue += d.revenue || 0;
+    if (!x.postcode && d.postcode) { x.postcode = pc5(d.postcode); x.basis = d.basis || 'account'; }
     merged.set(k, x);
   }
   for (const d of merged.values()) {
     out.orders += d.orders; out.trips += d.trips;
+    // no postcode in the data: one typed on Settings (typed[level1]), if any
+    if (!d.postcode && typed && typed[d.level1]) { d.postcode = String(typed[d.level1]).padStart(5, '0'); d.basis = 'typed'; }
     const pt = d.postcode && Z ? Z[d.postcode] : null;
-    if (!pt) { out.noPostcode++; continue; }
+    if (!pt) {
+      out.noPostcode++;
+      const m = out.missing[d.level1] || (out.missing[d.level1] = { level1: d.level1, days: 0, revenue: 0 });
+      m.days++; m.revenue += d.revenue;
+      continue;
+    }
     const routes = byDate.get(d.date);
     if (!routes || !routes.length) { out.noRoute++; continue; }
     let best = null;
@@ -75,8 +83,11 @@ export function placeDeliveries(days, deliveries, Z) {
       }
     }
     best.day.stops.splice(best.after + 1, 0, { stop: 'D' + d.level1, level1: d.level1, postcode: d.postcode, pt, services: d.trips || 1, pounds: 0, delivery: true, orders: d.orders });
-    out.placed++;
+    out.placed++; out.basis[d.basis || 'account'] = (out.basis[d.basis || 'account'] || 0) + 1;
   }
+  // the accounts with no postcode, largest delivery revenue first: for Settings, to type one in
+  out.missing = Object.values(out.missing).sort((a, b) => b.revenue - a.revenue || b.days - a.days).slice(0, 30)
+    .map(m => ({ ...m, revenue: Math.round(m.revenue) }));
   return out;
 }
 
@@ -85,7 +96,7 @@ export function routeCosts(R, rows, Z, deliveries = []) {
   const accounts = {}, postcodes = {}, movement = {};
   let services = 0, stops = 0, roundMin = 0;
   const on = !!R.SETTINGS.deliveryMatch && (deliveries || []).length > 0;
-  const dels = on ? placeDeliveries(days, deliveries, Z) : null;
+  const dels = on ? placeDeliveries(days, deliveries, Z, R.SETTINGS.postcodes || {}) : null;
   for (const day of days) {
     const a = allocate(R, day);
     roundMin += a.minutes.round;

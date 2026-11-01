@@ -375,20 +375,30 @@ async function routestops() {
     GROUP BY 1, 2, 3 ORDER BY 1, 2, 4 NULLS LAST, 3`, [anchor.latest_done]);
 }
 
-// Box deliveries and pickups, twelve months: VCK delivery work orders (service code 01) by day and
-// account, with the account's usual Veri-Shred postcode where it has one. VCK holds no route, truck or
-// driver for them; components/routecost.js turns them into delivery truck days when Settings says
-// deliveries run on their own trucks.
+// Box deliveries and pickups, twelve months: VCK delivery lines (service code 01) by day and account,
+// with a postcode for placing them on that day's shred route (components/routecost.js). VCK holds no
+// addresses (checked 1 November 2026: the only addresses in the database are Veri-Shred's stops), so:
+//   1. the sub-account's own Veri-Shred postcode (levelid: the site itself), else
+//   2. the account's usual Veri-Shred postcode (level1: often the head office), else
+//   3. none here; a postcode typed on Settings is applied by routecost.js.
 async function deliverydays() {
   return query(`
-    WITH ${BOUNDS}, ${PL},
-    pc AS (SELECT DISTINCT ON (level1) level1, postcode FROM (
-             SELECT NULLIF(level1, '')::int AS level1, left(coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')), 5) AS postcode, count(*) AS n
-             FROM vs_service_orders WHERE NULLIF(level1, '') IS NOT NULL AND coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')) IS NOT NULL
-             GROUP BY 1, 2) x ORDER BY level1, n DESC)
-    SELECT l.d::text AS date, l.level1, count(DISTINCT l.woid)::int AS orders, sum(l.units)::float AS trips, min(pc.postcode) AS postcode
-    FROM l LEFT JOIN pc ON pc.level1 = l.level1
-    WHERE l.servcode = '01' AND l.units > 0
+    WITH ${BOUNDS},
+    pl AS (
+      SELECT level1, levelid, woid, servcodeid, units, totamt, wodate FROM priced_lines
+      UNION ALL
+      SELECT c.level1, c.levelid, c.woid, c.servcodeid, c.units, c.totamt, c.wodate FROM priced_lines_current c
+      WHERE NOT EXISTS (SELECT 1 FROM priced_lines p WHERE p.woid = c.woid AND p.servcodeid = c.servcodeid AND p.units = c.units AND p.totamt = c.totamt)),
+    l AS (SELECT pl.level1, pl.levelid, pl.woid, pl.units, pl.totamt, pl.wodate::date AS d FROM pl JOIN servcode s USING (servcodeid), b
+          WHERE s.servcode = '01' AND pl.units > 0 AND pl.wodate >= b.f AND pl.wodate < b.t),
+    vs AS (SELECT NULLIF(level1, '')::int AS level1, NULLIF(levelid, '')::int AS levelid, left(coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')), 5) AS postcode
+           FROM vs_service_orders WHERE coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')) ~ '^[0-9]{5}'),
+    sub AS (SELECT DISTINCT ON (levelid) levelid, postcode FROM (SELECT levelid, postcode, count(*) AS n FROM vs WHERE levelid IS NOT NULL GROUP BY 1, 2) x ORDER BY levelid, n DESC),
+    acc AS (SELECT DISTINCT ON (level1) level1, postcode FROM (SELECT level1, postcode, count(*) AS n FROM vs WHERE level1 IS NOT NULL GROUP BY 1, 2) x ORDER BY level1, n DESC)
+    SELECT l.d::text AS date, l.level1, count(DISTINCT l.woid)::int AS orders, sum(l.units)::float AS trips, sum(l.totamt)::float AS revenue,
+           coalesce(min(sub.postcode), min(acc.postcode)) AS postcode,
+           CASE WHEN min(sub.postcode) IS NOT NULL THEN 'site' WHEN min(acc.postcode) IS NOT NULL THEN 'account' END AS basis
+    FROM l LEFT JOIN sub ON sub.levelid = l.levelid LEFT JOIN acc ON acc.level1 = l.level1
     GROUP BY 1, 2 ORDER BY 1, 2`);
 }
 

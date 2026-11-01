@@ -56,12 +56,26 @@ function draw(main, S) {
       <ul class="st-list">${g.keys.map(([k, u, q]) => row(k, u, q)).join('')}</ul>
       ${g.title === 'Box deliveries' && del && del.customerDays ? `<p class="src">${del.on ? `${del.placed.toLocaleString('en-US')} of ${del.customerDays.toLocaleString('en-US')} customer delivery days placed on a shred route that day, ${del.accounts} accounts, ${esc(String(del.from))} to ${esc(String(del.to))} (VCK code 01). ${del.noPostcode ? `${del.noPostcode.toLocaleString('en-US')} could not be placed for want of a postcode (the customer has no Veri-Shred address; VCK holds none)` : ''}${del.noPostcode && del.noRoute ? '; ' : ''}${del.noRoute ? `${del.noRoute.toLocaleString('en-US')} fell on a date no route ran` : ''}${del.noPostcode || del.noRoute ? ': those stay at the average visit, under review.' : ''}` : 'Off: deliveries are left out of the route days, and delivery and pickup stay at the average visit, under review.'}</p>` : ''}
     </section>`).join('')}
-    ${S.history && S.history.length ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Changes</h2><small>newest first</small></div><ul class="st-hist">${S.history.map(h => `<li><span>${esc((S.notes[h.key] || [h.key])[0])}: <b>${esc(fmt(h.key, h.value))}</b></span><span>${esc(h.who)} · ${esc(when(h.at))}</span></li>`).join('')}</ul></section>` : ''}
+    ${pcCard(S)}
+    ${S.history && S.history.length ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Changes</h2><small>newest first</small></div><ul class="st-hist">${S.history.map(h => `<li><span>${/^pc:/.test(h.key) ? `Postcode for account ${esc(h.key.slice(3))}: <b>${+h.value ? esc(String(Math.round(h.value)).padStart(5, '0')) : 'removed'}</b>` : `${esc((S.notes[h.key] || [h.key])[0])}: <b>${esc(fmt(h.key, h.value))}</b>`}</span><span>${esc(h.who)} · ${esc(when(h.at))}</span></li>`).join('')}</ul></section>` : ''}
     <section class="h2-card" data-rv><details class="fold"><summary><h3>The rates</h3><span class="sub">model/rates.js · GL pools over the database's volumes · open</span></summary>
       <ul class="st-rates">${S.rates.map(r => `<li><b>${esc(r.key)}</b><span class="v">${typeof r.value === 'number' ? esc(+r.value.toFixed(4) + '') : esc(Object.entries(r.value).map(([k, v]) => `${k} ${v}`).join(', '))} <small>${esc(r.unit || '')}</small></span><span class="fl">${esc(r.flag || '')}</span><span class="d">${esc(r.derivation || '')}</span></li>`).join('')}</ul></details></section>
   </div>`;
 
-  main.querySelectorAll('.st-save').forEach(b => b.addEventListener('click', async () => {
+  // a postcode for a delivery account with none in the data
+  main.querySelectorAll('.st-pc-save').forEach(b => b.addEventListener('click', async () => {
+    const id = b.dataset.id, el = main.querySelector(`input[data-pc="${id}"]`), msg = main.querySelector(`.st-msg[data-pcfor="${id}"]`);
+    const raw = String(el.value).trim(), v = raw === '' ? 0 : Number(raw);
+    if (raw !== '' && !/^\d{5}$/.test(raw)) { msg.textContent = 'Five digits, please.'; return; }
+    msg.textContent = 'Saving and re-costing…';
+    const r = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: 'pc:' + id, value: v }) }).catch(() => null);
+    const j = r ? await r.json().catch(() => ({})) : {};
+    if (!r || !r.ok) { msg.textContent = j.error || 'Could not save just now.'; return; }
+    const fresh = await fetch('/api/settings').then(x => x.json()).catch(() => null);
+    if (fresh && fresh.data) draw(main, fresh.data);
+  }));
+
+  main.querySelectorAll('.st-save:not(.st-pc-save)').forEach(b => b.addEventListener('click', async () => {
     const k = b.dataset.k, el = main.querySelector(`[data-k="${k}"]:not(button)`), msg = main.querySelector(`.st-msg[data-for="${k}"]`);
     let v = Number(String(el.value).replace(/[%\s]/g, ''));
     if (!Number.isFinite(v)) { msg.textContent = 'A number, please.'; return; }
@@ -76,4 +90,20 @@ function draw(main, S) {
     if (fresh && fresh.data) { draw(main, fresh.data); const m2 = main.querySelector(`.st-msg[data-for="${k}"]`); if (m2) m2.textContent = 'Saved. Every screen now uses it (reload any open page).'; }
   }));
   reveal(main.querySelector('.st'));
+}
+
+// Delivery accounts with no postcode anywhere in the data (VCK holds no addresses; Veri-Shred has one
+// only for shred stops), largest delivery revenue first, each with a box to type its postcode; and the
+// postcodes already typed. Until VCK's address table joins the daily push, this is how the gap closes.
+function pcCard(S) {
+  const d = (S.reference || {}).deliveries, typed = (S.reference || {}).typed || [];
+  if (!d || !d.on || (!(d.missing || []).length && !typed.length)) return '';
+  const row = (id, name, sub, val) => `<li class="st-pcrow"><span><b>${esc(name)}</b><small>${esc(sub)}</small></span>
+    <span class="st-val">${S.canEdit ? `<input data-pc="${id}" inputmode="numeric" maxlength="5" placeholder="60601" value="${esc(val || '')}"><button type="button" class="st-save st-pc-save" data-id="${id}">Save</button>` : esc(val || '—')}<span class="st-msg hint" data-pcfor="${id}"></span></span></li>`;
+  const b = d.basis || {};
+  return `<section class="h2-card" data-rv><div class="h2-ch"><h2>${d.noPostcode ? `${d.noPostcode.toLocaleString('en-US')} delivery days have no address` : 'Delivery addresses'}</h2><small>type a postcode and those deliveries are placed on that day's route</small></div>
+    <p class="hint">Placed so far: ${(b.site || 0).toLocaleString('en-US')} at the site's own address, ${(b.account || 0).toLocaleString('en-US')} at the account's usual address, ${(b.typed || 0).toLocaleString('en-US')} at a postcode typed here. VCK's own addresses are not in the daily push; adding its address table would fill this list without typing.</p>
+    <ul class="st-list">${(d.missing || []).slice(0, 25).map(m => row(m.level1, m.name, `${m.days} delivery day${m.days === 1 ? '' : 's'}${m.revenue ? `, $${m.revenue.toLocaleString('en-US')} of delivery revenue` : ''} · account ${m.level1}`)).join('')}
+    ${typed.map(t => row(t.level1, t.name, `postcode typed here · account ${t.level1} · clear the box and save to remove`, t.postcode)).join('')}</ul>
+  </section>`;
 }

@@ -15,6 +15,7 @@ const R = require('../model/rates');
 
 const FILE = path.join(__dirname, '..', 'data', 'settings.json');
 const DEFAULTS = { ...R.SETTINGS };
+delete DEFAULTS.postcodes;
 let ready = false, saveable = true;
 
 async function rows() {
@@ -26,8 +27,15 @@ async function rows() {
 async function load() {
   const rs = await rows();
   const latest = {};
-  for (const r of rs) if (r.key in DEFAULTS) latest[r.key] = r;
-  for (const k of Object.keys(DEFAULTS)) R.SETTINGS[k] = latest[k] ? Number(latest[k].value) : DEFAULTS[k];
+  const typed = {};
+  for (const r of rs) {
+    if (r.key in DEFAULTS) latest[r.key] = r;
+    // a postcode typed for a delivery account with none in the data: key pc:<level1>; 0 removes it
+    const m = /^pc:(\d+)$/.exec(r.key || '');
+    if (m) { if (Number(r.value) > 0) typed[m[1]] = String(Math.round(Number(r.value))).padStart(5, '0'); else delete typed[m[1]]; }
+  }
+  for (const k of Object.keys(DEFAULTS)) if (k !== 'postcodes') R.SETTINGS[k] = latest[k] ? Number(latest[k].value) : DEFAULTS[k];
+  R.SETTINGS.postcodes = typed;
   ready = true;
   return { latest, history: rs.slice().reverse().slice(0, 30) };
 }
@@ -35,6 +43,7 @@ const ensure = () => ready ? Promise.resolve() : load();
 
 function clean(b) {
   const key = String(b.key || ''), B = R.SETTING_BOUNDS[key], v = Number(b.value);
+  if (/^pc:\d+$/.test(key)) return Number.isInteger(v) && (v === 0 || (v >= 501 && v <= 99950)) ? { key, value: v } : null;
   if (!B || !Number.isFinite(v)) return null;
   if (key === 'deliveryMatch') return { key, value: v ? 1 : 0 };
   return { key, value: Math.min(B[1], Math.max(B[0], v)) };
@@ -49,6 +58,8 @@ async function save(row) {
   await query(`INSERT INTO app.setting (key, value, who) VALUES ($1, $2, $3)`, [row.key, row.value, row.who]);
 }
 
+const nameOf = (D, id) => { const a = (D.C && D.C.accounts || []).find(x => x.level1 === id) || (D.M && D.M.accounts || []).find(x => x.level1 === id); return a ? a.customer : `Account ${id}`; };
+
 const api = express.Router();
 api.get('/', async (req, res) => {
   try {
@@ -59,13 +70,14 @@ api.get('/', async (req, res) => {
     const ing = rc.accounts[12530];
     const book = Object.values(rc.accounts).reduce((t, a) => ({ cost: t.cost + a.cost, services: t.services + a.services }), { cost: 0, services: 0 });
     res.json({ data: {
-      values: { ...R.SETTINGS }, defaults: DEFAULTS, bounds: R.SETTING_BOUNDS, notes: R.TIME_NOTES, latest, history,
+      values: (({ postcodes, ...v }) => v)(R.SETTINGS), defaults: DEFAULTS, bounds: R.SETTING_BOUNDS, notes: R.TIME_NOTES, latest, history,
       canEdit: !!(req.session.user && req.session.user.role === 'admin'), saveable,
       reference: {
         routeDay: R.RATES.routeDay.v, days: rc.days, from: rc.from, to: rc.to, avgRoundHours: rc.avgRoundHours,
         ingalls: ing ? { perService: ing.cost / ing.services, days: ing.days } : null,
         book: book.services ? { perService: book.cost / book.services, services: book.services } : null,
-        deliveries: rc.deliveries || null,
+        deliveries: rc.deliveries ? { ...rc.deliveries, missing: (rc.deliveries.missing || []).map(m => ({ ...m, name: nameOf(D, m.level1) })) } : null,
+        typed: Object.entries(R.SETTINGS.postcodes || {}).map(([l, pc]) => ({ level1: Number(l), postcode: pc, name: nameOf(D, Number(l)) })),
       },
       rates: Object.entries(R.RATES).map(([k, r]) => ({ key: k, value: r.v, unit: r.u, flag: r.c || null, derivation: r.d || null })),
     } });
@@ -78,7 +90,7 @@ api.post('/', async (req, res) => {
   try {
     await save({ ...row, who: req.session.user.name });
     await load();
-    res.json({ data: { ...R.SETTINGS } });
+    res.json({ data: (({ postcodes, ...v }) => v)(R.SETTINGS) });
   } catch (e) { res.status(500).json({ error: saveable ? e.message : 'Changes cannot be saved until the setup SQL has been applied on the PC.' }); }
 });
 

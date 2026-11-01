@@ -151,7 +151,7 @@ async function loadFromDb(query) {
 // its day is by time instead: its drive minutes (its detour in road miles at mph) plus its drop
 // minutes (stopMin at each stop and serviceMin a service), scaled so a day's stops add up to the
 // route day. Three assumptions, all `assumed`, for Mike to check (31 October 2026).
-const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliveryMatch: 1 };
+const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliveryMatch: 1, postcodes: {} };
 const TIME_NOTES = {
   mph: ['Average city speed between stops', 'assumed', 'Chicago streets with a box truck; the main roads give the miles, this turns them into minutes.'],
   stopMin: ['Minutes at each stop before any service', 'assumed', 'Park, walk in, sign, walk out.'],
