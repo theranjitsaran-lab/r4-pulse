@@ -182,3 +182,9 @@ html.ask-open .h2-fab { display: none; }
 .h2-team h3 a { color: var(--brand); text-decoration: none; font-weight: 500; }
 .h2-team .next { margin: 0; font-size: var(--fs-sm); color: var(--ink-2); line-height: 1.45; }
 @media (max-width: 760px) { .h2-team { grid-template-columns: 1fr; } }
+
+/* the money section folds on a phone (1 November 2026) */
+.h2-fold > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); }
+.h2-fold > summary::-webkit-details-marker { display: none; }
+.h2-fold > summary small { font-family: var(--f-sans); font-size: var(--fs-label); color: var(--ink-3); }
+@media (max-width: 700px) { .h2-fold:not([open]) > summary { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-lg); padding: var(--sp-4); margin-bottom: var(--sp-4); } .h2-fold > summary::before { content: '›'; color: var(--ink-5); margin-right: var(--sp-2); } .h2-fold[open] > summary::before { content: '⌄'; } }

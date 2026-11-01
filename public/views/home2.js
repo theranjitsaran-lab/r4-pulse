@@ -131,9 +131,9 @@ export async function render(main, P) {
     </section>`;
 
   main.innerHTML = `<div class="h2">${sumCard}${kpis}${dayCard}${pulse}${segCard}${custCard}
-    <h2 class="h2-sec" data-rv>Where the money is</h2>
+    <details class="h2-fold" id="h2-money" ${innerWidth > 700 ? 'open' : ''}><summary class="h2-sec" data-rv>Where the money is<small>route density, cross-sell, shredding · ${innerWidth > 700 ? '' : 'open'}</small></summary>
     <div class="h2-row">${mapCard}${crossCard}</div>
-    ${destCard}
+    ${destCard}</details>
     <div class="h2-foot">Posted through ${mon(P.monthly[P.monthly.length - 1].month)} · work done through ${dm(A.latestDone)} · ◇ modelled: work priced at last month's value a service, costs from model/rates.js · Citadel held apart</div>
   </div>`;
 
@@ -161,8 +161,10 @@ export async function render(main, P) {
 
   trend(main.querySelector('#h2-trend'), m);
   weekBars(main.querySelector('#h2-weeks'), w);
-  if (dens) densityMap(main.querySelector('#h2-map'), dens, base);
-  if (dest) destChart(main.querySelector('#h2-dest'), dest);
+  // the money section: drawn at its on-screen width, so on a phone when it is opened
+  const money = main.querySelector('#h2-money');
+  const drawMoney = () => { if (dens) densityMap(main.querySelector('#h2-map'), dens, base); if (dest) destChart(main.querySelector('#h2-dest'), dest); };
+  if (money.open) drawMoney(); else money.addEventListener('toggle', () => { if (money.open && !money.dataset.drawn) { money.dataset.drawn = '1'; drawMoney(); } });
 
   // feedback on a line
   main.querySelector('.h2-day').addEventListener('click', async ev => {

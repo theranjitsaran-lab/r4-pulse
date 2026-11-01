@@ -8,7 +8,7 @@ import { reveal } from '/components/motion.js';
 import { KINDS, STATUSES } from '/components/opps.js';
 
 const STATUS_NAMES = { open: 'Open', contacted: 'Contacted', quoted: 'Quoted', won: 'Won', lost: 'Lost' };
-const SHOW = 40;
+const SHOW = () => innerWidth <= 700 ? 15 : 40;   // a phone shows fewer, then 'show all'
 
 export async function render(main, params, tabs) {
   if (!main) return;
@@ -81,7 +81,7 @@ export async function render(main, params, tabs) {
   function draw() {
     main.querySelectorAll('#op-kinds button').forEach(b => b.classList.toggle('on', b.dataset.kind === kind));
     main.querySelectorAll('#op-states button').forEach(b => b.classList.toggle('on', b.dataset.state === state));
-    const r = filtered(), shown = all ? r : r.slice(0, SHOW);
+    const r = filtered(), shown = all ? r : r.slice(0, SHOW());
     const rec = r.filter(x => !x.once), once = r.filter(x => x.once);
     $('#op-say').textContent = r.length ? `${r.length} opportunit${r.length === 1 ? 'y' : 'ies'}: ${moneyK(sumOf(rec))} a year${once.length ? ` and ${moneyK(sumOf(once))} once` : ''}. Largest first; tap one for an opener, an owner and its status.` : 'Nothing here yet.';
     list.innerHTML = shown.map(row).join('');

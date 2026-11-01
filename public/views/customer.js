@@ -37,7 +37,10 @@ export async function render(main, C, params) {
 
   const ltm = s ? s.ltm : m.revenue;
   const pc = m && m.revenue > 0 ? m.margin / m.revenue : null;
-  const routeHeavy = m && [...UNDER_REVIEW].some(f => m.fam[f] && m.fam[f].cost > 0.25 * m.cost);
+  // a route line is under review only while it rests on the average visit: bins from the account's own
+  // route days, and delivery from delivery truck days (Settings), are not
+  const review = f => UNDER_REVIEW.has(f) && !(f === 'bin' && R.routeFor && R.routeFor(id)) && !(f === 'movement' && R.movementFor && R.movementFor(id));
+  const routeHeavy = m && [...UNDER_REVIEW].some(f => review(f) && m.fam[f] && m.fam[f].cost > 0.25 * m.cost);
   const slipping = s && s.move && slippingAccounts(C).some(x => x.level1 === id);
 
   // the account in a few sentences, in place of a row of figure tiles
@@ -46,7 +49,7 @@ export async function render(main, C, params) {
   const lede = [];
   lede.push(`<b>${moneyK(ltm)}</b> billed in the last twelve months${s ? `, ${share('storage')}% storage and ${share('service')}% service` : ''}.`);
   if (s && s.move) lede.push(`Over the last three months it ran at ${moneyK(s.move.last3)} a month against its own ${moneyK(s.move.run)} before${Math.abs(s.move.pct || 0) >= 0.05 ? `: ${moveReason(s.move, moneyK)}` : ', about level'}.`);
-  if (m && m.cost > 0) lede.push(`About ${moneyK(m.cost)} a year to serve ◇ ${m.margin >= 0 ? `leaves ${moneyK(m.margin)}${pc != null ? ` (${Math.round(pc * 100)}%)` : ''}` : `is ${moneyK(-m.margin)} more than it pays`}${routeHeavy ? ', with route costs under review' : ''}.`);
+  if (m && m.cost > 0) lede.push(`About ${moneyK(m.cost)} a year to serve ◇ ${m.margin >= 0 ? `leaves ${moneyK(m.margin)}${pc != null ? ` (${Math.round(pc * 100)}%)` : ''}` : `is ${moneyK(-m.margin)} more than it pays`}${routeHeavy ? ', with route costs under review' : R.routeFor && R.routeFor(id) && m.fam.bin ? ', its bins costed from its own route days' : ''}.`);
   if (acct && (acct.boxes >= 1 || acct.bins)) lede.push([acct.boxes >= 1 ? `It stores ${n0(acct.boxes)} boxes` : '', acct.bins ? `${acct.boxes >= 1 ? 'and had' : 'It had'} ${n0(acct.bins)} bin services on ${n0(acct.visits)} visits` : ''].filter(Boolean).join(' ') + '.');
   if (id === CITADEL) lede.push('Citadel\'s settlements land in lumps, so it is held apart from core.');
   const summary = lede.join(' ');
@@ -92,16 +95,18 @@ export async function render(main, C, params) {
     </div>
     <p class="cp-lede">${summary}</p>
     <div class="card" id="cp-chart"></div>
+    <section class="card cp-opps" id="cp-opps"><div class="card-head"><h3>Open opportunities</h3><a href="#customers?view=opportunities">All opportunities ›</a></div><p class="sub">Loading…</p></section>
     <div class="grid one">
       <div class="card">
         <div class="card-head"><h3>Margin by line of business</h3><a href="#customers?view=margin&id=${id}">The margin drill: line, job, route ›</a></div>
         ${fams.length ? `<div class="famhead"><span>Line</span><span>Revenue</span><span class="cost">Cost ◇</span><span>Margin</span><span></span></div>` : ''}
         <div id="cp-fams">${fams.map(x => {
-          const p = x.revenue > 0 ? 1 - x.cost / x.revenue : null, rev = UNDER_REVIEW.has(x.f);
+          const p = x.revenue > 0 ? 1 - x.cost / x.revenue : null, rev = review(x.f);
           return `<div class="fam" data-f="${x.f}"><span>${esc(FAMILY_NAMES[x.f] || x.f)}${rev ? ' <span class="chip review">under review</span>' : ''}</span><span class="r">${money0(x.revenue)}</span><span class="r cost">${x.f === 'other' ? '—' : money0(x.cost)}</span><span class="r ${p != null && p < 0 && !rev ? 'is-bad' : ''}">${x.f === 'other' || p == null ? '—' : rev ? '◇' : Math.round(p * 100) + '%'}</span><span class="go">›</span></div><div class="lines" data-for="${x.f}" hidden></div>`;
         }).join('') || '<p class="sub">No priced lines in the last twelve months.</p>'}</div>
       </div>
     </div>
+    <details class="fold cp-fold"><summary><h3>Not bought yet, prices against the book, signals</h3><span class="sub">${sigs.length ? `${sigs.length} signal${sigs.length === 1 ? '' : 's'} · ` : ''}${mine.length} prices · open</span></summary>
     <div class="grid three">
         ${wsCard(wsRow, pitch)}
         <div class="card">
@@ -118,8 +123,19 @@ export async function render(main, C, params) {
           ${log.length ? `<div class="aside" style="margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:var(--hair) solid var(--rule)"><div class="lab" style="margin-bottom:var(--sp-1)">Logged</div>${log.slice(0, 5).map(l => `<div class="sub">${when(l.logged_at)} · ${esc(l.who)} · ${VERB[l.verdict]} (${esc(l.signal)})</div>`).join('')}</div>` : ''}
         </div>
     </div>
+    </details>
+    <details class="fold cp-fold"><summary><h3>Work orders and shredding visits</h3><span class="sub">last six months, each opening to its cost and its route day · open</span></summary>
     <div class="grid drill" id="cp-drill"><div class="card"><div class="card-head"><h3>Work orders</h3><small>last six months</small></div><p class="sub">Loading…</p></div><div class="card"><div class="card-head"><h3>Shredding visits</h3><small>last six months</small></div><p class="sub">Loading…</p></div></div>
+    </details>
   </div>`;
+
+  // this customer's open opportunities, from the same list as Customers › Opportunities
+  getJson('view/opportunities?level1=' + id).then(V => {
+    const box = main.querySelector('#cp-opps'); if (!box) return;
+    const open = V.rows.filter(r => r.status !== 'won' && r.status !== 'lost').slice(0, 5);
+    const KIND = { cross: 'Cross-sell', price: 'Price gap', slip: 'Win back', round: 'Rate round', overdue: 'Overdue boxes' };
+    box.querySelector('p').outerHTML = open.length ? `<ul class="cp-opp">${open.map(r => `<li><span><b>${esc(KIND[r.kind] || r.kind)}</b>${r.owner ? ` · ${esc(r.owner)}` : ''}${r.status !== 'open' ? ` · ${esc(r.status)}` : ''}<small>${esc(r.reason)}</small></span><em>${moneyK(r.value)}${r.once ? ' once' : ''}${r.modelled ? ' ◇' : ''}</em></li>`).join('')}</ul>` : '<p class="sub">Nothing open for this customer.</p>';
+  }).catch(() => { const box = main.querySelector('#cp-opps'); if (box) box.remove(); });
 
   if (s) {
     const pts = k => s.months.map((x, i) => ({ x, y: s[k][i] }));

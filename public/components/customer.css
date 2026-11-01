@@ -71,3 +71,20 @@
   .cp .grid:not(.drill):not(.one):not(.three) .stack { display: contents; }
   .cp .grid:not(.drill):not(.one):not(.three) > .card, .cp .grid:not(.drill):not(.one):not(.three) .stack > .card { break-inside: avoid; margin: 0 0 var(--sp-4); }
 }
+
+/* the shorter page (1 November 2026): opportunities up top, the rest folded */
+.cp .cp-opps { margin-bottom: var(--sp-4); }
+.cp-opp { list-style: none; margin: 0; padding: 0; }
+.cp-opp li { display: flex; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-2) 0; border-bottom: 1px solid var(--rule); font-size: var(--fs-sm); }
+.cp-opp li:last-child { border-bottom: 0; }
+.cp-opp small { display: block; color: var(--ink-3); margin-top: 2px; }
+.cp-opp em { font-style: normal; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cp details.cp-fold { margin: 0 0 var(--sp-4); background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-lg); padding: var(--sp-4); }
+.cp details.cp-fold > summary { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); cursor: pointer; list-style: none; }
+.cp details.cp-fold > summary::-webkit-details-marker { display: none; }
+.cp details.cp-fold > summary h3 { margin: 0; font-size: var(--fs-head); font-weight: 600; }
+.cp details.cp-fold > summary h3::before { content: "›"; color: var(--ink-5); display: inline-block; margin-right: var(--sp-2); transition: transform var(--t-fast); }
+.cp details.cp-fold[open] > summary h3::before { transform: rotate(90deg); }
+.cp details.cp-fold > summary .sub { font-size: var(--fs-label); color: var(--ink-3); }
+.cp details.cp-fold[open] > summary { margin-bottom: var(--sp-3); }
+@media (max-width: 700px) { .cp details.cp-fold > summary .sub { display: none; } }

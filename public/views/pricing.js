@@ -22,7 +22,10 @@ const median = v => v.length ? v.slice().sort((a, b) => a - b)[Math.floor(v.leng
 
 export async function render(main, PR, params) {
   if (!main) return;
-  const [R, M, Z] = await Promise.all([loadRates(), getJson('margin'), fetch('/data/zcta.json').then(r => r.json()).catch(() => ({})), loadRoadnet().catch(() => null)]);
+  const [R, M] = await Promise.all([loadRates(), getJson('margin')]);
+  // the postcode centres and the roads are only needed once a postcode is entered: fetched then
+  let Z = {}, places = null;
+  const loadPlaces = () => places || (places = Promise.all([fetch('/data/zcta.json').then(r => r.json()).catch(() => ({})), loadRoadnet().catch(() => null)]).then(([z]) => { Z = z; }));
 
   // the book: each service's account rates; storage from storage_rate_hist's latest month
   const book = {};
@@ -237,8 +240,11 @@ export async function render(main, PR, params) {
   $('p-pc').addEventListener('input', () => {
     const pc = $('p-pc').value.trim();
     st.postcode = /^\d{5}$/.test(pc) ? pc : null;
-    if (st.postcode && Z[st.postcode]) { st.miles = Math.round(dist(YARD, Z[st.postcode]) * 10) / 10; $('p-miles').value = st.miles; }
-    draw();
+    if (!st.postcode) { draw(); return; }
+    loadPlaces().then(() => {
+      if (Z[st.postcode]) { st.miles = Math.round(dist(YARD, Z[st.postcode]) * 10) / 10; $('p-miles').value = st.miles; }
+      draw();
+    });
   });
   $('p-slide').addEventListener('input', () => { st.price = Number($('p-slide').value); $('p-price').value = st.price.toFixed(st.code === 'STO' ? 3 : 2); draw(); });
   $('p-ask').addEventListener('click', e => dispatchEvent(new CustomEvent('open-ask', { detail: { ask: e.currentTarget.dataset.q } })));
@@ -339,6 +345,7 @@ export async function render(main, PR, params) {
   $('q-add').addEventListener('click', addLine);
   drawQuote(); loadSaved();
 
+  if (st.postcode) loadPlaces().then(() => draw());   // a link that carries a postcode
   draw();
   reveal(main.querySelector('.pr2'));
 }

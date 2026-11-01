@@ -80,7 +80,8 @@ router.get('/opportunities', async (req, res) => {
     const [D, L, statuses] = await Promise.all([data(), load(), sales.opportunities()]);
     const st = stamp(D);
     if (!oppBase || oppBase.stamp !== st) oppBase = { stamp: st, v: L.opps.opportunities({ C: D.C, PR: D.PR, CA: D.CA, M: D.M }, {}) };
-    const rows = oppBase.v.rows.map(r => {
+    const only = req.query.level1 != null ? Number(req.query.level1) : null;   // one customer's, for its page
+    const rows = oppBase.v.rows.filter(r => only == null || r.level1 === only).map(r => {
       const s = statuses[r.key];
       return s ? { ...r, status: s.status, owner: s.owner, at: s.at, note: s.note } : r;
     });
