@@ -228,7 +228,7 @@ export function pointsView(D, { month: m, cust, cross, dens, lines }) {
   if (c0) {
     const ls = c0.lines.filter(l => !l.have && l.opp > 0).map(l => l.name);
     const say = `Cross-sell is worth up to ${money(cross.totalMonth)} a month est. ${title(c0.customer)} is the largest to explore: ${money(c0.opp / 12)} a month in ${ls.join(' and ')}.`;
-    out.push({ key: 'cross', title: 'Cross-sell opportunities', href: '#customers?view=opportunities&kind=cross', bullet: true, line: say, say });
+    out.push({ key: 'cross', title: 'Cross-sell opportunities', href: '#opportunities?kind=cross', bullet: true, line: say, say });
   }
   // a briefing item has to be worth about $25K a year; smaller ones stay on their own screen
   const p0 = dens && dens.save[0];

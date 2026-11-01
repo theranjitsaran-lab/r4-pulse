@@ -21,6 +21,7 @@ const ROUTES = {
   numbers:   { view: 'numbers',   api: 'view/numbers', nav: 'numbers' },
   settings:  { view: 'settings',  api: 'settings',  nav: 'settings' },
   activity:  { view: 'activity',  api: 'activity',  nav: 'activity' },
+  opportunities: { view: 'customers', api: 'customers', nav: 'opportunities', params: { view: 'opportunities' } },
   how:       { view: 'how',       api: 'storage',   nav: 'how' },   // How it's calculated
   calls:     { view: 'customers', api: 'customers', nav: 'customers', params: { view: 'conversations' } },
 };
@@ -49,6 +50,12 @@ let seq = 0;
 async function show() {
   const my = ++seq;
   const { name, params } = parse();
+  // Opportunities has its own tab now; links saved from Accounts follow it
+  if (name === 'customers' && params.view === 'opportunities') {
+    const u = new URLSearchParams(location.hash.split('?')[1] || ''); u.delete('view');
+    location.replace('#opportunities' + (u.toString() ? '?' + u : ''));
+    return;
+  }
   const route = ROUTES[name];
   document.querySelectorAll('#nav a, .mast-gear').forEach(a => a.classList.toggle('on', a.dataset.screen === route.nav));
   main.innerHTML = '<div class="sk" role="status" aria-label="Loading"><i class="sk-h"></i><div class="sk-tiles"><i></i><i></i><i></i><i></i></div><i class="sk-c"></i><i class="sk-c"></i></div>';
@@ -93,6 +100,7 @@ fetch('/health').then(r => r.json()).then(h => {
 const SUGGEST = {
   pulse: ['Are we on track for this month?', 'Who should I call this week?', 'Where are the cross-sell wins?', 'What happens if customers shred their eligible boxes?'],
   customers: ['Which customers are slipping and why?', 'Which large accounts cost most to serve?', 'Where are the cross-sell wins?', 'How are the lines of business doing?'],
+  opportunities: ['What is the best move this week?', 'Which customers are slipping and why?', 'Where are the cross-sell wins?'],
   numbers: ['How far are we from $1.0M?', 'What was EBITDA over the last twelve months?', 'Which line of business keeps the most margin?'],
   pricing: ['Which prices are furthest under the book?', 'Who has missed every rate round?', 'How are the lines of business doing?'],
   activity: ['Where would one more customer save most travel?', 'How busy was last week?', 'What happens if customers shred their eligible boxes?'],

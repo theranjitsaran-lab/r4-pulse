@@ -42,7 +42,7 @@ button{font:inherit}
   .brand span{display:none}
   .mast-right #asof{display:none}
   #nav{position:fixed;left:0;right:0;bottom:0;z-index:30;border-radius:0;padding: var(--sp-2) var(--sp-2) calc(var(--sp-2) + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter: saturate(180%) blur(var(--sp-5));-webkit-backdrop-filter: saturate(180%) blur(var(--sp-5));border-top: var(--hair) solid var(--rule);justify-content:space-around}
-  #nav a{display:flex;flex-direction:column;align-items:center;gap: var(--hair-2);font-size: var(--fs-tiny);padding: var(--sp-1) var(--sp-3);color:var(--ink-4);box-shadow:none!important;background:none!important}
+  #nav a{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;gap: var(--hair-2);font-size: var(--fs-tiny);padding: var(--sp-1) 0;color:var(--ink-4);box-shadow:none!important;background:none!important}
   #nav a.on{color:var(--brand)}
   #nav a svg{display:block;width: var(--sp-6);height: var(--sp-6)}
   #main{padding: var(--sp-4) var(--sp-4) calc(var(--u) * 24)}

@@ -1,4 +1,4 @@
-// Accounts › Opportunities (#customers, the default view): every next conversation, each account once, the
+// Opportunities (#opportunities, the last tab): every next conversation, each account once, the
 // top twenty first, its opportunities inside it, each with its dollars a year, the reason, a draft opener, an owner and a status. The list is
 // worked out on the server (components/opps.js via /api/view/opportunities); a status change is
 // written to app.opportunity (server/sales.js) and feeds "won this month" on Home.
@@ -12,7 +12,7 @@ const STATUS_NAMES = { open: 'Open', contacted: 'Contacted', quoted: 'Quoted', w
 const SHOW = 20;   // the top twenty accounts, then 'show all'
 const STATES = [['active', 'Open and in play'], ['open', 'Not started'], ['play', 'In play'], ['mine', 'Mine'], ['won', 'Won'], ['lost', 'Lost']];
 
-export async function render(main, params, tabs) {
+export async function render(main, params) {
   if (!main) return;
   const V = await getJson('view/opportunities');
   const rows = V.rows, me = V.me;
@@ -32,8 +32,8 @@ export async function render(main, params, tabs) {
   </section>`;
 
   main.innerHTML = `<div class="cust c2 op">
-    <h1>Accounts</h1>
-    ${tabs}
+    <h1>Opportunities</h1>
+    <p class="op-how">One row per account, largest first: the single best move, what it’s worth, who owns it.</p>
     ${kpis}
     <section class="h2-card c2-tablecard" data-rv>
       <div class="c2-tools">
@@ -132,7 +132,7 @@ export async function render(main, params, tabs) {
   main.querySelectorAll('[data-state]').forEach(b => b.addEventListener('click', () => { state = b.dataset.state; all = false; draw(); }));
   $('#op-kinds-p').addEventListener('change', e => { kind = e.target.value; all = false; draw(); });
   $('#op-states-p').addEventListener('change', e => { state = e.target.value; all = false; draw(); });
-  $('.c2-find').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); const u = new URLSearchParams(location.hash.split('?')[1] || ''); if (q) u.set('q', q); else u.delete('q'); history.replaceState(null, '', '#customers?' + u); draw(); });
+  $('.c2-find').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); const u = new URLSearchParams(location.hash.split('?')[1] || ''); if (q) u.set('q', q); else u.delete('q'); history.replaceState(null, '', '#opportunities' + (u.toString() ? '?' + u : '')); draw(); });
   $('#op-csv').addEventListener('click', () => {
     const cols = [{ l: 'Account', get: r => r.name }, { l: 'Type', get: r => KINDS[r.kind] }, { l: '$ a year', get: r => r.once ? null : Math.round(r.value) }, { l: '$ once', get: r => r.once ? Math.round(r.value) : null }, { l: 'Estimate', get: r => r.modelled ? 'est.' : '' }, { l: 'Owner', get: r => r.owner || '' }, { l: 'Status', get: r => STATUS_NAMES[r.status] }, { l: 'Why', get: r => r.reason }];
     const a = document.createElement('a');

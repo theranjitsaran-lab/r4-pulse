@@ -19,9 +19,7 @@ const CITADEL = 6714;
 const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under review: delivery days not yet in the volumes
 
 export const VIEWS = {
-  opportunities: { label: 'Opportunities', blurb: 'Every next conversation, each account once.' },
   overview:      { label: 'All accounts', blurb: 'Last month, who moved, and every account: sort any column, filter to a line, tap a figure for why.' },
-  opportunities: { label: 'Opportunities', blurb: 'Every next conversation in one list: cross-sell, price gaps, win-back, rate rounds and overdue boxes, each with an owner and a status.' },
   conversations: { label: 'This week', hidden: true, blurb: 'Ten conversations worth having, ranked by what is at stake. Log what you did; the list learns.' },
   main:          { label: 'Up and down', hidden: true, blurb: 'Last month against the month before and a year ago, the year to date, and this month so far.' },
   grid:          { label: 'Month grid', blurb: 'The 30 largest accounts, month by month, each against its own run.' },
@@ -30,7 +28,7 @@ export const VIEWS = {
   gaps:          { hidden: true, label: 'Price gaps', blurb: 'Paying under the book\'s median for storage or a service, sized by their volume. Home counts half of each gap.' },
   rounds:        { hidden: true, label: 'Missed rate rounds', blurb: 'No rate has moved in two years.' },
   destruction:   { hidden: true, label: 'Overdue boxes', blurb: 'Boxes past their retention review, by account: what destruction bills once, and the storage it ends.' },
-  margin:        { label: 'Margin', blurb: 'Every account: revenue less what it costs to serve, worst first.' },
+  margin:        { hidden: true, label: 'Margin', blurb: 'Every account: revenue less what it costs to serve, worst first.' },
   all:           { label: 'All', hidden: true, blurb: 'Every account with revenue in the last twelve months.' },
 };
 
@@ -82,9 +80,9 @@ async function rowsFor(view, ser, book, C) {
 
 export async function render(main, C, params) {
   if (!main) return;
-  const view = VIEWS[params.view] && (params.view !== 'margin' || costsVisible()) ? params.view : 'opportunities';
+  const view = VIEWS[params.view] && (params.view !== 'margin' || costsVisible()) || params.view === 'opportunities' ? params.view : 'overview';
   if (view === 'overview') return (await import('/views/custoverview.js')).render(main, C, params, tabsHtml('overview'));
-  if (view === 'opportunities') return (await import('/views/opps.js')).render(main, params, tabsHtml('opportunities'));
+  if (view === 'opportunities') return (await import('/views/opps.js')).render(main, params);
   if (view === 'conversations') return conversations(main, C);
   if (view === 'whitespace') return whitespace(main, C, params);
   if (view === 'main') return upDown(main, C, params);
@@ -128,7 +126,7 @@ if (typeof document !== 'undefined') {
 }
 
 export function tabsHtml(on) {
-  const views = Object.entries(VIEWS).filter(([k, v]) => (!v.hidden || k === on) && (k !== 'margin' || costsVisible()));
+  const views = Object.entries(VIEWS).filter(([k, v]) => (!v.hidden || (k === on && k !== 'margin')));
   // a dropdown on a phone, so no tab is ever scrolled off the screen
   return `<div class="bar"><div class="views on-desk"><div class="seg">${views.map(([k, v]) => `<a href="#customers?view=${k}" class="${k === on ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
     <select class="on-phone c2-viewpick" aria-label="View">${views.map(([k, v]) => `<option value="${k}" ${k === on ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select></div>`;

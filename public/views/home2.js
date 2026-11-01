@@ -51,7 +51,7 @@ export async function render(main, P) {
       <div class="h2-kpi lead"><span>${m.next ? `${mon(m.workMonth)}'s work → ${mon(m.next.month)} bill (est.)` : 'Next bill'}</span><b>${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b>
         <small>${m.next ? (m.next.jobCount ? `+ up to ${moneyK(m.next.jobs)}: ${jobWord(m.next.jobCount)}` : Math.round(m.next.lo / 1000) !== Math.round(m.next.hi / 1000) ? `${moneyK(m.next.lo)}–${moneyK(m.next.hi)}` : '') : ''}</small></div>
       <a class="h2-kpi" href="#numbers"><span>${esc(LABELS.invoiced)}, ${mon(billShown.month)}</span><b>${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${monS(billShown.vs)}` : 'posted, core'}</small></a>
-      <a class="h2-kpi" href="#customers?view=opportunities"><span>Gap to $1.0M</span><b>${moneyK(m.gap)}</b><small>a month${m.next && m.next.jobCount ? ', before jobs to check' : ''}</small></a>
+      <a class="h2-kpi" href="#opportunities"><span>Gap to $1.0M</span><b>${moneyK(m.gap)}</b><small>a month${m.next && m.next.jobCount ? ', before jobs to check' : ''}</small></a>
     </section>${tieLine(V.tie)}`;
 
   const sumCard = `<section class="h2-card h2-sum" data-rv>

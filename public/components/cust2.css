@@ -142,6 +142,8 @@ select.on-phone { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2) v
   .op-ahead .op-kinds { grid-column: 1 / -1; grid-row: 2; }
 }
 
+.op-how { margin: 0 0 var(--sp-3); font-size: var(--fs-sm); color: var(--ink-3); }
+
 /* The one table and filter bar (components/datatable.js) */
 .dt-tools { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; margin-bottom: var(--sp-2); }
 .dt-find { flex: 1 1 calc(var(--u) * 40); min-width: 0; padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); font: inherit; font-size: var(--fs-sm); background: var(--surface); color: var(--ink); }

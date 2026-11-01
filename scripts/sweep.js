@@ -11,7 +11,7 @@ const { chromium } = require('playwright');
 const ROOT = path.join(__dirname, '..');
 const role = (process.argv.find(a => a.startsWith('--role=')) || '--role=owner').slice(7);
 const drill = require('../fixtures/drill.json').data.accounts.filter(a => a.level1 !== 6714).sort((a, b) => b.visits.length - a.visits.length);
-const SCREENS = ['#pulse', '#customers', '#customers?view=overview', '#customers?view=conversations', '#customers?view=opportunities', '#customers?view=grid', '#customers?view=whitespace', '#customers?view=margin',
+const SCREENS = ['#pulse', '#customers', '#customers?view=overview', '#customers?view=conversations', '#opportunities', '#customers?view=grid', '#customers?view=whitespace', '#customers?view=margin',
   '#customers?view=slipping', '#customers?view=gaps', '#customers?view=rounds', '#customers?view=destruction', '#customers?view=overview&line=bin', `#customer/${drill[0].level1}`, '#customer/12530',
   '#pricing', '#pricing?code=B3', '#numbers', '#activity', '#numbers?tab=warehouse', '#how', '#settings', '#classic'];
 

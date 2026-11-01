@@ -8,7 +8,7 @@ export const LABELS = {
   estWord: 'est. means estimated',
   normalDay: d => `normal for a ${d}`,
   normalRoute: 'normal for this route',
-  slipping: 'still invoicing, the last 3 months at least 10% and $250 a month below the account\'s own prior 12',
+  slipping: 'still invoicing, the last 3 months at least 10% and $250 a month below the account\'s own prior 12, on a run of $500 or more',
   activeAccounts: 'active accounts (over $1,000 in the last 12 months)',
   invoicedThisMonth: 'Accounts invoiced this month',
   crossSell: 'a month if each account bought the lines its peers buy',
