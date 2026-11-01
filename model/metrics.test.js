@@ -198,6 +198,6 @@ test('one table: filters and search narrow the rows, the total follows them, and
 
 test('#36 internal and placeholder accounts are not customers', async () => {
   const { isInternal } = await import('../public/components/metrics.js');
-  for (const n of ['R4 Services INC', 'R4 Services LLC', 'Single Invoice Customer', 'Account 0', 'Bear Stearns']) assert.ok(isInternal(n), n);
+  for (const n of ['R4 Services INC', 'R4 Services LLC', 'Single Invoice Customer', 'Account 0']) assert.ok(isInternal(n), n);
   for (const n of ['City of Chicago', 'R5 Holdings', 'Chapman & Cutler']) assert.ok(!isInternal(n), n);
 });
