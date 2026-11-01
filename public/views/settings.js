@@ -1,0 +1,80 @@
+// Settings (#settings): the cost model's assumptions in one place, each with what it means, the
+// question for Mike, who changed it last, and its effect on two reference figures. Admin users can
+// change them (server/settings.js); every screen and Ask then cost with the new values. Below, the
+// rates themselves (model/rates.js), read-only, with their derivation and confidence.
+import { esc } from '/components/data.js';
+import { money0 } from '/components/chart.js';
+import { reveal } from '/components/motion.js';
+
+const GROUPS = [
+  { title: 'A route day, shared by minutes', sub: 'how each stop\'s share of its route day is worked out, from the real route days', keys: [
+    ['mph', 'mph', 'What is a typical speed between stops in the city, door to door?'],
+    ['stopMin', 'minutes', 'How long is a stop before any bins: park, sign in, walk in and out?'],
+    ['serviceMin', 'minutes', 'How long does each bin swap take once inside?'],
+  ] },
+  { title: 'Where there are no route days', sub: 'a new account with no postcode, a line with no route days', keys: [
+    ['split', 'share', 'Of a typical route day, how much is driving rather than at customers?'],
+  ] },
+  { title: 'Box deliveries', sub: 'delivery work orders are in VCK with a date and a customer, but no route or truck', keys: [
+    ['deliverySeparate', 'yes/no', 'Do box deliveries go out on different trucks from the shred routes?'],
+    ['deliveryStops', 'deliveries', 'How many deliveries does a delivery truck make in a day?'],
+  ] },
+];
+const fmt = (k, v) => k === 'split' ? Math.round(v * 100) + '%' : k === 'deliverySeparate' ? (v ? 'Yes' : 'No') : String(+Number(v).toFixed(2));
+const when = s => s ? new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+export async function render(main, S) {
+  if (!main) return;
+  draw(main, S);
+}
+
+function draw(main, S) {
+  const ref = S.reference || {};
+  const refHtml = `<section class="h2-kpis four" data-rv>
+    <div class="h2-kpi lead"><span>A route day</span><b>${money0(ref.routeDay || 0)}</b><small>drivers, vehicles and route software ÷ route days ◇</small></div>
+    <div class="h2-kpi"><span>Ingalls, on the road</span><b>${ref.ingalls ? '$' + ref.ingalls.perService.toFixed(2) : '—'}</b><small>${ref.ingalls ? `a bin service, over its ${ref.ingalls.days} route days ◇` : 'no route days'}</small></div>
+    <div class="h2-kpi"><span>The book, on the road</span><b>${ref.book ? '$' + ref.book.perService.toFixed(2) : '—'}</b><small>${ref.book ? `a service, ${ref.book.services.toLocaleString('en-US')} services on ${ref.days} route days ◇` : ''}</small></div>
+    <div class="h2-kpi"><span>The day as the model sees it</span><b>${ref.avgRoundHours ? ref.avgRoundHours.toFixed(1) + ' hours' : '—'}</b><small>drive plus stops; a real route day runs about 8 to 9, so a short figure means the minutes are low</small></div>
+  </section>`;
+  const row = (k, unit, q) => {
+    const v = S.values[k], d = S.defaults[k], b = S.bounds[k], n = S.notes[k] || [k, 'assumed', ''], last = S.latest && S.latest[k];
+    const input = k === 'deliverySeparate'
+      ? `<select data-k="${k}" ${S.canEdit ? '' : 'disabled'}><option value="0" ${v ? '' : 'selected'}>No</option><option value="1" ${v ? 'selected' : ''}>Yes</option></select>`
+      : `<input data-k="${k}" inputmode="decimal" value="${k === 'split' ? Math.round(v * 100) : +Number(v).toFixed(2)}" ${S.canEdit ? '' : 'disabled'}><span class="st-unit">${k === 'split' ? '%' : esc(unit)}</span>`;
+    return `<li class="st-row">
+      <div class="st-what"><b>${esc(n[0])}</b><span>${esc(n[2])}</span><span class="st-q">For Mike: ${esc(q)}</span></div>
+      <div class="st-val">${input}${S.canEdit ? `<button type="button" class="st-save" data-k="${k}">Save</button>` : ''}
+        <small>${esc(n[1])} · default ${esc(fmt(k, d))}${k !== 'deliverySeparate' ? ` · ${esc(fmt(k, b[0]))} to ${esc(fmt(k, b[1]))}` : ''}${last ? ` · set by ${esc(last.who)} on ${esc(when(last.at))}` : ''}</small>
+        <span class="st-msg hint" data-for="${k}"></span></div>
+    </li>`;
+  };
+  const del = ref.deliveries;
+  main.innerHTML = `<div class="st">
+    <h1>Settings</h1>
+    <p class="hint">The assumptions behind every cost on screen. ${S.canEdit ? 'Change one and save: every screen and Ask use it at once.' : 'Only an admin can change them.'}${S.saveable ? '' : ' <b>Changes cannot be saved yet:</b> the settings table is created by the one-off setup on the PC (sql/setup_2026_11.sql).'}</p>
+    ${refHtml}
+    ${GROUPS.map(g => `<section class="h2-card" data-rv><div class="h2-ch"><h2>${esc(g.title)}</h2><small>${esc(g.sub)}</small></div>
+      <ul class="st-list">${g.keys.map(([k, u, q]) => row(k, u, q)).join('')}</ul>
+      ${g.title === 'Box deliveries' && del ? `<p class="src">${del.days.toLocaleString('en-US')} days with deliveries, ${del.orders.toLocaleString('en-US')} delivery work orders${del.truckDays ? `, ${del.truckDays.toLocaleString('en-US')} delivery truck days at ${S.values.deliveryStops} a day` : ''}, ${esc(String(del.from))} to ${esc(String(del.to))} (VCK)${del.on ? ` · the route day is shared across ${del.shredDays.toLocaleString('en-US')} shred and ${del.truckDays.toLocaleString('en-US')} delivery days, so a day costs ${money0(del.dayCost)} rather than ${money0(ref.routeDay)}` : ''}</p>` : ''}
+    </section>`).join('')}
+    ${S.history && S.history.length ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Changes</h2><small>newest first</small></div><ul class="st-hist">${S.history.map(h => `<li><span>${esc((S.notes[h.key] || [h.key])[0])}: <b>${esc(fmt(h.key, h.value))}</b></span><span>${esc(h.who)} · ${esc(when(h.at))}</span></li>`).join('')}</ul></section>` : ''}
+    <section class="h2-card" data-rv><details class="fold"><summary><h3>The rates</h3><span class="sub">model/rates.js · GL pools over the database's volumes · open</span></summary>
+      <ul class="st-rates">${S.rates.map(r => `<li><b>${esc(r.key)}</b><span class="v">${typeof r.value === 'number' ? esc(+r.value.toFixed(4) + '') : esc(Object.entries(r.value).map(([k, v]) => `${k} ${v}`).join(', '))} <small>${esc(r.unit || '')}</small></span><span class="fl">${esc(r.flag || '')}</span><span class="d">${esc(r.derivation || '')}</span></li>`).join('')}</ul></details></section>
+  </div>`;
+
+  main.querySelectorAll('.st-save').forEach(b => b.addEventListener('click', async () => {
+    const k = b.dataset.k, el = main.querySelector(`[data-k="${k}"]:not(button)`), msg = main.querySelector(`.st-msg[data-for="${k}"]`);
+    let v = Number(String(el.value).replace(/[%\s]/g, ''));
+    if (!Number.isFinite(v)) { msg.textContent = 'A number, please.'; return; }
+    if (k === 'split') v = v / 100;
+    msg.textContent = 'Saving and re-costing…';
+    const r = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: k, value: v }) }).catch(() => null);
+    const j = r ? await r.json().catch(() => ({})) : {};
+    if (!r || !r.ok) { msg.textContent = j.error || 'Could not save just now.'; return; }
+    // the browser's copy of the cost model takes the new values; reload so every cached figure is redone
+    if (window.R4RATES) Object.assign(window.R4RATES.SETTINGS, j.data);
+    const fresh = await fetch('/api/settings').then(x => x.json()).catch(() => null);
+    if (fresh && fresh.data) { draw(main, fresh.data); const m2 = main.querySelector(`.st-msg[data-for="${k}"]`); if (m2) m2.textContent = 'Saved. Every screen now uses it (reload any open page).'; }
+  }));
+  reveal(main.querySelector('.st'));
+}

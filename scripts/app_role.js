@@ -38,6 +38,8 @@ GRANT SELECT, INSERT ON app.quote TO ${ROLE};
 GRANT USAGE ON SEQUENCE app.quote_id_seq TO ${ROLE};
 GRANT SELECT, INSERT ON app.opportunity TO ${ROLE};
 GRANT USAGE ON SEQUENCE app.opportunity_id_seq TO ${ROLE};
+GRANT SELECT, INSERT ON app.setting TO ${ROLE};
+GRANT USAGE ON SEQUENCE app.setting_id_seq TO ${ROLE};
 `;
 
 function connOpts(url) {

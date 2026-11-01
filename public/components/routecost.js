@@ -68,7 +68,7 @@ export function routeCosts(R, rows, Z) {
     days: days.length, stops, services, accounts, postcodes,
     // the time model's day against the eight to nine hours a route day really runs: Mike's check
     avgRoundHours: days.length ? roundMin / days.length / 60 : null,
-    settings: { mph: R.SETTINGS.mph, stopMin: R.SETTINGS.stopMin, serviceMin: R.SETTINGS.serviceMin },
+    settings: { ...R.SETTINGS },
   };
 }
 

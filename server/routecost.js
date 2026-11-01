@@ -41,7 +41,7 @@ function offlineRows() {
 
 // rc for the current settings and data; key: the data's stamp and the three time assumptions
 async function routeCosts(stampKey) {
-  const key = `${stampKey}|${R.SETTINGS.mph}|${R.SETTINGS.stopMin}|${R.SETTINGS.serviceMin}`;
+  const key = `${stampKey}|${JSON.stringify(R.SETTINGS)}`;
   if (memo.key === key && memo.rc) return memo.rc;
   if (memo.key === key && memo.p) return memo.p;
   memo = { key, rc: null, p: (async () => {

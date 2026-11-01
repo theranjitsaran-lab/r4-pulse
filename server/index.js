@@ -41,6 +41,7 @@ auth.install(app);
 app.use('/api/log', require('./log'));
 app.use('/api/feedback', feedback.api);
 app.use('/api/sales', require('./sales').api);   // quotes and opportunity statuses
+app.use('/api/settings', require('./settings').api);   // the cost model's assumptions, editable
 app.use('/api/summary', require('./summary'));
 app.use('/api/ask', require('./ask'));
 app.use('/api/view', require('./views'));
@@ -73,7 +74,7 @@ async function watch() {
   } catch (e) { console.warn('freshness stamp:', e.message); }
 }
 
-(USE_FIXTURES ? Promise.resolve() : rates.loadFromDb(query)).then(() => {
+(USE_FIXTURES ? Promise.resolve() : rates.loadFromDb(query)).then(() => require('./settings').load()).then(() => {
   if (!USE_FIXTURES) { watch().then(warm); setInterval(watch, 10 * 60 * 1000); }
   app.listen(port, () => {
     console.log(`R4 Pulse on http://localhost:${port}  (${USE_FIXTURES ? 'fixtures' : 'live database'}; route day $${rates.RATES.routeDay.v.toFixed(2)})`);

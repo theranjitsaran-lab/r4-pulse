@@ -33,6 +33,6 @@ async function data() {
 }
 
 // a stamp that moves when the data does: the views cache their result against it
-function stamp(D) { return D.A ? `${D.A.latestDone}|${D.P && D.P.monthly ? D.P.monthly.length : 0}|${D.PR ? D.PR.rates.length : 0}` : 'none'; }
+function stamp(D) { return JSON.stringify(R.SETTINGS) + '|' + (D.A ? `${D.A.latestDone}|${D.P && D.P.monthly ? D.P.monthly.length : 0}|${D.PR ? D.PR.rates.length : 0}` : 'none'); }
 
 module.exports = { data, stamp, NAMES };

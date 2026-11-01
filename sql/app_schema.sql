@@ -65,3 +65,9 @@ CREATE TABLE IF NOT EXISTS app.opportunity (
   at         timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS opportunity_key ON app.opportunity (key, at DESC);
+
+-- The cost model's assumptions, editable on Settings (server/settings.js): one row per change.
+CREATE TABLE IF NOT EXISTS app.setting (
+  id bigserial PRIMARY KEY, key text NOT NULL, value numeric NOT NULL, who text NOT NULL,
+  at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS setting_key ON app.setting (key, at DESC);

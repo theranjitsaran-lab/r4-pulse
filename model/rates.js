@@ -151,12 +151,17 @@ async function loadFromDb(query) {
 // its day is by time instead: its drive minutes (its detour in road miles at mph) plus its drop
 // minutes (stopMin at each stop and serviceMin a service), scaled so a day's stops add up to the
 // route day. Three assumptions, all `assumed`, for Mike to check (31 October 2026).
-const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3 };
+const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliverySeparate: 0, deliveryStops: 12 };
 const TIME_NOTES = {
   mph: ['Average city speed between stops', 'assumed', 'Chicago streets with a box truck; the main roads give the miles, this turns them into minutes.'],
   stopMin: ['Minutes at each stop before any service', 'assumed', 'Park, walk in, sign, walk out.'],
   serviceMin: ['Minutes a service', 'assumed', 'Swap one bin, or one pickup or delivery line.'],
+  split: ['Travel share of a route day, where there are no route days', 'assumed', 'Prices a visit at the book\'s average: a new account with no postcode, a line with no route days.'],
+  deliverySeparate: ['Box deliveries run on their own trucks', 'assumed', 'If yes, VCK delivery work orders become delivery truck days, and the route-day cost is shared across shred and delivery days.'],
+  deliveryStops: ['Deliveries a delivery truck makes in a day', 'assumed', 'Turns each day\'s delivery work orders into delivery truck days.'],
 };
+// Settings anyone can change on the Settings screen (server/settings.js): the bounds a value must sit in.
+const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], split: [0.1, 0.8], deliverySeparate: [0, 1], deliveryStops: [4, 40] };
 
 // The account's real route-day cost, set once the route days are costed (server: server/routecost.js;
 // browser: loadRates in components/data.js). { accounts: { level1: { cost, travel, onsite, services,
@@ -291,7 +296,7 @@ function isModelled(family) {
   return family === 'bin' || family === 'itad' || family === 'movement' || family === 'shred';
 }
 
-const api = { RATES, MODEL, SETTINGS, TIME_NOTES, setRouteCosts, routeFor, routeCostsNow, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
+const api = { RATES, MODEL, SETTINGS, TIME_NOTES, SETTING_BOUNDS, setRouteCosts, routeFor, routeCostsNow, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 if (typeof window !== 'undefined') window.R4RATES = api;

@@ -16,6 +16,7 @@ const ROUTES = {
   customer:  { view: 'customer',  api: 'customers', nav: 'customers' },
   pricing:   { view: 'pricing',   api: 'pricing',   nav: 'pricing' },
   numbers:   { view: 'numbers',   api: 'view/numbers', nav: 'numbers' },
+  settings:  { view: 'settings',  api: 'settings',  nav: 'settings' },
   activity:  { view: 'activity',  api: 'activity',  nav: 'activity' },
   calls:     { view: 'customers', api: 'customers', nav: 'customers', params: { view: 'conversations' } },
 };
@@ -44,7 +45,7 @@ async function show() {
   const my = ++seq;
   const { name, params } = parse();
   const route = ROUTES[name];
-  document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('on', a.dataset.screen === route.nav));
+  document.querySelectorAll('#nav a, .mast-gear').forEach(a => a.classList.toggle('on', a.dataset.screen === route.nav));
   main.innerHTML = '<div class="loading">Loading…</div>';
   let data;
   try {

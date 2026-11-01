@@ -27,11 +27,11 @@
 .pr .worth.you { background: var(--well); margin: 0 calc(var(--sp-3) * -1); padding: var(--sp-3) var(--sp-3); border-radius: var(--r); border-top-color: transparent; }
 .pr .nocost { color: var(--ink-3); }
 .pr .book { grid-column: 1 / -1; }
-.pr details.fold summary { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); cursor: pointer; list-style: none; }
-.pr details.fold summary::-webkit-details-marker { display: none; }
-.pr details.fold summary h3 { margin: 0; font-size: var(--fs-head); font-weight: 600; }
-.pr details.fold summary h3::before { content: "›"; color: var(--ink-5); display: inline-block; margin-right: var(--sp-2); transition: transform var(--t-fast); }
-.pr details.fold[open] summary h3::before { transform: rotate(90deg); }
+.pr details.fold summary, .st details.fold summary, .nb details.fold summary { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); cursor: pointer; list-style: none; }
+.pr details.fold summary::-webkit-details-marker, .st details.fold summary::-webkit-details-marker, .nb details.fold summary::-webkit-details-marker { display: none; }
+.pr details.fold summary h3, .st details.fold summary h3, .nb details.fold summary h3 { margin: 0; font-size: var(--fs-head); font-weight: 600; }
+.pr details.fold summary h3::before, .st details.fold summary h3::before, .nb details.fold summary h3::before { content: "›"; color: var(--ink-5); display: inline-block; margin-right: var(--sp-2); transition: transform var(--t-fast); }
+.pr details.fold[open] summary h3::before, .st details.fold[open] summary h3::before, .nb details.fold[open] summary h3::before { transform: rotate(90deg); }
 .pr .trk { position: relative; height: calc(var(--u) * 23); margin: calc(var(--u) * 9) var(--sp-2) var(--sp-2); }
 .pr .trk .base { position: absolute; left: 0; right: 0; top: var(--sp-10); height: var(--sp-3); border-radius: var(--r-sm); background: var(--well-2); }
 .pr .trk .loss { position: absolute; top: var(--sp-10); height: var(--sp-3); left: 0; border-radius: var(--r-sm) 0 0 var(--r-sm); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--bad) 55%, transparent) 0 var(--hatch), transparent var(--hatch) var(--sp-2)); }
@@ -157,3 +157,30 @@
 .nb-oh { list-style: none; margin: var(--sp-2) 0 0; padding: 0; font-size: var(--fs-sm); }
 .nb-oh li { display: flex; justify-content: space-between; padding: var(--sp-1) 0; border-bottom: 1px solid var(--rule); }
 @media (max-width: 700px) { .nb-wf li { grid-template-columns: minmax(0, 1fr) 90px 40px; } .nb-wf i { grid-column: 1 / -1; grid-row: 2; } }
+
+/* Settings (1 November 2026) */
+.mast-gear { display: inline-flex; align-items: center; color: var(--ink-3); margin: 0 var(--sp-3); }
+.mast-gear:hover, .mast-gear.on { color: var(--brand); }
+.st h1 { margin: 0 0 var(--sp-2); }
+.st > .hint { margin: 0 0 var(--sp-4); max-width: var(--measure); }
+.st .h2-card, .st .h2-kpis { margin-bottom: var(--sp-4); }
+.st-list { list-style: none; margin: 0; padding: 0; }
+.st-row { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--sp-4); padding: var(--sp-3) 0; border-bottom: 1px solid var(--rule); }
+.st-row:last-child { border-bottom: 0; }
+.st-what b { display: block; font-size: var(--fs-body); font-weight: 600; }
+.st-what span { display: block; font-size: var(--fs-sm); color: var(--ink-3); margin-top: 2px; }
+.st-what .st-q { color: var(--ink-2); font-style: italic; }
+.st-val { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; align-content: flex-start; }
+.st-val input, .st-val select { font: inherit; font-size: var(--fs-body); width: 88px; padding: var(--sp-1) var(--sp-2); border: 1px solid var(--rule-4); border-radius: var(--r-sm); font-variant-numeric: tabular-nums; }
+.st-val select { width: auto; }
+.st-unit { font-size: var(--fs-sm); color: var(--ink-3); }
+.st-val small { flex-basis: 100%; font-size: var(--fs-tiny); color: var(--ink-4); }
+.st-save { background: var(--brand); color: #fff; border: 0; border-radius: var(--r-pill); padding: var(--sp-1) var(--sp-3); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
+.st-msg { flex-basis: 100%; }
+.st-hist, .st-rates { list-style: none; margin: 0; padding: 0; font-size: var(--fs-sm); }
+.st-hist li { display: flex; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-1) 0; border-bottom: 1px solid var(--rule); color: var(--ink-2); }
+.st-rates li { display: grid; grid-template-columns: 120px 180px 90px minmax(0, 1fr); gap: var(--sp-3); padding: var(--sp-2) 0; border-bottom: 1px solid var(--rule); }
+.st-rates .v { font-variant-numeric: tabular-nums; } .st-rates small { color: var(--ink-4); }
+.st-rates .fl { color: var(--ink-3); font-size: var(--fs-tiny); } .st-rates .d { color: var(--ink-3); font-size: var(--fs-tiny); }
+@media (max-width: 700px) { .st-row { grid-template-columns: 1fr; gap: var(--sp-2); } .st-rates li { grid-template-columns: 1fr 1fr; } .st-rates .d { grid-column: 1 / -1; } }
+.st details.fold summary .sub, .nb details.fold summary .sub { font-size: var(--fs-label); color: var(--ink-3); }
