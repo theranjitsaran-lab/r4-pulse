@@ -16,7 +16,7 @@ const SCREENS = ['#pulse', '#customers', '#customers?view=overview', '#customers
   '#pricing', '#pricing?code=B3', '#numbers', '#activity', '#numbers?tab=warehouse', '#how', '#settings', '#classic'];
 
 // what R4 users must not see while costs are not final
-const COSTS = [/\bMargin\b/, /Renegotiate/, /\bRe-route\b/, /\bDrop\b/, /below cost/i, /Cost est\./, /cost to serve(?! not ready)/i, /to serve est\./, /of revenue kept/, /Left, provisional/, /Gross margin(?! by line of business\s+Not costed)/, /How to improve the margin/, /saves about/, /Route time est\./];
+const COSTS = [/\bMargin\b(?!\s+Margins arrive)/, /Renegotiate/, /\bRe-route\b/, /\bDrop\b/, /below cost/i, /Cost est\./, /cost to serve(?! not ready)/i, /to serve est\./, /of revenue kept/, /Left, provisional/, /Gross margin(?! by line of business\s+Not costed)/, /How to improve the margin/, /saves about/, /Route time est\./];
 // what nobody at R4 should ever read
 const TEXT = [/to confirm with Anne/, /ZCTA/, /median R3/, /centroid/i, /zcta\.json/, /npm run/, /rates\.js/, /\bnode scripts/, /load_gl/, /gl_month/, /\bClaude\b/, /kpi\.monthly/, /storage_rate_hist/, /storage_retention/, /status I\b/, /not built yet/i, /\bundefined\b/, /\bNaN\b/, /\$-/, /◇/, /est\.\./, /\best\. est\./];
 const ZEROS = [/▼ ?0%/, /▲ ?0%/, /\b0 services on 0 routes/, /won this month \$0/, /(\$[\d.]+[KM]?)[–-]\1\b/, /\b0 called/];

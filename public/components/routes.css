@@ -72,6 +72,8 @@
 /* ── the map (30 October 2026): the day's routes over every postcode R4 visits (areamap.js) ── */
 .rt-mapsum { cursor: pointer; font-size: var(--fs-sm); font-weight: 600; color: var(--brand); }
 .rt-mapcard[open] .rt-mapsum { margin-bottom: var(--sp-3); }
+.nb-lines-bar { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-3); align-items: center; margin-bottom: var(--sp-3); }
+.nb-lines-note { font-size: var(--fs-tiny); color: var(--ink-3); }
 .how { max-width: calc(var(--u) * 190); display: grid; gap: var(--sp-3); }
 .how-lede { margin: 0; color: var(--ink-3); }
 .how p { margin: var(--sp-2) 0 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--ink-2); }

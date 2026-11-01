@@ -177,6 +177,7 @@ select.on-phone { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2) v
 .dt-est { font-weight: 600; color: var(--ink-3); }
 .dt-t .c2-x { padding: 0; font: inherit; }
 .dt-p { display: none; }
+.seg button:disabled { color: var(--ink-4); cursor: not-allowed; }
 .dt-span button.on { background: var(--surface); color: var(--ink); font-weight: 600; }
 .dt-ftoggle { display: none; font: inherit; font-size: var(--fs-label); padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); background: var(--surface); color: var(--brand); font-weight: 600; cursor: pointer; }
 .dt-more { text-align: center; padding-top: var(--sp-2); }

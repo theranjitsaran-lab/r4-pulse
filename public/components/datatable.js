@@ -10,7 +10,8 @@
 //              total: 'sum', or (rows) => html
 //     filters  [{ k, l, options: [[value, label]], test: (row, value) => boolean }]
 //     months   { list: [every month, oldest first], est: [months in progress], get: (row, month) => value,
-//                cell?: (row, month) => html, cellCls?, cellStyle? (row, month) => string }
+//                cell?: (row, month) => html, cellCls?, cellStyle? (row, month) => string,
+//                sumCell?: (row, months) => html, totalCell?: (rows, months) => html }
 //     ns       a prefix for the table's link state, where a page has more than one table
 //     inTotal  which rows the total counts, where one is held apart
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -25,10 +26,10 @@ const kCell = v => v ? kOnly(v) : '—';
 export function monthCols(M, span) {
   const last12 = M.list.slice(-12), year = M.list[M.list.length - 1].slice(0, 4), ytd = M.list.filter(m => m.startsWith(year));
   const over = (r, ms) => ms.reduce((t, m) => t + (Number(M.get(r, m)) || 0), 0);
-  const sum = (k, l, ms, extra) => ({ k, l, fixed: true, sum: true, get: r => over(r, ms), fmt: r => kCell(over(r, ms)), total: 'sum', totalFmt: kOnly, ...extra });
+  const sum = (k, l, ms, extra) => ({ k, l, fixed: true, sum: true, get: r => over(r, ms), fmt: r => M.sumCell ? M.sumCell(r, ms) : kCell(over(r, ms)), total: 'sum', totalFmt: kOnly, totalHtml: M.totalCell ? rows => M.totalCell(rows, ms) : null, ...extra });
   return [
     ...M.list.slice(-span).map(m => ({
-      k: m, l: monthName(m), month: m, fixed: true, est: !!(M.est && M.est.includes(m)), get: r => M.get(r, m), total: 'sum', totalFmt: kOnly,
+      k: m, l: monthName(m), month: m, fixed: true, est: !!(M.est && M.est.includes(m)), get: r => M.get(r, m), total: 'sum', totalFmt: kOnly, totalHtml: M.totalCell ? rows => M.totalCell(rows, [m]) : null,
       fmt: r => M.cell ? M.cell(r, m) : kCell(M.get(r, m)),
       cellCls: M.cellCls ? r => M.cellCls(r, m) : null, cellStyle: M.cellStyle ? r => M.cellStyle(r, m) : null,
     })),
@@ -136,7 +137,7 @@ export function dataTable(el, o) {
     const num = v => v == null || v === '' || isNaN(v) ? '' : ` data-v="${Number(v)}"`;
     const body = sorted.slice(0, shown).map(r => `<tr data-i="${o.rows.indexOf(r)}"${o.inTotal && !o.inTotal(r) ? ' data-out="1"' : ''}>${cols.map(c => `<td class="${tdCls(c)}${c.cellCls ? ' ' + c.cellCls(r) : ''}"${c.cellStyle ? ` style="${c.cellStyle(r)}"` : ''}${c.name && c.get ? ` title="${esc(c.get(r))}"` : ''}${c.total === 'sum' ? num(c.get(r)) : ''}>${c.fmt ? c.fmt(r) : esc(c.get ? c.get(r) ?? '—' : '')}</td>`).join('')}</tr>`).join('');
     const hasTotal = cols.some(c => c.total), counted = o.inTotal ? rows.filter(o.inTotal) : rows;
-    const foot = hasTotal ? `<tfoot><tr>${cols.map((c, i) => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(counted, c)) : ''}>${i === 0 ? esc(o.totalLabel || 'Total') : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(counted, c)) : sumOf(counted, c).toLocaleString('en-US')) : typeof c.total === 'function' ? c.total(counted) : ''}</td>`).join('')}</tr></tfoot>` : '';
+    const foot = hasTotal ? `<tfoot><tr>${cols.map((c, i) => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(counted, c)) : ''}>${i === 0 ? esc(o.totalLabel || 'Total') : c.totalHtml ? c.totalHtml(counted) : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(counted, c)) : sumOf(counted, c).toLocaleString('en-US')) : typeof c.total === 'function' ? c.total(counted) : ''}</td>`).join('')}</tr></tfoot>` : '';
     table.innerHTML = `<thead><tr>${head}</tr></thead><tbody>${body || `<tr><td class="tl" colspan="${cols.length}">Nothing matches these filters.</td></tr>`}</tbody>${foot}`;
     $('.dt-more').innerHTML = rows.length > shown ? `<button type="button" class="linkbtn">Show all ${rows.length.toLocaleString('en-US')} ›</button>` : '';
     if (o.onDraw) o.onDraw(st, rows);

@@ -18,7 +18,7 @@ const say = (state, n, text) => { if (state === 'FAIL') fails++; console.log(`${
 
 // every table as drawn: each column adds to the total row, unfiltered and searched; with months, each row's
 // and the total's YTD and 12 months equal their months
-const TABLES = [['All accounts', '#customers?view=overview', 'chicago'], ['Month grid', '#customers?view=grid&span=12', 'chicago'], ['Cross-sell', '#customers?view=whitespace', 'chicago'],
+const TABLES = [['Money', '#numbers?span=12', 'bin'], ['Money, storage / service', '#numbers?span=12&group=ss', 'serv'], ['All accounts', '#customers?view=overview', 'chicago'], ['Month grid', '#customers?view=grid&span=12', 'chicago'], ['Cross-sell', '#customers?view=whitespace', 'chicago'],
   ['Warehouse', '#numbers?tab=warehouse', 'west'], ['Long way round', '#activity', '60'], ['Price gaps', '#pricing', 'box']];
 const readTable = t => {
   const n = x => Number(x.dataset.v);
@@ -38,15 +38,17 @@ const readTable = t => {
       if (Math.abs(ytd - c(yi)) > 0.5) wrong.push('YTD in ' + tr.children[0].innerText + ': ' + Math.round(ytd) + ' against ' + Math.round(c(yi)));
     }
   }
-  return { rows: rows.length, cols: foot.filter(x => x.dataset.v !== undefined).length, months: months.length, wrong };
+  const lastFoot = months.length ? n(foot[months[months.length - 1][1]]) : null;
+  return { rows: rows.length, cols: foot.filter(x => x.dataset.v !== undefined).length, months: months.length, wrong, lastFoot };
 };
 async function tables(base, pass) {
   const browser = await chromium.launch();
+  const found = {};
   try {
-    const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
-    await page.goto(base + '/login'); await page.fill('input[name=name]', 'foot'); await page.fill('input[name=password]', pass);
-    await Promise.all([page.waitForNavigation(), page.click('button')]);
-    for (const [name, hash, term] of TABLES) {
+    const sign = async who => { const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage(); await page.goto(base + '/login'); await page.fill('input[name=name]', who); await page.fill('input[name=password]', pass); await Promise.all([page.waitForNavigation(), page.click('button')]); return page; };
+    const owner = await sign('foot'), admin = await sign('footadm');
+    for (const [name, hash, term, who] of [...TABLES.map(t => [...t, owner]), ['Money, margin (admin)', '#numbers?span=12&show=margin', 'bin', admin], ['Money, margin by kind (admin)', '#numbers?span=12&show=margin&group=ss', 'serv', admin]]) {
+      const page = who;
       await page.goto('about:blank'); await page.goto(base + '/' + hash);
       await page.waitForSelector('.dt-t tbody tr', { timeout: 30000 }); await page.waitForTimeout(400);
       for (const stage of ['all', 'searched']) {
@@ -55,16 +57,18 @@ async function tables(base, pass) {
           if (stage === 'searched') { await (await d.$('.dt-find')).fill(term); await page.waitForTimeout(100); }
           const more = await d.$('.dt-more button'); if (more) { await more.click(); await page.waitForTimeout(100); }
           const r = await d.$eval('.dt-t', readTable);
+          if (name === 'Money' && stage === 'all') found.moneyLast = r.lastFoot;
           say(r.wrong.length ? 'FAIL' : 'PASS', '1 ', `${name}, ${stage}: ${r.rows} rows, ${r.cols} columns foot${r.months ? ', YTD and 12 months equal their months' : ''}${r.wrong.length ? ': ' + r.wrong.slice(0, 3).join('; ') : ''}`);
         }
       }
     }
   } finally { await browser.close(); }
+  return found;
 }
 
 async function main() {
   const port = 3400 + Math.floor(Math.random() * 90), pass = crypto.randomBytes(9).toString('hex');
-  const env = { ...process.env, PORT: String(port), USE_FIXTURES: '1', NODE_ENV: 'development', AUTH_USERS: `foot:${bcrypt.hashSync(pass, 8)}:owner`, SESSION_SECRET: crypto.randomBytes(16).toString('hex'), ANTHROPIC_API_KEY: '', DATABASE_URL: '' };
+  const env = { ...process.env, PORT: String(port), USE_FIXTURES: '1', NODE_ENV: 'development', AUTH_USERS: `foot:${bcrypt.hashSync(pass, 8)}:owner,footadm:${bcrypt.hashSync(pass, 8)}:admin`, SESSION_SECRET: crypto.randomBytes(16).toString('hex'), ANTHROPIC_API_KEY: '', DATABASE_URL: '' };
   const server = spawn(process.execPath, ['server/index.js'], { cwd: ROOT, env, stdio: ['ignore', 'pipe', 'ignore'] });
   await new Promise((ok, no) => { server.stdout.on('data', b => { if (String(b).includes('R4 Pulse on')) ok(); }); server.on('exit', c => no(new Error('server exited ' + c))); });
   const base = `http://localhost:${port}`;
@@ -80,11 +84,22 @@ async function main() {
     if (months.length) say(bad.length ? 'FAIL' : 'PASS', '1a', `Today's lines add to their total in ${months.length - bad.length} of ${months.length} months${bad.length ? ': not ' + bad.join(', ') : ''}`);
     const rows = cust.rows.filter(r => !r.citadel), sum = k => rows.reduce((t, r) => t + (r[k] || 0), 0);
     say('UNIT', '1b', `All accounts: the total row adds the filtered rows, held by the unit test: last month ${K(sum('last'))}, cross-sell est. ${K(sum('opp') / 12)} a month`);
-    await tables(base, pass);
+    const drawn = await tables(base, pass);
 
     // 2. Money's October against Today's headline
     const m = home.month, oct = m.workMonth, lineOct = LV.totals[oct];
-    say(close(Math.round(lineOct / 1000), Math.round(m.next.central / 1000), 0) ? 'PASS' : 'FAIL', '2 ', `October's lines total ${K(lineOct)} (${D(lineOct)}); Today's headline ${K(m.next.central)}. Money shows no such table until Step 3`);
+    say(close(drawn.moneyLast, lineOct) && close(Math.round(drawn.moneyLast / 1000), Math.round(m.next.central / 1000), 0) ? 'PASS' : 'FAIL', '2 ', `Money's October as drawn ${K(drawn.moneyLast)} (${D(drawn.moneyLast)}); Today's lines ${D(lineOct)}; Today's headline ${K(m.next.central)}`);
+
+    // what R4 users are sent, and the months' costs against the year they were split from
+    const logA = await fetch(base + '/login', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ name: 'footadm', password: pass }) });
+    const adm = await (await fetch(`${base}/api/view/numbers`, { headers: { cookie: (logA.headers.get('set-cookie') || '').split(';')[0] } })).json().then(j => j.data !== undefined ? j.data : j);
+    say(numbers.lineCosts == null && numbers.margin == null ? 'PASS' : 'FAIL', 'C ', 'Money sends an owner no monthly costs and no margin table; admins get both');
+    const G = adm.lineGrid, C = adm.lineCosts, pricedI = G.months.map((x, i) => C.priced[i] ? i : -1).filter(i => i >= 0).slice(-12);
+    for (const l of adm.margin.lines) {
+      const c = C.costs[l.family]; if (!c || !l.cost) continue;
+      const months = pricedI.reduce((t, i) => t + c[i], 0), off = months / l.cost - 1;
+      say(Math.abs(off) <= .02 ? 'PASS' : 'FAIL', 'C ', `${l.family}: the months' cost ${K(months)} against the year's ${K(l.cost)}`);
+    }
 
     // 3. Accounts' October against invoiced core
     const last = pulse.monthly[pulse.monthly.length - 1], listed = rows.reduce((t, r) => t + (r.last || 0), 0), gap = last.core - listed;

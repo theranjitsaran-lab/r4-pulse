@@ -213,6 +213,19 @@ test('Step 2: months are the latest on the right, and YTD and 12 months hold wha
   assert.equal(kOnly(12400), '12');
 });
 
+test('Step 3: margin adds dollars, not percentages, and leaves out what has no cost', async () => {
+  const { gridRows, marginOver } = await import('../public/components/linegrid.js');
+  const grid = { months: ['a', 'b'], est: ['b'], rows: [{ key: 'storage', name: 'Storage', rev: [100, 100] }, { key: 'bin', name: 'Bins', rev: [50, 60] }, { key: 'other', name: 'Fees', rev: [10, 10] }] };
+  const C = { priced: [true, false], costs: { storage: [20, 0], bin: [40, 0], other: [0, 0] } };
+  const rows = gridRows(grid, C, 'lines');
+  assert.deepEqual(marginOver(rows, [0, 1], C.priced), { rev: 150, cost: 60, margin: 90, pct: .6 }, 'fees and the unpriced month are out');
+  const ss = gridRows(grid, C, 'ss');
+  assert.deepEqual(ss.map(r => r.name), ['Storage', 'Service']);
+  assert.deepEqual(ss[1].rev, [60, 70], 'revenue keeps the fees');
+  assert.equal(marginOver([ss[1]], [0], C.priced).rev, 50, 'margin counts only what has a cost');
+  assert.equal(gridRows(grid, null, 'lines')[0].costed, false, 'no costs, no margin');
+});
+
 test('#38 not billed: internal out, dormant apart by invoices rather than by name', async () => {
   const { splitNotBilled } = await import('../public/components/storage.js');
   const { isInternal } = await import('../public/components/metrics.js');

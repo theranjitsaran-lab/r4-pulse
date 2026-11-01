@@ -7,6 +7,11 @@
 // Worked out on the server (/api/view/numbers); the customer-level margin stays at contribution:
 // overheads are never spread by revenue.
 import { esc } from '/components/data.js';
+import { dataTable } from '/components/datatable.js';
+import { gridRows, marginOver } from '/components/linegrid.js';
+import { FAMS } from '/components/custbook.js';
+import { openPop } from '/components/pop.js';
+import { whoAmI } from '/components/access.js';
 import { money0, moneyK } from '/components/chart.js';
 import { reveal } from '/components/motion.js';
 import { trend, destChart } from '/components/homecharts.js';
@@ -17,6 +22,58 @@ const pc = v => Math.round(v * 100) + '%';
 const ROUTE_FAMILIES = ['handling', 'movement'];
 
 const tabsHtml = on => `<div class="top"><div><h1>Money</h1></div><div class="seg rt-tabs"><a href="#numbers" class="${on === 'warehouse' ? '' : 'on'}">Numbers</a><a href="#numbers?tab=warehouse" class="${on === 'warehouse' ? 'on' : ''}">Warehouse</a></div></div>`;
+
+const monLong = m => new Date(m + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
+function linesTitle(V) {
+  const G = V.lineGrid, last = G.months[G.months.length - 1], i = G.months.length - 1, tot = G.rows.reduce((t, r) => t + r.rev[i], 0), st = G.rows.find(r => r.key === 'storage');
+  return `${monLong(last)} comes to ${moneyK(tot)}${G.est.includes(last) ? ' est.' : ''}, ${moneyK(st.rev[i])} of it storage`;
+}
+function linesSource(V) {
+  const G = V.lineGrid, last = G.months[G.months.length - 1], est = G.est.includes(last);
+  return `${est ? `Hatched: ${monLong(last)}'s work, not billed until the next run${G.jobs > 0 ? `, before up to ${moneyK(G.jobs)} of jobs to check` : ''} · ` : ''}priced work from VCK, storage from the posted bills${V.lineCosts ? ' · margin is est., and blank until a month is priced' : ''}`;
+}
+
+// lines of business by month: revenue for everyone; margin for admins while costs are provisional
+const LINE_LINK = new Set(FAMS.map(f => f.key));
+const pctOf = v => v == null ? "—" : `${v < 0 ? "−" : ""}${Math.abs(Math.round(v * 100))}%`;
+function drawLines(el, V) {
+  const G = V.lineGrid, C = V.lineCosts, at = m => G.months.indexOf(m), bar = el.querySelector('.nb-lines-bar');
+  const p = () => new URLSearchParams(location.hash.split('?')[1] || '');
+  let group = p().get('group') === 'ss' ? 'ss' : 'lines', show = C && p().get('show') === 'margin' ? 'margin' : 'revenue';
+  const setLink = () => { const u = p(); group === 'ss' ? u.set('group', 'ss') : u.delete('group'); show === 'margin' ? u.set('show', 'margin') : u.delete('show'); history.replaceState(null, '', '#numbers' + (u.toString() ? '?' + u : '')); };
+  bar.innerHTML = `<span class="seg" role="group" aria-label="Group"><button type="button" data-g="lines">Every line</button><button type="button" data-g="ss">Storage / service</button></span>
+    <span class="seg" role="group" aria-label="Show"><button type="button" data-s="revenue">Revenue</button><button type="button" data-s="margin" ${C ? '' : 'disabled'}>Margin</button></span>
+    ${C ? '' : '<small class="nb-lines-note">Margins arrive when route costs are signed off.</small>'}`;
+  const table = () => {
+    bar.querySelectorAll('[data-g]').forEach(b => b.classList.toggle('on', b.dataset.g === group));
+    bar.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === show));
+    const rows = gridRows(G, C, group), margin = show === 'margin';
+    const name = { k: 'name', l: group === 'ss' ? 'Kind' : 'Line', name: true, text: true, get: r => r.name };
+    const months = margin ? {
+      list: G.months, est: G.est,
+      get: (r, m) => { const i = at(m); return r.costed && C.priced[i] ? marginOver([r], [i], C.priced).margin : 0; },
+      cell: (r, m) => { const i = at(m); if (!r.costed || !C.priced[i]) return '—'; return `<span data-cost="${m}">${pctOf(marginOver([r], [i], C.priced).pct)}</span>`; },
+      sumCell: (r, ms) => r.costed ? pctOf(marginOver([r], ms.map(at), C.priced).pct) : '—',
+      totalCell: (rs, ms) => pctOf(marginOver(rs, ms.map(at), C.priced).pct),
+    } : { list: G.months, est: G.est, get: (r, m) => r.rev[at(m)] };
+    dataTable(el.querySelector('#nb-lines'), { key: 'money', ns: '', who: whoAmI(), rows, cols: [name], months, noun: margin ? 'lines · margin %' : 'lines · $K', placeholder: 'Find a line', search: r => r.name,
+      totalLabel: margin ? 'Costed lines' : 'Total', inTotal: margin ? r => r.costed : null,
+      onRow: (r, e) => {
+        const c = e.target.closest('[data-cost]');
+        if (c) {
+          const i = at(c.dataset.cost), x = marginOver([r], [i], C.priced);
+          return openPop({ title: `${r.name}, ${mon(c.dataset.cost)}`, sub: 'revenue less the cost to serve, est.', html: `<ul class="h2-stats"><li><span>Revenue</span><b>${money0(x.rev)}</b></li><li><span>Cost est.</span><b>${money0(x.cost)}</b></li><li><span>Margin est.</span><b>${x.margin < 0 ? '−' : ''}${money0(Math.abs(x.margin))}</b></li></ul><p class="src">Each account's own cost a unit × its units that month; storage is the rate × that month's boxes. Provisional; bins, retrieval and delivery are under review.</p>` });
+        }
+        if (!margin && LINE_LINK.has(r.key)) location.hash = '#customers?view=overview&f_line=' + r.key;
+      } });
+  };
+  bar.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    if (b.dataset.g) group = b.dataset.g; if (b.dataset.s) show = b.dataset.s;
+    setLink(); table();
+  });
+  table();
+}
 
 export async function render(main, V, params = {}) {
   if (!main) return;
@@ -42,6 +99,9 @@ export async function render(main, V, params = {}) {
       <div class="src">Posted invoices on invoice date, storage plus service, Citadel held apart, from VCK · storage bills a month ahead, service a month behind</div>
     </section>
     ${V.month && V.month.thisMonth.length ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Work volume: ${esc(mon(V.month.workMonth, { month: 'long' }))} is ${Math.abs(V.month.vsLast || 0) < 0.02 ? 'level with' : `${pc(Math.abs(V.month.vsLast))} ${V.month.vsLast > 0 ? 'ahead of' : 'behind'}`} ${esc(mon(V.month.prevMonth, { month: 'long' }))}</h2><small>Done is what drivers confirmed in Veri-Shred. By working day, at last month's value a service, est.</small></div><div id="nb-trend"></div></section>` : ''}
+    ${V.lineGrid ? `<section class="h2-card" data-rv id="nb-linecard"><div class="h2-ch"><h2>${esc(linesTitle(V))}</h2><small>$K · storage by month billed, service by month of work · Citadel held apart</small></div>
+      <div class="nb-lines-bar"></div><div id="nb-lines"></div>
+      <div class="src">${esc(linesSource(V))}</div></section>` : ''}
     <section class="h2-card" data-rv id="nb-ebitda"></section>
     ${V.dest ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Shredding ${Math.round(V.dest.eligible / 1000)}K eligible boxes pays ${moneyK(V.dest.fee)} once est., then costs ${moneyK(V.dest.lostYear / 12)} a month</h2><small>${pc(V.dest.share)} of the building · the fee covers ${Math.round(V.dest.fee / (V.dest.lostYear / 12))} months of lost storage unless new boxes refill the space</small></div><div id="nb-dest"></div><div class="src">Retention review overdue, not on hold or permanent · the fee at the book's median · <a href="#activity?tab=warehouse">the Warehouse, by account ›</a></div></section>` : ''}
     <details class="h2-card fold" data-rv><summary><h3>Why this isn't the P&amp;L</h3><span class="sub">open</span></summary>
@@ -58,6 +118,8 @@ export async function render(main, V, params = {}) {
   </div>`;
 
   coreChart(main.querySelector('#nb-core'), M.slice(-13), V.target);
+  const lineCard = main.querySelector('#nb-linecard');
+  if (lineCard) drawLines(lineCard, V);
   trend(main.querySelector('#nb-trend'), V.month);
   destChart(main.querySelector('#nb-dest'), V.dest);
   main.querySelector('#nb-ebitda').innerHTML = G ? ebitdaHtml(G) : `<div class="h2-ch"><h2>The EBITDA bridge</h2><small>revenue to EBITDA, by month</small></div>

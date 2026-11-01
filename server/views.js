@@ -15,7 +15,7 @@ const { seesCosts } = require('./settings');
 
 const router = express.Router();
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework', 'metrics'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
+const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework', 'linegrid', 'metrics'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
 
 async function callsLog() {
   if (USE_FIXTURES) { try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'calls_log.json'), 'utf8')); } catch { return []; } }
@@ -107,14 +107,16 @@ router.get('/numbers', async (req, res) => {
         .filter(x => x.revenue > 0).sort((a, b) => b.revenue - a.revenue);
       const rc = D.R.routeCostsNow();
       const realBins = book.accounts.filter(a => a.fam.bin && D.R.routeFor(a.level1));
+      const lineGrid = L.linegrid.lineGrid(D);
       numBase = { stamp: st, v: {
         monthly, target: 1e6, month: L.home2data.monthView(D), dest: L.home2data.destructionView(D), tie: L.metrics.tieOut(D.P), citadelBridge: (D.P.tieout || []).slice(-2)[0] || null,
         gap: (() => { const m = L.home2data.monthView(D); return { gap: m.gap, next: m.next ? m.next.month : null }; })(),   // the same gap as Home
+        lineGrid, lineCosts: L.linegrid.lineCosts(D, lineGrid),
         gl: G ? { months: G.months, last12: L.gl.sumMonths(G.months, 12), overheadLines: G.overheadLines, loadedAt: D.G.loadedAt, source: D.G.source } : null,
         margin: { lines, accounts: book.accounts.length, deliveriesOn: !!(rc.deliveries && rc.deliveries.on), moveReal: book.accounts.filter(a => a.fam.movement && D.R.movementFor(a.level1)).length, binReal: { accounts: realBins.length, revenue: realBins.reduce((t, a) => t + a.fam.bin.revenue, 0), routeDays: rc.days, from: rc.from, to: rc.to } },
       } };
     }
-    send(req, res, seesCosts(req) ? numBase.v : { ...numBase.v, margin: null });
+    send(req, res, seesCosts(req) ? numBase.v : { ...numBase.v, margin: null, lineCosts: null });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
