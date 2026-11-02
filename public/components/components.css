@@ -1,3 +1,6 @@
+/* Hallmark · checked: 2026-11-02 · genre: modern-minimal (inferred)
+ * floor: see docs/hallmark-audit.md · app scope, text exceptions listed there
+ * built: the project · redesign: polish · copy: verbatim · v2.0.0 */
 /* Shared components. Every colour, size and face from tokens.css. SVG marks take their colour from
    these classes, so no component file carries a colour literal. */
 
@@ -233,5 +236,7 @@ i.k.neutral, i.k.band { background: var(--s-citadel); }
 
 /* ── titles and big figures: the system sans at 600, a step up from the text, not a second face ── */
 h1, .sec-t, .card-head h3, .chart-title, details.fold summary h3, .hb-fig, .hb-side b, .tile b, .xpl h2 {
-  font-family: var(--f-display); font-weight: var(--w-head); letter-spacing: var(--track-tight);
+  font-family: var(--f-display); font-weight: var(--w-head); letter-spacing: var(--track-tight); text-wrap: balance;
 }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0ms !important; transition-duration: 0ms !important; } }

@@ -4,6 +4,7 @@
 // price. The verdict, where that price sits among every account, the cost to serve with its
 // arithmetic, and what the change is worth a year. Opens prefilled from #pricing?level1=&code=.
 // Every cost comes from model/rates.js; every rate and volume from the fixtures.
+import * as Fmt from '/components/format.js';
 import { money0, moneyK } from '/components/chart.js';
 import { strip, stripStats } from '/components/strip.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
@@ -119,10 +120,10 @@ export async function render(main, PR, params) {
     $('p-freq-row').hidden = st.visits == null;
     syncFreq();
     $('p-miles').value = st.miles;
-    $('p-price').value = st.price != null ? (st.code === 'STO' ? st.price.toFixed(3) : st.price.toFixed(2)) : '';
+    $('p-price').value = st.price != null ? (st.code === 'STO' ? Fmt.fixed(st.price, 3) : Fmt.fixed(st.price, 2)) : '';
     $('p-units-lab').textContent = !svc ? 'Units a year' : svc.fam === 'storage' ? 'Box-months a year' : svc.unit[0].toUpperCase() + svc.unit.slice(1) + 's a year';
-    $('p-hint').textContent = mine ? `Pays $${mine.v.toFixed(st.code === 'STO' ? 3 : 2)} today, pre-filled. ${a && a.bins && svc && svc.fam === 'bin' ? `${a.bins.toLocaleString('en-US')} bin services on ${a.visits} visits in 12 months.` : ''}` : (st.level1 ? 'No rate on this service yet: a quote.' : svc && svc.fam === 'bin' ? 'A quote for one bin emptied weekly. Change the bins or how often.' : 'A quote at the typical account\'s volume.');
-    if (st.price == null) { st.price = median(rows.map(r => r.v)); $('p-price').value = st.price.toFixed(st.code === 'STO' ? 3 : 2); }
+    $('p-hint').textContent = mine ? `Pays ${Fmt.money(mine.v, { dp: st.code === 'STO' ? 3 : 2 })} today, pre-filled. ${a && a.bins && svc && svc.fam === 'bin' ? `${Fmt.grouped(a.bins)} bin services on ${a.visits} visits in 12 months.` : ''}` : (st.level1 ? 'No rate on this service yet: a quote.' : svc && svc.fam === 'bin' ? 'A quote for one bin emptied weekly. Change the bins or how often.' : 'A quote at the typical account\'s volume.');
+    if (st.price == null) { st.price = median(rows.map(r => r.v)); $('p-price').value = Fmt.fixed(st.price, st.code === 'STO' ? 3 : 2); }
   }
 
   // the frequency picker shows the visits a year when they match a schedule, else "Other"
@@ -138,7 +139,7 @@ export async function render(main, PR, params) {
 
   function draw() {
     const rows = book[st.code].rows, svc = SERVICES[st.code];
-    const dec = st.code === 'STO' ? 3 : 2, f = v => '$' + v.toFixed(dec);
+    const dec = st.code === 'STO' ? 3 : 2, f = v => Fmt.money(v, { dp: dec });
     const c = costsVisible() ? cost() : null, unitCost = c ? c.perUnit : null;
     // storage compares box-weighted: monthly minimums make small accounts look dear per box
     const vals = rows.map(r => ({ v: r.v, name: r.name, w: st.code === 'STO' ? r.units : undefined }));
@@ -158,7 +159,7 @@ export async function render(main, PR, params) {
     const near = Math.abs(price / (s.median || 1) - 1) < 0.02;
     let cls = '', lab = near ? 'At book' : price < s.median ? 'Below book' : 'Above book', text;
     if (sure != null && price < sure) { cls = 'is-bad'; lab = 'Below cost'; text = `${f(price)} is below what this costs to serve. Cost to serve is ${f(unitCost)} a ${svc.unit}. Every one loses ${f(unitCost - price)}, and more volume makes it worse.`; }
-    else if (price < s.median && !near) { cls = 'is-warn'; text = `${f(price)} ${sure != null ? `earns ${f(price - sure)} a ${svc.unit} over cost, but ` : ''}sits below the ${f(s.median)} ${medName}: cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.`; }
+    else if (price < s.median && !near) { cls = 'is-warn'; text = `${f(price)} ${sure != null ? `earns ${f(price - sure)} a ${svc.unit} over cost, but ` : ''}sits below the ${f(s.median)} ${medName}: cheaper than ${Fmt.pct(1 - s.below(price))} of ${of}.`; }
     else text = `${f(price)} is ${near ? 'at' : 'above'} the ${f(s.median)} ${medName}${sure != null ? ` and ${f(price - sure)} a ${svc.unit} over cost` : ''}.`;
     $('p-verdict').innerHTML = `<section class="h2-card pr2-verdict ${cls}"><span class="pr2-tag">${lab}</span><p class="pr2-head">${esc(text)}</p>${!costsVisible() ? `<p class="hint">${money0(price * Math.max(0, st.units || 0))} a year at this volume. ${esc(NOT_READY)}</p>` : review ? `<p class="hint">Judged against the book only: the cost of a visit is under review until delivery routes are in the data, so the margin below is provisional.${svc.fam === 'bin' && !st.level1 ? ' Enter the postcode under Volume to cost it from real route days there.' : ''}</p>` : real ? `<p class="hint">Route cost from ${c.routeBasis === 'account' ? `${esc(who)}'s own route days` : `real route days in and around ${esc(st.postcode)}`}, shared by minutes est. Days the truck also delivered boxes are not in the route data yet, so this reads a little high.</p>` : ''}</section>`;
 
@@ -179,7 +180,7 @@ export async function render(main, PR, params) {
       // the first sentence says what the line is; the rate's full working is one tap away
       const split = t => { const i = t.indexOf('. '); return i > 0 ? [t.slice(0, i + 1), t.slice(i + 2)] : [t, '']; };
       $('p-cost').innerHTML = c.lines.map(l => { const [head, rest] = split(l[2]); return `<div class="line"><span>${esc(l[0])}${l[3] ? ' est.' : ''}</span><span class="v">${money0(l[1])}</span><span class="d">${esc(head)}${rest ? ` <details style="display:inline"><summary style="display:inline;cursor:pointer;color:var(--brand)">How it is worked out</summary><span style="display:block;margin-top:var(--sp-1)">${esc(rest)}</span></details>` : ''}</span></div>`; }).join('')
-        + `<div class="line total"><span>A year, ${Math.round(st.units).toLocaleString('en-US')} ${svc.fam === 'storage' ? 'box-months' : svc.unit + 's'}</span><span class="v">${money0(c.total)}</span></div>`
+        + `<div class="line total"><span>A year, ${Fmt.num(st.units)} ${svc.fam === 'storage' ? 'box-months' : svc.unit + 's'}</span><span class="v">${money0(c.total)}</span></div>`
         + (review ? `<p class="hint">Route costs are under review: delivery routes are not yet in the route volumes, so visit costs run high.</p>` : '');
     } else {
       $('p-cost-title').textContent = 'How the cost is worked out';
@@ -213,10 +214,10 @@ export async function render(main, PR, params) {
         <li class="rev"><span>Revenue</span><i style="--w:${(rev / max * 100).toFixed(1)}%"></i><b>${money0(rev)}</b></li>
         ${lines.map(l => `<li class="cost"><span>${esc(l.name)}</span><i style="--w:${(l.v / max * 100).toFixed(1)}%"></i><b>−${money0(l.v)}</b></li>`).join('')}
         <li class="left ${review ? 'review' : left < 0 ? 'neg' : ''}"><span>${review ? 'Left, provisional' : 'Gross margin'}</span><i style="--w:${(Math.abs(left) / max * 100).toFixed(1)}%"></i><b>${left < 0 ? '−' : ''}${money0(Math.abs(left))}</b></li></ul>
-        <p class="pr2-pc">${rev > 0 ? `<b class="${left < 0 && !review ? 'is-bad' : ''}">${Math.round(left / rev * 100)}%</b> of revenue kept est.` : ''}${review ? ' · route costs under review' : ''}</p>`;
+        <p class="pr2-pc">${rev > 0 ? `<b class="${left < 0 && !review ? 'is-bad' : ''}">${Fmt.pct(left / rev)}</b> of revenue kept est.` : ''}${review ? ' · route costs under review' : ''}</p>`;
       // the levers, each on its own
       const lv = [];
-      if (price < s.median) lv.push({ t: `Move to the ${medName}, ${f(s.median)}`, v: (s.median - price) * units2, s: `${Math.round((1 - s.below(price)) * 100)}% of ${of} pay more` });
+      if (price < s.median) lv.push({ t: `Move to the ${medName}, ${f(s.median)}`, v: (s.median - price) * units2, s: `${Fmt.pct(1 - s.below(price))} of ${of} pay more` });
       if (sure != null && rev > 0 && left / rev < .4) { const p40 = sure / .6; if (p40 > price) lv.push({ t: `Price for a 40% margin, ${f(p40)}`, v: (p40 - price) * units2, s: p40 > s.p75 ? 'above three-quarters of the book: a hard conversation' : 'still inside the book' }); }
       if (st.visits && st.visits >= 24 && svc && ['bin', 'trip', 'itad'].includes(svc.fam)) {
         const keep = { ...st }; st.visits = Math.round(st.visits / 2); const c2 = cost(); Object.assign(st, keep);
@@ -237,7 +238,7 @@ export async function render(main, PR, params) {
     const sl = $('p-slide'), lo = Math.max(0, Math.min(s.p25 * .5, unitCost || Infinity, price)), hi = Math.max(s.p75 * 1.6, (unitCost || 0) * 1.3, price);
     sl.min = lo; sl.max = hi; if (document.activeElement !== sl) sl.value = price;
     $('p-slide-lab').textContent = `${f(lo)} to ${f(hi)} · median ${f(s.median)}`;
-    $('p-vol-sum').textContent = `Volume: ${Math.round(st.units || 0).toLocaleString('en-US')} ${svc ? (svc.fam === 'storage' ? 'box-months' : svc.unit + 's') : 'units'} a year${st.visits ? ` on ${Math.round(st.visits)} visits` : ''}${st.postcode ? ` in ${st.postcode}` : ''} · change`;
+    $('p-vol-sum').textContent = `Volume: ${Fmt.num(st.units || 0)} ${svc ? (svc.fam === 'storage' ? 'box-months' : svc.unit + 's') : 'units'} a year${st.visits ? ` on ${Math.round(st.visits)} visits` : ''}${st.postcode ? ` in ${st.postcode}` : ''} · change`;
   }
 
   const num = el => { const v = parseFloat(String(el.value).replace(/[$,\s]/g, '')); return Number.isFinite(v) ? v : null; };
@@ -262,7 +263,7 @@ export async function render(main, PR, params) {
       draw();
     });
   });
-  $('p-slide').addEventListener('input', () => { st.price = Number($('p-slide').value); $('p-price').value = st.price.toFixed(st.code === 'STO' ? 3 : 2); draw(); });
+  $('p-slide').addEventListener('input', () => { st.price = Number($('p-slide').value); $('p-price').value = Fmt.fixed(st.price, st.code === 'STO' ? 3 : 2); draw(); });
   $('p-ask').addEventListener('click', e => dispatchEvent(new CustomEvent('open-ask', { detail: { ask: e.currentTarget.dataset.q } })));
   // a schedule sets the visits; the bins (or units) each visit stay the same
   $('p-freq').addEventListener('change', () => {
@@ -294,9 +295,9 @@ export async function render(main, PR, params) {
       { k: 'name', l: 'Service', name: true, text: true, get: r => r.name, fmt: r => esc(r.name) },
       { k: 'under', l: 'Accounts under', def: true, get: r => r.under, total: 'sum', fmt: r => r.under },
       { k: 'gap', l: 'At the median, a year', def: true, sorted: true, get: r => r.gap, total: 'sum', totalFmt: v => '+' + moneyK(v), fmt: r => '+' + moneyK(r.gap) },
-      { k: 'med', l: 'Median', get: r => r.med, fmt: r => '$' + r.med.toFixed(r.code === 'STO' ? 3 : 2) },
+      { k: 'med', l: 'Median', get: r => r.med, fmt: r => Fmt.money(r.med, { dp: r.code === 'STO' ? 3 : 2 }) },
       { k: 'n', l: 'Accounts', get: r => r.n, fmt: r => r.n },
-      { k: 'share', l: 'Volume under', get: r => r.share, fmt: r => Math.round(r.share * 100) + '%' },
+      { k: 'share', l: 'Volume under', get: r => r.share, fmt: r => Fmt.pct(r.share) },
     ] });
 
   // ── the quote: several lines, each priced and costed as above, a deal total and its margin a year.
@@ -323,7 +324,7 @@ export async function render(main, PR, params) {
   }
   function quoteText() {
     const T = totals(), who = Q.level1 ? nameOf(Q.level1) : (Q.prospect || 'New customer');
-    return [`Quote for ${who}${Q.postcode ? ` (${Q.postcode})` : ''}`, ...Q.lines.map(l => `${l.name}: ${Math.round(l.units).toLocaleString('en-US')} ${l.unit}s a year at $${l.price.toFixed(l.code === 'STO' ? 3 : 2)} = ${money0(l.price * l.units)}`), `Total: ${money0(T.rev)} a year`].join('\n');
+    return [`Quote for ${who}${Q.postcode ? ` (${Q.postcode})` : ''}`, ...Q.lines.map(l => `${l.name}: ${Fmt.num(l.units)} ${l.unit}s a year at ${Fmt.money(l.price, { dp: l.code === 'STO' ? 3 : 2 })} = ${money0(l.price * l.units)}`), `Total: ${money0(T.rev)} a year`].join('\n');
   }
   function drawQuote() {
     const T = totals(), n = Q.lines.length;
@@ -335,10 +336,10 @@ export async function render(main, PR, params) {
       <table class="q-t"><thead><tr><th>Line</th><th class="v">A year</th><th class="v">Price</th><th class="v">Revenue</th>${costsVisible() ? '<th class="v">Margin est.</th>' : ''}<th></th></tr></thead><tbody>
       ${Q.lines.map((l, i) => { const r = l.price * l.units, m = l.cost == null ? null : r - l.cost; return `<tr>
         <td>${esc(l.name)}${!costsVisible() ? '' : l.basis === 'average' ? '<small>route cost under review</small>' : l.basis === 'account' || l.basis === 'postcode' ? '<small>from real route days</small>' : l.basis === 'none' ? '<small>a fee: not costed</small>' : ''}</td>
-        <td class="v">${Math.round(l.units).toLocaleString('en-US')} ${esc(l.unit)}s</td><td class="v">$${l.price.toFixed(dec(l))}</td><td class="v">${money0(r)}</td>
-        ${!costsVisible() ? '' : `<td class="v ${m != null && m < 0 && l.basis !== 'average' ? 'is-bad' : ''}">${m == null ? '—' : (m < 0 ? '−' : '') + money0(Math.abs(m))}${m != null && r > 0 ? `<small>${Math.round(m / r * 100)}%</small>` : ''}</td>`}
+        <td class="v">${Fmt.num(l.units)} ${esc(l.unit)}s</td><td class="v">${Fmt.money(l.price, { dp: dec(l) })}</td><td class="v">${money0(r)}</td>
+        ${!costsVisible() ? '' : `<td class="v ${m != null && m < 0 && l.basis !== 'average' ? 'is-bad' : ''}">${m == null ? '—' : (m < 0 ? '−' : '') + money0(Math.abs(m))}${m != null && r > 0 ? `<small>${Fmt.pct(m / r)}</small>` : ''}</td>`}
         <td><button class="q-x" type="button" data-i="${i}" aria-label="Remove ${esc(l.name)}">×</button></td></tr>`; }).join('')}
-      </tbody><tfoot><tr><td>Total</td><td></td><td></td><td class="v">${money0(T.rev)}</td>${!costsVisible() ? '' : `<td class="v ${T.margin < 0 && !T.review ? 'is-bad' : ''}">${T.pc == null ? '—' : (T.margin < 0 ? '−' : '') + money0(Math.abs(T.margin))}<small>${T.pc == null ? '' : Math.round(T.pc * 100) + '%'}</small></td>`}<td></td></tr></tfoot></table>
+      </tbody><tfoot><tr><td>Total</td><td></td><td></td><td class="v">${money0(T.rev)}</td>${!costsVisible() ? '' : `<td class="v ${T.margin < 0 && !T.review ? 'is-bad' : ''}">${T.pc == null ? '—' : (T.margin < 0 ? '−' : '') + money0(Math.abs(T.margin))}<small>${T.pc == null ? '' : Fmt.pct(T.pc)}</small></td>`}<td></td></tr></tfoot></table>
       ${!costsVisible() ? '' : `<p class="src">Margin is revenue less the cost to serve from the cost model est.${T.uncosted ? `, on the ${n - T.uncosted} costed line${n - T.uncosted === 1 ? '' : 's'}` : ''}${T.review ? '; bin lines without route days use the average visit, under review' : ''}.</p>`}
       <div class="q-acts"><button type="button" id="q-save" class="q-add">Save the quote</button><button type="button" id="q-copy">Copy as text</button><button type="button" id="q-clear">Start again</button><span id="q-msg" class="hint"></span></div>
       ${savedHtml()}`;
@@ -386,5 +387,5 @@ function track(el, { price, cost, s, f, cls, medName, of }) {
     ${ticks.map((t, i) => `<div class="tk ${t.c}" style="left:${x(t.v)}%"></div><div class="tl ${t.c} ${i % 2 ? 'up' : 'dn'}" style="left:${x(t.v)}%">${esc(t.t)}</div>`).join('')}
     <div class="pin ${cls}" style="left:${x(price)}%"><b>${f(price)}</b><i></i></div>
   </div>
-  <div class="sub" style="margin-top:var(--sp-1)">The grey band is where the middle half of ${of} sit, ${f(s.p25)} to ${f(s.p75)}.${cost != null ? ' The striped red stretch is below the cost to serve est.' : ''} ${price < s.median ? `Cheaper than ${Math.round((1 - s.below(price)) * 100)}% of ${of}.` : price > s.median ? `Dearer than ${Math.round(s.below(price) * 100)}% of ${of}.` : `At the ${medName}.`}</div>`;
+  <div class="sub" style="margin-top:var(--sp-1)">The grey band is where the middle half of ${of} sit, ${f(s.p25)} to ${f(s.p75)}.${cost != null ? ' The striped red stretch is below the cost to serve est.' : ''} ${price < s.median ? `Cheaper than ${Fmt.pct(1 - s.below(price))} of ${of}.` : price > s.median ? `Dearer than ${Fmt.pct(s.below(price))} of ${of}.` : `At the ${medName}.`}</div>`;
 }

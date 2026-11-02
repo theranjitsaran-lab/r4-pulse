@@ -8,6 +8,7 @@
 //     are one place, and share its detour by services;
 //   drop minutes: an assumed few minutes at each stop and a few more for each service.
 // So the stops' shares add up to the route day exactly (31 October 2026; it was a flat 40% travel).
+import * as Fmt from './format.js';
 export const YARD = [41.8307, -87.6573];   // 1301 W 35th St
 export const NEAR_MILES = 2, NEAR_DAYS = 3;
 
@@ -311,7 +312,7 @@ export function mapSvg(day, { width = 640, base = null, far = null } = {}) {
     const [x, y] = F.P(q.pt), key = q.postcode, n = seen.get(key) || 0; seen.set(key, n + 1);
     const ox = n ? Math.cos(n * 2.1) * 7 : 0, oy = n ? Math.sin(n * 2.1) * 7 : 0, i = day.stops.indexOf(q);
     g += `<g class="rm-stop${q.mine ? ' me' : ''}" data-i="${i}" transform="translate(${(x + ox).toFixed(1)},${(y + oy).toFixed(1)})"><circle r="${q.mine ? 9 : 7.5}"/><text y="3.5" text-anchor="middle">${i + 1}</text></g>`;
-    if (far && far.i === i) g += `<text class="rm-far" x="${(x + ox + 13).toFixed(1)}" y="${(y + oy + 4).toFixed(1)}">+${far.miles.toFixed(0)} mi</text>`;
+    if (far && far.i === i) g += `<text class="rm-far" x="${Fmt.fixed(x + ox + 13, 1)}" y="${Fmt.fixed(y + oy + 4, 1)}">+${Fmt.fixed(far.miles, 0)} mi</text>`;
   });
   g += scaleBar(F);
   return `<svg class="rm${base ? ' based' : ''}" viewBox="0 0 ${F.width} ${F.height}" role="img" aria-label="${esc(`Route ${day.route} on ${day.date}: ${placed.length} stops in order from the yard`)}">${g}</svg>`;

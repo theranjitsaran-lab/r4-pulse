@@ -4,6 +4,7 @@
 //   Mike's 06:30      yesterday's routes that were not normal, and what is booked for the next day
 //   Trisha's view     what changed for the business, and what the team did last week
 // A line someone marked "already knew" or "not right" in the last 30 days is held back from them.
+import * as Fmt from './format.js';
 import { seriesOf, moveReason } from './series.js';
 import { slippingAccounts, serviceGaps, storageGaps, CITADEL } from './levers.js';
 import { moneyK } from './chart.js';
@@ -17,7 +18,7 @@ export const OPENERS = {
   slipping: n => `We've seen less work from ${n} over the last two months. Is anything changing on your side we should know about?`,
   gap: (n, x) => `Your ${x.service} rate hasn't kept pace with what similar clients pay. Could we talk about bringing it in line?`,
   rounds: n => `Your rates haven't moved in two years. We're reviewing them for the new year and wanted to talk with you first.`,
-  overdue: (n, x) => `${x.boxes.toLocaleString('en-US')} of your boxes are past their retention date. Shall we arrange secure destruction?`,
+  overdue: (n, x) => `${Fmt.grouped(x.boxes)} of your boxes are past their retention date. Shall we arrange secure destruction?`,
   nodestroy: n => `You store your records with us but shred elsewhere. We can collect and destroy on the same visit.`,
   quiet: n => `We haven't been out to you for a couple of weeks. Is everything all right with the schedule?`,
 };
@@ -35,11 +36,11 @@ export function conversationCandidates({ C, PR, CA, log = [] }) {
   const add = (id, sig) => { if (id === CITADEL) return; const c = cands.get(id) || { level1: id, sigs: [] }; c.sigs.push(sig); cands.set(id, c); };
   for (const d of slippingAccounts(C)) add(d.level1, { key: 'slipping', stake: -d.move.d * 12, ev: `${moveReason(d.move, moneyK)} over the last three months, against its own run`, name: d.customer });
   const sg = serviceGaps(PR);
-  for (const a of sg.values()) add(a.level1, { key: 'gap', stake: a.worth * 12, ev: `${title(a.top.service)}: $${a.top.rate.toFixed(2)} against a $${a.top.med.toFixed(2)} median · ${moneyK(a.worth * 12)} a year at the median`, service: title(a.top.service).toLowerCase(), name: a.customer });
-  for (const r of storageGaps(PR).rows) add(r.level1, { key: 'gap', stake: r.worth * 12, ev: `storage at $${r.rate.toFixed(3)} a box against $${r.med.toFixed(3)} · ${moneyK(r.worth * 12)} a year at the median`, service: 'storage', name: r.customer });
+  for (const a of sg.values()) add(a.level1, { key: 'gap', stake: a.worth * 12, ev: `${title(a.top.service)}: ${Fmt.money(a.top.rate, { dp: 2 })} against a ${Fmt.money(a.top.med, { dp: 2 })} median · ${moneyK(a.worth * 12)} a year at the median`, service: title(a.top.service).toLowerCase(), name: a.customer });
+  for (const r of storageGaps(PR).rows) add(r.level1, { key: 'gap', stake: r.worth * 12, ev: `storage at ${Fmt.money(r.rate, { dp: 3 })} a box against ${Fmt.money(r.med, { dp: 3 })} · ${moneyK(r.worth * 12)} a year at the median`, service: 'storage', name: r.customer });
   for (const c of CA) {
     if (c.not_raised_2y && !sg.has(c.level1)) add(c.level1, { key: 'rounds', stake: c.service * 0.08, ev: `no rate moved in two years on ${moneyK(c.service)} of service · ${moneyK(c.service * 0.08)} a year at the typical 8% rise`, name: c.customer });
-    if (c.boxes_review_overdue >= 50) add(c.level1, { key: 'overdue', stake: 0, boxes: Math.round(c.boxes_review_overdue), ev: `${Math.round(c.boxes_review_overdue).toLocaleString('en-US')} boxes past their retention review`, name: c.customer });
+    if (c.boxes_review_overdue >= 50) add(c.level1, { key: 'overdue', stake: 0, boxes: Math.round(c.boxes_review_overdue), ev: `${Fmt.num(c.boxes_review_overdue)} boxes past their retention review`, name: c.customer });
     if (c.storage_no_destruction && c.storage > 20000) add(c.level1, { key: 'nodestroy', stake: 0, ev: `${moneyK(c.storage)} of storage a year and no destruction`, name: c.customer });
   }
   const week = Date.now() - 7 * 864e5;

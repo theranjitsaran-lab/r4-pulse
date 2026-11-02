@@ -10,6 +10,7 @@
 const YARD = [41.8307, -87.6573];   // 1301 W 35th St
 const miles = (a, b) => { const r = Math.PI / 180, R = 3958.8, dp = (b[0] - a[0]) * r, dl = (b[1] - a[1]) * r;
   return 2 * R * Math.asin(Math.sqrt(Math.sin(dp / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dl / 2) ** 2)); };
+import * as Fmt from '/components/format.js';
 import { money0, moneyK } from '/components/chart.js';
 import { titleCase, esc, loadRates } from '/components/data.js';
 import { routeNorms, LABELS, THIN } from '/components/metrics.js';
@@ -25,9 +26,9 @@ const dlabel = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { wee
 const dshort = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' });
 const addDays = (d, n) => new Date(new Date(d + 'T00:00:00Z').getTime() + n * 864e5).toISOString().slice(0, 10);
 const dow = d => new Date(d + 'T00:00:00Z').getUTCDay();   // 0 Sun … 6 Sat
-const n0 = v => Math.round(v || 0).toLocaleString('en-US');
+const n0 = Fmt.count;
 const pl = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-const pct = v => v >= 3 ? 'new' : v <= -1 ? 'stopped' : (v >= 0.01 ? '▲ ' : v <= -0.01 ? '▼ ' : '') + Math.abs(Math.round(v * 100)) + '%';
+const pct = v => Fmt.change(v);
 // colour for a fifth or more against the norm, as everywhere else; thin routes carry their own word
 const dcls = v => v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat';
 
@@ -81,12 +82,12 @@ export async function render(main, A, params) {
     const thin = rows.filter(r => r.services_done > 0 && norm[r.route] && r.services_done < THIN * norm[r.route].done);
     const age = Math.round((Date.now() - Date.parse(A.latestDone + 'T12:00:00Z')) / 864e5);
     const stale = age > 2 ? `<span class="is-warn">The latest work in the data is ${esc(dlabel(A.latestDone))}, ${age} days ago: the daily refresh has not run since, so "booked" dates may already have passed.</span> ` : '';
-    $('rt-say').innerHTML = stale + (done ? `${esc(dlabel(day))}: ${done.toLocaleString('en-US')} services done on ${pl(rows.filter(r => r.services_done > 0).length, 'route')}${normDay ? `, <span class="delta ${dcls(done / normDay - 1)}">${pct(done / normDay - 1)}</span> on what is normal for these routes` : ''}.${thin.length ? ` <span class="is-warn">Thin: ${thin.map(r => `${esc(routeName(r.route))} (${r.services_done} against ${Math.round(norm[r.route].done)})`).join(', ')}.</span>` : ' No thin route.'}` : 'No work done on this day.');
+    $('rt-say').innerHTML = stale + (done ? `${esc(dlabel(day))}: ${Fmt.grouped(done)} services done on ${pl(rows.filter(r => r.services_done > 0).length, 'route')}${normDay ? `, <span class="delta ${dcls(done / normDay - 1)}">${pct(done / normDay - 1)}</span> on what is normal for these routes` : ''}.${thin.length ? ` <span class="is-warn">Thin: ${thin.map(r => `${esc(routeName(r.route))} (${r.services_done} against ${Math.round(norm[r.route].done)})`).join(', ')}.</span>` : ' No thin route.'}` : 'No work done on this day.');
     $('rt-sum').innerHTML = `
-      <div class="card"><div class="lab">Services done</div><div class="big">${done.toLocaleString('en-US')}</div><div class="sub">${normDay ? `<span class="delta ${dcls(done / normDay - 1)}">${pct(done / normDay - 1)}</span> on the ${Math.round(normDay)} normal for these routes` : ''}</div></div>
-      <div class="card"><div class="lab">Booked, not done</div><div class="big ${booked - done > done * .5 ? 'is-warn' : ''}">${(booked - done).toLocaleString('en-US')}</div><div class="sub">of ${booked.toLocaleString('en-US')} booked</div></div>
+      <div class="card"><div class="lab">Services done</div><div class="big">${Fmt.grouped(done)}</div><div class="sub">${normDay ? `<span class="delta ${dcls(done / normDay - 1)}">${pct(done / normDay - 1)}</span> on the ${Math.round(normDay)} normal for these routes` : ''}</div></div>
+      <div class="card"><div class="lab">Booked, not done</div><div class="big ${booked - done > done * .5 ? 'is-warn' : ''}">${Fmt.grouped(booked - done)}</div><div class="sub">of ${Fmt.grouped(booked)} booked</div></div>
       <div class="card"><div class="lab">Routes out</div><div class="big">${rows.filter(r => r.services_done > 0).length}</div><div class="sub">${rows.reduce((t, r) => t + r.stops_done, 0)} stops done</div></div>
-      <div class="card"><div class="lab">Pounds recorded</div><div class="big">${Math.round(pounds).toLocaleString('en-US')}</div><div class="sub">${pounds ? `${Math.round(rows.reduce((t, r) => t + r.pounds_exec_default, 0) / pounds * 100)}% of it is executive bins at a set weight, not weighed` : 'none recorded'}</div></div>`;
+      <div class="card"><div class="lab">Pounds recorded</div><div class="big">${Fmt.num(pounds)}</div><div class="sub">${pounds ? `${Fmt.pct(rows.reduce((t, r) => t + r.pounds_exec_default, 0) / pounds)} of it is executive bins at a set weight, not weighed` : 'none recorded'}</div></div>`;
 
     // each card title says what it found, not what it is
     const out = rows.filter(r => r.services_done > 0).length;
@@ -204,11 +205,11 @@ export async function render(main, A, params) {
         const r = real.find(x => x.date === d && x.route === rt);
         if (!r || !r.services_done) { g += `<span class="c none">${r && r.services ? `<small>${r.services} booked</small>` : '—'}</span>`; continue; }
         const a = .12 + .55 * r.services_done / max;
-        g += `<span class="c ${d === day ? 'sel' : ''}" data-d="${d}" style="background:color-mix(in srgb, var(--heat) ${Math.round(a * 100)}%, var(--surface))"><b>${r.services_done}</b><small>${pl(r.stops_done, 'stop')}</small></span>`;
+        g += `<span class="c ${d === day ? 'sel' : ''}" data-d="${d}" style="background:color-mix(in srgb, var(--heat) ${Fmt.pct(a)}, var(--surface))"><b>${r.services_done}</b><small>${pl(r.stops_done, 'stop')}</small></span>`;
       }
     }
     const wk = real.filter(r => dates.includes(r.date)).reduce((t, r) => t + r.services_done, 0);
-    $('rt-week-h').textContent = `${wk.toLocaleString('en-US')} services done in the week of ${dshort(monday)}`;
+    $('rt-week-h').textContent = `${Fmt.grouped(wk)} services done in the week of ${dshort(monday)}`;
     $('rt-week').innerHTML = g + '</div>';
   }
 
@@ -216,7 +217,7 @@ export async function render(main, A, params) {
     const ahead = real.filter(r => r.date > A.latestDone && r.services > 0);
     const dates = [...new Set(ahead.map(r => r.date))].sort().slice(0, 7);
     const bookedAhead = ahead.filter(r => dates.includes(r.date)).reduce((t, r) => t + r.services, 0);
-    $('rt-ahead-h').textContent = dates.length ? `${bookedAhead.toLocaleString('en-US')} services booked over the next ${pl(dates.length, 'day')}` : 'Nothing booked ahead';
+    $('rt-ahead-h').textContent = dates.length ? `${Fmt.grouped(bookedAhead)} services booked over the next ${pl(dates.length, 'day')}` : 'Nothing booked ahead';
     $('rt-ahead').innerHTML = dates.map(d => {
       const rs = ahead.filter(r => r.date === d), tot = rs.reduce((t, r) => t + r.services, 0);
       return `<div class="stop" style="grid-template-columns: minmax(0,1fr) auto"><span><b>${dshort(d)}</b> <span class="sub">${rs.map(r => routeName(r.route)).join(', ')}</span></span><span class="v"><b>${tot}</b> <span class="sub">booked</span></span></div>`;
@@ -254,9 +255,9 @@ export async function render(main, A, params) {
     const rows = by.filter(p => !p.billing);
     const near10 = (bands[0].sv + bands[1].sv) / (total || 1);
     const window = pts ? 'twelve months' : `the ${Math.round((new Date(A.latestDone) - new Date(A.orders.map(o => o.date).sort()[0])) / 864e5) + 1} days to ${dshort(A.latestDone)}`;
-    el.innerHTML = `<div class="card-head"><h3>${Math.round(near10 * 100)}% of the work is within ten miles of the yard</h3><small>${esc(window)}</small></div>
+    el.innerHTML = `<div class="card-head"><h3>${Fmt.pct(near10)} of the work is within ten miles of the yard</h3><small>${esc(window)}</small></div>
       <div class="sub">Done services by distance from 1301 W 35th St, as the crow flies.${pts ? '' : ' Three weeks of stops for now; the next snapshot brings a full year.'}</div>
-      <div class="bands">${bands.map(b => `<span>${b.l}</span><span class="bar"><i style="width:${b.share * 100}%"></i></span><span class="v">${b.sv.toLocaleString('en-US')}</span><span class="v sub">${Math.round(b.share * 100)}%</span>`).join('')}</div>
+      <div class="bands">${bands.map(b => `<span>${b.l}</span><span class="bar"><i style="width:${b.share * 100}%"></i></span><span class="v">${Fmt.grouped(b.sv)}</span><span class="v sub">${Fmt.pct(b.share)}</span>`).join('')}</div>
       <div class="card-head" style="margin-top:var(--sp-2)"><h3>The long way round</h3><small>${costsVisible() ? 'visit cost est. per service' : 'by visits a year'}</small></div>
       <div id="rt-far-t"></div>
       <div class="src"><a class="how-link" href="#how">How it's calculated ›</a> · Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles in a straight line from the yard, by postcode${costsVisible() ? " · route time from the cost model: a route day's travel share scaled for distance, plus time on site est. · route costs under review" : ''}</div>`;
@@ -268,7 +269,7 @@ export async function render(main, A, params) {
         { k: 'visits', l: 'Visits', def: true, sorted: !costsVisible(), get: p => p.visits, total: 'sum', fmt: p => n0(p.visits) },
         ...(costsVisible() ? [{ k: 'per', l: 'A service, est.', def: true, get: p => p.per, fmt: p => `<span class="${p.per > 100 ? 'is-warn' : ''}">${money0(p.per)}</span>` }, { k: 'cost', l: 'Route time est.', def: true, sorted: true, get: p => p.cost, total: 'sum', totalFmt: v => money0(v), fmt: p => money0(p.cost) }] : []),
         { k: 'services', l: 'Services', def: !costsVisible(), get: p => p.services, total: 'sum', fmt: p => n0(p.services) },
-        { k: 'mi', l: 'Miles', def: !costsVisible(), get: p => p.mi, fmt: p => p.mi.toFixed(0) },
+        { k: 'mi', l: 'Miles', def: !costsVisible(), get: p => p.mi, fmt: p => Fmt.fixed(p.mi, 0) },
         { k: 'customers', l: 'Customers', get: p => p.customers, fmt: p => n0(p.customers) },
       ] });
   }

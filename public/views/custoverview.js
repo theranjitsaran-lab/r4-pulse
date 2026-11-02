@@ -3,6 +3,7 @@
 // any column, filter to one line of business to see price and cost per unit. Every figure opens a
 // pop-out that says why it is what it is, against similar accounts, and what to do about it.
 // Figures from components/custbook.js and home2data.js, the same ones Home and Ask read.
+import * as Fmt from '/components/format.js';
 import { money0, moneyK, sparkline } from '/components/chart.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { pricePosition, sizePeers, FAMS } from '/components/custbook.js';
@@ -18,12 +19,12 @@ import { accountFilters } from '/components/acctfilters.js';
 import { reveal } from '/components/motion.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
-const pct = v => `${Math.abs(Math.round(v * 100))}%`;
+const pct = v => `${Fmt.pct(v, { abs: true })}`;
 const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat'}">${changeWord(v)}</span>`;
 const signedK = v => v == null ? '—' : (v < 0 ? '−' : '+') + moneyK(Math.abs(v));
 // a lumpy line's move reads in dollars, not a percentage
 const move = (key, v, pct) => pct == null || pct <= -1 || !isLumpy(key, v / (1 + pct)) ? chip(pct) : `<span class="h2-d quiet">${signedK(v - v / (1 + pct))}</span>`;
-const unitMoney = (v, unit) => v == null ? '—' : '$' + (unit === 'box a month' || unit === 'lb' ? v.toFixed(3) : v.toFixed(2));
+const unitMoney = (v, unit) => v == null ? '—' : '$' + (unit === 'box a month' || unit === 'lb' ? Fmt.fixed(v, 3) : Fmt.fixed(v, 2));
 
 export async function render(main, C, params, tabs) {
   // the customer book and the book by line, worked out on the server (server/views.js); pricing loads only
@@ -89,12 +90,12 @@ export async function render(main, C, params, tabs) {
     { k: 'opp', l: 'Cross-sell est., a month', short: 'Cross-sell est.', get: r => r.opp ? r.opp / 12 : 0, fmt: r => r.opp > 0 ? cellBtn(r, moneyK(r.opp / 12), 'opp') : '—' },
     { k: 'gap', l: 'Under the book, a year', short: 'Under book', get: r => r.gap, fmt: r => r.gap > 0 ? cellBtn(r, moneyK(r.gap), 'gap') : '—' },
     { k: 'spark', l: '13 months', csv: () => '', fmt: r => r.spark ? sparkline(r.spark, { w: 84, h: 22, cls: 'service' }) : '' },
-    ...(costsVisible() ? [{ k: 'pc', l: 'Margin est.', def: true, get: r => r.pc, fmt: r => r.pc == null ? '—' : cellBtn(r, `<span class="${r.margin < 0 ? 'is-bad' : r.pc < .15 ? 'is-warn' : ''}">${Math.round(r.pc * 100)}%</span>${r.review ? '<small> review</small>' : ''}`, 'margin') }] : []),
+    ...(costsVisible() ? [{ k: 'pc', l: 'Margin est.', def: true, get: r => r.pc, fmt: r => r.pc == null ? '—' : cellBtn(r, `<span class="${r.margin < 0 ? 'is-bad' : r.pc < .15 ? 'is-warn' : ''}">${Fmt.pct(r.pc)}</span>${r.review ? '<small> review</small>' : ''}`, 'margin') }] : []),
   ];
   // a line of business chosen: who buys it, with its price and units beside the months
   const famCols = key => [name,
     { k: 'price', l: 'Price a unit', short: 'Price', def: true, get: r => r.fam && r.fam[key] && r.fam[key].price, fmt: r => { const f = r.fam && r.fam[key], p = f && f.price ? pricePosition(B, r, key) : null; return f && f.price ? cellBtn(r, `${unitMoney(f.price, f.unit)}${p && !p.widened ? ` <span class="c2-pct ${p.pct < .25 ? 'lo' : p.pct > .75 ? 'hi' : ''}">${p.pct < .25 ? 'low' : p.pct > .75 ? 'high' : 'mid'}</span>` : ''}`, 'price') : '—'; } },
-    { k: 'units', l: 'Units, a year', short: 'Units', def: true, get: r => r.fam && r.fam[key] && r.fam[key].units, fmt: r => r.fam && r.fam[key] ? Math.round(r.fam[key].units).toLocaleString('en-US') : '—' },
+    { k: 'units', l: 'Units, a year', short: 'Units', def: true, get: r => r.fam && r.fam[key] && r.fam[key].units, fmt: r => r.fam && r.fam[key] ? Fmt.num(r.fam[key].units) : '—' },
     ...(costsVisible() ? [
       { k: 'costPer', l: 'Cost a unit est.', get: r => r.fam && r.fam[key] && r.fam[key].costPer, fmt: r => { const f = r.fam && r.fam[key]; return f && f.costPer ? cellBtn(r, unitMoney(f.costPer, f.unit), 'price') : '—'; } },
       { k: 'fmargin', l: 'Margin est.', def: true, get: r => r.fam && r.fam[key] ? r.fam[key].revenue - r.fam[key].cost : null, fmt: r => { const f = r.fam && r.fam[key]; if (!f) return '—'; const v = f.revenue - f.cost; return cellBtn(r, `<span class="${v < 0 ? 'is-bad' : ''}">${signedK(v)}</span>`, 'margin'); } },
@@ -160,9 +161,9 @@ export async function explain(kind, r, { B, PR, line, R }) {
     if (r.cost > 0 && travel / r.cost > .35) todo.push(`<li><b>Getting there</b> is ${pct(travel / r.cost)} of its cost est. (${r.visits} visits a year). Fewer, fuller visits, or a day when a route is already nearby, cuts it more than any price.</li>`);
     if (r.revenue < 5000 && r.pc < .15) todo.push('<li><b>Small</b>: under $5,000 a year. A minimum charge is the usual fix.</li>');
     return openPop({
-      title: name, sub: `Margin est. ${Math.round((r.pc || 0) * 100)}%: ${money0(r.revenue)} of revenue, ${money0(r.cost)} to serve`, ask: `Why is ${name}'s margin ${Math.round((r.pc || 0) * 100)}%, and how do we improve it?`,
+      title: name, sub: `Margin est. ${Fmt.pct(r.pc || 0)}: ${money0(r.revenue)} of revenue, ${money0(r.cost)} to serve`, ask: `Why is ${name}'s margin ${Fmt.pct(r.pc || 0)}, and how do we improve it?`,
       html: `<p class="p2-verdict ${act.cls}"><b>${esc(act.tag)}</b> ${esc(act.why)}</p>
-        ${peers.pc != null ? `<p>Similar-sized accounts keep a median <b>${Math.round(peers.pc * 100)}%</b> est.</p>` : ''}
+        ${peers.pc != null ? `<p>Similar-sized accounts keep a median <b>${Fmt.pct(peers.pc)}</b> est.</p>` : ''}
         <h3>By line, last twelve months est.</h3>
         <table class="p2-t"><thead><tr><th class="tl">Line</th><th>Revenue</th><th>Cost</th><th>Margin</th></tr></thead><tbody>${fam.map(([k, v]) => `<tr><td class="tl">${esc(FAMILY_NAMES[k] || k)}</td><td>${money0(v.revenue)}</td><td>${money0(v.cost)}</td><td class="${v.revenue - v.cost < 0 ? 'is-bad' : ''}">${signedK(v.revenue - v.cost)}</td></tr>`).join('')}</tbody></table>
         <h3>Where the cost goes est.</h3>${bars(PARTS.filter(p => parts[p[0]] > 0).map(p => ({ name: p[1], v: parts[p[0]], label: moneyK(parts[p[0]]), cls: p[0] === 'route' ? 'warn' : '' })), pmax)}
@@ -192,7 +193,7 @@ export async function explain(kind, r, { B, PR, line, R }) {
         <p>${f.costPer ? `It costs about <b>${unitMoney(f.costPer, f.unit)}</b> a ${esc(f.unit)} to serve est., so each one ${f.price >= f.costPer ? `leaves <b>${unitMoney(f.price - f.costPer, f.unit)}</b>` : `<b class="is-bad">loses ${unitMoney(f.costPer - f.price, f.unit)}</b>`}.` : ''}
         ${p && p.toMedian > 0 ? ` At its peers' median it would bill <b>+${moneyK(p.toMedian)} a year</b>.` : ''}</p>
         ${f.lines && f.lines.length ? `<h3>The cost working est.</h3><table class="p2-t"><tbody>${f.lines.map(l => `<tr><td class="tl">${esc(l[0])}<small>${esc(String(l[2] || '').split(/(?<=\.)\s/)[0])}</small></td><td>${money0(l[1])}</td></tr>`).join('')}</tbody></table>` : ''}
-        ${p && !p.widened ? `<h3>Closest in volume</h3><ul class="p2-list">${p.names.map(n => `<li><a href="#customer/${n.level1}">${esc(titleCase(n.customer))}</a>: ${unitMoney(n.price, p.unit)} on ${Math.round(n.units).toLocaleString('en-US')}</li>`).join('')}</ul>` : ''}`,
+        ${p && !p.widened ? `<h3>Closest in volume</h3><ul class="p2-list">${p.names.map(n => `<li><a href="#customer/${n.level1}">${esc(titleCase(n.customer))}</a>: ${unitMoney(n.price, p.unit)} on ${Fmt.num(n.units)}</li>`).join('')}</ul>` : ''}`,
     });
   }
   if (kind === 'opp') {
@@ -213,8 +214,8 @@ export async function explain(kind, r, { B, PR, line, R }) {
       title: name, sub: `About ${moneyK(r.gap)} a year under the book's median`, ask: `Which of ${name}'s prices should we raise first?`,
       html: `<p class="p2-lede">Where ${esc(name)} pays under the median account for the same service, and what the median would bill on its own volume.</p>
         <table class="p2-t"><thead><tr><th class="tl">Service</th><th>Pays</th><th>Median</th><th>A year</th></tr></thead><tbody>
-        ${st ? `<tr><td class="tl">Storage, a box a month</td><td>$${st.rate_per_box.toFixed(3)}</td><td colspan="2"><small>see Price gaps</small></td></tr>` : ''}
-        ${svc.map(x => `<tr><td class="tl">${esc(titleCase(String(x.service).trim()))}<small>last moved ${esc(x.last_changed || '—')}</small></td><td>$${x.modal_rate.toFixed(2)}</td><td>$${meds[x.servcode].toFixed(2)}</td><td>${moneyK((meds[x.servcode] - x.modal_rate) * x.units)}</td></tr>`).join('')}</tbody></table>
+        ${st ? `<tr><td class="tl">Storage, a box a month</td><td>${Fmt.money(st.rate_per_box, { dp: 3 })}</td><td colspan="2"><small>see Price gaps</small></td></tr>` : ''}
+        ${svc.map(x => `<tr><td class="tl">${esc(titleCase(String(x.service).trim()))}<small>last moved ${esc(x.last_changed || '—')}</small></td><td>${Fmt.money(x.modal_rate, { dp: 2 })}</td><td>${Fmt.money(meds[x.servcode], { dp: 2 })}</td><td>${moneyK((meds[x.servcode] - x.modal_rate) * x.units)}</td></tr>`).join('')}</tbody></table>
         <p class="src">The median across accounts, not lines; a rate under a fifth of the median is left out as a likely unit mismatch. <a href="#pricing">Pricing ›</a></p>`,
     });
   }

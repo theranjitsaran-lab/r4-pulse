@@ -21,3 +21,6 @@ logs/
 
 # The P&L from QuickBooks, if a snapshot pulls it: company financials stay off GitHub
 fixtures/gl.json
+
+# Hallmark runs: saved pages and baselines hold client figures
+.hallmark/

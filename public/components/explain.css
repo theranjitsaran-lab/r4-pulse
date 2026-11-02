@@ -1,7 +1,7 @@
 /* The cross-sell explainer. Moved out of the view so every value reads tokens.css. */
 
 /* CSS */
-.xpl { border: 0; padding: 0; border-radius: var(--r-lg); width: min(calc(var(--u) * 180), calc(100vw - var(--sp-6))); max-height: calc(100vh - var(--sp-10)); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-dialog); }
+.xpl { border: 0; padding: 0; border-radius: var(--r-lg); width: min(calc(var(--u) * 180), calc(100% - var(--sp-6))); max-height: calc(100vh - var(--sp-10)); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-dialog); }
 .xpl::backdrop { background: var(--scrim); }
 .xpl .in { padding: var(--sp-6) var(--sp-6) var(--sp-5); overflow: auto; max-height: calc(100vh - var(--sp-10)); box-sizing: border-box; }
 .xpl .top { display: flex; justify-content: space-between; gap: var(--sp-3); align-items: flex-start; }

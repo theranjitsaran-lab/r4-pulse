@@ -1,6 +1,7 @@
 // One customer: the page every list and every number opens. Desktop first, restacks on a phone.
 // Header figures · 24-month storage and service on one axis · margin by line of business, each line
 // opening to its priced lines · prices against the book's median and what moving is worth · signals.
+import * as Fmt from '/components/format.js';
 import { lineChart, money0, moneyK } from '/components/chart.js';
 import { buildMargins, accountCosts, FAMILY_NAMES } from '/components/margin.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
@@ -30,7 +31,7 @@ export async function render(main, C, params) {
   const wsRow = buildWhitespace(M, { exclude: [CITADEL], top: 100000 }).rows.find(x => x.level1 === id);
   const ownRate = (PR.storage.find(r => r.level1 === id) || {}).rate_per_box;
   const overdue = signals && signals.boxes_review_overdue > 0 ? Math.round(signals.boxes_review_overdue) : 0;
-  const pitch = overdue && ownRate ? `The case for them: ${overdue.toLocaleString('en-US')} of their boxes are past their retention review. Destroying them would save them about ${moneyK(overdue * ownRate)} a month in storage at their own $${ownRate.toFixed(3)} a box.` : '';
+  const pitch = overdue && ownRate ? `The case for them: ${Fmt.grouped(overdue)} of their boxes are past their retention review. Destroying them would save them about ${moneyK(overdue * ownRate)} a month in storage at their own ${Fmt.money(ownRate, { dp: 3 })} a box.` : '';
 
   // an account with nothing billed in twelve months gets one honest line, not a page of blanks
   const billed = (s ? s.total.some(v => v !== 0) : false) || (m ? m.revenue !== 0 || m.cost !== 0 : false);
@@ -46,11 +47,11 @@ export async function render(main, C, params) {
 
   // the account in a few sentences, in place of a row of figure tiles
   const share = k => s ? Math.round(s[k].slice(-12).reduce((t, v) => t + v, 0) / Math.max(1, s.ltm) * 100) : null;
-  const n0 = v => Math.round(v || 0).toLocaleString('en-US');
+  const n0 = Fmt.count;
   const lede = [];
   lede.push(`<b>${moneyK(ltm)}</b> invoiced in the last twelve months${s ? `, ${share('storage')}% storage and ${share('service')}% service` : ''}.`);
   if (s && s.move) lede.push(`Over the last three months it ran at ${moneyK(s.move.last3)} a month against its own ${moneyK(s.move.run)} before${Math.abs(s.move.pct || 0) >= 0.05 ? `: ${moveReason(s.move, moneyK)}` : ', about level'}.`);
-  if (costsVisible() && m && m.cost > 0) lede.push(`About ${moneyK(m.cost)} a year to serve est. ${m.margin >= 0 ? `leaves ${moneyK(m.margin)}${pc != null ? ` (${Math.round(pc * 100)}%)` : ''}` : `is ${moneyK(-m.margin)} more than it pays`}${routeHeavy ? ', with route costs under review' : R.routeFor && R.routeFor(id) && m.fam.bin ? ', its bins costed from its own route days' : ''}.`);
+  if (costsVisible() && m && m.cost > 0) lede.push(`About ${moneyK(m.cost)} a year to serve est. ${m.margin >= 0 ? `leaves ${moneyK(m.margin)}${pc != null ? ` (${Fmt.pct(pc)})` : ''}` : `is ${moneyK(-m.margin)} more than it pays`}${routeHeavy ? ', with route costs under review' : R.routeFor && R.routeFor(id) && m.fam.bin ? ', its bins costed from its own route days' : ''}.`);
   if (acct && (acct.boxes >= 1 || acct.bins)) lede.push([acct.boxes >= 1 ? `It stores ${n0(acct.boxes)} boxes` : '', acct.bins ? `${acct.boxes >= 1 ? 'and had' : 'It had'} ${n0(acct.bins)} bin services on ${n0(acct.visits)} visits` : ''].filter(Boolean).join(' ') + '.');
   if (id === CITADEL) lede.push('Citadel\'s settlements land in lumps, so it is held apart from core.');
   const summary = lede.join(' ');
@@ -75,7 +76,7 @@ export async function render(main, C, params) {
     if (signals.not_raised_2y) sigs.push({ key: 'rounds', text: `No rate has moved in two years across ${signals.codes} services.` });
     if (signals.storage_no_destruction) sigs.push({ key: 'nodestroy', text: 'Stores with R4 but buys no destruction: shredding is a natural next conversation.' });
     if (signals.destruction_no_storage) sigs.push({ key: 'nostorage', text: 'Buys destruction but stores nothing with R4.' });
-    if (signals.boxes_review_overdue > 0) sigs.push({ key: 'overdue', text: `${Math.round(signals.boxes_review_overdue).toLocaleString('en-US')} boxes are past their retention review: a destruction conversation.` });
+    if (signals.boxes_review_overdue > 0) sigs.push({ key: 'overdue', text: `${Fmt.num(signals.boxes_review_overdue)} boxes are past their retention review: a destruction conversation.` });
   }
   const said = new Map(log.filter(l => l.kind === 'signal').map(l => [l.signal, l]));
   const VERB = { right: 'right', not_right: 'not right', called: 'called', emailed: 'emailed', not_this_week: 'not this week' };
@@ -104,7 +105,7 @@ export async function render(main, C, params) {
         ${fams.length ? `<div class="famhead"><span>Line</span><span>Revenue</span><span class="cost">Cost est.</span><span>Margin</span><span></span></div>` : ''}
         <div id="cp-fams">${fams.map(x => {
           const p = x.revenue > 0 ? 1 - x.cost / x.revenue : null, rev = review(x.f);
-          return `<div class="fam" data-f="${x.f}"><span>${esc(FAMILY_NAMES[x.f] || x.f)}${rev ? ' <span class="chip review">under review</span>' : ''}</span><span class="r">${money0(x.revenue)}</span><span class="r cost">${x.f === 'other' ? '—' : money0(x.cost)}</span><span class="r ${p != null && p < 0 && !rev ? 'is-bad' : ''}">${x.f === 'other' || p == null ? '—' : rev ? 'est.' : Math.round(p * 100) + '%'}</span><span class="go">›</span></div><div class="lines" data-for="${x.f}" hidden></div>`;
+          return `<div class="fam" data-f="${x.f}"><span>${esc(FAMILY_NAMES[x.f] || x.f)}${rev ? ' <span class="chip review">under review</span>' : ''}</span><span class="r">${money0(x.revenue)}</span><span class="r cost">${x.f === 'other' ? '—' : money0(x.cost)}</span><span class="r ${p != null && p < 0 && !rev ? 'is-bad' : ''}">${x.f === 'other' || p == null ? '—' : rev ? 'est.' : Fmt.pct(p)}</span><span class="go">›</span></div><div class="lines" data-for="${x.f}" hidden></div>`;
         }).join('') || '<p class="sub">No priced lines in the last twelve months.</p>'}</div>`}
       </div>
     </div>
@@ -114,7 +115,7 @@ export async function render(main, C, params) {
         <div class="card">
           <div class="card-head"><h3>Prices against the book</h3><a href="#pricing?level1=${id}">Price it ›</a></div>
           ${mine.map(r => `<div class="price">
-            <span><a href="#pricing?level1=${id}&code=${encodeURIComponent(r.servcode)}" style="color:inherit;text-decoration:none"><b>${esc(titleCase(r.service))}</b> <span style="color:var(--brand)">›</span></a><span class="sub" style="display:block">$${r.modal_rate.toFixed(2)} · book median $${r.med.toFixed(2)} · ${r.suspect ? 'so far apart it is probably billed in another unit: check before quoting' : r.modal_rate < r.med ? `cheaper than ${Math.round((1 - r.below) * 100)}% of accounts` : `dearer than ${Math.round(r.below * 100)}% of accounts`}</span></span>
+            <span><a href="#pricing?level1=${id}&code=${encodeURIComponent(r.servcode)}" style="color:inherit;text-decoration:none"><b>${esc(titleCase(r.service))}</b> <span style="color:var(--brand)">›</span></a><span class="sub" style="display:block">${Fmt.money(r.modal_rate, { dp: 2 })} · book median ${Fmt.money(r.med, { dp: 2 })} · ${r.suspect ? 'so far apart it is probably billed in another unit: check before quoting' : r.modal_rate < r.med ? `cheaper than ${Fmt.pct(1 - r.below)} of accounts` : `dearer than ${Fmt.pct(r.below)} of accounts`}</span></span>
             <span class="v">${r.suspect ? '<span class="chip warn">check the unit</span>' : r.worth > 0 ? `+${moneyK(r.worth)} a year<span class="sub" style="display:block;font-weight:400">at the median</span>` : '<span class="sub">at or above</span>'}</span>
             <div class="pos"><b style="left:${pos(r.med, r)}%"></b><i style="left:${pos(r.modal_rate, r)}%"></i></div>
           </div>`).join('') || '<p class="sub">No service rates in the last thirteen months.</p>'}
@@ -192,7 +193,7 @@ export async function render(main, C, params) {
     if (fam === 'storage') return;
     ledgerTable(box.querySelector('.lp-lines'), { columns: [
       { key: 'servcode', label: 'Service', fmt: (v) => esc(titleCase(svcName.get(v.replace(/^S5[BPT]$/, 'S5')) || v)) + ` <span class="sub" style="display:inline">${esc(v)}</span>` },
-      { key: 'units', label: 'Units', num: true, fmt: (v, r) => Math.round(v).toLocaleString('en-US') + ' ' + (r.unit || '') },
+      { key: 'units', label: 'Units', num: true, fmt: (v, r) => Fmt.num(v) + ' ' + (r.unit || '') },
       { key: 'revenue', label: 'Revenue', num: true, fmt: v => money0(v) },
     ], rows: ls.filter(l => l.revenue !== 0 || l.drives_cost) });
     // 3. this line's own work orders, each opening to its cost build
@@ -235,7 +236,7 @@ async function loadDrill(id, R, M) {
 }
 
 const dayFmt = t => new Date(t + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
-const n0 = v => Math.round(v || 0).toLocaleString('en-US');
+const n0 = v => Fmt.num(v || 0);
 function ordersTable(el, rows, svcName, name, famName) {
   ledgerTable(el, {
     columns: [
@@ -261,7 +262,7 @@ async function drawDrill(el, drillP, svcName) {
   }
   if (!el.isConnected) return;
   const day = t => new Date(t + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
-  const n0 = v => Math.round(v || 0).toLocaleString('en-US');
+  const n0 = v => Fmt.num(v || 0);
   const ordRev = d.orders.reduce((t, o) => t + o.revenue, 0);
   const lbs = d.visits.reduce((t, v) => t + (v.pounds || 0), 0);
   el.innerHTML = `
@@ -313,9 +314,9 @@ function pos(v, r) {
 // what it buys. "Running at $13K a month, about level on its own run, all service".
 function chartTitle(s) {
   const m = s.move, st = s.storage.reduce((a, b) => a + b, 0), sv = s.service.reduce((a, b) => a + b, 0);
-  const mix = !st ? ', all service' : !sv ? ', all storage' : `, ${Math.round(st / (st + sv) * 100)}% storage`;
+  const mix = !st ? ', all service' : !sv ? ', all storage' : `, ${Fmt.pct(st / (st + sv))} storage`;
   if (!m || m.pct == null) return `Billing by month${mix}`;
-  const how = Math.abs(m.pct) < 0.05 ? 'about level' : `${m.pct > 0 ? 'up' : 'down'} ${Math.abs(Math.round(m.pct * 100))}%`;
+  const how = Math.abs(m.pct) < 0.05 ? 'about level' : `${m.pct > 0 ? 'up' : 'down'} ${Fmt.pct(m.pct, { abs: true })}`;
   return `Running at ${moneyK(m.last3)} a month, ${how} on its own run${mix}`;
 }
 
@@ -336,13 +337,13 @@ function drawWhere(el, d) {
   if (!placed.length) return;
   const far = placed.reduce((m, p) => p.mi > m.mi ? p : m, placed[0]);
   const all = places.reduce((t, p) => t + p.services, 0), within10 = placed.filter(p => p.mi <= 10).reduce((t, p) => t + p.services, 0);
-  const title = placed.length === 1 ? `Served at one postcode, ${far.mi.toFixed(0)} miles from the yard`
-    : `Served at ${placed.length} postcodes; the furthest, ${far.postcode}, is ${far.mi.toFixed(0)} miles from the yard`;
+  const title = placed.length === 1 ? `Served at one postcode, ${Fmt.fixed(far.mi, 0)} miles from the yard`
+    : `Served at ${placed.length} postcodes; the furthest, ${far.postcode}, is ${Fmt.fixed(far.mi, 0)} miles from the yard`;
   const card = document.createElement('div');
   card.className = 'card'; card.style.gridColumn = '1 / -1';
   card.innerHTML = `<div class="card-head"><h3>${esc(title)}</h3></div>
-    <div class="rm-grid"><div class="rm-wrap"></div><ol class="rm-list">${places.slice(0, 12).map(p => `<li><span>${esc(p.postcode)}<small>${p.mi != null ? `${p.mi.toFixed(1)} miles from the yard` : 'no postcode centre'} · ${p.days} day${p.days === 1 ? '' : 's'} on a route</small></span><span class="num">${p.services.toLocaleString('en-US')}<small>services</small></span></li>`).join('')}</ol></div>
-    <div class="src">${Math.round(within10 / Math.max(1, all) * 100)}% of its ${all.toLocaleString('en-US')} done services in six months were within ten miles of the yard · Veri-Shred done orders on ${days.size} route days · postcode centres from the US Census, straight lines: no GPS was captured</div>`;
+    <div class="rm-grid"><div class="rm-wrap"></div><ol class="rm-list">${places.slice(0, 12).map(p => `<li><span>${esc(p.postcode)}<small>${p.mi != null ? `${Fmt.fixed(p.mi, 1)} miles from the yard` : 'no postcode centre'} · ${p.days} day${p.days === 1 ? '' : 's'} on a route</small></span><span class="num">${Fmt.grouped(p.services)}<small>services</small></span></li>`).join('')}</ol></div>
+    <div class="src">${Fmt.pct(within10 / Math.max(1, all))} of its ${Fmt.grouped(all)} done services in six months were within ten miles of the yard · Veri-Shred done orders on ${days.size} route days · postcode centres from the US Census, straight lines: no GPS was captured</div>`;
   el.prepend(card);
   const draw = () => { const w = card.querySelector('.rm-wrap'); if (w && w.isConnected) w.innerHTML = placesSvg(placed, { width: Math.max(280, Math.min(900, w.clientWidth || 560)), base: basemapNow(), label: title }); };
   draw();

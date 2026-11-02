@@ -19,10 +19,11 @@
 //     detail   row => html: a tap opens it under the row
 //     ns       a prefix for the table's link state, where a page has more than one table
 //     inTotal  which rows the total counts, where one is held apart
+import * as Fmt from './format.js';
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 // a month's figure in the months' columns: $K, no unit on each cell
-export const kOnly = v => { const r = Math.round((v || 0) / 1000); return (r < 0 ? '−' : '') + Math.abs(r).toLocaleString('en-US'); };
+export const kOnly = Fmt.thousands;
 const monthName = m => new Date(m + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' }) + ' ' + m.slice(2, 4);
 const kCell = v => v ? kOnly(v) : '—';
 
@@ -137,7 +138,7 @@ export function dataTable(el, o) {
     el.querySelectorAll('.dt-f').forEach(s => { s.value = st.f[s.dataset.k] || ''; s.classList.toggle('on', !!s.value); });
     const chips = (o.filters || []).filter(f => st.f[f.k]).map(f => { const lab = (f.options.find(([v]) => v === st.f[f.k]) || [])[1] || st.f[f.k]; return `<button type="button" class="dt-chip" data-k="${f.k}">${esc(lab)} ×</button>`; });
     if (st.q) chips.unshift(`<button type="button" class="dt-chip" data-k="__q">“${esc(st.q)}” ×</button>`);
-    $('.dt-chips').innerHTML = `<b>${rows.length.toLocaleString('en-US')}${rows.length !== o.rows.length ? ` of ${o.rows.length.toLocaleString('en-US')}` : ''}</b>${o.say || o.noun ? ` <span>${esc(o.say ? o.say(st, rows) : o.noun)}</span>` : ''}${chips.join('')}`;
+    $('.dt-chips').innerHTML = `<b>${Fmt.grouped(rows.length)}${rows.length !== o.rows.length ? ` of ${Fmt.grouped(o.rows.length)}` : ''}</b>${o.say || o.noun ? ` <span>${esc(o.say ? o.say(st, rows) : o.noun)}</span>` : ''}${chips.join('')}`;
     el.querySelectorAll('.dt-span button').forEach(b => b.classList.toggle('on', +b.dataset.span === spanNow()));
     el.querySelectorAll('.dt-type').forEach(b => { const on = st.f[b.dataset.k] === b.dataset.v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
     $('.dt-cols').hidden = !all.some(c => !c.name && !c.fixed);
@@ -155,11 +156,11 @@ export function dataTable(el, o) {
       return `<tr data-i="${index.get(r)}"${o.inTotal && !o.inTotal(r) ? ' data-out="1"' : ''}${o.expand || o.detail ? ` tabindex="0" aria-expanded="${!!open}"` : ''}>${cols.map(c => `<td class="${tdCls(c)}${c.cellCls ? ' ' + c.cellCls(r) : ''}"${c.cellStyle ? ` style="${c.cellStyle(r)}"` : ''}${c.name && c.get ? ` title="${esc(c.get(r))}"` : ''}${c.total === 'sum' ? num(c.get(r)) : ''}>${c.name && (o.expand || o.detail) ? `<span class="dt-caret">${open ? '▾' : '▸'}</span>` : ''}${c.fmt ? c.fmt(r) : esc(c.get ? c.get(r) ?? '—' : '')}</td>`).join('')}</tr>${kids}`;
     }).join('');
     const restRows = o.rest ? sorted.slice(shown) : [], restCounted = o.inTotal ? restRows.filter(o.inTotal) : restRows;
-    const rest = restRows.length ? `<tr class="dt-rest" data-rest="1">${cols.map(c => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(restCounted, c)) : ''}>${c.name ? `All other ${esc(o.noun || 'rows')} (${restRows.length.toLocaleString('en-US')})` : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(restCounted, c)) : sumOf(restCounted, c).toLocaleString('en-US')) : ''}</td>`).join('')}</tr>` : '';
+    const rest = restRows.length ? `<tr class="dt-rest" data-rest="1">${cols.map(c => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(restCounted, c)) : ''}>${c.name ? `All other ${esc(o.noun || 'rows')} (${Fmt.grouped(restRows.length)})` : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(restCounted, c)) : Fmt.grouped(sumOf(restCounted, c))) : ''}</td>`).join('')}</tr>` : '';
     const hasTotal = cols.some(c => c.total), counted = o.inTotal ? rows.filter(o.inTotal) : rows;
-    const foot = hasTotal ? `<tfoot><tr>${cols.map((c, i) => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(counted, c)) : ''}>${i === 0 ? esc(o.totalLabel || 'Total') : c.totalHtml ? c.totalHtml(counted) : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(counted, c)) : sumOf(counted, c).toLocaleString('en-US')) : typeof c.total === 'function' ? c.total(counted) : ''}</td>`).join('')}</tr>${o.ref ? `<tr class="dt-ref">${cols.map(c => { const v = c.month ? o.ref.get(c.month) : c.ms ? c.ms.reduce((t, m) => t + (o.ref.get(m) || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(o.ref.label) : v == null ? '' : kOnly(v)}</td>`; }).join('')}</tr>` : ''}</tfoot>` : '';
+    const foot = hasTotal ? `<tfoot><tr>${cols.map((c, i) => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(counted, c)) : ''}>${i === 0 ? esc(o.totalLabel || 'Total') : c.totalHtml ? c.totalHtml(counted) : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(counted, c)) : Fmt.grouped(sumOf(counted, c))) : typeof c.total === 'function' ? c.total(counted) : ''}</td>`).join('')}</tr>${o.ref ? `<tr class="dt-ref">${cols.map(c => { const v = c.month ? o.ref.get(c.month) : c.ms ? c.ms.reduce((t, m) => t + (o.ref.get(m) || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(o.ref.label) : v == null ? '' : kOnly(v)}</td>`; }).join('')}</tr>` : ''}</tfoot>` : '';
     table.innerHTML = `<thead><tr>${head}</tr></thead><tbody>${body ? body + rest : `<tr><td class="tl" colspan="${cols.length}">Nothing matches these filters.</td></tr>`}</tbody>${foot}`;
-    $('.dt-more').innerHTML = rows.length > shown ? `<button type="button" class="linkbtn">Show all ${rows.length.toLocaleString('en-US')} ›</button>` : '';
+    $('.dt-more').innerHTML = rows.length > shown ? `<button type="button" class="linkbtn">Show all ${Fmt.grouped(rows.length)} ›</button>` : '';
     if (o.onDraw) o.onDraw(st, rows);
   }
 

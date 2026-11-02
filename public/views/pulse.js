@@ -5,6 +5,7 @@
 //   the route to $1.0m: today's six-month average, each lever in dollars a month, and what is left
 //     for new business; every step opens the accounts behind it;
 //   customers moving: dollars a month against each account's own run, falls and gains.
+import * as Fmt from '/components/format.js';
 import { money0, moneyK } from '/components/chart.js';
 import { getJson, loadRates, titleCase, esc, getLog } from '/components/data.js';
 import { changesFor, daySentence } from '/components/changes.js';
@@ -20,7 +21,7 @@ import { bridge, billNow, slippingAccounts, risingAccounts, TARGET, CITADEL } fr
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const addMonths = (d, n) => new Date(Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1 + n, 1)).toISOString().slice(0, 10);
 const dayMonth = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-const pct = v => (v > 0 ? '▲ ' : v < 0 ? '▼ ' : '') + Math.abs(Math.round(v * 100)) + '%';
+const pct = v => Fmt.change(v, { arrows: true });
 const mk = v => Math.abs(v) < 50 ? '$0' : moneyK(v);   // no "−$0" from a few cents of credit
 const dcls = v => v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat';   // colour for big moves only
 
@@ -75,8 +76,8 @@ export async function render(main, P) {
   const nb = addMonths(billMonth, 1), top = mv.falls[0], gain = mv.gains[0];
   const sheet = [
     age > 2 && { key: 'stale', line: `The data stops on ${dayMonth(A.latestDone)}, ${age} days ago; the daily refresh has not run since` },
-    runCore != null && { key: 'bill', line: `${mon(billMonth)}'s bill, already known: ${moneyK(runCore)} core, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target, ${pct(runCore / last.core - 1).replace('▲ ', 'up ').replace('▼ ', 'down ')} on ${mon(last.month)}'s ${moneyK(last.core)}`,
-      say: `${mon(billMonth)} bills ${moneyK(runCore)}, ${Math.round(runCore / TARGET * 100)}% of the $1.0M target.` },
+    runCore != null && { key: 'bill', line: `${mon(billMonth)}'s bill, already known: ${moneyK(runCore)} core, ${Fmt.pct(runCore / TARGET)} of the $1.0M target, ${pct(runCore / last.core - 1).replace('▲ ', 'up ').replace('▼ ', 'down ')} on ${mon(last.month)}'s ${moneyK(last.core)}`,
+      say: `${mon(billMonth)} bills ${moneyK(runCore)}, ${Fmt.pct(runCore / TARGET)} of the $1.0M target.` },
     X.bill && { key: 'next', line: `${mon(nb)}'s bill, building from ${mon(workMonth)}'s work: about ${moneyK(X.bill.central)} est. (likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}), ${moneyK(TARGET - X.bill.central)} short of $1.0M; ${X.elapsed} of ${X.workdays} working days in`,
       say: `${mon(nb)} is heading for about ${moneyK(X.bill.central)} est., likely ${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)}.` },
     top2.length && { key: 'levers', line: `Biggest levers to $1.0M from existing customers: ${top2.map(x => `${x.t.toLowerCase()}, ${x.modelled ? 'up to ' : ''}${moneyK(x.v)} a month${x.modelled ? ' (a ceiling est.)' : ''}`).join('; ')}; new business must find ${moneyK(B.newBusiness)} a month`,
@@ -127,7 +128,7 @@ export async function render(main, P) {
       <section class="card">
         <div class="card-head"><h3>Mike · ${esc(new Date(A.latestDone + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' }))}</h3><a href="#activity">Routes ›</a></div>
         ${lineList(MK.lines, 'Every route within its usual range.')}
-        ${MK.next ? `<p class="next">Booked for ${esc(MK.next.label)}: ${MK.next.services.toLocaleString('en-US')} services on ${MK.next.routes.length} routes${MK.next.routes.length ? ` (${MK.next.routes.slice(0, 4).map(r => `${esc(r.route)} ${r.services}`).join(', ')})` : ''}.</p>` : ''}
+        ${MK.next ? `<p class="next">Booked for ${esc(MK.next.label)}: ${Fmt.grouped(MK.next.services)} services on ${MK.next.routes.length} routes${MK.next.routes.length ? ` (${MK.next.routes.slice(0, 4).map(r => `${esc(r.route)} ${r.services}`).join(', ')})` : ''}.</p>` : ''}
       </section>
       <p class="done">Last 7 days: ${t.called} called · ${t.emailed} emailed · ${t.deferred} put off · rates moved on ${t.ratesMoved} account${t.ratesMoved === 1 ? '' : 's'} in 30 days · lines marked useful ${t.useful}, already known ${t.knew}, not right ${t.wrong}</p>
     </div>`;
@@ -143,7 +144,7 @@ export async function render(main, P) {
       <div class="src">est. cross-sell is a ceiling · prices and slipping counted halfway · ${B.stopped.accounts} stopped accounts (${moneyK(B.stopped.lost)} a month) left out, <a href="#customers?view=slipping">listed with Slipping</a></div>
     </details>
     <div class="also" data-rv>
-      <a href="#customers?view=margin"><b>Margin est.</b> ${Math.round(solidPc * 100)}% on costs we are sure of; ${sure.length} account${sure.length === 1 ? '' : 's'} below cost, ${unsure.length} more under review ›</a>
+      <a href="#customers?view=margin"><b>Margin est.</b> ${Fmt.pct(solidPc)} on costs we are sure of; ${sure.length} account${sure.length === 1 ? '' : 's'} below cost, ${unsure.length} more under review ›</a>
       <a href="#numbers?tab=warehouse"><b>Warehouse</b> ${Math.round(B.overdue.boxes / 1000)}K boxes past retention review across ${B.overdue.accounts} accounts ›</a>
     </div>`;
 
@@ -188,11 +189,11 @@ export async function render(main, P) {
   const atDay = (pts, d) => (pts.find(p => p.day === d) || {}).y;
   const dNow = thisMonth.length ? thisMonth[thisMonth.length - 1].day : null, yNow = dNow ? atDay(thisMonth, dNow) : null;
   const vsLast = yNow && atDay(lastMonth, dNow) ? yNow / atDay(lastMonth, dNow) - 1 : null, vsYear = yNow && atDay(lastYear, dNow) ? yNow / atDay(lastYear, dNow) - 1 : null;
-  const word = v => Math.abs(v) < 0.02 ? 'level with' : v > 0 ? `${Math.round(v * 100)}% ahead of` : `${Math.round(-v * 100)}% behind`;
+  const word = v => Math.abs(v) < 0.02 ? 'level with' : v > 0 ? `${Fmt.pct(v)} ahead of` : `${Fmt.pct(-v)} behind`;
   const landTitle = vsLast != null ? `${mon(nb)}'s bill is ${word(vsLast)} ${mon(billMonth)}'s at working day ${dNow}${vsYear != null ? `, ${word(vsYear)} last year's` : ''}` : 'Where the month lands';
   landing(main.querySelector('#home-land'), {
     title: landTitle,
-    sub: `Each bill building by working day: its storage, then each day's work at ${perService ? '$' + perService.toFixed(2) : "last month's value"} a service est.`,
+    sub: `Each bill building by working day: its storage, then each day's work at ${perService ? Fmt.money(perService, { dp: 2 }) : "last month's value"} a service est.`,
     series: [
       { name: `${mon(addMonths(lyMonth, 1))} ${addMonths(lyMonth, 1).slice(0, 4)}'s bill`, cls: 'neutral faint', points: lastYear },
       { name: `${mon(billMonth)}'s bill`, cls: 'neutral', points: lastMonth },

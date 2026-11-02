@@ -1,5 +1,6 @@
 // An account's month, down to its invoices: number, date, what was on it, amount. Opened from any element
 // with data-inv-id and data-inv-m (YYYY-MM-01). Anyone who knows an account can check it against VCK.
+import * as Fmt from './format.js';
 import { money0 } from './chart.js';
 import { esc, titleCase, getJson } from './data.js';
 import { openPop } from './pop.js';
@@ -15,7 +16,7 @@ export async function openInvoices(level1, month, name = '') {
   try { d = await getJson(`view/invoices?level1=${encodeURIComponent(level1)}&month=${encodeURIComponent(month)}`); }
   catch (e) { openPop({ title, sub: 'Invoices in VCK', html: `<p>${e.status === 404 ? 'The invoices for this account are read live; they are not in this offline copy.' : 'The invoices could not be read just now.'}</p>` }); return; }
   const row = i => {
-    const lines = (i.lines || []).map(l => `<tr><td class="tl">${esc(titleCase(l.service))}${l.units ? `<small>${n(l.units).toLocaleString('en-US')} at $${l.units ? (l.amount / l.units).toFixed(2) : '0.00'}</small>` : ''}</td><td>${money0(l.amount)}</td></tr>`).join('');
+    const lines = (i.lines || []).map(l => `<tr><td class="tl">${esc(titleCase(l.service))}${l.units ? `<small>${Fmt.grouped(n(l.units))} at $${l.units ? Fmt.fixed(l.amount / l.units, 2) : '0.00'}</small>` : ''}</td><td>${money0(l.amount)}</td></tr>`).join('');
     const other = i.service - (i.lines || []).reduce((t, l) => t + l.amount, 0);
     return `<li class="inv"><div class="inv-h"><b>${esc(i.invoice_no)}</b><span>${day(i.date)}</span><b>${money0(i.total)}</b></div>
       <table class="p2-t"><tbody>${i.storage ? `<tr><td class="tl">Storage</td><td>${money0(i.storage)}</td></tr>` : ''}${lines}${Math.abs(other) >= 0.5 ? `<tr><td class="tl">Other service<small>on the invoice, no priced line</small></td><td>${money0(other)}</td></tr>` : ''}</tbody></table></li>`;

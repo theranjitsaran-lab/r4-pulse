@@ -18,11 +18,15 @@ function parseUsers(raw) {
 }
 
 const LOGIN_PAGE = (err) => `<!doctype html>
-<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Sign in to R4 Pulse, R4 Services' management view.">
 <title>R4 Pulse — sign in</title>
 <link rel="icon" href="/brand/r4-icon-192.png">
 <link rel="stylesheet" href="/tokens.css">
 <style>
+html,body{overflow-x:clip}
+:focus-visible{outline:var(--hair-2) solid var(--brand);outline-offset:var(--hair-2)}
+button:active{opacity:.7}
+button:disabled,input:disabled{cursor:not-allowed}
 body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--f-sans);font-size:var(--fs-body)}
 .mast{background:var(--logo-ground);border-bottom:var(--hair) solid var(--rule);padding:var(--sp-3) var(--sp-8);display:flex;gap:var(--sp-4);align-items:center}
 .mast img{height:var(--logo-h);width:auto;display:block}
@@ -30,7 +34,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--f-sans
 main{max-width:calc(var(--u) * 90);margin:var(--sp-12) auto;background:var(--surface);border:var(--hair) solid var(--rule-2);border-radius:var(--r-lg);padding:var(--sp-8)}
 h1{font-family:var(--f-display);font-weight:400;font-synthesis:none;font-size:var(--fs-display-ph);margin:0 0 var(--sp-4);letter-spacing:var(--track-tight)}
 label{display:block;font-size:var(--fs-source);font-weight:500;color:var(--ink-3);margin:var(--sp-3) 0 var(--sp-1)}
-input{width:100%;box-sizing:border-box;padding:var(--sp-2) var(--sp-3);border:var(--hair) solid var(--rule-4);border-radius:var(--r-sm);font:inherit;background:var(--surface);color:var(--ink)}
+input{width:100%;box-sizing:border-box;padding:var(--sp-2) var(--sp-3);border:var(--hair) solid var(--field-edge);border-radius:var(--r-sm);font:inherit;background:var(--surface);color:var(--ink)}
 button{margin-top:var(--sp-5);width:100%;padding:var(--sp-3);background:var(--hero-bg-2);color:var(--hero-ink);border:0;border-radius:var(--r-sm);font:inherit;font-weight:600;cursor:pointer}
 .err{color:var(--bad);font-size:var(--fs-source);margin-top:var(--sp-3)}
 </style></head><body>

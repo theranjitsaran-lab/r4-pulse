@@ -8,6 +8,7 @@
 // service in that month (pricer, below): its own priced lines once complete, else its posted bill.
 // The month in progress is priced at last month's value per service. Invoiced revenue is never charted by week:
 // it lands when a billing run posts, not when the work is done.
+import * as Fmt from './format.js';
 import { billNow, bridge, slippingAccounts, risingAccounts, TARGET, CITADEL, CROSS_SELL_DEPTH } from './levers.js';
 import { project, dailyFrom, curve, addMonths, monthStart } from './projection.js';
 import { seriesOf } from './series.js';
@@ -195,8 +196,8 @@ export function destructionView(D, n = 5) {
 // ── everything Home draws, and the figure sheet the summary is written from ──
 // ── the four points at the top of Home, each chosen by a rule and written as facts for the summary ──
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
-const money = v => { const a = Math.abs(v); return '$' + (a >= 1e6 ? (a / 1e6).toFixed(1) + 'M' : a >= 1000 ? Math.round(a / 1000) + 'K' : String(Math.round(a))); };
-const pc = v => Math.abs(Math.round(v * 100)) + '%';
+const money = v => Fmt.money(v, { short: 'abs' });
+const pc = v => Fmt.pct(v, { abs: true });
 const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase()).replace(/(?!^)\b(Of|And|The|For|In|At|On|To)\b/g, w => w.toLowerCase()).replace(/\b(Llp|Llc|Pc|Inc|Icu|Itad)\b/g, w => w.toUpperCase());
 
 export function pointsView(D, { month: m, cust, cross, dens, lines }) {

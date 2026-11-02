@@ -1,3 +1,9 @@
+/* Hallmark · checked: 2026-11-02 · genre: modern-minimal (inferred)
+ * floor: exceptions and false alarms listed in docs/hallmark-audit.md · app scope
+ * built: the project · redesign: polish · copy: verbatim · v2.0.0 */
+/* Hallmark · waive 39b · table toolbar controls at 25 to 27px, chips at 17 to 21px · a dense tool on 30px rows, the table round's locked decision */
+/* Hallmark · waive 49b · links wrap only at 320px · real customer names that cannot shorten, two lines at most */
+/* Hallmark · waive 72 · a list inside a scrolling box on the customer page · its rows are meant to run past the box and scroll */
 /* R4's face, from r4services.com: Average Sans (SIL Open Font License), one weight, served from this
    app so no page calls Google. The wordmark and the intro only: one light weight could not carry titles. */
 @font-face { font-family: "Average Sans"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/AverageSans-Regular.ttf") format("truetype"); }
@@ -30,10 +36,12 @@
   --rule-3:     #d8d8de;
   --rule-4:     #c7c7cc;   /* input borders */
   --rule-ink:   #1d1d1f;
+  --field-edge: #8e8e93;   /* the edge of an input or select: 3.3:1 on white */
 
   /* ── brand: R4 Services green from r4services.com (top bar, buttons), links and the tap affordance ── */
   --brand:      #0e5116;
   --brand-2:    #1a6b24;
+  --on-brand:   #ffffff;   /* text on a brand fill */
   --r4-bright:  #38b449;   /* the green of the R4 mark: fills and lines only, never text (2.7:1 on white) */
 
   /* ── the R4 logo (public/brand/r4-logo.png): black bars, so it always sits on white ── */
@@ -191,7 +199,7 @@
 .num, .fig { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .src { font-size: var(--fs-source); color: var(--ink-4); padding: 10px 0 0; }
 /* a figure that is modelled rather than measured */
-.modelled::after { content: " est."; color: var(--ink-5); font-weight: 400; }
+.modelled::after { content: " est."; color: var(--ink-4); font-weight: 400; }
 /* an honest empty state */
 .pending { border: 1px dashed var(--ink-5); border-radius: var(--r-sm); padding: 8px 10px; font-size: var(--fs-label); color: var(--ink-3); }
 /* status, exceptions only */

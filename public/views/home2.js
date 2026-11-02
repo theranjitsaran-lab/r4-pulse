@@ -2,6 +2,7 @@
 // figures, tied to VCK; lines of business as one list, each row one comparison and a tap for the rest; yesterday;
 // three things to act on, each with its owner; the weeks. Everything analytical lives on its own tab.
 // Every figure from components/home2data.js, which the Ask sheet (server/ask.js) reads too.
+import * as Fmt from '/components/format.js';
 import { money0, moneyK, sparkline } from '/components/chart.js';
 import { getJson, titleCase, esc } from '/components/data.js';
 import { reveal } from '/components/motion.js';
@@ -12,14 +13,14 @@ import { LABELS, changeWord, isLumpy } from '/components/metrics.js';
 import { closedMonth } from '/components/linework.js';
 
 // one line under the figures: the invoiced month adds up to VCK's invoices, or it has moved and says by how much
-const tieLine = t => !t ? '' : t.ok ? `<p class="h2-tie">✓ ${t.invoices.toLocaleString('en-US')} VCK invoices add up to the invoiced figure</p>` : `<p class="h2-tie late">VCK now holds ${moneyK(t.core)}: ${moneyK(Math.abs(t.moved))} ${t.moved > 0 ? 'posted' : 'removed'} since this was built</p>`;
+const tieLine = t => !t ? '' : t.ok ? `<p class="h2-tie">✓ ${Fmt.grouped(t.invoices)} VCK invoices add up to the invoiced figure</p>` : `<p class="h2-tie late">VCK now holds ${moneyK(t.core)}: ${moneyK(Math.abs(t.moved))} ${t.moved > 0 ? 'posted' : 'removed'} since this was built</p>`;
 // a card's method, behind one mark
 const info = text => `<details class="h2-i"><summary aria-label="How this is worked out">ⓘ</summary><p>${esc(text)}</p></details>`;
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const monS = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' });
 const dm = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-const pctW = v => v == null ? '' : `${Math.abs(Math.round(v * 100))}%`;
+const pctW = v => v == null ? '' : `${Fmt.pct(v, { abs: true })}`;
 const tone = v => v == null ? 'flat' : v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat';
 const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat'}">${changeWord(v)}</span>`;
 const signedK = v => (v < 0 ? '−' : '+') + moneyK(Math.abs(v));
@@ -179,8 +180,8 @@ function monthBars(bars, on, { w = 150, h = 40, labels = false } = {}) {
 const nmL = s => esc(titleCase(s));
 // why a job is left out, in a line: its size against what the account has bought, or no price of its own
 const whyHeld = j => {
-  const u = Math.round(j.units).toLocaleString('en-US'), at = '$' + j.rate.toFixed(2);
-  if (j.reason === 'check') return `${u} hours at its own ${at}, against ${Math.round(j.maxUnits).toLocaleString('en-US')} at most before (last ${dm(j.lastDate)} ${j.lastDate.slice(0, 4)}). May be a keying error.`;
+  const u = Fmt.num(j.units), at = Fmt.money(j.rate, { dp: 2 });
+  if (j.reason === 'check') return `${u} hours at its own ${at}, against ${Fmt.num(j.maxUnits)} at most before (last ${dm(j.lastDate)} ${j.lastDate.slice(0, 4)}). May be a keying error.`;
   return `${u} ${j.family === 'labour' ? 'hours' : 'units'}, never bought before. Priced at the book's ${at}, usually what a first-time buyer pays.`;
 };
 async function openLine(key, month, LV) {
@@ -207,7 +208,7 @@ async function openLine(key, month, LV) {
     <div class="p2-mbs">${monthBars(d.bars, month, { w: 340, h: 92, labels: true })}</div>
     <ul class="h2-stats"><li><span>This month</span><b>${moneyK(d.total)}${d.est ? ' est.' : ''}</b></li><li><span>On ${esc(monS(d.prevMonth || month))}</span><b>${chip(k.pct)}</b></li><li><span>3 months</span><b>${chip(k.p3)}</b></li><li><span>Year to date</span><b>${chip(k.ytd)}</b></li></ul>
     ${d.jobs.length ? `<h3>To check, not in the figure est.</h3><ul class="h2-pl job">${d.jobs.map(j => `<li><a href="#customer/${j.level1}"><span>${nmL(j.customer)}<em>${esc(whyHeld(j))}</em></span><b>about ${moneyK(j.value)}</b></a></li>`).join('')}</ul>` : ''}
-    <h3>Top 5 customers</h3><ul class="h2-pl">${d.top.map(x => row(x, `<small>${x.share != null ? Math.round(x.share * 100) + '%' : ''}</small><b>${moneyK(x.v)}</b>`)).join('')}<li class="rest"><span>All others</span><b>${moneyK(d.others)}</b></li></ul>
+    <h3>Top 5 customers</h3><ul class="h2-pl">${d.top.map(x => row(x, `<small>${x.share != null ? Fmt.pct(x.share) : ''}</small><b>${moneyK(x.v)}</b>`)).join('')}<li class="rest"><span>All others</span><b>${moneyK(d.others)}</b></li></ul>
     ${d.up.length ? `<h3>Rising on ${esc(prevName)}</h3><ul class="h2-pl">${d.up.map(x => row(x, `<b class="h2-cv up">${sgn(x.d)}</b>`)).join('')}</ul>` : ''}
     ${d.down.length ? `<h3>Falling on ${esc(prevName)}</h3><ul class="h2-pl">${d.down.map(x => row(x, `<b class="h2-cv down">${sgn(x.d)}</b>`)).join('')}</ul>` : ''}
     ${d.est ? '<p class="src">Estimates: Work orders priced at each account\'s own rates; charges added at the run carried from the last priced month. Replaced by the invoices when the run posts.</p>' : ''}`;

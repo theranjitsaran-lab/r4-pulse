@@ -5,9 +5,10 @@
 //     delta  { text, cls: 'is-bad' | '' }   e.g. ▼ 17% against early 2025
 'use strict';
 
+import * as Fmt from './format.js';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-const money0 = v => (v < 0 ? '−$' : '$') + Math.round(Math.abs(v)).toLocaleString('en-US');
-const moneyM = v => '$' + (v / 1e6).toFixed(1) + 'm';
+const money0 = v => Fmt.money(v);
+const moneyM = v => Fmt.money(v, { millions: true });
 
 export function meter(el, o) {
   if (!el) return;
