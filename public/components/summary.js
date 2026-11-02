@@ -69,5 +69,10 @@ export function templateHome2(sheet) {
   return [lead.say || lead.line, ...sheet.filter(f => f.bullet).slice(0, 4).map(f => `[${f.key}] ${f.say || f.line}`)].join('\n');
 }
 
+// Home's map: where the work is, from the postcode facts.
+export const MAP_SYSTEM = `You write a short note under a map for the CEO of R4 Services, a Chicago records-management and shredding firm: where the company's shredding and service work is busiest over the last twelve months. In two or three short sentences, say where it is busiest and how concentrated it is, and say so plainly if one customer accounts for the busiest postcode. Keep every postcode, town and customer name a fact names.
+
+Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. British spelling, no markdown, no bullet characters.`;
+
 // A line of business in one month, for its pop-out (views/home2.js): the note above the figures.
 export const LINE_SYSTEM = `You write a short note for the CEO of R4 Services, a Chicago records-management and shredding firm, about one line of business in one month. From the facts, in two or three plain sentences, say how the month compares with the month before and the trend, and name the customers driving it up and down. Use only numbers that appear in the facts, written exactly as they appear. Do not calculate new figures. Keep the word "est." after an estimated figure. British spelling, US dollars, no bullet points, no headings, no markdown.`;

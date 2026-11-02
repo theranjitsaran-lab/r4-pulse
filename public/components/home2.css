@@ -23,6 +23,56 @@
 .h2-bul { list-style: none; margin: 0; padding: 0; display: grid; }
 .h2-bul a { display: flex; gap: var(--sp-3); align-items: center; padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); color: var(--ink-2); text-decoration: none; font-size: var(--fs-body); line-height: 1.35; }
 .h2-bul a span { flex: 1; }
+/* a light on each point: steady and soft, pulsing when the point needs attention */
+.h2-bul a i.h2-light { flex: none; align-self: flex-start; width: var(--sp-2); height: var(--sp-2); margin-top: var(--sp-2); border-radius: 50%; background: var(--r4-bright); box-shadow: 0 0 var(--sp-2) var(--r4-bright); }
+.h2-bul .alert a i.h2-light { background: var(--bad); box-shadow: 0 0 var(--sp-2) var(--bad); animation: h2-glow 1.6s ease-in-out infinite; }
+@keyframes h2-glow { 0%, 100% { box-shadow: 0 0 var(--sp-1) var(--bad); opacity: 1; } 50% { box-shadow: 0 0 var(--sp-4) var(--sp-1) var(--bad); opacity: .65; } }
+/* how far the bill gets toward $1.0M */
+.h2-tobar { display: flex; height: var(--sp-4); margin: var(--sp-3) 0 var(--sp-2); border-radius: var(--r-pill); background: var(--well-2); overflow: hidden; }
+.h2-tobar i, .h2-tokey i { display: block; }
+.h2-tobar .pr, .h2-tokey .pr { background: var(--brand); }
+.h2-tobar .ck, .h2-tokey .ck { background: repeating-linear-gradient(45deg, var(--warn) 0 3px, var(--warn-bg) 3px 6px); }
+.h2-tokey { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); margin: 0 0 var(--sp-3); font-size: var(--fs-label); color: var(--ink-3); }
+.h2-tokey span { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.h2-tokey i { width: var(--sw); height: var(--sw); border-radius: var(--r-xs); }
+.h2-tokey .end { margin-left: auto; }
+/* the lower half: lines on the right, the day, weeks and actions stacked on the left */
+.h2-split, .h2-stack { display: grid; gap: var(--sp-4); min-width: 0; }
+.h2-stack > * { min-width: 0; }
+@media (max-width: 999px) { .h2-stack .h2-acts { order: 1; } .h2-stack > section:not(.h2-acts) { order: 2; } }
+@media (min-width: 1000px) { .h2-split { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: start; } .h2-stack { grid-column: 1; grid-row: 1; } .h2-split > #h2-lines { grid-column: 2; grid-row: 1; } }
+/* the Chicago map */
+.h2-mapc > summary { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); cursor: pointer; list-style: none; }
+.h2-mapc > summary::-webkit-details-marker { display: none; }
+.h2-mapc > summary h2 { margin: 0; font-family: var(--f-display); font-weight: 400; font-synthesis: none; font-size: var(--fs-lead); line-height: 1.25; letter-spacing: var(--track-tight); }
+.h2-mapopen { font-size: var(--fs-label); font-weight: 600; color: var(--brand); white-space: nowrap; }
+.h2-mapc[open] .h2-mapopen { display: none; }
+.hm-grid { display: grid; gap: var(--sp-4); margin-top: var(--sp-3); }
+.hm-stage { min-width: 0; }
+.hm-ctl { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-3); align-items: center; margin-bottom: var(--sp-2); }
+.hm-days { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); }
+.hm-days button, .hm-routes button { min-height: var(--sp-8); padding: 0 var(--sp-3); font: inherit; font-size: var(--fs-label); color: var(--ink-2); background: var(--surface); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); cursor: pointer; }
+.hm-days button:disabled { color: var(--ink-5); }
+.hm-routes { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.hm-routes button.on { background: var(--tint-brand); border-color: var(--brand); color: var(--ink); font-weight: 600; }
+.hm-map { display: block; width: 100%; height: auto; background: var(--map-water); border-radius: var(--r); }
+.hm-h { fill: var(--s-service); stroke: var(--surface); stroke-width: 1; }
+.hm-h.b1 { opacity: .3; } .hm-h.b2 { opacity: .45; } .hm-h.b3 { opacity: .6; } .hm-h.b4 { opacity: .75; }
+.hm-route { fill: none; stroke: var(--brand); stroke-width: 2.5; stroke-linejoin: round; stroke-dasharray: 6 5; animation: hm-dash 1s linear infinite; }
+.hm-route.on { stroke-width: 3; } .hm-route.dim, .hm-stop.dim { opacity: .15; }
+.hm-map.paused .hm-route { animation-play-state: paused; }
+@keyframes hm-dash { to { stroke-dashoffset: -11; } }
+.hm-stop { fill: var(--brand); stroke: var(--surface); stroke-width: 1; }
+.hm-van { fill: var(--surface); stroke: var(--brand); stroke-width: 2; }
+.hm-lab { font-size: var(--fs-tiny); font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3; }
+.hm-map .h2-maplab { paint-order: stroke; stroke: var(--surface); stroke-width: 3; }
+.hm-say { margin: 0 0 var(--sp-3); font-size: var(--fs-body); line-height: 1.45; color: var(--ink-2); }
+.hm-top { list-style: none; margin: 0; padding: 0; font-size: var(--fs-sm); }
+.hm-top li { display: grid; grid-template-columns: minmax(0, 1fr) auto calc(var(--u) * 10); gap: var(--sp-3); align-items: baseline; padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); }
+.hm-top small { display: block; font-size: var(--fs-tiny); color: var(--ink-4); }
+.hm-top li > b, .hm-top li > span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+@media (min-width: 1000px) { .hm-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); } }
+@media (prefers-reduced-motion: reduce) { .hm-route, .h2-bul .alert a i.h2-light { animation: none; } }
 .h2-bul a i { font-style: normal; color: var(--ink-5); }
 .h2-by { margin: var(--sp-2) 0 0; font-size: var(--fs-tiny); color: var(--ink-4); }
 
@@ -289,3 +339,6 @@ button.h2-seg:hover { background: var(--tint-brand); }
   .h2-kpis.bills .h2-kpi { padding: var(--sp-3); }
   .h2-kpis.bills .h2-kpi b { font-size: var(--fs-num-lg); }
 }
+
+/* a phone keeps Home to two screens: tighter cards, the change note left to the desk */
+@media (max-width: 700px) { .h2, .h2-split, .h2-stack { gap: var(--sp-2); } .h2-card { padding: var(--sp-3); } .h2-sum .h2-by { display: none; } .h2-bul a { padding: var(--sp-1) 0; } .h2-rows .h2-lr { min-height: 0; } }

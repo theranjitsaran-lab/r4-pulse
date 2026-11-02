@@ -35,14 +35,14 @@ router.post('/', async (req, res) => {
   if (!sheet || !sheet.every(f => f && typeof f.line === 'string' && f.line.length < 400)) return res.status(400).json({ error: 'sheet must be a list of { key, line }' });
   const S = await shared();
   // form 'home2': a headline and three keyed bullets (views/home2.js); otherwise the paragraph
-  const home2 = req.body.form === 'home2', lineNote = req.body.form === 'line';
-  const template = { text: home2 ? S.templateHome2(sheet) : lineNote ? sheet.map(f => f.say || f.line).join(' ') : S.templateSummary(sheet), source: 'template' };
+  const home2 = req.body.form === 'home2', lineNote = req.body.form === 'line', mapNote = req.body.form === 'map';
+  const template = { text: home2 ? S.templateHome2(sheet) : lineNote || mapNote ? sheet.map(f => f.say || f.line).join(' ') : S.templateSummary(sheet), source: 'template' };
   if (!process.env.ANTHROPIC_API_KEY) return res.json(template);
-  const key = crypto.createHash('sha256').update((home2 ? 'home2' : lineNote ? 'line' : '') + JSON.stringify(sheet)).digest('hex');
+  const key = crypto.createHash('sha256').update((home2 ? 'home2' : lineNote ? 'line' : mapNote ? 'map' : '') + JSON.stringify(sheet)).digest('hex');
   if (!cache.has(key)) {
     cache.set(key, (async () => {
       try {
-        const text = home2 ? await write(sheet, S, S.HOME2_SYSTEM, S.home2SheetText(sheet)) : lineNote ? await write(sheet, S, S.LINE_SYSTEM) : await write(sheet, S);
+        const text = home2 ? await write(sheet, S, S.HOME2_SYSTEM, S.home2SheetText(sheet)) : lineNote ? await write(sheet, S, S.LINE_SYSTEM) : mapNote ? await write(sheet, S, S.MAP_SYSTEM) : await write(sheet, S);
         if (!text) return template;
         const check = S.checkNumbers(text, sheet);
         if (home2 && !S.parseHome2(text, sheet)) { console.warn('summary: home2 reply not in four lines, template used'); return template; }

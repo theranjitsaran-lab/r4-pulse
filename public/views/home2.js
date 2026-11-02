@@ -11,6 +11,7 @@ import { openPop } from '/components/pop.js';
 
 import { LABELS, changeWord, isLumpy } from '/components/metrics.js';
 import { closedMonth } from '/components/linework.js';
+import { drawHomeMap } from '/components/homemap.js';
 
 // one line under the figures: the invoiced month adds up to VCK's invoices, or it has moved and says by how much
 const tieLine = t => !t ? '' : t.ok ? `<p class="h2-tie">✓ ${Fmt.grouped(t.invoices)} VCK invoices add up to the invoiced figure</p>` : `<p class="h2-tie late">VCK now holds ${moneyK(t.core)}: ${moneyK(Math.abs(t.moved))} ${t.moved > 0 ? 'posted' : 'removed'} since this was built</p>`;
@@ -46,6 +47,7 @@ export async function render(main, P) {
     ...(V.points || []).map(p => ({ key: p.key, bullet: true, href: p.href, title: p.title, line: p.line, say: p.say })),
   ].filter(Boolean);
   const hrefOf = Object.fromEntries(sheet.map(f => [f.key, f.href])), titleOf = Object.fromEntries(sheet.map(f => [f.key, f.title]));
+  const alertOf = Object.fromEntries((V.points || []).map(p => [p.key, !!p.alert]));
 
 
   const kpis = `<section class="h2-kpis bills" data-rv>
@@ -56,7 +58,7 @@ export async function render(main, P) {
     </section>${tieLine(V.tie)}`;
 
   const sumCard = `<section class="h2-card h2-sum" data-rv>
-      <h1 class="h2-head" id="h2-head"></h1>${changedNote ? `<p class="h2-by">${esc(changedNote)}</p>` : ''}
+      <h1 class="h2-head" id="h2-head"></h1>${tracking(m)}${changedNote ? `<p class="h2-by">${esc(changedNote)}</p>` : ''}
       <ul class="h2-bul" id="h2-bul"></ul>
     </section>`;
 
@@ -80,7 +82,13 @@ export async function render(main, P) {
 
   const weeks = `<section class="h2-card" data-rv><div class="h2-ch h2-chi"><div><h2>${w.lastFull ? `Last week ${moneyK(w.lastFull.value)} est., ${w.vsAvg >= 0 ? 'up' : 'down'} ${pctW(w.vsAvg)}` : 'Weeks'}</h2></div>${info(`${LABELS.veriShred} Work done each week, priced at that month's value a service, against the weeks before.`)}</div><div id="h2-weeks"></div></section>`;
 
-  main.innerHTML = `<div class="h2">${sumCard}${kpis}${segCard}${yesterday}${acts}${weeks}
+  // a phone folds the map, and loads it only when opened
+  const mapCard = `<details class="h2-card h2-mapc" id="h2-map" data-rv><summary><h2 id="hm-title">Where the work is</h2><span class="h2-mapopen">Show the map</span></summary>
+      <div class="hm-grid"><div class="hm-stage"><div class="hm-ctl"><div class="hm-days"><button type="button" id="hm-prev" aria-label="The day before">‹</button><b id="hm-day"></b><button type="button" id="hm-next" aria-label="The day after">›</button></div><div class="hm-routes" id="hm-routes"></div></div><div id="hm-svg"><p class="sub">Loading the map…</p></div></div>
+      <div class="hm-side"><p class="hm-say" id="hm-say"></p><ol class="hm-top" id="hm-top"></ol></div></div>
+      <p class="src">Shading: Veri-Shred done services by postcode, last twelve months, postcode centres only. Dashed lines: that day's routes from the yard and back, in recorded stop order along the main roads. Not GPS, which was never captured.</p></details>`;
+
+  main.innerHTML = `<div class="h2">${sumCard}${kpis}<div class="h2-split">${segCard}<div class="h2-stack">${yesterday}${weeks}${acts}</div></div>${mapCard}
     <div class="h2-foot">${esc(LABELS.estWord)} · Citadel held apart</div>
   </div>`;
 
@@ -89,7 +97,7 @@ export async function render(main, P) {
     const p = parseHome2(text, sheet);
     if (!p) return false;
     main.querySelector('#h2-head').textContent = p.headline;
-    main.querySelector('#h2-bul').innerHTML = p.bullets.map(b => `<li class="${esc(b.key)}"><a href="${esc(hrefOf[b.key] || '#pulse')}"><span><b>${esc(titleOf[b.key] || '')}</b>${esc(b.text)}</span><i>›</i></a></li>`).join('');
+    main.querySelector('#h2-bul').innerHTML = p.bullets.map(b => `<li class="${esc(b.key)}${alertOf[b.key] ? ' alert' : ''}"><a href="${esc(hrefOf[b.key] || '#pulse')}"><i class="h2-light"${alertOf[b.key] ? ' role="img" aria-label="Needs attention" title="Needs attention"' : ' aria-hidden="true"'}></i><span><b>${esc(titleOf[b.key] || '')}</b>${esc(b.text)}</span><i>›</i></a></li>`).join('');
     return true;
   };
   const tmpl = [sheet.find(f => f.lead) || sheet[0], ...sheet.filter(f => f.bullet)];
@@ -146,7 +154,22 @@ export async function render(main, P) {
     } catch (e) { box.querySelectorAll('button').forEach(x => x.disabled = false); }
   });
 
+  // the map: open on a desk, a tap on a phone; drawn once, when first opened
+  const mapEl = main.querySelector('#h2-map');
+  let mapDrawn = false;
+  const openMap = () => { if (!mapEl.open || mapDrawn) return; mapDrawn = true; drawHomeMap(mapEl); };
+  mapEl.addEventListener('toggle', openMap);
+  if (matchMedia('(min-width: 701px)').matches) mapEl.open = true;
+
   reveal(main.querySelector('.h2'));
+}
+
+// how far the month's bill gets toward $1.0M: priced, then the jobs still to check. The same figures as the tiles.
+function tracking(m) {
+  if (!m.next) return '';
+  const T = 1e6, w = v => Math.max(0, Math.min(100, v / T * 100)).toFixed(2) + '%', jobs = m.next.jobs || 0;
+  return `<div class="h2-tobar" role="img" aria-label="${esc(moneyK(m.next.central))} priced, ${esc(moneyK(jobs))} to check, of $1.0M a month"><i class="pr" style="width:${w(m.next.central)}"></i>${jobs ? `<i class="ck" style="width:${w(jobs)}"></i>` : ''}</div>
+    <div class="h2-tokey"><span><i class="pr"></i>${esc(moneyK(m.next.central))} est. priced</span>${jobs ? `<span><i class="ck"></i>${esc(moneyK(jobs))} to check</span>` : ''}<span class="end">$1.0M a month</span></div>`;
 }
 
 // ── the last thirteen weeks of work, priced est.; the week in progress hatched, the usual week a line ──

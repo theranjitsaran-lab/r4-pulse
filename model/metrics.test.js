@@ -17,6 +17,20 @@ test('a flat fee: the two IR accounts, not an account with priced bins or none a
   assert.equal(flatFeeYear([{ servcode: 'B2', revenue: 0, units: 5 }]), 0);
 });
 
+test('Home map: shares add up, billing-only postcodes are out, routes keep their recorded stop order', async () => {
+  const { busiest, dayRoutes, routeDates, busiestFacts } = await import('../public/components/homemap.js');
+  const A = require('../fixtures/activity.json').data, Z = require('../public/data/zcta.json');
+  const B = busiest(A, Z, []);
+  assert.ok(Math.abs(B.rows.reduce((t, p) => t + p.share, 0) - 1) < 1e-9);
+  assert.ok(B.rows.every(p => !p.billing_only && Z[p.postcode]));
+  assert.ok(B.rows[0].services >= B.rows[1].services);
+  assert.ok(busiestFacts(B).every(f => f.line.length < 400));
+  const Zt = { a: [41.8, -87.6], b: [41.9, -87.7] };
+  const T = { orders: [{ date: 'd', route: 'R', seq: 3, postcode: 'b', done: true }, { date: 'd', route: 'R', seq: 1, postcode: 'a', done: true }, { date: 'd', route: 'R', seq: 2, postcode: 'a', done: true }, { date: 'd', route: 'R', seq: 4, postcode: 'b', done: false }, { date: 'd', route: '--', seq: 1, postcode: 'a', done: true }] };
+  assert.deepEqual(dayRoutes(T, Zt, 'd'), [{ route: 'R', services: 3, stops: ['a', 'b'] }]);
+  assert.deepEqual(routeDates(T), ['d']);
+});
+
 test('#20 shredding: Opportunities, Warehouse and Home count the same boxes for an account', async () => {
   const { opportunities } = await import('../public/components/opps.js');
   const { destructionView } = await import('../public/components/home2data.js');

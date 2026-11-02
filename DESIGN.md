@@ -31,7 +31,7 @@ Type sizes run from `--fs-tiny` (12px, the floor: nothing on screen is smaller) 
 ## Colour rules
 - `--brand` is for links, buttons and the top bar. `--r4-bright` is for fills and lines only, never text (2.7:1 on white).
 - The R4 logo's bars are black, so it always sits on white.
-- Green is the brand and never on a number. Status marks exceptions only and always comes with a word: red below cost and down, amber below median, blue for a delta that is up. Sound is ink.
+- Green is the brand and never on a number. Home's points each carry a small light: green and steady, red and pulsing when the point needs attention. Status marks exceptions only and always comes with a word: red below cost and down, amber below median, blue for a delta that is up. Sound is ink.
 - A delta wears colour only at a fifth or more (±20%). There is no arrow under 1%, and past 300% it reads "new" or "stopped".
 - A month-table cell is coloured only when more than 25% and $5K from its row's own 12-month average: red below, blue above.
 - Series colour follows the entity: storage blue, service orange, Citadel a neutral. Text never wears a series colour.
@@ -61,7 +61,7 @@ Every control shows a 2px `--brand` focus ring, instantly. A field's edge is `--
 Plain English, British spelling in prose, US dollar figures. One idea per row. Every number carries its comparison. Estimated figures carry "est." with the assumption named once nearby, and charts hatch them. A figure that can't be calculated yet is a dashed empty state with a one-line reason.
 
 ## Motion
-Entrances only, quick: `--t-slow` 260ms, `--t-draw` 480ms, `--rise` 8px. All of it is off under reduced motion.
+Entrances only, quick, with two moving marks on Home by Theran's request (2 November 2026): a light that pulses on a point needing attention, and the map's routes. Both stop under reduced motion. Timings: `--t-slow` 260ms, `--t-draw` 480ms, `--rise` 8px. All of it is off under reduced motion.
 
 ## Exports
 `public/tokens.css` in this project.
