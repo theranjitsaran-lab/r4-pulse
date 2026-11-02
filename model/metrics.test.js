@@ -7,6 +7,16 @@ const J = n => require(`../fixtures/${n}.json`).data;
 const R = require('../model/rates');
 const D = () => ({ P: J('pulse'), A: J('activity'), C: J('customers'), M: J('margin'), PR: J('pricing'), CA: J('calls'), S: J('storage'), SG: J('segments'), LW: J('linework'), R, Z: require('../public/data/zcta.json') });
 
+test('a flat fee: the two IR accounts, not an account with priced bins or none at all', async () => {
+  const { flatFeeYear } = await import('../public/components/margin.js');
+  const M = require('../fixtures/margin.json').data, of = id => M.lines.filter(l => l.level1 === id);
+  assert.equal(Math.round(flatFeeYear(of(12601))), 139220);
+  const flat = M.accounts.filter(a => flatFeeYear(of(a.level1)) > 0).map(a => a.level1);
+  assert.equal(flat.length, 2);
+  assert.equal(flatFeeYear([{ servcode: 'IR', revenue: 100, units: 100 }, { servcode: 'B2', revenue: 50, units: 5 }]), 0);
+  assert.equal(flatFeeYear([{ servcode: 'B2', revenue: 0, units: 5 }]), 0);
+});
+
 test('#20 shredding: Opportunities, Warehouse and Home count the same boxes for an account', async () => {
   const { opportunities } = await import('../public/components/opps.js');
   const { destructionView } = await import('../public/components/home2data.js');

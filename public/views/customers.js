@@ -7,7 +7,7 @@ import { dataTable, kOnly } from '/components/datatable.js';
 import { accountFilters, carryHash } from '/components/acctfilters.js';
 import { dailyFrom, addMonths } from '/components/projection.js';
 import { sparkline, money0, moneyK } from '/components/chart.js';
-import { buildMargins, marginSummary, marginAction, accountLines, accountCosts, costParts, PARTS, FAMILY_NAMES } from '/components/margin.js';
+import { buildMargins, marginSummary, marginAction, accountLines, accountCosts, flatFeeYear, costParts, PARTS, FAMILY_NAMES } from '/components/margin.js';
 import { costOrders, jobHtml, drawRouteBlock, jobPlace, densityByPostcode } from '/components/jobview.js';
 import { loadRoadnet } from '/components/routemap.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
@@ -452,7 +452,8 @@ async function accountJobs(R, M, id) {
     const [r, A, Z, PR] = await Promise.all([fetch(`/api/customer/${id}`, { credentials: 'same-origin' }), getJson('activity').catch(() => null), zctaP(), getJson('pricing'), loadRoadnet()]);
     const j = await r.json().catch(() => ({}));
     if (!r.ok) return { error: j.error || `HTTP ${r.status}` };
-    const d = j.data, C = costOrders(R, d, meta, A, Z, id);
+    const d = j.data; d.flatFee = flatFeeYear(M.lines.filter(l => l.level1 === id));
+    const C = costOrders(R, d, meta, A, Z, id);
     return { d, meta, A, Z, C, svcName: new Map(PR.rates.map(x => [x.servcode, x.service])) };
   })();
   jobCache.set(id, p);
@@ -477,17 +478,17 @@ async function marginLine(main, R, M, MS, id, f) {
   if (J.error) { box.innerHTML = `<div class="pending">${esc(J.error)}</div>`; return; }
   const jobs = J.d.orders.map(o => { const items = famItems(o, f, J.meta); if (!items.length) return null; const x = J.C.cost(o, items); return { o, items, ...x, rev: items.reduce((t, i) => t + (i.revenue || 0), 0), place: jobPlace(x.ctx) }; }).filter(Boolean);
   if (!jobs.length) { box.innerHTML = '<p class="note">No orders on this line in the last six months.</p>'; return; }
-  const short = jobs.filter(j => j.margin < 0), real = jobs.filter(j => j.cost.real).length, route = jobs.filter(j => j.cost.route).length;
+  const onFee = j => !!J.d.flatFee && !j.rev, short = jobs.filter(j => j.margin < 0 && !onFee(j)), real = jobs.filter(j => j.cost.real).length, route = jobs.filter(j => j.cost.route).length;
   const units = j => j.items.reduce((t, i) => t + (i.units || 0), 0);
-  box.innerHTML = `<p class="note">${short.length ? `<b>${short.length} of ${jobs.length} jobs did not cover their cost.</b>` : `All ${jobs.length} jobs covered their cost.`} ${route ? `The route share moves most: it depends on how many other stops the driver made that day and how far apart they were. ${real} of the ${route} route jobs are costed on their real route day; the rest at the model's average visit${real < route ? ' (no Veri-Shred route for this account that day, or the date is outside the routes held offline)' : ''}.` : ''} Tap a job to see how its cost is built.</p>
+  box.innerHTML = `<p class="note">${J.d.flatFee ? `<b>Billed as a flat fee, ${money0(J.d.flatFee)} in the last twelve months, so read the line's year, not each job.</b>` : short.length ? `<b>${short.length} of ${jobs.length} jobs did not cover their cost.</b>` : `All ${jobs.length} jobs covered their cost.`} ${route ? `The route share moves most: it depends on how many other stops the driver made that day and how far apart they were. ${real} of the ${route} route jobs are costed on their real route day; the rest at the model's average visit${real < route ? ' (no Veri-Shred route for this account that day, or the date is outside the routes held offline)' : ''}.` : ''} Tap a job to see how its cost is built.</p>
     <div class="card jobs"><div class="hd"><span>Date</span><span>Where</span><span>Miles</span><span>Stops</span><span>Units</span><span>Billed</span><span>Cost est.</span><span>Left</span><span></span></div>
     ${jobs.slice(0, 80).map(j => `<a class="rw" href="${mlink({ id, line: f, job: j.o.woid })}">
       <span class="dt">${esc(new Date(j.o.date + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }))}</span>
       <span class="nm">${j.place ? `${esc(j.place.postcode || '—')} <small style="display:inline;color:var(--ink-4)">route ${esc(/\d/.test(j.place.route) ? j.place.route : titleCase(j.place.route))}</small>` : '<span class="sub">no route that day</span>'}</span>
       <span class="pl">${j.place ? `${j.place.miles != null ? Fmt.fixed(j.place.miles, 0) + ' mi · ' : ''}${j.place.stops} stops` : ''}</span>
       <span class="r mi">${j.place && j.place.miles != null ? Fmt.fixed(j.place.miles, 0) : '—'}</span><span class="r st">${j.place ? `${j.place.stops}` : '—'}</span>
-      <span class="r u">${n0(units(j))}</span><span class="r rv">${money0(j.rev)}</span><span class="r cs">${money0(j.cost.total)}</span>
-      <span class="r lf ${j.margin < 0 ? (j.cost.real || !j.cost.route ? 'is-bad' : 'is-warn') : ''}">${money0(j.margin)}</span><span class="go">›</span></a>`).join('')}
+      <span class="r u">${n0(units(j))}</span><span class="r rv">${onFee(j) ? 'flat fee' : money0(j.rev)}</span><span class="r cs">${money0(j.cost.total)}</span>
+      <span class="r lf ${onFee(j) ? '' : j.margin < 0 ? (j.cost.real || !j.cost.route ? 'is-bad' : 'is-warn') : ''}">${onFee(j) ? '—' : money0(j.margin)}</span><span class="go">›</span></a>`).join('')}
     <div class="src">VCK work orders, six months, this line's items only · miles from the yard and stops on the route that day from Veri-Shred done orders${J.d.routes && J.d.routes.length ? '' : ' (about three weeks held offline)'} · cost est. from the cost model</div></div>`;
 }
 

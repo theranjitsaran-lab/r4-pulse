@@ -3,7 +3,7 @@
 // opening to its priced lines · prices against the book's median and what moving is worth · signals.
 import * as Fmt from '/components/format.js';
 import { lineChart, money0, moneyK } from '/components/chart.js';
-import { buildMargins, accountCosts, FAMILY_NAMES } from '/components/margin.js';
+import { buildMargins, accountCosts, flatFeeYear, FAMILY_NAMES } from '/components/margin.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 import { ledgerTable } from '/components/table.js';
@@ -204,7 +204,7 @@ export async function render(main, C, params) {
     const mine = d.orders.filter(o => o.items.some(i => { const f = (meta.get(i.code) || {}).family; return (f && f !== 'none' ? f : 'other') === fam || (fam === 'bin' && /^B\d$/.test(i.code)); }));
     if (!mine.length) { ob.innerHTML = '<p class="sub">No orders on this line in the last six months.</p>'; return; }
     const lost = mine.filter(o => o.cost.total && o.margin < 0).length;
-    ob.insertAdjacentHTML('beforebegin', `<p class="sub" style="margin:0 0 var(--sp-2)">${mine.length}${mine.length >= 200 ? '+' : ''} orders; ${lost} cost more to serve than they billed est.</p>`);
+    ob.insertAdjacentHTML('beforebegin', `<p class="sub" style="margin:0 0 var(--sp-2)">${mine.length}${mine.length >= 200 ? '+' : ''} orders; ${d.flatFee ? 'billed by the flat fee, not order by order' : `${lost} cost more to serve than they billed est.`}</p>`);
     ordersTable(ob, mine.slice(0, 12), svcName, name, famName);
     if (mine.length > 12) {
       const b = document.createElement('button');
@@ -229,6 +229,7 @@ async function loadDrill(id, R, M) {
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
     const d = j.data;
+    d.flatFee = flatFeeYear(M.lines.filter(l => l.level1 === id));
     costOrders(R, d, meta, A, Z, id);
     RCTX = { id, R, d, A, Z };
     return { d, meta };
@@ -242,9 +243,9 @@ function ordersTable(el, rows, svcName, name, famName) {
     columns: [
       { key: 'date', label: 'Date', fmt: v => dayFmt(v) },
       { key: 'woid', label: 'Order', fmt: v => `<span class="sub" style="display:inline">${esc(v)}</span>` },
-      { key: 'revenue', label: 'Value', num: true, fmt: v => money0(v) },
+      { key: 'revenue', label: 'Value', num: true, fmt: (v, r) => r.flatFee ? 'flat fee' : money0(v) },
       ...(costsVisible() ? [{ key: 'cost', label: 'Cost est.', num: true, fmt: v => v.total ? money0(v.total) : '—' },
-      { key: 'margin', label: 'Left', num: true, fmt: (v, r) => r.cost.total ? `<span class="${v < 0 ? (r.cost.route ? 'is-warn' : 'is-bad') : ''}">${money0(v)}</span>` : '—' }] : []),
+      { key: 'margin', label: 'Left', num: true, fmt: (v, r) => r.cost.total && !r.flatFee ? `<span class="${v < 0 ? (r.cost.route ? 'is-warn' : 'is-bad') : ''}">${money0(v)}</span>` : '—' }] : []),
     ],
     rows,
     detail: !costsVisible() ? undefined : (o, td) => { td.innerHTML = `${famName ? `<div class="lp-crumb">${esc(name)} › ${esc(famName)} › order ${esc(o.woid)}, ${dayFmt(o.date)}</div>` : ''}${jobHtml({ o, items: o.items, c: o.cost, svcName, ctx: o.day, A: RCTX && RCTX.A })}`; if (RCTX) drawRouteBlock(td.querySelector('.jv-route'), o.day, RCTX); },
@@ -266,7 +267,7 @@ async function drawDrill(el, drillP, svcName) {
   const ordRev = d.orders.reduce((t, o) => t + o.revenue, 0);
   const lbs = d.visits.reduce((t, v) => t + (v.pounds || 0), 0);
   el.innerHTML = `
-    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? (d.orders.length >= 200 ? `the latest 200 orders, ${money0(ordRev)}` : `${n0(d.orders.length)} in six months, ${money0(ordRev)}`) : 'last six months'}</small></div><div id="cp-orders"></div><div class="pending" style="margin-top:var(--sp-3)">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · cost est. from the cost model, one visit shared between the day's orders · tap an order for its cost build</div></div>
+    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? (d.orders.length >= 200 ? `the latest 200 orders, ${money0(ordRev)}` : `${n0(d.orders.length)} in six months, ${money0(ordRev)}`) : 'last six months'}</small></div>${d.flatFee ? `<p class="sub">Billed as a flat fee: ${money0(d.flatFee)} in the last twelve months. Rotation orders carry no value of their own, so read the account's year, not each order.</p>` : ''}<div id="cp-orders"></div><div class="pending" style="margin-top:var(--sp-3)">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · cost est. from the cost model, one visit shared between the day's orders · tap an order for its cost build</div></div>
     <div class="card"><div class="card-head"><h3>Shredding visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} days on a route · ${n0(lbs)} lb` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Bin and shredding stops drivers marked done in Veri-Shred, one row per day and route. Box deliveries and retrievals are on the work orders, not here. Executive-bin weights are a set figure, not weighed.</div></div>`;
   const oBox = el.querySelector('#cp-orders'), vBox = el.querySelector('#cp-visits');
   drawWhere(el, d);
