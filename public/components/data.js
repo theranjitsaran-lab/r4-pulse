@@ -7,7 +7,7 @@ export function getJson(name, opts = {}) {
     cache.set(name, fetch('/api/' + name).then(async r => {
       if (!r.ok) { cache.delete(name); const e = new Error(`${name}: ${r.status}`); e.status = r.status; throw e; }
       return r.json();
-    }));
+    }).catch(e => { cache.delete(name); throw e; }));
   }
   return cache.get(name).then(j => opts.envelope ? j : j.data);
 }
