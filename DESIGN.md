@@ -39,6 +39,13 @@ Type sizes run from `--fs-tiny` (12px, the floor: nothing on screen is smaller) 
 ## States
 Every control shows a 2px `--brand` focus ring, instantly. A field's edge is `--field-edge`, 3:1 on white. Labels are sentence case, never capitals, and a line of prose stops at `--measure`.
 
+## Data states
+`docs/states.html` lists every data block; it marks what is built and what is only specified.
+- Loading: grey shapes where the page will be, once per screen, no spinner.
+- Empty: a dashed border and one line saying what belongs here, never a zero or an invented figure. A filtered table with no rows says "Nothing matches these filters."
+- Error: what broke and what to do, never the raw error. Blocks sharing a data call fail together.
+- Stale: one amber bar under the masthead, for the whole app, with figures kept as of that date. No block has its own.
+
 ## Type
 - Average Sans (`--f-brand`, one weight, at 400 with `font-synthesis: none`) is for the "Pulse" wordmark and the intro only.
 - Everything else is the system sans. Table figures use the system monospace, `--f-num`.

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R4 Pulse data states</title>
+<meta name="description" content="Loading, empty, error and stale-data states for every data block in R4 Pulse: what is built and what is specified.">
+<link rel="stylesheet" href="../public/tokens.css">
+<style>
+/* Hallmark · checked: 2026-11-02 · genre: modern-minimal (inferred)
+ * floor: see the sweep in docs/hallmark-audit.md · app scope
+ * built: the project · redesign: polish · copy: verbatim · v2.0.0 */
+html, body { overflow-x: clip; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: var(--fs-body)/1.5 var(--f-sans); }
+:focus-visible { outline: var(--hair-2) solid var(--brand); outline-offset: var(--hair-2); }
+main { max-width: calc(var(--u) * 280); margin: 0 auto; padding: var(--sp-8) var(--sp-4) var(--sp-12); }
+h1 { margin: 0 0 var(--sp-2); font-size: var(--fs-display); font-weight: var(--w-head); letter-spacing: var(--track-tight); text-wrap: balance; }
+h2 { margin: var(--sp-10) 0 var(--sp-3); font-size: var(--fs-title); font-weight: var(--w-head); text-wrap: balance; }
+h3 { margin: 0 0 var(--sp-1); font-size: var(--fs-head); font-weight: var(--w-head); text-wrap: balance; }
+p { margin: 0 0 var(--sp-3); max-width: var(--measure); }
+a { color: var(--brand); } a:active { opacity: .7; }
+code { font-family: var(--f-num); font-size: var(--fs-sm); }
+.lede { font-size: var(--fs-body-lg); color: var(--ink-2); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, calc(var(--u) * 60)), 1fr)); gap: var(--sp-4); }
+.state { padding: var(--sp-4); border: var(--hair) solid var(--rule-3); border-radius: var(--r); }
+.state h3 { margin-bottom: var(--sp-2); }
+.state p { font-size: var(--fs-sm); color: var(--ink-3); margin: var(--sp-3) 0 0; }
+.sk-demo { display: grid; gap: var(--sp-2); }
+.sk-demo i { display: block; height: var(--sp-4); border-radius: var(--r-sm); background: var(--well-2); }
+.sk-demo i:first-child { width: 40%; height: var(--sp-6); }
+.sk-demo i:last-child { height: var(--sp-12); }
+.dash { padding: var(--sp-2) var(--sp-3); border: var(--hair) dashed var(--ink-5); border-radius: var(--r-sm); font-size: var(--fs-label); color: var(--ink-3); }
+.err b { display: block; font-size: var(--fs-head); font-weight: var(--w-head); margin-bottom: var(--sp-1); }
+.late { padding: var(--sp-1) var(--sp-3); border-radius: var(--r-sm); background: var(--warn-bg); color: var(--warn); font-size: var(--fs-label); font-weight: 600; }
+.rules { margin: 0; padding: 0 0 0 var(--sp-5); max-width: var(--measure); }
+.rules li { margin-bottom: var(--sp-2); }
+.screen { margin: var(--sp-6) 0; }
+.calls { font-size: var(--fs-label); color: var(--ink-3); margin-bottom: var(--sp-2); max-width: none; }
+.scroll { overflow-x: auto; border: var(--hair) solid var(--rule-3); border-radius: var(--r-sm); }
+table { width: 100%; min-width: calc(var(--u) * 160); border-collapse: collapse; font-size: var(--fs-sm); }
+th, td { padding: var(--sp-2) var(--sp-3); text-align: left; vertical-align: top; border-top: var(--hair) solid var(--rule); }
+thead th { border-top: 0; background: var(--well); font-weight: 600; }
+tbody th { width: 26%; font-weight: 500; }
+td { width: 37%; color: var(--ink-2); }
+.tag { display: inline-block; margin-right: var(--sp-1); padding: 0 var(--sp-2); border-radius: var(--r-pill); font-size: var(--fs-tiny); font-weight: 600; }
+.built .tag { background: var(--tint-brand); color: var(--ink); }
+.spec .tag { border: var(--hair) dashed var(--ink-5); color: var(--ink-3); }
+</style></head><body><main>
+<h1>Data states for R4 Pulse</h1>
+<p class="lede">Every data block on every screen, in loading, empty, error and stale. "Built" means the app does this today, in the words shown. "Spec" means it is designed here and not built.</p>
+<p>12 screens and 51 data blocks. Of their 102 empty and error states, 31 are built and 71 are specs. Nothing on this page changes the app.</p>
+
+<h2>The four states</h2>
+<div class="grid">
+<div class="state"><h3>Loading</h3><div class="sk-demo" aria-hidden="true"><i></i><i></i><i></i><i></i></div><p>Built, once per screen, in <code>public/app.js</code>: grey shapes where the page will be, no spinner, still under reduced motion. Blocks that share a data call load together, so they share it.</p></div>
+<div class="state"><h3>Empty</h3><div class="dash">No postcodes on done orders in this window.</div><p>A dashed border and one line saying what belongs here. Never a zero or an invented figure. A table with no rows left after filtering stays a plain row: "Nothing matches these filters."</p></div>
+<div class="state"><h3>Error</h3><div class="err"><b>This screen did not load</b>Its figures are not available just now. Try again in a minute.</div><p>Built, once per screen. What broke and what to do, never the raw error. One failed call takes down every block that uses it.</p></div>
+<div class="state"><h3>Stale</h3><div class="late">Data to Fri, 30 Oct: late, Veri-Shred has sent no finished work since then</div><p>Built, for the whole app, in the bar under the masthead. Figures stay on screen as of that date.</p></div>
+</div>
+
+<h2>Stale: one rule for every block</h2>
+<ul class="rules">
+<li><b>The bar under the masthead, on every screen.</b> It turns amber when the latest finished work is older than the last working day (<code>freshStamp</code>, <code>public/components/metrics.js</code>).</li>
+<li><b>Operations, and the old Home at <code>#classic</code>.</b> A sentence is added when the data is more than two days old.</li>
+<li><b>No block has its own stale state.</b> All the figures come from the same nightly refresh, so a block-by-block warning would repeat the same fact. Today has no sentence of its own, only the bar.</li>
+<li><b>VCK's invoices can move on separately.</b> Today and Money show the difference, for example "VCK now holds $638K: $6K posted since this was built".</li>
+</ul>
+
+<h2>Loading and error: one rule per data call</h2>
+<p>Most blocks share a call with their screen, so they load and fail together. The table says "Screen error" for those. To make a block fail on its own, its call would need splitting, which changes the server and was decided against for this work.</p>
+
+<h2>Empty and error, block by block</h2>
+<section class="screen"><h3>Today</h3><p class="calls"><code>#pulse</code>. Data from: pulse, view/home, then a worded summary.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">Headline and three points</th><td class="spec"><span class="tag">Spec</span> Say the work figure is not in yet, and link to Money.</td><td class="built"><span class="tag">Built</span> The summary call failing leaves the plain worded headline.</td></tr>
+<tr><th scope="row">Bill, invoiced and gap tiles</th><td class="spec"><span class="tag">Spec</span> A dashed tile for any month not posted: "Not posted yet."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Lines of business by month</th><td class="spec"><span class="tag">Spec</span> "No priced work for this month yet."</td><td class="built"><span class="tag">Built</span> A line's pop-out shows the error message. Replace it with "This line could not be read just now."</td></tr>
+<tr><th scope="row">The day, against normal</th><td class="spec"><span class="tag">Spec</span> "No routes ran on this day."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Three things to act on</th><td class="spec"><span class="tag">Spec</span> "Nothing needs acting on today."</td><td class="built"><span class="tag">Built</span> A failed tick re-enables its buttons, with no message. Add "Could not save just now."</td></tr>
+<tr><th scope="row">Last 13 weeks</th><td class="spec"><span class="tag">Spec</span> "No finished work in these weeks."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+</tbody></table></div></section>
+<section class="screen"><h3>Accounts: All accounts</h3><p class="calls"><code>#customers?view=overview</code>. Data from: pulse, view/customers, rates; view/account-lines for an opened row.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">Headline tiles</th><td class="spec"><span class="tag">Spec</span> A dashed tile: "Not posted yet."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">The book by line</th><td class="spec"><span class="tag">Spec</span> "No lines billed in this month yet."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Who moved</th><td class="spec"><span class="tag">Spec</span> "No account moved in these three months."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Every account by month</th><td class="built"><span class="tag">Built</span> "Nothing matches these filters."</td><td class="spec"><span class="tag">Spec</span> Gap: a failed row opens empty with no message. Show "These lines could not be read just now."</td></tr>
+</tbody></table></div></section>
+<section class="screen"><h3>Accounts: Month grid</h3><p class="calls"><code>#customers?view=grid</code>. Data from: activity, pulse.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">Accounts by month</th><td class="built"><span class="tag">Built</span> "Nothing matches these filters."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+</tbody></table></div></section>
+<section class="screen"><h3>Accounts: Cross-sell</h3><p class="calls"><code>#customers?view=whitespace</code>. Data from: rates, margin, calls.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">Cross-sell list</th><td class="built"><span class="tag">Built</span> "Nothing matches these filters."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+</tbody></table></div></section>
+<section class="screen"><h3>Quote</h3><p class="calls"><code>#pricing</code>. Data from: rates, margin; postcodes and roads on first use; saved quotes.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">The quote</th><td class="spec"><span class="tag">Spec</span> "Add a service to start a quote."</td><td class="built"><span class="tag">Built</span> "Could not save just now."</td></tr>
+<tr><th scope="row">Verdict and the price's P&amp;L</th><td class="spec"><span class="tag">Spec</span> "Pick a service to see the verdict."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">How to improve the margin</th><td class="built"><span class="tag">Built</span> "Nothing obvious: the price is at or above the book" and the rest of that line.</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">The price on one track</th><td class="spec"><span class="tag">Spec</span> "Too few accounts buy this for a comparison."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">The cost working</th><td class="spec"><span class="tag">Spec</span> "No cost for this service: nothing drives one."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Invoiced against the book</th><td class="built"><span class="tag">Built</span> "Nothing matches these filters."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Saved quotes</th><td class="spec"><span class="tag">Spec</span> "No quotes saved yet."</td><td class="spec"><span class="tag">Spec</span> Gap: if the list fails, it shows as no quotes. Show "Saved quotes could not be read just now."</td></tr>
+</tbody></table></div></section>
+<section class="screen"><h3>Money</h3><p class="calls"><code>#numbers</code>. Data from: view/numbers.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">Core against $1.0M</th><td class="spec"><span class="tag">Spec</span> "No posted months yet."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Work volume</th><td class="spec"><span class="tag">Spec</span> "No finished work this month yet."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Lines by month</th><td class="built"><span class="tag">Built</span> "Nothing matches these filters." For R4 users, the margin switch is greyed: "Margins arrive when route costs are signed off."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">The EBITDA bridge</th><td class="built"><span class="tag">Built</span> "Arrives after the month's books close."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Shredding eligible boxes</th><td class="built"><span class="tag">Built</span> The block is left out when there is nothing to show.</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Gross margin by line</th><td class="built"><span class="tag">Built</span> Hidden for R4 users until costs are signed off.</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+</tbody></table></div></section>
+<section class="screen"><h3>Money: Warehouse</h3><p class="calls"><code>#numbers?tab=warehouse</code>. Data from: storage, pricing, margin.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">The building by who fills it</th><td class="spec"><span class="tag">Spec</span> "No boxes in storage in this snapshot."</td><td class="built"><span class="tag">Built</span> "Warehouse data is not in this snapshot yet." It covers every failure, so a real error reads as missing data. Word the two apart.</td></tr>
+<tr><th scope="row">Shredding the eligible boxes</th><td class="built"><span class="tag">Built</span> "Nothing matches these filters."</td><td class="built"><span class="tag">Built</span> As above.</td></tr>
+<tr><th scope="row">Boxes not on the bill</th><td class="built"><span class="tag">Built</span> "Nothing matches these filters."</td><td class="built"><span class="tag">Built</span> As above.</td></tr>
+<tr><th scope="row">The storage bill by month</th><td class="spec"><span class="tag">Spec</span> "No storage bills in this snapshot."</td><td class="built"><span class="tag">Built</span> As above.</td></tr>
+</tbody></table></div></section>
+<section class="screen"><h3>Operations</h3><p class="calls"><code>#activity</code>. Data from: rates, activity; postcodes and roads.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">The day in a sentence</th><td class="built"><span class="tag">Built</span> "No work done on this day."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">By route against its norm</th><td class="spec"><span class="tag">Spec</span> "No routes ran on this day."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">The map</th><td class="spec"><span class="tag">Spec</span> "No stops with a postcode on this day."</td><td class="built"><span class="tag">Built</span> "The map is not available: the postcode centres did not load."</td></tr>
+<tr><th scope="row">The week</th><td class="spec"><span class="tag">Spec</span> "No finished work this week."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Booked ahead</th><td class="built"><span class="tag">Built</span> "Nothing booked beyond the latest day."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Distance from the yard</th><td class="spec"><span class="tag">Spec</span> "No postcodes on done orders in this window."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">The long way round</th><td class="built"><span class="tag">Built</span> "No postcodes on done orders in this window."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+</tbody></table></div></section>
+<section class="screen"><h3>Opportunities</h3><p class="calls"><code>#opportunities</code>. Data from: view/opportunities, view/customers.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">In play, won and mine tiles</th><td class="built"><span class="tag">Built</span> Left out until something is moving.</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">One row per account</th><td class="built"><span class="tag">Built</span> "Nothing matches these filters."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">An account's other moves</th><td class="spec"><span class="tag">Spec</span> "No other moves on this account."</td><td class="built"><span class="tag">Built</span> "Could not save just now."</td></tr>
+</tbody></table></div></section>
+<section class="screen"><h3>Customer page</h3><p class="calls"><code>#customer/&lt;id&gt;</code>. Data from: rates, margin, pricing, calls, log; view/opportunities; customer detail, activity, postcodes.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">Headline and 24-month chart</th><td class="spec"><span class="tag">Spec</span> "No invoices for this account in these months."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Invoices for a month</th><td class="spec"><span class="tag">Spec</span> "No invoices in this month."</td><td class="built"><span class="tag">Built</span> "The invoices could not be read just now."</td></tr>
+<tr><th scope="row">Open opportunities</th><td class="spec"><span class="tag">Spec</span> "Nothing open on this account."</td><td class="spec"><span class="tag">Spec</span> Gap: on failure the block disappears. Show "Could not be read just now."</td></tr>
+<tr><th scope="row">Margin by line</th><td class="built"><span class="tag">Built</span> Hidden for R4 users until costs are signed off. An opened line with no orders says "No orders on this line in the last six months."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+<tr><th scope="row">Not bought yet, prices, signals</th><td class="spec"><span class="tag">Spec</span> "Buys every line it could."</td><td class="built"><span class="tag">Built</span> A failed signal shows the error message. Replace it with "Could not save just now."</td></tr>
+<tr><th scope="row">The map of its stops</th><td class="spec"><span class="tag">Spec</span> "No stops with a postcode."</td><td class="spec"><span class="tag">Spec</span> Show "The map is not available just now."</td></tr>
+<tr><th scope="row">Work orders</th><td class="spec"><span class="tag">Spec</span> "No work orders in these months."</td><td class="spec"><span class="tag">Spec</span> Show "Work orders could not be read just now."</td></tr>
+<tr><th scope="row">Shredding visits</th><td class="spec"><span class="tag">Spec</span> "No shredding visits in these months."</td><td class="spec"><span class="tag">Spec</span> Show "Visits could not be read just now."</td></tr>
+</tbody></table></div></section>
+<section class="screen"><h3>How it's calculated</h3><p class="calls"><code>#how</code>. Data from: storage.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">Box types</th><td class="spec"><span class="tag">Spec</span> Leave the section out.</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+</tbody></table></div></section>
+<section class="screen"><h3>Settings</h3><p class="calls"><code>#settings</code>. Data from: settings.</p>
+<div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
+<tr><th scope="row">Assumptions</th><td class="spec"><span class="tag">Spec</span> Never empty: the model holds defaults.</td><td class="built"><span class="tag">Built</span> The server's error, else "Could not save just now."</td></tr>
+<tr><th scope="row">Delivery days with no address</th><td class="spec"><span class="tag">Spec</span> The block is left out when there are none.</td><td class="built"><span class="tag">Built</span> The server's error, else "Could not save just now."</td></tr>
+<tr><th scope="row">The rates</th><td class="spec"><span class="tag">Spec</span> Never empty: the model holds defaults.</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
+</tbody></table></div></section>
+
+<h2>To wire later, most useful first</h2>
+<ol class="rules">
+<li>A failed account row opens empty with no message (<code>public/components/datatable.js:204</code>). It reads as an account with no lines, so this one could mislead.</li>
+<li>Warehouse words every failure as "not in this snapshot yet" (<code>public/views/storage.js:54</code>), so a real error reads as missing data.</li>
+<li>Open opportunities disappears from the customer page on failure (<code>public/views/customer.js:141</code>).</li>
+<li>Saved quotes shows no quotes when the list fails (<code>public/views/pricing.js:362</code>).</li>
+<li>Raw error messages show in a line's pop-out and on a failed signal (<code>public/views/home2.js:193</code>, <code>public/views/customer.js:168</code>).</li>
+<li>Every "Spec" empty state above. Most of these can't happen with today's data, so they matter least.</li>
+</ol>
+</main></body></html>
