@@ -354,4 +354,6 @@ button.h2-seg:hover { background: var(--tint-brand); }
   .h2-kpis.bills .h2-kpi.lead { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-1) var(--sp-3); align-items: baseline; }
   .h2-kpis.bills .h2-kpi.lead span { grid-column: 1 / -1; }
   .h2 { padding-bottom: var(--sp-4); }
+  /* a line and its three feedback marks on one row */
+  .h2-acts li { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--sp-2); align-items: start; }
 }

@@ -175,7 +175,7 @@ function tracking(m) {
 // ── the last thirteen weeks of work, priced est.; the week in progress hatched, the usual week a line ──
 function weekBars(el, w) {
   if (!el || !w.rows.length) return;
-  const W = Math.max(280, Math.min(1300, el.clientWidth || 360)), H = W < 500 ? 110 : 170, T = 14, B = 20;
+  const W = Math.max(280, Math.min(1300, el.clientWidth || 360)), H = W < 500 ? 88 : 170, T = 14, B = 20;
   const max = Math.max(...w.rows.map(r => r.value)) * 1.1, slot = W / w.rows.length, bw = Math.min(18, slot * .62);
   const fy = v => T + (1 - v / max) * (H - T - B);
   let g = `<defs><pattern id="h2-hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="4" class="h2-hatch"/></pattern></defs>`;
