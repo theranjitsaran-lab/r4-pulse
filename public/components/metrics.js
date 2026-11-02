@@ -1,5 +1,6 @@
 // One definition, one label. A figure or term shown on more than one screen is defined here, and the
 // screens import it, so they cannot drift apart. model/metrics.test.js holds them to it.
+import * as Fmt from './format.js';
 import { quantile } from './strip.js';
 
 export const LABELS = {
@@ -77,7 +78,7 @@ export function yesterdayLine(P, A, date = A.latestDone) {
   const normal = normalForDay(P, A, date), norms = routeNorms(A, date);
   const thin = rows.filter(r => norms[r.route] && r.services_done < THIN * norms[r.route].done).map(r => routeWord(r.route));
   return { date, label: new Date(date + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' }), done, thin,
-    text: `${done.toLocaleString('en-US')} services on ${rows.length} route${rows.length === 1 ? '' : 's'}${normal != null ? `, ${Math.round(normal)} ${LABELS.normalDay(name)}` : ''}.${thin.length ? ` Thin: ${thin.join(', ')}.` : ''}` };
+    text: `${Fmt.grouped(done)} services on ${rows.length} route${rows.length === 1 ? '' : 's'}${normal != null ? `, ${Math.round(normal)} ${LABELS.normalDay(name)}` : ''}.${thin.length ? ` Thin: ${thin.join(', ')}.` : ''}` };
 }
 
 // Three things to act on: what changed first, then the calls most at stake; each with its owner and where it opens.
@@ -92,9 +93,8 @@ export function topActions({ lines = [], calls = [] }, n = 3) {
 // A change as a word: a percentage, or "new" when the month before was too small for a percentage to mean anything
 export function changeWord(v, base = null) {
   if (v == null) return '—';
-  if ((base != null && base < 500) || v >= 3) return 'new';
-  if (v <= -1) return 'stopped';
-  return `${v >= 0.01 ? '▲ ' : v <= -0.01 ? '▼ ' : ''}${Math.abs(Math.round(v * 100))}%`;
+  if (base != null && base < 500) return 'new';
+  return Fmt.change(v);
 }
 
 // a percentage misleads on a small base or on a line that swings by nature: show the dollars

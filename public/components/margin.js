@@ -7,6 +7,7 @@
 //   book.families: { family: { revenue, cost } }   'other' is revenue with no cost family (fees, scanning)
 'use strict';
 
+import * as Fmt from './format.js';
 const CENTRE_HOURS = new Set(['53', '54']);   // customer support, data entry: Service Centre rate
 
 export function buildMargins(R, M, opts = {}) {
@@ -151,13 +152,13 @@ export function jobCost(R, items, meta, share = 1, day = null) {
 
 // The route lines of one job from its real route day: the account's travel and time on site that
 // day (routemap.js allocate), shared between the account's route orders that day.
-const m0 = v => '$' + Math.round(v).toLocaleString('en-US');
+const m0 = v => Fmt.money(v, { hyphen: true });
 function dayLines(R, { day, alloc }, share) {
   const a = alloc, me = a.me, part = share > 1 ? `, and this order is one of the account's ${share} that day, so it carries ${share === 2 ? 'half' : share === 3 ? 'a third' : `1/${share}`}` : '';
   const route = /\d/.test(day.route) ? day.route : day.route.charAt(0) + day.route.slice(1).toLowerCase();
   return [
     ['Travel to site', me.travel / share,
-      `Route ${route} cost ${m0(a.total)} that day, shared between its ${a.stops} stop${a.stops === 1 ? '' : 's'} by minutes. This account's stops added ${me.detour != null ? me.detour.toFixed(1) : '0'} of the day's ${Math.round(a.dayMiles)} miles, ${Math.round(me.driveMin)} minutes at ${R.SETTINGS.mph} mph: ${m0(me.travel)}${part}.`, 'route'],
+      `Route ${route} cost ${m0(a.total)} that day, shared between its ${a.stops} stop${a.stops === 1 ? '' : 's'} by minutes. This account's stops added ${me.detour != null ? Fmt.fixed(me.detour, 1) : '0'} of the day's ${Math.round(a.dayMiles)} miles, ${Math.round(me.driveMin)} minutes at ${R.SETTINGS.mph} mph: ${m0(me.travel)}${part}.`, 'route'],
     ['Time on site', me.onsite / share,
       `${Math.round(me.dropMin)} minutes on site (${R.SETTINGS.stopMin} at each stop, ${R.SETTINGS.serviceMin} a service, ${me.services} service${me.services === 1 ? '' : 's'}) out of the day's ${Math.round(a.minutes.drive + a.minutes.drop)}: ${m0(me.onsite)}${part}.`, 'route'],
   ];

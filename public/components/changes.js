@@ -11,6 +11,7 @@
 //   quiet      an account served most weeks that has now gone ten working days without a service,
 //              said on the day it crosses (not every day after)
 //   pace       month to date against last month at the same working day, beyond ±10%, said on Mondays
+import * as Fmt from './format.js';
 import { quantile } from './strip.js';
 import { weekdaysOf } from './projection.js';
 import { normalForDay, routeNorms, LABELS } from './metrics.js';
@@ -20,7 +21,7 @@ const isWork = d => { const w = wd(d); return w > 0 && w < 6; };
 const addDays = (d, n) => new Date(new Date(d + 'T00:00:00Z').getTime() + n * 864e5).toISOString().slice(0, 10);
 const dayName = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' });
 const dayMon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-const n0 = v => Math.round(v || 0).toLocaleString('en-US');
+const n0 = Fmt.count;
 const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase());
 const routeName = r => /\d/.test(r || '') ? r : title(r);
 const sorted = a => a.slice().sort((x, y) => x - y);
@@ -51,7 +52,7 @@ export function changesFor(P, A, date = A.latestDone, opts = {}) {
     if (today.booked > 0 && shares.length >= 4) {
       const share = 1 - today.done / today.booked, hiS = quantile(shares, R.hi);
       if (share > hiS && today.booked - today.done >= 20) items.push({ key: 'undone', owner: 'mike', level: 'down', subject: 'day',
-        text: `${n0(today.booked - today.done)} of ${n0(today.booked)} services booked for ${dayName(date)} were not done (${Math.round(share * 100)}%; usually ${Math.round(quantile(shares, 0.5) * 100)}%).`,
+        text: `${n0(today.booked - today.done)} of ${n0(today.booked)} services booked for ${dayName(date)} were not done (${Fmt.pct(share)}; usually ${Fmt.pct(quantile(shares, 0.5))}).`,
         figures: { booked: today.booked, undone: today.booked - today.done } });
     }
   }
@@ -92,7 +93,7 @@ export function changesFor(P, A, date = A.latestDone, opts = {}) {
     const sumTo = (from, to) => [...daily.values()].filter(r => r.date >= from && r.date <= to).reduce((t, r) => t + r.done, 0);
     const now = sumTo(m, date), then = sumTo(prev, cut);
     if (then > 0 && Math.abs(now / then - 1) > R.pace) items.push({ key: 'pace', owner: 'trisha', level: now > then ? 'up' : 'down', subject: 'month',
-      text: `Month to date: ${n0(now)} services done in ${k} working days, ${Math.round(Math.abs(now / then - 1) * 100)}% ${now > then ? 'ahead of' : 'behind'} last month at the same point (${n0(then)}).`,
+      text: `Month to date: ${n0(now)} services done in ${k} working days, ${Fmt.pct(Math.abs(now / then - 1))} ${now > then ? 'ahead of' : 'behind'} last month at the same point (${n0(then)}).`,
       figures: { now, then, k } });
   }
 
@@ -128,6 +129,6 @@ export function daySentence(P, A, date = A.latestDone) {
   const sumTo = (from, to) => [...daily.values()].filter(r => r.date >= from && r.date <= to).reduce((t, r) => t + r.done, 0);
   const now = sumTo(m, date), then = sumTo(prev, cut), d = then ? now / then - 1 : null;
   const vs = med == null ? '' : Math.abs(today.done / med - 1) < 0.1 ? `, about ${LABELS.normalDay(dayName(date))} (${n0(med)})` : `, against ${n0(med)} ${LABELS.normalDay(dayName(date))}`;
-  const mtd = d == null ? '' : ` Month to date ${n0(now)}, ${Math.abs(d) < 0.02 ? 'level with' : `${Math.round(Math.abs(d) * 100)}% ${d > 0 ? 'ahead of' : 'behind'}`} last month at working day ${k}.`;
+  const mtd = d == null ? '' : ` Month to date ${n0(now)}, ${Math.abs(d) < 0.02 ? 'level with' : `${Fmt.pct(Math.abs(d))} ${d > 0 ? 'ahead of' : 'behind'}`} last month at working day ${k}.`;
   return { text: `${n0(today.done)} services done on ${routes} route${routes === 1 ? '' : 's'}${vs}.${mtd}`, done: today.done, median: med, routes, mtd: now, mtdPrev: then };
 }

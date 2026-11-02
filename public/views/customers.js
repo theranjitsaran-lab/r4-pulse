@@ -1,6 +1,7 @@
 // Customers — one list, several views. Every number on Home opens one of these; every row opens
 // the customer page. Each row: name and why it is listed, a 24-month sparkline, twelve-month
 // revenue, change on the twelve months before, and gross margin (est. means modelled).
+import * as Fmt from '/components/format.js';
 import { customerTable, falling, rising, tableHtml, sortRows, COLUMNS } from '/components/custtable.js';
 import { dataTable, kOnly } from '/components/datatable.js';
 import { accountFilters, carryHash } from '/components/acctfilters.js';
@@ -57,11 +58,11 @@ async function rowsFor(view, ser, book, C) {
   if (view === 'gaps') {
     const PR = await getJson('pricing');
     const sg = serviceGaps(PR), st = storageGaps(PR), by = new Map();
-    for (const a of sg.values()) by.set(a.level1, { level1: a.level1, customer: a.customer, worth: a.worth, why: `${titleCase(a.top.service)}: $${a.top.rate.toFixed(2)} against a $${a.top.med.toFixed(2)} median` });
+    for (const a of sg.values()) by.set(a.level1, { level1: a.level1, customer: a.customer, worth: a.worth, why: `${titleCase(a.top.service)}: ${Fmt.money(a.top.rate, { dp: 2 })} against a ${Fmt.money(a.top.med, { dp: 2 })} median` });
     for (const r of st.rows) {
       const a = by.get(r.level1) || { level1: r.level1, customer: r.customer, worth: 0, why: null };
       a.worth += r.worth;
-      const sw = `Storage $${r.rate.toFixed(3)} a box against $${r.med.toFixed(3)} on ${Math.round(r.boxes).toLocaleString('en-US')} boxes`;
+      const sw = `Storage ${Fmt.money(r.rate, { dp: 3 })} a box against ${Fmt.money(r.med, { dp: 3 })} on ${Fmt.num(r.boxes)} boxes`;
       a.why = a.why ? `${sw}; ${a.why}` : sw;
       by.set(r.level1, a);
     }
@@ -155,7 +156,7 @@ function row(r) {
     <span class="sp">${s ? sparkline(s.total, { w: 130, h: 30, cls }) : ''}</span>
     <span class="r rv"><span class="rev">${s ? moneyK(s.ltm) : '—'}</span>${s ? (r.level1 === CITADEL ? '<small class="delta flat">lumpy</small>' : `<small class="delta ${deltaCls(c)}">${deltaText(c)}</small>`) : ''}</span>
     <span class="r ch">${r.level1 === CITADEL ? '<span class="delta flat">lumpy</span>' : `<span class="delta ${deltaCls(c)}">${s && s.move ? deltaText(c) : '—'}</span>`}</span>
-    <span class="r mg">${!costsVisible() ? '' : pc == null ? '—' : `${Math.round(pc * 100)}%${routeHeavy ? '<span class="rvm" title="route costs under review">est.</span>' : ''}`}</span>
+    <span class="r mg">${!costsVisible() ? '' : pc == null ? '—' : `${Fmt.pct(pc)}${routeHeavy ? '<span class="rvm" title="route costs under review">est.</span>' : ''}`}</span>
     <span class="go">›</span></a></li>`;
 }
 
@@ -336,8 +337,8 @@ function marginReason(a, m) {
   const top = Object.entries(m.fam).filter(([f, v]) => v.cost > 0).sort((x, y) => y[1].cost - x[1].cost)[0];
   if (!top) return 'no modelled cost: fees and charges only';
   const [f] = top;
-  if (f === 'bin') return `${(a.bins || 0).toLocaleString('en-US')} bin services on ${(a.visits || 0).toLocaleString('en-US')} visits`;
-  if (f === 'storage') return `${Math.round(a.boxes).toLocaleString('en-US')} boxes stored`;
+  if (f === 'bin') return `${Fmt.grouped(a.bins || 0)} bin services on ${Fmt.grouped(a.visits || 0)} visits`;
+  if (f === 'storage') return `${Fmt.num(a.boxes)} boxes stored`;
   if (f === 'movement') return 'deliveries and pickups carry most of the cost';
   if (f === 'handling') return 'retrievals and refiles carry most of the cost';
   if (f === 'itad') return 'ITAD collections carry most of the cost';
@@ -351,8 +352,8 @@ function marginReason(a, m) {
 //   3 one line, job by job: each order with its place on the route that day
 //   4 one job: the cost build in sentences, the route that day on a map, what would have made it cheaper
 // #customers?view=margin[&id=<level1>[&line=<family>[&job=<woid>]]]
-const n0 = v => Math.round(v || 0).toLocaleString('en-US');
-const pcText = pc => pc == null ? '—' : pc < 0 ? 'below cost' : Math.round(pc * 100) + '%';
+const n0 = Fmt.count;
+const pcText = pc => pc == null ? '—' : pc < 0 ? 'below cost' : Fmt.pct(pc);
 const mlink = (o = {}) => '#customers?view=margin' + Object.entries(o).filter(([, v]) => v != null && v !== 'all').map(([k, v]) => `&${k}=${encodeURIComponent(v)}`).join('');
 const zctaP = () => fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
 const jobCache = new Map();
@@ -393,13 +394,13 @@ async function marginList(main, R, M, MS, params) {
         <span class="r lf ${r.margin < 0 && !r.review ? 'is-bad' : ''}">${money0(r.margin)}</span>
         <span class="r pc ${r.pc < 0.15 && !r.review ? 'is-bad' : r.pc < 0.5 && !r.review ? 'is-warn' : ''}">${pcText(r.pc)}</span>
         <span class="ac"><span class="tag ${r.act.cls}" title="${esc(r.act.why)}">${r.act.tag}</span></span><span class="go">›</span></a>`).join('')}
-      <div class="rw a tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r rv">${money0(sum('revenue'))}</span><span class="r cs">${money0(sum('cost'))}</span><span class="r lf">${money0(sum('margin'))}</span><span class="r pc">${sum('revenue') > 0 ? Math.round(sum('margin') / sum('revenue') * 100) + '%' : '—'}</span><span></span><span></span></div>
+      <div class="rw a tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r rv">${money0(sum('revenue'))}</span><span class="r cs">${money0(sum('cost'))}</span><span class="r lf">${money0(sum('margin'))}</span><span class="r pc">${sum('revenue') > 0 ? Fmt.pct(sum('margin') / sum('revenue')) : '—'}</span><span></span><span></span></div>
       ${rows.length > shown ? `<a class="more" style="display:inline-block;margin-top:var(--sp-3);color:var(--brand);font-weight:500;text-decoration:none" href="${mlink({ f: filter, n: 'all' })}">Show all ${rows.length}</a>` : ''}
     </div>
     ${D.rows.length ? `<div class="card dens" style="margin-top:var(--sp-4)">
       <div class="card-head"><h3>Where more volume would cut cost: ${esc(D.rows[0].postcode)} first, about ${money0(D.rows[0].saving)} a year est.</h3></div>
       <p class="sub" style="margin:0 0 var(--sp-2)">Travel to a postcode is shared by the customers on the visit. Where visits carry one customer, one more on the same visits takes this much a year off the cost of serving the ones already there.</p>
-      ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${d.miles.toFixed(0)} miles out<small>${n0(d.visits)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${d.perVisit.toFixed(1)} customers each`} · ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
+      ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${Fmt.fixed(d.miles, 0)} miles out<small>${n0(d.visits)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${Fmt.fixed(d.perVisit, 1)} customers each`} · ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
       <div class="src">Route visits from ${D.days > 120 ? 'six months of route days' : `the ${D.days} days of routes held offline, scaled to a year`} · customers a visit from the twelve-month postcode book</div>
     </div>` : ''}
     <p class="foot">Twelve months. Cost to serve est. from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Actions: Drop under $5,000 and under 15% · Re-route under 15% with travel over 40% of cost · Renegotiate under 15% · Reprice 15–50% · Hold 50% and over · Check routes where most of the cost is route cost under review.</p>
@@ -421,7 +422,7 @@ async function marginAccount(main, R, M, MS, id) {
   <div class="cust mv2">
     <div class="crumb"><a href="${mlink()}">Margin</a><span>›</span><span>${esc(name)}</span></div>
     <h2 class="t">${esc(name)} pays ${money0(m.revenue)} a year for work that costs about ${money0(m.cost)} to serve est.</h2>
-    <p class="lede">${left >= 0 ? `That leaves ${money0(left)}, ${Math.round(left / m.revenue * 100)}% of what it pays.` : `That is ${money0(-left)} a year short.`} ${act ? `<span class="tag ${act.cls}">${act.tag}</span> ${esc(act.why)}` : ''} <a href="#customer/${id}?from=margin" style="color:var(--brand);text-decoration:none">The customer page ›</a></p>
+    <p class="lede">${left >= 0 ? `That leaves ${money0(left)}, ${Fmt.pct(left / m.revenue)} of what it pays.` : `That is ${money0(-left)} a year short.`} ${act ? `<span class="tag ${act.cls}">${act.tag}</span> ${esc(act.why)}` : ''} <a href="#customer/${id}?from=margin" style="color:var(--brand);text-decoration:none">The customer page ›</a></p>
     <div class="card">
       <div class="jv-bars">
         <span class="lab">Pays</span><div class="jv-bar"><i class="p-rev" style="width:${m.revenue / total * 100}%">${moneyK(m.revenue)}</i></div>
@@ -483,8 +484,8 @@ async function marginLine(main, R, M, MS, id, f) {
     ${jobs.slice(0, 80).map(j => `<a class="rw" href="${mlink({ id, line: f, job: j.o.woid })}">
       <span class="dt">${esc(new Date(j.o.date + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }))}</span>
       <span class="nm">${j.place ? `${esc(j.place.postcode || '—')} <small style="display:inline;color:var(--ink-4)">route ${esc(/\d/.test(j.place.route) ? j.place.route : titleCase(j.place.route))}</small>` : '<span class="sub">no route that day</span>'}</span>
-      <span class="pl">${j.place ? `${j.place.miles != null ? j.place.miles.toFixed(0) + ' mi · ' : ''}${j.place.stops} stops` : ''}</span>
-      <span class="r mi">${j.place && j.place.miles != null ? j.place.miles.toFixed(0) : '—'}</span><span class="r st">${j.place ? `${j.place.stops}` : '—'}</span>
+      <span class="pl">${j.place ? `${j.place.miles != null ? Fmt.fixed(j.place.miles, 0) + ' mi · ' : ''}${j.place.stops} stops` : ''}</span>
+      <span class="r mi">${j.place && j.place.miles != null ? Fmt.fixed(j.place.miles, 0) : '—'}</span><span class="r st">${j.place ? `${j.place.stops}` : '—'}</span>
       <span class="r u">${n0(units(j))}</span><span class="r rv">${money0(j.rev)}</span><span class="r cs">${money0(j.cost.total)}</span>
       <span class="r lf ${j.margin < 0 ? (j.cost.real || !j.cost.route ? 'is-bad' : 'is-warn') : ''}">${money0(j.margin)}</span><span class="go">›</span></a>`).join('')}
     <div class="src">VCK work orders, six months, this line's items only · miles from the yard and stops on the route that day from Veri-Shred done orders${J.d.routes && J.d.routes.length ? '' : ' (about three weeks held offline)'} · cost est. from the cost model</div></div>`;
@@ -501,7 +502,7 @@ async function marginJob(main, R, M, MS, id, f, woid) {
   const items = famItems(o, f, J.meta).length ? famItems(o, f, J.meta) : o.items, x = J.C.cost(o, items), pl = jobPlace(x.ctx);
   main.innerHTML = `<div class="cust mv2">${crumb}
     <h2 class="t">${esc(fname)} for ${esc(name)}, order ${esc(o.woid)}</h2>
-    <p class="lede">${pl ? `At ${esc(pl.postcode || 'an unplaced address')}${pl.miles != null ? `, ${pl.miles.toFixed(0)} miles from the yard` : ''}, on route ${esc(/\d/.test(pl.route) ? pl.route : titleCase(pl.route))} with ${pl.stops} stop${pl.stops === 1 ? '' : 's'} for ${pl.visits} customer${pl.visits === 1 ? '' : 's'} that day.` : 'Not on a Veri-Shred route that day.'}</p>
+    <p class="lede">${pl ? `At ${esc(pl.postcode || 'an unplaced address')}${pl.miles != null ? `, ${Fmt.fixed(pl.miles, 0)} miles from the yard` : ''}, on route ${esc(/\d/.test(pl.route) ? pl.route : titleCase(pl.route))} with ${pl.stops} stop${pl.stops === 1 ? '' : 's'} for ${pl.visits} customer${pl.visits === 1 ? '' : 's'} that day.` : 'Not on a Veri-Shred route that day.'}</p>
     <div class="card">${jobHtml({ o, items, c: x.cost, svcName: J.svcName, ctx: x.ctx, A: J.A })}</div></div>`;
   drawRouteBlock(main.querySelector('.jv-route'), x.ctx, { R, A: J.A, Z: J.Z });
 }
@@ -525,16 +526,16 @@ async function destructionView(main, C, params) {
   <div class="cust dv">
     <h1>Accounts</h1>
     ${tabsHtml('destruction')}
-    <p class="lede">${Math.round(T('boxes')).toLocaleString('en-US')} boxes across ${rows.length} accounts are past their retention review. Destroying them would bill about <b>${moneyK(T('once'))} once</b>, at the book's median $${perBox.toFixed(2)} a box, and end about <b>${moneyK(T('lost'))} a month</b> of storage. At the median storage rate one destruction equals ${Math.round(medMonths)} months of storage, so the strongest cases are the accounts paying least to store${top ? `, starting with ${esc(titleCase(top.customer))}: ${Math.round(top.boxes).toLocaleString('en-US')} overdue boxes at $${top.rate.toFixed(3)} a box` : ''}.</p>
+    <p class="lede">${Fmt.num(T('boxes'))} boxes across ${rows.length} accounts are past their retention review. Destroying them would bill about <b>${moneyK(T('once'))} once</b>, at the book's median ${Fmt.money(perBox, { dp: 2 })} a box, and end about <b>${moneyK(T('lost'))} a month</b> of storage. At the median storage rate one destruction equals ${Math.round(medMonths)} months of storage, so the strongest cases are the accounts paying least to store${top ? `, starting with ${esc(titleCase(top.customer))}: ${Fmt.num(top.boxes)} overdue boxes at ${Fmt.money(top.rate, { dp: 3 })} a box` : ''}.</p>
     <div class="card">
       <div class="hd"><span>Customer</span><span>Overdue boxes</span><span>Destruction, once</span><span>Storage it ends, a month</span><span>Months it equals</span><span></span></div>
       ${rows.slice(0, shown).map(r => `<a class="rw" href="#customer/${r.level1}">
-        <span class="nm">${esc(titleCase(r.customer))}<small>${r.total ? `${Math.round(r.boxes / Math.max(r.boxes, r.total) * 100)}% of ${Math.round(r.total).toLocaleString('en-US')} boxes stored · ` : ''}$${r.rate.toFixed(3)} a box${r.own ? '' : ' (book median)'}</small>${r.total ? `<span class="share"><i style="width:${Math.min(100, r.boxes / r.total * 100)}%"></i></span>` : ''}</span>
-        <span class="r bx">${Math.round(r.boxes).toLocaleString('en-US')}</span>
+        <span class="nm">${esc(titleCase(r.customer))}<small>${r.total ? `${Fmt.pct(r.boxes / Math.max(r.boxes, r.total))} of ${Fmt.num(r.total)} boxes stored · ` : ''}${Fmt.money(r.rate, { dp: 3 })} a box${r.own ? '' : ' (book median)'}</small>${r.total ? `<span class="share"><i style="width:${Math.min(100, r.boxes / r.total * 100)}%"></i></span>` : ''}</span>
+        <span class="r bx">${Fmt.num(r.boxes)}</span>
         <span class="r once">${moneyK(r.once)}<span class="sub" style="display:none"> once</span></span>
         <span class="r lost">−${moneyK(r.lost)}</span>
         <span class="r mo">${r.months == null ? '—' : Math.round(r.months)}</span><span class="go">›</span></a>`).join('')}
-      <div class="rw tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r bx">${Math.round(T('boxes')).toLocaleString('en-US')}</span><span class="r once">${moneyK(T('once'))}</span><span class="r lost">−${moneyK(T('lost'))}</span><span class="r mo">${Math.round(T('once') / T('lost'))}</span><span></span></div>
+      <div class="rw tot" style="cursor:default"><span class="nm">${rows.length} accounts</span><span class="r bx">${Fmt.num(T('boxes'))}</span><span class="r once">${moneyK(T('once'))}</span><span class="r lost">−${moneyK(T('lost'))}</span><span class="r mo">${Math.round(T('once') / T('lost'))}</span><span></span></div>
       ${rows.length > shown ? `<a style="display:inline-block;margin-top:var(--sp-3);color:var(--brand);font-weight:500;text-decoration:none" href="#customers?view=destruction&n=all">Show all ${rows.length}</a>` : ''}
     </div>
     <p class="foot">Overdue: boxes in storage with a review date passed, not on hold and not permanent. Destruction at the book's median fee per standard box; storage at the account's latest rate per box, else the box-weighted median. Destruction needs the client's sign-off on the retention list. Citadel apart.</p>

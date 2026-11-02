@@ -6,6 +6,7 @@
 // customer page): the last three months' average against the account's own average of the twelve
 // months before them, in dollars a month and as a share, split into storage and service so a row can
 // say which moved.
+import * as Fmt from './format.js';
 const sum = a => a.reduce((t, v) => t + v, 0);
 const avg = a => a.length ? sum(a) / a.length : 0;
 
@@ -30,7 +31,7 @@ export function seriesOf(C) {
   return map;
 }
 
-export function deltaText(c) { if (c == null || c >= 3) return 'new'; if (c <= -1) return 'stopped'; return (c >= 0.01 ? '▲ ' : c <= -0.01 ? '▼ ' : '') + Math.abs(Math.round(c * 100)) + '%'; }
+export function deltaText(c) { return c == null ? 'new' : Fmt.change(c); }
 // colour for a move of a fifth or more only; a smaller one keeps its arrow in ink (status marks exceptions)
 export function deltaCls(c) { return c == null ? 'flat' : c >= 0.2 ? 'up' : c <= -0.2 ? 'down' : 'flat'; }
 

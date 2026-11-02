@@ -9,6 +9,7 @@
 // The median comparable, not the best; a cell is never larger than the account's whole spend today.
 // Read from fixtures/margin.json: accounts (storage_revenue, boxes) and lines by family.
 
+import * as Fmt from './format.js';
 export const LINES = [
   { key: 'storage',  name: 'Storage',      by: 'ratio' },
   { key: 'handling', name: 'Retrieval and refile', short: 'Retrieval', by: 'boxes' },
@@ -77,7 +78,7 @@ export function buildWhitespace(M, { exclude = [], top = 40 } = {}) {
         if (a.boxes >= STORER && r.per1000) {
           opp = r.per1000 * a.boxes / 1000;
           ref = r;
-          basis = `$${Math.round(r.per1000).toLocaleString('en-US')} a year per 1,000 boxes, the median of ${r.peers} storers that buy it, on ${Math.round(a.boxes).toLocaleString('en-US')} boxes`;
+          basis = `${Fmt.money(r.per1000, { hyphen: true })} a year per 1,000 boxes, the median of ${r.peers} storers that buy it, on ${Fmt.num(a.boxes)} boxes`;
         }
       } else {
         const other = a.total - a.spend[x.key], r = rates[x.key].bands[band(other)];

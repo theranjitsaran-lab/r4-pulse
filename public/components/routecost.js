@@ -12,6 +12,7 @@
 //
 // Caveat, labelled wherever it shows: days when the truck also delivered boxes are not in the route
 // data yet, so the stops on them carry the whole day and read high.
+import * as Fmt from './format.js';
 import { allocate, miles, YARD } from './routemap.js';
 
 const pc5 = p => p ? String(p).slice(0, 5) : null;
@@ -166,5 +167,5 @@ export function quoteRoute(pcCost, units, visits, S) {
   const travel = v * pcCost.travelPerStop, onsite = v * pcCost.perMinute * ((S.stopMin ?? 8) + (S.serviceMin ?? 3) * k);
   const where = pcCost.basis === 'postcode' ? `stops in ${pcCost.postcode}` : `stops within ${NEAR} miles of ${pcCost.postcode} (${pcCost.postcodes} postcodes)`;
   return { services: units, travel, onsite, days: pcCost.days,
-    label: `${Math.round(v)} visits, each costed as the ${pcCost.stops.toLocaleString('en-US')} real ${where} cost: ${'$' + pcCost.travelPerStop.toFixed(2)} of drive time a stop, ${'$' + pcCost.perMinute.toFixed(2)} a minute on site` };
+    label: `${Math.round(v)} visits, each costed as the ${Fmt.grouped(pcCost.stops)} real ${where} cost: ${Fmt.money(pcCost.travelPerStop, { dp: 2 })} of drive time a stop, ${Fmt.money(pcCost.perMinute, { dp: 2 })} a minute on site` };
 }

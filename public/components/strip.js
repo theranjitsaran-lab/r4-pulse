@@ -10,6 +10,7 @@
 //   stats: { n, min, p10, p25, median, p75, p90, max, below(price) }  — share of accounts cheaper
 'use strict';
 
+import * as Fmt from './format.js';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 export function quantile(sorted, q) {
@@ -39,7 +40,7 @@ export function stripStats(values) {
 export function strip(el, o) {
   if (!el) return null;
   const st = stripStats(o.values);
-  const fmt = o.fmt || (v => '$' + v.toFixed(2));
+  const fmt = o.fmt || (v => Fmt.money(v, { dp: 2 }));
   const W = 900, H = 236, L = 18, R = 18, TOP = 62, BOT = 56, iw = W - L - R;
   const cost = Number.isFinite(o.cost) ? o.cost : null, list = Number.isFinite(o.list) ? o.list : null;
   const price = Number.isFinite(o.price) ? o.price : null;

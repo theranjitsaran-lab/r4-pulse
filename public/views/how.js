@@ -1,5 +1,6 @@
 // How it's calculated: where the screens' figures come from, in plain words, so the working
 // stays off the screens themselves. Box codes come from the storage data; the rest is fixed text.
+import * as Fmt from '/components/format.js';
 import { esc } from '/components/data.js';
 import { LABELS } from '/components/metrics.js';
 import { costsVisible } from '/components/access.js';
@@ -45,6 +46,6 @@ export async function render(main, S) {
     <h1>How it's calculated</h1>
     <p class="how-lede">Refreshed daily from VCK (billing and pricing) and Veri-Shred (operations).</p>
     ${SECTIONS().map(([h, ps]) => `<section class="h2-card"><div class="h2-ch"><h2>${esc(h)}</h2></div>${ps.map(p => `<p>${esc(p)}</p>`).join('')}</section>`).join('')}
-    ${codes.length ? `<section class="h2-card"><div class="h2-ch"><h2>Box types, as VCK holds them</h2><small>the share of boxes; R4 has still to name these codes</small></div><p>${codes.map(([k, v]) => `${esc(k || 'none')} ${Math.round(v / total * 100)}%`).join(' · ')}</p></section>` : ''}
+    ${codes.length ? `<section class="h2-card"><div class="h2-ch"><h2>Box types, as VCK holds them</h2><small>the share of boxes; R4 has still to name these codes</small></div><p>${codes.map(([k, v]) => `${esc(k || 'none')} ${Fmt.pct(v / total)}`).join(' · ')}</p></section>` : ''}
   </div>`;
 }

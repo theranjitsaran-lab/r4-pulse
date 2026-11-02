@@ -2,6 +2,7 @@
 // shredded and what that is worth, and boxes held that are not on a storage bill. From
 // /api/storage (storage_retention, status I) with pricing (rates) and margin (for the drill link).
 // Every box is at one location (CHI) and rack capacity is not in the data: no percent full.
+import * as Fmt from '/components/format.js';
 import { lineChart, money0, moneyK } from '/components/chart.js';
 import { getJson, titleCase, esc } from '/components/data.js';
 import { byAccount, totals, cells, eligibleList, heldNotBilled, splitNotBilled, gridSvg, STATES } from '/components/storage.js';
@@ -39,9 +40,9 @@ const CSS = `
   .wh .nb .rw .gp { grid-area: gp; } .wh .nb .rw .bl { grid-area: bl; font-size: 12px; color: var(--ink-3); } .wh .nb .rw .hl { display: none; }
 }`;
 
-const n0 = v => Math.round(v || 0).toLocaleString('en-US');
-const k0 = v => v >= 10000 ? Math.round(v / 1000).toLocaleString('en-US') + 'K' : n0(v);
-const pc = v => Math.round(v * 100) + '%';
+const n0 = Fmt.count;
+const k0 = v => v >= 10000 ? Fmt.num(v / 1000) + 'K' : n0(v);
+const pc = v => Fmt.pct(v);
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 
 export async function render(main, tabs) {
@@ -67,16 +68,16 @@ export async function render(main, tabs) {
     ${tabs}
     <p class="lede">${say}</p>
     <div class="card">
-      <div class="card-head"><h3>The building by who fills it: one square for every ${G.per.toLocaleString('en-US')} boxes</h3><small>hover or tap a group</small></div>
+      <div class="card-head"><h3>The building by who fills it: one square for every ${Fmt.grouped(G.per)} boxes</h3><small>hover or tap a group</small></div>
       <div class="gwrap"><div id="wh-grid"></div><div class="c-tip" hidden></div></div>
       <div class="wkey">${STATES.map(([k, l]) => `<span><i style="background:${k === 'inuse' ? 'color-mix(in srgb, var(--s-storage) 28%, var(--surface))' : k === 'old' ? 'var(--s-storage)' : k === 'eligible' ? 'var(--s-service)' : 'var(--ink-4)'}"></i>${l} ${k0(T[k])}</span>`).join('')}</div>
-      <div class="src">VCK boxes in storage, all at one location (Chicago) · accounts largest first, those under ${G.per.toLocaleString('en-US')} boxes together at the end · eligible is review overdue less permanent and legal hold, at least est. · rack capacity is not in the data, so this shows what is held, not how full the building is</div>
+      <div class="src">VCK boxes in storage, all at one location (Chicago) · accounts largest first, those under ${Fmt.grouped(G.per)} boxes together at the end · eligible is review overdue less permanent and legal hold, at least est. · rack capacity is not in the data, so this shows what is held, not how full the building is</div>
     </div>
     <div class="cols">
       <div class="card">
         <div class="card-head"><h3>Shredding the eligible boxes would bill about ${moneyK(E.once)} once and end ${moneyK(E.lost)} a month of storage est.</h3></div>
         <div id="wh-elig"></div>
-        <div class="src">Destruction at the book's median fee, $${(E.perBox || 0).toFixed(2)} a box; storage at each account's own rate per box (else the book's median) · "pays back" is the months of lost storage the destruction bill covers · <a href="#customers?view=destruction" style="color:var(--brand)">Overdue boxes by account ›</a></div>
+        <div class="src">Destruction at the book's median fee, ${Fmt.money(E.perBox || 0, { dp: 2 })} a box; storage at each account's own rate per box (else the book's median) · "pays back" is the months of lost storage the destruction bill covers · <a href="#customers?view=destruction" style="color:var(--brand)">Overdue boxes by account ›</a></div>
       </div>
       <div class="card nb">
         <div class="card-head"><h3>${n0(SP.activeBoxes)} boxes at ${SP.active.length} current accounts are not on the ${NB.month ? mon(NB.month) : 'latest'} storage bill</h3></div>
@@ -115,7 +116,7 @@ export async function render(main, tabs) {
       { k: 'lost', l: 'Storage lost, a month', short: 'Lost a month', def: true, get: r => r.lost, total: 'sum', totalFmt: v => money0(v), fmt: r => money0(r.lost) },
       { k: 'boxes', l: 'Boxes held', get: r => r.boxes, total: 'sum', fmt: r => n0(r.boxes) },
       { k: 'months', l: 'Pays back, months', get: r => r.months, fmt: r => r.months != null ? Math.round(r.months) : '—' },
-      { k: 'share', l: 'Of the building', get: r => r.share, fmt: r => (r.share * 100).toFixed(1) + '%' },
+      { k: 'share', l: 'Of the building', get: r => r.share, fmt: r => Fmt.pct(r.share, { dp: 1 }) },
     ] });
   dataTable(main.querySelector('#wh-nb'), { key: 'notbilled', ns: 'n_', noun: 'accounts', who: whoAmI(), rows: nbRows, defaults: { status: 'current' }, filters: [{ k: 'status', l: 'Status', options: [['current', 'Current accounts'], ['dormant', 'Dormant accounts']], test: (r, v) => v === 'dormant' ? r.dormant : !r.dormant }, size], search: r => r.customer, placeholder: 'Find an account', onRow: open,
     cols: [nm,
@@ -125,9 +126,9 @@ export async function render(main, tabs) {
     ] });
 
   if (m.length > 1) lineChart(main.querySelector('#wh-trend'), {
-    title: yoy != null ? `The storage bill carried ${n0(last.boxes)} boxes in ${mon(last.month)}, ${yoy >= 0 ? 'up' : 'down'} ${(Math.abs(yoy) * 100).toFixed(1)}% on a year ago` : 'Boxes on the storage bill',
+    title: yoy != null ? `The storage bill carried ${n0(last.boxes)} boxes in ${mon(last.month)}, ${yoy >= 0 ? 'up' : 'down'} ${Fmt.pct(Math.abs(yoy), { dp: 1 })} on a year ago` : 'Boxes on the storage bill',
     series: [{ name: 'Boxes billed', cls: 'storage', points: m.map(x => ({ x: x.month, y: x.boxes })) }],
-    yFormat: v => Math.round(v / 1000).toLocaleString('en-US') + 'K', height: 220,
+    yFormat: v => Fmt.num(v / 1000) + 'K', height: 220,
     source: 'VCK · boxes on each month\'s storage bill',
   });
 }

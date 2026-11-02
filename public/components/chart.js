@@ -10,14 +10,11 @@
 //   sparkline(values, { w, h, cls })  →  an SVG string, last point marked
 'use strict';
 
+import * as Fmt from './format.js';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
-export const money0 = v => (v < 0 ? '−$' : '$') + Math.round(Math.abs(v)).toLocaleString('en-US');
-export const moneyK = v => {
-  const a = Math.abs(v);
-  const s = a >= 1e6 ? (a / 1e6).toFixed(a >= 1e7 ? 0 : 1) + 'M' : a >= 1000 ? Math.round(a / 1000) + 'K' : String(Math.round(a));
-  return (v < 0 ? '−$' : '$') + s;
-};
+export const money0 = v => Fmt.money(v);
+export const moneyK = v => Fmt.money(v, { short: true });
 const monthLabel = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', year: '2-digit', timeZone: 'UTC' }).replace(' ', " '");
 // Drawn at the width it is shown, so text keeps its true size in a half card or on a phone.
 const widthFor = (el, o) => o.width || Math.max(300, Math.min(1000, el.clientWidth || 900));
@@ -113,7 +110,7 @@ export function barChart(el, o) {
   const max = Math.max(...o.bars.map(b => b.value), 0) || 1;
   const slot = (W - L - R) / o.bars.length, bw = Math.min(W > 600 ? 30 : 18, slot * .6);   // ~24px on screen
   const fy = v => T + (1 - v / max) * (H - T - B);
-  const yf = o.yFormat || (v => Math.round(v).toLocaleString('en-US'));
+  const yf = o.yFormat || (v => Fmt.num(v));
   const r = 4;
   let g = `<line class="c-zero" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/>`;
   o.bars.forEach((b, i) => {
@@ -133,7 +130,7 @@ export function sparkline(values, o = {}) {
   const lo = Math.min(0, ...v), hi = Math.max(...v, 1);
   const fx = i => pad + i / Math.max(1, v.length - 1) * (w - pad * 2);
   const fy = y => pad + (1 - (y - lo) / (hi - lo)) * (h - pad * 2);
-  const pts = v.map((y, i) => `${fx(i).toFixed(1)},${fy(y).toFixed(1)}`).join(' ');
+  const pts = v.map((y, i) => `${Fmt.fixed(fx(i), 1)},${Fmt.fixed(fy(y), 1)}`).join(' ');
   const last = v.length - 1;
   return `<svg class="spark ${o.cls || ''}" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true">
     <polygon class="sp-area" points="${fx(0)},${fy(Math.max(lo, 0))} ${pts} ${fx(last)},${fy(Math.max(lo, 0))}"/>

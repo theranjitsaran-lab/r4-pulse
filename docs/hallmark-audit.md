@@ -48,7 +48,9 @@ Items marked ✓ were confirmed on the running app.
 | 67 | 48 | "Typed in capitals": customer names as VCK holds them (BSPS LLC., THE ART INSTITUTE OF CHICAGO), route names (MARK MRS), ITAD, box-condition codes | Data, not code |
 | 63 | 6 | "WORD - fragment": a customer's real name, "NRC - American Renal Associates" | Data, not code |
 
-Customer and route names should stay exactly as VCK and Veri-Shred hold them whatever is decided. The uppercase labels in section 1 also change what the text comparison reads, ACTIVITY becoming Activity, so Step 4 lists those as expected differences.
+**Decided (Theran, 2 November 2026): these are listed as exceptions, and the characters stay.** "0 FAIL" means 0 apart from this section and any CLAUDE.md clash, each named in the final report.
+
+Customer and route names stay exactly as VCK and Veri-Shred hold them. The uppercase labels in section 1 also change what the text comparison reads, ACTIVITY becoming Activity, so Step 4 lists those as expected differences.
 
 ## 3. Likely false alarms: recorded, not waived
 

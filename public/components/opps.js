@@ -8,6 +8,7 @@
 // Each has a key (kind:level1[:line]), a value a year, a reason, a draft opener, and, from
 // app.opportunity (server/sales.js), an owner and a status.
 //   opportunities({ C, PR, CA, M }, statuses) → { rows, totals, won }
+import * as Fmt from './format.js';
 import { serviceGaps, storageGaps, slippingAccounts, overdueBoxes } from './levers.js';
 import { buildWhitespace, LINES } from './whitespace.js';
 import { OPENERS } from './lists.js';
@@ -19,7 +20,7 @@ export const KINDS = {
   cross: 'Cross-sell', price: 'Price gap', slip: 'Win back', round: 'Rate round', overdue: 'Overdue boxes',
 };
 export const STATUSES = ['open', 'contacted', 'quoted', 'won', 'lost'];
-const k$ = v => '$' + (Math.abs(v) >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : Math.abs(v) >= 1e3 ? Math.round(v / 1e3) + 'K' : Math.round(v));
+const k$ = v => Fmt.money(v, { short: 'hyphen' });
 const lineName = Object.fromEntries(LINES.map(l => [l.key, l.name]));
 const lc = n => n === 'ITAD' ? n : n.toLowerCase();
 
@@ -43,15 +44,15 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
   for (const a of sg.values()) {
     const name = titleCase(a.customer);
     push({ key: `price:${a.level1}:svc`, kind: 'price', level1: a.level1, name, line: 'service', value: a.worth * 12,
-      short: `${titleCase(a.top.service)} at $${a.top.rate.toFixed(2)} against a $${a.top.med.toFixed(2)} median`,
-      reason: `${titleCase(a.top.service)} at $${a.top.rate.toFixed(2)} against a $${a.top.med.toFixed(2)} median${a.worth * 12 > a.top.worth * 12 + 1 ? `, with other lines under too` : ''}: ${k$(a.worth * 12)} a year at the median.`,
+      short: `${titleCase(a.top.service)} at ${Fmt.money(a.top.rate, { dp: 2 })} against a ${Fmt.money(a.top.med, { dp: 2 })} median`,
+      reason: `${titleCase(a.top.service)} at ${Fmt.money(a.top.rate, { dp: 2 })} against a ${Fmt.money(a.top.med, { dp: 2 })} median${a.worth * 12 > a.top.worth * 12 + 1 ? `, with other lines under too` : ''}: ${k$(a.worth * 12)} a year at the median.`,
       opener: OPENERS.gap(name, { service: titleCase(a.top.service).toLowerCase() }) });
   }
   for (const r of storageGaps(PR).rows) {
     const name = titleCase(r.customer);
     push({ key: `price:${r.level1}:storage`, kind: 'price', level1: r.level1, name, line: 'storage', value: r.worth * 12,
-      short: `Storage at $${r.rate.toFixed(3)} a box against a $${r.med.toFixed(3)} median`,
-      reason: `Storage at $${r.rate.toFixed(3)} a box against $${r.med.toFixed(3)} on ${Math.round(r.boxes).toLocaleString('en-US')} boxes: ${k$(r.worth * 12)} a year at the median.`,
+      short: `Storage at ${Fmt.money(r.rate, { dp: 3 })} a box against a ${Fmt.money(r.med, { dp: 3 })} median`,
+      reason: `Storage at ${Fmt.money(r.rate, { dp: 3 })} a box against ${Fmt.money(r.med, { dp: 3 })} on ${Fmt.num(r.boxes)} boxes: ${k$(r.worth * 12)} a year at the median.`,
       opener: OPENERS.gap(name, { service: 'storage' }) });
   }
   // win back: still billing, down on its own run
@@ -73,8 +74,8 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
   for (const r of ob.rows) if (r.boxes >= 50 && r.once > 0) {
     const name = titleCase(r.customer);
     push({ key: `overdue:${r.level1}`, kind: 'overdue', level1: r.level1, name, value: r.once, once: true,
-      short: `${Math.round(r.boxes).toLocaleString('en-US')} boxes past their review; needs client sign-off`,
-      reason: `${Math.round(r.boxes).toLocaleString('en-US')} boxes past their retention review: ${k$(r.once)} of destruction once, ending ${k$(r.lost * 12)} a year of storage. A one-off, and it needs the client's sign-off.`,
+      short: `${Fmt.num(r.boxes)} boxes past their review; needs client sign-off`,
+      reason: `${Fmt.num(r.boxes)} boxes past their retention review: ${k$(r.once)} of destruction once, ending ${k$(r.lost * 12)} a year of storage. A one-off, and it needs the client's sign-off.`,
       opener: OPENERS.overdue(name, { boxes: Math.round(r.boxes) }) });
   }
   // what the team has said about each

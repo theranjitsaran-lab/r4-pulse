@@ -6,6 +6,7 @@
 //   3. gross margin by line of business est. from the cost model (components/margin.js)
 // Worked out on the server (/api/view/numbers); the customer-level margin stays at contribution:
 // overheads are never spread by revenue.
+import * as Fmt from '/components/format.js';
 import { esc } from '/components/data.js';
 import { dataTable } from '/components/datatable.js';
 import { gridRows, marginOver } from '/components/linegrid.js';
@@ -18,7 +19,7 @@ import { trend, destChart } from '/components/homecharts.js';
 
 const mon = (d, o = { month: 'short' }) => new Date(String(d).slice(0, 10) + 'T00:00:00Z').toLocaleDateString('en-GB', { ...o, timeZone: 'UTC' });
 const monY = d => mon(d, { month: 'long', year: 'numeric' });
-const pc = v => Math.round(v * 100) + '%';
+const pc = v => Fmt.pct(v);
 const ROUTE_FAMILIES = ['handling', 'movement'];
 
 const tabsHtml = on => `<div class="top"><div><h1>Money</h1></div><div class="seg rt-tabs"><a href="#numbers" class="${on === 'warehouse' ? '' : 'on'}">Numbers</a><a href="#numbers?tab=warehouse" class="${on === 'warehouse' ? 'on' : ''}">Warehouse</a></div></div>`;
@@ -35,7 +36,7 @@ function linesSource(V) {
 
 // lines of business by month: revenue for everyone; margin for admins while costs are provisional
 const LINE_LINK = new Set(FAMS.map(f => f.key));
-const pctOf = v => v == null ? "—" : `${v < 0 ? "−" : ""}${Math.abs(Math.round(v * 100))}%`;
+const pctOf = v => v == null ? "—" : Fmt.pct(v, { minus: true });
 function drawLines(el, V) {
   const G = V.lineGrid, C = V.lineCosts, at = m => G.months.indexOf(m), bar = el.querySelector('.nb-lines-bar');
   const p = () => new URLSearchParams(location.hash.split('?')[1] || '');
@@ -95,7 +96,7 @@ export async function render(main, V, params = {}) {
     ${kpis}
     <section class="h2-card" data-rv>
       <div class="h2-ch"><h2>${esc(coreTitle(l12, V.target))}</h2><small>invoiced in VCK by month, core: storage and service, against $1.0M</small></div>
-      <div id="nb-core"></div>${V.tie ? `<p class="h2-tie ${V.tie.ok ? '' : 'late'}">${V.tie.ok ? `✓ ${V.tie.invoices.toLocaleString('en-US')} VCK invoices add up to ${esc(monY(V.tie.month))}` : `VCK now holds ${moneyK(V.tie.core)} on ${V.tie.invoices.toLocaleString('en-US')} invoices for ${esc(monY(V.tie.month))}: ${moneyK(Math.abs(V.tie.moved))} ${V.tie.moved > 0 ? 'posted' : 'removed'} since this was built`}</p>` : ''}
+      <div id="nb-core"></div>${V.tie ? `<p class="h2-tie ${V.tie.ok ? '' : 'late'}">${V.tie.ok ? `✓ ${Fmt.grouped(V.tie.invoices)} VCK invoices add up to ${esc(monY(V.tie.month))}` : `VCK now holds ${moneyK(V.tie.core)} on ${Fmt.grouped(V.tie.invoices)} invoices for ${esc(monY(V.tie.month))}: ${moneyK(Math.abs(V.tie.moved))} ${V.tie.moved > 0 ? 'posted' : 'removed'} since this was built`}</p>` : ''}
       <div class="src">Posted invoices on invoice date, storage plus service, Citadel held apart, from VCK · storage bills a month ahead, service a month behind</div>
     </section>
     ${V.month && V.month.thisMonth.length ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Work volume: ${esc(mon(V.month.workMonth, { month: 'long' }))} is ${Math.abs(V.month.vsLast || 0) < 0.02 ? 'level with' : `${pc(Math.abs(V.month.vsLast))} ${V.month.vsLast > 0 ? 'ahead of' : 'behind'}`} ${esc(mon(V.month.prevMonth, { month: 'long' }))}</h2><small>Done is what drivers confirmed in Veri-Shred. By working day, at last month's value a service, est.</small></div><div id="nb-trend"></div></section>` : ''}

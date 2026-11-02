@@ -3,12 +3,13 @@
 //   why this account (the trigger in its own data),
 //   how it is usually sold (a draft playbook, to be rewritten in R4's words).
 // Opened from a dashed cell on the Cross-sell grid and from the customer page's "Not bought yet".
+import * as Fmt from '/components/format.js';
 import { money0, moneyK } from '/components/chart.js';
 import { titleCase, esc } from '/components/data.js';
 import { LINES } from '/components/whitespace.js';
 
 
-const n = v => Math.round(v || 0).toLocaleString('en-US');
+const n = Fmt.count;
 
 // why this account: what its own data says
 function trigger(key, row, call) {

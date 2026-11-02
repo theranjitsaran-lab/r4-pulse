@@ -9,6 +9,7 @@
 //   eligible    review overdue, not protected: at least this many    max(0, overdue − hold − permanent)
 //   old         over ten years, review not yet due: at least         ten − min(ten, overdue), within what is left
 //   in use      the rest
+import * as Fmt from './format.js';
 import { storageGaps } from './levers.js';
 
 const sum = (a, f) => a.reduce((t, x) => t + (f(x) || 0), 0);
@@ -117,5 +118,5 @@ export function gridSvg(G, { width = 900, size = 9, gap = 2 } = {}) {
       g += `<rect class="wc ${s}" data-b="${bi}" x="${x}" y="${y}" width="${size}" height="${size}" rx="1.5"/>`;
     }
   });
-  return `<svg class="wgrid" viewBox="0 0 ${cols * step - gap} ${h}" role="img" aria-label="${G.n} cells, one per ${G.per.toLocaleString('en-US')} boxes, grouped by account and coloured by state">${g}</svg>`;
+  return `<svg class="wgrid" viewBox="0 0 ${cols * step - gap} ${h}" role="img" aria-label="${G.n} cells, one per ${Fmt.grouped(G.per)} boxes, grouped by account and coloured by state">${g}</svg>`;
 }
