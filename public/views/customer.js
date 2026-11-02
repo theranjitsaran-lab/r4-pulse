@@ -79,7 +79,7 @@ export async function render(main, C, params) {
   const levers = F && costsVisible() ? marginLevers(R, acct, lines, F, { row, position }) : [];
   const working = F ? Object.values(F.fams).flatMap(x => x.working) : [];
   const drawer = (family = null, woid = null) => openDrawer({ level1: id, name: (s && s.customer) || (m && m.customer) || name, R, row, B, family, woid });
-  const tile = (cls, d, label, big, small) => `<div class="h2-kpi ${cls}" data-in style="--d:${d}ms"><span>${label}</span><b data-count data-delay="${d}">${big}</b><small>${small}</small></div>`;
+  const tile = (cls, d, label, big, small) => `<div class="h2-kpi ${cls}" data-in style="--d:${d}ms"><span>${label}</span><b>${big}</b><small>${small}</small></div>`;
   const moved = s && s.move && s.move.pct != null ? (Math.abs(s.move.pct) < 0.01 ? 'level with' : `${s.move.pct > 0 ? 'up' : 'down'} ${Fmt.pct(s.move.pct, { abs: true })} on`) : null;
 
   main.innerHTML = `

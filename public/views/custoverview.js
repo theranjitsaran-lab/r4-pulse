@@ -39,10 +39,10 @@ export async function render(main, C, params, tabs) {
   const crossV = B.ws.total / 12;
 
   const kpis = `<section class="h2-kpis four">
-      <div class="h2-kpi lead" data-in style="--d:0ms"><span>${esc(LABELS.invoiced)}, ${esc(mon(last.month))}, core</span><b data-count>${moneyK(last.core)}</b><small>${chip(last.core / prev.core - 1)} on ${esc(mon(prev.month))}${ly ? ` · ${chip(last.core / ly.core - 1)} on a year ago` : ''}</small></div>
-      <div class="h2-kpi" data-in style="--d:80ms"><span>${LABELS.invoicedThisMonth}</span><b data-count data-delay="80">${active}</b><small>${chip(active / activePrev - 1)} on the month before</small></div>
-      <a class="h2-kpi" data-in style="--d:160ms" href="#opportunities?f_kind=slip"><span>Slipping ›</span><b data-count data-delay="160">${slip.length}</b><small>${moneyK(slipV)} a month below their own run</small></a>
-      <a class="h2-kpi" data-in style="--d:240ms" href="#customers?view=whitespace"><span>Cross-sell est. ›</span><b data-count data-delay="240">${moneyK(crossV)}</b><small>a month, if each bought like its peers</small></a>
+      <div class="h2-kpi lead" data-in style="--d:0ms"><span>${esc(LABELS.invoiced)}, ${esc(mon(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${chip(last.core / prev.core - 1)} on ${esc(mon(prev.month))}${ly ? ` · ${chip(last.core / ly.core - 1)} on a year ago` : ''}</small></div>
+      <div class="h2-kpi" data-in style="--d:80ms"><span>${LABELS.invoicedThisMonth}</span><b>${active}</b><small>${chip(active / activePrev - 1)} on the month before</small></div>
+      <a class="h2-kpi" data-in style="--d:160ms" href="#opportunities?f_kind=slip"><span>Slipping ›</span><b>${slip.length}</b><small>${moneyK(slipV)} a month below their own run</small></a>
+      <a class="h2-kpi" data-in style="--d:240ms" href="#customers?view=whitespace"><span>Cross-sell est. ›</span><b>${moneyK(crossV)}</b><small>a month, if each bought like its peers</small></a>
     </section>`;
 
   // the book by line: one bar, each line's share of last month, with its change
