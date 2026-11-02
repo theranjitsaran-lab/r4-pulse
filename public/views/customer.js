@@ -1,27 +1,29 @@
 // One customer: the page every list and every number opens. Desktop first, restacks on a phone.
-// Header figures · 24-month storage and service on one axis · margin by line of business, each line
-// opening to its priced lines · prices against the book's median and what moving is worth · signals.
+// Four figures · 24 months of storage and service with proper axes · its margin bridge and lines, each opening
+// the one drill drawer (components/margindrawer.js): every job, then one job's cost build · what would improve it
+// and its open opportunities · folded below: not bought yet, prices, signals; where it is served and its visits.
 import * as Fmt from '/components/format.js';
 import { lineChart, money0, moneyK } from '/components/chart.js';
-import { buildMargins, accountCosts, flatFeeYear, FAMILY_NAMES } from '/components/margin.js';
+import { buildMargins, accountJobs, marginLevers, FAMILY_NAMES } from '/components/margin.js';
+import { pricePosition } from '/components/custbook.js';
+import { openDrawer, bridgeHtml, linesHtml, leversHtml, linesOf } from '/components/margindrawer.js';
+import { openInvoices } from '/components/invoices.js';
+import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 import { ledgerTable } from '/components/table.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 import { seriesOf, deltaText, moveReason } from '/components/series.js';
 import { slippingAccounts, unitSuspect } from '/components/levers.js';
-import { costOrders, jobHtml, drawRouteBlock } from '/components/jobview.js';
 import { costsVisible } from '/components/access.js';
 import { placesSvg, miles, YARD, loadBasemap, basemapNow, loadRoadnet } from '/components/routemap.js';
 
 const CITADEL = 6714;
-const UNDER_REVIEW = new Set(['bin', 'handling', 'movement']);
-
 
 export async function render(main, C, params) {
   if (!main) return;
   const id = Number(params.id);
-  const [R, M, PR, CA, log] = await Promise.all([loadRates(), getJson('margin'), getJson('pricing'), getJson('calls'), getLog(Number(params.id)).catch(() => [])]);
+  const [R, M, PR, CA, log, VW] = await Promise.all([loadRates(), getJson('margin'), getJson('pricing'), getJson('calls'), getLog(Number(params.id)).catch(() => []), costsVisible() ? getJson('view/customers').catch(() => null) : null]);
   const s = seriesOf(C).get(id);
   const book = buildMargins(R, M, {});
   const m = book.accounts.find(a => a.level1 === id);
@@ -39,22 +41,10 @@ export async function render(main, C, params) {
 
   const ltm = s ? s.ltm : m.revenue;
   const pc = m && m.revenue > 0 ? m.margin / m.revenue : null;
-  // a route line is under review only while it rests on the average visit: bins from the account's own
-  // route days, and delivery from delivery truck days (Settings), are not
-  const review = f => UNDER_REVIEW.has(f) && !(f === 'bin' && R.routeFor && R.routeFor(id)) && !(f === 'movement' && R.movementFor && R.movementFor(id));
-  const routeHeavy = m && [...UNDER_REVIEW].some(f => review(f) && m.fam[f] && m.fam[f].cost > 0.25 * m.cost);
   const slipping = s && s.move && slippingAccounts(C).some(x => x.level1 === id);
-
-  // the account in a few sentences, in place of a row of figure tiles
   const share = k => s ? Math.round(s[k].slice(-12).reduce((t, v) => t + v, 0) / Math.max(1, s.ltm) * 100) : null;
   const n0 = Fmt.count;
-  const lede = [];
-  lede.push(`<b>${moneyK(ltm)}</b> invoiced in the last twelve months${s ? `, ${share('storage')}% storage and ${share('service')}% service` : ''}.`);
-  if (s && s.move) lede.push(`Over the last three months it ran at ${moneyK(s.move.last3)} a month against its own ${moneyK(s.move.run)} before${Math.abs(s.move.pct || 0) >= 0.05 ? `: ${moveReason(s.move, moneyK)}` : ', about level'}.`);
-  if (costsVisible() && m && m.cost > 0) lede.push(`About ${moneyK(m.cost)} a year to serve est. ${m.margin >= 0 ? `leaves ${moneyK(m.margin)}${pc != null ? ` (${Fmt.pct(pc)})` : ''}` : `is ${moneyK(-m.margin)} more than it pays`}${routeHeavy ? ', with route costs under review' : R.routeFor && R.routeFor(id) && m.fam.bin ? ', its bins costed from its own route days' : ''}.`);
-  if (acct && (acct.boxes >= 1 || acct.bins)) lede.push([acct.boxes >= 1 ? `It stores ${n0(acct.boxes)} boxes` : '', acct.bins ? `${acct.boxes >= 1 ? 'and had' : 'It had'} ${n0(acct.bins)} bin services on ${n0(acct.visits)} visits` : ''].filter(Boolean).join(' ') + '.');
-  if (id === CITADEL) lede.push('Citadel\'s settlements land in lumps, so it is held apart from core.');
-  const summary = lede.join(' ');
+  const summary = s && s.move && Math.abs(s.move.pct || 0) >= 0.05 ? `Over the last three months: ${moveReason(s.move, moneyK)}.` : id === CITADEL ? "Citadel's settlements land in lumps, so it is held apart from core." : '';
 
   // prices: this account's rates against the book's median for each service, and what moving is worth
   const byCode = new Map();
@@ -82,31 +72,42 @@ export async function render(main, C, params) {
   const VERB = { right: 'right', not_right: 'not right', called: 'called', emailed: 'emailed', not_this_week: 'not this week' };
   const when = t => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
-  const fams = m ? Object.entries(m.fam).map(([f, v]) => ({ f, ...v })).filter(x => x.revenue !== 0 || x.cost !== 0).sort((a, b) => b.revenue - a.revenue) : [];
-  const svcName = new Map(PR.rates.map(r => [r.servcode, r.service]));
+  const lines = M.lines.filter(l => l.level1 === id);
+  const F = acct ? accountJobs(R, acct, lines, []) : null;
+  const B = VW ? { rows: VW.rows, book: VW.book } : null, row = B ? VW.rows.find(r => r.level1 === id) || null : null;
+  const position = B ? (r, k) => pricePosition(B, r, k) : null;
+  const levers = F && costsVisible() ? marginLevers(R, acct, lines, F, { row, position }) : [];
+  const working = F ? Object.values(F.fams).flatMap(x => x.working) : [];
+  const drawer = (family = null, woid = null) => openDrawer({ level1: id, name: (s && s.customer) || (m && m.customer) || name, R, row, B, family, woid });
+  const tile = (cls, d, label, big, small) => `<div class="h2-kpi ${cls}" data-in style="--d:${d}ms"><span>${label}</span><b data-count data-delay="${d}">${big}</b><small>${small}</small></div>`;
+  const moved = s && s.move && s.move.pct != null ? (Math.abs(s.move.pct) < 0.01 ? 'level with' : `${s.move.pct > 0 ? 'up' : 'down'} ${Fmt.pct(s.move.pct, { abs: true })} on`) : null;
 
   main.innerHTML = `
-  <div class="cp">
-    <div class="crumb">${params.from === 'margin' ? '<a href="#customers?view=margin">Margin</a>' : '<a href="#customers">Customers</a>'}<span>›</span><span style="color:var(--ink-2)">${esc(name)}</span></div>
-    <h1>${esc(name)}</h1>
+  <div class="cp h2">
+    <div class="crumb"><a href="#customers">Accounts</a><span>›</span><span style="color:var(--ink-2)">${esc(name)}</span></div>
+    <div class="cp-head"><h1>${esc(name)}</h1>
     <div class="tags">
-      ${id === CITADEL ? '<span class="chip">Held apart from core · settlements land in lumps</span>' : ''}
+      ${id === CITADEL ? '<span class="chip">Held apart from core</span>' : ''}
       ${slipping ? `<span class="chip bad">Slipping: ${deltaText(s.move.pct)} on its own run</span>` : ''}
       ${signals && signals.not_raised_2y ? '<span class="chip warn">Missed every rate round</span>' : ''}
-      ${costsVisible() && routeHeavy ? '<span class="chip review">Route costs under review</span>' : ''}
     </div>
-    <p class="cp-lede">${summary}</p>
-    <div class="card" id="cp-chart"></div>
-    ${s ? `<div class="cp-inv"><span>Invoices</span>${s.months.slice(-6).reverse().map(x => `<button type="button" class="chip" data-inv-id="${id}" data-inv-m="${x}" data-inv-name="${esc(s.customer)}">${new Date(x + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })}</button>`).join('')}</div>` : ''}
-    <section class="card cp-opps" id="cp-opps"><div class="card-head"><h3>Open opportunities</h3><a href="#opportunities">All opportunities ›</a></div><p class="sub">Loading…</p></section>
-    <div class="grid one">
-      <div class="card">
-        ${!costsVisible() ? `<div class="card-head"><h3>What it buys, the last twelve months</h3></div><div id="cp-fams"><ul class="h2-pl">${fams.filter(x => x.revenue > 0).map(x => `<li class="rest"><span>${esc(FAMILY_NAMES[x.f] || x.f)}</span><b>${money0(x.revenue)}</b></li>`).join('') || '<li class="rest"><span>No priced lines in the last twelve months.</span></li>'}</ul></div>` : `<div class="card-head"><h3>Margin by line of business</h3><a href="#customers?view=margin&id=${id}">The margin drill: line, job, route ›</a></div>
-        ${fams.length ? `<div class="famhead"><span>Line</span><span>Revenue</span><span class="cost">Cost est.</span><span>Margin</span><span></span></div>` : ''}
-        <div id="cp-fams">${fams.map(x => {
-          const p = x.revenue > 0 ? 1 - x.cost / x.revenue : null, rev = review(x.f);
-          return `<div class="fam" data-f="${x.f}"><span>${esc(FAMILY_NAMES[x.f] || x.f)}${rev ? ' <span class="chip review">under review</span>' : ''}</span><span class="r">${money0(x.revenue)}</span><span class="r cost">${x.f === 'other' ? '—' : money0(x.cost)}</span><span class="r ${p != null && p < 0 && !rev ? 'is-bad' : ''}">${x.f === 'other' || p == null ? '—' : rev ? 'est.' : Fmt.pct(p)}</span><span class="go">›</span></div><div class="lines" data-for="${x.f}" hidden></div>`;
-        }).join('') || '<p class="sub">No priced lines in the last twelve months.</p>'}</div>`}
+    ${summary ? `<p class="cp-lede">${summary}</p>` : ''}</div>
+    <section class="h2-kpis four">
+      ${tile('lead', 0, 'Invoiced, last twelve months', moneyK(ltm), s ? `${share('storage')}% storage, ${share('service')}% service` : '')}
+      ${s && s.move ? tile('', 80, 'Running at, a month', moneyK(s.move.last3), `${moved || 'against'} its own ${moneyK(s.move.run)} before`) : ''}
+      ${costsVisible() && m && m.cost > 0 ? tile('', 160, 'Margin est.', pc != null ? Fmt.pct(pc).replace('-', '−') : '—', `${m.margin >= 0 ? 'keeps' : 'short by'} ${moneyK(Math.abs(m.margin))} on ${moneyK(m.cost)} to serve`) : ''}
+      ${acct && (acct.boxes >= 1 || acct.bins) ? tile('', 240, acct.boxes >= 1 ? 'Boxes stored' : 'Bin services, a year', n0(acct.boxes >= 1 ? acct.boxes : acct.bins), acct.bins ? `${n0(acct.bins)} bin services on ${n0(acct.visits)} visits` : 'on average, over the year') : ''}
+    </section>
+    <section class="h2-card" data-in id="cp-chart"></section>
+    <div class="cp-two">
+      <section class="h2-card" data-in>
+        <div class="h2-ch cp-ch"><h2>${costsVisible() ? (m && m.cost > 0 ? (m.margin >= 0 ? `Keeps ${moneyK(m.margin)} of ${moneyK(m.revenue)} est.` : `Costs ${moneyK(-m.margin)} more than it pays est.`) : 'What it buys') : 'What it buys, the last twelve months'}</h2>${F && linesOf(F).length ? '<button type="button" class="linkbtn" id="cp-jobs">Every job ›</button>' : ''}</div>
+        ${costsVisible() && m && m.cost > 0 ? bridgeHtml(m.revenue, working) : ''}
+        <div id="cp-fams">${F ? linesHtml(F, costsVisible(), F.noLine) : '<p class="sub">No priced lines in the last twelve months.</p>'}</div>
+      </section>
+      <div class="cp-side">
+        ${costsVisible() ? `<section class="h2-card" data-in><div class="h2-ch"><h2>What would improve it</h2></div>${leversHtml(levers, 4)}</section>` : ''}
+        <section class="h2-card cp-opps" id="cp-opps" data-in><div class="h2-ch cp-ch"><h2>Open opportunities</h2><a href="#opportunities">All ›</a></div><p class="sub">Loading…</p></section>
       </div>
     </div>
     <details class="fold cp-fold"><summary><h3>Not bought yet, prices against the book, signals</h3><span class="sub">${sigs.length ? `${sigs.length} signal${sigs.length === 1 ? '' : 's'} · ` : ''}${mine.length} prices · open</span></summary>
@@ -127,8 +128,8 @@ export async function render(main, C, params) {
         </div>
     </div>
     </details>
-    <details class="fold cp-fold"><summary><h3>Work orders and shredding visits</h3><span class="sub">last six months${costsVisible() ? ', each opening to its cost and its route day' : ''} · open</span></summary>
-    <div class="grid drill" id="cp-drill"><div class="card"><div class="card-head"><h3>Work orders</h3><small>last six months</small></div><p class="sub">Loading…</p></div><div class="card"><div class="card-head"><h3>Shredding visits</h3><small>last six months</small></div><p class="sub">Loading…</p></div></div>
+    <details class="fold cp-fold" id="cp-where"><summary><h3>Where it is served, and its shredding visits</h3><span class="sub">last six months · open</span></summary>
+    <div class="grid drill" id="cp-drill"><div class="card" style="grid-column:1/-1"><p class="sub">Loading…</p></div></div>
     </details>
   </div>`;
 
@@ -140,20 +141,33 @@ export async function render(main, C, params) {
     box.querySelector('p').outerHTML = open.length ? `<ul class="cp-opp">${open.map(r => `<li><span><b>${esc(KIND[r.kind] || r.kind)}</b>${r.owner ? ` · ${esc(r.owner)}` : ''}${r.status !== 'open' ? ` · ${esc(r.status)}` : ''}<small>${esc(r.reason)}</small></span><em>${moneyK(r.value)}${r.once ? ' once' : ''}${r.modelled ? ' est.' : ''}</em></li>`).join('')}</ul>` : '<p class="sub">Nothing open for this customer.</p>';
   }).catch(() => { const box = main.querySelector('#cp-opps'); if (box) box.remove(); });
 
+  const play = firstPlay('r4-customer-played');
   if (s) {
     const pts = k => s.months.map((x, i) => ({ x, y: s[k][i] }));
+    const parts = ['storage', 'service'].filter(k => s[k].some(Boolean));
     lineChart(main.querySelector('#cp-chart'), {
-      title: chartTitle(s), sub: `${s.months.length} months to the latest posted month · invoice month · one axis`,
+      title: chartTitle(s), sub: `${s.months.length} months to the latest posted month · tap a month for its invoices`,
+      axes: { y: '$ invoiced a month' }, play, onPick: x => openInvoices(id, x, s.customer),
       // a part never billed is said in the source line, not drawn as a line along the axis
-      series: [{ name: 'Storage', cls: 'storage', points: pts('storage') }, { name: 'Service', cls: 'service', points: pts('service') }].filter(x => x.points.some(p => p.y)),
-      source: `VCK invoices, by invoice month · ${['storage', 'service'].filter(k => !s[k].some(Boolean)).map(k => `no ${k} billed in these months · `).join('')}storage and service as billed`,
+      series: [{ name: 'Storage', cls: 'storage', points: pts('storage') }, { name: 'Service', cls: 'service', points: pts('service') }].filter(x => parts.includes(x.cls)),
+      source: `VCK invoices, by invoice month · ${['storage', 'service'].filter(k => !parts.includes(k)).map(k => `no ${k} billed in these months · `).join('')}as billed`,
     });
   } else main.querySelector('#cp-chart').remove();
 
   const wsBox = main.querySelector('.ws1') && main.querySelector('.ws1').closest('.card');
   if (wsBox && wsRow) wsBox.addEventListener('click', ev => { const b = ev.target.closest('button.opp'); if (b) openExplainer({ row: wsRow, key: b.dataset.key, call: signals, H: M.history, names: new Map(M.accounts.map(a => [a.level1, a.customer])) }); });
-  const drillP = loadDrill(id, R, M);
-  drawDrill(main.querySelector('#cp-drill'), drillP, svcName);
+  // the visits and the map, read when the fold opens
+  const where = main.querySelector('#cp-where');
+  if (where) where.addEventListener('toggle', () => { if (where.open && !where.dataset.read) { where.dataset.read = '1'; drawDrill(main.querySelector('#cp-drill'), loadDrill(id)); } });
+
+  // a line opens the drawer at that line; every job, at the account
+  main.querySelector('#cp-fams').addEventListener('click', ev => { const b = ev.target.closest('button.md-line'); if (b) drawer(b.dataset.f); });
+  const allJobs = main.querySelector('#cp-jobs'); if (allJobs) allJobs.addEventListener('click', () => drawer());
+  if (params.line) drawer(params.line, params.job || null);
+
+  document.documentElement.classList.add('js');
+  const root = main.querySelector('.cp');
+  if (play) { root.classList.add('play'); whenIntroDone().then(() => playIn(root)); }
 
   // right or not right on a signal: logged, and the buttons show what was said
   const sigBox = main.querySelector('#cp-sigs');
@@ -169,120 +183,32 @@ export async function render(main, C, params) {
     row.querySelectorAll('button').forEach(x => x.disabled = false);
   });
 
-  // a line of business opens in place to its priced lines
-  main.querySelector('#cp-fams').addEventListener('click', async ev => {
-    const row = ev.target.closest('.fam'); if (!row) return;
-    const box = main.querySelector(`.lines[data-for="${row.dataset.f}"]`);
-    const open = !box.hidden;
-    main.querySelectorAll('.lines').forEach(b => { b.hidden = true; b.innerHTML = ''; });
-    main.querySelectorAll('.fam').forEach(f => f.classList.remove('open'));
-    if (open) return;
-    row.classList.add('open'); box.hidden = false;
-    const fam = row.dataset.f, famName = FAMILY_NAMES[fam] || fam;
-    const ls = M.lines.filter(l => l.level1 === id && ((l.family && l.family !== 'none' ? l.family : 'other') === fam))
-      .sort((a, b) => b.revenue - a.revenue);
-    // 1. how this line's cost is worked out, from the same results the margin is built from
-    const costs = acct ? (accountCosts(R, acct, M.lines.filter(l => l.level1 === id))[fam] || []) : [];
-    const working = costs.flatMap(c => c.lines);
-    box.innerHTML = `
-      <div class="lp-crumb">${esc(name)} › ${esc(famName)}</div>
-      <div class="lab" style="margin:var(--sp-2) 0 var(--sp-1)">How the cost is worked out est.</div>
-      <div class="lp-cost">${working.length ? working.map(l => `<details class="ob-row"><summary><span>${esc(l[0])}${l[3] ? ' est.' : ''}</span><span class="num">${money0(l[1])}</span></summary><p class="sub">${esc(l[2])}</p></details>`).join('') + `<div class="ob-row" style="border-top:var(--hair) solid var(--rule-ink);margin-top:var(--sp-1);padding-top:var(--sp-2);font-weight:600"><span>A year</span><span class="num">${money0(working.reduce((t, l) => t + l[1], 0))}</span></div>` : '<p class="sub">No modelled cost on this line: fees and charges with no volume behind them.</p>'}</div>
-      ${fam === 'storage' ? '' : '<div class="lab" style="margin:var(--sp-4) 0 var(--sp-1)">On the invoices, twelve months</div><div class="lp-lines"></div>'}
-      ${fam === 'storage' ? '' : '<div class="lab" style="margin:var(--sp-4) 0 var(--sp-1)">Its orders, last six months</div><div class="lp-orders"><p class="sub">Loading…</p></div>'}`;
-    if (fam === 'storage') return;
-    ledgerTable(box.querySelector('.lp-lines'), { columns: [
-      { key: 'servcode', label: 'Service', fmt: (v) => esc(titleCase(svcName.get(v.replace(/^S5[BPT]$/, 'S5')) || v)) + ` <span class="sub" style="display:inline">${esc(v)}</span>` },
-      { key: 'units', label: 'Units', num: true, fmt: (v, r) => Fmt.num(v) + ' ' + (r.unit || '') },
-      { key: 'revenue', label: 'Revenue', num: true, fmt: v => money0(v) },
-    ], rows: ls.filter(l => l.revenue !== 0 || l.drives_cost) });
-    // 3. this line's own work orders, each opening to its cost build
-    const { d, error, meta } = await drillP;
-    const ob = box.querySelector('.lp-orders');
-    if (!ob || !ob.isConnected) return;
-    if (error) { ob.innerHTML = `<div class="pending">${esc(error)}</div>`; return; }
-    const mine = d.orders.filter(o => o.items.some(i => { const f = (meta.get(i.code) || {}).family; return (f && f !== 'none' ? f : 'other') === fam || (fam === 'bin' && /^B\d$/.test(i.code)); }));
-    if (!mine.length) { ob.innerHTML = '<p class="sub">No orders on this line in the last six months.</p>'; return; }
-    const lost = mine.filter(o => o.cost.total && o.margin < 0).length;
-    ob.insertAdjacentHTML('beforebegin', `<p class="sub" style="margin:0 0 var(--sp-2)">${mine.length}${mine.length >= 200 ? '+' : ''} orders; ${d.flatFee ? 'billed by the flat fee, not order by order' : `${lost} cost more to serve than they billed est.`}</p>`);
-    ordersTable(ob, mine.slice(0, 12), svcName, name, famName);
-    if (mine.length > 12) {
-      const b = document.createElement('button');
-      b.className = 'linkbtn'; b.textContent = `Show ${Math.min(mine.length, 60)} orders`;
-      b.onclick = () => { ordersTable(ob, mine.slice(0, 60), svcName, name, famName); b.remove(); };
-      ob.after(b);
-    }
-  });
 }
 
-// the open customer page's drill: rates, activity and postcode centres, for each order's route day
-let RCTX = null;
 const zcta = () => fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
 
-// One fetch per customer page: the orders and visits, each order costed once, on its real route day
-// where the account was on one (components/jobview.js).
-async function loadDrill(id, R, M) {
-  const meta = new Map();
-  for (const l of M.lines) if (l.level1 === id || !meta.has(l.servcode)) meta.set(l.servcode, { family: l.family, unit: l.unit, drives_cost: l.drives_cost });
+// Its Veri-Shred visits and the postcodes they were at, read when the fold opens.
+async function loadDrill(id) {
   try {
-    const [r, A, Z] = await Promise.all([fetch(`/api/customer/${id}`, { credentials: 'same-origin' }), getJson('activity').catch(() => null), zcta(), loadRoadnet()]);
+    const [r, Z] = await Promise.all([fetch(`/api/customer/${id}`, { credentials: 'same-origin' }), zcta(), loadRoadnet()]);
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
-    const d = j.data;
-    d.flatFee = flatFeeYear(M.lines.filter(l => l.level1 === id));
-    costOrders(R, d, meta, A, Z, id);
-    RCTX = { id, R, d, A, Z };
-    return { d, meta };
-  } catch (e) { return { error: e.message, meta }; }
+    return { d: j.data, Z };
+  } catch (e) { return { error: e.message }; }
 }
 
-const dayFmt = t => new Date(t + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
-const n0 = v => Fmt.num(v || 0);
-function ordersTable(el, rows, svcName, name, famName) {
-  ledgerTable(el, {
-    columns: [
-      { key: 'date', label: 'Date', fmt: v => dayFmt(v) },
-      { key: 'woid', label: 'Order', fmt: v => `<span class="sub" style="display:inline">${esc(v)}</span>` },
-      { key: 'revenue', label: 'Value', num: true, fmt: (v, r) => r.flatFee ? 'flat fee' : money0(v) },
-      ...(costsVisible() ? [{ key: 'cost', label: 'Cost est.', num: true, fmt: v => v.total ? money0(v.total) : '—' },
-      { key: 'margin', label: 'Left', num: true, fmt: (v, r) => r.cost.total && !r.flatFee ? `<span class="${v < 0 ? (r.cost.route ? 'is-warn' : 'is-bad') : ''}">${money0(v)}</span>` : '—' }] : []),
-    ],
-    rows,
-    detail: !costsVisible() ? undefined : (o, td) => { td.innerHTML = `${famName ? `<div class="lp-crumb">${esc(name)} › ${esc(famName)} › order ${esc(o.woid)}, ${dayFmt(o.date)}</div>` : ''}${jobHtml({ o, items: o.items, c: o.cost, svcName, ctx: o.day, A: RCTX && RCTX.A })}`; if (RCTX) drawRouteBlock(td.querySelector('.jv-route'), o.day, RCTX); },
-  });
-}
-
-// Below the page: the account's work orders (what was billed, order by order) and its Veri-Shred
-// visits (one row per day and route). Per account, so fetched here rather than in the snapshot.
-async function drawDrill(el, drillP, svcName) {
+async function drawDrill(el, drillP) {
   if (!el) return;
-  const { d, error } = await drillP;
-  if (error) {
-    el.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="card-head"><h3>Work orders and visits</h3></div><div class="pending">${esc(error)}</div></div>`;
-    return;
-  }
+  const { d, Z, error } = await drillP;
   if (!el.isConnected) return;
+  if (error) { el.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="pending">${esc(error)}</div></div>`; return; }
   const day = t => new Date(t + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
   const n0 = v => Fmt.num(v || 0);
-  const ordRev = d.orders.reduce((t, o) => t + o.revenue, 0);
   const lbs = d.visits.reduce((t, v) => t + (v.pounds || 0), 0);
-  el.innerHTML = `
-    <div class="card"><div class="card-head"><h3>Work orders</h3><small>${d.orders.length ? (d.orders.length >= 200 ? `the latest 200 orders, ${money0(ordRev)}` : `${n0(d.orders.length)} in six months, ${money0(ordRev)}`) : 'last six months'}</small></div>${d.flatFee ? `<p class="sub">Billed as a flat fee: ${money0(d.flatFee)} in the last twelve months. Rotation orders carry no value of their own, so read the account's year, not each order.</p>` : ''}<div id="cp-orders"></div><div class="pending" style="margin-top:var(--sp-3)">Box by box: not in the database yet. Lines carry a count of boxes; the barcodes are in VCK's work-order detail, which is not in the daily push.</div><div class="src">VCK priced lines by work order · cost est. from the cost model, one visit shared between the day's orders · tap an order for its cost build</div></div>
-    <div class="card"><div class="card-head"><h3>Shredding visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} days on a route · ${n0(lbs)} lb` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Bin and shredding stops drivers marked done in Veri-Shred, one row per day and route. Box deliveries and retrievals are on the work orders, not here. Executive-bin weights are a set figure, not weighed.</div></div>`;
-  const oBox = el.querySelector('#cp-orders'), vBox = el.querySelector('#cp-visits');
-  drawWhere(el, d);
-  // the latest twelve of each, with the rest one tap away
-  const more = (box, total, draw) => {
-    if (total <= 12) return draw(total);
-    draw(12);
-    const b = document.createElement('button');
-    b.className = 'linkbtn'; b.textContent = total > 60 ? "Show the latest 60" : `Show all ${total}`;
-    b.onclick = () => { draw(Math.min(total, 60)); b.remove(); };
-    box.after(b);
-  };
-  if (d.orders.length) more(oBox, d.orders.length, n => ordersTable(oBox, d.orders.slice(0, n), svcName));
-  else oBox.innerHTML = '<p class="sub">No billed work orders in the last six months.</p>';
-  if (d.visits.length) more(vBox, d.visits.length, n => ledgerTable(vBox, {
+  el.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="card-head"><h3>Shredding visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} days on a route · ${n0(lbs)} lb` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Bin and shredding stops drivers marked done in Veri-Shred, one row per day and route. Executive-bin weights are a set figure, not weighed.</div></div>`;
+  const vBox = el.querySelector('#cp-visits');
+  drawWhere(el, d, Z);
+  const draw = n => ledgerTable(vBox, {
     columns: [
       { key: 'date', label: 'Date', fmt: v => v ? day(v) : '—' },
       { key: 'route', label: 'Route', fmt: (v, r) => `${esc(v || '—')}${r.driver ? ` <span class="sub" style="display:inline">${esc(r.driver)}</span>` : ''}` },
@@ -290,8 +216,10 @@ async function drawDrill(el, drillP, svcName) {
       { key: 'pounds', label: 'Pounds', num: true, fmt: v => v ? n0(v) : '—' },
     ],
     rows: d.visits.slice(0, n),
-  }));
-  else vBox.innerHTML = '<p class="sub">No done Veri-Shred orders in the last six months: this account\'s work is storage or warehouse handling.</p>';
+  });
+  if (!d.visits.length) { vBox.innerHTML = '<p class="sub">No done Veri-Shred orders in the last six months: this account\'s work is storage or warehouse handling.</p>'; return; }
+  draw(Math.min(12, d.visits.length));
+  if (d.visits.length > 12) { const b = document.createElement('button'); b.className = 'linkbtn'; b.textContent = `Show all ${d.visits.length}`; b.onclick = () => { draw(d.visits.length); b.remove(); }; vBox.after(b); }
 }
 
 // What the account doesn't buy yet, sized at what comparable accounts spend (components/whitespace.js).
@@ -323,8 +251,7 @@ function chartTitle(s) {
 
 // Where the account is served: its own stops over six months (the drill's route lists), by postcode,
 // against the yard, above the orders and visits. One look says a city account or one far out.
-function drawWhere(el, d) {
-  const Z = RCTX && RCTX.Z;
+function drawWhere(el, d, Z) {
   if (!el || !Z || !d.routes) return;
   const by = new Map(), days = new Set();
   for (const r of d.routes) {

@@ -10,6 +10,7 @@
 //              total: 'sum', or (rows) => html
 //     filters  [{ k, l, options: [[value, label]], test: (row, value, state) => boolean, hidden?, chips? }]
 //              chips: a row of buttons, not a select; hidden: in the link and the chips below, not the bar
+//              seg: a switch, always on one of its options (give it a default in defaults); never a removable chip
 //     months   { list: [every month, oldest first], est: [months in progress], get: (row, month) => value,
 //                cell?: (row, month) => html, flag?: false for no colour,
 //                sumCell?: (row, months) => html, totalCell?: (rows, months) => html }
@@ -19,6 +20,8 @@
 //     detail   row => html: a tap opens it under the row
 //     ns       a prefix for the table's link state, where a page has more than one table
 //     inTotal  which rows the total counts, where one is held apart
+//     opens    the row opens something through onRow: it takes the keyboard too
+//     plain    only search, filters and CSV: for a table inside a drawer
 import * as Fmt from './format.js';
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
@@ -113,11 +116,13 @@ export function dataTable(el, o) {
   const colsOn = () => colsAll().filter(c => c.name || c.fixed || (st.cols ? st.cols.includes(c.k) : c.def));
   const views = () => [...(o.views || []), ...loadSaved(o.who, o.key)];
   el.classList.add('dt');
+  if (o.plain) el.classList.add('dt-plain');
   el.innerHTML = `<div class="dt-tools">
       ${o.search ? `<input class="dt-find" type="search" placeholder="${esc(o.placeholder || 'Find')}" aria-label="${esc(o.placeholder || 'Find')}" value="${esc(st.q)}">` : ''}
       <button type="button" class="dt-ftoggle" aria-expanded="false">More</button>
+      ${(o.filters || []).filter(f => f.seg).map(f => `<span class="seg dt-seg" role="group" aria-label="${esc(f.l)}">${f.options.map(([v, l]) => `<button type="button" data-k="${f.k}" data-v="${esc(v)}">${esc(l)}</button>`).join('')}</span>`).join('')}
       ${(o.filters || []).filter(f => !f.hidden && f.chips).map(f => `<span class="dt-types" role="group" aria-label="${esc(f.l)}">${f.options.map(([v, l]) => `<button type="button" class="dt-type" data-k="${f.k}" data-v="${esc(v)}">${esc(l)}</button>`).join('')}</span>`).join('')}
-      ${(o.filters || []).filter(f => !f.hidden && !f.chips).map(f => `<select class="dt-f" data-k="${f.k}" aria-label="${esc(f.l)}"><option value="">${esc(f.l)}</option>${f.options.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>`).join('')}
+      ${(o.filters || []).filter(f => !f.hidden && !f.chips && !f.seg).map(f => `<select class="dt-f" data-k="${f.k}" aria-label="${esc(f.l)}"><option value="">${esc(f.l)}</option>${f.options.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>`).join('')}
       ${o.months ? '<span class="seg dt-span" role="group" aria-label="Months shown"><button type="button" data-span="3">3 months</button><button type="button" data-span="12">12 months</button></span>' : ''}
       <details class="dt-cols"><summary>Columns</summary><div class="dt-colbox"></div></details>
       <select class="dt-views" aria-label="Saved views"></select>
@@ -134,13 +139,14 @@ export function dataTable(el, o) {
     const all = colsAll(), cols = colsOn();
     const rows = filterRows(o.rows, o, st);
     const col = cols.find(c => c.k === st.sort && c.get) || cols.find(c => c.sorted) || cols.find(c => c.get && !c.name) || cols[0];
-    const sorted = sortRows(rows, col, st.sort ? st.dir : col.text ? 1 : -1);
+    const sorted = sortRows(rows, col, st.sort ? st.dir : col.asc || (col.text && col.asc !== false) ? 1 : -1);
     // the filter bar: selects and chips say the same thing
     el.querySelectorAll('.dt-f').forEach(s => { s.value = st.f[s.dataset.k] || ''; s.classList.toggle('on', !!s.value); });
-    const chips = (o.filters || []).filter(f => st.f[f.k]).map(f => { const lab = (f.options.find(([v]) => v === st.f[f.k]) || [])[1] || st.f[f.k]; return `<button type="button" class="dt-chip" data-k="${f.k}">${esc(lab)} ×</button>`; });
+    const chips = (o.filters || []).filter(f => st.f[f.k] && !f.seg).map(f => { const lab = (f.options.find(([v]) => v === st.f[f.k]) || [])[1] || st.f[f.k]; return `<button type="button" class="dt-chip" data-k="${f.k}">${esc(lab)} ×</button>`; });
     if (st.q) chips.unshift(`<button type="button" class="dt-chip" data-k="__q">“${esc(st.q)}” ×</button>`);
     $('.dt-chips').innerHTML = `<b>${Fmt.grouped(rows.length)}${rows.length !== o.rows.length ? ` of ${Fmt.grouped(o.rows.length)}` : ''}</b>${o.say || o.noun ? ` <span>${esc(o.say ? o.say(st, rows) : o.noun)}</span>` : ''}${chips.join('')}`;
     el.querySelectorAll('.dt-span button').forEach(b => b.classList.toggle('on', +b.dataset.span === spanNow()));
+    el.querySelectorAll('.dt-seg button').forEach(b => { const on = st.f[b.dataset.k] === b.dataset.v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
     el.querySelectorAll('.dt-type').forEach(b => { const on = st.f[b.dataset.k] === b.dataset.v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
     $('.dt-cols').hidden = !all.some(c => !c.name && !c.fixed);
     $('.dt-colbox').innerHTML = all.filter(c => !c.name && !c.fixed).map(c => `<label><input type="checkbox" data-c="${c.k}" ${cols.some(x => x.k === c.k) ? 'checked' : ''}> ${esc(c.l)}</label>`).join('');
@@ -154,7 +160,7 @@ export function dataTable(el, o) {
     const childCell = (c, ch) => { const v = c.month ? ch.values[c.month] || 0 : c.ms ? c.ms.reduce((t, m) => t + (ch.values[m] || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(ch.name) : v == null ? '' : v ? kOnly(v) : '—'}</td>`; };
     const body = sorted.slice(0, shown).map(r => {
       const open = opened.get(r), kids = open && o.detail ? `<tr class="dt-detail"><td colspan="${cols.length}">${o.detail(r, st)}</td></tr>` : open === FAILED ? `<tr class="dt-detail"><td colspan="${cols.length}">These lines could not be read just now. Close this row and open it again to retry.</td></tr>` : Array.isArray(open) ? open.map(ch => `<tr class="dt-child">${cols.map(c => childCell(c, ch)).join('')}</tr>`).join('') : '';
-      return `<tr data-i="${index.get(r)}"${o.inTotal && !o.inTotal(r) ? ' data-out="1"' : ''}${o.expand || o.detail ? ` tabindex="0" aria-expanded="${!!open}"` : ''}>${cols.map(c => `<td class="${tdCls(c)}${c.cellCls ? ' ' + c.cellCls(r) : ''}"${c.cellStyle ? ` style="${c.cellStyle(r)}"` : ''}${c.name && c.get ? ` title="${esc(c.get(r))}"` : ''}${c.total === 'sum' ? num(c.get(r)) : ''}>${c.name && (o.expand || o.detail) ? `<span class="dt-caret">${open ? '▾' : '▸'}</span>` : ''}${c.fmt ? c.fmt(r) : esc(c.get ? c.get(r) ?? '—' : '')}</td>`).join('')}</tr>${kids}`;
+      return `<tr data-i="${index.get(r)}"${o.inTotal && !o.inTotal(r) ? ' data-out="1"' : ''}${o.expand || o.detail ? ` tabindex="0" aria-expanded="${!!open}"` : o.opens ? ' tabindex="0" class="dt-opens"' : ''}>${cols.map(c => `<td class="${tdCls(c)}${c.cellCls ? ' ' + c.cellCls(r) : ''}"${c.cellStyle ? ` style="${c.cellStyle(r)}"` : ''}${c.name && c.get ? ` title="${esc(c.get(r))}"` : ''}${c.total === 'sum' ? num(c.get(r)) : ''}>${c.name && (o.expand || o.detail) ? `<span class="dt-caret">${open ? '▾' : '▸'}</span>` : ''}${c.fmt ? c.fmt(r) : esc(c.get ? c.get(r) ?? '—' : '')}</td>`).join('')}</tr>${kids}`;
     }).join('');
     const restRows = o.rest ? sorted.slice(shown) : [], restCounted = o.inTotal ? restRows.filter(o.inTotal) : restRows;
     const rest = restRows.length ? `<tr class="dt-rest" data-rest="1">${cols.map(c => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(restCounted, c)) : ''}>${c.name ? `All other ${esc(o.noun || 'rows')} (${Fmt.grouped(restRows.length)})` : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(restCounted, c)) : Fmt.grouped(sumOf(restCounted, c))) : ''}</td>`).join('')}</tr>` : '';
@@ -166,6 +172,7 @@ export function dataTable(el, o) {
   }
 
   el.querySelectorAll('.dt-span button').forEach(b => b.addEventListener('click', () => { st.span = +b.dataset.span; if (st.sort && !colsAll().some(c => c.k === st.sort)) st.sort = null; keep(); draw(); }));
+  el.querySelectorAll('.dt-seg button').forEach(b => b.addEventListener('click', () => { st.f[b.dataset.k] = b.dataset.v; keep(); draw(); }));
   el.querySelectorAll('.dt-type').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; st.f[k] = st.f[k] === b.dataset.v ? '' : b.dataset.v; shown = PAGE; keep(); draw(); }));
   const find = $('.dt-find');
   $('.dt-ftoggle').addEventListener('click', e => e.target.setAttribute('aria-expanded', String(el.classList.toggle('dt-open'))));
@@ -215,6 +222,7 @@ export function dataTable(el, o) {
   });
   table.addEventListener('keydown', e => {
     const th = e.target.closest('th[data-s]'); if (th && e.key === 'Enter') th.click();
+    const go = e.target.closest && e.target.closest('tbody tr[data-i]'); if (o.opens && o.onRow && go && e.target === go && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); o.onRow(o.rows[+go.dataset.i], e); return; }
     const tr = e.target.closest && e.target.closest('tbody tr[data-i]'); if ((o.expand || o.detail) && tr && e.target === tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(tr); }
   });
   draw();

@@ -55,6 +55,30 @@ test('Delivery: code 01 boxes are not trips, and a delivery with no postcode sta
   assert.equal(rc.deliveries.noPostcode, 1);
 });
 
+test('Jobs add up: each line\'s jobs plus what is unallocated tie to the line, revenue and cost, for the three named accounts', async () => {
+  const fs = require('fs'), path = require('path'), R = require('../model/rates');
+  const jf = path.join(__dirname, '..', 'fixtures', 'jobs.json');
+  if (!fs.existsSync(jf)) return;
+  const read = n => JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'fixtures', n + '.json'), 'utf8')).data;
+  const { accountJobs, buildMargins } = await import('../public/components/margin.js'), { routeCosts } = await import('../public/components/routecost.js');
+  const Z = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'data', 'zcta.json'), 'utf8'));
+  const M = read('margin'), J = read('jobs'), rc = routeCosts(R, read('routestops'), Z, read('deliverydays'));
+  const keep = R.routeCostsNow(); R.setRouteCosts(rc);
+  try {
+    const book = buildMargins(R, M, {});
+    for (const id of [12601, 12530, 8153]) {
+      const a = M.accounts.find(x => x.level1 === id), lines = M.lines.filter(l => l.level1 === id), m = book.accounts.find(x => x.level1 === id);
+      const F = accountJobs(R, a, lines, J.accounts.find(x => x.level1 === id).orders, { daily: rc.daily[id] || {}, moveDaily: rc.moveDaily[id] || {} });
+      for (const [f, x] of Object.entries(F.fams)) {
+        const rev = x.jobs.reduce((t, j) => t + j.revenue, 0), cost = x.jobs.reduce((t, j) => t + j.cost, 0);
+        if (f !== 'storage') assert.ok(Math.abs(rev - x.revenue) < 1, id + ' ' + f + ' revenue ' + rev + ' against ' + x.revenue);
+        assert.ok(Math.abs(cost + x.unallocated - (m.fam[f] ? m.fam[f].cost : 0)) < 1, id + ' ' + f + ' cost ' + (cost + x.unallocated) + ' against ' + (m.fam[f] && m.fam[f].cost));
+        assert.ok(Math.abs(x.revenue - (m.fam[f] ? m.fam[f].revenue : 0)) < 1, id + ' ' + f + ' line revenue');
+      }
+    }
+  } finally { R.setRouteCosts(keep); }
+});
+
 test('#20 shredding: Opportunities, Warehouse and Home count the same boxes for an account', async () => {
   const { opportunities } = await import('../public/components/opps.js');
   const { destructionView } = await import('../public/components/home2data.js');

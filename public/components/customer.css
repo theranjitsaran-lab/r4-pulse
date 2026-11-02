@@ -88,3 +88,17 @@
 .cp details.cp-fold > summary .sub { font-size: var(--fs-label); color: var(--ink-3); }
 .cp details.cp-fold[open] > summary { margin-bottom: var(--sp-3); }
 @media (max-width: 700px) { .cp details.cp-fold > summary .sub { display: none; } }
+
+/* the page around the drawer: Home's canvas and cards, fewer blocks */
+.cp.h2 h1 { font-family: var(--f-display); font-weight: 400; font-synthesis: none; }
+.cp .cp-head .cp-lede { font-size: var(--fs-body); margin: var(--sp-1) 0 0; color: var(--ink-3); }
+.cp .crumb { margin-bottom: 0; }
+.cp .tags { margin: var(--sp-1) 0 0; } .cp .tags:empty { display: none; }
+.cp-two { display: grid; gap: var(--sp-4); grid-template-columns: minmax(0, 1fr); align-items: start; }
+.cp-side { display: grid; gap: var(--sp-4); min-width: 0; }
+.cp-ch { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); }
+.cp-ch a { color: var(--brand); font-weight: 600; text-decoration: none; font-size: var(--fs-label); }
+.cp .md-bridge { margin-bottom: var(--sp-4); }
+.cp .cp-opps { margin-bottom: 0; }
+.cp details.cp-fold { margin: 0; background: var(--surface); border-color: var(--card-ring); box-shadow: var(--shadow-card); }
+@media (min-width: 1000px) { .cp-two { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); } }

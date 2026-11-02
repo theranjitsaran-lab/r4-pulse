@@ -8,7 +8,7 @@ import { money0, moneyK, sparkline } from '/components/chart.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { pricePosition, sizePeers, FAMS } from '/components/custbook.js';
 import { customerView } from '/components/home2data.js';
-import { costParts, PARTS, marginAction, FAMILY_NAMES } from '/components/margin.js';
+import { FAMILY_NAMES } from '/components/margin.js';
 import { serviceMedians, slippingAccounts, CITADEL } from '/components/levers.js';
 import { LINES } from '/components/whitespace.js';
 import { openPop } from '/components/pop.js';
@@ -16,7 +16,8 @@ import { dataTable, kOnly } from '/components/datatable.js';
 import { costsVisible, whoAmI, myRole } from '/components/access.js';
 import { LABELS, changeWord, isLumpy } from '/components/metrics.js';
 import { accountFilters } from '/components/acctfilters.js';
-import { reveal } from '/components/motion.js';
+import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
+import { openDrawer } from '/components/margindrawer.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const pct = v => `${Fmt.pct(v, { abs: true })}`;
@@ -37,21 +38,21 @@ export async function render(main, C, params, tabs) {
   const slip = slippingAccounts(C), slipV = slip.reduce((t, s) => t - s.move.d, 0);
   const crossV = B.ws.total / 12;
 
-  const kpis = `<section class="h2-kpis four" data-rv>
-      <div class="h2-kpi lead"><span>${esc(LABELS.invoiced)}, ${esc(mon(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${chip(last.core / prev.core - 1)} on ${esc(mon(prev.month))}${ly ? ` · ${chip(last.core / ly.core - 1)} on a year ago` : ''}</small></div>
-      <div class="h2-kpi"><span>${LABELS.invoicedThisMonth}</span><b>${active}</b><small>${chip(active / activePrev - 1)} on the month before</small></div>
-      <a class="h2-kpi" href="#opportunities?f_kind=slip"><span>Slipping ›</span><b>${slip.length}</b><small>${moneyK(slipV)} a month below their own run</small></a>
-      <a class="h2-kpi" href="#customers?view=whitespace"><span>Cross-sell est. ›</span><b>${moneyK(crossV)}</b><small>a month, if each bought like its peers</small></a>
+  const kpis = `<section class="h2-kpis four">
+      <div class="h2-kpi lead" data-in style="--d:0ms"><span>${esc(LABELS.invoiced)}, ${esc(mon(last.month))}, core</span><b data-count>${moneyK(last.core)}</b><small>${chip(last.core / prev.core - 1)} on ${esc(mon(prev.month))}${ly ? ` · ${chip(last.core / ly.core - 1)} on a year ago` : ''}</small></div>
+      <div class="h2-kpi" data-in style="--d:80ms"><span>${LABELS.invoicedThisMonth}</span><b data-count data-delay="80">${active}</b><small>${chip(active / activePrev - 1)} on the month before</small></div>
+      <a class="h2-kpi" data-in style="--d:160ms" href="#opportunities?f_kind=slip"><span>Slipping ›</span><b data-count data-delay="160">${slip.length}</b><small>${moneyK(slipV)} a month below their own run</small></a>
+      <a class="h2-kpi" data-in style="--d:240ms" href="#customers?view=whitespace"><span>Cross-sell est. ›</span><b data-count data-delay="240">${moneyK(crossV)}</b><small>a month, if each bought like its peers</small></a>
     </section>`;
 
   // the book by line: one bar, each line's share of last month, with its change
-  const segCard = seg ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>${esc(mon(seg.month))} by line of business</h2><small>${moneyK(seg.total)} · tap a line to see its customers' prices and costs</small></div>
+  const segCard = seg ? `<section class="h2-card" data-in><div class="h2-ch"><h2>${esc(mon(seg.month))} by line of business</h2><small>${moneyK(seg.total)} · tap a line to see its customers' prices and costs</small></div>
       <div class="c2-stack">${seg.rows.map((s, i) => `<i class="s${i}" style="--w:${(s.lm / seg.total * 100).toFixed(2)}%" title="${esc(s.name)} ${moneyK(s.lm)}"></i>`).join('')}</div>
       <div class="c2-legend">${seg.rows.map((s, i) => { const f = FAMS.find(x => x.key === s.key); return `<${f ? `a href="#customers?view=overview&f_line=${s.key}"` : 'span'} class="c2-li"><i class="k s${i}"></i><span>${esc(s.name)}</span><b>${moneyK(s.lm)}</b>${move(s.key, s.lm, s.lmPct)}</${f ? 'a' : 'span'}>`; }).join('')}</div></section>` : '';
 
   const custRow = (r, kind) => `<li><a href="#customer/${r.level1}"><span class="h2-cn">${esc(titleCase(r.customer))}</span>${sparkline(r.spark, { w: 72, h: 22, cls: 'service' })}
       <span class="h2-cv ${kind === 'top' ? '' : kind === 'rising' ? 'up' : 'down'}">${kind === 'top' ? moneyK(r.last3) : signedK(r.d)}<small>a month</small></span></a></li>`;
-  const fives = `<section class="h2-card" data-rv><div class="h2-ch"><h2>Who moved</h2><small>last three months against each account's own year before</small></div>
+  const fives = `<section class="h2-card" data-in><div class="h2-ch"><h2>Who moved</h2><small>last three months against each account's own year before</small></div>
       <div class="seg h2-tabs"><button data-k="top" class="on">Largest</button><button data-k="rising">Rising</button><button data-k="falling">Slipping</button></div>
       <div class="h2-cols">
         <div class="h2-col" data-k="top"><h3>Largest</h3><ul class="h2-cl">${cust.top.map(r => custRow(r, 'top')).join('')}</ul></div>
@@ -59,14 +60,14 @@ export async function render(main, C, params, tabs) {
         <div class="h2-col" data-k="falling"><h3>Slipping <a href="#customers?view=slipping">all ${cust.slipping} ›</a></h3><ul class="h2-cl">${cust.falling.map(r => custRow(r, 'falling')).join('')}</ul></div>
       </div></section>`;
 
-  main.innerHTML = `<div class="cust c2">
+  main.innerHTML = `<div class="cust c2 h2">
     <h1>Accounts</h1>
     ${tabs}
     ${kpis}
     <div class="h2-row">${segCard}${fives}</div>
-    <section class="h2-card c2-tablecard" data-rv>
+    <section class="h2-card c2-tablecard" data-in>
       <div id="c2-dt"></div>
-      <div class="src">Sales as invoiced, Citadel held apart from totals ${costsVisible() ? '· margin and cost a unit est. are modelled; route-based costs are under review ' : ''}· price a unit is the line's revenue over the units that drive it · tap an account for its lines, a month for its invoices</div>
+      <div class="src">Sales as invoiced, Citadel held apart from totals ${costsVisible() ? '· margin and cost a unit est. are modelled from GL pools over twelve months, provisional · tap a margin for its lines and jobs ' : ''}· price a unit is the line's revenue over the units that drive it · tap an account for its lines, a month for its invoices</div>
     </section>
   </div>`;
 
@@ -85,23 +86,26 @@ export async function render(main, C, params, tabs) {
     return { ...b, level1: a.level1, customer: a.customer, m: a.m, ltm: a.m.slice(-12).reduce((t, v) => t + v, 0) };
   });
   const name = { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` };
-  const allCols = [name,
+  const asK = st => st.f.mv === 'k';
+  const marginCell = (r, v, st, x = 'margin') => `<button class="c2-x" data-x="${x}" data-id="${r.level1}"><span class="${v.m < 0 ? 'is-bad' : v.pc != null && v.pc < .15 ? 'is-warn' : ''}">${asK(st) ? signedK(v.m) : v.pc == null ? '—' : Fmt.pct(v.pc).replace('-', '−')}</span></button>`;
+  const marginTotal = (st, of) => rows => { const t = rows.reduce((a, r) => { const v = of(r); return v ? { rev: a.rev + v.rev, m: a.m + v.m } : a; }, { rev: 0, m: 0 }); return asK(st) ? signedK(t.m) : t.rev > 0 ? Fmt.pct(t.m / t.rev).replace('-', '−') : '—'; };
+  const allCols = st => [name,
     { k: 'd', l: 'Against its own run, a month', short: 'Own run', get: r => r.d, fmt: r => r.d == null ? '—' : cellBtn(r, `<span class="h2-cv ${r.movePct >= .2 ? 'up' : r.movePct <= -.2 ? 'down' : ''}">${signedK(r.d)}</span>`, 'sales') },
     { k: 'opp', l: 'Cross-sell est., a month', short: 'Cross-sell est.', get: r => r.opp ? r.opp / 12 : 0, fmt: r => r.opp > 0 ? cellBtn(r, moneyK(r.opp / 12), 'opp') : '—' },
     { k: 'gap', l: 'Under the book, a year', short: 'Under book', get: r => r.gap, fmt: r => r.gap > 0 ? cellBtn(r, moneyK(r.gap), 'gap') : '—' },
     { k: 'spark', l: '13 months', csv: () => '', fmt: r => r.spark ? sparkline(r.spark, { w: 84, h: 22, cls: 'service' }) : '' },
-    ...(costsVisible() ? [{ k: 'pc', l: 'Margin est.', def: true, get: r => r.pc, fmt: r => r.pc == null ? '—' : cellBtn(r, `<span class="${r.margin < 0 ? 'is-bad' : r.pc < .15 ? 'is-warn' : ''}">${Fmt.pct(r.pc)}</span>${r.review ? '<small> review</small>' : ''}`, 'margin') }] : []),
+    ...(costsVisible() ? [{ k: 'pc', l: asK(st) ? 'Margin $K est.' : 'Margin % est.', short: asK(st) ? '$K est.' : '% est.', def: true, get: r => asK(st) ? r.margin : r.pc, csv: r => asK(st) ? r.margin : r.pc, fmt: r => r.pc == null ? '—' : marginCell(r, { m: r.margin, pc: r.pc }, st), totalHtml: marginTotal(st, r => r.pc == null ? null : { rev: r.revenue, m: r.margin }) }] : []),
   ];
   // a line of business chosen: who buys it, with its price and units beside the months
-  const famCols = key => [name,
+  const famCols = (key, st) => [name,
     { k: 'price', l: 'Price a unit', short: 'Price', def: true, get: r => r.fam && r.fam[key] && r.fam[key].price, fmt: r => { const f = r.fam && r.fam[key], p = f && f.price ? pricePosition(B, r, key) : null; return f && f.price ? cellBtn(r, `${unitMoney(f.price, f.unit)}${p && !p.widened ? ` <span class="c2-pct ${p.pct < .25 ? 'lo' : p.pct > .75 ? 'hi' : ''}">${p.pct < .25 ? 'low' : p.pct > .75 ? 'high' : 'mid'}</span>` : ''}`, 'price') : '—'; } },
     { k: 'units', l: 'Units, a year', short: 'Units', def: true, get: r => r.fam && r.fam[key] && r.fam[key].units, fmt: r => r.fam && r.fam[key] ? Fmt.num(r.fam[key].units) : '—' },
     ...(costsVisible() ? [
       { k: 'costPer', l: 'Cost a unit est.', get: r => r.fam && r.fam[key] && r.fam[key].costPer, fmt: r => { const f = r.fam && r.fam[key]; return f && f.costPer ? cellBtn(r, unitMoney(f.costPer, f.unit), 'price') : '—'; } },
-      { k: 'fmargin', l: 'Margin est.', def: true, get: r => r.fam && r.fam[key] ? r.fam[key].revenue - r.fam[key].cost : null, fmt: r => { const f = r.fam && r.fam[key]; if (!f) return '—'; const v = f.revenue - f.cost; return cellBtn(r, `<span class="${v < 0 ? 'is-bad' : ''}">${signedK(v)}</span>`, 'margin'); } },
+      { k: 'fmargin', l: asK(st) ? 'Margin $K est.' : 'Margin % est.', short: asK(st) ? '$K est.' : '% est.', def: true, get: r => { const f = r.fam && r.fam[key]; return !f ? null : asK(st) ? f.revenue - f.cost : f.revenue > 0 ? (f.revenue - f.cost) / f.revenue : null; }, fmt: r => { const f = r.fam && r.fam[key]; return f ? marginCell(r, { m: f.revenue - f.cost, pc: f.revenue > 0 ? (f.revenue - f.cost) / f.revenue : null }, st) : '—'; }, totalHtml: marginTotal(st, r => { const f = r.fam && r.fam[key]; return f ? { rev: f.revenue, m: f.revenue - f.cost } : null; }) },
     ] : []),
   ];
-  const filters = accountFilters(VW, C);
+  const filters = [...(costsVisible() ? [{ k: 'mv', l: 'Show margin as', seg: true, options: [['pc', '% margin'], ['k', '$K margin']], test: () => true }] : []), ...accountFilters(VW, C)];
   const role = myRole();
   const views = [
     ...(role === 'owner' || role === 'admin' ? [{ name: 'Slipping over $2K a month', q: 'f_trend=slip2k' }] : []),
@@ -110,23 +114,24 @@ export async function render(main, C, params, tabs) {
   if (params.line) history.replaceState(null, '', location.hash.replace(/([?&])line=/, '$1f_line='));   // links saved before the filter bar
   const host = main.querySelector('#c2-dt');
   const core = new Map(P.monthly.map(x => [x.month, x.core]));
-  dataTable(host, { key: 'accounts', who: whoAmI(), rows, filters, views, placeholder: 'Find an account', noun: 'accounts', rest: true,
+  dataTable(host, { key: 'accounts', who: whoAmI(), rows, filters, views, defaults: costsVisible() ? { mv: 'pc' } : {}, placeholder: 'Find an account', noun: 'accounts', rest: true,
     ref: { label: LABELS.invoiced + ', core', get: m => core.get(m) },
     months: { list: am.months, get: (r, m) => r.m[at.get(m)],
       cell: (r, m) => { const v = r.m[at.get(m)]; return v ? `<span data-inv-id="${r.level1}" data-inv-m="${m}" data-inv-name="${esc(r.customer)}">${kOnly(v)}</span>` : '—'; } },
-    search: r => r.customer, cols: st => st.f.line ? famCols(st.f.line) : allCols,
+    search: r => r.customer, cols: st => st.f.line ? famCols(st.f.line, st) : allCols(st),
     say: (st, shown) => { const f = st.f.line && FAMS.find(x => x.key === st.f.line); return f ? `accounts buying ${f.name.toLowerCase()} · $K` : 'accounts · invoiced, by month billed · $K'; },
     expand: async r => { const v = await getJson('view/account-lines?level1=' + r.level1); return v.rows.map(l => ({ name: l.name, values: Object.fromEntries(v.months.map((m, i) => [m, l.values[i]])) })); },
-    onRow: (r, e) => { const b = e.target.closest('.c2-x'); if (b) explain(b.dataset.x, r, { B, PR, line: (new URLSearchParams(location.hash.split('?')[1] || '')).get('f_line'), R }); },
+    onRow: (r, e) => { const b = e.target.closest('.c2-x'), line = (new URLSearchParams(location.hash.split('?')[1] || '')).get('f_line'); if (!b) return; if (b.dataset.x === 'margin') return openDrawer({ level1: r.level1, name: r.customer, R, row: r, B, family: line || null }); explain(b.dataset.x, r, { B, PR, line, R }); },
   });
-  reveal(main.querySelector('.c2'));
+  document.documentElement.classList.add('js');
+  const root = main.querySelector('.c2');
+  if (firstPlay('r4-accounts-played')) { root.classList.add('play'); whenIntroDone().then(() => playIn(root)); }
 }
 
 // ── the pop-outs: why a figure is what it is, against similar accounts, and what to do ──
 const bars = (items, max) => `<ul class="p2-bars">${items.map(i => `<li><span>${esc(i.name)}</span><i style="--w:${Math.max(1, i.v / max * 100).toFixed(1)}%" class="${i.cls || ''}"></i><b>${i.label}</b></li>`).join('')}</ul>`;
 
 export async function explain(kind, r, { B, PR, line, R }) {
-  if (kind === 'margin' && !costsVisible()) return;
   if (kind === 'gap' && !PR) PR = await getJson('pricing');
   const name = titleCase(r.customer);
   const peers = sizePeers(B, r);
@@ -143,32 +148,6 @@ export async function explain(kind, r, { B, PR, line, R }) {
         <h3>What it buys, last twelve months</h3>${bars(fam.map(([k, v]) => ({ name: FAMILY_NAMES[k] || k, v: v.revenue, label: moneyK(v.revenue) })), max)}
         ${missing.length ? `<h3>Not bought yet est.</h3><ul class="p2-list">${missing.map(x => `<li><b>${esc(x.name)}</b>: about ${moneyK(r.oppRow.cells[x.key].opp)} a year at ${esc(r.oppRow.cells[x.key].basis)}.</li>`).join('')}</ul>` : ''}
         ${B.months.length ? `<p class="p2-go"><a href="#" data-inv-id="${r.level1}" data-inv-m="${B.months[B.months.length - 1]}" data-inv-name="${esc(r.customer)}">See its invoices for ${esc(mon(B.months[B.months.length - 1]))} ›</a></p>` : ''}
-        <p class="p2-go"><a href="#customer/${r.level1}">Open ${esc(name)} ›</a></p>`,
-    });
-  }
-  if (kind === 'margin') {
-    const fam = Object.entries(r.mfam).filter(([, v]) => v.revenue > 0 || v.cost > 0).sort((a, b) => b[1].revenue - a[1].revenue);
-    const lines = Object.values(r.fam).flatMap(f => f.lines || []);
-    const parts = costParts(lines), travel = lines.filter(l => l[0] === 'Travel to site').reduce((t, l) => t + l[1], 0);
-    const act = marginAction({ pc: r.pc, review: r.review, revenue: r.revenue, cost: r.cost }, travel);
-    const pmax = Math.max(...Object.values(parts), 1);
-    // what would move it: prices under similar accounts, route cost, size
-    const todo = [];
-    for (const f of FAMS) {
-      const p = pricePosition(B, r, f.key);
-      if (p && p.toMedian > 250 && p.pct < .4) todo.push(`<li><b>${esc(f.name)}</b>: pays ${unitMoney(r.fam[f.key].price, p.unit)} a ${esc(p.unit)} where ${p.n} similar accounts pay a median ${unitMoney(p.med, p.unit)}. At the median: <b>+${moneyK(p.toMedian)} a year</b>.</li>`);
-    }
-    if (r.cost > 0 && travel / r.cost > .35) todo.push(`<li><b>Getting there</b> is ${pct(travel / r.cost)} of its cost est. (${r.visits} visits a year). Fewer, fuller visits, or a day when a route is already nearby, cuts it more than any price.</li>`);
-    if (r.revenue < 5000 && r.pc < .15) todo.push('<li><b>Small</b>: under $5,000 a year. A minimum charge is the usual fix.</li>');
-    return openPop({
-      title: name, sub: `Margin est. ${Fmt.pct(r.pc || 0)}: ${money0(r.revenue)} of revenue, ${money0(r.cost)} to serve`, ask: `Why is ${name}'s margin ${Fmt.pct(r.pc || 0)}, and how do we improve it?`,
-      html: `<p class="p2-verdict ${act.cls}"><b>${esc(act.tag)}</b> ${esc(act.why)}</p>
-        ${peers.pc != null ? `<p>Similar-sized accounts keep a median <b>${Fmt.pct(peers.pc)}</b> est.</p>` : ''}
-        <h3>By line, last twelve months est.</h3>
-        <table class="p2-t"><thead><tr><th class="tl">Line</th><th>Revenue</th><th>Cost</th><th>Margin</th></tr></thead><tbody>${fam.map(([k, v]) => `<tr><td class="tl">${esc(FAMILY_NAMES[k] || k)}</td><td>${money0(v.revenue)}</td><td>${money0(v.cost)}</td><td class="${v.revenue - v.cost < 0 ? 'is-bad' : ''}">${signedK(v.revenue - v.cost)}</td></tr>`).join('')}</tbody></table>
-        <h3>Where the cost goes est.</h3>${bars(PARTS.filter(p => parts[p[0]] > 0).map(p => ({ name: p[1], v: parts[p[0]], label: moneyK(parts[p[0]]), cls: p[0] === 'route' ? 'warn' : '' })), pmax)}
-        ${todo.length ? `<h3>What would move it</h3><ul class="p2-list">${todo.join('')}</ul>` : ''}
-        <p class="src">Estimates: Costs from the cost model: GL pools over twelve months of volumes, provisional; route costs under review until delivery routes are in the data.</p>
         <p class="p2-go"><a href="#customer/${r.level1}">Open ${esc(name)} ›</a></p>`,
     });
   }

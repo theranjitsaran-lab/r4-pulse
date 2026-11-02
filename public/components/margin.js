@@ -57,6 +57,125 @@ export function flatFeeYear(lines) {
   return fee > 0 && rotations.some(l => l.units > 0) && rotations.every(l => !l.revenue) ? fee : 0;
 }
 
+// Every job of one account, costed so the jobs add up to the line the margin shows. Nothing is costed twice:
+// each working line of accountCosts is shared out to the jobs by what drives it.
+//   route lines   its real share of each route day (routecost.js daily), split between its jobs that day. A
+//                 route day with no billed job on this line stays in unallocated, and a job on a day with no
+//                 stop carries no route cost and says so. With no route days: the average visit, by job day.
+//   every other   by the job's own units of what drives the line: movements, pounds, boxes, hours.
+// orders: [{ woid, date, items: [{ code, units, revenue }] }] from customerJobs, tagged as margin() tags them.
+// Returns { [family]: { revenue, cost, jobs, unallocated, why, working } } and noLine: invoiced service with no line.
+const ROUTE_NAMES = new Set(['Travel to site', 'Truck time', 'Time on site']);
+const sayDay = t => new Date(t + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const UNIT_WORD = { 'Warehouse handling': 'movements', 'Box handling': 'boxes', 'Shred plant': 'lb', 'Plant throughput': 'devices', 'Driver time': 'hours', 'Service Centre time': 'hours' };
+const famKey = l => l && l.family && l.family !== 'none' ? l.family : 'other';
+export function accountJobs(R, acct, lines, orders, { daily = null, moveDaily = null } = {}) {
+  const meta = new Map(lines.map(l => [l.servcode, l])), m = c => meta.get(c) || {};
+  const working = accountCosts(R, acct, lines), fams = {};
+  const fam = f => fams[f] || (fams[f] = { family: f, revenue: 0, cost: 0, jobs: [], unallocated: 0, why: [], working: [] });
+  for (const l of lines) if (famKey(l) !== 'storage') fam(famKey(l)).revenue += l.revenue;
+  if (acct.storage_revenue) fam('storage').revenue += acct.storage_revenue;
+  for (const o of orders) {
+    const by = {};
+    for (const i of o.items) { const f = famKey(m(i.code)); if (f !== 'storage') (by[f] || (by[f] = [])).push(i); }
+    for (const [f, items] of Object.entries(by)) fam(f).jobs.push({ woid: o.woid, date: o.date, items, revenue: items.reduce((t, i) => t + (i.revenue || 0), 0), lines: [], cost: 0, margin: 0 });
+  }
+  const unitsOf = (j, pred) => j.items.reduce((t, i) => pred(i, m(i.code)) ? t + (i.units || 0) : t, 0);
+  const lbOnDate = new Map();
+  for (const o of orders) for (const i of o.items) if (i.code === 'S5B') lbOnDate.set(o.date, (lbOnDate.get(o.date) || 0) + (i.units || 0));
+  const money = v => Fmt.money(v);
+  for (const [f, results] of Object.entries(working)) {
+    const F = fam(f), js = F.jobs, onDate = new Map();
+    for (const j of js) onDate.set(j.date, (onDate.get(j.date) || 0) + 1);
+    const dayCount = onDate.size;
+    const source = f === 'bin' && R.routeFor && R.routeFor(acct.level1) ? daily : f === 'movement' && R.movementFor && R.movementFor(acct.level1) ? moveDaily : null;
+    // the shares of one working line, and what each share is
+    const share = (l, name) => {
+      const amount = l[1];
+      F.working.push(l);
+      if (!js.length) { F.unallocated += amount; return; }
+      let weight, total, say;
+      if (ROUTE_NAMES.has(name)) {
+        if (source) {
+          const field = name === 'Time on site' ? 'onsite' : 'travel';
+          total = Object.values(source).reduce((t, d) => t + d[field], 0);
+          weight = j => { const d = source[j.date]; return d ? d[field] / onDate.get(j.date) : 0; };
+          say = j => { const d = source[j.date], n = onDate.get(j.date); return d ? `Its share of the route day on ${sayDay(j.date)}${n > 1 ? `, split between its ${n} jobs that day` : ''}.` : `No stop recorded for this account on ${sayDay(j.date)}, so no route cost falls on this job.`; };
+        } else {
+          total = dayCount;
+          weight = j => 1 / onDate.get(j.date);
+          say = () => `The model's average visit: ${money(amount)} over ${dayCount} job days. This line has no route days to read.`;
+        }
+      } else {
+        const pred = name === 'Warehouse handling' ? (i, x) => x.family === 'handling' && x.drives_cost
+          : name === 'Box handling' ? (i, x) => x.family === 'movement' && x.drives_cost && x.unit === 'box'
+          : name === 'Plant throughput' ? (i, x) => x.family === 'itad' && x.drives_cost
+          : name === 'Driver time' ? (i, x) => x.family === 'labour' && x.drives_cost && !CENTRE_HOURS.has(i.code)
+          : name === 'Service Centre time' ? (i, x) => x.family === 'labour' && x.drives_cost && CENTRE_HOURS.has(i.code)
+          : f === 'shred' ? (l[2].includes(' lb') || l[2].includes('pound') ? i => i.code === 'S3' || i.code === 'S5P' : (i, x) => x.family === 'shred' && x.drives_cost && (x.unit === 'box' || x.unit === 'cubic foot'))
+          : i => /^B\d$/.test(i.code);
+        // pounds on S5 sit on the date's bins, not always on the same order
+        if (name === 'Shred plant' && f === 'bin' && lbOnDate.size) { weight = j => (lbOnDate.get(j.date) || 0) / onDate.get(j.date); total = js.reduce((t, j) => t + weight(j), 0); }
+        else { weight = j => unitsOf(j, pred); total = js.reduce((t, j) => t + weight(j), 0); }
+        const word = name === 'Shred plant' && f === 'shred' && !(l[2].includes(' lb') || l[2].includes('pound')) ? 'boxes' : name === 'Shred plant' && f === 'bin' && !lbOnDate.size ? 'bins' : UNIT_WORD[name] || 'units';
+        say = j => { const w = weight(j); return `${Fmt.grouped(Math.round(w * 10) / 10)} of the line's ${Fmt.grouped(Math.round(total))} ${word} at ${Fmt.money(amount / total, { dp: amount / total < 1 ? 4 : 2 })}.`; };
+      }
+      if (!total || Math.abs(total) < 1e-9) { F.unallocated += amount; F.why.push(`${name}: ${money(amount)} has no job carrying what drives it.`); return; }
+      let given = 0;
+      for (const j of js) {
+        const v = amount * weight(j) / total;
+        given += v;
+        if (Math.abs(v) > 0.005 || (ROUTE_NAMES.has(name) && source)) j.lines.push([name, v, say(j), l[3]]);
+        if (source && ROUTE_NAMES.has(name) && !source[j.date]) j.noRoute = true;
+        if (source && ROUTE_NAMES.has(name) && source[j.date]) j.real = true;
+      }
+      if (Math.abs(amount - given) > 0.005) { F.unallocated += amount - given; F.why.push(`${name}: ${money(amount - given)} on route days with no billed job on this line.`); }
+    };
+    for (const r of results) { F.cost += r.total; for (const l of r.lines) share(l, l[0]); }
+  }
+  const flat = flatFeeYear(lines);
+  for (const F of Object.values(fams)) for (const j of F.jobs) {
+    j.lines = j.lines.filter(l => Math.abs(l[1]) > 0.005);
+    j.cost = j.lines.reduce((t, l) => t + l[1], 0); j.margin = j.revenue - j.cost;
+    j.route = j.lines.some(l => ROUTE_NAMES.has(l[0]));
+    j.flatFee = !!flat && F.family === 'bin' && !j.revenue;
+  }
+  const lined = Object.values(fams).filter(F => F.family !== 'storage').reduce((t, F) => t + F.revenue, 0);
+  return { fams, noLine: (acct.service_revenue || 0) - lined, flat };
+}
+
+// What would move an account's margin or one of its lines: each on its own, in dollars a year, from the
+// functions the rest of the app prices with. They overlap, so they are never added together.
+//   row: its customerBook row; B: the book. family: one line, or all of them
+export function marginLevers(R, acct, lines, F, { row = null, position = null, family = null } = {}) {
+  const out = [], fams = Object.values(F.fams).filter(x => !family || x.family === family);
+  for (const x of fams) {
+    if (!(x.cost > 0) && !(x.revenue > 0)) continue;
+    const name = FAMILY_NAMES[x.family] || x.family;
+    const p = row && position && row.fam && row.fam[x.family] ? position(row, x.family) : null;
+    if (p && p.toMedian > 250 && p.pct < .5) out.push({ kind: 'price', family: x.family, title: `${name}: move to its peers' median`, say: `${p.n} accounts of a similar size pay a median ${Fmt.money(p.med, { dp: p.med < 1 ? 3 : 2 })} a ${p.unit}; it pays ${Fmt.money(row.fam[x.family].price, { dp: row.fam[x.family].price < 1 ? 3 : 2 })}.`, worth: p.toMedian });
+    if (x.cost > 0 && x.revenue < x.cost / .6 && x.family !== 'other') out.push({ kind: 'price', family: x.family, title: `${name}: price for a 40% margin`, say: `${Fmt.money(x.revenue)} of revenue on ${Fmt.money(x.cost)} to serve est.`, worth: x.cost / .6 - x.revenue });
+  }
+  // fewer, fuller visits: the same units on half the stops, costed the way a quote is
+  const S = R.SETTINGS, binF = F.fams.bin;
+  if (binF && (!family || family === 'bin') && acct.bins > 0 && acct.visits >= 24) {
+    const r = R.routeFor && R.routeFor(acct.level1), lb = lines.filter(l => l.servcode === 'S5B').reduce((t, l) => t + l.units, 0), base = lb > 0 ? { pounds: lb } : { binCode: acct.main_bin };
+    let saving = 0;
+    if (r) {
+      const mins = r.stops * S.stopMin + r.services * S.serviceMin, perMin = mins > 0 ? r.onsite / mins : 0, tps = r.travel / r.stops;
+      const at = v => v * tps + v * perMin * (S.stopMin + S.serviceMin * r.services / v);
+      saving = (at(r.stops) - at(r.stops / 2)) * acct.bins / r.services;
+    } else saving = R.costToServe('bin', acct.bins, { visits: acct.visits, ...base }).total - R.costToServe('bin', acct.bins, { visits: Math.round(acct.visits / 2), ...base }).total;
+    if (saving > 0) out.push({ kind: 'ops', family: 'bin', title: `Bin service: half as many visits, ${Fmt.grouped(Math.round(acct.visits / 2))} a year`, say: 'The same bins on fewer stops, each one fuller.', worth: saving });
+  }
+  const moveF = F.fams.movement, trips = lines.filter(l => l.servcode === '01').reduce((t, l) => t + l.units, 0);
+  if (moveF && (!family || family === 'movement') && trips >= 24) {
+    const route = R.movementFor && R.movementFor(acct.level1), travel = (moveF.working || []).filter(l => ROUTE_NAMES.has(l[0])).reduce((t, l) => t + l[1], 0);
+    if (travel > 0) out.push({ kind: 'ops', family: 'movement', title: `Delivery: batch into half as many trips, ${Fmt.grouped(Math.round(trips / 2))} a year`, say: route ? 'The same boxes on fewer stops, from its own delivery days.' : "The same boxes on fewer stops, at the model's average visit.", worth: travel / 2 });
+  }
+  return out.filter(l => l.worth > 0).sort((a, b) => b.worth - a.worth);
+}
+
 // The book's margin as Home and the Margin view show it, from one place so they always agree:
 // accounts over $1,000 a year (Citadel apart) with their margin %, a flag when route costs are over
 // half their cost (under review), the margin on the lines costed with confidence, and the accounts

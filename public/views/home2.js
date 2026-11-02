@@ -5,7 +5,7 @@
 import * as Fmt from '/components/format.js';
 import { money0, moneyK, sparkline } from '/components/chart.js';
 import { getJson, titleCase, esc } from '/components/data.js';
-import { whenIntroDone } from '/components/motion.js';
+import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
 import { parseHome2, checkNumbers } from '/components/summary.js';
 import { openPop } from '/components/pop.js';
 
@@ -157,34 +157,10 @@ export async function render(main, P) {
   });
 
   document.documentElement.classList.add('js');   // what starts hidden is only ever hidden when scripts run
-  const play = firstPlay();
+  const play = firstPlay('r4-home-played');
   const root = main.querySelector('.h2');
   drawHomeMap(main.querySelector('#h2-map'), { play });
   if (play) { root.classList.add('play'); whenIntroDone().then(() => playIn(root)); }
-}
-
-// ── the entrance: once a session. Later visits, and reduced motion, get the end state as drawn. ──
-const SEEN = 'r4-home-played';
-function firstPlay() {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
-  try { if (sessionStorage.getItem(SEEN)) return false; sessionStorage.setItem(SEEN, '1'); return true; } catch (e) { return false; }
-}
-const easeOut = t => 1 - Math.pow(1 - t, 3);
-// a figure runs up to itself: the real text is there first, stays for a screen reader, and is put back at the end
-function countUp(e) {
-  const final = e.textContent, m = final.match(/^(\D*)(\d[\d,]*(?:\.\d+)?)(.*)$/); if (!m) return;
-  const to = Number(m[2].replace(/,/g, '')), dp = (m[2].split('.')[1] || '').length, comma = m[2].includes(','), delay = +(e.dataset.delay || 0), dur = +(e.dataset.dur || 900);
-  const show = v => { const n = dp ? v.toFixed(dp) : String(Math.round(v)); e.textContent = m[1] + (comma ? Number(n).toLocaleString('en-US') : n) + m[3]; };
-  e.setAttribute('aria-label', final); show(0);
-  let from = null;
-  const step = now => { if (from === null) from = now + delay; const t = Math.min(1, Math.max(0, (now - from) / dur)); show(to * easeOut(t)); if (t < 1 && e.isConnected) requestAnimationFrame(step); else { e.textContent = final; e.removeAttribute('aria-label'); } };
-  requestAnimationFrame(step);
-}
-function playIn(root) {
-  const go = el => { el.classList.add('on'); el.querySelectorAll('[data-count]').forEach(countUp); };
-  if (typeof IntersectionObserver !== 'function') { root.querySelectorAll('[data-in]').forEach(go); return; }
-  const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { go(x.target); io.unobserve(x.target); } }), { threshold: 0.15 });
-  root.querySelectorAll('[data-in]').forEach(el => io.observe(el));
 }
 
 // how far the month's bill gets toward $1.0M: priced, then the jobs still to check. The same figures as the tiles.

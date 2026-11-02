@@ -1,10 +1,12 @@
 // The explain pop-out: a panel from the right on a desk, a sheet from the bottom on a phone. One open
 // at a time; Escape, the scrim, the close button or moving screen closes it. Content is HTML the
 // caller has escaped. A question in `ask` adds a button that hands it to the Ask sheet (app.js).
-let el = null;
+let el = null, closing = null;
 
-export function openPop({ title, sub = '', html, ask = null }) {
+export function openPop({ title, sub = '', html, ask = null, wide = false, onClose = null }) {
   if (!el) el = build();
+  el.classList.toggle('wide', wide);
+  closing = onClose;
   el.querySelector('.pop-t').textContent = title;
   el.querySelector('.pop-s').textContent = sub;
   el.querySelector('.pop-b').innerHTML = html;
@@ -18,6 +20,7 @@ export function openPop({ title, sub = '', html, ask = null }) {
 
 export function closePop() {
   if (!el || el.hidden) return;
+  if (closing) { closing(); closing = null; }
   el.classList.remove('is-on');
   document.documentElement.classList.remove('ask-open');
   setTimeout(() => { if (!el.classList.contains('is-on')) el.hidden = true; }, 250);

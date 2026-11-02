@@ -354,6 +354,7 @@ async function customerDrill(level1) {
     WHERE billable = 'true' AND NULLIF(level1, '')::int = $1
       AND NULLIF(date, '')::date >= b.f AND NULLIF(date, '')::date < b.t
     GROUP BY 1, 2 ORDER BY 1 DESC, 2 LIMIT 200`, [level1]);
+  // (customerJobs below is the same work over the margin's twelve months, every order, tagged as the margin query tags it.)
   // The whole route on each of the account's visit days, six months (about 130 working days), stop by stop in order: who else
   // the driver served, where, and how much, so a job's share of the day can be seen on a map.
   const routes = await query(`
@@ -429,6 +430,33 @@ async function gl() {
 
 // Snapshot: the drill for the 50 largest accounts, and a check of data rule 9 (is the units field
 // on retrieval, return and destruction-pull lines a box barcode, or a count of boxes?).
+// Every job of one account over the margin's twelve months, uncapped: each order with its lines, the
+// lines tagged exactly as margin() tags them, so jobs add up to the lines the margin is built from.
+async function customerJobs(level1) {
+  return query(`
+    WITH ${BOUNDS}, ${PL},
+    truck AS (SELECT DISTINCT woid FROM l WHERE servcode = 'S0' AND level1 = $1),
+    binday AS (SELECT DISTINCT d FROM l WHERE servcode IN ${BIN_CODES} AND level1 = $1),
+    tagged AS (SELECT l.*, CASE WHEN servcode = '01' AND units > 1 THEN '01B'
+                                WHEN servcode <> 'S5' THEN servcode
+                                WHEN woid IN (SELECT woid FROM truck) THEN 'S5T'
+                                WHEN d IN (SELECT d FROM binday) THEN 'S5B'
+                                ELSE 'S5P' END AS code
+               FROM l WHERE level1 = $1)
+    SELECT woid, min(d)::text AS date, sum(totamt)::float AS revenue,
+           json_agg(json_build_object('code', code, 'units', units::float, 'revenue', totamt::float) ORDER BY totamt DESC, code, woservid) AS items
+    FROM tagged GROUP BY woid ORDER BY min(d) DESC, woid DESC`, [level1]);
+}
+
+// Offline: the jobs of the accounts the drill keeps.
+async function jobs() {
+  const top = await query(`SELECT level1 FROM invoices, (SELECT (max(month) - interval '11 months')::date AS f FROM kpi.monthly) b
+    WHERE COALESCE(invdate, billdate) >= b.f GROUP BY level1 ORDER BY sum(ret_tot + ser_tot) DESC, level1 LIMIT 50`);
+  const accounts = [];
+  for (const t of top) accounts.push({ level1: t.level1, orders: await customerJobs(t.level1) });
+  return { accounts };
+}
+
 async function drill() {
   const top = await query(`
     WITH ${BOUNDS}
@@ -578,4 +606,4 @@ async function invoices() {
   return { rows };
 }
 
-module.exports = { invoices, customerInvoices, pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, linework, routestops, deliverydays, gl, accountmonths, accountlines };
+module.exports = { invoices, customerInvoices, pulse, activity, pricing, calls, margin, customers, drill, customerDrill, customerJobs, jobs, storage, segments, linework, routestops, deliverydays, gl, accountmonths, accountlines };

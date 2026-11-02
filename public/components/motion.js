@@ -30,3 +30,26 @@ export function drawIn(svg, { x = 0, y = 0, w, h } = {}) {
   svg.querySelectorAll('.c-line, .c-end, .c-area').forEach(n => n.setAttribute('clip-path', `url(#${id})`));
   introDone.then(() => requestAnimationFrame(() => requestAnimationFrame(() => r.classList.add('is-in'))));
 }
+
+// The entrance Home plays, once a session for each page. Later visits, and reduced motion, get the end state as drawn.
+export function firstPlay(key) {
+  if (reduced()) return false;
+  try { if (sessionStorage.getItem(key)) return false; sessionStorage.setItem(key, '1'); return true; } catch (e) { return false; }
+}
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+// a figure runs up to itself: the real text is there first, stays for a screen reader, and is put back at the end
+function countUp(e) {
+  const final = e.textContent, m = final.match(/^(\D*)(\d[\d,]*(?:\.\d+)?)(.*)$/); if (!m) return;
+  const to = Number(m[2].replace(/,/g, '')), dp = (m[2].split('.')[1] || '').length, comma = m[2].includes(','), delay = +(e.dataset.delay || 0), dur = +(e.dataset.dur || 900);
+  const show = v => { const n = dp ? v.toFixed(dp) : String(Math.round(v)); e.textContent = m[1] + (comma ? Number(n).toLocaleString('en-US') : n) + m[3]; };
+  e.setAttribute('aria-label', final); show(0);
+  let from = null;
+  const step = now => { if (from === null) from = now + delay; const t = Math.min(1, Math.max(0, (now - from) / dur)); show(to * easeOut(t)); if (t < 1 && e.isConnected) requestAnimationFrame(step); else e.textContent = final; };
+  requestAnimationFrame(step);
+}
+export function playIn(root) {
+  const go = el => { el.classList.add('on'); el.querySelectorAll('[data-count]').forEach(countUp); };
+  if (typeof IntersectionObserver !== 'function') { root.querySelectorAll('[data-in]').forEach(go); return; }
+  const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { go(x.target); io.unobserve(x.target); } }), { threshold: 0.15 });
+  root.querySelectorAll('[data-in]').forEach(el => io.observe(el));
+}

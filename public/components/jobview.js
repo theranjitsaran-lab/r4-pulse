@@ -51,14 +51,14 @@ export function jobPlace(ctx) {
 const PART_CLS = { space: 'p-space', handling: 'p-hand', route: 'p-route', plant: 'p-plant', labour: 'p-lab' };
 
 // The job as HTML. items: the invoice lines shown; c: its cost (jobCost); svcName: code → name.
-export function jobHtml({ o, items, c, svcName, ctx, A }) {
+export function jobHtml({ o, items, c, svcName, ctx, A, basis: said = null }) {
   const rev = items.reduce((t, i) => t + (i.revenue || 0), 0), left = rev - c.total;
   const parts = costParts(c.lines), total = Math.max(rev, c.total, 1);
   const seg = (v, cls, label) => v > 0.5 ? `<i class="${cls}" style="width:${v / total * 100}%" title="${esc(label)} ${money0(v)}">${v / total > 0.12 ? money0(v) : ''}</i>` : '';
   const flat = !!(o && o.flatFee);
   const what = flat ? `On the account's flat fee: this order bills nothing of its own and costs about ${money0(c.total)} to serve. The fee is billed each month, on the orders that show a value.` : !c.total ? 'Nothing on this job carries a modelled cost: fees and charges with no volume behind them.'
     : `Billed ${money0(rev)} against about ${money0(c.total)} to serve, ${left >= 0 ? `leaving ${money0(left)}` : `${money0(-left)} short`}.`;
-  const basis = !c.route ? '' : c.real ? ' Its route cost is its real share of the route that day, below.'
+  const basis = said != null ? said : !c.route ? '' : c.real ? ' Its route cost is its real share of the route that day, below.'
     : ` Its route cost is the model's average visit: ${ctx === null && A ? 'this account was on no Veri-Shred route that day. Box deliveries and retrievals run on delivery routes, which are not in the data yet.' : 'the route lists for this date arrive with the next snapshot.'}`;
   const inv = items.map(i => `<div class="jv-row"><span>${esc(title(svcName.get(String(i.code).replace(/^S5[BPT]$/, 'S5')) || i.code))} <small>${esc(i.code)} · ${n0(i.units)}</small></span><span class="num">${money0(i.revenue)}</span></div>`).join('');
   return `<div class="jv">

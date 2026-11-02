@@ -101,7 +101,9 @@ export function placeDeliveries(days, deliveries, Z, typed = {}) {
 
 export function routeCosts(R, rows, Z, deliveries = []) {
   const days = daysFrom(rows, Z);
-  const accounts = {}, postcodes = {}, movement = {};
+  const accounts = {}, postcodes = {}, movement = {}, daily = {}, moveDaily = {};
+  // an account's share of one date, for its jobs (margin.js accountJobs): by level1, then date
+  const onDay = (o, s, date) => { const by = o[s.level1] || (o[s.level1] = {}), x = by[date] || (by[date] = { cost: 0, travel: 0, onsite: 0, services: 0 }); x.cost += s.cost; x.travel += s.travel; x.onsite += s.onsite; x.services += s.services || 0; };
   let services = 0, stops = 0, roundMin = 0;
   const on = !!R.SETTINGS.deliveryMatch && (deliveries || []).length > 0;
   const dels = on ? placeDeliveries(days, deliveries, Z, R.SETTINGS.postcodes || {}) : null;
@@ -112,12 +114,14 @@ export function routeCosts(R, rows, Z, deliveries = []) {
     for (const s of day.stops) {
       stops++; services += s.services || 0;
       if (s.delivery) {   // a box delivery placed on this route: its share is delivery and pickup's
+        onDay(moveDaily, s, day.date);
         const x = movement[s.level1] || (movement[s.level1] = { cost: 0, travel: 0, onsite: 0, services: 0, days: 0, from: day.date, to: day.date });
         x.cost += s.cost; x.travel += s.travel; x.onsite += s.onsite; x.services += s.services || 0;
         if (!seenMove.has(s.level1)) { seenMove.add(s.level1); x.days++; x.to = day.date; }
         continue;
       }
       if (s.level1 != null) {
+        onDay(daily, s, day.date);
         const x = accounts[s.level1] || (accounts[s.level1] = { cost: 0, travel: 0, onsite: 0, services: 0, pounds: 0, stops: 0, days: 0, detour: 0, from: day.date, to: day.date });
         x.cost += s.cost; x.travel += s.travel; x.onsite += s.onsite; x.services += s.services || 0; x.pounds += s.pounds || 0; x.stops++; x.detour += s.detour || 0;
         if (!seenAcc.has(s.level1)) { seenAcc.add(s.level1); x.days++; x.to = day.date; }
@@ -134,7 +138,7 @@ export function routeCosts(R, rows, Z, deliveries = []) {
   const r2 = v => Math.round(v * 100) / 100;
   for (const o of [...Object.values(accounts), ...Object.values(postcodes), ...Object.values(movement)]) for (const f of ['cost', 'travel', 'onsite', 'detour', 'pounds']) if (o[f] != null) o[f] = r2(o[f]);
   const dates = (deliveries || []).map(d => d.date).filter(Boolean).sort();
-  return {
+  const out = {
     from: days.length ? days[0].date : null, to: days.length ? days[days.length - 1].date : null,
     days: days.length, stops, services, accounts, postcodes, movement,
     deliveries: { on, ...(dels || {}), customerDays: dels ? dels.placed + dels.noPostcode + dels.noRoute : null, accounts: Object.keys(movement).length,
@@ -143,6 +147,9 @@ export function routeCosts(R, rows, Z, deliveries = []) {
     avgRoundHours: days.length ? roundMin / days.length / 60 : null,
     settings: { ...R.SETTINGS },
   };
+  // the working by day stays on the server: not enumerable, so never sent with view/routecost
+  for (const [k, v] of Object.entries({ daily, moveDaily, dayList: days })) Object.defineProperty(out, k, { value: v, enumerable: false });
+  return out;
 }
 
 // What a bin service costs in a postcode: its own route days when it has at least MIN services,
