@@ -45,7 +45,7 @@ td { width: 37%; color: var(--ink-2); }
 </style></head><body><main>
 <h1>Data states for R4 Pulse</h1>
 <p class="lede">Every data block on every screen, in loading, empty, error and stale. "Built" means the app does this today, in the words shown. "Spec" means it is designed here and not built.</p>
-<p>12 screens and 51 data blocks. Of their 102 empty and error states, 31 are built and 71 are specs. Nothing on this page changes the app.</p>
+<p>12 screens and 51 data blocks. Of their 102 empty and error states, 32 are built and 70 are specs. Nothing on this page changes the app.</p>
 
 <h2>The four states</h2>
 <div class="grid">
@@ -81,7 +81,7 @@ td { width: 37%; color: var(--ink-2); }
 <tr><th scope="row">Headline tiles</th><td class="spec"><span class="tag">Spec</span> A dashed tile: "Not posted yet."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
 <tr><th scope="row">The book by line</th><td class="spec"><span class="tag">Spec</span> "No lines billed in this month yet."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
 <tr><th scope="row">Who moved</th><td class="spec"><span class="tag">Spec</span> "No account moved in these three months."</td><td class="spec"><span class="tag">Spec</span> Screen error.</td></tr>
-<tr><th scope="row">Every account by month</th><td class="built"><span class="tag">Built</span> "Nothing matches these filters."</td><td class="spec"><span class="tag">Spec</span> Gap: a failed row opens empty with no message. Show "These lines could not be read just now."</td></tr>
+<tr><th scope="row">Every account by month</th><td class="built"><span class="tag">Built</span> "Nothing matches these filters."</td><td class="built"><span class="tag">Built</span> A failed row says "These lines could not be read just now. Close this row and open it again to retry."</td></tr>
 </tbody></table></div></section>
 <section class="screen"><h3>Accounts: Month grid</h3><p class="calls"><code>#customers?view=grid</code>. Data from: activity, pulse.</p>
 <div class="scroll"><table><thead><tr><th>Data block</th><th>Empty</th><th>Error</th></tr></thead><tbody>
@@ -157,7 +157,6 @@ td { width: 37%; color: var(--ink-2); }
 
 <h2>To wire later, most useful first</h2>
 <ol class="rules">
-<li>A failed account row opens empty with no message (<code>public/components/datatable.js:204</code>). It reads as an account with no lines, so this one could mislead.</li>
 <li>Warehouse words every failure as "not in this snapshot yet" (<code>public/views/storage.js:54</code>), so a real error reads as missing data.</li>
 <li>Open opportunities disappears from the customer page on failure (<code>public/views/customer.js:141</code>).</li>
 <li>Saved quotes shows no quotes when the list fails (<code>public/views/pricing.js:362</code>).</li>

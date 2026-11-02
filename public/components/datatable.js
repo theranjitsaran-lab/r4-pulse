@@ -24,6 +24,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&am
 
 // a month's figure in the months' columns: $K, no unit on each cell
 export const kOnly = Fmt.thousands;
+const FAILED = 'failed';   // a row whose own rows could not be read: never drawn as a row with none
 const monthName = m => new Date(m + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' }) + ' ' + m.slice(2, 4);
 const kCell = v => v ? kOnly(v) : '—';
 
@@ -152,7 +153,7 @@ export function dataTable(el, o) {
     const num = v => v == null || v === '' || isNaN(v) ? '' : ` data-v="${Number(v)}"`;
     const childCell = (c, ch) => { const v = c.month ? ch.values[c.month] || 0 : c.ms ? c.ms.reduce((t, m) => t + (ch.values[m] || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(ch.name) : v == null ? '' : v ? kOnly(v) : '—'}</td>`; };
     const body = sorted.slice(0, shown).map(r => {
-      const open = opened.get(r), kids = open && o.detail ? `<tr class="dt-detail"><td colspan="${cols.length}">${o.detail(r, st)}</td></tr>` : Array.isArray(open) ? open.map(ch => `<tr class="dt-child">${cols.map(c => childCell(c, ch)).join('')}</tr>`).join('') : '';
+      const open = opened.get(r), kids = open && o.detail ? `<tr class="dt-detail"><td colspan="${cols.length}">${o.detail(r, st)}</td></tr>` : open === FAILED ? `<tr class="dt-detail"><td colspan="${cols.length}">These lines could not be read just now. Close this row and open it again to retry.</td></tr>` : Array.isArray(open) ? open.map(ch => `<tr class="dt-child">${cols.map(c => childCell(c, ch)).join('')}</tr>`).join('') : '';
       return `<tr data-i="${index.get(r)}"${o.inTotal && !o.inTotal(r) ? ' data-out="1"' : ''}${o.expand || o.detail ? ` tabindex="0" aria-expanded="${!!open}"` : ''}>${cols.map(c => `<td class="${tdCls(c)}${c.cellCls ? ' ' + c.cellCls(r) : ''}"${c.cellStyle ? ` style="${c.cellStyle(r)}"` : ''}${c.name && c.get ? ` title="${esc(c.get(r))}"` : ''}${c.total === 'sum' ? num(c.get(r)) : ''}>${c.name && (o.expand || o.detail) ? `<span class="dt-caret">${open ? '▾' : '▸'}</span>` : ''}${c.fmt ? c.fmt(r) : esc(c.get ? c.get(r) ?? '—' : '')}</td>`).join('')}</tr>${kids}`;
     }).join('');
     const restRows = o.rest ? sorted.slice(shown) : [], restCounted = o.inTotal ? restRows.filter(o.inTotal) : restRows;
@@ -201,7 +202,7 @@ export function dataTable(el, o) {
     if (open) { opened.delete(r); draw(); return; }
     opened.set(r, true); draw();
     if (o.detail) return;
-    const kids = await o.expand(r).catch(() => []);
+    const kids = await o.expand(r).catch(() => FAILED);
     if (opened.get(r)) { opened.set(r, kids); draw(); }
   };
   table.addEventListener('click', e => {
