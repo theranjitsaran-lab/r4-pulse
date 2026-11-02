@@ -13,7 +13,7 @@ export async function reveal(root) {
   if (!root) return;
   const els = [...root.querySelectorAll('[data-rv]')];
   if (reduced()) { els.forEach(e => e.classList.add('is-in')); return; }
-  document.documentElement.classList.add('motion-on');
+  document.documentElement.classList.add('js', 'motion-on');
   els.forEach((e, i) => e.style.setProperty('--i', Math.min(i, 5)));   // the first six stagger; the rest arrive with the sixth
   await introDone;
   requestAnimationFrame(() => requestAnimationFrame(() => els.forEach(e => e.classList.add('is-in'))));

@@ -1,3 +1,6 @@
+/* Hallmark · checked: 2026-11-02 · genre: modern-minimal (inferred)
+ * floor: see docs/hallmark-audit.md · app scope, text exceptions listed there
+ * built: the project · redesign: polish · copy: verbatim · v2.0.0 */
 /* The shell: header, navigation, page. Screens bring their own layout; everything reads tokens.css.
    On a phone the navigation is a tab bar at the bottom, where the thumb is. */
 *{box-sizing:border-box}
@@ -25,7 +28,7 @@ button{font:inherit}
 .crumb a{text-decoration:none;font-weight:500}
 .crumb span{color:var(--ink-4)}
 .empty{margin: calc(var(--u) * 15) auto;max-width: calc(var(--u) * 130);background:var(--surface);border-radius:var(--r-lg);padding: var(--sp-6) calc(var(--u) * 7);color:var(--ink-3);box-shadow:var(--shadow)}
-.empty h2{font-size: var(--fs-title);color:var(--ink);margin: 0 0 var(--sp-2);letter-spacing:var(--track-tight)}
+.empty h2{text-wrap:balance;font-size: var(--fs-title);color:var(--ink);margin: 0 0 var(--sp-2);letter-spacing:var(--track-tight)}
 .sk { display: grid; gap: var(--sp-4); padding-top: var(--sp-4); }
 .sk i { display: block; border-radius: var(--r); background: var(--well); animation: sk 1.4s ease-in-out infinite; }
 .sk .sk-h { width: 30%; height: var(--sp-8); }
@@ -47,7 +50,13 @@ button{font:inherit}
   #nav a svg{display:block;width: var(--sp-6);height: var(--sp-6)}
   #main{padding: var(--sp-4) var(--sp-4) calc(var(--u) * 24)}
 }
-html,body{overflow-x:hidden}
+html,body{overflow-x:clip}
+:focus-visible{outline:var(--hair-2) solid var(--brand);outline-offset:var(--hair-2)}
+a:active,button:active,summary:active{opacity:.7}
+button:disabled,input:disabled,select:disabled,textarea:disabled{cursor:not-allowed}
+small{font-size:max(var(--fs-tiny),.8333em)}
+.lede,.cp-lede,p.src{max-width:var(--measure)}
+.mast-right{white-space:nowrap}
 .stamp{padding: var(--sp-1) var(--sp-4);font-size: var(--fs-tiny);color:var(--ink-3);text-align:center;border-top: var(--hair) solid var(--rule)}
 .stamp.late{background:var(--warn-bg);color:var(--warn);font-weight:600}
 .mast-right button.mast-ask{display:inline-flex;align-items:center;gap: var(--sp-1);padding: var(--sp-1) var(--sp-3);border-radius: var(--r-pill);background:var(--tint-brand);color:var(--brand);font-weight:600}

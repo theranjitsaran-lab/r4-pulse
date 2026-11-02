@@ -11,7 +11,7 @@ import { isInternal, SIZE_BANDS, inBand } from '/components/metrics.js';
 import { whoAmI } from '/components/access.js';
 
 const CSS = `
-.wh .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 14px; max-width: 940px; }
+.wh .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 14px; max-width: var(--measure); }
 .wh .wgrid { display: block; width: 100%; height: auto; }
 .wh .wc.inuse { fill: color-mix(in srgb, var(--s-storage) 28%, var(--surface)); }
 .wh .wc.old { fill: var(--s-storage); }
@@ -30,7 +30,7 @@ const CSS = `
 .wh .rw .go { color: var(--ink-5); font-size: 20px; }
 .wh .tot { border-top: 1px solid var(--rule-ink); font-weight: 700; }
 .wh .nb .hd, .wh .nb .rw { grid-template-columns: minmax(0, 1fr) 120px 120px 120px 14px; }
-.wh .cols { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 14px; }
+.wh .cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; margin-top: 14px; }
 @media (max-width: 860px) {
   .wh .hd { display: none; }
   .wh .rw { grid-template-columns: minmax(0, 1fr) 92px 14px; grid-template-areas: "nm el go" "nm on go"; gap: 2px 10px; }

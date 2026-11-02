@@ -3,7 +3,7 @@
 /* CSS */
 .cp .crumb { margin-bottom: var(--sp-3); }
 .cp h1 { font-size: var(--fs-display); font-weight: var(--w-head); letter-spacing: var(--track-tight); margin: 0; line-height: 1.1; }
-.cp .cp-lede { font-size: var(--fs-head); line-height: 1.5; color: var(--ink-2); margin: 0 0 var(--sp-4); max-width: calc(var(--u) * 230); }
+.cp .cp-lede { font-size: var(--fs-head); line-height: 1.5; color: var(--ink-2); margin: 0 0 var(--sp-4); max-width: var(--measure); }
 .cp .tags { margin: var(--sp-2) 0 var(--sp-3); display: flex; gap: var(--sp-2); flex-wrap: wrap; }
 .cp .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-4); margin-bottom: var(--sp-4); }
 .cp .stat .lab { margin-bottom: var(--sp-1); }
@@ -12,7 +12,7 @@
 .cp .grid.one { grid-template-columns: minmax(0, 1fr); }
 .cp .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
 .cp .grid.three .card-head { flex-wrap: wrap; } .cp .grid.three .card-head a { white-space: nowrap; }
-.cp .grid.drill { align-items: stretch; }
+.cp .grid.drill { align-items: stretch; margin-bottom: var(--sp-4); }
 .cp .fam { display: grid; grid-template-columns: minmax(0, 1fr) calc(var(--u) * 24) calc(var(--u) * 24) calc(var(--u) * 16) var(--sp-3); gap: var(--sp-3); align-items: center; padding: var(--sp-3) 0; border-top: var(--hair) solid var(--rule); cursor: pointer; }
 .cp .fam:first-of-type { border-top: 0; }
 .cp .fam .r { text-align: right; font-variant-numeric: tabular-nums; }

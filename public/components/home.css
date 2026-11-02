@@ -1,7 +1,7 @@
 /* Home, the intro and the motion it uses. Every colour, size, space and duration from tokens.css. */
 
 /* ── the intro (components/intro.js): a white sheet, as r4services.com sets the logo ── */
-html.intro-on, html.intro-on body { overflow: hidden; }
+html.intro-on, html.intro-on body { overflow: clip; }
 .intro { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; color: var(--ink-on-light);
   background: var(--logo-ground);
   transition: transform var(--t-slow) var(--ease-io), opacity var(--t-slow) var(--ease-io); }
@@ -11,26 +11,26 @@ html.intro-on, html.intro-on body { overflow: hidden; }
 /* the logo read into view by a scan line, left to right, like a barcode reader */
 .intro-mark { position: relative; display: block; height: var(--logo-h-intro); }
 .intro-mark img { display: block; height: 100%; width: auto; clip-path: inset(0 100% 0 0); transition: clip-path var(--t-draw) var(--ease-io); }
-.intro-scan { position: absolute; top: calc(var(--sp-2) * -1); bottom: calc(var(--sp-2) * -1); left: 0; width: var(--hair-2); background: var(--r4-bright);
-  box-shadow: 0 0 var(--sp-3) var(--r4-bright); opacity: 0; transition: left var(--t-draw) var(--ease-io), opacity var(--t) linear var(--t-draw); }
+.intro-scan { position: absolute; top: calc(var(--sp-2) * -1); bottom: calc(var(--sp-2) * -1); left: 0; width: 100%; opacity: 0; transition: transform var(--t-draw) var(--ease-io), opacity var(--t) linear var(--t-draw); }
+.intro-scan::before { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--hair-2); background: var(--r4-bright); box-shadow: 0 0 var(--sp-3) var(--r4-bright); }
 .intro-word { font-family: var(--f-brand); font-weight: 400; font-synthesis: none; font-size: var(--intro-word); color: var(--brand);
-  opacity: 0; transform: translateX(calc(var(--rise) * -1));
   transition: opacity var(--t-slow) var(--ease-out) calc(var(--t-draw) * .8), transform var(--t-slow) var(--ease-out) calc(var(--t-draw) * .8); }
+html.js .intro-word { opacity: 0; transform: translateX(calc(var(--rise) * -1)); }
 .intro-beat { width: 100%; height: var(--intro-beat); overflow: visible; }
 .intro-beat path { fill: none; stroke: var(--r4-bright); stroke-width: var(--intro-stroke); stroke-linejoin: round; stroke-linecap: round;
   stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset var(--t-draw) var(--ease-io) calc(var(--t-draw) * .6); }
 .intro-line { margin: 0; font-size: var(--fs-label); color: var(--ink-on-logo); letter-spacing: var(--track-label); opacity: 0;
   transition: opacity var(--t-slow) linear var(--t-draw); text-align: center; }
 .intro.is-on .intro-mark img { clip-path: inset(0 0 0 0); }
-.intro.is-on .intro-scan { left: 100%; opacity: 0; }
+.intro.is-on .intro-scan { transform: translateX(100%); opacity: 0; }
 .intro .intro-scan { opacity: 1; }
 .intro.is-on .intro-line { opacity: 1; }
 .intro.is-on .intro-word { opacity: 1; transform: none; }
 .intro.is-on .intro-beat path { stroke-dashoffset: 0; }
 
 /* ── entrances (components/motion.js) ── */
-html.motion-on [data-rv] { opacity: 0; transform: translateY(var(--rise)); }
-html.motion-on [data-rv].is-in { opacity: 1; transform: none;
+html.js.motion-on [data-rv] { opacity: 0; transform: translateY(var(--rise)); }
+html.js.motion-on [data-rv].is-in { opacity: 1; transform: none;
   transition: opacity var(--t-slow) var(--ease-out) calc(var(--i, 0) * var(--t-stagger)), transform var(--t-slow) var(--ease-out) calc(var(--i, 0) * var(--t-stagger)); }
 .draw-clip { transform: scaleX(0); transform-box: fill-box; transform-origin: left; }
 .draw-clip.is-in { transform: scaleX(1); transition: transform var(--t-draw) var(--ease-io) calc(var(--t-slow) / 2); }

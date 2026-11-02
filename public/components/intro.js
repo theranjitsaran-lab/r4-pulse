@@ -29,7 +29,7 @@ export function playIntro() {
       <p class="intro-line">R4 Services · Reliable · Resourceful · Responsive · Reasonable</p>
     </div>`;
   document.body.appendChild(el);
-  document.documentElement.classList.add('intro-on');
+  document.documentElement.classList.add('js', 'intro-on');
   requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-on')));
 
   const t0 = performance.now();

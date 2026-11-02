@@ -15,8 +15,8 @@ The locked system, written on 2 November 2026 from `public/tokens.css` and the D
 :root {
   --ground: #ffffff;  --surface: #ffffff;  --well: #f6f8f6;  --well-2: #ececf0;  --tint-brand: #e3f2e5;
   --ink: #1d1d1f;  --ink-2: #3a3a3c;  --ink-3: #58585d;  --ink-4: #6c6c71;  --ink-5: #aeaeb2;
-  --rule: #ececf0;  --rule-2: #e3e3e8;  --rule-3: #d8d8de;  --rule-4: #c7c7cc;
-  --brand: #0e5116;  --brand-2: #1a6b24;  --r4-bright: #38b449;
+  --rule: #ececf0;  --rule-2: #e3e3e8;  --rule-3: #d8d8de;  --rule-4: #c7c7cc;  --field-edge: #8e8e93;
+  --brand: #0e5116;  --brand-2: #1a6b24;  --on-brand: #ffffff;  --r4-bright: #38b449;
   --s-storage: #2a78d6;  --s-service: #eb6834;  --s-citadel: #b4b2aa;
   --good: #1a5a8a;  --warn: #9a5c00;  --bad: #c62f2f;  --flag-dn: #a8231c;  --flag-up: #1a5a8a;
   --f-sans: system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
@@ -35,6 +35,9 @@ Type sizes run from `--fs-tiny` (12px, the floor: nothing on screen is smaller) 
 - A delta wears colour only at a fifth or more (±20%). There is no arrow under 1%, and past 300% it reads "new" or "stopped".
 - A month-table cell is coloured only when more than 25% and $5K from its row's own 12-month average: red below, blue above.
 - Series colour follows the entity: storage blue, service orange, Citadel a neutral. Text never wears a series colour.
+
+## States
+Every control shows a 2px `--brand` focus ring, instantly. A field's edge is `--field-edge`, 3:1 on white. Labels are sentence case, never capitals, and a line of prose stops at `--measure`.
 
 ## Type
 - Average Sans (`--f-brand`, one weight, at 400 with `font-synthesis: none`) is for the "Pulse" wordmark and the intro only.

@@ -20,9 +20,9 @@
 .cust .rev { font-weight: 600; }
 .cust .go { color: var(--ink-5); font-size: var(--fs-lead); }
 .cust .foot { font-size: var(--fs-source); color: var(--ink-4); margin-top: var(--sp-3); }
-.cust .find { width: 100%; max-width: calc(var(--u) * 105); box-sizing: border-box; font: inherit; font-size: var(--fs-body); padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r); background: var(--surface); color: var(--ink); margin: 0 0 var(--sp-3); }
+.cust .find { width: 100%; max-width: calc(var(--u) * 105); box-sizing: border-box; font: inherit; font-size: var(--fs-body); padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--field-edge); border-radius: var(--r); background: var(--surface); color: var(--ink); margin: 0 0 var(--sp-3); }
 .cust .list .rv small { display: none; }
-.cust .rvm { color: var(--ink-5); font-size: var(--fs-tiny); margin-left: var(--hatch); vertical-align: var(--hair); }
+.cust .rvm { color: var(--ink-4); font-size: var(--fs-tiny); margin-left: var(--hatch); vertical-align: var(--hair); }
 @media (max-width: 760px) {
   .cust h1 { font-size: var(--fs-display-ph); }
   .cust .head { display: none; }
@@ -34,7 +34,7 @@
 }
 
 /* WS_CSS */
-.ws .lede { font-size: var(--fs-head); line-height: 1.45; color: var(--ink-2); margin: 0 0 var(--sp-2); max-width: calc(var(--u) * 225); }
+.ws .lede { font-size: var(--fs-head); line-height: 1.45; color: var(--ink-2); margin: 0 0 var(--sp-2); max-width: var(--measure); }
 .ws .key { display: flex; gap: var(--sp-5); flex-wrap: wrap; font-size: var(--fs-source); color: var(--ink-3); margin: var(--sp-3) 0 var(--sp-4); align-items: center; }
 .ws .key span span { display: inline-block; width: calc(var(--u) * 7); height: var(--sp-4); border-radius: var(--r-sm); vertical-align: calc(var(--hatch) * -1); margin-right: var(--sp-2); }
 .ws .more { margin-top: var(--sp-3); border: 0; background: none; color: var(--brand); font: inherit; font-size: var(--fs-sm); font-weight: 500; cursor: pointer; padding: var(--sp-2) 0; }
@@ -46,13 +46,13 @@
 .ws .opp { border: var(--hair) dashed var(--ink-5); background: none; color: var(--ink-2); font: inherit; font-weight: 600; padding: 0 var(--sp-1); border-radius: var(--r-sm); cursor: pointer; }
 .ws .opp:hover { border-color: var(--brand); color: var(--brand); }
 .ws .none { color: var(--ink-5); }
-.mg .lede { font-size: var(--fs-head); line-height: 1.45; color: var(--ink-2); margin: 0 0 var(--sp-3); max-width: calc(var(--u) * 225); }
+.mg .lede { font-size: var(--fs-head); line-height: 1.45; color: var(--ink-2); margin: 0 0 var(--sp-3); max-width: var(--measure); }
 .mg .tools { display: flex; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; align-items: center; margin-bottom: var(--sp-3); }
 @media (max-width: 760px) {
 }
 
 /* MV_CSS */
-.mv2 .lede { font-size: var(--fs-head); line-height: 1.45; color: var(--ink-2); margin: 0 0 var(--sp-3); max-width: calc(var(--u) * 225); }
+.mv2 .lede { font-size: var(--fs-head); line-height: 1.45; color: var(--ink-2); margin: 0 0 var(--sp-3); max-width: var(--measure); }
 .mv2 .tools { display: flex; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; align-items: center; margin-bottom: var(--sp-3); }
 .mv2 .hd, .mv2 .rw { display: grid; grid-template-columns: minmax(0, 1fr) calc(var(--u) * 24) calc(var(--u) * 24) calc(var(--u) * 26) calc(var(--u) * 16) var(--sp-4); gap: var(--sp-4); align-items: center; }
 .mv2 .hd { font-size: var(--fs-source); color: var(--ink-3); padding: 0 var(--sp-1) var(--sp-2); }
@@ -99,7 +99,7 @@
 }
 
 /* DV_CSS */
-.dv .lede { font-size: var(--fs-head); line-height: 1.45; color: var(--ink-2); margin: 0 0 var(--sp-4); max-width: calc(var(--u) * 230); }
+.dv .lede { font-size: var(--fs-head); line-height: 1.45; color: var(--ink-2); margin: 0 0 var(--sp-4); max-width: var(--measure); }
 .dv .hd, .dv .rw { display: grid; grid-template-columns: minmax(0, 1fr) calc(var(--u) * 28) calc(var(--u) * 30) calc(var(--u) * 33) calc(var(--u) * 25) var(--sp-4); gap: var(--sp-4); align-items: center; }
 .dv .hd { font-size: var(--fs-source); color: var(--ink-3); padding: 0 var(--sp-1) var(--sp-2); }
 .dv .hd span:nth-child(n+2) { text-align: right; }

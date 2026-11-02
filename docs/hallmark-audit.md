@@ -87,3 +87,35 @@ Polish settles sections 1 and 4. The left edge on the headline card and the 3-co
 - The checker saw saved pages without scripts, so it didn't test states people reach by clicking. The footing checks, the sweep and interaction checks cover those in the real app.
 - It ran in Edge, because Chrome isn't installed and the checker couldn't start Playwright's Chromium.
 - Judged gates: only Today, Accounts, Opportunities, Customer and Warehouse were read by eye, at desk or phone size. The other screens rest on the checker alone.
+
+## After the polish (Step 4, 2 November 2026)
+
+| | Before | After |
+|---|---|---|
+| FAIL lines | 2,509 | 1,296 |
+| Reflex lines unanswered | 519 | 0 (3 gates waived with a reason, spacing reported as notes) |
+| Links and fields kept | | 1,097 of 1,097, 2 of 2 |
+
+**The 1,296 that remain, none of them a real fault found so far:**
+
+| Lines | Gate | Why it stays |
+|---|---|---|
+| 1,132 | 63 | Exception decided by Theran: `›` and `·` stay, and real names such as "NRC - American Renal Associates" |
+| 48 | 67 | Exception decided by Theran: names and codes in capitals as the source systems hold them |
+| 99 | 56 | False alarm: table heads stick inside their own scrolling box. Tested on 17 screens at both widths: nothing slides under the masthead |
+| 17 | 73 | False alarm: the covered text is scrolled out of its own box, or sits behind the table's sticky name column or total row. Sampled on the 1440 pages, not every line |
+
+`—` in empty cells (gate 19) now reports as a note, because the check stamp says `copy: verbatim`. Reading `public/` directly also still flags `public/index.html` for gates 26a and 34, because that check doesn't follow the linked CSS; the saved pages, which carry it, pass both. `public/styleguide.html` is out of scope.
+
+**Text against the baseline:** 84 screens, 19,898 lines, 112 differences, all the Today labels going from capitals to sentence case (ACTIVITY to Activity, FRIDAY 30 OCT to Friday 30 Oct, ANNE to Anne). Footing is unchanged.
+
+**Clicked states against the last merged code:** of 172 attempts, 115 opened something, and every difference was either those labels or the masthead now staying on screen. The other 57 found nothing to click in either version, so those states aren't covered.
+
+**Fresh-eyes review.** Fixed: the stripe and status dots on Today's headline card, clipped account names on Opportunities, the missing gap on the customer page. Left for Theran:
+1. Customer page, Work orders: flat-fee rows may read Value $0 and Left −$134 while the page says the account keeps 53%. Not traced to the data; it needs new content.
+2. Today: "VCK now holds $638K: $6K posted since this was built" under "Invoiced in VCK, October $632K". The brief set this wording.
+3. Sparklines: the hatched latest bar reads as a striped capsule at that size, and the Last week chart draws its estimate solid.
+4. Customer page: cards inside a card in the folded sections (gate 4) need a new composition, beyond a polish.
+5. Smaller: the first Today tile wraps to three lines on a phone, map dots cover "Yard", the breadcrumb says "Customers" while the nav says "Accounts".
+
+The review's read of the customer page is from one screenshot; other screens rest on the checker.

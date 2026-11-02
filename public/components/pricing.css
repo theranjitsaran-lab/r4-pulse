@@ -6,7 +6,7 @@
 .pr .rail { position: sticky; top: calc(var(--u) * 18); }
 .pr label { display: block; font-size: var(--fs-source); font-weight: 500; color: var(--ink-3); margin: var(--sp-4) 0 var(--sp-1); }
 .pr .rail > label:first-child { margin-top: 0; }
-.pr input, .pr select { width: 100%; font: inherit; font-size: var(--fs-body); padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r); background: var(--surface); color: var(--ink); }
+.pr input, .pr select { width: 100%; font: inherit; font-size: var(--fs-body); padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--field-edge); border-radius: var(--r); background: var(--surface); color: var(--ink); }
 .pr input:focus, .pr select:focus { outline: var(--hair-2) solid color-mix(in srgb, var(--brand) 40%, transparent); border-color: var(--brand); }
 .pr .price input { font-size: var(--fs-display-ph); font-weight: var(--w-head); padding: var(--sp-2) var(--sp-3); letter-spacing: -.01em; }
 .pr .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
@@ -74,7 +74,7 @@
 .pr2-bar { display: grid; gap: var(--sp-3); }
 .pr2-pick { display: grid; gap: var(--sp-3); grid-template-columns: minmax(0, 1fr); }
 .pr2 label { display: grid; gap: var(--sp-1); font-size: var(--fs-tiny); font-weight: 600; color: var(--ink-3); }
-.pr2 select, .pr2 input:not([type=range]) { font: inherit; font-size: var(--fs-body); padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); background: var(--surface); color: var(--ink); min-width: 0; width: 100%; box-sizing: border-box; }
+.pr2 select, .pr2 input:not([type=range]) { font: inherit; font-size: var(--fs-body); padding: var(--sp-2) var(--sp-3); border: var(--hair) solid var(--field-edge); border-radius: var(--r-sm); background: var(--surface); color: var(--ink); min-width: 0; width: 100%; box-sizing: border-box; }
 .pr2-price { display: grid; grid-template-columns: auto calc(var(--u) * 28) minmax(0, 1fr); align-items: center; gap: var(--sp-1) var(--sp-3); }
 .pr2-price input#p-price { font-size: var(--fs-num); font-weight: 650; padding: var(--sp-1) var(--sp-2); }
 .pr2-price input[type=range] { width: 100%; accent-color: var(--brand); }
@@ -115,11 +115,11 @@
 
 /* the quote (31 October 2026): lines, a deal total and its margin */
 .pr2-quote .h2-ch { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--sp-2); }
-.q-add { background: var(--brand); color: #fff; border: 0; border-radius: var(--r-pill); padding: var(--sp-2) var(--sp-4); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
+.q-add { background: var(--brand); color: var(--on-brand); border: 0; border-radius: var(--r-pill); padding: var(--sp-2) var(--sp-4); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
 .q-acts { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; margin-top: var(--sp-3); }
 .q-acts button:not(.q-add) { background: none; border: 1px solid var(--rule-4); border-radius: var(--r-pill); padding: var(--sp-2) var(--sp-4); font: inherit; font-size: var(--fs-sm); cursor: pointer; color: var(--ink); }
 .q-who { display: flex; gap: var(--sp-2); align-items: center; font-size: var(--fs-label); color: var(--ink-3); margin-bottom: var(--sp-2); }
-.q-who input { font: inherit; font-size: var(--fs-sm); padding: var(--sp-1) var(--sp-2); border: 1px solid var(--rule-4); border-radius: var(--r-sm); min-width: 0; flex: 1; max-width: 320px; }
+.q-who input { font: inherit; font-size: var(--fs-sm); padding: var(--sp-1) var(--sp-2); border: 1px solid var(--field-edge); border-radius: var(--r-sm); min-width: 0; flex: 1; max-width: 320px; }
 .q-t { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
 .q-t th { text-align: left; font-size: var(--fs-label); font-weight: 500; color: var(--ink-3); padding: var(--sp-1) var(--sp-2); border-bottom: 1px solid var(--rule); }
 .q-t td { padding: var(--sp-2); border-bottom: 1px solid var(--rule); vertical-align: top; }
@@ -171,11 +171,11 @@
 .st-what span { display: block; font-size: var(--fs-sm); color: var(--ink-3); margin-top: 2px; }
 .st-what .st-q { color: var(--ink-2); font-style: italic; }
 .st-val { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; align-content: flex-start; }
-.st-val input, .st-val select { font: inherit; font-size: var(--fs-body); width: 88px; padding: var(--sp-1) var(--sp-2); border: 1px solid var(--rule-4); border-radius: var(--r-sm); font-variant-numeric: tabular-nums; }
+.st-val input, .st-val select { font: inherit; font-size: var(--fs-body); width: 88px; padding: var(--sp-1) var(--sp-2); border: 1px solid var(--field-edge); border-radius: var(--r-sm); font-variant-numeric: tabular-nums; }
 .st-val select { width: auto; }
 .st-unit { font-size: var(--fs-sm); color: var(--ink-3); }
 .st-val small { flex-basis: 100%; font-size: var(--fs-tiny); color: var(--ink-4); }
-.st-save { background: var(--brand); color: #fff; border: 0; border-radius: var(--r-pill); padding: var(--sp-1) var(--sp-3); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
+.st-save { background: var(--brand); color: var(--on-brand); border: 0; border-radius: var(--r-pill); padding: var(--sp-1) var(--sp-3); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
 .st-msg { flex-basis: 100%; }
 .st-hist, .st-rates { list-style: none; margin: 0; padding: 0; font-size: var(--fs-sm); }
 .st-hist li { display: flex; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-1) 0; border-bottom: 1px solid var(--rule); color: var(--ink-2); }
