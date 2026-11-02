@@ -69,10 +69,17 @@ export function placeDeliveries(days, deliveries, Z, typed = {}) {
       out.noPostcode++;
       const m = out.missing[d.level1] || (out.missing[d.level1] = { level1: d.level1, days: 0, revenue: 0 });
       m.days++; m.revenue += d.revenue;
-      continue;
     }
     const routes = byDate.get(d.date);
     if (!routes || !routes.length) { out.noRoute++; continue; }
+    // no postcode: it still rode a truck that day, so it takes its share of the fullest route and the average detour,
+    // rather than a cost on top of route days already shared out in full
+    if (!pt) {
+      const day = routes.reduce((a, b) => b.stops.length > a.stops.length ? b : a);
+      day.stops.push({ stop: 'D' + d.level1, level1: d.level1, postcode: null, pt: null, services: d.trips || 1, pounds: 0, delivery: true, orders: d.orders });
+      out.unlocated = (out.unlocated || 0) + 1;
+      continue;
+    }
     let best = null;
     for (const day of routes) {
       const pts = [YARD, ...day.stops.filter(s => s.pt).map(s => s.pt), YARD];

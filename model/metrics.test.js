@@ -40,6 +40,21 @@ test('Home map: shares add up, billing-only postcodes are out, routes keep their
   assert.equal(RW.reduce((t, r) => t + r.services, 0), A.routeDays.filter(r => W.includes(r.date) && r.route && r.route !== '--').reduce((t, r) => t + r.services_done, 0));
 });
 
+test('Delivery: code 01 boxes are not trips, and a delivery with no postcode stays inside the route day', async () => {
+  const R = require('../model/rates'), { accountCosts } = await import('../public/components/margin.js'), { routeCosts } = await import('../public/components/routecost.js');
+  const lines = [{ level1: 1, servcode: '01', family: 'movement', unit: 'trip', drives_cost: true, units: 10, revenue: 200, days: 10 }, { level1: 1, servcode: '01B', family: 'movement', unit: 'box', drives_cost: true, units: 500, revenue: 1000, days: 10 }];
+  const c = accountCosts(R, { level1: 1, boxes: 0, bins: 0 }, lines).movement[0];
+  assert.equal(c.visits, 10);
+  assert.ok(Math.abs(c.lines.find(l => l[0] === 'Box handling')[1] - 500 * R.RATES.handling.v) < 1e-6);
+  const Z = { 60601: [41.88, -87.62] }, rows = [{ date: '2026-10-26', route: 'M', stop: 's1', seq: 1, level1: 2, postcode: '60601', services: 2, pounds: 0 }];
+  const was = R.SETTINGS.deliveryMatch; R.SETTINGS.deliveryMatch = 1;
+  const rc = routeCosts(R, rows, Z, [{ date: '2026-10-26', level1: 3, orders: 1, trips: 1, postcode: null, revenue: 10 }]);
+  R.SETTINGS.deliveryMatch = was;
+  assert.ok(rc.movement[3].cost > 0);
+  assert.ok(Math.abs(rc.movement[3].cost + rc.accounts[2].cost - R.RATES.routeDay.v) < 0.05);   // one route day, shared, not charged twice
+  assert.equal(rc.deliveries.noPostcode, 1);
+});
+
 test('#20 shredding: Opportunities, Warehouse and Home count the same boxes for an account', async () => {
   const { opportunities } = await import('../public/components/opps.js');
   const { destructionView } = await import('../public/components/home2data.js');

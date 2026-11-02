@@ -320,12 +320,13 @@ async function margin() {
     WITH ${BOUNDS}, ${PL},
     truck AS (SELECT DISTINCT woid FROM l WHERE servcode = 'S0'),
     binday AS (SELECT DISTINCT level1, d FROM l WHERE servcode IN ${BIN_CODES}),
-    tagged AS (SELECT l.*, CASE WHEN servcode <> 'S5' THEN servcode
+    tagged AS (SELECT l.*, CASE WHEN servcode = '01' AND units > 1 THEN '01B'
+                                WHEN servcode <> 'S5' THEN servcode
                                 WHEN woid IN (SELECT woid FROM truck) THEN 'S5T'
                                 WHEN (level1, d) IN (SELECT level1, d FROM binday) THEN 'S5B'
                                 ELSE 'S5P' END AS code
                FROM l)
-    SELECT t.level1, t.code AS servcode, sf.family, sf.unit, coalesce(sf.drives_cost, false) AS drives_cost,
+    SELECT t.level1, t.code AS servcode, sf.family, CASE WHEN t.code = '01B' THEN 'box' ELSE sf.unit END AS unit, coalesce(sf.drives_cost, false) AS drives_cost,
            sum(t.units)::float AS units, sum(t.totamt)::float AS revenue, count(DISTINCT t.d)::int AS days
     FROM tagged t LEFT JOIN model.service_family sf ON sf.servcode = t.servcode
     GROUP BY 1, 2, 3, 4, 5
@@ -408,7 +409,7 @@ async function deliverydays() {
            FROM vs_service_orders WHERE coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')) ~ '^[0-9]{5}'),
     sub AS (SELECT DISTINCT ON (levelid) levelid, postcode FROM (SELECT levelid, postcode, count(*) AS n FROM vs WHERE levelid IS NOT NULL GROUP BY 1, 2) x ORDER BY levelid, n DESC),
     acc AS (SELECT DISTINCT ON (level1) level1, postcode FROM (SELECT level1, postcode, count(*) AS n FROM vs WHERE level1 IS NOT NULL GROUP BY 1, 2) x ORDER BY level1, n DESC)
-    SELECT l.d::text AS date, l.level1, count(DISTINCT l.woid)::int AS orders, sum(l.units)::float AS trips, sum(l.totamt)::float AS revenue,
+    SELECT l.d::text AS date, l.level1, count(DISTINCT l.woid)::int AS orders, sum(CASE WHEN l.units <= 1 THEN l.units ELSE 0 END)::float AS trips, sum(l.totamt)::float AS revenue,
            coalesce(min(sub.postcode), min(acc.postcode)) AS postcode,
            CASE WHEN min(sub.postcode) IS NOT NULL THEN 'site' WHEN min(acc.postcode) IS NOT NULL THEN 'account' END AS basis
     FROM l LEFT JOIN sub ON sub.levelid = l.levelid LEFT JOIN acc ON acc.level1 = l.level1

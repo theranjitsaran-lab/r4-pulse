@@ -167,7 +167,7 @@ const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], 
 // days, pounds } }, postcodes: { postcode: { cost, services, days, customers } }, from, to, days }
 let ROUTE = { accounts: {}, postcodes: {}, days: 0 };
 function setRouteCosts(rc) { if (rc && rc.accounts) ROUTE = rc; }
-function routeFor(level1) { const r = ROUTE.accounts[level1]; return r && r.services >= 20 ? r : null; }   // 20 services or more: enough days to trust
+function routeFor(level1) { const r = ROUTE.accounts[level1]; return r && r.services > 0 ? r : null; }   // any account with stops on real route days: its own share of them
 function routeCostsNow() { return ROUTE; }
 // delivery and pickup from the route days its deliveries were placed on (Settings: deliveryMatch)
 function movementFor(level1) { const r = ROUTE.movement && ROUTE.movement[level1]; return ROUTE.deliveries && ROUTE.deliveries.on && r && r.services > 0 ? r : null; }

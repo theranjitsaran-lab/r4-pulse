@@ -127,7 +127,7 @@ export function jobCost(R, items, meta, share = 1, day = null) {
   const parts = [];
   const handling = units((i, m) => m.family === 'handling' && m.drives_cost);
   if (handling > 0) parts.push(R.costToServe('handling', handling));
-  const trips = units(i => i.code === '01'), dboxes = units((i, m) => m.family === 'movement' && m.drives_cost && m.unit === 'box');
+  const trips = units(i => i.code === '01' && i.units <= 1), dboxes = units((i, m) => i.code === '01' ? i.units > 1 : m.family === 'movement' && m.drives_cost && m.unit === 'box');
   if (trips > 0 || dboxes > 0) parts.push(R.costToServe('movement', dboxes, { visits: 1 }));
   // account level counts bins from Veri-Shred; at order level the bin codes themselves are the bins
   const bins = units((i, m) => m.family === 'bin' && /^B\d$/.test(i.code)), binLb = units(i => i.code === 'S5B' || (i.code === 'S5' && bins > 0));   // S5 on an order with bins is their weight
