@@ -37,7 +37,7 @@ export function costOrders(R, d, meta, A, Z, id) {
     const c = jobCost(R, items, meta, perDay.get(o.date) || 1, ctx);
     return { cost: c, margin: items.reduce((t, i) => t + (i.revenue || 0), 0) - c.total, ctx };
   };
-  for (const o of d.orders) { const x = cost(o); o.cost = x.cost; o.margin = x.margin; o.day = x.ctx; }
+  for (const o of d.orders) { const x = cost(o); o.cost = x.cost; o.margin = x.margin; o.day = x.ctx; o.flatFee = !!d.flatFee && !o.revenue; }
   return { cost, dayOf, perDay };
 }
 
@@ -55,7 +55,8 @@ export function jobHtml({ o, items, c, svcName, ctx, A }) {
   const rev = items.reduce((t, i) => t + (i.revenue || 0), 0), left = rev - c.total;
   const parts = costParts(c.lines), total = Math.max(rev, c.total, 1);
   const seg = (v, cls, label) => v > 0.5 ? `<i class="${cls}" style="width:${v / total * 100}%" title="${esc(label)} ${money0(v)}">${v / total > 0.12 ? money0(v) : ''}</i>` : '';
-  const what = !c.total ? 'Nothing on this job carries a modelled cost: fees and charges with no volume behind them.'
+  const flat = !!(o && o.flatFee);
+  const what = flat ? `On the account's flat fee: this order bills nothing of its own and costs about ${money0(c.total)} to serve. The fee is billed each month, on the orders that show a value.` : !c.total ? 'Nothing on this job carries a modelled cost: fees and charges with no volume behind them.'
     : `Billed ${money0(rev)} against about ${money0(c.total)} to serve, ${left >= 0 ? `leaving ${money0(left)}` : `${money0(-left)} short`}.`;
   const basis = !c.route ? '' : c.real ? ' Its route cost is its real share of the route that day, below.'
     : ` Its route cost is the model's average visit: ${ctx === null && A ? 'this account was on no Veri-Shred route that day. Box deliveries and retrievals run on delivery routes, which are not in the data yet.' : 'the route lists for this date arrive with the next snapshot.'}`;
@@ -64,14 +65,14 @@ export function jobHtml({ o, items, c, svcName, ctx, A }) {
     <div class="jv-bars">
       <span class="lab">Billed</span><div class="jv-bar"><i class="p-rev" style="width:${rev / total * 100}%">${rev / total > 0.12 ? money0(rev) : ''}</i></div>
       <span class="lab">Cost to serve est.</span><div class="jv-bar">${PARTS.map(p => seg(parts[p[0]], PART_CLS[p[0]], p[1])).join('')}</div>
-      <span class="lab">${left >= 0 ? 'Left' : 'Short'}</span><div class="jv-bar"><i class="${left >= 0 ? 'p-left' : 'p-loss'}" style="width:${Math.abs(left) / total * 100}%">${Math.abs(left) / total > 0.12 ? money0(left) : ''}</i></div>
+      ${flat ? '' : `<span class="lab">${left >= 0 ? 'Left' : 'Short'}</span><div class="jv-bar"><i class="${left >= 0 ? 'p-left' : 'p-loss'}" style="width:${Math.abs(left) / total * 100}%">${Math.abs(left) / total > 0.12 ? money0(left) : ''}</i></div>`}
     </div>
     <div class="jv-key">${PARTS.filter(p => parts[p[0]] > 0.5).map(p => `<span><i class="${PART_CLS[p[0]]}"></i>${p[1]}</span>`).join('')}</div>
     <p class="jv-say">${esc(what)}${esc(basis)}</p>
     <table class="jv-tab"><tbody>
       <tr class="rev"><td>Billed</td><td class="why">${inv || '—'}</td><td class="num">${money0(rev)}</td></tr>
       ${c.lines.map(l => `<tr><td><i class="dot ${PART_CLS[(PARTS.find(p => p[2].includes(l[0])) || [''])[0]] || ''}"></i>${esc(l[0])}${l[3] ? ' est.' : ''}</td><td class="why">${esc(l[2])}</td><td class="num">${money0(l[1])}</td></tr>`).join('')}
-      <tr class="tot"><td>${left >= 0 ? 'Left' : 'Short'}</td><td class="why"></td><td class="num ${left < 0 ? (c.real || !c.route ? 'is-bad' : 'is-warn') : ''}">${money0(left)}</td></tr>
+      ${flat ? '' : `<tr class="tot"><td>${left >= 0 ? 'Left' : 'Short'}</td><td class="why"></td><td class="num ${left < 0 ? (c.real || !c.route ? 'is-bad' : 'is-warn') : ''}">${money0(left)}</td></tr>`}
     </tbody></table>
     <div class="jv-route"></div>
   </div>`;

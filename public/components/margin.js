@@ -49,6 +49,14 @@ export function buildMargins(R, M, opts = {}) {
   return { accounts, families };
 }
 
+// A flat-fee account's fee over the year, else 0. The fee is billed on code IR and its bin rotations at $0
+// (data rule 12), so the money and the route cost sit on different orders: an order has no margin of its own.
+export function flatFeeYear(lines) {
+  const fee = lines.filter(l => l.servcode === 'IR').reduce((t, l) => t + l.revenue, 0);
+  const rotations = lines.filter(l => /^B\d$/.test(l.servcode));
+  return fee > 0 && rotations.some(l => l.units > 0) && rotations.every(l => !l.revenue) ? fee : 0;
+}
+
 // The book's margin as Home and the Margin view show it, from one place so they always agree:
 // accounts over $1,000 a year (Citadel apart) with their margin %, a flag when route costs are over
 // half their cost (under review), the margin on the lines costed with confidence, and the accounts
