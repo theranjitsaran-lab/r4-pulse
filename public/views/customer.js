@@ -9,6 +9,7 @@ import { pricePosition } from '/components/custbook.js';
 import { openDrawer, bridgeHtml, linesHtml, leversHtml, linesOf } from '/components/margindrawer.js';
 import { openInvoices } from '/components/invoices.js';
 import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
+import { loadZones, bookShading, playMap, zoneKey } from '/components/mapkit.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
 import { openExplainer } from '/components/explain.js';
 import { ledgerTable } from '/components/table.js';
@@ -190,16 +191,16 @@ const zcta = () => fetch('/data/zcta.json', { credentials: 'same-origin' }).then
 // Its Veri-Shred visits and the postcodes they were at, read when the fold opens.
 async function loadDrill(id) {
   try {
-    const [r, Z] = await Promise.all([fetch(`/api/customer/${id}`, { credentials: 'same-origin' }), zcta(), loadRoadnet()]);
+    const [r, Z, A] = await Promise.all([fetch(`/api/customer/${id}`, { credentials: 'same-origin' }), zcta(), getJson('activity').catch(() => null), loadRoadnet(), loadZones()]);
     const j = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
-    return { d: j.data, Z };
+    return { d: j.data, Z, A };
   } catch (e) { return { error: e.message }; }
 }
 
 async function drawDrill(el, drillP) {
   if (!el) return;
-  const { d, Z, error } = await drillP;
+  const { d, Z, A, error } = await drillP;
   if (!el.isConnected) return;
   if (error) { el.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="pending">${esc(error)}</div></div>`; return; }
   const day = t => new Date(t + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
@@ -207,7 +208,7 @@ async function drawDrill(el, drillP) {
   const lbs = d.visits.reduce((t, v) => t + (v.pounds || 0), 0);
   el.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="card-head"><h3>Shredding visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} days on a route · ${n0(lbs)} lb` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Bin and shredding stops drivers marked done in Veri-Shred, one row per day and route. Executive-bin weights are a set figure, not weighed.</div></div>`;
   const vBox = el.querySelector('#cp-visits');
-  drawWhere(el, d, Z);
+  drawWhere(el, d, Z, A);
   const draw = n => ledgerTable(vBox, {
     columns: [
       { key: 'date', label: 'Date', fmt: v => v ? day(v) : '—' },
@@ -251,7 +252,7 @@ function chartTitle(s) {
 
 // Where the account is served: its own stops over six months (the drill's route lists), by postcode,
 // against the yard, above the orders and visits. One look says a city account or one far out.
-function drawWhere(el, d, Z) {
+function drawWhere(el, d, Z, A) {
   if (!el || !Z || !d.routes) return;
   const by = new Map(), days = new Set();
   for (const r of d.routes) {
@@ -270,10 +271,10 @@ function drawWhere(el, d, Z) {
   const card = document.createElement('div');
   card.className = 'card'; card.style.gridColumn = '1 / -1';
   card.innerHTML = `<div class="card-head"><h3>${esc(title)}</h3></div>
-    <div class="rm-grid"><div class="rm-wrap"></div><ol class="rm-list">${places.slice(0, 12).map(p => `<li><span>${esc(p.postcode)}<small>${p.mi != null ? `${Fmt.fixed(p.mi, 1)} miles from the yard` : 'no postcode centre'} · ${p.days} day${p.days === 1 ? '' : 's'} on a route</small></span><span class="num">${Fmt.grouped(p.services)}<small>services</small></span></li>`).join('')}</ol></div>
-    <div class="src">${Fmt.pct(within10 / Math.max(1, all))} of its ${Fmt.grouped(all)} done services in six months were within ten miles of the yard · Veri-Shred done orders on ${days.size} route days · postcode centres from the US Census, straight lines: no GPS was captured</div>`;
+    <div class="rm-grid"><div><div class="rm-wrap"></div>${zoneKey()}</div><ol class="rm-list">${places.slice(0, 12).map(p => `<li><span>${esc(p.postcode)}<small>${p.mi != null ? `${Fmt.fixed(p.mi, 1)} miles from the yard` : 'no postcode centre'} · ${p.days} day${p.days === 1 ? '' : 's'} on a route</small></span><span class="num">${Fmt.grouped(p.services)}<small>services</small></span></li>`).join('')}</ol></div>
+    <div class="src">${Fmt.pct(within10 / Math.max(1, all))} of its ${Fmt.grouped(all)} done services in six months were within ten miles of the yard · Veri-Shred done orders on ${days.size} route days · postcode centres from the US Census, the likely way along main roads: no GPS was captured · districts shaded by R4's done services over twelve months</div>`;
   el.prepend(card);
-  const draw = () => { const w = card.querySelector('.rm-wrap'); if (w && w.isConnected) w.innerHTML = placesSvg(placed, { width: Math.max(280, Math.min(900, w.clientWidth || 560)), base: basemapNow(), label: title }); };
+  const draw = () => { const w = card.querySelector('.rm-wrap'); if (w && w.isConnected) { w.innerHTML = placesSvg(placed, { width: Math.max(280, Math.min(900, w.clientWidth || 560)), base: basemapNow(), label: title, shading: bookShading(A, Z) }); playMap(w.querySelector('svg'), { vans: 5 }); } };
   draw();
   if (!basemapNow()) loadBasemap().then(b => { if (b) draw(); });   // redrawn once the outline arrives
 }

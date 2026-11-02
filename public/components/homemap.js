@@ -8,12 +8,12 @@ import { areaFrame, landLayer, yardMark, scaleBar } from './areamap.js';
 import { getJson, esc, titleCase } from './data.js';
 import { checkNumbers } from './summary.js';
 import * as Fmt from './format.js';
+import { shadesOf, ringsD as zoneD, pathD, seg, vanLoop, loopTime } from './mapkit.js';
 
 const NEAR_TOWN = 6;      // miles: further than this, a postcode names no town
 const NEAR_YARD = 10;
 const PLACEHOLDER = /single invoice/i;
-const SHADES = 5;
-const REVEAL_MS = 2200, REVEAL_GAP = 250, LOOP_MIN = 7000, LOOP_MAX = 30000, PX_PER_SEC = 90;
+const REVEAL_MS = 2200, REVEAL_GAP = 250;
 const nearest = (pt, places) => { let best = null, d = NEAR_TOWN; for (const [name, lat, lon] of places || []) { const m = miles(pt, [lat, lon]); if (m < d) { d = m; best = name; } } return best; };
 const utc = d => new Date(d + 'T12:00:00Z');
 const dayShort = d => utc(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' }).replace(',', '');
@@ -93,9 +93,7 @@ export function busiestFacts(B) {
 const reduced = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const routeName = r => /\d/.test(r) ? r : titleCase(r);
 const NS = 'http://www.w3.org/2000/svg';
-const pathD = line => line.map((q, i) => `${i ? 'L' : 'M'}${q[0].toFixed(1)} ${q[1].toFixed(1)}`).join('');
-const seg = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
-const ringsD = (rings, F) => rings.map(r => { let d = '', last = null; for (const p of r) { const [x, y] = F.P(p); if (last && Math.abs(x - last[0]) < 1 && Math.abs(y - last[1]) < 1) continue; d += (d ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); last = [x, y]; } return d + 'Z'; }).join('');
+const ringsD = (rings, F) => zoneD(rings, F.P);
 
 // A route over its days: yard, stops, yard, day after day, along the main roads. Where each stop falls along the line.
 function routeLine(r, Z, F) {
@@ -136,7 +134,7 @@ export async function drawHomeMap(root, { play = false } = {}) {
   // the map itself, drawn once: land, districts darker the busier, top labels, the yard; routes go between
   const W = Math.max(300, Math.min(1100, stage.clientWidth || 700)), H = Math.round(W < 500 ? W * 1.1 : W * 0.66);
   const F = areaFrame(B.rows.map(p => p.pt), W, H, { pad: 20, trim: .12 }), still = reduced();
-  const asc = B.rows.slice().reverse(), shade = new Map(asc.map((p, i) => [p.postcode, 1 + Math.floor(i / asc.length * SHADES)]));
+  const asc = B.rows.slice().reverse(), shade = shadesOf(B.rows);
   let districts = '';
   asc.forEach((p, i) => {
     const rings = zones[p.postcode]; if (!rings) return;
@@ -159,12 +157,12 @@ export async function drawHomeMap(root, { play = false } = {}) {
   // ── the period, the routes, and what is drawn for them ──
   const st = { day: 'week', route: null };
   const periodDates = () => st.day === 'week' ? week : [st.day];
-  let drawn = [], loopFrom = 0;
-  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+    const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+  const loop = vanLoop(svg, () => root.isConnected, r => !st.route || st.route === r.route);
   const drawRoutes = animate => {
     gRoutes.textContent = ''; gReveal.textContent = ''; gStops.textContent = ''; gVans.textContent = '';
     const routes = periodRoutes(A, Z, periodDates());
-    drawn = routes.filter(r => r.days.length).map((r, n) => {
+    loop.drawn = routes.filter(r => r.days.length).map((r, n) => {
       const { line, stops, len } = routeLine(r, Z, F), d = pathD(line);
       el('path', { class: 'hm-case', d, 'data-r': r.route }, gRoutes);
       const path = el('path', { class: 'hm-route', d, 'data-r': r.route }, gRoutes);
@@ -174,9 +172,9 @@ export async function drawHomeMap(root, { play = false } = {}) {
       const van = still ? null : el('circle', { class: 'hm-van', r: 5, cx: line[0][0].toFixed(1), cy: line[0][1].toFixed(1), 'data-r': r.route }, gVans);
       if (animate) requestAnimationFrame(() => requestAnimationFrame(() => { mask.style.transition = `stroke-dashoffset ${REVEAL_MS}ms var(--ease-io) ${n * REVEAL_GAP}ms`; mask.setAttribute('stroke-dashoffset', '0'); }));
       const hits = stops.map(s => ({ at: len ? s.at / len : 0, dot: dots[[...seen].indexOf(s.code)] }));
-      return { route: r.route, services: r.services, path, len, van, hits, T: Math.max(LOOP_MIN, Math.min(LOOP_MAX, len / PX_PER_SEC * 1000)), offset: n * 0.11, prev: 0 };
+      return { route: r.route, services: r.services, path, len, van, hits, T: loopTime(len), offset: n * 0.11, prev: 0 };
     });
-    loopFrom = performance.now() + (animate ? REVEAL_MS : 0);
+    loop.from = performance.now() + (animate ? REVEAL_MS : 0);
     return routes;
   };
 
@@ -189,23 +187,6 @@ export async function drawHomeMap(root, { play = false } = {}) {
     root.querySelector('#hm-days').innerHTML = `<button type="button" data-d="week" aria-pressed="${st.day === 'week'}">Last week</button>${week.map(d => `<button type="button" data-d="${d}" aria-pressed="${st.day === d}">${esc(dayShort(d))}</button>`).join('')}`;
   };
   const dim = () => { for (const e of svg.querySelectorAll('#hm-routesvg [data-r], #hm-stops [data-r], #hm-vans [data-r]')) e.classList.toggle('dim', !!st.route && e.dataset.r !== st.route); };
-
-  // ── a marker per route, out and back; each stop pulses as it's reached; nothing moves off screen ──
-  let seen = false, raf = null;
-  const frame = now => {
-    raf = null;
-    if (!root.isConnected) return;
-    if (now >= loopFrom) for (const r of drawn) {
-      if (!r.van || !r.len) continue;
-      const p = (((now - loopFrom) / r.T) + r.offset) % 1, q = r.path.getPointAtLength(p * r.len);
-      r.van.setAttribute('cx', q.x.toFixed(1)); r.van.setAttribute('cy', q.y.toFixed(1));
-      if (!st.route || st.route === r.route) for (const h of r.hits) if (h.dot && r.prev < h.at && p >= h.at) { h.dot.classList.remove('hit'); h.dot.getBoundingClientRect(); h.dot.classList.add('hit'); }
-      r.prev = p;
-    }
-    if (seen && !document.hidden) raf = requestAnimationFrame(frame);
-  };
-  const wake = () => { svg.classList.toggle('paused', !seen || document.hidden); if (!still && seen && !document.hidden && raf == null) raf = requestAnimationFrame(frame); };
-  document.addEventListener('visibilitychange', wake);
 
   const redraw = animate => { const routes = drawRoutes(animate && !still); drawControls(routes); dim(); };
   root.querySelector('#hm-days').addEventListener('click', ev => { const b = ev.target.closest('button[data-d]'); if (b && b.dataset.d !== st.day) { st.day = b.dataset.d; redraw(true); } });
@@ -237,6 +218,6 @@ export async function drawHomeMap(root, { play = false } = {}) {
   // the routes wait until the map is in view: the first draw is what plays
   let started = false;
   const begin = () => { if (started) return; started = true; redraw(play); };
-  if (typeof IntersectionObserver === 'function') new IntersectionObserver(es => { seen = es[es.length - 1].isIntersecting; if (seen) begin(); wake(); }, { threshold: 0.1 }).observe(stage);
-  else { seen = true; begin(); wake(); }
+  if (typeof IntersectionObserver === 'function') new IntersectionObserver(es => { loop.seen = es[es.length - 1].isIntersecting; if (loop.seen) begin(); loop.wake(); }, { threshold: 0.1 }).observe(stage);
+  else { loop.seen = true; begin(); loop.wake(); }
 }

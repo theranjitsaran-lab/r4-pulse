@@ -8,6 +8,7 @@
 //     are one place, and share its detour by services;
 //   drop minutes: an assumed few minutes at each stop and a few more for each service.
 // So the stops' shares add up to the route day exactly (31 October 2026; it was a flat 40% travel).
+import { districtLayer, routeLayer, maskFor, maskId, seg } from './mapkit.js';
 import * as Fmt from './format.js';
 export const YARD = [41.8307, -87.6573];   // 1301 W 35th St
 export const NEAR_MILES = 2, NEAR_DAYS = 3;
@@ -261,8 +262,8 @@ function frame(pts, width) {
 }
 
 // The outline, in the frame: points closer than a pixel are dropped, so a far-out county costs little.
-function baseLayer(base, F, avoid = []) {
-  if (!base) return '';
+function baseLayer(base, F, avoid = [], shading = null) {
+  if (!base) return districtLayer(shading, F.P);
   const path = (ring, close) => {
     let d = '', last = null;
     for (const p of ring) {
@@ -275,6 +276,7 @@ function baseLayer(base, F, avoid = []) {
   const inView = ([x, y], m = 0) => x >= -m && x <= F.width + m && y >= -m && y <= F.height + m;
   let g = `<path class="rm-land" d="${(base.land || []).map(r => path(r, true)).join('')}"/>`;
   g += `<path class="rm-road" d="${(base.roads || []).map(r => path(r.l || r, false)).join('')}"/>`;
+  g += districtLayer(shading, F.P);
   // town names: the largest first, none on top of another or of the frame's edge
   // town names never sit on the yard or a stop: the data is read first
   const marks = [YARD, ...avoid].map(F.P), taken = [];
@@ -296,43 +298,50 @@ const yardMark = F => { const [x, y] = F.P(YARD); return `<rect class="rm-yard" 
 
 // One route's day: the stops in order from the yard and back. far: { i, miles } names the stop that
 // took the van furthest out of its way.
-export function mapSvg(day, { width = 640, base = null, far = null } = {}) {
+export function mapSvg(day, { width = 640, base = null, far = null, shading = null } = {}) {
   const placed = day.stops.filter(s => s.pt);
   const F = frame([YARD, ...placed.map(s => s.pt)], width);
-  const stops = [YARD, ...placed.map(q => q.pt), YARD], xy = pts => pts.map(F.P).map(q => q.map(v => v.toFixed(1)).join(',')).join(' ');
-  let road = '', straight = '';
-  for (let i = 1; i < stops.length; i++) {
-    if (stops[i - 1].join() === stops[i].join()) continue;
-    const r = roadPath(stops[i - 1], stops[i]);
-    if (r) road += `<polyline class="rm-path road" points="${xy(r.pts)}"/>`; else straight += `<polyline class="rm-path" points="${xy([stops[i - 1], stops[i]])}"/>`;
+  // yard → stops → yard, each leg the likely way along the main roads; how far along each stop falls, for its pulse
+  const way = [YARD, ...placed.map(q => q.pt), YARD], line = [F.P(YARD)], ats = [];
+  let run = 0;
+  for (let i = 1; i < way.length; i++) {
+    if (way[i - 1].join() !== way[i].join()) {
+      const r = roadPath(way[i - 1], way[i]);
+      for (const q of r ? r.pts.slice(1) : [way[i]]) { const xy = F.P(q); run += seg(line[line.length - 1], xy); line.push(xy); }
+    }
+    if (i < way.length - 1) ats.push(run);
   }
-  let g = baseLayer(base, F, placed.map(q => q.pt)) + road + straight + yardMark(F);
+  const id = maskId();
+  let g = baseLayer(base, F, placed.map(q => q.pt), shading) + maskFor(id, F.width, F.height, [line]) + `<g mask="url(#${id})">${routeLayer(0, line)}</g>` + yardMark(F);
   const seen = new Map();
   placed.forEach(q => {
     const [x, y] = F.P(q.pt), key = q.postcode, n = seen.get(key) || 0; seen.set(key, n + 1);
-    const ox = n ? Math.cos(n * 2.1) * 7 : 0, oy = n ? Math.sin(n * 2.1) * 7 : 0, i = day.stops.indexOf(q);
-    g += `<g class="rm-stop${q.mine ? ' me' : ''}" data-i="${i}" transform="translate(${(x + ox).toFixed(1)},${(y + oy).toFixed(1)})"><circle r="${q.mine ? 9 : 7.5}"/><text y="3.5" text-anchor="middle">${i + 1}</text></g>`;
+    const ox = n ? Math.cos(n * 2.1) * 7 : 0, oy = n ? Math.sin(n * 2.1) * 7 : 0, i = day.stops.indexOf(q), at = run ? ats[placed.indexOf(q)] / run : 0;
+    g += `<g class="rm-stop${q.mine ? ' me' : ''}" data-i="${i}" data-n="0" data-at="${at.toFixed(4)}" transform="translate(${(x + ox).toFixed(1)},${(y + oy).toFixed(1)})"><circle r="${q.mine ? 9 : 7.5}"/><text y="3.5" text-anchor="middle">${i + 1}</text></g>`;
     if (far && far.i === i) g += `<text class="rm-far" x="${Fmt.fixed(x + ox + 13, 1)}" y="${Fmt.fixed(y + oy + 4, 1)}">+${Fmt.fixed(far.miles, 0)} mi</text>`;
   });
   g += scaleBar(F);
-  return `<svg class="rm${base ? ' based' : ''}" viewBox="0 0 ${F.width} ${F.height}" role="img" aria-label="${esc(`Route ${day.route} on ${day.date}: ${placed.length} stops in order from the yard`)}">${g}</svg>`;
+  return `<svg class="rm hm-map mm${base ? ' based' : ''}" viewBox="0 0 ${F.width} ${F.height}" role="img" aria-label="${esc(`Route ${day.route} on ${day.date}: ${placed.length} stops in order from the yard`)}">${g}</svg>`;
 }
 
 // Where one account is served: its postcodes against the yard, each dot sized by its services.
 // places: [{ pt, postcode, services }]
-export function placesSvg(places, { width = 640, base = null, label = '' } = {}) {
+export function placesSvg(places, { width = 640, base = null, label = '', shading = null } = {}) {
   const placed = places.filter(p => p.pt);
   const F = frame([YARD, ...placed.map(p => p.pt)], width);
   const max = Math.max(1, ...placed.map(p => p.services || 0));
-  let g = baseLayer(base, F, placed.map(p => p.pt));
-  for (const p of placed) { const [x, y] = F.P(p.pt); g += `<line class="rm-ray" x1="${F.P(YARD)[0].toFixed(1)}" y1="${F.P(YARD)[1].toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }
+  // busiest first, so the markers go to the places that matter
+  const ordered = [...placed].sort((a, b) => (b.services || 0) - (a.services || 0));
+  const lines = ordered.map(p => { const out = roadPath(YARD, p.pt), pts = out ? out.pts.map(F.P) : [F.P(YARD), F.P(p.pt)]; return [...pts, ...pts.slice(0, -1).reverse()]; });
+  const id = maskId();
+  let g = baseLayer(base, F, placed.map(p => p.pt), shading) + maskFor(id, F.width, F.height, lines) + `<g mask="url(#${id})">${lines.map((l, n) => routeLayer(n, l)).join('')}</g>`;
   // the yard goes on last, over the dots
   // every postcode a dot; names for the largest, and only where one does not sit on another or the yard
   const [yx, yy] = F.P(YARD), taken = [[yx + 10, yy, 36]];
   let labels = '';
   for (const p of [...placed].sort((a, b) => (b.services || 0) - (a.services || 0))) {
     const [x, y] = F.P(p.pt), r = 4 + 8 * Math.sqrt((p.services || 0) / max), lx = x + r + 4;
-    g += `<g class="rm-stop me" transform="translate(${x.toFixed(1)},${y.toFixed(1)})"><circle r="${r.toFixed(1)}"/></g>`;
+    g += `<g class="rm-stop me" data-n="${ordered.indexOf(p)}" data-at="0.5" transform="translate(${x.toFixed(1)},${y.toFixed(1)})"><circle r="${r.toFixed(1)}"/></g>`;
     if (taken.length < 9 && !taken.some(([tx, ty, tw]) => lx < tx + tw + 4 && lx + 40 > tx - 4 && Math.abs(ty - y) < 14)) {
       taken.push([lx, y, 40]);
       labels += `<text class="rm-lab" x="${lx.toFixed(1)}" y="${(y + 4).toFixed(1)}">${esc(p.postcode)}</text>`;
@@ -340,5 +349,5 @@ export function placesSvg(places, { width = 640, base = null, label = '' } = {})
   }
   g += labels + yardMark(F);
   g += scaleBar(F);
-  return `<svg class="rm${base ? ' based' : ''}" viewBox="0 0 ${F.width} ${F.height}" role="img" aria-label="${esc(label)}">${g}</svg>`;
+  return `<svg class="rm hm-map mm${base ? ' based' : ''}" viewBox="0 0 ${F.width} ${F.height}" role="img" aria-label="${esc(label)}">${g}</svg>`;
 }

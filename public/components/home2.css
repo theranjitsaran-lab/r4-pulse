@@ -108,7 +108,7 @@ html.js .h2.play .on .hm-barlet { transform: scaleX(var(--s)); transition: trans
 /* a press */
 .h2-acts .fb button.pop svg { animation: h2-pop 320ms var(--ease-out); }
 @keyframes h2-pop { 0% { transform: scale(.6); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
-@media (prefers-reduced-motion: reduce) { .hm-route, .hm-stop.hit, .h2-bul a i.h2-light, .h2-bul .alert a i.h2-light::after, .h2-tobar .ck::before, .h2-acts .fb button.pop svg { animation: none; } .hm-rv { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { .hm-route, .hm-stop.hit, .rm-stop circle.hit, .hm-map.fade .hm-z, .h2-bul a i.h2-light, .h2-bul .alert a i.h2-light::after, .h2-tobar .ck::before, .h2-acts .fb button.pop svg { animation: none; } .hm-rv { transition: none !important; } }
 .h2-bul a i { font-style: normal; color: var(--ink-5); }
 .h2-by { margin: var(--sp-2) 0 0; font-size: var(--fs-tiny); color: var(--ink-4); }
 

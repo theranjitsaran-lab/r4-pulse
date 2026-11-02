@@ -68,6 +68,7 @@ Home, by Theran's decision on 2 November 2026:
 - **Entrance, once a session** (sessionStorage), later visits show the end state: the hero fades up, the $1.0M bar fills, figures count up in step, summary lines and tiles stagger. On scroll, once: the 13 weeks and the line bars grow.
 - **State lights:** green breathes; red pings, only on a line over its threshold.
 - **Live route map:** district shading appears lightest to darkest, routes draw out from the yard, dashes march, a marker loops out and back and each stop pulses as it's reached. It pauses off screen or when the tab is hidden.
+- **Every other map follows Home's** (Theran, 2 November 2026; `components/mapkit.js`): the same district shading, always R4's done services over twelve months, so a district is one colour everywhere; routes as the marching dashed line drawn out from the yard, a marker going round and stops pulsing, paused off screen.
 - **Rules:** animate only transform, opacity and stroke-dashoffset; never `transition: all`; the real figures are in the HTML first; reduced motion shows end states and no loops.
 
 ## Map

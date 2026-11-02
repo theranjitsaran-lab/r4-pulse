@@ -91,3 +91,24 @@
 .rm-scale { stroke: var(--ink-3); stroke-width: 2; }
 .h2-key .k.thinline { height: var(--hair-2); background: var(--warn); }
 .rt .r.open { background: var(--tint-brand); }
+
+/* the other maps, as Home draws them (components/mapkit.js) */
+.mm.hm-map, .mm.rt-map { background: var(--map-water); overflow: hidden; }
+.mm .hm-z { cursor: default; }
+.mm .hm-z:hover { stroke: var(--ink); stroke-width: 1.5; }
+.mm .rm-land, .mm .h2-land { fill: var(--map-land); stroke: var(--rule-3); stroke-width: 1; }
+.mm .rm-road, .mm .h2-road { stroke: var(--rule-3); stroke-width: 1; }
+.mm .rm-lab, .mm .rm-place, .mm .h2-maplab, .mm .rm-far { paint-order: stroke; stroke: var(--surface); stroke-width: 3; }
+.mm .rm-lab { font-weight: 600; fill: var(--ink); }
+.mm .rm-stop circle { fill: var(--surface); stroke: var(--brand); stroke-width: 2.5; transform-box: fill-box; transform-origin: center; }
+.mm .rm-stop text { fill: var(--ink); }
+.mm .rm-stop.me circle { fill: var(--brand); stroke: var(--surface); stroke-width: 2; }
+.mm .rm-stop.me text { fill: var(--surface); }
+.mm .rm-stop.hot circle { stroke: var(--ink); stroke-width: 3; }
+.mm .rm-stop circle.hit { animation: h2-pop 420ms var(--ease-out); }
+.mm .hm-route.thin { stroke: var(--warn); }
+.mm .hm-route.on { stroke-width: 4; }
+.mm .hm-stop.thin { stroke: var(--warn); }
+.hm-van.dim { opacity: .15; }
+.rm-grid > div:first-child { min-width: 0; }
+.rt-map + .hm-key, #rt-map-key .hm-key { margin-top: 0; }

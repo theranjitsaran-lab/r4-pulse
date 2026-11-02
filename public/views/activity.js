@@ -16,7 +16,8 @@ import { titleCase, esc, loadRates } from '/components/data.js';
 import { routeNorms, LABELS, THIN } from '/components/metrics.js';
 import { costsVisible, whoAmI } from '/components/access.js';
 import { dataTable } from '/components/datatable.js';
-import { areaFrame, landLayer, postcodeLayer, yardMark, scaleBar } from '/components/areamap.js';
+import { areaFrame, landLayer, yardMark, scaleBar } from '/components/areamap.js';
+import { loadZones, bookShading, districtLayer, routeLayer, maskFor, maskId, playMap, zoneKey, seg } from '/components/mapkit.js';
 import { densityByPostcode } from '/components/jobview.js';
 import { allocate, mapSvg, loadBasemap, basemapNow, loadRoadnet, roadPath } from '/components/routemap.js';
 const routeName = r => /\d/.test(r || '') ? r : titleCase(r);
@@ -37,7 +38,7 @@ export async function render(main, A, params) {
   // Warehouse moved to Money; old links follow it
   if (params.tab === 'warehouse') { location.replace('#numbers?tab=warehouse'); return; }
   const [R, Z, base] = await Promise.all([loadRates(), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
-    loadBasemap(), loadRoadnet()]);
+    loadBasemap(), loadRoadnet(), loadZones()]);
   const real = A.routeDays.filter(r => r.route && r.route !== '--');
   const doneDays = [...new Set(real.filter(r => r.services_done > 0).map(r => r.date))].sort();
   let day = params.date && doneDays.includes(params.date) ? params.date : A.latestDone;
@@ -105,11 +106,11 @@ export async function render(main, A, params) {
     }).join('') || '<p class="sub">No routes ran on this day.</p>';
   }
 
-  // ── the map: every postcode R4 visits as a quiet layer; the day's routes from the yard in stop
+  // ── the map, as Home draws it: every district R4 visits shaded by its services; the day's routes from the yard in stop
   // order, each leg along the main roads (routemap.js roadPath; a straight line only where the roads
   // give no way; no GPS was ever captured), thin routes in amber, the one tapped in green.
   // The other layer is the sales one Home shows: where one more customer saves most est.
-  let layer = 'day', hl = null;
+  let layer = 'day', hl = null, played = null;
   const pts = (A.postcodes || []).filter(p => Z[p.postcode] && !p.billing_only).map(p => ({ ...p, pt: Z[p.postcode] }));
   function routePath(route) {
     const os = A.orders.filter(o => o.date === day && o.route === route && o.postcode).sort((a, b) => (a.seq ?? 999) - (b.seq ?? 999));
@@ -121,34 +122,41 @@ export async function render(main, A, params) {
     if (!pts.length) { el.innerHTML = '<div class="pending">The map is not available: the postcode centres did not load.</div>'; return; }
     const W = Math.max(300, Math.min(1100, el.clientWidth || 700)), H = Math.round(W < 500 ? W * 1.0 : W * 0.52);
     const F = areaFrame(pts.map(p => p.pt), W, H);
-    let g = landLayer(base, F) + postcodeLayer(pts, F);
+    const shading = bookShading(A, Z);
+    let g = landLayer(base, F) + districtLayer(shading, F.P), over = '', defs = '';
     if (layer === 'day') {
       const rows = real.filter(r => r.date === day && r.services_done > 0);
       const thinSet = new Set(rows.filter(r => norm[r.route] && r.services_done < THIN * norm[r.route].done).map(r => r.route));
-      const yard = F.P(YARD);
-      for (const r of rows.slice().sort((a, b) => (a.route === hl) - (b.route === hl))) {
-        const geo = routePath(r.route).map(p => Z[p]), path = geo.map(q => F.P(q));
-        if (!path.length) continue;
-        const cls = r.route === hl ? 'on' : thinSet.has(r.route) ? 'thin' : hl ? 'dim' : '';
-        // yard → stops → yard, each leg the likely way along the main roads
-        const way = [YARD, ...geo, YARD], line = [yard];
-        for (let i = 1; i < way.length; i++) { const rp = roadPath(way[i - 1], way[i]); line.push(...(rp ? rp.pts.slice(1) : [way[i]]).map(q => F.P(q))); }
-        g += `<polyline class="rt-line ${cls}" points="${line.map(q => q.map(v => v.toFixed(1)).join(',')).join(' ')}"><title>${esc(routeName(r.route))}: ${r.services_done} services, ${r.stops_done} stops</title></polyline>`;
-        g += path.map(([x, y]) => `<circle class="rt-stop ${cls}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.route === hl ? 4.5 : 3}"/>`).join('');
-      }
+      const lines = [], routes = [];
+      rows.slice().sort((a, b) => (a.route === hl) - (b.route === hl)).forEach(r => {
+        const geo = routePath(r.route).map(p => Z[p]);
+        if (!geo.length) return;
+        const cls = r.route === hl ? 'on' : thinSet.has(r.route) ? 'thin' : hl ? 'dim' : '', n = lines.length;
+        // yard → stops → yard, each leg the likely way along the main roads; how far along each stop falls, for its pulse
+        const way = [YARD, ...geo, YARD], line = [F.P(YARD)], ats = [];
+        let run = 0;
+        for (let i = 1; i < way.length; i++) { const rp = roadPath(way[i - 1], way[i]); for (const q of rp ? rp.pts.slice(1) : [way[i]]) { const xy = F.P(q); run += seg(line[line.length - 1], xy); line.push(xy); } if (i < way.length - 1) ats.push(run); }
+        lines.push(line);
+        routes.push(routeLayer(n, line, cls, `${routeName(r.route)}: ${r.services_done} services, ${r.stops_done} stops`));
+        over += geo.map((q, i) => { const [x, y] = F.P(q); return `<circle class="hm-stop ${cls}" data-n="${n}" data-at="${(run ? ats[i] / run : 0).toFixed(4)}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.route === hl ? 4.5 : 3.5}"/>`; }).join('');
+      });
+      const id = maskId();
+      defs = maskFor(id, W, H, lines); g += `<g mask="url(#${id})">${routes.join('')}</g>` + over;
       const stops = rows.reduce((t, r) => t + r.stops_done, 0), pcs = new Set(rows.flatMap(r => routePath(r.route)));
       $('rt-map-t').textContent = `${dlabel(day)}: ${pl(rows.length, 'route')}, ${pl(stops, 'stop')} across ${pl(pcs.size, 'postcode')}`;
       $('rt-map-s').textContent = hl ? `${routeName(hl)} in green · tap it again in the list to clear` : thinSet.size ? `${[...thinSet].map(routeName).join(', ')} ran thin · tap a route below to follow it` : 'tap a route below to follow it';
-      $('rt-map-key').innerHTML = '<span><i class="k line"></i>a route, yard to its stops in order along the main roads</span><span><i class="k thinline"></i>thin against its own norm</span><span><i class="k pt"></i>postcodes visited in a year, by visits</span>';
+      $('rt-map-key').innerHTML = `<span><i class="k line"></i>a route, yard to its stops in order along the main roads</span><span><i class="k thinline"></i>thin against its own norm</span>${zoneKey()}`;
     } else {
       const save = densityByPostcode(R, A, Z, { top: 8 }).rows;
       save.forEach((r, i) => { const [x, y] = F.P(Z[r.postcode]); g += `<g class="h2-best" transform="translate(${Math.max(10, Math.min(W - 10, x)).toFixed(1)},${Math.max(10, Math.min(H - 10, y)).toFixed(1)})"><circle r="10"/><text y="4" text-anchor="middle">${i + 1}</text><title>${esc(r.postcode)}${costsVisible() ? `: one more customer saves about ${money0(r.saving)} a year est.` : ''}</title></g>`; });
       $('rt-map-t').textContent = costsVisible() ? `One more customer in these ${save.length} postcodes saves ${moneyK(save.reduce((t, r) => t + r.saving, 0))} a year est.` : `${save.length} postcodes where a second stop would share the most trips`;
       $('rt-map-s').textContent = save.slice(0, 3).map((r, i) => `${i + 1}. ${r.postcode}, ${r.visits} visits a year, ${Math.round(r.miles)} mi`).join(' · ');
-      $('rt-map-key').innerHTML = '<span><i class="k best"></i>' + (costsVisible() ? 'one more customer saves most' : 'a second stop would share the most trips') + '</span><span><i class="k pt"></i>visited, by visits a year</span><span><i class="k single"></i>one customer only</span>';
+      $('rt-map-key').innerHTML = '<span><i class="k best"></i>' + (costsVisible() ? 'one more customer saves most' : 'a second stop would share the most trips') + '</span>' + zoneKey();
     }
     g += yardMark(F) + scaleBar(F);
-    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="h2-map rt-map" role="img" aria-label="Map of the day's routes from the yard">${g}</svg>`;
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="h2-map rt-map hm-map mm" role="img" aria-label="Map of the day's routes from the yard">${defs}${g}</svg>`;
+    // a new day or layer plays; following a route only redraws it
+    const key = layer + day; playMap(el.querySelector('svg'), { reveal: played !== key }); played = key;
   }
 
   function drawStops(route, box) {
@@ -188,7 +196,7 @@ export async function render(main, A, params) {
     const unplaced = rd.stops.length - placed, fs = farOk && rd.stops[farOk.i];
     const say = `About ${Math.round(a.dayMiles)} ${a.road ? 'road ' : ''}miles yard to yard est.${fs ? `; stop ${farOk.i + 1}, ${esc(titleCase(fs.company))} at ${esc(fs.postcode)}, took the van about ${Math.round(farOk.miles)} miles out of its way` : ''}${unplaced ? `; ${pl(unplaced, 'stop')} without a postcode centre left off the map` : ''}. ${a.road ? 'The likely way by main roads between postcode centres (US Census); dashed where the roads give no way' : 'Straight lines between postcode centres'}: no GPS was captured.`;
     box.innerHTML = `<div class="rm-grid"><div class="rm-wrap"></div><div>${list}</div></div><p class="sub" style="margin:var(--sp-2) 0 0">${say}</p>`;
-    const draw = () => { const w = box.querySelector('.rm-wrap'); if (w) w.innerHTML = mapSvg(rd, { width: Math.max(280, Math.min(900, w.clientWidth || 560)), base: basemapNow(), far: farOk }); };
+    const draw = () => { const w = box.querySelector('.rm-wrap'); if (w) { w.innerHTML = mapSvg(rd, { width: Math.max(280, Math.min(900, w.clientWidth || 560)), base: basemapNow(), far: farOk, shading: bookShading(A, Z) }); playMap(w.querySelector('svg')); } };
     draw();
     if (!basemapNow()) loadBasemap().then(b => { if (b && box.isConnected && !box.hidden) draw(); });   // redrawn once the outline arrives
   }
