@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Read this first, every session. Then `DECISIONS.md`. Then `docs/` for the brief, the logic pack,
+Read this first, every session. Then `DECISIONS.md`, and `DESIGN.md` for the visual system. Then `docs/` for the brief, the logic pack,
 the data addendum and the margin spec — those four hold every number the screens show.
 
 ## What this is
