@@ -342,3 +342,16 @@ button.h2-seg:hover { background: var(--tint-brand); }
 
 /* a phone keeps Home to two screens: tighter cards, the change note left to the desk */
 @media (max-width: 700px) { .h2, .h2-split, .h2-stack { gap: var(--sp-2); } .h2-card { padding: var(--sp-3); } .h2-sum .h2-by { display: none; } .h2-bul a { padding: var(--sp-1) 0; } .h2-rows .h2-lr { min-height: 0; } }
+
+/* the three tiles on a phone: the bill across the full width and large, invoiced and the gap side by side */
+@media (max-width: 700px) {
+  .h2-kpis.bills { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .h2-kpis.bills .h2-kpi { padding: var(--sp-3); gap: var(--sp-1); }
+  .h2-kpis.bills .h2-kpi b { font-size: var(--fs-num); }
+  .h2-kpis.bills .h2-kpi.lead { grid-column: 1 / -1; }
+  .h2-kpis.bills .h2-kpi.lead b { font-size: var(--fs-num-lg); }
+  .h2-kpis.bills .h2-kpi { padding: var(--sp-2) var(--sp-3); }
+  .h2-kpis.bills .h2-kpi.lead { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-1) var(--sp-3); align-items: baseline; }
+  .h2-kpis.bills .h2-kpi.lead span { grid-column: 1 / -1; }
+  .h2 { padding-bottom: var(--sp-4); }
+}
