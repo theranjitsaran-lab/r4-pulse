@@ -43,7 +43,8 @@ async function main() {
       await page.waitForFunction(() => !document.querySelector('#main .loading'), null, { timeout: 20000 }).catch(() => {});
       await page.waitForTimeout(400);
       // folded sections count: a phone user can open them
-      if (hash === '#pulse') { const h = await page.evaluate(() => document.documentElement.scrollHeight); console.log(`     Home is ${h}px, ${(h / 844).toFixed(1)} phone screens`); if (h > 2 * 844) { hits++; console.log('HIT  Home is over two phone screens'); } }
+      // the map stays open on a phone by decision (2 November 2026): the two-screen limit is for everything above it
+      if (hash === '#pulse') { const h = await page.evaluate(() => { const m = document.querySelector('#h2-map'); return document.documentElement.scrollHeight - (m ? m.getBoundingClientRect().height + 16 : 0); }); console.log(`     Home is ${h}px, ${(h / 844).toFixed(1)} phone screens`); if (h > 2 * 844) { hits++; console.log('HIT  Home is over two phone screens'); } }
       if (hash === '#pulse') { const n = await page.evaluate(() => { const e = document.querySelector('#h2-head'); return e ? Math.round(e.getBoundingClientRect().height / parseFloat(getComputedStyle(e).lineHeight)) : 0; }); if (n > 2) { hits++; console.log(`HIT  the headline runs to ${n} lines`); } }
       if (hash.startsWith('#pricing')) await page.click('#q-add').catch(() => {});   // a quote line, which once showed its margin
       await page.evaluate(() => document.querySelectorAll('details').forEach(d => { d.open = true; }));

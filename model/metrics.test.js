@@ -18,17 +18,26 @@ test('a flat fee: the two IR accounts, not an account with priced bins or none a
 });
 
 test('Home map: shares add up, billing-only postcodes are out, routes keep their recorded stop order', async () => {
-  const { busiest, dayRoutes, routeDates, busiestFacts } = await import('../public/components/homemap.js');
+  const { busiest, lastWeek, periodRoutes, districtActivity, busiestFacts } = await import('../public/components/homemap.js');
   const A = require('../fixtures/activity.json').data, Z = require('../public/data/zcta.json');
   const B = busiest(A, Z, []);
   assert.ok(Math.abs(B.rows.reduce((t, p) => t + p.share, 0) - 1) < 1e-9);
   assert.ok(B.rows.every(p => !p.billing_only && Z[p.postcode]));
   assert.ok(B.rows[0].services >= B.rows[1].services);
   assert.ok(busiestFacts(B).every(f => f.line.length < 400));
-  const Zt = { a: [41.8, -87.6], b: [41.9, -87.7] };
-  const T = { orders: [{ date: 'd', route: 'R', seq: 3, postcode: 'b', done: true }, { date: 'd', route: 'R', seq: 1, postcode: 'a', done: true }, { date: 'd', route: 'R', seq: 2, postcode: 'a', done: true }, { date: 'd', route: 'R', seq: 4, postcode: 'b', done: false }, { date: 'd', route: '--', seq: 1, postcode: 'a', done: true }] };
-  assert.deepEqual(dayRoutes(T, Zt, 'd'), [{ route: 'R', services: 3, stops: ['a', 'b'] }]);
-  assert.deepEqual(routeDates(T), ['d']);
+  const Zt = { a: [41.8, -87.6], b: [41.9, -87.7] }, R = (date, route, services_done) => ({ date, route, services_done });
+  const o = (date, route, seq, postcode, done = true) => ({ date, route, seq, postcode, done });
+  const T = { latestDone: '2026-10-30', routeDays: [R('2026-10-26', 'M', 3), R('2026-10-27', 'M', 3), R('2026-10-28', 'J', 1), R('2026-10-30', '--', 9), R('2026-10-30', 'M', 2), R('2026-10-19', 'M', 8)],
+    orders: [o('2026-10-26', 'M', 3, 'b'), o('2026-10-26', 'M', 1, 'a'), o('2026-10-26', 'M', 2, 'a'), o('2026-10-26', 'M', 4, 'b', false), o('2026-10-27', 'M', 1, 'a'), o('2026-10-27', 'M', 2, 'b'), o('2026-10-28', 'J', 1, 'b'), o('2026-10-30', 'M', 1, 'b')] };
+  assert.deepEqual(lastWeek(T), ['2026-10-26', '2026-10-27', '2026-10-28', '2026-10-30']);
+  const P = periodRoutes(T, Zt, lastWeek(T));
+  assert.deepEqual(P.map(r => [r.route, r.services]), [['M', 8], ['J', 1]]);
+  assert.deepEqual(P[0].days, [{ date: '2026-10-26', stops: ['a', 'b'] }, { date: '2026-10-30', stops: ['b'] }]);   // the same stops on the 27th draw once
+  assert.deepEqual(districtActivity(T, ['2026-10-26'], 'b'), { services: 1, routes: [{ route: 'M', n: 1 }] });
+  // the real week: routes add to the same count Operations shows
+  const W = lastWeek(A), RW = periodRoutes(A, Z, W);
+  assert.equal(W.length, 5);
+  assert.equal(RW.reduce((t, r) => t + r.services, 0), A.routeDays.filter(r => W.includes(r.date) && r.route && r.route !== '--').reduce((t, r) => t + r.services_done, 0));
 });
 
 test('#20 shredding: Opportunities, Warehouse and Home count the same boxes for an account', async () => {

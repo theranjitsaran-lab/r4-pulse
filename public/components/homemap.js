@@ -1,8 +1,8 @@
-// Home's Chicago map: where the work is over twelve months, and one day's routes moving out from the yard and back.
-// The heat is done services by postcode (activity.postcodes). A route is its done orders in recorded stop order
-// (activity.orders, about three weeks), along the main roads: not GPS, which was never captured (data rule 8).
-// The note is written from busiestFacts and checked like every other summary. busiest, dayRoutes and busiestFacts
-// have no DOM; the server and the tests can read them.
+// Home's Chicago map: postcode districts shaded by twelve months of done services, and last week's real routes moving
+// out from the yard and back. Shading: activity.postcodes on the Census districts in public/data/zones.json. Routes:
+// done orders in recorded stop order (activity.orders), joined along the main roads; not GPS, which was never captured
+// (data rule 8). Counts: activity.routeDays. busiest, lastWeek, periodRoutes, districtActivity and busiestFacts have
+// no DOM, for the tests. The note is written from busiestFacts and checked like every other summary.
 import { YARD, miles, roadPath, loadRoadnet, loadBasemap } from './routemap.js';
 import { areaFrame, landLayer, yardMark, scaleBar } from './areamap.js';
 import { getJson, esc, titleCase } from './data.js';
@@ -12,9 +12,16 @@ import * as Fmt from './format.js';
 const NEAR_TOWN = 6;      // miles: further than this, a postcode names no town
 const NEAR_YARD = 10;
 const PLACEHOLDER = /single invoice/i;
+const SHADES = 5;
+const REVEAL_MS = 2200, REVEAL_GAP = 250, LOOP_MIN = 7000, LOOP_MAX = 30000, PX_PER_SEC = 90;
 const nearest = (pt, places) => { let best = null, d = NEAR_TOWN; for (const [name, lat, lon] of places || []) { const m = miles(pt, [lat, lon]); if (m < d) { d = m; best = name; } } return best; };
-const day = d => new Date(d + 'T12:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' });
+const utc = d => new Date(d + 'T12:00:00Z');
+const dayShort = d => utc(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' }).replace(',', '');
+const dayLong = d => utc(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }).replace(',', '');
 const realRoute = r => r && r !== '--';
+const addDays = (d, n) => { const t = utc(d); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().slice(0, 10); };
+const where = p => `${p.postcode}${p.town ? ` near ${p.town}` : ''}`;
+const namesOf = p => (p.names || '').split(', ').filter(n => n && !PLACEHOLDER.test(n)).map(titleCase);
 
 // Every postcode with a real site address, largest first, each with its share of the services
 export function busiest(A, Z, places = []) {
@@ -25,30 +32,55 @@ export function busiest(A, Z, places = []) {
   return { rows, total, count: rows.length, near: total ? within / total : 0, top3: rows.slice(0, 3).reduce((t, p) => t + p.share, 0) };
 }
 
-// The dates the route orders cover, oldest first
-export const routeDates = A => [...new Set((A.orders || []).filter(o => o.done && realRoute(o.route)).map(o => o.date))].sort();
-
-// One day's routes: each its done orders in stop order, consecutive stops in a postcode as one
-export function dayRoutes(A, Z, date) {
-  const by = new Map();
-  for (const o of A.orders || []) {
-    if (o.date !== date || !o.done || !realRoute(o.route)) continue;
-    (by.get(o.route) || by.set(o.route, []).get(o.route)).push(o);
-  }
-  return [...by.entries()].map(([route, list]) => {
-    const stops = [];
-    for (const o of list.slice().sort((a, b) => (a.seq ?? 1e9) - (b.seq ?? 1e9))) if (Z[o.postcode] && stops[stops.length - 1] !== o.postcode) stops.push(o.postcode);
-    return { route, services: list.length, stops };
-  }).sort((a, b) => b.services - a.services);
+// The last complete Monday to Friday in the data: its dates that ran, oldest first
+export function lastWeek(A) {
+  const latest = A.latestDone; if (!latest) return [];
+  const dow = utc(latest).getUTCDay();      // 0 Sunday
+  const monday = addDays(latest, dow === 0 ? -6 : dow >= 5 ? 1 - dow : -6 - dow);
+  const ran = new Set((A.routeDays || []).filter(r => realRoute(r.route) && r.services_done > 0).map(r => r.date));
+  return [0, 1, 2, 3, 4].map(i => addDays(monday, i)).filter(d => ran.has(d));
 }
 
-const where = p => `${p.postcode}${p.town ? ` near ${p.town}` : ''}`;
+// The routes over some dates, busiest first: services from routeDays, and for each date its stops in recorded order,
+// consecutive stops in one postcode as one. A route that ran the same stops on two days is drawn once.
+export function periodRoutes(A, Z, dates) {
+  const on = new Set(dates), by = new Map();
+  for (const r of A.routeDays || []) {
+    if (!on.has(r.date) || !realRoute(r.route) || !(r.services_done > 0)) continue;
+    const x = by.get(r.route) || { route: r.route, services: 0, days: [] };
+    x.services += r.services_done; by.set(r.route, x);
+  }
+  const orders = new Map();
+  for (const o of A.orders || []) {
+    if (!on.has(o.date) || !o.done || !by.has(o.route)) continue;
+    const k = o.date + '|' + o.route; (orders.get(k) || orders.set(k, []).get(k)).push(o);
+  }
+  for (const x of by.values()) {
+    const seen = new Set();
+    for (const date of dates) {
+      const stops = [];
+      for (const o of (orders.get(date + '|' + x.route) || []).slice().sort((a, b) => (a.seq ?? 1e9) - (b.seq ?? 1e9))) if (Z[o.postcode] && stops[stops.length - 1] !== o.postcode) stops.push(o.postcode);
+      const key = stops.join();
+      if (stops.length && !seen.has(key)) { seen.add(key); x.days.push({ date, stops }); }
+    }
+  }
+  return [...by.values()].sort((a, b) => b.services - a.services);
+}
+
+// What happened in a district over some dates: its services, and the routes that did them
+export function districtActivity(A, dates, postcode) {
+  const on = new Set(dates), routes = new Map(); let services = 0;
+  for (const o of A.orders || []) {
+    if (!on.has(o.date) || !o.done || o.postcode !== postcode || !realRoute(o.route)) continue;
+    services++; routes.set(o.route, (routes.get(o.route) || 0) + 1);
+  }
+  return { services, routes: [...routes.entries()].sort((a, b) => b[1] - a[1]).map(([route, n]) => ({ route, n })) };
+}
 
 // What the note may say, every figure as the panel shows it
 export function busiestFacts(B) {
   const t = B.rows[0]; if (!t) return [];
-  // a placeholder such as Single Invoice Customer isn't a customer to name
-  const names = (t.names || '').split(', ').filter(n => n && !PLACEHOLDER.test(n)).map(titleCase);
+  const names = namesOf(t);
   const who = t.customers <= 2 && names.length === 1 ? `${names[0]} is the customer there.` : t.customers === 2 && names.length === 2 ? `${names.join(' and ')} are the customers there.` : `It has ${t.customers} customers.`;
   return [
     { key: 'top', line: `${where(t)} is the busiest postcode: ${Fmt.num(t.services)} services in the last twelve months, ${Fmt.pct(t.share)} of the ${Fmt.num(B.total)} across ${B.count} postcodes. ${who}` },
@@ -60,18 +92,36 @@ export function busiestFacts(B) {
 // ── the card ──
 const reduced = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const routeName = r => /\d/.test(r) ? r : titleCase(r);
+const NS = 'http://www.w3.org/2000/svg';
 const pathD = line => line.map((q, i) => `${i ? 'L' : 'M'}${q[0].toFixed(1)} ${q[1].toFixed(1)}`).join('');
-const lengthOf = line => line.reduce((t, q, i) => i ? t + Math.hypot(q[0] - line[i - 1][0], q[1] - line[i - 1][1]) : 0, 0);
+const seg = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+const ringsD = (rings, F) => rings.map(r => { let d = '', last = null; for (const p of r) { const [x, y] = F.P(p); if (last && Math.abs(x - last[0]) < 1 && Math.abs(y - last[1]) < 1) continue; d += (d ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); last = [x, y]; } return d + 'Z'; }).join('');
 
-export async function drawHomeMap(root) {
+// A route over its days: yard, stops, yard, day after day, along the main roads. Where each stop falls along the line.
+function routeLine(r, Z, F) {
+  const yard = F.P(YARD), line = [yard], stops = []; let at = 0;
+  const push = q => { at += seg(line[line.length - 1], q); line.push(q); };
+  for (const d of r.days) {
+    const way = [YARD, ...d.stops.map(c => Z[c]), YARD];
+    for (let i = 1; i < way.length; i++) {
+      const rp = roadPath(way[i - 1], way[i]);
+      for (const q of rp ? rp.pts.slice(1) : [way[i]]) push(F.P(q));
+      if (i < way.length - 1) stops.push({ code: d.stops[i - 1], pt: F.P(way[i]), at });
+    }
+  }
+  return { line, stops, len: at };
+}
+
+export async function drawHomeMap(root, { play = false } = {}) {
   const stage = root.querySelector('#hm-svg'); if (!stage) return;
-  let A, Z, base;
+  let A, Z, base, zones;
   try {
-    [A, Z, base] = await Promise.all([getJson('activity'), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}), loadBasemap(), loadRoadnet().catch(() => null)]);
+    const json = u => fetch(u, { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {});
+    [A, Z, base, zones] = await Promise.all([getJson('activity'), json('/data/zcta.json'), loadBasemap(), json('/data/zones.json'), loadRoadnet().catch(() => null)]);
   } catch (e) { stage.innerHTML = '<div class="pending">The map is not available just now.</div>'; return; }
-  const B = busiest(A, Z, (base && base.places) || []), dates = routeDates(A);
+  const B = busiest(A, Z, (base && base.places) || []), week = lastWeek(A);
   if (!B.rows.length) { stage.innerHTML = '<div class="pending">No postcodes on done orders in this window.</div>'; return; }
-  const t = B.rows[0], max = t.services;
+  const t = B.rows[0], max = t.services, byCode = new Map(B.rows.map(p => [p.postcode, p]));
   root.querySelector('#hm-title').textContent = `Busiest in ${where(t)}: ${Fmt.pct(t.share)} of the year's services`;
 
   // the note: the facts now, Claude's when it passes the check
@@ -81,54 +131,111 @@ export async function drawHomeMap(root) {
     .then(r => r.ok ? r.json() : null)
     .then(j => { if (j && j.source === 'claude' && checkNumbers(j.text, facts).ok && say.isConnected) say.textContent = j.text; })
     .catch(() => {});
-  root.querySelector('#hm-top').innerHTML = B.rows.slice(0, 5).map(p => `<li><span><b>${esc(p.postcode)}</b>${p.town ? ` ${esc(p.town)}` : ''}<small>${esc(p.customers === 1 ? '1 customer' : `${p.customers} customers`)}</small></span><b>${Fmt.num(p.services)}</b><span>${Fmt.pct(p.share)}</span></li>`).join('');
+  root.querySelector('#hm-top').innerHTML = B.rows.slice(0, 5).map((p, i) => `<li data-pc="${esc(p.postcode)}"><span><b>${esc(p.postcode)}</b>${p.town ? ` ${esc(p.town)}` : ''}<small>${esc(p.customers === 1 ? '1 customer' : `${p.customers} customers`)}</small></span><b>${Fmt.num(p.services)}</b><span>${Fmt.pct(p.share)}</span><i class="hm-barlet" style="--s:${(p.services / max).toFixed(3)};--i:${i}"></i></li>`).join('');
 
-  const st = { i: dates.length - 1, route: null };
-  const draw = () => {
-    const date = dates[st.i], routes = date ? dayRoutes(A, Z, date) : [];
-    if (st.route && !routes.some(r => r.route === st.route)) st.route = null;
-    root.querySelector('#hm-day').textContent = date ? day(date) : 'No routes held';
-    root.querySelector('#hm-prev').disabled = st.i <= 0;
-    root.querySelector('#hm-next').disabled = st.i >= dates.length - 1;
-    root.querySelector('#hm-routes').innerHTML = routes.length > 1 ? `<button type="button" data-r=""${st.route ? '' : ' class="on"'}>All ${routes.length} routes</button>${routes.map(r => `<button type="button" data-r="${esc(r.route)}"${st.route === r.route ? ' class="on"' : ''}>${esc(routeName(r.route))} ${r.services}</button>`).join('')}` : '';
+  // the map itself, drawn once: land, districts darker the busier, top labels, the yard; routes go between
+  const W = Math.max(300, Math.min(1100, stage.clientWidth || 700)), H = Math.round(W < 500 ? W * 1.1 : W * 0.66);
+  const F = areaFrame(B.rows.map(p => p.pt), W, H, { pad: 20, trim: .12 }), still = reduced();
+  const asc = B.rows.slice().reverse(), shade = new Map(asc.map((p, i) => [p.postcode, 1 + Math.floor(i / asc.length * SHADES)]));
+  let districts = '';
+  asc.forEach((p, i) => {
+    const rings = zones[p.postcode]; if (!rings) return;
+    const label = `${where(p)}: ${Fmt.num(p.services)} services, ${p.customers} customer${p.customers === 1 ? '' : 's'}`;
+    districts += `<path class="hm-z z${shade.get(p.postcode)}" data-pc="${esc(p.postcode)}" style="--i:${i}" d="${ringsD(rings, F)}"><title>${esc(label)}</title></path>`;
+  });
+  const taken = []; let labels = '';
+  for (const p of B.rows.slice(0, 5)) {
+    const [x, y] = F.P(p.pt);
+    if (!F.inside([x, y]) || taken.some(q => Math.abs(q[0] - x) < 60 && Math.abs(q[1] - y) < 16)) continue;
+    taken.push([x, y]);
+    labels += `<text class="hm-lab" x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle">${esc(p.postcode)}</text>`;
+  }
+  stage.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="hm-map${play && !still ? ' fade' : ''}" role="img" aria-label="Postcode districts shaded by services over twelve months, and last week's routes from the yard">
+    ${landLayer(base, F)}<g id="hm-zones">${districts}</g><defs><mask id="hm-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect width="${W}" height="${H}" class="hm-mask-off"/><g id="hm-reveal"></g></mask></defs>
+    <g id="hm-routesvg" mask="url(#hm-mask)"></g><g id="hm-stops"></g><g id="hm-vans"></g>${labels}${yardMark(F)}${scaleBar(F)}</svg>`;
+  const svg = stage.querySelector('svg'), gRoutes = svg.querySelector('#hm-routesvg'), gReveal = svg.querySelector('#hm-reveal'), gStops = svg.querySelector('#hm-stops'), gVans = svg.querySelector('#hm-vans');
+  root.querySelector('#hm-key').innerHTML = `<span>Fewer services</span>${[1, 2, 3, 4, 5].map(i => `<i class="z${i}"></i>`).join('')}<span>More</span>`;
 
-    const W = Math.max(300, Math.min(1100, stage.clientWidth || 700)), H = Math.round(W < 500 ? W * 1.1 : W * 0.66);
-    const F = areaFrame(B.rows.map(p => p.pt), W, H, { pad: 20, trim: .12 }), scale = W < 500 ? 13 : 22, big = [...B.rows].slice(0, 5).map(p => p.postcode);
-    let g = landLayer(base, F);
-    // the heat: area for services, darker the busier; postcode centres only, so no smoothed surface
-    B.rows.slice().reverse().forEach((p, i) => {
-      const [x, y] = F.P(p.pt); if (!F.inside([x, y])) return;
-      const q = p.services / max, band = q > .5 ? 4 : q > .25 ? 3 : q > .1 ? 2 : 1;
-      g += `<circle class="hm-h b${band}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(2 + scale * Math.sqrt(q)).toFixed(1)}"><title>${esc(where(p))}: ${Fmt.num(p.services)} services, ${p.customers} customer${p.customers === 1 ? '' : 's'}</title></circle>`;
+  // ── the period, the routes, and what is drawn for them ──
+  const st = { day: 'week', route: null };
+  const periodDates = () => st.day === 'week' ? week : [st.day];
+  let drawn = [], loopFrom = 0;
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+  const drawRoutes = animate => {
+    gRoutes.textContent = ''; gReveal.textContent = ''; gStops.textContent = ''; gVans.textContent = '';
+    const routes = periodRoutes(A, Z, periodDates());
+    drawn = routes.filter(r => r.days.length).map((r, n) => {
+      const { line, stops, len } = routeLine(r, Z, F), d = pathD(line);
+      const path = el('path', { class: 'hm-route', d, 'data-r': r.route }, gRoutes);
+      const mask = el('path', { class: 'hm-rv', d, 'stroke-dasharray': len.toFixed(1), 'stroke-dashoffset': animate ? len.toFixed(1) : '0' }, gReveal);
+      const seen = new Set(), dots = [];
+      for (const s of stops) { if (seen.has(s.code)) continue; seen.add(s.code); dots.push(el('circle', { class: 'hm-stop', cx: s.pt[0].toFixed(1), cy: s.pt[1].toFixed(1), r: 3.5, 'data-r': r.route }, gStops)); }
+      const van = still ? null : el('circle', { class: 'hm-van', r: 5, cx: line[0][0].toFixed(1), cy: line[0][1].toFixed(1), 'data-r': r.route }, gVans);
+      if (animate) requestAnimationFrame(() => requestAnimationFrame(() => { mask.style.transition = `stroke-dashoffset ${REVEAL_MS}ms var(--ease-io) ${n * REVEAL_GAP}ms`; mask.setAttribute('stroke-dashoffset', '0'); }));
+      const hits = stops.map(s => ({ at: len ? s.at / len : 0, dot: dots[[...seen].indexOf(s.code)] }));
+      return { route: r.route, services: r.services, path, len, van, hits, T: Math.max(LOOP_MIN, Math.min(LOOP_MAX, len / PX_PER_SEC * 1000)), offset: n * 0.11, prev: 0 };
     });
-    const still = reduced();
-    routes.forEach((r, n) => {
-      const geo = r.stops.map(c => Z[c]); if (!geo.length) return;
-      const way = [YARD, ...geo, YARD], line = [F.P(YARD)];
-      for (let i = 1; i < way.length; i++) { const rp = roadPath(way[i - 1], way[i]); line.push(...(rp ? rp.pts.slice(1) : [way[i]]).map(q => F.P(q))); }
-      const cls = st.route === r.route ? ' on' : st.route ? ' dim' : '', d = pathD(line), dur = Math.max(6, Math.min(24, lengthOf(line) / 70)).toFixed(1);
-      g += `<path class="hm-route${cls}" d="${d}"><title>${esc(routeName(r.route))}: ${r.services} services</title></path>`;
-      g += geo.map(q => { const [x, y] = F.P(q); return `<circle class="hm-stop${cls}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/>`; }).join('');
-      if (!still && !(st.route && st.route !== r.route)) g += `<circle class="hm-van" r="4"><animateMotion dur="${dur}s" begin="-${(n * 0.7).toFixed(1)}s" repeatCount="indefinite" path="${d}"/></circle>`;
-    });
-    const taken = [];
-    for (const p of B.rows.filter(x => big.includes(x.postcode))) {
-      const [x, y] = F.P(p.pt);
-      if (!F.inside([x, y]) || taken.some(q => Math.abs(q[0] - x) < 60 && Math.abs(q[1] - y) < 16)) continue;
-      taken.push([x, y]);
-      g += `<text class="hm-lab" x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle">${esc(p.postcode)}</text>`;
-    }
-    stage.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="hm-map" role="img" aria-label="Done services by postcode over twelve months, and the routes on ${esc(date ? day(date) : 'no day')}">${g}${yardMark(F)}${scaleBar(F)}</svg>`;
-    watch();
+    loopFrom = performance.now() + (animate ? REVEAL_MS : 0);
+    return routes;
   };
-  // nothing moves off screen
-  let seen = true;
-  const apply = () => { const s = stage.querySelector('svg'); if (!s || !s.pauseAnimations) return; if (seen) s.unpauseAnimations(); else s.pauseAnimations(); s.classList.toggle('paused', !seen); };
-  const watch = () => apply();
-  if (typeof IntersectionObserver === 'function') new IntersectionObserver(es => { seen = es[es.length - 1].isIntersecting; apply(); }).observe(stage);
 
-  root.querySelector('#hm-prev').addEventListener('click', () => { st.i--; draw(); });
-  root.querySelector('#hm-next').addEventListener('click', () => { st.i++; draw(); });
-  root.querySelector('#hm-routes').addEventListener('click', ev => { const b = ev.target.closest('button[data-r]'); if (b) { st.route = b.dataset.r || null; draw(); } });
-  draw();
+  const sum = root.querySelector('#hm-sum'), chips = root.querySelector('#hm-chips');
+  const drawControls = routes => {
+    const services = routes.reduce((a, r) => a + r.services, 0), label = st.day === 'week' ? `Last week, ${dayShort(week[0])} to ${dayLong(week[week.length - 1])}` : dayLong(st.day);
+    sum.textContent = `${label}: ${Fmt.num(services)} services on ${routes.length} route${routes.length === 1 ? '' : 's'}`;
+    if (st.route && !routes.some(r => r.route === st.route)) st.route = null;
+    chips.innerHTML = `<button type="button" data-r="" aria-pressed="${!st.route}">All ${routes.length} routes</button>${routes.map(r => `<button type="button" data-r="${esc(r.route)}" aria-pressed="${st.route === r.route}">${esc(routeName(r.route))} ${Fmt.num(r.services)}</button>`).join('')}`;
+    root.querySelector('#hm-days').innerHTML = `<button type="button" data-d="week" aria-pressed="${st.day === 'week'}">Last week</button>${week.map(d => `<button type="button" data-d="${d}" aria-pressed="${st.day === d}">${esc(dayShort(d))}</button>`).join('')}`;
+  };
+  const dim = () => { for (const e of svg.querySelectorAll('#hm-routesvg [data-r], #hm-stops [data-r], #hm-vans [data-r]')) e.classList.toggle('dim', !!st.route && e.dataset.r !== st.route); };
+
+  // ── a marker per route, out and back; each stop pulses as it's reached; nothing moves off screen ──
+  let seen = false, raf = null;
+  const frame = now => {
+    raf = null;
+    if (!root.isConnected) return;
+    if (now >= loopFrom) for (const r of drawn) {
+      if (!r.van || !r.len) continue;
+      const p = (((now - loopFrom) / r.T) + r.offset) % 1, q = r.path.getPointAtLength(p * r.len);
+      r.van.setAttribute('cx', q.x.toFixed(1)); r.van.setAttribute('cy', q.y.toFixed(1));
+      if (!st.route || st.route === r.route) for (const h of r.hits) if (h.dot && r.prev < h.at && p >= h.at) { h.dot.classList.remove('hit'); h.dot.getBoundingClientRect(); h.dot.classList.add('hit'); }
+      r.prev = p;
+    }
+    if (seen && !document.hidden) raf = requestAnimationFrame(frame);
+  };
+  const wake = () => { svg.classList.toggle('paused', !seen || document.hidden); if (!still && seen && !document.hidden && raf == null) raf = requestAnimationFrame(frame); };
+  document.addEventListener('visibilitychange', wake);
+
+  const redraw = animate => { const routes = drawRoutes(animate && !still); drawControls(routes); dim(); };
+  root.querySelector('#hm-days').addEventListener('click', ev => { const b = ev.target.closest('button[data-d]'); if (b && b.dataset.d !== st.day) { st.day = b.dataset.d; redraw(true); } });
+  chips.addEventListener('click', ev => { const b = ev.target.closest('button[data-r]'); if (!b) return; st.route = b.dataset.r || null; drawControls(periodRoutes(A, Z, periodDates())); dim(); });
+
+  // ── hover or tap a district, or a row of the list: what's going on there ──
+  const tip = root.querySelector('#hm-tip'), stageBox = root.querySelector('.hm-stage');
+  let hot = null;
+  const mark = code => { if (hot) hot.classList.remove('hot'); hot = code ? svg.querySelector(`.hm-z[data-pc="${code}"]`) : null; if (hot) { hot.classList.add('hot'); hot.parentNode.appendChild(hot); } };
+  const showTip = (code, x, y) => {
+    const p = byCode.get(code); if (!p) return;
+    const a = districtActivity(A, periodDates(), code), names = namesOf(p), period = st.day === 'week' ? 'Last week' : dayLong(st.day);
+    tip.innerHTML = `<b>${esc(where(p))}</b><span>${Fmt.num(p.services)} services in twelve months, ${Fmt.pct(p.share)} of the total</span><span>${p.customers} customer${p.customers === 1 ? '' : 's'}${names.length ? `, including ${esc(names.slice(0, 2).join(' and '))}` : ''}</span><span class="now">${esc(period)}: ${a.services ? `${Fmt.num(a.services)} service${a.services === 1 ? '' : 's'} by ${esc(a.routes.slice(0, 3).map(r => routeName(r.route)).join(', '))}` : 'no services'}</span>`;
+    const box = stageBox.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.max(0, Math.min(box.width - w, x - box.left - w / 2)) + 'px';
+    tip.style.top = Math.max(0, y - box.top - h - 12) + 'px';
+    tip.classList.add('on');
+  };
+  const hideTip = () => { tip.classList.remove('on'); mark(null); };
+  svg.addEventListener('mousemove', ev => { const z = ev.target.closest && ev.target.closest('.hm-z'); if (!z) { hideTip(); return; } if (z !== hot) mark(z.dataset.pc); showTip(z.dataset.pc, ev.clientX, ev.clientY); });
+  svg.addEventListener('mouseleave', hideTip);
+  svg.addEventListener('click', ev => { const z = ev.target.closest && ev.target.closest('.hm-z'); if (z) { mark(z.dataset.pc); showTip(z.dataset.pc, ev.clientX, ev.clientY); } else hideTip(); });
+  const listTip = li => { if (!li) return; mark(li.dataset.pc); const r = hot && hot.getBoundingClientRect(); if (r) showTip(li.dataset.pc, r.left + r.width / 2, r.top + r.height / 2); };
+  const list = root.querySelector('#hm-top');
+  list.addEventListener('mouseover', ev => listTip(ev.target.closest('li[data-pc]')));
+  list.addEventListener('mouseleave', hideTip);
+  list.addEventListener('click', ev => listTip(ev.target.closest('li[data-pc]')));
+
+  // the routes wait until the map is in view: the first draw is what plays
+  let started = false;
+  const begin = () => { if (started) return; started = true; redraw(play); };
+  if (typeof IntersectionObserver === 'function') new IntersectionObserver(es => { seen = es[es.length - 1].isIntersecting; if (seen) begin(); wake(); }, { threshold: 0.1 }).observe(stage);
+  else { seen = true; begin(); wake(); }
 }

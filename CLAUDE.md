@@ -171,7 +171,7 @@ blue above. Sparklines are ink with only the latest point coloured.
 and Mike already know. Estimated figures carry "est.". Route-based costs (bins, handling, delivery) show
 "under review" until delivery routes are in the route volumes.
 
-**Never on screen:** a dual axis, a pie chart, a gauge or dial, count-ups, invented figures.
+**Never on screen:** a dual axis, a pie chart, a gauge or dial, invented figures. Count-ups only in Home's once-a-session entrance (Theran, 2 November 2026; `DESIGN.md` Motion), never anywhere else.
 
 ## When you are unsure
 

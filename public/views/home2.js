@@ -5,7 +5,7 @@
 import * as Fmt from '/components/format.js';
 import { money0, moneyK, sparkline } from '/components/chart.js';
 import { getJson, titleCase, esc } from '/components/data.js';
-import { reveal } from '/components/motion.js';
+import { whenIntroDone } from '/components/motion.js';
 import { parseHome2, checkNumbers } from '/components/summary.js';
 import { openPop } from '/components/pop.js';
 
@@ -50,21 +50,21 @@ export async function render(main, P) {
   const alertOf = Object.fromEntries((V.points || []).map(p => [p.key, !!p.alert]));
 
 
-  const kpis = `<section class="h2-kpis bills" data-rv>
-      <div class="h2-kpi lead"><span>${m.next ? `${mon(m.workMonth)}'s work → ${mon(m.next.month)} bill (est.)` : 'Next bill'}</span><b>${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b>
+  const kpis = `<section class="h2-kpis bills">
+      <div class="h2-kpi lead" data-in style="--d:150ms"><span>${m.next ? `${mon(m.workMonth)}'s work → ${mon(m.next.month)} bill (est.)` : 'Next bill'}</span><b data-count data-delay="400">${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b>
         <small>${m.next ? (m.next.jobCount ? `+ up to ${moneyK(m.next.jobs)}: ${jobWord(m.next.jobCount)}` : Math.round(m.next.lo / 1000) !== Math.round(m.next.hi / 1000) ? `${moneyK(m.next.lo)}–${moneyK(m.next.hi)}` : '') : ''}</small></div>
-      <a class="h2-kpi" href="#numbers"><span>${esc(LABELS.invoiced)}, ${mon(billShown.month)}</span><b>${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${monS(billShown.vs)}` : 'posted, core'}</small></a>
-      <a class="h2-kpi" href="#opportunities"><span>Gap to $1.0M</span><b>${moneyK(m.gap)}</b><small>a month${m.next && m.next.jobCount ? ', before jobs to check' : ''}</small></a>
+      <a class="h2-kpi" data-in style="--d:230ms" href="#numbers"><span>${esc(LABELS.invoiced)}, ${mon(billShown.month)}</span><b data-count data-delay="480">${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${monS(billShown.vs)}` : 'posted, core'}</small></a>
+      <a class="h2-kpi" data-in style="--d:310ms" href="#opportunities"><span>Gap to $1.0M</span><b data-count data-delay="560">${moneyK(m.gap)}</b><small>a month${m.next && m.next.jobCount ? ', before jobs to check' : ''}</small></a>
     </section>${tieLine(V.tie)}`;
 
-  const sumCard = `<section class="h2-card h2-sum" data-rv>
+  const sumCard = `<section class="h2-card h2-sum" data-in>
       <h1 class="h2-head" id="h2-head"></h1>${tracking(m)}${changedNote ? `<p class="h2-by">${esc(changedNote)}</p>` : ''}
       <ul class="h2-bul" id="h2-bul"></ul>
     </section>`;
 
   const LV = V.lines;
   let lineMonth = LV ? closedMonth(LV) : null;
-  const segCard = LV ? `<section class="h2-card" id="h2-lines" data-rv>
+  const segCard = LV ? `<section class="h2-card" id="h2-lines" data-in data-grow>
       <div class="h2-ch h2-chi"><div><h2 id="h2-lines-t"></h2><small id="h2-lines-s"></small></div>${info("Storage by the month it bills, service by the month of the work, Citadel apart. Estimated months are hatched: work orders at each account's own prices, charges added at the run carried from the last priced month. A job to check is left out until someone has looked at it.")}</div>
       <div class="seg h2-months" id="h2-months">${LV.pick.slice(-4).map(x => `<button data-m="${x}">${esc(monS(x))}${LV.meta[x].est ? ' est.' : ''}</button>`).join('')}</div>
       <ul class="h2-rows" id="h2-tiles"></ul>
@@ -73,20 +73,20 @@ export async function render(main, P) {
 
   // yesterday, in a line, opening Routes
   const Y = V.yesterday;
-  const yesterday = Y ? `<a class="h2-card h2-yest" href="#activity" data-rv><span class="h2-eyebrow">${esc(Y.label)}</span><span>${esc(Y.text)}</span><i>›</i></a>` : '';
+  const yesterday = Y ? `<a class="h2-card h2-yest" href="#activity" data-in><span class="h2-eyebrow">${esc(Y.label)}</span><span>${esc(Y.text)}</span><i class="h2-chev" aria-hidden="true"></i></a>` : '';
 
   // three things to act on, each with its owner
   const OWNER = { trisha: 'Trisha', anne: 'Anne', mike: 'Mike' };
   const fbBtns = i => `<span class="fb" data-key="${esc(i.key)}" data-subject="${esc(i.subject)}">${fbIcon('useful', 'Useful')}${fbIcon('knew', 'I knew this')}${fbIcon('wrong', 'Not right')}</span>`;
-  const acts = V.actions && V.actions.length ? `<section class="h2-card h2-acts" data-rv><div class="h2-ch"><h2>Three things to act on</h2></div><ul>${V.actions.map(i => `<li><a href="${esc(i.href)}"><b>${esc(OWNER[i.owner] || i.owner)}</b><span>${esc(i.text)}</span></a>${fbBtns(i)}</li>`).join('')}</ul></section>` : '';
+  const acts = V.actions && V.actions.length ? `<section class="h2-card h2-acts" data-in><div class="h2-ch"><h2>Three things to act on</h2></div><ul>${V.actions.map(i => `<li><a href="${esc(i.href)}"><b>${esc(OWNER[i.owner] || i.owner)}</b><span>${esc(i.text)}</span></a>${fbBtns(i)}</li>`).join('')}</ul></section>` : '';
 
-  const weeks = `<section class="h2-card" data-rv><div class="h2-ch h2-chi"><div><h2>${w.lastFull ? `Last week ${moneyK(w.lastFull.value)} est., ${w.vsAvg >= 0 ? 'up' : 'down'} ${pctW(w.vsAvg)}` : 'Weeks'}</h2></div>${info(`${LABELS.veriShred} Work done each week, priced at that month's value a service, against the weeks before.`)}</div><div id="h2-weeks"></div></section>`;
+  const weeks = `<section class="h2-card" data-in data-grow><div class="h2-ch h2-chi"><div><h2>${w.lastFull ? `Last week ${moneyK(w.lastFull.value)} est., ${w.vsAvg >= 0 ? 'up' : 'down'} ${pctW(w.vsAvg)}` : 'Weeks'}</h2></div>${info(`${LABELS.veriShred} Work done each week, priced at that month's value a service, against the weeks before.`)}</div><div id="h2-weeks"></div></section>`;
 
-  // a phone folds the map, and loads it only when opened
-  const mapCard = `<details class="h2-card h2-mapc" id="h2-map" data-rv><summary><h2 id="hm-title">Where the work is</h2><span class="h2-mapopen">Show the map</span></summary>
-      <div class="hm-grid"><div class="hm-stage"><div class="hm-ctl"><div class="hm-days"><button type="button" id="hm-prev" aria-label="The day before">‹</button><b id="hm-day"></b><button type="button" id="hm-next" aria-label="The day after">›</button></div><div class="hm-routes" id="hm-routes"></div></div><div id="hm-svg"><p class="sub">Loading the map…</p></div></div>
+  const mapCard = `<section class="h2-card h2-mapc" id="h2-map" data-in><h2 id="hm-title">Where the work is</h2><p class="hm-sum" id="hm-sum" aria-live="polite"></p>
+      <div class="hm-days" id="hm-days" role="group" aria-label="Day"></div><div class="hm-routes" id="hm-chips" role="group" aria-label="Route"></div>
+      <div class="hm-grid"><div class="hm-stage"><div id="hm-svg"><p class="sub">Loading the map…</p></div><div class="hm-tip" id="hm-tip" role="status"></div><div class="hm-key" id="hm-key"></div></div>
       <div class="hm-side"><p class="hm-say" id="hm-say"></p><ol class="hm-top" id="hm-top"></ol></div></div>
-      <p class="src">Shading: Veri-Shred done services by postcode, last twelve months, postcode centres only. Dashed lines: that day's routes from the yard and back, in recorded stop order along the main roads. Not GPS, which was never captured.</p></details>`;
+      <p class="src">Shading: Veri-Shred done services by postcode district, last twelve months, on the Census's postcode areas. Dashed lines: last week's routes from the yard and back, one per driver, in recorded stop order, joined along the main roads. Not GPS, which was never captured.</p></section>`;
 
   main.innerHTML = `<div class="h2">${sumCard}${kpis}<div class="h2-split">${segCard}<div class="h2-stack">${yesterday}${weeks}${acts}</div></div>${mapCard}
     <div class="h2-foot">${esc(LABELS.estWord)} · Citadel held apart</div>
@@ -97,7 +97,7 @@ export async function render(main, P) {
     const p = parseHome2(text, sheet);
     if (!p) return false;
     main.querySelector('#h2-head').textContent = p.headline;
-    main.querySelector('#h2-bul').innerHTML = p.bullets.map(b => `<li class="${esc(b.key)}${alertOf[b.key] ? ' alert' : ''}"><a href="${esc(hrefOf[b.key] || '#pulse')}"><i class="h2-light"${alertOf[b.key] ? ' role="img" aria-label="Needs attention" title="Needs attention"' : ' aria-hidden="true"'}></i><span><b>${esc(titleOf[b.key] || '')}</b>${esc(b.text)}</span><i>›</i></a></li>`).join('');
+    main.querySelector('#h2-bul').innerHTML = p.bullets.map((b, i) => `<li style="--n:${i}" class="${esc(b.key)}${alertOf[b.key] ? ' alert' : ''}"><a href="${esc(hrefOf[b.key] || '#pulse')}"><i class="h2-light"${alertOf[b.key] ? ' role="img" aria-label="Needs attention" title="Needs attention"' : ' aria-hidden="true"'}></i><span><b>${esc(titleOf[b.key] || '')}</b>${esc(b.text)}</span><i class="h2-chev" aria-hidden="true"></i></a></li>`).join('');
     return true;
   };
   const tmpl = [sheet.find(f => f.lead) || sheet[0], ...sheet.filter(f => f.bullet)];
@@ -121,8 +121,8 @@ export async function render(main, P) {
     main.querySelector('#h2-lines-s').textContent = meta.est ? `on ${bill}'s bill` : `${work}'s storage and work`;
     main.querySelectorAll('#h2-months button').forEach(b => b.classList.toggle('on', b.dataset.m === x));
     main.querySelector('#h2-tiles').innerHTML = LV.rows.map(r => { const k = r.by[x], jobs = r.jobs[x] || 0;
-      return `<li><button class="h2-lr" data-k="${r.key}" type="button"><span class="h2-lr-n">${esc(r.name)}${jobs ? `<small>+${moneyK(jobs)} to check</small>` : ''}</span><b>${moneyK(k.v)}</b>${move(r.key, k.v, k.pct)}${monthBars(r.bars, x, { w: 72, h: 24 })}</button></li>`; }).join('')
-      + `<li class="h2-lr-tot"><span>Total${meta.est ? ' (est.)' : ''}</span><b>${moneyK(LV.totals[x])}</b></li>`;
+      return `<li><button class="h2-lr" data-k="${r.key}" type="button"><span class="h2-lr-n">${esc(r.name)}${jobs ? `<small>+${moneyK(jobs)} to check</small>` : ''}</span><b data-count>${moneyK(k.v)}</b>${move(r.key, k.v, k.pct)}${monthBars(r.bars, x, { w: 72, h: 24 })}</button></li>`; }).join('')
+      + `<li class="h2-lr-tot"><span>Total${meta.est ? ' (est.)' : ''}</span><b data-count data-delay="300">${moneyK(LV.totals[x])}</b></li>`;
   };
   if (LV) {
     drawLines();
@@ -136,6 +136,7 @@ export async function render(main, P) {
   const actsEl = main.querySelector('.h2-acts');
   if (actsEl) actsEl.addEventListener('click', async ev => {
     const b = ev.target.closest('.fb button'); if (!b) return;
+    b.classList.add('pop');
     const box = b.closest('.fb'), li = b.closest('li');
     // "Not right" asks one question first
     if (b.dataset.v === 'wrong' && !b.classList.contains('fb-send')) {
@@ -149,19 +150,41 @@ export async function render(main, P) {
     try {
       const r = await fetch('/api/feedback', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: box.dataset.key, subject: box.dataset.subject, verdict: b.dataset.v, note: note || undefined, brief_date: V.latestDone }) });
       if (!r.ok) throw new Error('not saved');
+      await new Promise(ok => setTimeout(ok, 320));   // let the press finish
       box.innerHTML = `<em>${b.dataset.v === 'useful' ? 'Noted: useful' : b.dataset.v === 'knew' ? 'Held back for 30 days' : 'Sent, thank you'}</em>`;
       if (b.dataset.v !== 'useful') li.classList.add('held');
     } catch (e) { box.querySelectorAll('button').forEach(x => x.disabled = false); }
   });
 
-  // the map: open on a desk, a tap on a phone; drawn once, when first opened
-  const mapEl = main.querySelector('#h2-map');
-  let mapDrawn = false;
-  const openMap = () => { if (!mapEl.open || mapDrawn) return; mapDrawn = true; drawHomeMap(mapEl); };
-  mapEl.addEventListener('toggle', openMap);
-  if (matchMedia('(min-width: 701px)').matches) mapEl.open = true;
+  document.documentElement.classList.add('js');   // what starts hidden is only ever hidden when scripts run
+  const play = firstPlay();
+  const root = main.querySelector('.h2');
+  drawHomeMap(main.querySelector('#h2-map'), { play });
+  if (play) { root.classList.add('play'); whenIntroDone().then(() => playIn(root)); }
+}
 
-  reveal(main.querySelector('.h2'));
+// ── the entrance: once a session. Later visits, and reduced motion, get the end state as drawn. ──
+const SEEN = 'r4-home-played';
+function firstPlay() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  try { if (sessionStorage.getItem(SEEN)) return false; sessionStorage.setItem(SEEN, '1'); return true; } catch (e) { return false; }
+}
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+// a figure runs up to itself: the real text is there first, stays for a screen reader, and is put back at the end
+function countUp(e) {
+  const final = e.textContent, m = final.match(/^(\D*)(\d[\d,]*(?:\.\d+)?)(.*)$/); if (!m) return;
+  const to = Number(m[2].replace(/,/g, '')), dp = (m[2].split('.')[1] || '').length, comma = m[2].includes(','), delay = +(e.dataset.delay || 0), dur = +(e.dataset.dur || 900);
+  const show = v => { const n = dp ? v.toFixed(dp) : String(Math.round(v)); e.textContent = m[1] + (comma ? Number(n).toLocaleString('en-US') : n) + m[3]; };
+  e.setAttribute('aria-label', final); show(0);
+  let from = null;
+  const step = now => { if (from === null) from = now + delay; const t = Math.min(1, Math.max(0, (now - from) / dur)); show(to * easeOut(t)); if (t < 1 && e.isConnected) requestAnimationFrame(step); else { e.textContent = final; e.removeAttribute('aria-label'); } };
+  requestAnimationFrame(step);
+}
+function playIn(root) {
+  const go = el => { el.classList.add('on'); el.querySelectorAll('[data-count]').forEach(countUp); };
+  if (typeof IntersectionObserver !== 'function') { root.querySelectorAll('[data-in]').forEach(go); return; }
+  const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { go(x.target); io.unobserve(x.target); } }), { threshold: 0.15 });
+  root.querySelectorAll('[data-in]').forEach(el => io.observe(el));
 }
 
 // how far the month's bill gets toward $1.0M: priced, then the jobs still to check. The same figures as the tiles.
@@ -169,7 +192,7 @@ function tracking(m) {
   if (!m.next) return '';
   const T = 1e6, w = v => Math.max(0, Math.min(100, v / T * 100)).toFixed(2) + '%', jobs = m.next.jobs || 0;
   return `<div class="h2-tobar" role="img" aria-label="${esc(moneyK(m.next.central))} priced, ${esc(moneyK(jobs))} to check, of $1.0M a month"><i class="pr" style="width:${w(m.next.central)}"></i>${jobs ? `<i class="ck" style="width:${w(jobs)}"></i>` : ''}</div>
-    <div class="h2-tokey"><span><i class="pr"></i>${esc(moneyK(m.next.central))} est. priced</span>${jobs ? `<span><i class="ck"></i>${esc(moneyK(jobs))} to check</span>` : ''}<span class="end">$1.0M a month</span></div>`;
+    <div class="h2-tokey"><span><i class="pr"></i><span data-count data-delay="250" data-dur="1100">${esc(moneyK(m.next.central))} est. priced</span></span>${jobs ? `<span><i class="ck"></i><span data-count data-delay="1250" data-dur="600">${esc(moneyK(jobs))} to check</span></span>` : ''}<span class="end">$1.0M a month</span></div>`;
 }
 
 // ── the last thirteen weeks of work, priced est.; the week in progress hatched, the usual week a line ──
@@ -181,10 +204,10 @@ function weekBars(el, w) {
   let g = `<defs><pattern id="h2-hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="4" class="h2-hatch"/></pattern></defs>`;
   w.rows.forEach((r, i) => {
     const x = slot * (i + .5) - bw / 2, y = fy(r.value), h = H - B - y, rr = Math.min(4, h);
-    g += `<path class="h2-bar${r.partial ? ' partial' : ''}${i === w.rows.length - (r.partial ? 2 : 1) ? ' last' : ''}" d="M${x},${H - B} V${y + rr} Q${x},${y} ${x + rr},${y} H${x + bw - rr} Q${x + bw},${y} ${x + bw},${y + rr} V${H - B} Z"><title>Week of ${dm(r.week)}: ${money0(r.value)} est., ${r.done} services${r.partial ? ' (so far)' : ''}</title></path>`;
+    g += `<path style="--i:${i}" class="h2-bar${r.partial ? ' partial' : ''}${i === w.rows.length - (r.partial ? 2 : 1) ? ' last' : ''}" d="M${x},${H - B} V${y + rr} Q${x},${y} ${x + rr},${y} H${x + bw - rr} Q${x + bw},${y} ${x + bw},${y + rr} V${H - B} Z"><title>Week of ${dm(r.week)}: ${money0(r.value)} est., ${r.done} services${r.partial ? ' (so far)' : ''}</title></path>`;
     if (i % 4 === 0 || i === w.rows.length - 1) g += `<text class="c-axis" x="${slot * (i + .5)}" y="${H - 6}" text-anchor="middle">${dm(r.week)}</text>`;
   });
-  if (w.avg) g += `<line class="h2-avg" x1="0" x2="${W}" y1="${fy(w.avg)}" y2="${fy(w.avg)}"/><text class="c-axis" x="0" y="${fy(w.avg) - 5}">usual ${moneyK(w.avg)}</text>`;
+  if (w.avg) g += `<line class="h2-avg" x1="0" x2="${W}" y1="${fy(w.avg)}" y2="${fy(w.avg)}"/><text class="c-axis h2-avgt" x="0" y="${fy(w.avg) - 5}">usual ${moneyK(w.avg)}</text>`;
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="h2-svg" role="img" aria-label="Work done each week, priced">${g}</svg>`;
 }
 
@@ -194,7 +217,7 @@ function monthBars(bars, on, { w = 150, h = 40, labels = false } = {}) {
   const g = bars.map((b, i) => {
     const bh = Math.max(b.v > 0 ? 1.5 : 0, Math.max(0, b.v) / max * (h - T - B)), x = slot * i + (slot - bw) / 2;
     const lab = labels && (i % 3 === 0 || i === bars.length - 1) ? `<text class="c-axis" x="${(x + bw / 2).toFixed(1)}" y="${h - 3}" text-anchor="middle">${esc(monS(b.m))}</text>` : '';
-    return `<rect class="h2-mb${b.m === on ? ' on' : ''}${b.est ? ' est' : ''}" data-m="${b.m}" x="${x.toFixed(1)}" y="${(h - B - bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="1.5"><title>${esc(monS(b.m))}: ${moneyK(b.v)}${b.est ? ' est.' : ''}</title></rect>${lab}`;
+    return `<rect style="--i:${i}" class="h2-mb${b.m === on ? ' on' : ''}${b.est ? ' est' : ''}" data-m="${b.m}" x="${x.toFixed(1)}" y="${(h - B - bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="1.5"><title>${esc(monS(b.m))}: ${moneyK(b.v)}${b.est ? ' est.' : ''}</title></rect>${lab}`;
   }).join('');
   return `<svg class="h2-mbs" viewBox="0 0 ${w} ${h}" aria-hidden="true">${g}</svg>`;
 }

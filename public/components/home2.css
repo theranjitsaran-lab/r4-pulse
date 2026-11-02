@@ -24,14 +24,19 @@
 .h2-bul a { display: flex; gap: var(--sp-3); align-items: center; padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); color: var(--ink-2); text-decoration: none; font-size: var(--fs-body); line-height: 1.35; }
 .h2-bul a span { flex: 1; }
 /* a light on each point: steady and soft, pulsing when the point needs attention */
-.h2-bul a i.h2-light { flex: none; align-self: flex-start; width: var(--sp-2); height: var(--sp-2); margin-top: var(--sp-2); border-radius: 50%; background: var(--r4-bright); box-shadow: 0 0 var(--sp-2) var(--r4-bright); }
-.h2-bul .alert a i.h2-light { background: var(--bad); box-shadow: 0 0 var(--sp-2) var(--bad); animation: h2-glow 1.6s ease-in-out infinite; }
-@keyframes h2-glow { 0%, 100% { box-shadow: 0 0 var(--sp-1) var(--bad); opacity: 1; } 50% { box-shadow: 0 0 var(--sp-4) var(--sp-1) var(--bad); opacity: .65; } }
+.h2-bul a i.h2-light { position: relative; flex: none; align-self: flex-start; width: 10px; height: 10px; margin-top: var(--sp-2); border-radius: 50%; background: var(--r4-bright); box-shadow: 0 0 0 3px color-mix(in srgb, var(--r4-bright) 33%, transparent); animation: h2-breathe 4s var(--ease-io) infinite; }
+.h2-bul .alert a i.h2-light { background: var(--bad); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bad) 33%, transparent); animation: none; }
+.h2-bul .alert a i.h2-light::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--bad); animation: h2-ping 2.4s var(--ease-out) infinite 1.6s; }
+@keyframes h2-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+@keyframes h2-ping { 0% { transform: scale(1); opacity: .55; } 70%, 100% { transform: scale(3.2); opacity: 0; } }
 /* how far the bill gets toward $1.0M */
 .h2-tobar { display: flex; height: var(--sp-4); margin: var(--sp-3) 0 var(--sp-2); border-radius: var(--r-pill); background: var(--well-2); overflow: hidden; }
 .h2-tobar i, .h2-tokey i { display: block; }
 .h2-tobar .pr, .h2-tokey .pr { background: var(--brand); }
-.h2-tobar .ck, .h2-tokey .ck { background: repeating-linear-gradient(45deg, var(--warn) 0 3px, var(--warn-bg) 3px 6px); }
+.h2-tokey .ck { background: repeating-linear-gradient(135deg, var(--warn) 0 2px, var(--warn-bg) 2px 4px); }
+.h2-tobar .ck { position: relative; overflow: hidden; }
+.h2-tobar .ck::before { content: ""; position: absolute; inset: 0 -12px; background: repeating-linear-gradient(135deg, var(--warn) 0 4px, var(--warn-bg) 4px 8px); animation: h2-drift 1.6s linear infinite; }
+@keyframes h2-drift { to { transform: translateX(11.31px); } }
 .h2-tokey { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); margin: 0 0 var(--sp-3); font-size: var(--fs-label); color: var(--ink-3); }
 .h2-tokey span { display: inline-flex; align-items: center; gap: var(--sp-2); }
 .h2-tokey i { width: var(--sw); height: var(--sw); border-radius: var(--r-xs); }
@@ -42,37 +47,67 @@
 @media (max-width: 999px) { .h2-stack .h2-acts { order: 1; } .h2-stack > section:not(.h2-acts) { order: 2; } }
 @media (min-width: 1000px) { .h2-split { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: start; } .h2-stack { grid-column: 1; grid-row: 1; } .h2-split > #h2-lines { grid-column: 2; grid-row: 1; } }
 /* the Chicago map */
-.h2-mapc > summary { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); cursor: pointer; list-style: none; }
-.h2-mapc > summary::-webkit-details-marker { display: none; }
-.h2-mapc > summary h2 { margin: 0; font-family: var(--f-display); font-weight: 400; font-synthesis: none; font-size: var(--fs-lead); line-height: 1.25; letter-spacing: var(--track-tight); }
-.h2-mapopen { font-size: var(--fs-label); font-weight: 600; color: var(--brand); white-space: nowrap; }
-.h2-mapc[open] .h2-mapopen { display: none; }
-.hm-grid { display: grid; gap: var(--sp-4); margin-top: var(--sp-3); }
-.hm-stage { min-width: 0; }
-.hm-ctl { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-3); align-items: center; margin-bottom: var(--sp-2); }
-.hm-days { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); }
-.hm-days button, .hm-routes button { min-height: var(--sp-8); padding: 0 var(--sp-3); font: inherit; font-size: var(--fs-label); color: var(--ink-2); background: var(--surface); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); cursor: pointer; }
-.hm-days button:disabled { color: var(--ink-5); }
-.hm-routes { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
-.hm-routes button.on { background: var(--tint-brand); border-color: var(--brand); color: var(--ink); font-weight: 600; }
+.h2-mapc > h2 { margin: 0; font-family: var(--f-display); font-weight: 400; font-synthesis: none; font-size: var(--fs-lead); line-height: 1.25; letter-spacing: var(--track-tight); }
+.hm-sum { margin: var(--sp-1) 0 var(--sp-3); color: var(--ink-2); font-size: var(--fs-body); }
+.hm-days { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; margin-bottom: var(--sp-2); background: var(--well-2); border-radius: var(--r-sm); }
+.hm-days button { min-height: var(--sp-8); padding: 0 var(--sp-3); font: inherit; font-size: var(--fs-label); color: var(--ink-2); background: none; border: 0; border-radius: var(--r-xs); cursor: pointer; }
+.hm-days button[aria-pressed="true"] { background: var(--surface); box-shadow: var(--shadow-sm); color: var(--ink); font-weight: 600; }
+.hm-routes { display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-bottom: var(--sp-3); }
+.hm-routes button { min-height: var(--sp-8); padding: 0 var(--sp-3); font: inherit; font-size: var(--fs-label); color: var(--ink-2); background: var(--surface); border: var(--hair) solid var(--rule-4); border-radius: var(--r-pill); cursor: pointer; }
+.hm-routes button[aria-pressed="true"] { background: var(--tint-brand); border-color: var(--brand); color: var(--ink); font-weight: 600; }
+.hm-grid { display: grid; gap: var(--sp-4); }
+.hm-stage { position: relative; min-width: 0; }
 .hm-map { display: block; width: 100%; height: auto; background: var(--map-water); border-radius: var(--r); }
-.hm-h { fill: var(--s-service); stroke: var(--surface); stroke-width: 1; }
-.hm-h.b1 { opacity: .3; } .hm-h.b2 { opacity: .45; } .hm-h.b3 { opacity: .6; } .hm-h.b4 { opacity: .75; }
-.hm-route { fill: none; stroke: var(--brand); stroke-width: 2.5; stroke-linejoin: round; stroke-dasharray: 6 5; animation: hm-dash 1s linear infinite; }
-.hm-route.on { stroke-width: 3; } .hm-route.dim, .hm-stop.dim { opacity: .15; }
+.hm-map .h2-land { fill: var(--map-land); }
+.hm-z { stroke: var(--surface); stroke-width: .7; cursor: pointer; }
+.z1 { fill: var(--zone-1); background: var(--zone-1); } .z2 { fill: var(--zone-2); background: var(--zone-2); } .z3 { fill: var(--zone-3); background: var(--zone-3); } .z4 { fill: var(--zone-4); background: var(--zone-4); } .z5 { fill: var(--zone-5); background: var(--zone-5); }
+.hm-z.hot { stroke: var(--ink); stroke-width: 2; }
+.hm-map.fade .hm-z { animation: hm-in 500ms var(--ease-out) both; animation-delay: calc(var(--i) * 8ms + 150ms); }
+@keyframes hm-in { from { opacity: 0; } to { opacity: 1; } }
+.hm-mask-off { fill: black; }
+.hm-rv { fill: none; stroke: white; stroke-width: 8; }
+.hm-route { fill: none; stroke: var(--brand); stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 6 5; pointer-events: none; animation: hm-dash 1.2s linear infinite; }
 .hm-map.paused .hm-route { animation-play-state: paused; }
 @keyframes hm-dash { to { stroke-dashoffset: -11; } }
-.hm-stop { fill: var(--brand); stroke: var(--surface); stroke-width: 1; }
-.hm-van { fill: var(--surface); stroke: var(--brand); stroke-width: 2; }
+.hm-stop { fill: var(--surface); stroke: var(--brand); stroke-width: 2; pointer-events: none; transform-box: fill-box; transform-origin: center; }
+.hm-stop.hit { animation: h2-pop 420ms var(--ease-out); }
+.hm-van { fill: var(--brand); stroke: var(--surface); stroke-width: 2; pointer-events: none; }
+.hm-route.dim, .hm-stop.dim, .hm-van.dim { opacity: .15; }
+.hm-map text { pointer-events: none; }
 .hm-lab { font-size: var(--fs-tiny); font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3; }
 .hm-map .h2-maplab { paint-order: stroke; stroke: var(--surface); stroke-width: 3; }
+.h2-chev::before { content: "›"; }
+.hm-tip { position: absolute; z-index: 3; left: 0; top: 0; display: grid; gap: 2px; width: min(calc(var(--u) * 72), 100%); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-label); line-height: 1.35; color: var(--ink-2); background: var(--surface); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); box-shadow: var(--shadow-pop); pointer-events: none; }
+html.js .hm-tip { opacity: 0; transform: translateY(4px); transition: opacity 120ms var(--ease-out), transform 120ms var(--ease-out); }
+html.js .hm-tip.on { opacity: 1; transform: none; }
+.hm-tip b { color: var(--ink); } .hm-tip .now { color: var(--ink); font-weight: 600; }
+.hm-key { display: flex; align-items: center; gap: 2px; margin-top: var(--sp-2); font-size: var(--fs-tiny); color: var(--ink-3); }
+.hm-key i { display: block; width: var(--sp-6); height: var(--sp-2); } .hm-key span:first-child { margin-right: var(--sp-1); } .hm-key span:last-child { margin-left: var(--sp-1); }
 .hm-say { margin: 0 0 var(--sp-3); font-size: var(--fs-body); line-height: 1.45; color: var(--ink-2); }
 .hm-top { list-style: none; margin: 0; padding: 0; font-size: var(--fs-sm); }
-.hm-top li { display: grid; grid-template-columns: minmax(0, 1fr) auto calc(var(--u) * 10); gap: var(--sp-3); align-items: baseline; padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); }
+.hm-top li { cursor: pointer; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto calc(var(--u) * 10); gap: var(--sp-3); align-items: baseline; padding: var(--sp-2) 0; border-top: var(--hair) solid var(--rule); }
+.hm-barlet { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--zone-4); transform-origin: left; transform: scaleX(var(--s)); }
 .hm-top small { display: block; font-size: var(--fs-tiny); color: var(--ink-4); }
 .hm-top li > b, .hm-top li > span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 @media (min-width: 1000px) { .hm-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); } }
-@media (prefers-reduced-motion: reduce) { .hm-route, .h2-bul .alert a i.h2-light { animation: none; } }
+/* ── the entrance, once a session, and only when .play is set ── */
+html.js .h2.play [data-in] { opacity: 0; transform: translateY(var(--rise)); }
+html.js .h2.play [data-in].on { opacity: 1; transform: none; transition: opacity 520ms var(--ease-out) var(--d, 0ms), transform 520ms var(--ease-out) var(--d, 0ms); }
+html.js .h2.play .h2-tobar i { transform: scaleX(0); transform-origin: left; }
+html.js .h2.play .on .h2-tobar .pr { transform: scaleX(1); transition: transform 1100ms var(--ease-out) 250ms; }
+html.js .h2.play .on .h2-tobar .ck { transform: scaleX(1); transition: transform 600ms var(--ease-out) 1250ms; }
+html.js .h2.play .h2-bul li { opacity: 0; transform: translateY(var(--rise)); }
+html.js .h2.play .on .h2-bul li { opacity: 1; transform: none; transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out); transition-delay: calc(var(--n, 0) * 120ms + 500ms); }
+.h2.play [data-grow] .h2-bar, .h2.play [data-grow] .h2-mb { transform-box: fill-box; transform-origin: center bottom; transform: scaleY(0); }
+.h2.play [data-grow].on .h2-bar, .h2.play [data-grow].on .h2-mb { transform: scaleY(1); transition: transform 600ms var(--ease-out); transition-delay: calc(var(--i, 0) * 35ms + 200ms); }
+html.js .h2.play .h2-avg, html.js .h2.play .h2-avgt { opacity: 0; }
+html.js .h2.play .on .h2-avg, html.js .h2.play .on .h2-avgt { opacity: 1; transition: opacity 400ms var(--ease-out) 800ms; }
+html.js .h2.play .hm-barlet { transform: scaleX(0); }
+html.js .h2.play .on .hm-barlet { transform: scaleX(var(--s)); transition: transform 800ms var(--ease-out); transition-delay: calc(var(--i, 0) * 80ms + 300ms); }
+/* a press */
+.h2-acts .fb button.pop svg { animation: h2-pop 320ms var(--ease-out); }
+@keyframes h2-pop { 0% { transform: scale(.6); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .hm-route, .hm-stop.hit, .h2-bul a i.h2-light, .h2-bul .alert a i.h2-light::after, .h2-tobar .ck::before, .h2-acts .fb button.pop svg { animation: none; } .hm-rv { transition: none !important; } }
 .h2-bul a i { font-style: normal; color: var(--ink-5); }
 .h2-by { margin: var(--sp-2) 0 0; font-size: var(--fs-tiny); color: var(--ink-4); }
 
@@ -342,6 +377,15 @@ button.h2-seg:hover { background: var(--tint-brand); }
 
 /* a phone keeps Home to two screens: tighter cards, the change note left to the desk */
 @media (max-width: 700px) { .h2, .h2-split, .h2-stack { gap: var(--sp-2); } .h2-card { padding: var(--sp-3); } .h2-sum .h2-by { display: none; } .h2-bul a { padding: var(--sp-1) 0; } .h2-rows .h2-lr { min-height: 0; } }
+
+/* ── Home on its canvas: white cards with a soft edge; the top bar stays white ── */
+html:has(.h2) body { background: var(--canvas); }
+html:has(.h2) .mast, html:has(.h2) .stamp { background: var(--surface); }
+.h2 .h2-card, .h2 .h2-kpi { background: var(--surface); border-color: var(--card-ring); box-shadow: var(--shadow-card); }
+.h2 .h2-kpi.lead { background: var(--surface); border-color: var(--lead-ring); box-shadow: var(--shadow-card), inset 0 0 0 var(--hair) var(--lead-ring); }
+.h2 .h2-foot { color: var(--ink-3); }
+.h2 .h2-tie { color: var(--ink-3); }
+.h2 .h2-tie.late { color: var(--warn-on-canvas); }
 
 /* the three tiles on a phone: the bill across the full width and large, invoiced and the gap side by side */
 @media (max-width: 700px) {
