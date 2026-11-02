@@ -166,6 +166,7 @@ export async function drawHomeMap(root, { play = false } = {}) {
     const routes = periodRoutes(A, Z, periodDates());
     drawn = routes.filter(r => r.days.length).map((r, n) => {
       const { line, stops, len } = routeLine(r, Z, F), d = pathD(line);
+      el('path', { class: 'hm-case', d, 'data-r': r.route }, gRoutes);
       const path = el('path', { class: 'hm-route', d, 'data-r': r.route }, gRoutes);
       const mask = el('path', { class: 'hm-rv', d, 'stroke-dasharray': len.toFixed(1), 'stroke-dashoffset': animate ? len.toFixed(1) : '0' }, gReveal);
       const seen = new Set(), dots = [];

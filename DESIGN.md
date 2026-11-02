@@ -71,7 +71,7 @@ Home, by Theran's decision on 2 November 2026:
 - **Rules:** animate only transform, opacity and stroke-dashoffset; never `transition: all`; the real figures are in the HTML first; reduced motion shows end states and no loops.
 
 ## Map
-Home's map is always open and defaults to last week, Monday to Friday. Postcode districts are shaded darker the busier, from the Census's postcode areas (`public/data/zones.json`), with a hover or tap showing what's going on there. Routes are one per driver, from the yard and back in recorded stop order, joined along the main roads, and say they are not GPS.
+Home's map is always open and defaults to last week, Monday to Friday. Postcode districts are shaded in light tints, a little deeper the busier, so the routes stay readable on top, from the Census's postcode areas (`public/data/zones.json`), with a hover or tap showing what's going on there. Routes are one per driver, from the yard and back in recorded stop order, joined along the main roads, and say they are not GPS.
 
 ## Exports
 `public/tokens.css` in this project.

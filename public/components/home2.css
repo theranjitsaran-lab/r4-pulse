@@ -65,14 +65,15 @@
 .hm-map.fade .hm-z { animation: hm-in 500ms var(--ease-out) both; animation-delay: calc(var(--i) * 8ms + 150ms); }
 @keyframes hm-in { from { opacity: 0; } to { opacity: 1; } }
 .hm-mask-off { fill: black; }
-.hm-rv { fill: none; stroke: white; stroke-width: 8; }
-.hm-route { fill: none; stroke: var(--brand); stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 6 5; pointer-events: none; animation: hm-dash 1.2s linear infinite; }
+.hm-rv { fill: none; stroke: white; stroke-width: 10; }
+.hm-case { fill: none; stroke: var(--surface); stroke-width: 6; stroke-linejoin: round; stroke-linecap: round; opacity: .9; pointer-events: none; }
+.hm-route { fill: none; stroke: var(--brand); stroke-width: 3; stroke-linejoin: round; stroke-linecap: butt; stroke-dasharray: 9 5; pointer-events: none; animation: hm-dash 1.2s linear infinite; }
 .hm-map.paused .hm-route { animation-play-state: paused; }
-@keyframes hm-dash { to { stroke-dashoffset: -11; } }
-.hm-stop { fill: var(--surface); stroke: var(--brand); stroke-width: 2; pointer-events: none; transform-box: fill-box; transform-origin: center; }
+@keyframes hm-dash { to { stroke-dashoffset: -14; } }
+.hm-stop { fill: var(--surface); stroke: var(--brand); stroke-width: 2.5; pointer-events: none; transform-box: fill-box; transform-origin: center; }
 .hm-stop.hit { animation: h2-pop 420ms var(--ease-out); }
 .hm-van { fill: var(--brand); stroke: var(--surface); stroke-width: 2; pointer-events: none; }
-.hm-route.dim, .hm-stop.dim, .hm-van.dim { opacity: .15; }
+.hm-case.dim, .hm-route.dim, .hm-stop.dim, .hm-van.dim { opacity: .15; }
 .hm-map text { pointer-events: none; }
 .hm-lab { font-size: var(--fs-tiny); font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3; }
 .hm-map .h2-maplab { paint-order: stroke; stroke: var(--surface); stroke-width: 3; }

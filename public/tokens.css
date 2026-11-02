@@ -120,7 +120,7 @@
   --map-border: #dedee3;   /* county lines */
   --map-road:   #cfcfd5;   /* the interstates */
   --map-place:  #8e8e93;   /* town names: decoration, not data */
-  --zone-1: #fbe4d8; --zone-2: #f6bfa3; --zone-3: #ea8f68; --zone-4: #c85a30; --zone-5: #8a3210;   /* postcode districts, quiet to busy */
+  --zone-1: #fdf3ec; --zone-2: #fbe3d4; --zone-3: #f8d0b8; --zone-4: #f3b796; --zone-5: #e99a72;   /* postcode districts, quiet to busy */
 
   /* ── route work: done services in ink, so green and red stay free for above and below the norm ── */
   --heat:    #6c6c71;
