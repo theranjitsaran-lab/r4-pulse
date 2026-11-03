@@ -11,6 +11,7 @@ if (shots) fs.mkdirSync(shots, { recursive: true });
 let bad = 0;
 const fail = m => { bad++; console.log('FAIL ' + m); };
 (async () => {
+  const { GUIDES, stepsFor } = await import(require('url').pathToFileURL(path.join(ROOT, 'public/components/tourdata.js')).href);
   for (const [f, v] of KEEP) if (v) fs.unlinkSync(f);
   const port = 3950 + Math.floor(Math.random() * 40), hash = bcrypt.hashSync('pw12345678', 8);
   const server = spawn(process.execPath, ['server/index.js'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'], env: { ...process.env, PORT: String(port), USE_FIXTURES: '1', NODE_ENV: 'development', AUTH_USERS: `tourdesk:${hash}:admin,tourphone:${hash}:billing,tourone:${hash}:owner,tourtwo:${hash}:billing`, SESSION_SECRET: 'x'.repeat(32), ANTHROPIC_API_KEY: '', DATABASE_URL: '' } });
@@ -19,11 +20,12 @@ const fail = m => { bad++; console.log('FAIL ' + m); };
   const signIn = async (who, w, h, pass = 'pw12345678') => { const ctx = await browser.newContext({ viewport: { width: w, height: h } }), p = await ctx.newPage(); p.setDefaultTimeout(45000); p.setDefaultNavigationTimeout(120000); p.errs = []; p.warns = []; p.on('pageerror', e => p.errs.push(e.message)); p.on('console', m => { if (m.type() === 'warning' && m.text().startsWith('tour:')) { p.warns.push(m.text()); console.log('  ' + m.text()); } }); await p.goto(base + '/login'); await p.fill('input[name=name]', who); await p.fill('input[name=password]', pass); await Promise.all([p.waitForNavigation(), p.click('button')]); await p.evaluate(() => { try { localStorage.setItem('r4-intro-day', new Date().toISOString().slice(0, 10)); } catch (e) {} }); return p; };
   const readStep = p => p.evaluate(() => { const r = document.querySelector('#tr-rect'), t = document.querySelector('.tr-tip').getBoundingClientRect(), n = { x: +r.getAttribute('x'), y: +r.getAttribute('y'), w: +r.getAttribute('width'), h: +r.getAttribute('height') }; return { count: document.querySelector('#tr-c').textContent, title: document.querySelector('#tr-h').textContent, hash: location.hash, hole: n, tip: { l: t.left, t: t.top, r: t.right, b: t.bottom }, W: innerWidth, H: innerHeight, over: document.documentElement.scrollWidth - innerWidth }; });
   try {
-    for (const [name, who, w, h, fullN] of [['desk', 'tourdesk', 1440, 900, 10], ['phone', 'tourphone', 390, 844, 9]]) {
+    for (const [name, who, w, h] of [['desk', 'tourdesk', 1440, 900, 10], ['phone', 'tourphone', 390, 844, 9]]) {
       const p = await signIn(who, w, h);
-      for (const tour of ['full', 'quote', 'account']) {
+      for (const tour of ['full', 'quote', 'account', ...GUIDES.map(g => g[0])]) {
         await p.goto('about:blank'); await p.goto(base + '/?welcome=1#pulse'); await p.waitForSelector('#mast-help'); await p.waitForTimeout(2500); if (!(await p.$('.wl'))) await p.click('#mast-help'); await p.waitForSelector('.wl'); await p.waitForTimeout(500);
         if (tour === 'full') { console.log(name, 'welcome:', await p.$eval('.wl', e => { const r = e.getBoundingClientRect(); return `${Math.round(r.width)}x${Math.round(r.height)} of ${innerWidth}x${innerHeight}, focus on ${document.activeElement.className.slice(0, 20)}`; })); if (shots) await p.screenshot({ path: path.join(shots, `${name}-welcome.png`) }); }
+        if (tour.startsWith('g-')) { await p.click('#wl-guide'); await p.waitForSelector('.wl-guides'); if (tour === 'g-today' && shots) await p.screenshot({ path: path.join(shots, `${name}-guides.png`) }); }
         await p.click(`[data-tour-start=${tour}]`);
         let n = 0;
         for (;;) {
@@ -37,12 +39,12 @@ const fail = m => { bad++; console.log('FAIL ' + m); };
           if (shots) await p.screenshot({ path: path.join(shots, `${name}-${tour}-${String(n).padStart(2, '0')}.png`) });
           await p.keyboard.press('ArrowRight');
         }
-        const want = tour === 'full' ? fullN : tour === 'quote' ? 4 : 3;
+        const want = stepsFor(tour, name === 'desk').length;
         if (n !== want) fail(`${name} ${tour}: ${n} of ${want} steps ran`);
       }
       if (p.warns.length) fail(`${name}: skipped ${p.warns.join('; ')}`);
       if (p.errs.length) fail(`${name}: ${p.errs.join('; ')}`);
-      await p.click('#mast-help'); await p.waitForSelector('.wl'); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
+      await p.goto('about:blank'); await p.goto(base + '/#pulse'); await p.waitForSelector('#mast-help'); await p.waitForTimeout(1500); await p.click('#mast-help'); await p.waitForSelector('.wl'); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
       if (await p.$('.wl')) fail(`${name}: Esc did not close the welcome`);
       await p.click('#mast-help'); await p.waitForSelector('.wl'); await p.click('[data-tour-start=account]'); await p.waitForSelector('.tr-wrap:not(.moving)'); await p.waitForTimeout(600); await p.keyboard.press('Escape'); await p.waitForTimeout(200);
       if (await p.$('.tr-wrap')) fail(`${name}: Esc did not end the tour`);

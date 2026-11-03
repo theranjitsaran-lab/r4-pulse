@@ -7,6 +7,7 @@ import * as Fmt from '/components/format.js';
 import { money0, moneyK } from '/components/chart.js';
 import { strip, stripStats } from '/components/strip.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
+import { phoneFold } from '/components/phonekit.js';
 import { unitSuspect } from '/components/levers.js';
 import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
 import { SERVICES, nearestRoute, marginLabel, quoteOptions, quoteFacts, costNotes, jobStats, defaultSite, routeLabel, dayLabel, RIDE_MILES } from '/components/quote.js';
@@ -108,14 +109,14 @@ export async function render(main, PR, params) {
     <section class="h2-card" data-in aria-labelledby="pq-where" id="p-where">
       <div class="pq-mh" data-tour="q-where"><div class="h2-ch"><h2 id="pq-where">2. Where is it?</h2><small id="p-where-s">Tap the map or type a postcode</small></div>
         <form class="pq-pc" id="p-pcf"><label>Postcode<input id="p-pc" inputmode="numeric" maxlength="5" placeholder="e.g. 60617"></label><button type="submit" class="pq-btn">Find</button></form></div>
-      <div id="p-map"></div>
       <p class="hint" id="p-map-msg" role="status"></p>
+      ${phoneFold('the map', `      <div id="p-map"></div>
       ${zoneKey()}
       <div class="pq-mk"><span><i class="r"></i>The route day that passes nearby</span><span><i class="o"></i>On its own, from the yard</span></div>
-      <p class="src">Routes join recorded stops in order along the main roads, from postcode centres. Not GPS, which was never captured.</p>
+      <p class="src">Routes join recorded stops in order along the main roads, from postcode centres. Not GPS, which was never captured.</p>`)}
     </section>
     </div>
-    <section class="h2-card pq-right" data-in aria-labelledby="pq-goes" id="p-goes">
+    <section class="h2-card pq-right" data-tour="q-goes" data-in aria-labelledby="pq-goes" id="p-goes">
       <div class="h2-ch"><h2 id="pq-goes">3. Where the price goes</h2><small id="p-goes-s"></small></div>
       ${costs ? `<div class="pq-stack" id="p-stack" role="img"></div>
       <div class="pq-rows" id="p-notes"></div>
@@ -129,7 +130,7 @@ export async function render(main, PR, params) {
       <div class="pq-foot"><span class="hint" id="p-year"></span><span class="pq-acts"><button type="button" class="pq-btn" id="p-ask">Ask about this price</button><button type="button" class="q-add" id="q-add">Add this line to the quote</button></span></div>
     </section>
 
-    <section class="h2-card pr2-quote" data-in id="q-card">
+    <section class="h2-card pr2-quote" data-tour="q-build" data-in id="q-card">
       <div class="h2-ch"><h2 id="q-title">The quote</h2></div>
       <div id="q-body"></div>
     </section>

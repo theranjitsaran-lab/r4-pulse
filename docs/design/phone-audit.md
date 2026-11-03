@@ -130,3 +130,4 @@ Left, on purpose:
 - Quote's save and copy row and the Ask send button are within 8px of 44, and the Margin drawer's Ask is 40px, to keep its footer on one line.
 - Long pages: Opportunities is longer as cards (4 to about 6 screens) because every owner, status and next step stays on the card; it shows 10 and then Show all. Map zoom is a separate step.
 - Table rows are 34px, not 44px, and their text a point smaller (Theran, 3 November 2026: the grids were too big). The whole row is the tap target; a margin pill and a name fill the row's height, so neighbours never overlap. On Accounts the filters sit behind More.
+- Quote's controls are 40px, not 44px, and its map sits behind Show the map (Theran, 3 November 2026: the screen was too long). Type a postcode or open the map; everything else on it stays.

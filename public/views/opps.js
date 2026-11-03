@@ -37,11 +37,11 @@ export async function render(main, params, C) {
 
   main.innerHTML = `<div class="cust c2 h2 ac op">
     <div><h1>Opportunities</h1><p class="op-how">One row per account, the single best move first: what it’s worth, who owns it, where it’s got to.</p></div>
-    ${litCard('op-lit', 'Pulse summary, from the list below')}
-    <section class="ktiles" id="op-tiles" data-in></section>
+    ${litCard('op-lit', 'Pulse summary, from the list below', 'p-lit')}
+    <section class="ktiles" id="op-tiles" data-tour="p-tiles" data-in></section>
     <section class="h2-card" data-tour="opp-pipe" data-in><div class="h2-ch"><h2>Where the list has got to</h2><small>Each account once, at its best move, at the status of whichever move is furthest along.</small></div><div class="op-pipe" id="op-pipe"></div></section>
-    <section class="h2-card" data-in><div class="h2-ch"><h2>What kind of money it is</h2><small>Each account at its best yearly move; overdue boxes apart, as a one-off. Tap a kind to filter the list.</small></div><div class="op-kinds" id="op-kbar" aria-hidden="true"></div><div class="op-kkey" id="op-kkey" role="group" aria-label="Filter by kind"></div></section>
-    <section class="h2-card c2-tablecard" data-in>
+    <section class="h2-card" data-tour="p-kinds" data-in><div class="h2-ch"><h2>What kind of money it is</h2><small>Each account at its best yearly move; overdue boxes apart, as a one-off. Tap a kind to filter the list.</small></div><div class="op-kinds" id="op-kbar" aria-hidden="true"></div><div class="op-kkey" id="op-kkey" role="group" aria-label="Filter by kind"></div></section>
+    <section class="h2-card c2-tablecard" data-tour="p-table" data-in>
       <div id="op-t"></div>
       <p class="op-msg" id="op-msg" role="status"></p>
       ${phoneFold('how these are worked out', `<div class="src">$ a year is each account's best move, once: moves on an account overlap, so they do not add up. Overdue-box destruction is a one-off that needs the client's sign-off, so it has its own column and never adds to the yearly figure. Cross-sell is est. at what comparable accounts spend, price gaps at the book's median, win-back at the drop on the account's own run, rate rounds at the typical 8%. Three marks: its own billing or the book median. Two: comparable accounts of its kind. One: the whole book or few comparable accounts.</div>`)}
