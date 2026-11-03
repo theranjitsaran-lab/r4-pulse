@@ -19,7 +19,7 @@ app.use(express.json());
 // Both before auth.install: no login. /health/data carries dates only, never a figure.
 // Not ready until the screens' data is warm: Render keeps the old version serving until this says ok, so nobody waits after a deploy
 let warmed = USE_FIXTURES;
-app.get('/health', (req, res) => res.status(warmed ? 200 : 503).json({ ok: warmed, fixtures: USE_FIXTURES, preview: PREVIEW }));
+app.get('/health', (req, res) => res.status(warmed ? 200 : 503).json({ ok: warmed, fixtures: USE_FIXTURES, preview: PREVIEW, version: (process.env.RENDER_GIT_COMMIT || '').slice(0, 7) }));
 app.get('/health/data', async (req, res) => {
   if (USE_FIXTURES) { try { return res.json({ fixtures: true, done_work: require('../fixtures/activity.json').data.latestDone, today: new Date().toISOString().slice(0, 10) }); } catch { return res.json({ fixtures: true }); } }
   try {
