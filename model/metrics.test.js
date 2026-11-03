@@ -96,7 +96,7 @@ test('Quote: real route days near it, never the whole average visit; four ways, 
     assert.equal(Q.nearestRoute(reg, Z, '60606', null).route, 'A');
     assert.equal(Q.nearestRoute(reg, Z, '60607', 7).route, 'A');
     assert.deepEqual(['good', 'thin', 'loss', 'loss'], [.5, .2, .05, -.1].map(m => Q.marginLabel(R, m).cls));
-    assert.deepEqual(['Healthy', 'Thin', 'Too thin', 'Loses money'], [.5, .2, .05, -.1].map(m => Q.marginLabel(R, m).word));
+    assert.deepEqual(['Healthy', 'Normal', 'Thin', 'Thin, losing money'], [.5, .2, .05, -.1].map(m => Q.marginLabel(R, m).word));
     const near = { route: 'MARK', dow: 5, postcode: '60617', miles: 1, carries: true, day: { stops: ['60617'], customers: 3 } };
     const list = Q.quoteOptions(R, { ...st, postcode: '60617' }, { Z, near, band: { p25: 85, p75: 111.77 } });
     assert.deepEqual(list.map(o => o.id), ['now', 'ride', 'fewer', 'band']);
@@ -130,6 +130,22 @@ test('Quote: real route days near it, never the whole average visit; four ways, 
     assert.ok(S.parseQuote(sheet.map(f => '[' + f.key + '] ' + f.say).join(String.fromCharCode(10)), sheet));
     assert.equal(S.parseQuote('[nearby] one line only', sheet), null);
   } finally { R.setRouteCosts(keep); }
+});
+
+test('One margin: Healthy, Normal, Thin from the two cut-offs; a comparable is the same kind at a similar size', async () => {
+  const R = require('../model/rates'), { marginBand } = await import('../public/components/margin.js'), { accountKind } = await import('../public/components/acctkind.js'), { buildWhitespace } = await import('../public/components/whitespace.js');
+  const S = R.SETTINGS;
+  assert.deepEqual([S.marginHealthy, S.marginHealthy - .01, S.marginThin, S.marginThin - .01, -.01].map(m => marginBand(R, m).word), ['Healthy', 'Normal', 'Normal', 'Thin', 'Thin, losing money']);
+  assert.deepEqual([S.marginHealthy, S.marginThin, 0].map(m => marginBand(R, m).cls), ['g', 'a', 'r']);
+  assert.equal(accountKind('KIRKLAND & ELLIS LLP'), 'Law firm'); assert.equal(accountKind('CITY OF CHICAGO'), 'Public body'); assert.equal(accountKind('INGALLS HOSPITAL'), 'Healthcare');
+  // six law firms of about the size: one buys little of a line, one none
+  const accounts = [], lines = [];
+  for (let i = 1; i <= 7; i++) { accounts.push({ level1: i, customer: 'FIRM ' + i + ' LLP', boxes: 10000 + i, storage_revenue: 50000 }); if (i <= 5) lines.push({ level1: i, servcode: 'R3', family: 'shred', unit: 'box', revenue: 10000 }); }
+  lines.push({ level1: 6, servcode: 'R3', family: 'shred', unit: 'box', revenue: 500 });
+  const W = buildWhitespace({ accounts, lines }, { top: 10 }), f = n => W.rows.find(r => r.level1 === n).cells.shred;
+  assert.equal(f(7).have, false); assert.ok(Math.abs(f(7).opp - 10000) < 50); assert.match(f(7).note, /law firms of a similar storage size/);
+  assert.equal(f(6).low, true); assert.ok(f(6).expected > 9000);
+  assert.ok(!f(1).low);
 });
 
 test('#20 shredding: Opportunities, Warehouse and Home count the same boxes for an account', async () => {

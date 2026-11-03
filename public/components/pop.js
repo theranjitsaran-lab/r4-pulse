@@ -3,9 +3,9 @@
 // caller has escaped. A question in `ask` adds a button that hands it to the Ask sheet (app.js).
 let el = null, closing = null;
 
-export function openPop({ title, sub = '', html, ask = null, wide = false, onClose = null }) {
+export function openPop({ title, sub = '', html, ask = null, wide = false, size = null, onClose = null }) {
   if (!el) el = build();
-  el.classList.toggle('wide', wide);
+  el.classList.toggle('wide', wide); el.classList.toggle('mid', size === 'mid');
   closing = onClose;
   el.querySelector('.pop-t').textContent = title;
   el.querySelector('.pop-s').textContent = sub;

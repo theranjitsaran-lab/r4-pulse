@@ -172,8 +172,8 @@ const TIME_NOTES = {
   split: ['Travel share of a route day, where there are no route days', 'assumed', 'Prices a visit at the book\'s average: a new account with no postcode, a line with no route days.'],
   routeHours: ['Hours in a route day', 'assumed', 'Turns the route day\'s cost into a route-hour rate, for what one more stop adds to a route that runs anyway. Hours were never captured, so this is the eight to nine hours a route day is said to run.'],
   dedicatedMinHours: ['Least hours a dedicated vehicle is costed at', 'assumed', 'A truck and driver pulled out for one job cost at least this, however close the job is.'],
-  marginHealthy: ['Margin that reads Healthy on a quote', 'assumed', 'At or above this a quote reads Healthy.'],
-  marginThin: ['Margin that reads Thin on a quote', 'assumed', 'At or above this and below Healthy it reads Thin; below this Too thin; below zero Loses money.'],
+  marginHealthy: ['Margin that reads Healthy', 'assumed', 'At or above this a margin reads Healthy, on every screen.'],
+  marginThin: ['Margin below which it reads Thin', 'assumed', 'At or above this and below Healthy a margin reads Normal; below this Thin; below zero Thin, losing money.'],
   deliveryMatch: ['Box deliveries ride the shred routes, placed by location', 'observed', 'Deliveries go on the shred trucks (Theran, 1 November 2026). VCK does not say which route, so each is placed on the route that passed closest to it that day, and shares that day by minutes.'],
 };
 // Settings anyone can change on the Settings screen (server/settings.js): the bounds a value must sit in.

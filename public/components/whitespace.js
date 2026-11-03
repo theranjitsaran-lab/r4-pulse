@@ -10,6 +10,7 @@
 // Read from fixtures/margin.json: accounts (storage_revenue, boxes) and lines by family.
 
 import * as Fmt from './format.js';
+import { accountKind, kindPlural } from './acctkind.js';
 export const LINES = [
   { key: 'storage',  name: 'Storage',      by: 'ratio' },
   { key: 'handling', name: 'Retrieval and refile', short: 'Retrieval', by: 'boxes' },
@@ -21,8 +22,12 @@ export const LINES = [
 const BUYS = 250;          // twelve-month spend below this is noise, not a customer of the line
 const STORER = 500;        // boxes before box-driven lines are sized
 const MIN_PEERS = 8;
+const MIN_KIND = 5;        // comparable accounts of the same kind and size before they are used
+const LOW = 4;             // an account buying under a quarter of what comparables spend, by at least $1,000, is low
 const ADDON = 0.4;         // a line is an add-on when it is under 40% of the account's spend       // fewer comparables than this and the band widens to the whole book
 const band = t => t < 25e3 ? 0 : t < 100e3 ? 1 : 2;
+const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase()).replace(/\b(Of|And|The)\b/g, w => w.toLowerCase()).replace(/\b(Llp|Llc|Inc|Pc|Itad|Cboe)\b/g, w => w.toUpperCase());
+const lineWord = n => n === 'ITAD' ? n : n.toLowerCase();
 const median = v => { if (!v.length) return null; const s = [...v].sort((a, b) => a - b), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
 
 export function buildWhitespace(M, { exclude = [], top = 40 } = {}) {
@@ -30,7 +35,7 @@ export function buildWhitespace(M, { exclude = [], top = 40 } = {}) {
   const acc = new Map();
   for (const a of M.accounts) {
     if (skip.has(a.level1)) continue;
-    acc.set(a.level1, { level1: a.level1, customer: a.customer, boxes: a.boxes || 0, spend: { storage: Math.max(0, a.storage_revenue || 0) } });
+    acc.set(a.level1, { level1: a.level1, customer: a.customer, kind: accountKind(a.customer), boxes: a.boxes || 0, spend: { storage: Math.max(0, a.storage_revenue || 0) } });
   }
   for (const l of M.lines) {
     const a = acc.get(l.level1);
@@ -68,10 +73,34 @@ export function buildWhitespace(M, { exclude = [], top = 40 } = {}) {
     }
   }
 
+  // the same kind of organisation at a similar size: a third to three times its boxes if it stores, its spend if not
+  const comparable = (a, x) => {
+    const near = p => a.boxes >= STORER ? p.boxes >= a.boxes / 3 && p.boxes <= a.boxes * 3 : p.boxes < STORER && p.total >= a.total / 3 && p.total <= a.total * 3;
+    const same = all.filter(p => p !== a && p.kind === a.kind && p.spend[x.key] >= BUYS && (x.by === 'boxes' ? p.boxes >= STORER : p.spend[x.key] < ADDON * p.total && p.total - p.spend[x.key] >= BUYS));
+    const sized = same.filter(near), ps = sized.length >= MIN_KIND ? sized : same;
+    if (ps.length < MIN_KIND) return null;
+    const boxy = x.by === 'boxes' && a.boxes >= STORER, other = a.total - a.spend[x.key];
+    if (!boxy && (x.by === 'boxes' || other < BUYS)) return null;
+    const rate = median(ps.map(p => boxy ? p.spend[x.key] / p.boxes * 1000 : p.spend[x.key] / (p.total - p.spend[x.key])));
+    const closest = ps.slice().sort((p, q) => Math.abs(p.total - a.total) - Math.abs(q.total - a.total)).slice(0, 3);
+    return { expected: boxy ? rate * a.boxes / 1000 : rate * other, count: ps.length, closest, words: ps === sized ? `${ps.length} ${kindPlural(a.kind)} of a similar ${a.boxes >= STORER ? 'storage ' : ''}size` : `${ps.length} ${kindPlural(a.kind)} of any size, too few being its size,` };
+  };
+  const named = (c, x) => c.closest.map(p => `${title(p.customer)} (${Fmt.money(p.spend[x.key], { short: true })})`).join(', ');
+
   const rows = all.sort((a, b) => b.total - a.total).slice(0, top).map(a => {
     const cells = {};
     for (const x of LINES) {
-      if (a.spend[x.key] >= BUYS) { cells[x.key] = { have: true, spend: a.spend[x.key] }; continue; }
+      const cmp = comparable(a, x);
+      if (a.spend[x.key] >= BUYS) {
+        const low = cmp && cmp.expected >= LOW * a.spend[x.key] && cmp.expected - a.spend[x.key] >= 1000;
+        cells[x.key] = { have: true, spend: a.spend[x.key], ...(low ? { low: true, expected: cmp.expected, note: `${title(a.customer)} spends ${Fmt.money(a.spend[x.key], { short: true })} a year on ${lineWord(x.name)}; ${cmp.words} would point to about ${Fmt.money(cmp.expected, { short: true })} at its size, such as ${named(cmp, x)}.` } : {}) };
+        continue;
+      }
+      if (cmp) {
+        const opp = Math.min(cmp.expected, a.total);
+        cells[x.key] = { have: false, spend: a.spend[x.key], opp, basis: `what ${cmp.words} spend, such as ${named(cmp, x)}`, peers: cmp.closest.map(p => ({ level1: p.level1, customer: p.customer, boxes: p.boxes, spend: p.spend[x.key] })), peerCount: cmp.count, note: `${title(a.customer)} does not buy ${lineWord(x.name)} yet; ${cmp.words} would point to about ${Fmt.money(opp, { short: true })} a year, such as ${named(cmp, x)}.` };
+        continue;
+      }
       let opp = 0, basis = '', ref = null;
       if (x.by === 'boxes') {
         const r = rates[x.key];
@@ -89,10 +118,10 @@ export function buildWhitespace(M, { exclude = [], top = 40 } = {}) {
         }
       }
       opp = Math.min(opp, a.total);
-      cells[x.key] = { have: false, spend: a.spend[x.key], opp, basis, peers: ref ? ref.examples : [], peerCount: ref ? ref.peers : 0 };
+      cells[x.key] = { have: false, spend: a.spend[x.key], opp, basis, peers: ref ? ref.examples : [], peerCount: ref ? ref.peers : 0, note: opp > 0 ? `${title(a.customer)} does not buy ${lineWord(x.name)} yet. Too few comparable accounts of its kind, so this is sized from the whole book: ${basis}.` : '' };
     }
     const opp = LINES.reduce((t, x) => t + (cells[x.key].have ? 0 : cells[x.key].opp), 0);
-    return { level1: a.level1, customer: a.customer, boxes: a.boxes, total: a.total, spend: a.spend, cells, opp };
+    return { level1: a.level1, customer: a.customer, kind: a.kind, boxes: a.boxes, total: a.total, spend: a.spend, cells, opp };
   });
   return { lines: LINES, rows, rates, total: rows.reduce((t, r) => t + r.opp, 0) };
 }

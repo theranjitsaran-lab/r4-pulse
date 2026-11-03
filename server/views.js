@@ -54,15 +54,15 @@ router.get('/customers', async (req, res) => {
     const st = stamp(D);
     if (!custBase || custBase.stamp !== st) {
       const B = L.custbook.customerBook({ C: D.C, M: D.M, PR: D.PR, R: D.R });
-      const trimCell = c => c ? { have: c.have, opp: c.opp, basis: c.basis, spend: c.spend } : c;
+      const trimCell = c => c ? { have: c.have, opp: c.opp, basis: c.basis, spend: c.spend, low: c.low, expected: c.expected, note: c.note } : c;
       const rows = B.rows.map(r => {
         const { move, ...rest } = r;
         return { ...rest, oppRow: r.oppRow ? { opp: r.oppRow.opp, cells: Object.fromEntries(Object.entries(r.oppRow.cells).map(([k, c]) => [k, trimCell(c)])) } : null };
       });
       // the same rows with every cost taken out, for people who do not see costs yet
-      const plain = rows.map(({ cost, margin, pc, review, routeCost, ...r }) => ({ ...r, fam: Object.fromEntries(Object.entries(r.fam).map(([k, { cost: c, costPer, lines, ...f }]) => [k, f])), mfam: Object.fromEntries(Object.entries(r.mfam).map(([k, v]) => [k, { revenue: v.revenue }])) }));
+      const plain = rows.map(({ cost, margin, pc, review, routeCost, parts, ...r }) => ({ ...r, fam: Object.fromEntries(Object.entries(r.fam).map(([k, { cost: c, costPer, lines, ...f }]) => [k, f])), mfam: Object.fromEntries(Object.entries(r.mfam).map(([k, v]) => [k, { revenue: v.revenue }])) }));
       custBase = { stamp: st, plain, v: { rows, book: B.book, months: B.months, ws: { total: B.ws.total }, seg: L.home2data.segmentView({ P: D.P, A: D.A, SG: D.SG }),
-        am: D.AM ? { months: D.AM.months, rows: D.AM.accounts.map(a => ({ level1: a.level1, customer: a.customer, m: a.storage.map((s, i) => s + a.service[i]) })) } : null } };
+        am: D.AM ? { months: D.AM.months, rows: D.AM.accounts.map(a => ({ level1: a.level1, customer: a.customer, m: a.storage.map((s, i) => s + a.service[i]), s: a.storage })) } : null } };
     }
     send(req, res, seesCosts(req) ? custBase.v : { ...custBase.v, rows: custBase.plain, book: Object.fromEntries(Object.entries(custBase.v.book).map(([k, u]) => [k, Object.fromEntries(Object.entries(u).map(([n, b]) => [n, { price: b.price }]))])) });
   } catch (e) { res.status(500).json({ error: e.message }); }

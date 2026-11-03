@@ -19,7 +19,7 @@ const ROUTES = {
   customers: { view: 'customers', api: 'customers', nav: 'customers' },
   customer:  { view: 'customer',  api: 'customers', nav: 'customers' },
   pricing:   { view: 'pricing',   api: 'pricing',   nav: 'pricing' },
-  numbers:   { view: 'numbers',   api: 'view/numbers', nav: 'numbers' },
+  numbers:   { view: 'numbers',   api: 'pulse', nav: 'activity' },   // Warehouse only: the Money page came out on 3 November 2026
   settings:  { view: 'settings',  api: 'settings',  nav: 'settings' },
   activity:  { view: 'activity',  api: 'activity',  nav: 'activity' },
   opportunities: { view: 'customers', api: 'customers', nav: 'opportunities', params: { view: 'opportunities' } },
@@ -57,6 +57,7 @@ async function show() {
     location.replace('#opportunities' + (u.toString() ? '?' + u : ''));
     return;
   }
+  if (name === 'numbers' && params.tab !== 'warehouse') { location.replace('#customers'); return; }
   const route = ROUTES[name];
   document.querySelectorAll('#nav a, .mast-gear').forEach(a => a.classList.toggle('on', a.dataset.screen === route.nav));
   main.innerHTML = '<div class="sk" role="status" aria-label="Loading"><i class="sk-h"></i><div class="sk-tiles"><i></i><i></i><i></i><i></i></div><i class="sk-c"></i><i class="sk-c"></i></div>';

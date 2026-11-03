@@ -50,7 +50,7 @@ export async function render(main, A, params) {
   main.innerHTML = `
   <div class="rt">
     <div class="top">
-      <div><h1>Operations</h1><div class="sub">Done is what drivers confirmed in Veri-Shred; booked includes work not yet done.</div><div class="seg rt-tabs" style="margin-top:10px"><a href="#activity" class="on">Routes</a><a href="#activity?tab=warehouse">Warehouse</a></div></div>
+      <div><h1>Operations</h1><div class="sub">Done is what drivers confirmed in Veri-Shred; booked includes work not yet done. <a href="#numbers?tab=warehouse">Warehouse ›</a></div><div class="seg rt-tabs" style="margin-top:10px"><a href="#activity" class="on">Routes</a><a href="#activity?tab=warehouse">Warehouse</a></div></div>
       <div class="day"><button id="rt-prev" aria-label="Previous day">‹</button><b id="rt-day"></b><button id="rt-next" aria-label="Next day">›</button></div>
     </div>
     <p class="rt-say" id="rt-say"></p>

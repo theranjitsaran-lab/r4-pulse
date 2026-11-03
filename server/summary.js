@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
   if (!sheet || !sheet.every(f => f && typeof f.line === 'string' && f.line.length < 400)) return res.status(400).json({ error: 'sheet must be a list of { key, line }' });
   const S = await shared();
   // form 'home2': a headline and three keyed bullets (views/home2.js); otherwise the paragraph
-  const home2 = req.body.form === 'home2', lineNote = req.body.form === 'line', mapNote = req.body.form === 'map', quoteNote = req.body.form === 'quote';
+  const home2 = req.body.form === 'home2', lineNote = req.body.form === 'line', mapNote = req.body.form === 'map', quoteNote = req.body.form === 'quote' || req.body.form === 'points';
   const template = { text: home2 ? S.templateHome2(sheet) : lineNote || mapNote || quoteNote ? sheet.map(f => f.say || f.line).join(' ') : S.templateSummary(sheet), source: 'template' };
   if (!process.env.ANTHROPIC_API_KEY) return res.json(template);
   const key = crypto.createHash('sha256').update((home2 ? 'home2' : lineNote ? 'line' : mapNote ? 'map' : quoteNote ? 'quote' : '') + JSON.stringify(sheet)).digest('hex');

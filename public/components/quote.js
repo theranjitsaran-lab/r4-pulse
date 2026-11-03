@@ -10,6 +10,7 @@
 import { nearbyCost, bookCost, quoteRoute } from './routecost.js';
 import { miles, dist, YARD } from './routemap.js';
 import * as Fmt from './format.js';
+import { marginBand } from './margin.js';
 
 export const RIDE_MILES = 3.5;   // a route this close can carry the stop
 
@@ -105,10 +106,11 @@ export function nearestRoute(Q, Z, postcode, level1 = null) {
   return { ...best, day, carries: best.miles <= RIDE_MILES };
 }
 
-// Healthy, Thin, Too thin, Loses money: the thresholds are on Settings
+// a quote's margin reads as every other margin does
 export function marginLabel(R, m) {
   if (m == null) return { cls: '', word: '' };
-  return m < 0 ? { cls: 'loss', word: 'Loses money' } : m < R.SETTINGS.marginThin ? { cls: 'loss', word: 'Too thin' } : m < R.SETTINGS.marginHealthy ? { cls: 'thin', word: 'Thin' } : { cls: 'good', word: 'Healthy' };
+  const b = marginBand(R, m);
+  return { cls: { g: 'good', a: 'thin', r: 'loss' }[b.cls], word: b.word };
 }
 
 const ROUTE_LINE = new Set(['Travel to site', 'Truck time', 'Drive to the job']), TIME_LINE = new Set(['Time on site', 'Truck hours']), PLANT_LINE = new Set(['Shred plant', 'Plant throughput']);

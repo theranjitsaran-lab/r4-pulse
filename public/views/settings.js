@@ -19,8 +19,8 @@ const GROUPS = [
   { title: 'Quotes', sub: 'what one more stop adds to a route, and how a quote\'s margin is labelled', keys: [
     ['routeHours', 'hours', 'How long does a route day really run, yard to yard?'],
     ['dedicatedMinHours', 'hours', 'When a truck goes out for one job, what is the least time it really takes?'],
-    ['marginHealthy', 'share', 'At what margin would you call a quote healthy?'],
-    ['marginThin', 'share', 'Below what margin is a quote too thin to take?'],
+    ['marginHealthy', 'share', 'At what margin would you call an account healthy?'],
+    ['marginThin', 'share', 'Below what margin is an account too thin?'],
   ] },
   { title: 'Box deliveries', sub: 'they ride the shred trucks; VCK has the date and customer but not the route', keys: [
     ['deliveryMatch', 'on/off', 'Are there days a delivery goes out on its own, not on a shred route?'],

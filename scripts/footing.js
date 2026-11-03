@@ -18,7 +18,7 @@ const say = (state, n, text) => { if (state === 'FAIL') fails++; console.log(`${
 
 // every table as drawn: each column adds to the total row, unfiltered and searched; with months, each row's
 // and the total's YTD and 12 months equal their months
-const TABLES = [['Money', '#numbers?span=12', 'bin'], ['Money, storage / service', '#numbers?span=12&group=ss', 'serv'], ['Accounts', '#customers?view=overview&span=12', 'chicago'], ['Opportunities', '#opportunities', 'chicago'], ['Month grid', '#customers?view=grid&span=12', 'chicago'], ['Cross-sell', '#customers?view=whitespace', 'chicago'],
+const TABLES = [['Accounts', '#customers?view=overview&span=12', 'chicago'], ['Opportunities', '#opportunities', 'chicago'], ['Month grid', '#customers?view=grid&span=12', 'chicago'], ['Cross-sell', '#customers?view=whitespace', 'chicago'],
   ['Warehouse', '#numbers?tab=warehouse', 'west'], ['Long way round', '#activity', '60'], ['Price gaps', '#pricing', 'box']];
 const readTable = t => {
   const n = x => Number(x.dataset.v);
@@ -54,7 +54,7 @@ async function tables(base, pass) {
   try {
     const sign = async who => { const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage(); await page.goto(base + '/login'); await page.fill('input[name=name]', who); await page.fill('input[name=password]', pass); await Promise.all([page.waitForNavigation(), page.click('button')]); return page; };
     const owner = await sign('foot'), admin = await sign('footadm');
-    for (const [name, hash, term, who] of [...TABLES.map(t => [...t, owner]), ['Money, margin (admin)', '#numbers?span=12&show=margin', 'bin', admin], ['Money, margin by kind (admin)', '#numbers?span=12&show=margin&group=ss', 'serv', admin]]) {
+    for (const [name, hash, term, who] of [...TABLES.map(t => [...t, owner])]) {
       const page = who;
       await page.goto('about:blank'); await page.goto(base + '/' + hash);
       await page.waitForSelector('.dt-t tbody tr', { timeout: 30000, state: 'attached' }); await page.evaluate(() => document.querySelectorAll('details.pq-book').forEach(d => { d.open = true; })); await page.waitForTimeout(400);
@@ -71,7 +71,6 @@ async function tables(base, pass) {
           }
           const more = await d.$('.dt-more button'); if (more) { const t0 = Date.now(); await more.click(); await page.waitForTimeout(100); if (name === 'Accounts') found.showAll = Date.now() - t0; }
           const r = await d.$eval('.dt-t', readTable);
-          if (name === 'Money' && stage === 'all') found.moneyLast = r.lastFoot;
           if (name === 'Opportunities' && stage === 'all') found.opps = await d.$$eval('.dt-t tfoot td[data-v]', e => e.map(x => Number(x.dataset.v)));
           say(r.wrong.length ? 'FAIL' : 'PASS', '1 ', `${name}, ${stage}: ${r.rows} rows, ${r.cols} columns foot${r.months ? ', YTD and 12 months equal their months' : ''}${r.wrong.length ? ': ' + r.wrong.slice(0, 3).join('; ') : ''}`);
         }
@@ -99,9 +98,10 @@ async function main() {
     if (months.length) say(bad.length ? 'FAIL' : 'PASS', '1a', `Today's lines add to their total in ${months.length - bad.length} of ${months.length} months${bad.length ? ': not ' + bad.join(', ') : ''}`);
     const drawn = await tables(base, pass);
 
-    // 2. Money's October against Today's headline
+    // 2. the lines of business, as the server works them out, against Today's headline (the Money page came out on 3 November 2026)
     const m = home.month, oct = m.workMonth, lineOct = LV.totals[oct];
-    say(close(drawn.moneyLast, lineOct) && close(Math.round(drawn.moneyLast / 1000), Math.round(m.next.central / 1000), 0) ? 'PASS' : 'FAIL', '2 ', `Money's October as drawn ${K(drawn.moneyLast)} (${D(drawn.moneyLast)}); Today's lines ${D(lineOct)}; Today's headline ${K(m.next.central)}`);
+    const gridLast = numbers.lineGrid.rows.reduce((t, r) => t + r.rev[r.rev.length - 1], 0);
+    say(close(gridLast, lineOct) && close(Math.round(gridLast / 1000), Math.round(m.next.central / 1000), 0) ? 'PASS' : 'FAIL', '2 ', `The lines' latest month ${K(gridLast)} (${D(gridLast)}); Today's lines ${D(lineOct)}; Today's headline ${K(m.next.central)}`);
 
     // what R4 users are sent, and the months' costs against the year they were split from
     const logA = await fetch(base + '/login', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ name: 'footadm', password: pass }) });

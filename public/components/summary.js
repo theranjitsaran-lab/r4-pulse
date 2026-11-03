@@ -55,7 +55,7 @@ each other line: one or two short sentences, at most 30 words, starting with its
 Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. Keep the word "est." after an estimated figure. If the data is stale, say so in the headline. British spelling, US dollars, no markdown, no bullet characters.`;
 
 // The Quote screen's points, one a line, each starting with its key
-export const QUOTE_SYSTEM = `You write short points for Anne, who prices work at R4 Services, a Chicago records-management and shredding firm, beside a quote she is working on. From the facts you are given (each starts with its key in square brackets), write one line for each fact, in the order given, and nothing else. Each line starts with its key in square brackets, then one plain sentence of at most 16 words saying what the fact says.
+export const QUOTE_SYSTEM = `You write short points beside the figures on a screen, for the people who run R4 Services, a Chicago records-management and shredding firm. From the facts you are given (each starts with its key in square brackets), write one line for each fact, in the order given, and nothing else. Each line starts with its key in square brackets, then one plain sentence of at most 16 words saying what the fact says.
 
 Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. Keep the word "est." after an estimated figure. British spelling, no markdown, no bullet characters.`;
 export function parseQuote(text, sheet) {

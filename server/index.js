@@ -46,6 +46,7 @@ app.use('/api/settings', require('./settings').api);   // the cost model's assum
 app.use('/api/summary', require('./summary'));
 app.use('/api/ask', require('./ask'));
 app.use('/api/view', require('./views'));
+app.use('/api/customer', require('./who'));   // who an account is, researched once
 app.use('/api', api);
 // Static files gzipped, cached and preloaded (server/static.js); the cost model runs in the browser too
 // (Pricing, Margin): the same file, never a copy. express.static stays behind it for anything else.

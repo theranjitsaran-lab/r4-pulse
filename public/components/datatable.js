@@ -47,7 +47,7 @@ export function monthCols(M, span) {
     ...M.list.slice(-span).map(m => ({
       k: m, l: monthName(m), month: m, fixed: true, est: !!(M.est && M.est.includes(m)), get: r => M.get(r, m), total: 'sum', totalFmt: kOnly, totalHtml: M.totalCell ? rows => M.totalCell(rows, [m]) : null,
       fmt: r => M.cell ? M.cell(r, m) : kCell(M.get(r, m)),
-      cellCls: M.flag === false ? null : r => monthFlag(M.get(r, m), last12.map(x => M.get(r, x))),
+      cellCls: M.flag === false ? null : r => { const c = M.cls ? M.cls(r, m) : null; return c != null ? c : monthFlag(M.get(r, m), last12.map(x => M.get(r, x))); },
     })),
     sum('ytd', 'YTD', ytd, { first: true }),
     sum('l12', '12 months', last12, { sorted: true }),
@@ -136,7 +136,7 @@ export function dataTable(el, o) {
   const keep = () => history.replaceState(null, '', withState(location.hash, st, ns));
 
   function draw() {
-    const all = colsAll(), cols = colsOn();
+    const all = colsAll(), cols = colsOn(), refNow = typeof o.ref === 'function' ? o.ref(st) : o.ref;
     const rows = filterRows(o.rows, o, st);
     const col = cols.find(c => c.k === st.sort && c.get) || cols.find(c => c.sorted) || cols.find(c => c.get && !c.name) || cols[0];
     const sorted = sortRows(rows, col, st.sort ? st.dir : col.asc || (col.text && col.asc !== false) ? 1 : -1);
@@ -165,7 +165,7 @@ export function dataTable(el, o) {
     const restRows = o.rest ? sorted.slice(shown) : [], restCounted = o.inTotal ? restRows.filter(o.inTotal) : restRows;
     const rest = restRows.length ? `<tr class="dt-rest" data-rest="1">${cols.map(c => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(restCounted, c)) : ''}>${c.name ? `All other ${esc(o.noun || 'rows')} (${Fmt.grouped(restRows.length)})` : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(restCounted, c)) : Fmt.grouped(sumOf(restCounted, c))) : ''}</td>`).join('')}</tr>` : '';
     const hasTotal = cols.some(c => c.total), counted = o.inTotal ? rows.filter(o.inTotal) : rows;
-    const foot = hasTotal ? `<tfoot><tr>${cols.map((c, i) => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(counted, c)) : ''}>${i === 0 ? esc(o.totalLabel || 'Total') : c.totalHtml ? c.totalHtml(counted) : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(counted, c)) : Fmt.grouped(sumOf(counted, c))) : typeof c.total === 'function' ? c.total(counted) : ''}</td>`).join('')}</tr>${o.ref ? `<tr class="dt-ref">${cols.map(c => { const v = c.month ? o.ref.get(c.month) : c.ms ? c.ms.reduce((t, m) => t + (o.ref.get(m) || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(o.ref.label) : v == null ? '' : kOnly(v)}</td>`; }).join('')}</tr>` : ''}</tfoot>` : '';
+    const foot = hasTotal ? `<tfoot><tr>${cols.map((c, i) => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(counted, c)) : ''}>${i === 0 ? esc(o.totalLabel || 'Total') : c.totalHtml ? c.totalHtml(counted) : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(counted, c)) : Fmt.grouped(sumOf(counted, c))) : typeof c.total === 'function' ? c.total(counted) : ''}</td>`).join('')}</tr>${refNow ? `<tr class="dt-ref">${cols.map(c => { const v = c.month ? refNow.get(c.month) : c.ms ? c.ms.reduce((t, m) => t + (refNow.get(m) || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(refNow.label) : v == null ? '' : kOnly(v)}</td>`; }).join('')}</tr>` : ''}</tfoot>` : '';
     table.innerHTML = `<thead><tr>${head}</tr></thead><tbody>${body ? body + rest : `<tr><td class="tl" colspan="${cols.length}">Nothing matches these filters.</td></tr>`}</tbody>${foot}`;
     $('.dt-more').innerHTML = rows.length > shown ? `<button type="button" class="linkbtn">Show all ${Fmt.grouped(rows.length)} ›</button>` : '';
     if (o.onDraw) o.onDraw(st, rows);

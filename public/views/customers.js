@@ -7,7 +7,7 @@ import { dataTable, kOnly } from '/components/datatable.js';
 import { accountFilters, carryHash } from '/components/acctfilters.js';
 import { dailyFrom, addMonths } from '/components/projection.js';
 import { sparkline, money0, moneyK } from '/components/chart.js';
-import { buildMargins, marginSummary, marginAction, accountLines, accountCosts, flatFeeYear, costParts, PARTS, FAMILY_NAMES } from '/components/margin.js';
+import { buildMargins, marginBand, marginSummary, marginAction, accountLines, accountCosts, flatFeeYear, costParts, PARTS, FAMILY_NAMES } from '/components/margin.js';
 import { costOrders, jobHtml, drawRouteBlock, jobPlace, densityByPostcode } from '/components/jobview.js';
 import { loadRoadnet } from '/components/routemap.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
@@ -17,6 +17,10 @@ import { openExplainer } from '/components/explain.js';
 import { conversationCandidates } from '/components/lists.js';
 import { LABELS } from '/components/metrics.js';
 import { costsVisible, whoAmI } from '/components/access.js';
+import { accountTable } from '/components/accttable.js';
+import { litCard, drawPoints } from '/components/lit.js';
+import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
+const acPlay = main => { document.documentElement.classList.add('js'); const root = main.querySelector('.ac'); if (firstPlay('r4-accounts-' + location.hash.slice(0, 40))) { root.classList.add('play'); whenIntroDone().then(() => playIn(root)); } };
 
 const CITADEL = 6714;
 const ROUTE_FAMILIES = ['bin', 'handling', 'movement'];   // route costs under review: delivery days not yet in the volumes
@@ -67,12 +71,12 @@ async function rowsFor(view, ser, book, C) {
       by.set(r.level1, a);
     }
     return [...by.values()].sort((a, b) => b.worth - a.worth).slice(0, 60)
-      .map(g => base(g.level1, `${g.why} · ${moneyK(g.worth * 12)} a year at the median`, { worth: g.worth, customer: g.customer }));
+      .map(g => base(g.level1, `${g.why}, ${moneyK(g.worth * 12)} a year at the median`, { worth: g.worth, customer: g.customer }));
   }
   if (view === 'rounds') {
     const CA = await getJson('calls');
     return CA.filter(c => c.not_raised_2y && c.level1 !== CITADEL).sort((a, b) => b.service - a.service)
-      .map(c => base(c.level1, `No rate moved since ${c.last_changed ? new Date(c.last_changed + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : 'at least two years ago'} · ${moneyK(c.service)} of service a year`));
+      .map(c => base(c.level1, `No rate moved since ${c.last_changed ? new Date(c.last_changed + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : 'at least two years ago'}, ${moneyK(c.service)} of service a year`));
   }
   if (view === 'margin') {
     return book.accounts.filter(a => a.revenue > 1000).sort((a, b) => a.margin - b.margin).slice(0, 50)
@@ -115,7 +119,7 @@ export async function render(main, C, params) {
       <div class="head"><span>Customer</span><span>24 months</span><span>Last 12 months</span><span>Last 3 months</span><span>${costsVisible() ? 'Margin' : ''}</span><span></span></div>
       <ul class="list">${rows.map(row).join('') || '<li style="padding:var(--sp-4);color:var(--ink-3)">No accounts in this view.</li>'}</ul>
     </div>
-    <p class="foot"><span id="c-count">${rows.length}</span> accounts · last 3 months is each account against its own twelve months before them, the same measure as Home and Slipping ${costsVisible() ? '· margin est. is revenue less modelled cost to serve; route-based costs are under review.' : ''}</p>
+    <p class="foot"><span id="c-count">${rows.length}</span> accounts, last 3 months is each account against its own twelve months before them, the same measure as Home and Slipping ${costsVisible() ? '· margin est. is revenue less modelled cost to serve; route-based costs are under review.' : ''}</p>
   </div>`;
   wireFind(main);
 }
@@ -174,7 +178,7 @@ async function conversations(main, C) {
     <div class="convs">${list.map((c, i) => `
       <div class="card conv" data-id="${c.level1}" data-sig="${c.sigs[0].key}">
         <div class="card-head"><h3><a href="#customer/${c.level1}" style="color:inherit;text-decoration:none">${i + 1}. ${esc(c.name)} <span style="color:var(--ink-5)">›</span></a></h3><small>${c.stake ? moneyK(c.stake) + ' a year at stake' : ''}</small></div>
-        <div class="sub">${c.sigs.slice(0, 2).map(s => esc(s.ev)).join(' · ')}</div>
+        <div class="sub">${c.sigs.slice(0, 2).map(s => esc(s.ev)).join(', ')}</div>
         <p class="open-line">“${esc(c.opener)}”</p>
         <div class="acts"><button data-v="called">Called</button><button data-v="emailed">Emailed</button><button data-v="not_this_week">Not this week</button><span class="done-note"></span></div>
       </div>`).join('') || '<div class="card">Nothing to call about this week.</div>'}</div>
@@ -197,53 +201,48 @@ async function conversations(main, C) {
 const lc = n => n === 'ITAD' ? n : n.toLowerCase();
 
 async function whitespace(main, C, params) {
-  const [M, CA] = await Promise.all([getJson('margin'), getJson('calls')]);
+  const M = await getJson('margin');
   const W = buildWhitespace(M, { exclude: [CITADEL], top: CROSS_SELL_DEPTH });
-  const rows = W.rows.filter(r => r.opp > 0).sort((a, b) => b.opp - a.opp);
-  const maxHave = Math.max(...W.rows.flatMap(r => LINES.map(x => r.cells[x.key].have ? r.cells[x.key].spend : 0)));
-  const top3 = rows.slice(0, 3).map(r => {
-    const best = LINES.map(x => ({ x, c: r.cells[x.key] })).filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp)[0];
-    return `${titleCase(r.customer)} (${lc(best.x.name)}, about ${moneyK(best.c.opp / 12)} a month)`;
-  });
+  const lows = r => LINES.filter(x => r.cells[x.key].low);
+  const rows = W.rows.filter(r => r.opp > 0 || lows(r).length).sort((a, b) => b.opp - a.opp);
+  const best = r => LINES.map(x => ({ x, c: r.cells[x.key] })).filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp)[0];
+  const starts = rows.filter(r => r.opp > 0).slice(0, 3).map(r => { const b = best(r); return `${titleCase(r.customer)} (${b.x.name === 'ITAD' ? 'ITAD' : lc(b.x.name)}, about ${moneyK(b.c.opp / 12)} a month)`; });
   const byLine = LINES.map(x => ({ x, v: rows.reduce((t, r) => t + (r.cells[x.key].have ? 0 : r.cells[x.key].opp), 0) })).sort((a, b) => b.v - a.v);
   const pace = crossSellPace(M.history), names = new Map(M.accounts.map(a => [a.level1, a.customer]));
-  const paceLine = pace ? ` <span style="display:block;margin-top:var(--sp-2)">That is the ceiling. R4's own record: in the last twelve months ${pace.count} existing accounts added a line (${pace.prevCount} the year before), worth about ${moneyK(pace.value)} in their first year so far. The biggest: ${pace.best.map(f => `${esc(titleCase(names.get(f.level1) || 'Account ' + f.level1))} (${lc((LINES.find(x => x.key === f.family) || { name: f.family }).name)}, ${moneyK(f.first_year)})`).join(', ')}.</span>` : '';
-
-  const cell = (r, x) => {
+  const pts = [
+    { key: 'worth', tone: 'g', lead: `${moneyK(W.total / 12)} a month more est.`, rest: `if the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do. Most of it is ${byLine[0].x.name === 'ITAD' ? 'ITAD' : lc(byLine[0].x.name)} and ${byLine[1].x.name === 'ITAD' ? 'ITAD' : lc(byLine[1].x.name)}.` },
+    { key: 'start', tone: 'a', lead: 'Start with:', rest: `${starts.join(', ')}.` },
+  ];
+  if (pace) { const b = pace.best[0]; pts.push({ key: 'done', tone: 'g', lead: 'It happens already:', rest: `in the last twelve months ${pace.count} accounts added a line, worth about ${moneyK(pace.value)} in their first year${b ? `. The biggest was ${titleCase(names.get(b.level1) || '')}, ${moneyK(b.first_year)}` : ''}.` }); }
+  const tile1 = (r, x) => {
     const c = r.cells[x.key];
+    if (c.have && c.low) return `<span class="lowc" title="${esc(c.note)}">${moneyK(c.spend)}</span>`;
     if (c.have) return `<span title="${esc(x.name)}: ${money0(c.spend)} in the last twelve months">${moneyK(c.spend)}</span>`;
-    if (c.opp > 0) return `<button class="opp" data-id="${r.level1}" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)}</button>`;
+    if (c.opp > 0) return `<span class="xs" title="${esc(c.note || c.basis)}">+${moneyK(c.opp)}</span>`;
     return '<span class="none">—</span>';
   };
-
-  main.innerHTML = `
-  <div class="cust ws">
+  main.innerHTML = `<div class="cust c2 h2 ac ws">
     <h1>Accounts</h1>
     ${tabsHtml('whitespace')}
-    <p class="lede">If the largest ${CROSS_SELL_DEPTH} accounts bought each line the way comparable accounts do, they would spend about <b>${moneyK(W.total / 12)} a month more</b> (${moneyK(W.total / 12)} a month est.). Most of it is ${lc(byLine[0].x.name)} and ${lc(byLine[1].x.name)}. Start with ${top3.join(', ')}.${paceLine}</p>
-    <div class="key"><span>A plain figure: buys it, twelve-month spend</span><span><span style="border:var(--hair) dashed var(--ink-5)"></span>doesn't buy it yet: what comparable accounts spend a year est.</span><span>— not sized</span></div>
-    <div class="card">
+    ${litCard('ws-lit', 'Pulse summary. Comparable accounts: the same kind of organisation at a similar storage size, on R4\'s own books.')}
+    <section class="h2-card" data-in>
+      <div class="ragkey"><span>A plain figure buys it, twelve months</span><span class="xs">+$</span><span>does not buy it yet: what comparable accounts spend a year est.</span><span class="lowc">$</span><span>buys it, but low for its size</span></div>
       <div id="ws-t"></div>
-    </div>
-    <p class="foot">Tap a dashed figure to see how it was worked out, the comparable accounts behind it, and how it is usually sold. Sized from the last twelve months. Retrieval, delivery and destruction for a storer: the median spend per 1,000 boxes among storers that buy the line. Storage, bins and ITAD: the median share of spend among similar-sized accounts that buy the line as an add-on. Never more than the account spends today. Citadel apart.</p>
+      <div class="src">Comparable: the same kind of organisation, read from the account's name because the database holds no industry, with a third to three times its boxes, or its spend if it does not store. Where fewer than five qualify it widens to the same kind at any size, then to the whole book, and says so. A ceiling at the median comparable, not a forecast. Tap an account to see why.</div>
+    </section>
   </div>`;
-  const calls = new Map(CA.map(c => [c.level1, c]));
+  drawPoints(main.querySelector('#ws-lit'), pts);
   const opp = (r, x) => { const c = r.cells[x.key]; return !c.have && c.opp > 0 ? c.opp : 0; };
-  dataTable(main.querySelector('#ws-t'), { key: 'crosssell', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows, noun: 'accounts', placeholder: 'Find an account', search: r => r.customer, totalLabel: 'Not bought yet, total',
+  const why = r => { const ns = LINES.map(x => r.cells[x.key]).filter(c => c.note && (c.low || (!c.have && c.opp > 0))).sort((a, b) => (b.opp || 0) - (a.opp || 0)); return `<div class="ws-why">${ns.map(c => `<p>${esc(c.note)}</p>`).join('') || '<p>Buys every line at about what comparable accounts do.</p>'}</div>`; };
+  dataTable(main.querySelector('#ws-t'), { key: 'crosssell', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows, noun: 'accounts', placeholder: 'Find an account', search: r => r.customer, totalLabel: 'Total', detail: why,
     cols: [
-      { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` },
-      ...LINES.map(x => ({ k: x.key, l: x.short || x.name, fixed: true, get: r => opp(r, x), fmt: r => cell(r, x), total: 'sum', totalFmt: v => '+' + moneyK(v) })),
-      { k: 'opp', l: 'Not bought yet', fixed: true, first: true, sorted: true, get: r => r.opp, fmt: r => '+' + moneyK(r.opp), total: 'sum', totalFmt: v => '+' + moneyK(v) },
+      { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a><span class="peer">${esc(r.kind)}</span>` },
+      ...LINES.map(x => ({ k: x.key, l: x.short || x.name, fixed: true, get: r => opp(r, x), fmt: r => tile1(r, x), total: 'sum', totalFmt: v => '+' + moneyK(v) })),
+      { k: 'opp', l: 'Not bought yet', fixed: true, first: true, sorted: true, get: r => r.opp, fmt: r => r.opp > 0 ? '+' + moneyK(r.opp) : 'buys all', total: 'sum', totalFmt: v => '+' + moneyK(v) },
     ],
-    onRow: (r, e) => { if (!e.target.closest('button.opp')) location.hash = '#customer/' + r.level1; },
   });
-  main.querySelector('#ws-t').addEventListener('click', ev => {
-    const b = ev.target.closest('button.opp'); if (!b) return;
-    const row = W.rows.find(r => r.level1 === Number(b.dataset.id));
-    if (row) openExplainer({ row, key: b.dataset.key, call: calls.get(row.level1), H: M.history, names: new Map(M.accounts.map(a => [a.level1, a.customer])) });
-  });
+  acPlay(main);
 }
-
 // ── Main customers: the 30 largest, month by month ───────────────────────────────────────────
 // Each cell is the month's billing; its shade is the change against the account's own average of
 // the six months before it. Red is down, green is up, ink is within 10%. Storage, service or both.
@@ -275,7 +274,7 @@ async function upDown(main, C, params) {
     <p class="lede">In ${lastName}, ${fall.length} accounts billed less than the month before and ${rise.length} more; net ${net < 0 ? '−' : '+'}${moneyK(Math.abs(net))}. ${fall[0] ? `The biggest fall was ${esc(titleCase(fall[0].customer))}, −${moneyK(-fall[0].dLast)}.` : ''}</p>
     <div class="tools"><div class="seg">${[['falling', 'Falling'], ['rising', 'Rising'], ['all', 'All']].map(([k, l]) => `<a href="${link(k)}" class="${k === f ? 'on' : ''}">${l}</a>`).join('')}</div></div>
     <div class="card" id="ud-table" style="overflow-x:auto"></div>
-    <div class="src">Posted invoices by invoice date, Citadel apart (exact) · ${esc(new Date(T.month + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' }))} so far est.: each account's Veri-Shred done services to ${esc(T.latest)} × its own value per done service in the weeks before, or the book's where it had none${T.outside.services ? ` · ${T.outside.services} services this month were for ${T.outside.accounts} smaller accounts outside this list` : ''} · storage for the month is billed in advance and not in this column · tap a column to sort</div>
+    <div class="src">Posted invoices by invoice date, Citadel apart (exact), ${esc(new Date(T.month + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' }))} so far est.: each account's Veri-Shred done services to ${esc(T.latest)} × its own value per done service in the weeks before, or the book's where it had none${T.outside.services ? `, ${T.outside.services} services this month were for ${T.outside.accounts} smaller accounts outside this list` : ''}, storage for the month is billed in advance and not in this column, tap a column to sort</div>
   </div>`;
   draw();
 }
@@ -284,50 +283,32 @@ async function upDown(main, C, params) {
 function bookPerService(P, A) { return billNow(P, A).perService; }
 
 async function monthGrid(main, C, params) {
-  const which = ['storage', 'service'].includes(params.series) ? params.series : 'total';
-  const ser = [...seriesOf(C).values()].filter(s => s.ltm > 0 && s.level1 !== CITADEL).sort((a, b) => b.ltm - a.ltm).slice(0, 30);
-  const months = ser.length ? ser[0].months : [];
-  const N = Math.min(13, months.length - 6), first = months.length - N;
-  const mlab = (m, i) => new Date(m + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' }) + (i === 0 || m.slice(5, 7) === '01' ? " '" + m.slice(2, 4) : '');
-  const cells = s => {
-    const v = s[which];
-    return months.slice(first).map((m, j) => {
-      const i = first + j, run = v.slice(i - 6, i).reduce((t, x) => t + x, 0) / 6;
-      return { m, v: v[i], run, d: run > 0 ? v[i] / run - 1 : null };
-    });
-  };
-  const grid = ser.map(s => ({ s, c: cells(s) }));
-  // the biggest move in the latest month, in dollars against the account's own run
-  // the sentence uses the app's one measure of movement (last three months against the twelve before)
-  const slipIds = new Set(slippingAccounts(C).map(x => x.level1)), riseIds = new Set(risingAccounts(C).map(x => x.level1));
-  const lastMoves = grid.filter(g => g.s.move).map(g => ({ s: g.s, d: g.s.move.d })).sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
-  const down = grid.filter(g => (g.c[g.c.length - 1].d ?? 0) < -0.1).length, up = grid.filter(g => (g.c[g.c.length - 1].d ?? 0) > 0.1).length;
-  const lastM = months[months.length - 1], lastName = new Date(lastM + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
-  const top = lastMoves[0];
-
-  const link = sv => `#customers?view=grid${sv !== 'total' ? '&series=' + sv : ''}`;
-  main.innerHTML = `
-  <div class="cust mg">
+  const [P, VW, R] = await Promise.all([getJson('pulse'), getJson('view/customers'), loadRates()]);
+  const B = { rows: VW.rows, book: VW.book, months: VW.months, ws: VW.ws };
+  const big = VW.rows.filter(r => !r.citadel).sort((a, b) => b.ltm - a.ltm).slice(0, 30), ids = new Set(big.map(r => r.level1));
+  const slip = slippingAccounts(C).filter(x => ids.has(x.level1)), rise = risingAccounts(C).filter(x => ids.has(x.level1));
+  const top = slip.slice().sort((a, b) => a.move.d - b.move.d)[0], up = rise.slice().sort((a, b) => b.move.d - a.move.d)[0];
+  const pts = [
+    slip.length ? { key: 'slip', tone: 'r', lead: `${slip.length} of the 30 largest are slipping,`, rest: `at least 10% below their own run.${top ? ` The biggest is ${titleCase(top.customer)}, down ${moneyK(-top.move.d)} a month.` : ''}` } : { key: 'slip', tone: 'g', lead: 'None of the 30 largest is slipping', rest: 'against its own run.' },
+  ];
+  if (costsVisible()) {
+    const thin = big.filter(r => r.pc != null && marginBand(R, r.pc).cls === 'r').sort((a, b) => a.pc - b.pc);
+    const say = r => `${titleCase(r.customer)} ${(r.pc < 0 ? '−' : '') + Fmt.pct(Math.abs(r.pc))}`;
+    pts.push(thin.length ? { key: 'thin', tone: 'r', lead: `${thin.length} of the 30 largest ${thin.length === 1 ? 'is' : 'are'} Thin:`, rest: `${thin.slice(0, 3).map(say).join(', ')} est.` } : { key: 'thin', tone: 'g', lead: 'None of the 30 largest is Thin', rest: 'on the cost model est.' });
+  }
+  pts.push(rise.length ? { key: 'rise', tone: 'g', lead: `${rise.length} ${rise.length === 1 ? 'is' : 'are'} rising,`, rest: `led by ${titleCase(up.customer)}, up ${moneyK(up.move.d)} a month on its own run.` } : { key: 'rise', tone: 'a', lead: 'None of the 30 largest is rising', rest: 'on its own run.' });
+  main.innerHTML = `<div class="cust c2 h2 ac mg">
     <h1>Accounts</h1>
     ${tabsHtml('grid')}
-    <p class="lede">Over the last three months, ${grid.filter(g => slipIds.has(g.s.level1)).length} of the 30 largest accounts are slipping (${LABELS.slipping}) and ${grid.filter(g => riseIds.has(g.s.level1)).length} are rising.${top ? ` The biggest move is ${esc(titleCase(top.s.customer))}, ${top.d < 0 ? '−' : '+'}${moneyK(Math.abs(top.d))} a month: ${esc(moveReason(top.s.move, moneyK))}.` : ''} A coloured cell is more than 25% and $5K from the account's own 12-month average.</p>
-    <div class="tools">
-      <div class="seg">${[['total', 'Storage and service'], ['storage', 'Storage'], ['service', 'Service']].map(([k, l]) => `<a href="${link(k)}" class="${k === which ? 'on' : ''}">${l}</a>`).join('')}</div>
-    </div>
-    <div class="card"><div id="mg-t"></div></div>
-    <p class="foot">Invoice month, posted runs. Storage bills in advance, so a month's storage is that month's boxes; service is the month before's work. Citadel apart. Figures in $K. Tap a row for the customer, a month for its invoices.</p>
+    ${litCard('mg-lit', "Pulse summary. A shaded month is more than 25% and $5K from the account's own 12-month average.")}
+    <section class="h2-card" data-in><div id="mg-t"></div>
+      <div class="src">Invoice month, posted runs. Storage bills in advance, so a month's storage is that month's boxes; service is the month before's work. Citadel apart. Tap an account for its lines, a month for its invoices.</div></section>
   </div>`;
-  const byId = new Map(grid.map(g => [g.s.level1, g.s]));
-  const cellOf = (r, m) => { const i = months.indexOf(m), v = r[which], run = i >= 6 ? v.slice(i - 6, i).reduce((t, x) => t + x, 0) / 6 : 0; return { v: v[i], run, d: run > 0 ? v[i] / run - 1 : null }; };
-  dataTable(main.querySelector('#mg-t'), { key: 'monthgrid', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows: grid.map(g => g.s), noun: 'of the largest accounts', placeholder: 'Find an account', search: r => r.customer,
-    cols: [{ k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` }],
-    months: { list: months, get: (r, m) => r[which][months.indexOf(m)],
-      cell: (r, m) => { const c = cellOf(r, m); return `<span data-inv-id="${r.level1}" data-inv-m="${m}" data-inv-name="${esc(r.customer)}" title="${esc(titleCase(r.customer))}: ${money0(c.v)} against its own ${money0(c.run)}">${kOnly(c.v)}</span>`; },
-    },
-    onRow: (r, e) => { if (!e.target.closest('[data-inv-id]') && byId.has(r.level1)) location.hash = '#customer/' + r.level1; },
-  });
+  drawPoints(main.querySelector('#mg-lit'), pts);
+  VW.lines = async r => { const v = await getJson('view/account-lines?level1=' + r.level1); return v.rows.map(l => ({ name: l.name, values: Object.fromEntries(v.months.map((m, i) => [m, l.values[i]])) })); };
+  accountTable(main.querySelector('#mg-t'), { key: 'monthgrid', VW, C, R, B, P, series: true });
+  acPlay(main);
 }
-
 // ── Margin: every account, revenue less what it costs to serve, worst first ──────────────────
 // The top of the margin drill: account → line of business → its orders → one order's cost build.
 // Filters as in v10: thin is 15–50% left, below cost is under 15%. Route-heavy accounts carry
@@ -400,10 +381,10 @@ async function marginList(main, R, M, MS, params) {
     ${D.rows.length ? `<div class="card dens" style="margin-top:var(--sp-4)">
       <div class="card-head"><h3>Where more volume would cut cost: ${esc(D.rows[0].postcode)} first, about ${money0(D.rows[0].saving)} a year est.</h3></div>
       <p class="sub" style="margin:0 0 var(--sp-2)">Travel to a postcode is shared by the customers on the visit. Where visits carry one customer, one more on the same visits takes this much a year off the cost of serving the ones already there.</p>
-      ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${Fmt.fixed(d.miles, 0)} miles out<small>${n0(d.visits)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${Fmt.fixed(d.perVisit, 1)} customers each`} · ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
-      <div class="src">Route visits from ${D.days > 120 ? 'six months of route days' : `the ${D.days} days of routes held offline, scaled to a year`} · customers a visit from the twelve-month postcode book</div>
+      ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${Fmt.fixed(d.miles, 0)} miles out<small>${n0(d.visits)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${Fmt.fixed(d.perVisit, 1)} customers each`}, ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
+      <div class="src">Route visits from ${D.days > 120 ? 'six months of route days' : `the ${D.days} days of routes held offline, scaled to a year`}, customers a visit from the twelve-month postcode book</div>
     </div>` : ''}
-    <p class="foot">Twelve months. Cost to serve est. from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Actions: Drop under $5,000 and under 15% · Re-route under 15% with travel over 40% of cost · Renegotiate under 15% · Reprice 15–50% · Hold 50% and over · Check routes where most of the cost is route cost under review.</p>
+    <p class="foot">Twelve months. Cost to serve est. from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Actions: Drop under $5,000 and under 15%, Re-route under 15% with travel over 40% of cost, Renegotiate under 15%, Reprice 15–50%, Hold 50% and over, Check routes where most of the cost is route cost under review.</p>
   </div>`;
 }
 
@@ -438,7 +419,7 @@ async function marginAccount(main, R, M, MS, id) {
         <span class="nm">${esc(FAMILY_NAMES[f] || f)}${pc != null && pc < 0 ? ' <span class="tag bad">below cost</span>' : ''}</span><span class="r u">${f === 'storage' || v.cost > 0 ? esc(units(f)) : ''}</span>
         <span class="r rv">${money0(v.revenue)}</span><span class="r cs">${v.cost ? money0(v.cost) : '—'}</span><span class="r lf ${l < 0 ? 'is-bad' : ''}">${money0(l)}</span>
         <span class="r pc">${pcText(pc)}</span><span class="go">›</span></a>`; }).join('')}
-      <div class="src">Twelve months, posted invoices · cost est. from the cost model · tap a line for its jobs</div>
+      <div class="src">Twelve months, posted invoices, cost est. from the cost model, tap a line for its jobs</div>
     </div>
   </div>`;
 }
@@ -485,11 +466,11 @@ async function marginLine(main, R, M, MS, id, f) {
     ${jobs.slice(0, 80).map(j => `<a class="rw" href="${mlink({ id, line: f, job: j.o.woid })}">
       <span class="dt">${esc(new Date(j.o.date + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }))}</span>
       <span class="nm">${j.place ? `${esc(j.place.postcode || '—')} <small style="display:inline;color:var(--ink-4)">route ${esc(/\d/.test(j.place.route) ? j.place.route : titleCase(j.place.route))}</small>` : '<span class="sub">no route that day</span>'}</span>
-      <span class="pl">${j.place ? `${j.place.miles != null ? Fmt.fixed(j.place.miles, 0) + ' mi · ' : ''}${j.place.stops} stops` : ''}</span>
+      <span class="pl">${j.place ? `${j.place.miles != null ? Fmt.fixed(j.place.miles, 0) + ' mi, ' : ''}${j.place.stops} stops` : ''}</span>
       <span class="r mi">${j.place && j.place.miles != null ? Fmt.fixed(j.place.miles, 0) : '—'}</span><span class="r st">${j.place ? `${j.place.stops}` : '—'}</span>
       <span class="r u">${n0(units(j))}</span><span class="r rv">${onFee(j) ? 'flat fee' : money0(j.rev)}</span><span class="r cs">${money0(j.cost.total)}</span>
       <span class="r lf ${onFee(j) ? '' : j.margin < 0 ? (j.cost.real || !j.cost.route ? 'is-bad' : 'is-warn') : ''}">${onFee(j) ? '—' : money0(j.margin)}</span><span class="go">›</span></a>`).join('')}
-    <div class="src">VCK work orders, six months, this line's items only · miles from the yard and stops on the route that day from Veri-Shred done orders${J.d.routes && J.d.routes.length ? '' : ' (about three weeks held offline)'} · cost est. from the cost model</div></div>`;
+    <div class="src">VCK work orders, six months, this line's items only, miles from the yard and stops on the route that day from Veri-Shred done orders${J.d.routes && J.d.routes.length ? '' : ' (about three weeks held offline)'}, cost est. from the cost model</div></div>`;
 }
 
 // level 4: one job
@@ -531,7 +512,7 @@ async function destructionView(main, C, params) {
     <div class="card">
       <div class="hd"><span>Customer</span><span>Overdue boxes</span><span>Destruction, once</span><span>Storage it ends, a month</span><span>Months it equals</span><span></span></div>
       ${rows.slice(0, shown).map(r => `<a class="rw" href="#customer/${r.level1}">
-        <span class="nm">${esc(titleCase(r.customer))}<small>${r.total ? `${Fmt.pct(r.boxes / Math.max(r.boxes, r.total))} of ${Fmt.num(r.total)} boxes stored · ` : ''}${Fmt.money(r.rate, { dp: 3 })} a box${r.own ? '' : ' (book median)'}</small>${r.total ? `<span class="share"><i style="width:${Math.min(100, r.boxes / r.total * 100)}%"></i></span>` : ''}</span>
+        <span class="nm">${esc(titleCase(r.customer))}<small>${r.total ? `${Fmt.pct(r.boxes / Math.max(r.boxes, r.total))} of ${Fmt.num(r.total)} boxes stored, ` : ''}${Fmt.money(r.rate, { dp: 3 })} a box${r.own ? '' : ' (book median)'}</small>${r.total ? `<span class="share"><i style="width:${Math.min(100, r.boxes / r.total * 100)}%"></i></span>` : ''}</span>
         <span class="r bx">${Fmt.num(r.boxes)}</span>
         <span class="r once">${moneyK(r.once)}<span class="sub" style="display:none"> once</span></span>
         <span class="r lost">−${moneyK(r.lost)}</span>

@@ -26,8 +26,9 @@ const hasMoney = x => Math.abs(x.revenue) >= 0.5 || Math.abs(x.cost) >= 0.5;
 export const linesOf = F => Object.values(F.fams).filter(hasMoney).sort((a, b) => b.revenue - a.revenue);
 
 // Revenue, then each kind of cost stepping down from it, to what is left. Drawn on one scale; below zero it says so.
-export function bridgeHtml(revenue, lines) {
-  const parts = costParts(lines), rows = PARTS.filter(p => parts[p[0]] > 0.5).map(p => ({ k: p[0], name: p[1], v: parts[p[0]] }));
+export const bridgeHtml = (revenue, lines) => bridgeParts(revenue, costParts(lines));
+export function bridgeParts(revenue, parts) {
+  const rows = PARTS.filter(p => (parts || {})[p[0]] > 0.5).map(p => ({ k: p[0], name: p[1], v: parts[p[0]] }));
   const cost = rows.reduce((t, r) => t + r.v, 0), left = revenue - cost, lo = Math.min(0, left), hi = Math.max(revenue, 1), span = hi - lo;
   const at = v => (v - lo) / span * 100;
   let run = revenue;
@@ -88,7 +89,7 @@ export async function openDrawer({ level1, name, R, row = null, B = null, family
     const act = costs ? marginAction({ pc: revenue > 0 ? (revenue - cost) / revenue : 0, review: false, revenue, cost }, travel) : null;
     const el = paint(`${crumb([{ t: title }])}${totals(revenue, cost, 'Revenue')}
       ${act ? `<p class="md-say"><b>${esc(act.tag)}.</b> ${esc(act.why)}${F.flat ? ` Billed as a flat fee of ${money0(F.flat)}: read the line, not each job.` : ''}</p><h3>From revenue to what is left est.</h3>${bridgeHtml(revenue, lines)}` : ''}
-      <h3>Its lines · tap one for every job</h3>${linesHtml(F, costs, F.noLine)}
+      <h3>Its lines, tap one for every job</h3>${linesHtml(F, costs, F.noLine)}
       ${costs ? `<h3>What would improve it</h3>${leversHtml(marginLevers(R, J.acct, J.lines, F, { row, position }))}<p class="src">Modelled costs: GL pools over twelve months of volumes, provisional.</p>` : ''}`, 0);
     if (el) el.querySelectorAll('button.md-line').forEach(b => b.addEventListener('click', () => line(b.dataset.f)));
   }
@@ -110,7 +111,7 @@ export async function openDrawer({ level1, name, R, row = null, B = null, family
       ${costs && x.working.length ? `<h3>How the cost is worked out est.</h3>${bridgeHtml(x.revenue, x.working)}<details class="md-how"><summary>The working, line by line</summary><div class="md-work">${x.working.map(l => `<div><span>${esc(l[0])}${l[3] ? ' est.' : ''}</span><b>${money0(l[1])}</b><p>${esc(l[2])}</p></div>`).join('')}</div></details>` : ''}
       ${lv.length ? `<h3>What would improve it</h3>${leversHtml(lv)}` : ''}
       ${f === 'storage' ? '' : `<h3>Every job in the period${costs ? ', worst first' : ''}</h3><div id="md-jobs"></div>
-      <p class="md-tie">Jobs ${money0(jRev)} billed${costs ? `, ${money0(jCost)} cost` : ''}${costs && Math.abs(x.unallocated) >= 0.5 ? `, plus ${money0(x.unallocated)} not on any job, comes to the line's ${money0(x.cost)}.` : ` · the line is ${money0(x.revenue)}${costs ? ` and ${money0(x.cost)}` : ''}.`}${empty ? ` ${Fmt.grouped(empty)} more orders carry no money on this line.` : ''}</p>
+      <p class="md-tie">Jobs ${money0(jRev)} billed${costs ? `, ${money0(jCost)} cost` : ''}${costs && Math.abs(x.unallocated) >= 0.5 ? `, plus ${money0(x.unallocated)} not on any job, comes to the line's ${money0(x.cost)}.` : `, the line is ${money0(x.revenue)}${costs ? ` and ${money0(x.cost)}` : ''}.`}${empty ? ` ${Fmt.grouped(empty)} more orders carry no money on this line.` : ''}</p>
       ${x.why.length ? `<p class="src">${x.why.map(esc).join(' ')}</p>` : ''}
       <p class="src">Boxes and barcodes inside a job are not in the database: VCK's work-order detail is not in the daily push.</p>`}`, 1);
     if (!el || f === 'storage') return;
@@ -136,7 +137,7 @@ export async function openDrawer({ level1, name, R, row = null, B = null, family
     const basis = !costs || !j.route && !j.noRoute ? '' : j.noRoute ? ` No stop is recorded for this account on ${day(j.date)}, so this job carries no route cost.` : j.real ? ' Its route cost is its real share of the route that day, below.' : " Its route cost is the model's average visit: this line has no route days to read.";
     const breakeven = costs && !j.flatFee && j.margin < 0 && j.items.length && j.items[0].units > 0 ? `<li><span><i class="md-kind">Price</i><b>To cover this job</b><small>${esc(titleCase(String(svc.get(j.items[0].code) || j.items[0].code)))} at ${Fmt.money((j.items[0].revenue - j.margin) / j.items[0].units, { dp: 2 })} a unit, against ${Fmt.money(j.items[0].revenue / j.items[0].units, { dp: 2 })} today.</small></span><em>+${money0(-j.margin)}</em></li>` : '';
     const el = paint(`${crumb([{ t: title, go: 'account' }, { t: famName(f), go: 'line' }, { t: `${j.woid}, ${day(j.date)}` }])}${totals(rev, j.cost, 'Billed')}
-      ${costs ? jobHtml({ o: j, items: j.items, c, svcName: svc, basis }) : `<div class="jv">${j.items.map(i => `<div class="jv-row"><span>${esc(titleCase(String(svc.get(i.code) || i.code)))} <small>${esc(i.code)} · ${Fmt.count(i.units)}</small></span><span class="num">${money0(i.revenue)}</span></div>`).join('')}</div>`}
+      ${costs ? jobHtml({ o: j, items: j.items, c, svcName: svc, basis }) : `<div class="jv">${j.items.map(i => `<div class="jv-row"><span>${esc(titleCase(String(svc.get(i.code) || i.code)))} <small>${esc(i.code)}, ${Fmt.count(i.units)}</small></span><span class="num">${money0(i.revenue)}</span></div>`).join('')}</div>`}
       ${breakeven ? `<h3>What would improve it</h3><ul class="md-levers">${breakeven}</ul>` : ''}
       <p class="src">One job of ${Fmt.grouped(x.jobs.length)} on this line. Boxes and barcodes inside it are not in the database: VCK's work-order detail is not in the daily push.</p>`, 2);
     if (!el || !costs || !j.real) return;

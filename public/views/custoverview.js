@@ -1,7 +1,5 @@
-// Customers › Overview — the first thing Customers shows. A KPI band (last month's sales, its trend,
-// the book by line), the largest, rising and slipping five, then every account in one table: sort by
-// any column, filter to one line of business to see price and cost per unit. Every figure opens a
-// pop-out that says why it is what it is, against similar accounts, and what to do about it.
+// All accounts: three lit points, four tiles, the book by line (each line opens a drawer), who moved, then every
+// account in one table (components/accttable.js). Every figure opens a pop-out that says why it is what it is.
 // Figures from components/custbook.js and home2data.js, the same ones Home and Ask read.
 import * as Fmt from '/components/format.js';
 import { money0, moneyK, sparkline } from '/components/chart.js';
@@ -12,24 +10,20 @@ import { FAMILY_NAMES } from '/components/margin.js';
 import { serviceMedians, slippingAccounts, CITADEL } from '/components/levers.js';
 import { LINES } from '/components/whitespace.js';
 import { openPop } from '/components/pop.js';
-import { dataTable, kOnly } from '/components/datatable.js';
-import { costsVisible, whoAmI, myRole } from '/components/access.js';
+import { costsVisible } from '/components/access.js';
 import { LABELS, changeWord, isLumpy } from '/components/metrics.js';
-import { accountFilters } from '/components/acctfilters.js';
 import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
-import { openDrawer } from '/components/margindrawer.js';
+import { accountTable } from '/components/accttable.js';
+import { litCard, drawPoints, tile, chip, chipText } from '/components/lit.js';
+import { openLine } from '/components/linedrawer.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const pct = v => `${Fmt.pct(v, { abs: true })}`;
-const chip = (v, quiet) => v == null ? '<span class="h2-d flat">—</span>' : `<span class="h2-d ${quiet ? 'quiet' : v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat'}">${changeWord(v)}</span>`;
 const signedK = v => v == null ? '—' : (v < 0 ? '−' : '+') + moneyK(Math.abs(v));
-// a lumpy line's move reads in dollars, not a percentage
-const move = (key, v, pct) => pct == null || pct <= -1 || !isLumpy(key, v / (1 + pct)) ? chip(pct) : `<span class="h2-d quiet">${signedK(v - v / (1 + pct))}</span>`;
 const unitMoney = (v, unit) => v == null ? '—' : '$' + (unit === 'box a month' || unit === 'lb' ? Fmt.fixed(v, 3) : Fmt.fixed(v, 2));
 
 export async function render(main, C, params, tabs) {
-  // the customer book and the book by line, worked out on the server (server/views.js); pricing loads only
-  // when a price pop-out opens
+  // the customer book and the book by line, worked out on the server (server/views.js)
   const [P, VW, R] = await Promise.all([getJson('pulse'), getJson('view/customers'), loadRates()]);
   const B = { rows: VW.rows, book: VW.book, months: VW.months, ws: VW.ws }, seg = VW.seg, PR = null;
   const cust = customerView({ C });
@@ -37,92 +31,60 @@ export async function render(main, C, params, tabs) {
   const active = B.rows.filter(r => r.last > 0 && !r.citadel).length, activePrev = C.accounts.filter(a => a.level1 !== CITADEL && (a.storage[a.storage.length - 2] + a.service[a.service.length - 2]) > 0).length;
   const slip = slippingAccounts(C), slipV = slip.reduce((t, s) => t - s.move.d, 0);
   const crossV = B.ws.total / 12;
+  const changeOf = v => v == null ? '' : Math.abs(v) < .01 ? 'level' : `${v > 0 ? 'up' : 'down'} ${Fmt.pct(v, { abs: true })}`;
+  const topCross = VW.rows.filter(r => r.oppRow && r.oppRow.opp > 0).sort((a, b) => b.oppRow.opp - a.oppRow.opp)[0];
+  const bestCell = r => Object.entries(r.oppRow.cells).filter(([, c]) => !c.have && c.opp > 0).sort((x, y) => y[1].opp - x[1].opp)[0];
+  const lineWord = k => { const n = (LINES.find(x => x.key === k) || { name: k }).name; return n === 'ITAD' ? n : n.toLowerCase(); };
+  const st = seg && seg.rows.find(x => x.key === 'storage');
+  const mPct = last.core / prev.core - 1, biggest = slip.slice().sort((a, b) => a.move.d - b.move.d)[0];
+  const pts = [
+    slip.length ? { key: 'slip', tone: 'r', lead: `${slip.length} accounts are slipping,`, rest: `${moneyK(slipV)} a month below their own run.${biggest ? ` The biggest is ${titleCase(biggest.customer)}, down ${moneyK(-biggest.move.d)} a month.` : ''}` } : { key: 'slip', tone: 'g', lead: 'No account is slipping', rest: 'against its own run.' },
+    { key: 'month', tone: mPct <= -.05 ? 'a' : 'g', lead: `Invoiced ${moneyK(last.core)} in ${mon(last.month)},`, rest: `${changeOf(mPct)} on ${mon(prev.month)}${ly ? ` and ${changeOf(last.core / ly.core - 1)} on a year ago` : ''}.${st ? ` Storage is ${moneyK(st.lm)} of the ${mon(seg.month)} lines.` : ''}` },
+    { key: 'cross', tone: 'a', lead: `Cross-sell is worth up to ${moneyK(crossV)} a month`, rest: `if accounts bought like comparable ones.${topCross ? ` Start with ${titleCase(topCross.customer)}: ${lineWord(bestCell(topCross)[0])}.` : ''}` },
+  ];
 
-  const kpis = `<section class="h2-kpis four">
-      <div class="h2-kpi lead" data-in style="--d:0ms"><span>${esc(LABELS.invoiced)}, ${esc(mon(last.month))}, core</span><b>${moneyK(last.core)}</b><small>${chip(last.core / prev.core - 1)} on ${esc(mon(prev.month))}${ly ? ` · ${chip(last.core / ly.core - 1)} on a year ago` : ''}</small></div>
-      <div class="h2-kpi" data-in style="--d:80ms"><span>${LABELS.invoicedThisMonth}</span><b>${active}</b><small>${chip(active / activePrev - 1)} on the month before</small></div>
-      <a class="h2-kpi" data-in style="--d:160ms" href="#opportunities?f_kind=slip"><span>Slipping ›</span><b>${slip.length}</b><small>${moneyK(slipV)} a month below their own run</small></a>
-      <a class="h2-kpi" data-in style="--d:240ms" href="#customers?view=whitespace"><span>Cross-sell est. ›</span><b>${moneyK(crossV)}</b><small>a month, if each bought like its peers</small></a>
-    </section>`;
+  const kpis = `<section class="ktiles">
+    ${tile({ lead: true, label: `${LABELS.invoiced}, ${mon(last.month)}`, big: moneyK(last.core), sub: `${chip(mPct)} on ${esc(mon(prev.month))}${ly ? `, ${esc(changeOf(last.core / ly.core - 1))} on a year ago` : ''}`, spark: P.monthly.slice(-12).map(m => m.core) })}
+    ${tile({ d: 80, label: LABELS.invoicedThisMonth, big: String(active), sub: `${chip(active / activePrev - 1)} on the month before` })}
+    ${tile({ d: 160, href: '#customers?view=slipping', label: 'Slipping', big: String(slip.length), sub: `${chipText('−' + moneyK(slipV) + ' a month', 'down')} below their own run` })}
+    ${tile({ d: 240, href: '#customers?view=whitespace', label: 'Cross-sell est.', big: moneyK(crossV), sub: 'a month, if each bought like its peers' })}
+  </section>`;
 
-  // the book by line: one bar, each line's share of last month, with its change
-  const segCard = seg ? `<section class="h2-card" data-in><div class="h2-ch"><h2>${esc(mon(seg.month))} by line of business</h2><small>${moneyK(seg.total)} · tap a line to see its customers' prices and costs</small></div>
-      <div class="c2-stack">${seg.rows.map((s, i) => `<i class="s${i}" style="--w:${(s.lm / seg.total * 100).toFixed(2)}%" title="${esc(s.name)} ${moneyK(s.lm)}"></i>`).join('')}</div>
-      <div class="c2-legend">${seg.rows.map((s, i) => { const f = FAMS.find(x => x.key === s.key); return `<${f ? `a href="#customers?view=overview&f_line=${s.key}"` : 'span'} class="c2-li"><i class="k s${i}"></i><span>${esc(s.name)}</span><b>${moneyK(s.lm)}</b>${move(s.key, s.lm, s.lmPct)}</${f ? 'a' : 'span'}>`; }).join('')}</div></section>` : '';
+  // the book by line: one bar, greens and greys, two columns; a line opens its drawer
+  const lobCard = seg ? `<section class="h2-card" data-in><div class="h2-ch"><h2>${esc(mon(seg.month))} by line of business</h2><small>${moneyK(seg.total)}. Tap a line for its trend, top customers and what to do next.</small></div>
+      <div class="lob-bar" aria-hidden="true">${seg.rows.map((s, i) => `<i class="l${i + 1}" style="flex:${Math.max(.2, s.lm / seg.total * 100).toFixed(2)} 0 0;--i:${i}"></i>`).join('')}</div>
+      <div class="lob-list">${seg.rows.map((s, i) => `<button type="button" class="lob-row" data-line="${s.key}"><i class="l${i + 1}"></i><span>${esc(s.name)}</span><b>${moneyK(s.lm)}</b>${chip(s.lmPct) || '<span></span>'}<em class="chev"></em></button>`).join('')}</div></section>` : '';
 
-  const custRow = (r, kind) => `<li><a href="#customer/${r.level1}"><span class="h2-cn">${esc(titleCase(r.customer))}</span>${sparkline(r.spark, { w: 72, h: 22, cls: 'service' })}
-      <span class="h2-cv ${kind === 'top' ? '' : kind === 'rising' ? 'up' : 'down'}">${kind === 'top' ? moneyK(r.last3) : signedK(r.d)}<small>a month</small></span></a></li>`;
-  const fives = `<section class="h2-card" data-in><div class="h2-ch"><h2>Who moved</h2><small>last three months against each account's own year before</small></div>
-      <div class="seg h2-tabs"><button data-k="top" class="on">Largest</button><button data-k="rising">Rising</button><button data-k="falling">Slipping</button></div>
-      <div class="h2-cols">
-        <div class="h2-col" data-k="top"><h3>Largest</h3><ul class="h2-cl">${cust.top.map(r => custRow(r, 'top')).join('')}</ul></div>
-        <div class="h2-col" data-k="rising"><h3>Rising</h3><ul class="h2-cl">${cust.rising.map(r => custRow(r, 'rising')).join('')}</ul></div>
-        <div class="h2-col" data-k="falling"><h3>Slipping <a href="#customers?view=slipping">all ${cust.slipping} ›</a></h3><ul class="h2-cl">${cust.falling.map(r => custRow(r, 'falling')).join('')}</ul></div>
-      </div></section>`;
+  const movedCol = (title, tone, kind, list, val, more = '') => { const mx = Math.max(1, ...list.map(r => Math.abs(val(r)))); return `<div class="mv-col"><h3><span><span class="light ${tone}"></span>${title}</span>${more}</h3>${list.map((r, i) => { const v = val(r); return `<a class="mv-row" href="#customer/${r.level1}"><span>${esc(titleCase(r.customer))}</span><b class="${kind}">${kind === 'lgst' ? moneyK(v) : signedK(v)}</b><i class="${kind}" style="--s:${(Math.abs(v) / mx).toFixed(3)};--i:${i}"></i></a>`; }).join('')}<small>${kind === 'lgst' ? 'a month' : kind === 'up' ? 'a month on its own run' : 'a month below its own run'}</small></div>`; };
+  const moved = `<section class="h2-card" data-in><div class="h2-ch"><h2>Who moved</h2><small>Last three months against each account's own year before</small></div><div class="mv-grid">
+    ${movedCol('Largest', 'g', 'lgst', cust.top, r => r.last3)}${movedCol('Rising', 'g', 'up', cust.rising, r => r.d)}${movedCol('Slipping', 'r', 'down', cust.falling, r => r.d, `<a class="chev" href="#customers?view=slipping">All ${cust.slipping}</a>`)}</div></section>`;
 
-  main.innerHTML = `<div class="cust c2 h2">
+  main.innerHTML = `<div class="cust c2 h2 ac">
     <h1>Accounts</h1>
     ${tabs}
+    ${litCard('ac-lit')}
     ${kpis}
-    <div class="h2-row">${segCard}${fives}</div>
+    ${lobCard}
+    ${moved}
     <section class="h2-card c2-tablecard" data-in>
       <div id="c2-dt"></div>
-      <div class="src">Sales as invoiced, Citadel held apart from totals ${costsVisible() ? '· margin and cost a unit est. are modelled from GL pools over twelve months, provisional · tap a margin for its lines and jobs ' : ''}· price a unit is the line's revenue over the units that drive it · tap an account for its lines, a month for its invoices</div>
+      <div class="src">Sales as invoiced, Citadel held apart from totals${costsVisible() ? '. Margin and cost a unit est. are modelled from GL pools over twelve months, provisional' : ''}. Tap an account for its lines, a month for its invoices.</div>
     </section>
   </div>`;
+  drawPoints(main.querySelector('#ac-lit'), pts);
+  main.querySelectorAll('.lob-row').forEach(b => b.addEventListener('click', () => openLine(seg.rows.find(s => s.key === b.dataset.line), { VW, seg })));
 
-  const tabsEl = main.querySelectorAll('.h2-tabs button'), cols = main.querySelectorAll('.h2-col');
-  const pick = k => { tabsEl.forEach(b => b.classList.toggle('on', b.dataset.k === k)); cols.forEach(c => c.classList.toggle('on', c.dataset.k === k)); };
-  tabsEl.forEach(b => b.addEventListener('click', () => pick(b.dataset.k))); pick('top');
-
-  // every account by month billed, on the one table: the 50 largest and all the others, adding to invoiced core.
-  // A row opens to its lines; a month opens its invoices; the other columns are behind Columns.
   const cellBtn = (r, inner, x) => `<button class="c2-x" data-x="${x}" data-id="${r.level1}">${inner}</button>`;
-  const kFmt = v => moneyK(v);
-  const byBook = new Map(B.rows.map(r => [r.level1, r]));
-  const am = VW.am, at = new Map(am.months.map((m, i) => [m, i]));
-  const rows = am.rows.filter(a => a.level1 !== CITADEL && a.m.some(Boolean)).map(a => {
-    const b = byBook.get(a.level1) || {};
-    return { ...b, level1: a.level1, customer: a.customer, m: a.m, ltm: a.m.slice(-12).reduce((t, v) => t + v, 0) };
-  });
-  const name = { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` };
-  const asK = st => st.f.mv === 'k';
-  const marginCell = (r, v, st, x = 'margin') => `<button class="c2-x" data-x="${x}" data-id="${r.level1}"><span class="${v.m < 0 ? 'is-bad' : v.pc != null && v.pc < .15 ? 'is-warn' : ''}">${asK(st) ? signedK(v.m) : v.pc == null ? '—' : Fmt.pct(v.pc).replace('-', '−')}</span></button>`;
-  const marginTotal = (st, of) => rows => { const t = rows.reduce((a, r) => { const v = of(r); return v ? { rev: a.rev + v.rev, m: a.m + v.m } : a; }, { rev: 0, m: 0 }); return asK(st) ? signedK(t.m) : t.rev > 0 ? Fmt.pct(t.m / t.rev).replace('-', '−') : '—'; };
-  const allCols = st => [name,
+  const extra = [
     { k: 'd', l: 'Against its own run, a month', short: 'Own run', get: r => r.d, fmt: r => r.d == null ? '—' : cellBtn(r, `<span class="h2-cv ${r.movePct >= .2 ? 'up' : r.movePct <= -.2 ? 'down' : ''}">${signedK(r.d)}</span>`, 'sales') },
     { k: 'opp', l: 'Cross-sell est., a month', short: 'Cross-sell est.', get: r => r.opp ? r.opp / 12 : 0, fmt: r => r.opp > 0 ? cellBtn(r, moneyK(r.opp / 12), 'opp') : '—' },
     { k: 'gap', l: 'Under the book, a year', short: 'Under book', get: r => r.gap, fmt: r => r.gap > 0 ? cellBtn(r, moneyK(r.gap), 'gap') : '—' },
     { k: 'spark', l: '13 months', csv: () => '', fmt: r => r.spark ? sparkline(r.spark, { w: 84, h: 22, cls: 'service' }) : '' },
-    ...(costsVisible() ? [{ k: 'pc', l: asK(st) ? 'Margin $K est.' : 'Margin % est.', short: asK(st) ? '$K est.' : '% est.', def: true, get: r => asK(st) ? r.margin : r.pc, csv: r => asK(st) ? r.margin : r.pc, fmt: r => r.pc == null ? '—' : marginCell(r, { m: r.margin, pc: r.pc }, st), totalHtml: marginTotal(st, r => r.pc == null ? null : { rev: r.revenue, m: r.margin }) }] : []),
-  ];
-  // a line of business chosen: who buys it, with its price and units beside the months
-  const famCols = (key, st) => [name,
-    { k: 'price', l: 'Price a unit', short: 'Price', def: true, get: r => r.fam && r.fam[key] && r.fam[key].price, fmt: r => { const f = r.fam && r.fam[key], p = f && f.price ? pricePosition(B, r, key) : null; return f && f.price ? cellBtn(r, `${unitMoney(f.price, f.unit)}${p && !p.widened ? ` <span class="c2-pct ${p.pct < .25 ? 'lo' : p.pct > .75 ? 'hi' : ''}">${p.pct < .25 ? 'low' : p.pct > .75 ? 'high' : 'mid'}</span>` : ''}`, 'price') : '—'; } },
-    { k: 'units', l: 'Units, a year', short: 'Units', def: true, get: r => r.fam && r.fam[key] && r.fam[key].units, fmt: r => r.fam && r.fam[key] ? Fmt.num(r.fam[key].units) : '—' },
-    ...(costsVisible() ? [
-      { k: 'costPer', l: 'Cost a unit est.', get: r => r.fam && r.fam[key] && r.fam[key].costPer, fmt: r => { const f = r.fam && r.fam[key]; return f && f.costPer ? cellBtn(r, unitMoney(f.costPer, f.unit), 'price') : '—'; } },
-      { k: 'fmargin', l: asK(st) ? 'Margin $K est.' : 'Margin % est.', short: asK(st) ? '$K est.' : '% est.', def: true, get: r => { const f = r.fam && r.fam[key]; return !f ? null : asK(st) ? f.revenue - f.cost : f.revenue > 0 ? (f.revenue - f.cost) / f.revenue : null; }, fmt: r => { const f = r.fam && r.fam[key]; return f ? marginCell(r, { m: f.revenue - f.cost, pc: f.revenue > 0 ? (f.revenue - f.cost) / f.revenue : null }, st) : '—'; }, totalHtml: marginTotal(st, r => { const f = r.fam && r.fam[key]; return f ? { rev: f.revenue, m: f.revenue - f.cost } : null; }) },
-    ] : []),
-  ];
-  const filters = [...(costsVisible() ? [{ k: 'mv', l: 'Show margin as', seg: true, options: [['pc', '% margin'], ['k', '$K margin']], test: () => true }] : []), ...accountFilters(VW, C)];
-  const role = myRole();
-  const views = [
-    ...(role === 'owner' || role === 'admin' ? [{ name: 'Slipping over $2K a month', q: 'f_trend=slip2k' }] : []),
-    ...(role === 'billing' || role === 'admin' ? [{ name: 'Storage under book', q: 'f_line=storage&f_book=under' }] : []),
   ];
   if (params.line) history.replaceState(null, '', location.hash.replace(/([?&])line=/, '$1f_line='));   // links saved before the filter bar
-  const host = main.querySelector('#c2-dt');
-  const core = new Map(P.monthly.map(x => [x.month, x.core]));
-  dataTable(host, { key: 'accounts', who: whoAmI(), rows, filters, views, defaults: costsVisible() ? { mv: 'pc' } : {}, placeholder: 'Find an account', noun: 'accounts', rest: true,
-    ref: { label: LABELS.invoiced + ', core', get: m => core.get(m) },
-    months: { list: am.months, get: (r, m) => r.m[at.get(m)],
-      cell: (r, m) => { const v = r.m[at.get(m)]; return v ? `<span data-inv-id="${r.level1}" data-inv-m="${m}" data-inv-name="${esc(r.customer)}">${kOnly(v)}</span>` : '—'; } },
-    search: r => r.customer, cols: st => st.f.line ? famCols(st.f.line, st) : allCols(st),
-    say: (st, shown) => { const f = st.f.line && FAMS.find(x => x.key === st.f.line); return f ? `accounts buying ${f.name.toLowerCase()} · $K` : 'accounts · invoiced, by month billed · $K'; },
-    expand: async r => { const v = await getJson('view/account-lines?level1=' + r.level1); return v.rows.map(l => ({ name: l.name, values: Object.fromEntries(v.months.map((m, i) => [m, l.values[i]])) })); },
-    onRow: (r, e) => { const b = e.target.closest('.c2-x'), line = (new URLSearchParams(location.hash.split('?')[1] || '')).get('f_line'); if (!b) return; if (b.dataset.x === 'margin') return openDrawer({ level1: r.level1, name: r.customer, R, row: r, B, family: line || null }); explain(b.dataset.x, r, { B, PR, line, R }); },
-  });
+  VW.lines = async r => { const v = await getJson('view/account-lines?level1=' + r.level1); return v.rows.map(l => ({ name: l.name, values: Object.fromEntries(v.months.map((m, i) => [m, l.values[i]])) })); };
+  VW.explain = (b, r) => explain(b.dataset.x, r, { B, PR, line: null, R });
+  accountTable(main.querySelector('#c2-dt'), { key: 'accounts', VW, C, R, B, P, extra });
   document.documentElement.classList.add('js');
   const root = main.querySelector('.c2');
   if (firstPlay('r4-accounts-played')) { root.classList.add('play'); whenIntroDone().then(() => playIn(root)); }
@@ -167,7 +129,7 @@ export async function explain(kind, r, { B, PR, line, R }) {
         <text x="${x(f.price)}" y="50" text-anchor="${anchor}">this account, ${unitMoney(f.price, f.unit)}</text></svg>`;
     }
     return openPop({
-      title: `${name} · ${fname}`, sub: `${unitMoney(f.price, f.unit)} a ${f.unit}${f.costPer ? `; costs ${unitMoney(f.costPer, f.unit)} to serve est.` : ''}`, ask: `Is ${name} priced right for ${fname.toLowerCase()} against similar accounts?`,
+      title: `${name}, ${fname}`, sub: `${unitMoney(f.price, f.unit)} a ${f.unit}${f.costPer ? `; costs ${unitMoney(f.costPer, f.unit)} to serve est.` : ''}`, ask: `Is ${name} priced right for ${fname.toLowerCase()} against similar accounts?`,
       html: `${p ? `<p class="p2-lede">${p.widened ? `Few accounts buy ${fname.toLowerCase()} at ${esc(name)}'s volume, so this is the whole book (${p.n}), mostly smaller accounts that pay more a unit.` : `Against ${p.n} accounts buying ${fname.toLowerCase()} at a similar volume, it pays more than <b>${pct(p.pct)}</b> of them. Their middle half pays ${unitMoney(p.p25, p.unit)} to ${unitMoney(p.p75, p.unit)}, median ${unitMoney(p.med, p.unit)}.`}</p>${strip}` : '<p>Too few accounts buy this line in the same unit to compare.</p>'}
         <p>${f.costPer ? `It costs about <b>${unitMoney(f.costPer, f.unit)}</b> a ${esc(f.unit)} to serve est., so each one ${f.price >= f.costPer ? `leaves <b>${unitMoney(f.price - f.costPer, f.unit)}</b>` : `<b class="is-bad">loses ${unitMoney(f.costPer - f.price, f.unit)}</b>`}.` : ''}
         ${p && p.toMedian > 0 ? ` At its peers' median it would bill <b>+${moneyK(p.toMedian)} a year</b>.` : ''}</p>

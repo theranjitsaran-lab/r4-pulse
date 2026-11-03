@@ -177,6 +177,14 @@ export function marginLevers(R, acct, lines, F, { row = null, position = null, f
   return out.filter(l => l.worth > 0).sort((a, b) => b.worth - a.worth);
 }
 
+// The one definition of a margin, used on every button, pill, tile and pop-out: Healthy, Normal, Thin, from the two
+// cut-offs on Settings (model/rates.js SETTINGS marginHealthy and marginThin). g, a, r are its colours.
+export function marginBand(R, m) {
+  if (m == null) return { cls: 'n', word: 'Not costed' };
+  const S = R.SETTINGS;
+  return m < 0 ? { cls: 'r', word: 'Thin, losing money' } : m < S.marginThin ? { cls: 'r', word: 'Thin' } : m < S.marginHealthy ? { cls: 'a', word: 'Normal' } : { cls: 'g', word: 'Healthy' };
+}
+
 // The book's margin as Home and the Margin view show it, from one place so they always agree:
 // accounts over $1,000 a year (Citadel apart) with their margin %, a flag when route costs are over
 // half their cost (under review), the margin on the lines costed with confidence, and the accounts

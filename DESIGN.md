@@ -70,6 +70,7 @@ Home, by Theran's decision on 2 November 2026:
 - **Live route map:** district shading appears lightest to darkest, routes draw out from the yard, dashes march, a marker loops out and back and each stop pulses as it's reached. It pauses off screen or when the tab is hidden.
 - **Every other map follows Home's** (Theran, 2 November 2026; `components/mapkit.js`): the same district shading, always R4's done services over twelve months, so a district is one colour everywhere; routes as the marching dashed line drawn out from the yard, a marker going round and stops pulsing, paused off screen.
 - **Quote** (Theran, 3 November 2026): the four figures count to their new values whenever anything changes; pin drop, ring, route draw, stop pop and card bars grow on its map and cards.
+- **Accounts and customer pages** (Theran, 3 November 2026): lights on every summary, figures count up in the once-a-session entrance, bars grow, margin pills pop in, the drawer slides and the margin pop-out scales.
 - **Rules:** animate only transform, opacity and stroke-dashoffset; never `transition: all`; the real figures are in the HTML first; reduced motion shows end states and no loops.
 
 ## Map

@@ -80,7 +80,7 @@
   --f-brand:    "Average Sans", var(--f-sans);   /* the "Pulse" wordmark only (27 October 2026) */
   --f-body:     var(--f-sans);
   --f-narrow:   var(--f-sans);
-  --f-num:      ui-monospace, "SF Mono", SFMono-Regular, Consolas, Menlo, monospace;   /* the tables' figures; system, nothing fetched */
+  --f-num:      var(--f-sans);   /* the tables' figures: the system sans with tabular figures */
   --w-head:     600;       /* every title and figure; 400 for text, nothing else */
 
   --fs-source:  12px;
@@ -116,6 +116,12 @@
 
   /* ── maps: a quiet outline under the route, the lake the one landmark; never a series colour ── */
   --q-travel: #7d847f; --q-time: #a3aaa5; --q-plant: #c7ccc8; --q-other: #dfe3df;   /* where a quote's price goes */
+  --rag-g: #dcefdc; --rag-g-ink: #1b5e20; --rag-a: #fdeccb; --rag-a-ink: #8a5200; --rag-r: #f9dcdc; --rag-r-ink: #b42020;   /* Healthy, Normal, Thin */
+  --up-bg: #e4edf9; --up-ink: #1f5fbf; --down-bg: #fbe6e6; --down-ink: #c62828;   /* a change chip */
+  --light-g: #4caf50; --light-a: #e0a030; --light-r: #c62828;   /* the summary's lights */
+  --l1: #1b5e20; --l2: #3f8f44; --l3: #6fae73; --l4: #a3cba6; --l5: #cfe3d0; --l6: #7d847f; --l7: #a8aea9; --l8: #d3d7d4;   /* lines of business: green ramp and greys */
+  --mk1: #e6f0e6; --mk2: #c9e1ca; --mk3: #9ac79d; --mk4: #4f9a55; --mk5: #1b5e20; --mkn1: #fbe6e6; --mkn2: #f6cccc; --mkn3: #efabab; --mkn4: #d96a6a; --mkn5: #b42020;   /* $K margin cells */
+  --xs-bg: #e3f1e4; --xs-ink: #1b5e20; --xs-ring: #9cc89f; --low-ring: #e9c27a;
   --map-water:  #e6edf3;
   --map-land:   #fbfbfc;
   --map-border: #dedee3;   /* county lines */

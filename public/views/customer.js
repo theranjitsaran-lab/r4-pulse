@@ -1,13 +1,15 @@
 // One customer: the page every list and every number opens. Desktop first, restacks on a phone.
-// Four figures · 24 months of storage and service with proper axes · its margin bridge and lines, each opening
-// the one drill drawer (components/margindrawer.js): every job, then one job's cost build · what would improve it
-// and its open opportunities · folded below: not bought yet, prices, signals; where it is served and its visits.
+// Three lit points beside who they are, four tiles, the margin one a button, twelve months beside what would improve
+// it, every line with its margin pill: a line's name opens the drill drawer (components/margindrawer.js), a pill the
+// margin pop-out, where it is served, folded below: opportunities, not bought yet, prices, signals, visits.
 import * as Fmt from '/components/format.js';
-import { lineChart, money0, moneyK } from '/components/chart.js';
-import { buildMargins, accountJobs, marginLevers, FAMILY_NAMES } from '/components/margin.js';
+import { money0, moneyK } from '/components/chart.js';
+import { buildMargins, accountJobs, marginLevers, marginBand, costParts, FAMILY_NAMES } from '/components/margin.js';
+import { drawPoints, tile, chip, ragPill, barsSvg } from '/components/lit.js';
+import { openMargin, weakest } from '/components/marginpop.js';
+import { isAdmin } from '/components/access.js';
 import { pricePosition } from '/components/custbook.js';
-import { openDrawer, bridgeHtml, linesHtml, leversHtml, linesOf } from '/components/margindrawer.js';
-import { openInvoices } from '/components/invoices.js';
+import { openDrawer, leversHtml, linesOf } from '/components/margindrawer.js';
 import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
 import { loadZones, bookShading, playMap, zoneKey } from '/components/mapkit.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
@@ -25,6 +27,7 @@ export async function render(main, C, params) {
   if (!main) return;
   const id = Number(params.id);
   const [R, M, PR, CA, log, VW] = await Promise.all([loadRates(), getJson('margin'), getJson('pricing'), getJson('calls'), getLog(Number(params.id)).catch(() => []), costsVisible() ? getJson('view/customers').catch(() => null) : null]);
+  const [QR, ZC] = await Promise.all([getJson('view/quote-routes').catch(() => null), zcta()]);
   const s = seriesOf(C).get(id);
   const book = buildMargins(R, M, {});
   const m = book.accounts.find(a => a.level1 === id);
@@ -45,7 +48,6 @@ export async function render(main, C, params) {
   const slipping = s && s.move && slippingAccounts(C).some(x => x.level1 === id);
   const share = k => s ? Math.round(s[k].slice(-12).reduce((t, v) => t + v, 0) / Math.max(1, s.ltm) * 100) : null;
   const n0 = Fmt.count;
-  const summary = s && s.move && Math.abs(s.move.pct || 0) >= 0.05 ? `Over the last three months: ${moveReason(s.move, moneyK)}.` : id === CITADEL ? "Citadel's settlements land in lumps, so it is held apart from core." : '';
 
   // prices: this account's rates against the book's median for each service, and what moving is worth
   const byCode = new Map();
@@ -80,44 +82,58 @@ export async function render(main, C, params) {
   const levers = F && costsVisible() ? marginLevers(R, acct, lines, F, { row, position }) : [];
   const working = F ? Object.values(F.fams).flatMap(x => x.working) : [];
   const drawer = (family = null, woid = null) => openDrawer({ level1: id, name: (s && s.customer) || (m && m.customer) || name, R, row, B, family, woid });
-  const tile = (cls, d, label, big, small) => `<div class="h2-kpi ${cls}" data-in style="--d:${d}ms"><span>${label}</span><b>${big}</b><small>${small}</small></div>`;
-  const moved = s && s.move && s.move.pct != null ? (Math.abs(s.move.pct) < 0.01 ? 'level with' : `${s.move.pct > 0 ? 'up' : 'down'} ${Fmt.pct(s.move.pct, { abs: true })} on`) : null;
-
+  const moved = s && s.move && s.move.pct != null ? (Math.abs(s.move.pct) < 0.01 ? null : s.move.pct) : null;
+  const allParts = costParts(working), rowsF = F ? linesOf(F) : [], costs = costsVisible(), weak = m ? weakest(m.fam) : null;
+  const pcS = v => { const t = Fmt.pct(Math.abs(v)); return (v < 0 && t !== '0%' ? '−' : '') + t; };
+  const word = n => n === 'ITAD' ? n : n.toLowerCase();
+  // the three points, from computed fields only
+  const pts = [];
+  if (s && s.move) pts.push({ key: 'run', tone: moved != null && moved <= -.1 ? 'r' : moved != null && moved < -.02 ? 'a' : 'g', lead: moved == null ? 'About level on its own run:' : moved > 0 ? `Up ${Fmt.pct(moved, { abs: true })} on its own run:` : `Down ${Fmt.pct(moved, { abs: true })} on its own run:`, rest: `running at ${moneyK(s.move.last3)} a month against ${moneyK(s.move.run)}; ${share('storage')}% of ${moneyK(ltm)} is storage.` });
+  else pts.push({ key: 'run', tone: 'a', lead: `${moneyK(ltm)} in twelve months,`, rest: 'too little history for a run.' });
+  if (costs && weak) { const l = weak.revenue - weak.cost, wp = l / weak.revenue; pts.push({ key: 'weak', tone: marginBand(R, wp).cls === 'g' ? 'g' : marginBand(R, wp).cls, lead: `${FAMILY_NAMES[weak.family] || weak.family} earns least:`, rest: `${money0(weak.revenue)} of revenue on ${money0(weak.cost)} to serve, ${pcS(wp)} est.` }); }
+  const lowCell = wsRow ? LINES.map(x => ({ x, c: wsRow.cells[x.key] })).find(o => o.c.low) : null, addCell = wsRow ? LINES.map(x => ({ x, c: wsRow.cells[x.key] })).filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp)[0] : null;
+  if (lowCell) pts.push({ key: 'low', tone: 'a', lead: `Low on ${word(lowCell.x.name)} for its size:`, rest: `${moneyK(lowCell.c.spend)} a year against about ${moneyK(lowCell.c.expected)} at comparable accounts est.` });
+  else if (addCell) pts.push({ key: 'add', tone: 'a', lead: `Does not buy ${word(addCell.x.name)} yet:`, rest: `about ${moneyK(addCell.c.opp)} a year at comparable accounts est.` });
+  else if (slipping) pts.push({ key: 'slip', tone: 'r', lead: 'Slipping:', rest: `${moneyK(s.move.last3)} a month against its own ${moneyK(s.move.run)}.` });
+  else pts.push({ key: 'all', tone: 'g', lead: 'Nothing else stands out', rest: 'against comparable accounts.' });
+  // where it is served, from its route stops
+  const pc0 = QR && QR.acctPc ? QR.acctPc[id] : null, own = R.routeFor && R.routeFor(id), served = pc0 && ZC[pc0] ? `Served at ${pc0}, ${Fmt.fixed(miles(YARD, ZC[pc0]), 1)} mi from the yard${own ? `: ${Fmt.num(own.services)} services on ${Fmt.num(own.days)} route days in twelve months.` : '.'}` : '';
+  const line12 = s ? s.months.slice(-12).map((x, i) => ({ m: x, v: s.total[s.total.length - 12 + i], attrs: `data-inv-id="${id}" data-inv-m="${x}" data-inv-name="${esc(s.customer)}"` })) : [];
   main.innerHTML = `
-  <div class="cp h2">
+  <div class="cp h2 ac">
     <div class="crumb"><a href="#customers">Accounts</a><span>›</span><span style="color:var(--ink-2)">${esc(name)}</span></div>
     <div class="cp-head"><h1>${esc(name)}</h1>
     <div class="tags">
       ${id === CITADEL ? '<span class="chip">Held apart from core</span>' : ''}
-      ${slipping ? `<span class="chip bad">Slipping: ${deltaText(s.move.pct)} on its own run</span>` : ''}
       ${signals && signals.not_raised_2y ? '<span class="chip warn">Missed every rate round</span>' : ''}
+    </div></div>
+    <div class="cp-top">
+      <section class="h2-card lit-card" data-in><div id="cp-lit"></div><small class="lit-by">Pulse summary, from the figures below</small></section>
+      <section class="h2-card cp-who" data-in id="cp-who"><div class="h2-ch"><h2>Who they are</h2></div><p class="sub">Reading…</p></section>
     </div>
-    ${summary ? `<p class="cp-lede">${summary}</p>` : ''}</div>
-    <section class="h2-kpis four">
-      ${tile('lead', 0, 'Invoiced, last twelve months', moneyK(ltm), s ? `${share('storage')}% storage, ${share('service')}% service` : '')}
-      ${s && s.move ? tile('', 80, 'Running at, a month', moneyK(s.move.last3), `${moved || 'against'} its own ${moneyK(s.move.run)} before`) : ''}
-      ${costsVisible() && m && m.cost > 0 ? tile('', 160, 'Margin est.', pc != null ? Fmt.pct(pc).replace('-', '−') : '—', `${m.margin >= 0 ? 'keeps' : 'short by'} ${moneyK(Math.abs(m.margin))} on ${moneyK(m.cost)} to serve`) : ''}
-      ${acct && (acct.boxes >= 1 || acct.bins) ? tile('', 240, acct.boxes >= 1 ? 'Boxes stored' : 'Bin services, a year', n0(acct.boxes >= 1 ? acct.boxes : acct.bins), acct.bins ? `${n0(acct.bins)} bin services on ${n0(acct.visits)} visits` : 'on average, over the year') : ''}
+    <section class="ktiles">
+      ${tile({ lead: true, label: 'Invoiced, last twelve months', big: moneyK(ltm), sub: s ? `${share('storage')}% storage, ${share('service')}% service` : '', spark: line12.map(x => x.v) })}
+      ${s && s.move ? tile({ d: 80, label: 'Running at, a month', big: moneyK(s.move.last3), sub: `${moved == null ? 'level with' : chip(moved) + ' on'} its own ${moneyK(s.move.run)}` }) : ''}
+      ${costs && m && m.cost > 0 ? tile({ d: 160, label: 'Margin est.', big: pc != null ? pcS(pc) : '—', sub: `${esc(marginBand(R, pc).word)}: ${m.margin >= 0 ? 'keeps' : 'short by'} ${moneyK(Math.abs(m.margin))} on ${moneyK(m.cost)} to serve`, margin: { cls: marginBand(R, pc).cls } }) : ''}
+      ${acct && (acct.boxes >= 1 || acct.bins) ? tile({ d: 240, label: acct.boxes >= 1 ? 'Boxes stored' : 'Bin services, a year', big: n0(acct.boxes >= 1 ? acct.boxes : acct.bins), sub: acct.bins ? `${n0(acct.bins)} bin services on ${n0(acct.visits)} visits` : 'on average, over the year' }) : ''}
     </section>
-    <section class="h2-card" data-in id="cp-chart"></section>
-    <div class="cp-two">
-      <section class="h2-card" data-in>
-        <div class="h2-ch cp-ch"><h2>${costsVisible() ? (m && m.cost > 0 ? (m.margin >= 0 ? `Keeps ${moneyK(m.margin)} of ${moneyK(m.revenue)} est.` : `Costs ${moneyK(-m.margin)} more than it pays est.`) : 'What it buys') : 'What it buys, the last twelve months'}</h2>${F && linesOf(F).length ? '<button type="button" class="linkbtn" id="cp-jobs">Every job ›</button>' : ''}</div>
-        ${costsVisible() && m && m.cost > 0 ? bridgeHtml(m.revenue, working) : ''}
-        <div id="cp-fams">${F ? linesHtml(F, costsVisible(), F.noLine) : '<p class="sub">No priced lines in the last twelve months.</p>'}</div>
-      </section>
-      <div class="cp-side">
-        ${costsVisible() ? `<section class="h2-card" data-in><div class="h2-ch"><h2>What would improve it</h2></div>${leversHtml(levers, 4)}</section>` : ''}
-        <section class="h2-card cp-opps" id="cp-opps" data-in><div class="h2-ch cp-ch"><h2>Open opportunities</h2><a href="#opportunities">All ›</a></div><p class="sub">Loading…</p></section>
-      </div>
+    <div class="cp-mid">
+      <section class="h2-card" data-in id="cp-chart">${s ? `<div class="h2-ch"><h2>${esc(chartTitle(s))}</h2><small>Invoiced a month, from VCK. Tap a month for its invoices.</small></div>${barsSvg(line12, { ref: s.move ? s.move.run : null, refLabel: s.move ? `own run ${moneyK(s.move.run)}` : '', label: chartTitle(s) })}` : ''}</section>
+      ${costs ? `<section class="h2-card" data-in><div class="h2-ch"><h2>What would improve it</h2></div>${leversHtml(levers, 4)}</section>` : ''}
     </div>
-    <details class="fold cp-fold"><summary><h3>Not bought yet, prices against the book, signals</h3><span class="sub">${sigs.length ? `${sigs.length} signal${sigs.length === 1 ? '' : 's'} · ` : ''}${mine.length} prices · open</span></summary>
+    <section class="h2-card" data-in><div class="h2-ch cp-ch"><h2>Every line${costs ? ', est.' : ''}</h2>${rowsF.length ? '<small>Tap a line for its jobs' + (costs ? ', a margin for its breakdown' : '') + '</small>' : ''}</div>
+      <div class="cp-lines"><table><thead><tr><th>Line</th><th>Revenue</th>${costs ? '<th>Cost est.</th><th>Left est.</th><th>Margin</th>' : ''}</tr></thead><tbody>${rowsF.map((x, i) => { const l = x.revenue - x.cost, p = x.revenue > 0 && x.cost > 0 ? l / x.revenue : null; return `<tr><td><button type="button" class="linkbtn cp-line" data-f="${esc(x.family)}">${esc(FAMILY_NAMES[x.family] || x.family)}</button></td><td>${money0(x.revenue)}</td>${costs ? `<td>${x.cost ? money0(x.cost) : 'not costed'}</td><td>${x.cost ? (l < 0 ? '−' : '') + moneyK(Math.abs(l)) : ''}</td><td>${p != null ? ragPill(R, p, pcS(p), `data-lm="${esc(x.family)}"`, i) : ''}</td>` : ''}</tr>`; }).join('') || `<tr><td colspan="5">No priced lines in the last twelve months.</td></tr>`}</tbody></table></div>
+      ${F && Math.abs(F.noLine) >= 1 ? `<p class="src">${money0(Math.abs(F.noLine))} invoiced with no line in this period: work and its invoice fall in different months, or a charge with no cost behind it.</p>` : ''}
+      ${served ? `<p class="cp-served">${esc(served)}</p>` : ''}
+    </section>
+    <details class="fold cp-fold"><summary><h3>Open opportunities</h3><a href="#opportunities" class="sub chev">All opportunities</a></summary><div id="cp-opps"><p class="sub">Loading…</p></div></details>
+    <details class="fold cp-fold"><summary><h3>Not bought yet, prices against the book, signals</h3><span class="sub">${sigs.length ? `${sigs.length} signal${sigs.length === 1 ? '' : 's'}, ` : ''}${mine.length} prices</span></summary>
     <div class="grid three">
         ${wsCard(wsRow, pitch)}
         <div class="card">
-          <div class="card-head"><h3>Prices against the book</h3><a href="#pricing?level1=${id}">Price it ›</a></div>
+          <div class="card-head"><h3>Prices against the book</h3><a class="chev" href="#pricing?level1=${id}">Price it</a></div>
           ${mine.map(r => `<div class="price">
-            <span><a href="#pricing?level1=${id}&code=${encodeURIComponent(r.servcode)}" style="color:inherit;text-decoration:none"><b>${esc(titleCase(r.service))}</b> <span style="color:var(--brand)">›</span></a><span class="sub" style="display:block">${Fmt.money(r.modal_rate, { dp: 2 })} · book median ${Fmt.money(r.med, { dp: 2 })} · ${r.suspect ? 'so far apart it is probably billed in another unit: check before quoting' : r.modal_rate < r.med ? `cheaper than ${Fmt.pct(1 - r.below)} of accounts` : `dearer than ${Fmt.pct(r.below)} of accounts`}</span></span>
+            <span><a href="#pricing?level1=${id}&code=${encodeURIComponent(r.servcode)}" style="color:inherit;text-decoration:none"><b class="chev">${esc(titleCase(r.service))}</b></a><span class="sub" style="display:block">${Fmt.money(r.modal_rate, { dp: 2 })}, book median ${Fmt.money(r.med, { dp: 2 })}, ${r.suspect ? 'so far apart it is probably billed in another unit: check before quoting' : r.modal_rate < r.med ? `cheaper than ${Fmt.pct(1 - r.below)} of accounts` : `dearer than ${Fmt.pct(r.below)} of accounts`}</span></span>
             <span class="v">${r.suspect ? '<span class="chip warn">check the unit</span>' : r.worth > 0 ? `+${moneyK(r.worth)} a year<span class="sub" style="display:block;font-weight:400">at the median</span>` : '<span class="sub">at or above</span>'}</span>
             <div class="pos"><b style="left:${pos(r.med, r)}%"></b><i style="left:${pos(r.modal_rate, r)}%"></i></div>
           </div>`).join('') || '<p class="sub">No service rates in the last thirteen months.</p>'}
@@ -125,11 +141,11 @@ export async function render(main, C, params) {
         <div class="card">
           <div class="card-head"><h3>Signals</h3></div>
           <div id="cp-sigs">${sigs.map(g => { const l = said.get(g.key); return `<div class="sig" data-sig="${g.key}">${esc(g.text)}<div class="acts"><button data-v="right" class="${l && l.verdict === 'right' ? 'on' : ''}">Right</button><button data-v="not_right" class="${l && l.verdict === 'not_right' ? 'on' : ''}">Not right</button><span class="sub said">${l ? `${esc(l.who)} said ${VERB[l.verdict]}, ${when(l.logged_at)}` : ''}</span></div></div>`; }).join('') || '<p class="sub">Nothing flagged this week.</p>'}</div>
-          ${log.length ? `<div class="aside" style="margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:var(--hair) solid var(--rule)"><div class="lab" style="margin-bottom:var(--sp-1)">Logged</div>${log.slice(0, 5).map(l => `<div class="sub">${when(l.logged_at)} · ${esc(l.who)} · ${VERB[l.verdict]} (${esc(l.signal)})</div>`).join('')}</div>` : ''}
+          ${log.length ? `<div class="aside" style="margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:var(--hair) solid var(--rule)"><div class="lab" style="margin-bottom:var(--sp-1)">Logged</div>${log.slice(0, 5).map(l => `<div class="sub">${when(l.logged_at)}, ${esc(l.who)}, ${VERB[l.verdict]} (${esc(l.signal)})</div>`).join('')}</div>` : ''}
         </div>
     </div>
     </details>
-    <details class="fold cp-fold" id="cp-where"><summary><h3>Where it is served, and its shredding visits</h3><span class="sub">last six months · open</span></summary>
+    <details class="fold cp-fold" id="cp-where"><summary><h3>Where it is served, and its shredding visits</h3><span class="sub">last six months</span></summary>
     <div class="grid drill" id="cp-drill"><div class="card" style="grid-column:1/-1"><p class="sub">Loading…</p></div></div>
     </details>
   </div>`;
@@ -139,21 +155,25 @@ export async function render(main, C, params) {
     const box = main.querySelector('#cp-opps'); if (!box) return;
     const open = V.rows.filter(r => r.status !== 'won' && r.status !== 'lost').slice(0, 5);
     const KIND = { cross: 'Cross-sell', price: 'Price gap', slip: 'Win back', round: 'Rate round', overdue: 'Overdue boxes' };
-    box.querySelector('p').outerHTML = open.length ? `<ul class="cp-opp">${open.map(r => `<li><span><b>${esc(KIND[r.kind] || r.kind)}</b>${r.owner ? ` · ${esc(r.owner)}` : ''}${r.status !== 'open' ? ` · ${esc(r.status)}` : ''}<small>${esc(r.reason)}</small></span><em>${moneyK(r.value)}${r.once ? ' once' : ''}${r.modelled ? ' est.' : ''}</em></li>`).join('')}</ul>` : '<p class="sub">Nothing open for this customer.</p>';
-  }).catch(() => { const box = main.querySelector('#cp-opps'); if (box) box.remove(); });
+    box.querySelector('p').outerHTML = open.length ? `<ul class="cp-opp">${open.map(r => `<li><span><b>${esc(KIND[r.kind] || r.kind)}</b>${r.owner ? `, ${esc(r.owner)}` : ''}${r.status !== 'open' ? `, ${esc(r.status)}` : ''}<small>${esc(r.reason)}</small></span><em>${moneyK(r.value)}${r.once ? ' once' : ''}${r.modelled ? ' est.' : ''}</em></li>`).join('')}</ul>` : '<p class="sub">Nothing open for this customer.</p>';
+  }).catch(() => { const box = main.querySelector('#cp-opps'); if (box) box.innerHTML = ''; });
 
   const play = firstPlay('r4-customer-played');
-  if (s) {
-    const pts = k => s.months.map((x, i) => ({ x, y: s[k][i] }));
-    const parts = ['storage', 'service'].filter(k => s[k].some(Boolean));
-    lineChart(main.querySelector('#cp-chart'), {
-      title: chartTitle(s), sub: `${s.months.length} months to the latest posted month · tap a month for its invoices`,
-      axes: { y: '$ invoiced a month' }, play, onPick: x => openInvoices(id, x, s.customer),
-      // a part never billed is said in the source line, not drawn as a line along the axis
-      series: [{ name: 'Storage', cls: 'storage', points: pts('storage') }, { name: 'Service', cls: 'service', points: pts('service') }].filter(x => parts.includes(x.cls)),
-      source: `VCK invoices, by invoice month · ${['storage', 'service'].filter(k => !parts.includes(k)).map(k => `no ${k} billed in these months · `).join('')}as billed`,
-    });
-  } else main.querySelector('#cp-chart').remove();
+  drawPoints(main.querySelector('#cp-lit'), pts);
+  // who they are: cached research, or an honest empty state; an admin can ask for it
+  const whoBox = main.querySelector('#cp-who');
+  const whoHtml = w => w.status === 'ok' ? `<div class="h2-ch"><h2>Who they are</h2></div>${w.lines.map(l => `<p>${esc(l)}</p>`).join('')}${w.reading ? `<p class="cp-reading"><b>Pulse's reading:</b> ${esc(w.reading)}</p>` : ''}<small class="lit-by">From <a href="${esc(w.source)}" target="_blank" rel="noopener">${esc((w.source.match(/^https?:\/\/(?:www\.)?([^/]+)/) || [])[1] || w.source)}</a>, researched ${esc(new Date(w.at + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }))}${w.reading ? ". The reading is Pulse's, not theirs" : ''}.</small>`
+    : `<div class="h2-ch"><h2>Who they are</h2></div><div class="pending">Not researched yet. It will come from the company's own public website.${w.note ? ` ${esc(w.note)}` : ''}</div>${w.canResearch ? '<button type="button" class="pq-btn" id="cp-research">Research it</button>' : ''}`;
+  const paintWho = w => { if (!whoBox.isConnected) return; whoBox.innerHTML = whoHtml(w); const b = whoBox.querySelector('#cp-research'); if (b) b.addEventListener('click', () => { b.disabled = true; b.textContent = 'Researching…'; fetch(`/api/customer/${id}/who`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) }).then(r => r.json()).then(paintWho).catch(() => paintWho({ status: 'none', note: 'Research did not finish.' })); }); };
+  fetch(`/api/customer/${id}/who`, { credentials: 'same-origin' }).then(r => r.ok ? r.json() : { status: 'none' }).then(paintWho).catch(() => paintWho({ status: 'none' }));
+  // the margin tile and pills open the pop-out; a line's name opens its jobs
+  const tileM = main.querySelector('[data-margin-tile]');
+  if (tileM) tileM.addEventListener('click', () => openMargin({ R, name, revenue: m.revenue, cost: m.cost, parts: allParts, weak, level1: id, row, B }));
+  main.querySelector('.cp-lines').addEventListener('click', ev => {
+    const pill = ev.target.closest('[data-lm]'), ln = ev.target.closest('.cp-line');
+    if (pill) { const x = F.fams[pill.dataset.lm]; openMargin({ R, name: `${name}, ${FAMILY_NAMES[x.family] || x.family}`, revenue: x.revenue, cost: x.cost, parts: costParts(x.working), level1: id, row, B, family: x.family }); }
+    else if (ln) drawer(ln.dataset.f);
+  });
 
   const wsBox = main.querySelector('.ws1') && main.querySelector('.ws1').closest('.card');
   if (wsBox && wsRow) wsBox.addEventListener('click', ev => { const b = ev.target.closest('button.opp'); if (b) openExplainer({ row: wsRow, key: b.dataset.key, call: signals, H: M.history, names: new Map(M.accounts.map(a => [a.level1, a.customer])) }); });
@@ -161,9 +181,6 @@ export async function render(main, C, params) {
   const where = main.querySelector('#cp-where');
   if (where) where.addEventListener('toggle', () => { if (where.open && !where.dataset.read) { where.dataset.read = '1'; drawDrill(main.querySelector('#cp-drill'), loadDrill(id)); } });
 
-  // a line opens the drawer at that line; every job, at the account
-  main.querySelector('#cp-fams').addEventListener('click', ev => { const b = ev.target.closest('button.md-line'); if (b) drawer(b.dataset.f); });
-  const allJobs = main.querySelector('#cp-jobs'); if (allJobs) allJobs.addEventListener('click', () => drawer());
   if (params.line) drawer(params.line, params.job || null);
 
   document.documentElement.classList.add('js');
@@ -206,7 +223,7 @@ async function drawDrill(el, drillP) {
   const day = t => new Date(t + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
   const n0 = v => Fmt.num(v || 0);
   const lbs = d.visits.reduce((t, v) => t + (v.pounds || 0), 0);
-  el.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="card-head"><h3>Shredding visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} days on a route · ${n0(lbs)} lb` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Bin and shredding stops drivers marked done in Veri-Shred, one row per day and route. Executive-bin weights are a set figure, not weighed.</div></div>`;
+  el.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="card-head"><h3>Shredding visits</h3><small>${d.visits.length ? `${n0(d.visits.length)} days on a route, ${n0(lbs)} lb` : 'last six months'}</small></div><div id="cp-visits"></div><div class="src">Bin and shredding stops drivers marked done in Veri-Shred, one row per day and route. Executive-bin weights are a set figure, not weighed.</div></div>`;
   const vBox = el.querySelector('#cp-visits');
   drawWhere(el, d, Z, A);
   const draw = n => ledgerTable(vBox, {
@@ -229,7 +246,7 @@ function wsCard(r, pitch) {
   const lines = LINES.map(x => ({ x, c: r.cells[x.key] }));
   const missing = lines.filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp);
   return `<div class="card">
-    <div class="card-head"><h3>${missing.length ? `Not bought yet: about ${moneyK(r.opp / 12)} a month est.` : lines.every(o => o.c.have) ? 'Buys every line we sell' : 'Not bought yet: too small to size'}</h3><a href="#customers?view=whitespace">Cross-sell ›</a></div>
+    <div class="card-head"><h3>${missing.length ? `Not bought yet: about ${moneyK(r.opp / 12)} a month est.` : lines.every(o => o.c.have) ? 'Buys every line we sell' : 'Not bought yet: too small to size'}</h3><a class="chev" href="#customers?view=whitespace">Cross-sell</a></div>
     ${!missing.length && !lines.every(o => o.c.have) ? '<p class="sub" style="margin:0 0 var(--sp-2)">It doesn\'t buy every line, but it has too few boxes or too little other spend to size what comparable accounts would spend.</p>' : ''}
     ${lines.map(({ x, c }) => `<div class="ws1"><span>${esc(x.name)}</span>${c.have ? `<span class="num">${moneyK(c.spend)} <span class="sub" style="display:inline">a year</span></span>` : c.opp > 0 ? `<button class="num opp" data-key="${x.key}" title="How this was worked out">+${moneyK(c.opp)} est.</button>` : '<span class="sub">—</span>'}</div>${!c.have && x.key === 'shred' && pitch ? `<div class="ws1p">${esc(pitch)}</div>` : ''}${!c.have && c.opp > 0 ? `<div class="sub ws1b">${esc(c.basis)}</div>` : ''}`).join('')}
   </div>`;
@@ -271,8 +288,8 @@ function drawWhere(el, d, Z, A) {
   const card = document.createElement('div');
   card.className = 'card'; card.style.gridColumn = '1 / -1';
   card.innerHTML = `<div class="card-head"><h3>${esc(title)}</h3></div>
-    <div class="rm-grid"><div><div class="rm-wrap"></div>${zoneKey()}</div><ol class="rm-list">${places.slice(0, 12).map(p => `<li><span>${esc(p.postcode)}<small>${p.mi != null ? `${Fmt.fixed(p.mi, 1)} miles from the yard` : 'no postcode centre'} · ${p.days} day${p.days === 1 ? '' : 's'} on a route</small></span><span class="num">${Fmt.grouped(p.services)}<small>services</small></span></li>`).join('')}</ol></div>
-    <div class="src">${Fmt.pct(within10 / Math.max(1, all))} of its ${Fmt.grouped(all)} done services in six months were within ten miles of the yard · Veri-Shred done orders on ${days.size} route days · postcode centres from the US Census, the likely way along main roads: no GPS was captured · districts shaded by R4's done services over twelve months</div>`;
+    <div class="rm-grid"><div><div class="rm-wrap"></div>${zoneKey()}</div><ol class="rm-list">${places.slice(0, 12).map(p => `<li><span>${esc(p.postcode)}<small>${p.mi != null ? `${Fmt.fixed(p.mi, 1)} miles from the yard` : 'no postcode centre'}, ${p.days} day${p.days === 1 ? '' : 's'} on a route</small></span><span class="num">${Fmt.grouped(p.services)}<small>services</small></span></li>`).join('')}</ol></div>
+    <div class="src">${Fmt.pct(within10 / Math.max(1, all))} of its ${Fmt.grouped(all)} done services in six months were within ten miles of the yard, Veri-Shred done orders on ${days.size} route days, postcode centres from the US Census, the likely way along main roads: no GPS was captured, districts shaded by R4's done services over twelve months</div>`;
   el.prepend(card);
   const draw = () => { const w = card.querySelector('.rm-wrap'); if (w && w.isConnected) { w.innerHTML = placesSvg(placed, { width: Math.max(280, Math.min(900, w.clientWidth || 560)), base: basemapNow(), label: title, shading: bookShading(A, Z) }); playMap(w.querySelector('svg'), { vans: 5 }); } };
   draw();

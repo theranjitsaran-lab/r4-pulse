@@ -31,13 +31,13 @@ DECISIONS.md "The route to $1.0m and cross-sell" holds what was settled.*
 | **Opportunities** | `#opportunities` (the last tab) | Anne, Trisha | One row per account, largest first: its best move with one reason, $ a year, one-off, owner, status; a tap opens its other moves, each with an opener, an owner and a status in `app.opportunity` (`views/opps.js`, `components/opps.js`). The old Slipping, Price gaps, Rate rounds, Overdue boxes and This week lists are folded into it, kept for old links |
 | **Customer page** | `#customer/<id>` | Anne | Four figures · 24-month chart with axes, a tap on a month for its invoices · margin bridge and lines · what would improve it · open opportunities; folded below: not bought yet, prices against the book, signals; where it is served and its visits. A line opens the drill drawer (`components/margindrawer.js`), also from a Margin cell on Accounts: account → line and every job in twelve months, uncapped → one job's cost build and route. `accountJobs` in `margin.js` shares each line's cost to its jobs, so jobs plus what is not on any job add to the line; the levers (`marginLevers`) are sized one by one and never added |
 | **Pricing** | `#pricing` (the Quote tab) | Anne | Four figures that stay in view (price, revenue, margin $ and %, labelled from Settings) · on the left, 1. what are we quoting, with time on site, on a run or a dedicated vehicle for deliveries, and the price on the real band, and 2. where is it: the map, pin, ring, nearest route day · on the right, 3. where the price goes: the bar, what is in each cost (`costNotes`) and three points written from computed fields (`quoteFacts`, Claude's version checked) · 4. four ways to price it (`quoteOptions`) · the quote builder (saved to `app.quote`) · folded: every account, the cost working · invoiced against the book |
-| **Numbers** | `#numbers` (Warehouse at `#numbers?tab=warehouse`) | Trisha, Theran | Core against $1.0M by month · lines of business by month, a Storage / service toggle and a Revenue | Margin switch, margin for admins only (`components/linegrid.js`) · the EBITDA bridge from the monthly QuickBooks export (`scripts/load_gl.js` → `model.gl_month`, sorted in `components/gl.js`) · gross margin by line (`views/numbers.js`) |
+| **Warehouse** | `#numbers?tab=warehouse`, linked from Operations | Mike | Boxes by retention state and location. The Money page was taken out on 3 November 2026 (Theran); `#numbers` goes to Accounts, and `view/numbers` still works its figures out for footing |
 | **How it's calculated** | `#how` | Everyone | Where the figures come from, in plain words; the working stays off the screens (`views/how.js`) |
 | **Settings** | `#settings` (gear in the masthead) | Theran, Mike | The cost model's assumptions, editable by admins with who and when (`app.setting`, `server/settings.js`): speed, minutes a stop and a service, the travel share, whether box deliveries are placed on the shred routes by location · the rates, read-only |
 | **Routes** | `#activity` | Mike | The day in a sentence, thin routes named · by route against its norm · the map on tap: the day's routes from the yard, or where to add customers · the week · booked ahead · distance from the yard and the long way round |
 
 Every figure shown in two places comes from one function (`components/levers.js`, `margin.js`,
-`whitespace.js`) and `model/levers.test.js` holds them together. Every number on screen goes through `components/format.js` (`money()`, `pct()`, `change()`), which `model/format.test.js` holds to the exact output; chart coordinates and the server's and `model/rates.js`'s own text do not. Every list is `components/datatable.js`: 13px figures in the system monospace on 30px rows, months with YTD and 12 months, 50 rows then Show all, and `npm run footing` reads what it draws. Tokens are in `public/tokens.css`.
+`whitespace.js`) and `model/levers.test.js` holds them together. Every number on screen goes through `components/format.js` (`money()`, `pct()`, `change()`), which `model/format.test.js` holds to the exact output; chart coordinates and the server's and `model/rates.js`'s own text do not. A margin reads one way everywhere: `marginBand` in `components/margin.js`, Healthy, Normal, Thin from the cut-offs on Settings. Every list is `components/datatable.js`: 13px tabular figures on 30px rows, months with YTD and 12 months, 50 rows then Show all, and `npm run footing` reads what it draws. Tokens are in `public/tokens.css`.
 
 ## Stack
 
@@ -140,7 +140,7 @@ Copy is part of the product. Plain English. British spelling in prose; US dollar
 
 **The customer is the centre.** Home → a customer list (`#customers?view=…`) → one customer page
 (`#customer/<level1>`) → lines → visits → boxes. Every number on Home opens a list; every list row
-opens the customer page. Nothing is a dead end. Nav: Today · Accounts · Quote · Money · Operations · Opportunities (routes #pulse, #customers, #pricing, #numbers, #activity, #opportunities); on a
+opens the customer page. Nothing is a dead end. Nav: Today · Accounts · Quote · Operations · Opportunities (routes #pulse, #customers, #pricing, #activity, #opportunities); on a
 phone it is a tab bar at the bottom. Accounts opens on All accounts; Anne signs in on Opportunities.
 
 **Brand, type and tokens.** R4 Services' own branding, from r4services.com (26 October 2026): the barcode
@@ -171,7 +171,7 @@ blue above. Sparklines are ink with only the latest point coloured.
 and Mike already know. Estimated figures carry "est.". Route-based costs (bins, handling, delivery) show
 "under review" until delivery routes are in the route volumes.
 
-**Never on screen:** a dual axis, a pie chart, a gauge or dial, invented figures. Count-ups only in Home's once-a-session entrance and Quote's four figures (Theran, 2 and 3 November 2026; `DESIGN.md` Motion), never anywhere else.
+**Never on screen:** a dual axis, a pie chart, a gauge or dial, invented figures. Count-ups only in Home's and Accounts' once-a-session entrances and Quote's four figures (Theran, 2 and 3 November 2026; `DESIGN.md` Motion), never anywhere else.
 
 ## When you are unsure
 
