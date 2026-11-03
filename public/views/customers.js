@@ -12,7 +12,7 @@ import { costOrders, jobHtml, drawRouteBlock, jobPlace, densityByPostcode } from
 import { loadRoadnet } from '/components/routemap.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 import { billNow, serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippingAccounts, stoppedAccounts, risingAccounts, CROSS_SELL_DEPTH, PRICED } from '/components/levers.js';
-import { buildWhitespace, LINES } from '/components/whitespace.js';
+import { buildWhitespace, LINES, lineCodes } from '/components/whitespace.js';
 import { drillData, drillHtml, wireDrill } from '/components/crossdrill.js';
 import { openExplainer } from '/components/explain.js';
 import { conversationCandidates } from '/components/lists.js';
@@ -237,8 +237,7 @@ async function whitespace(main, C, params) {
   // the drill-down: each account's own run, the code Quote opens on for each line, and what has been sent already
   const seen = new Set(), SR = seriesOf(C), kinds = new Map();
   for (const [list, kind] of [[slippingAccounts(C), 'slipping'], [stoppedAccounts(C), 'stopped'], [risingAccounts(C), 'rising']]) for (const a of list) kinds.set(a.level1, kind);
-  const quote = {};
-  for (const x of LINES) { const by = {}; for (const l of M.lines) if (l.family === x.key && PRICED.includes(l.servcode)) by[l.servcode] = (by[l.servcode] || 0) + l.revenue; const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0]; if (top) quote[x.key] = top[0]; }
+  const quote = lineCodes(M, PRICED);
   const said = await fetch('/api/sales/opportunities', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(j => (j && j.data) || {}).catch(() => ({}));
   const drill = r => { const s = SR.get(r.level1); return drillData(r, s ? { move: s.move, kind: kinds.get(r.level1) || 'level' } : null); };
   const why = r => drillHtml(drill(r), { fresh: !seen.has(r.level1), quote });

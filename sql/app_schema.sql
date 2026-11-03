@@ -51,7 +51,8 @@ CREATE INDEX IF NOT EXISTS quote_at ON app.quote (at DESC);
 -- itself (its dollars and reason) is worked out from the data each day; this holds only what the team
 -- says about it, one row per change, the latest row being its state.
 --   key     kind:level1[:code], e.g. 'cross:3507:bin', 'price:2948:B2', 'slip:12530'
---   status  open · contacted · quoted · won · lost
+--   status  open · contacted · agreed · won · lost ('quoted' is an older word for agreed, read as agreed)
+--   next_step  the date of the next step, if there is one
 --   value   the dollars a year when the status was set, so "won this month" is what was won then
 CREATE TABLE IF NOT EXISTS app.opportunity (
   id         bigserial PRIMARY KEY,
@@ -65,6 +66,9 @@ CREATE TABLE IF NOT EXISTS app.opportunity (
   at         timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS opportunity_key ON app.opportunity (key, at DESC);
+ALTER TABLE app.opportunity ADD COLUMN IF NOT EXISTS next_step date;
+ALTER TABLE app.opportunity DROP CONSTRAINT IF EXISTS opportunity_status_check;
+ALTER TABLE app.opportunity ADD CONSTRAINT opportunity_status_check CHECK (status IN ('open', 'contacted', 'quoted', 'agreed', 'won', 'lost'));
 
 -- The cost model's assumptions, editable on Settings (server/settings.js): one row per change.
 CREATE TABLE IF NOT EXISTS app.setting (

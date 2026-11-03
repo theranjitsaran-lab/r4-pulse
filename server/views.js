@@ -133,10 +133,7 @@ router.get('/opportunities', async (req, res) => {
     const st = stamp(D);
     if (!oppBase || oppBase.stamp !== st) oppBase = { stamp: st, v: L.opps.opportunities({ C: D.C, PR: D.PR, CA: D.CA, M: D.M }, {}) };
     const only = req.query.level1 != null ? Number(req.query.level1) : null;   // one customer's, for its page
-    const rows = oppBase.v.rows.filter(r => only == null || r.level1 === only).map(r => {
-      const s = statuses[r.key];
-      return s ? { ...r, status: s.status, owner: s.owner, at: s.at, note: s.note } : r;
-    });
+    const rows = L.opps.applyStatuses(oppBase.v.rows, statuses, D.M).filter(r => only == null || r.level1 === only);
     send(req, res, { rows, won: L.opps.wonIn(statuses), me: (req.session.user && req.session.user.name) || null });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -219,13 +216,22 @@ router.get('/home', async (req, res) => {
     };
     // the conversation candidates carry their signals; send only what the card shows
     team.anne.calls = team.anne.calls.map(c => ({ level1: c.level1, name: c.name, stake: c.stake, ev: c.sigs[0].ev }));
-    // selling: what was won this month, and what is in play (contacted or quoted), from Opportunities
-    const inPlay = Object.values(statuses).filter(x => x.status === 'contacted' || x.status === 'quoted');
+    // selling: what was won this month, and what is in play (contacted or agreed), from Opportunities
+    const inPlay = Object.values(statuses).filter(x => x.status === 'contacted' || x.status === 'agreed');
     const sell = { won: L.opps.wonIn(statuses), inPlay: { n: inPlay.length, value: inPlay.reduce((t, x) => t + (Number(x.value) || 0), 0) } };
     // what one more customer would save is a modelled route cost: not until costs are final
     const costs = seesCosts(req);
     const plain = costs ? base : { ...base, points: base.points.filter(p => p.key !== 'location') };
-    const actions = L.metrics.topActions({ lines: team.trisha.lines, calls: team.anne.calls });
+    // an action about an account can go on the list with its owner, at that account's best move
+    const st = stamp(D);
+    if (!oppBase || oppBase.stamp !== st) oppBase = { stamp: st, v: L.opps.opportunities({ C: D.C, PR: D.PR, CA: D.CA, M: D.M }, {}) };
+    const listed = L.opps.byAccount(L.opps.applyStatuses(oppBase.v.rows, statuses, D.M)).rows;
+    const actions = L.metrics.topActions({ lines: team.trisha.lines, calls: team.anne.calls }).map(i => {
+      const a = String(i.subject || '').startsWith('account:') ? listed.find(x => x.level1 === Number(i.subject.slice(8))) : null;
+      if (!a) return i;
+      const t = L.opps.accountState(a), m = t.lead;
+      return { ...i, move: { key: m.key, level1: m.level1, value: m.value, status: m.status, next: m.next, note: m.note, owner: t.owner } };
+    });
     send(req, res, { ...plain, actions, sell });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

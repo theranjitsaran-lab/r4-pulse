@@ -25,11 +25,23 @@ const STORER = 500;        // boxes before box-driven lines are sized
 const MIN_PEERS = 8;
 const MIN_KIND = 5;        // comparable accounts of the same kind and size before they are used
 const LOW = 4;             // an account buying under a quarter of what comparables spend, by at least $1,000, is low
+const SURE_PEERS = 8;      // same kind and this many accounts behind it, or it is few
 const ADDON = 0.4;         // a line is an add-on when it is under 40% of the account's spend       // fewer comparables than this and the band widens to the whole book
 const band = t => t < 25e3 ? 0 : t < 100e3 ? 1 : 2;
 const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase()).replace(/\b(Of|And|The)\b/g, w => w.toLowerCase()).replace(/\b(Llp|Llc|Inc|Pc|Itad|Cboe|Icu)\b/g, w => w.toUpperCase());
 const lineWord = n => n === 'ITAD' ? n : n.toLowerCase();
 const median = v => { if (!v.length) return null; const s = [...v].sort((a, b) => a - b), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+
+// How sure a figure is, the one scale everywhere: 3 the account's own billing or the book median; 2 accounts of its kind, enough
+// of them; 1 the whole book, or few. A gap sized from comparable accounts is never a 3.
+export const gapConfidence = c => c && c.basisLevel && c.basisLevel !== 'book' && c.peerCount >= SURE_PEERS ? 2 : 1;
+export const CONFIDENCE = { 3: "From its own billing or the book median", 2: 'From comparable accounts of its kind', 1: 'From the whole book or few comparable accounts' };
+// the code Quote opens on for a line: the one that bills most among those it prices
+export function lineCodes(M, priced) {
+  const out = {};
+  for (const x of LINES) { const by = {}; for (const l of M.lines) if (l.family === x.key && priced.includes(l.servcode)) by[l.servcode] = (by[l.servcode] || 0) + l.revenue; const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0]; if (top) out[x.key] = top[0]; }
+  return out;
+}
 
 export function buildWhitespace(M, { exclude = [], top = 40 } = {}) {
   const skip = new Set(exclude);

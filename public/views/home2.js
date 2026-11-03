@@ -78,7 +78,7 @@ export async function render(main, P) {
   // three things to act on, each with its owner
   const OWNER = { trisha: 'Trisha', anne: 'Anne', mike: 'Mike' };
   const fbBtns = i => `<span class="fb" data-key="${esc(i.key)}" data-subject="${esc(i.subject)}">${fbIcon('useful', 'Useful')}${fbIcon('knew', 'I knew this')}${fbIcon('wrong', 'Not right')}</span>`;
-  const acts = V.actions && V.actions.length ? `<section class="h2-card h2-acts" data-in><div class="h2-ch"><h2>Three things to act on</h2></div><ul>${V.actions.map(i => `<li><a href="${esc(i.href)}"><b>${esc(OWNER[i.owner] || i.owner)}</b><span>${esc(i.text)}</span></a>${fbBtns(i)}</li>`).join('')}</ul></section>` : '';
+  const acts = V.actions && V.actions.length ? `<section class="h2-card h2-acts" data-in><div class="h2-ch"><h2>Three things to act on</h2></div><ul>${V.actions.map(i => `<li><a href="${esc(i.href)}"><b>${esc(OWNER[i.owner] || i.owner)}</b><span>${esc(i.text)}</span></a>${fbBtns(i)}${i.move ? (i.move.owner ? `<span class="h2-listed"><span class="h2-lg">With ${esc(OWNER[i.move.owner] || i.move.owner)} on Opportunities</span><span class="h2-sm">Listed</span></span>` : `<button type="button" class="linkbtn h2-send" data-key="${esc(i.move.key)}" aria-label="Send to Opportunities, with ${esc(OWNER[i.owner] || i.owner)}"><span class="h2-lg">Send to Opportunities, with ${esc(OWNER[i.owner] || i.owner)}</span><span class="h2-sm">To the list</span></button>`) : ''}</li>`).join('')}</ul></section>` : '';
 
   const weeks = `<section class="h2-card" data-in data-grow><div class="h2-ch h2-chi"><div><h2>${w.lastFull ? `Last week ${moneyK(w.lastFull.value)} est., ${w.vsAvg >= 0 ? 'up' : 'down'} ${pctW(w.vsAvg)}` : 'Weeks'}</h2></div>${info(`${LABELS.veriShred} Work done each week, priced at that month's value a service, against the weeks before.`)}</div><div id="h2-weeks"></div></section>`;
 
@@ -135,6 +135,15 @@ export async function render(main, P) {
   // feedback on a line
   const actsEl = main.querySelector('.h2-acts');
   if (actsEl) actsEl.addEventListener('click', async ev => {
+    const send = ev.target.closest('.h2-send');
+    if (send) {
+      const i = V.actions.find(x => x.move && x.move.key === send.dataset.key); if (!i) return;
+      send.disabled = true;
+      const res = await fetch('/api/sales/opportunities', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: i.move.key, level1: i.move.level1, status: i.move.status || 'open', owner: i.owner, value: i.move.value, note: i.move.note || null, next_step: i.move.next || null }) }).catch(() => null);
+      if (!res || !res.ok) { send.disabled = false; send.textContent = 'That did not save. Try again'; return; }
+      const done = document.createElement('span'); done.className = 'h2-listed'; done.innerHTML = `<span class="h2-lg">With ${esc(OWNER[i.owner] || i.owner)} on Opportunities</span><span class="h2-sm">Listed</span>`; send.replaceWith(done);
+      return;
+    }
     const b = ev.target.closest('.fb button'); if (!b) return;
     b.classList.add('pop');
     const box = b.closest('.fb'), li = b.closest('li');

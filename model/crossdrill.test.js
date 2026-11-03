@@ -27,11 +27,11 @@ test('the tiles add up and come from the row, for every account', async () => {
   }
 });
 
-test('how sure follows how it was sized', async () => {
-  const { confidence, HIGH_PEERS } = await load();
-  assert.strictEqual(confidence({ basisLevel: 'similar', peerCount: HIGH_PEERS }), 3);
-  assert.strictEqual(confidence({ basisLevel: 'similar', peerCount: HIGH_PEERS - 1 }), 2);
+test('how sure is the one scale: a gap sized from other accounts is at most medium', async () => {
+  const { confidence } = await load();
+  assert.strictEqual(confidence({ basisLevel: 'similar', peerCount: 8 }), 2);
   assert.strictEqual(confidence({ basisLevel: 'kind', peerCount: 40 }), 2);
+  assert.strictEqual(confidence({ basisLevel: 'similar', peerCount: 7 }), 1);
   assert.strictEqual(confidence({ basisLevel: 'book', peerCount: 76 }), 1);
 });
 

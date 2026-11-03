@@ -143,10 +143,10 @@ function tools(L, D, X = {}) {
         const O = L.opps.opportunities({ C: D.C, PR: D.PR, CA: D.CA, M: D.M }, X.statuses || {});
         let rows = O.rows.filter(r => (kind === 'all' || r.kind === kind) && (level1 == null || r.level1 === level1));
         rows = rows.filter(r => status === 'active' ? r.status !== 'won' && r.status !== 'lost' : r.status === status);
-        const play = O.rows.filter(r => r.status === 'contacted' || r.status === 'quoted');
+        const play = O.rows.filter(r => r.status === 'contacted' || r.status === 'agreed');
         return {
           won_this_month: `${moneyK(O.won.value)} across ${O.won.n} opportunities marked won`,
-          in_play: `${play.length} contacted or quoted, ${moneyK(play.reduce((t, r) => t + r.value, 0))} a year`,
+          in_play: `${play.length} contacted or agreed, ${moneyK(play.reduce((t, r) => t + r.value, 0))} a year`,
           matching: rows.length,
           rows: rows.slice(0, 12).map(r => ({ level1: r.level1, customer: r.name, kind: L.opps.KINDS[r.kind], value: `${moneyK(r.value)}${r.once ? ' once' : ' a year'}${r.modelled ? ' est.' : ''}`, reason: r.reason, status: r.status, owner: r.owner || 'nobody yet', opener: r.opener })),
         };

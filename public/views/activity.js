@@ -17,7 +17,7 @@ import { loadZones, bookShading, districtLayer, routeLayer, maskFor, maskId, pla
 import { densityByPostcode } from '/components/jobview.js';
 import { allocate, mapSvg, loadBasemap, basemapNow, loadRoadnet, roadPath, YARD, miles } from '/components/routemap.js';
 import { likelyRound, FAR_MILES, MIN_VISITS } from '/components/opsdata.js';
-import { OWNERS } from '/components/opps.js';
+import { OWNERS, ownerName } from '/components/opps.js';
 
 const PERIODS = ['day', 'week', 'month', 'q', 'h', 'y'];
 const routeName = r => /\d/.test(r || '') ? r : titleCase(r);
@@ -402,7 +402,7 @@ export async function render(main, A, params) {
       <div class="md-tot"><div><small>Cost a visit, est.</small><b>${money0(a.perVisit)}</b></div><div><small>Revenue a visit, est.</small><b>${money0(a.revenuePerVisit)}</b></div><div><small>Route time a year, est.</small><b>${money0(a.cost)}</b></div><div><small>Margin, est.</small><b>${a.margin == null ? '—' : signedPc(a.margin)}</b></div></div>
       <div class="ops-dsec"><h3>Where a visit's route cost goes, est.</h3><div class="ops-split" role="img" aria-label="Driving ${esc(money0(drive / a.visits))} a visit, on site ${esc(money0(site / a.visits))} a visit"><i class="drive" style="flex:${(drive / all).toFixed(3)} 0 0"></i><i class="site" style="flex:${(site / all).toFixed(3)} 0 0"></i></div><div class="ops-splitkey"><span>Driving ${money0(drive / a.visits)}</span><span>On site ${money0(site / a.visits)}</span></div></div>
       <div class="ops-dsec"><h3>${a.best ? 'Ways to improve it, a year est.' : `It is ${esc(a.band.word.toLowerCase())}: nothing needs to change. If it did, a year est.`}</h3><ul class="ops-opts">${opt}</ul></div>
-      <div class="ops-dsec"><h3>Next step</h3><div class="ops-send" id="op-send"><label>Owner <select id="op-owner">${OWNERS.map(o => `<option${o === whoAmI() ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select></label><button type="button" class="pq-btn" id="op-go">Send to Opportunities</button></div></div>` });
+      <div class="ops-dsec"><h3>Next step</h3><div class="ops-send" id="op-send"><label>Owner <select id="op-owner">${OWNERS.map(o => `<option value="${o}"${o === whoAmI() ? ' selected' : ''}>${esc(ownerName(o))}</option>`).join('')}</select></label><button type="button" class="pq-btn" id="op-go">Send to Opportunities</button></div></div>` });
     const body = document.querySelector('.pop .pop-b');
     drawPoints(body.querySelector('#op-d-pts'), [
       { key: 'cost', tone: a.band.cls, lead: `Costs ${money0(a.perVisit)} a visit est.,`, rest: `${Fmt.pct(drive / all)} of it the drive: ${money0(a.cost)} of route time a year.` },
@@ -410,7 +410,7 @@ export async function render(main, A, params) {
       a.best ? { key: 'move', tone: 'a', lead: `Best move: ${best.title.toLowerCase()},`, rest: `about ${money0(best.saving)} a year est.` } : { key: 'move', tone: 'g', lead: 'No change needed.', rest: best ? `If it ever is, ${best.title.toLowerCase()} is the largest, about ${money0(best.saving)} a year est.` : '' },
     ]);
     const k = `route:${lead.level1}:${a.postcode}`, send = body.querySelector('#op-send');
-    const sent = o => { send.innerHTML = `<span class="ops-sent">With ${esc(o)} on Opportunities.</span> <a class="how-link chev" href="#opportunities">Open Opportunities</a>`; };
+    const sent = o => { send.innerHTML = `<span class="ops-sent">With ${esc(ownerName(o))} on Opportunities.</span> <a class="how-link chev" href="#opportunities">Open Opportunities</a>`; };
     fetch('/api/sales/opportunities', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(j => { const s = j && j.data && j.data[k]; if (s && send.isConnected) sent(s.owner || 'no owner'); }).catch(() => {});
     if (!best) { send.innerHTML = ''; return; }
     body.querySelector('#op-go').addEventListener('click', async ev => {

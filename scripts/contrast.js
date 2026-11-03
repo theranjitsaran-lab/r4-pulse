@@ -15,6 +15,7 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
 
 // [text token, ground token, minimum]: what the screens actually set as text
 const PAIRS = [
+  ...['win', 'price', 'cross', 'round', 'box', 'route'].map(k => [`k-${k}`, `k-${k}-bg`, 4.5]),
   ...['ink', 'ink-2', 'ink-3', 'ink-4'].flatMap(t => ['surface', 'ground', 'well'].map(g => [t, g, 4.5])),
   ...['ink', 'ink-2', 'ink-3'].map(t => [t, 'canvas', 4.5]), ['warn-on-canvas', 'canvas', 4.5], ['brand', 'canvas', 4.5],
   ['brand', 'surface', 4.5], ['brand', 'ground', 4.5],

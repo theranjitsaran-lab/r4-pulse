@@ -7,18 +7,15 @@
 import * as Fmt from './format.js';
 import { esc, titleCase } from './data.js';
 import { moneyK } from './chart.js';
-import { LINES } from './whitespace.js';
+import { LINES, gapConfidence } from './whitespace.js';
 import { accountKind } from './acctkind.js';
 import { tile } from './lit.js';
-import { OWNERS } from './opps.js';
+import { OWNERS, ownerName } from './opps.js';
 import { whoAmI } from './access.js';
 
 const word = n => n === 'ITAD' ? n : n.toLowerCase();
 const CONF = { 3: 'High', 2: 'Medium', 1: 'Low' };
-// how sure a gap is, from how it was sized: the same kind at a similar size, with enough of them; the same kind at any size,
-// or only just enough; or too few, so the whole book
-export const HIGH_PEERS = 8;
-export const confidence = c => c.basisLevel === 'similar' ? (c.peerCount >= HIGH_PEERS ? 3 : 2) : c.basisLevel === 'kind' ? 2 : 1;
+export const confidence = gapConfidence;   // the app's one scale: a gap sized from other accounts is at most medium
 const trendPoint = t => {
   if (!t || !t.move) return { key: 'trend', tone: 'a', lead: 'Too little history', rest: 'to say how it is moving on its own run.' };
   const m = t.move, run = `its own ${moneyK(m.run)} run`;
@@ -95,7 +92,7 @@ export function drillHtml(d, { fresh = false, quote = {} } = {}) {
         ${d.peers.length ? `<p class="cd-how"><small>${esc(peerWhat)}.</small></p><div class="cd-peers">${d.peers.map(p => `<a class="cd-peer" href="#customer/${p.level1}"><b>${esc(p.name)}</b><span>${esc(p.kind)}, ${moneyK(p.spend)}</span><i class="cd-pbar"><u style="width:${Math.max(2, p.spend / peerTop * 100).toFixed(1)}%"></u></i></a>`).join('')}</div>` : '<p class="cd-how">No comparable accounts to show.</p>'}
       </section>
     </div>
-    ${line ? `<div class="cd-acts" data-cd-acts><button type="button" class="pq-btn" data-cd-ask>Ask Pulse why</button>${quote[line.key] ? `<a class="pq-btn cd-a" href="#pricing?level1=${d.level1}&code=${esc(quote[line.key])}">Price ${esc(word(line.name))} in Quote</a>` : ''}<label class="cd-owner">Owner <select data-cd-owner>${OWNERS.map(o => `<option${o === whoAmI() ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select></label><button type="button" class="pq-btn cd-go" data-cd-send>Send to Opportunities</button></div>` : ''}
+    ${line ? `<div class="cd-acts" data-cd-acts><button type="button" class="pq-btn" data-cd-ask>Ask Pulse why</button>${quote[line.key] ? `<a class="pq-btn cd-a" href="#pricing?level1=${d.level1}&code=${esc(quote[line.key])}">Price ${esc(word(line.name))} in Quote</a>` : ''}<label class="cd-owner">Owner <select data-cd-owner>${OWNERS.map(o => `<option value="${o}"${o === whoAmI() ? ' selected' : ''}>${esc(ownerName(o))}</option>`).join('')}</select></label><button type="button" class="pq-btn cd-go" data-cd-send>Send to Opportunities</button></div>` : ''}
   </div>`;
 }
 
@@ -104,7 +101,7 @@ export const oppKey = d => `cross:${d.level1}:${d.top.key}`;
 export function wireDrill(root, d, said) {
   const acts = root.querySelector('[data-cd-acts]'); if (!acts || acts.dataset.on) return;
   acts.dataset.on = '1';
-  const k = oppKey(d), mark = o => { const b = acts.querySelector('[data-cd-send]'), s = acts.querySelector('.cd-owner'); if (b) b.remove(); if (s) s.remove(); if (!acts.querySelector('.cd-sent')) { const m = document.createElement('span'); m.className = 'cd-sent'; m.textContent = `With ${o} on Opportunities.`; acts.appendChild(m); } };
+  const k = oppKey(d), mark = o => { const b = acts.querySelector('[data-cd-send]'), s = acts.querySelector('.cd-owner'); if (b) b.remove(); if (s) s.remove(); if (!acts.querySelector('.cd-sent')) { const m = document.createElement('span'); m.className = 'cd-sent'; m.textContent = `With ${ownerName(o)} on Opportunities.`; acts.appendChild(m); } };
   if (said && said[k] && said[k].owner) mark(said[k].owner);
   acts.addEventListener('click', async ev => {
     if (ev.target.closest('[data-cd-ask]')) { dispatchEvent(new CustomEvent('open-ask', { detail: { ask: `Why is ${d.name}'s biggest cross-sell gap ${word(d.top.name)}, and how sure are we?` } })); return; }

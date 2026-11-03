@@ -36,7 +36,7 @@ const sparkBars = v => { const m = Math.max(1, ...v.map(x => Math.abs(x))); retu
 // o: { label, big, sub (html), lead, spark, href, margin: { cls, id }, d, still (no count-up), noIn (no entrance: drawn after the page's), solid }
 export function tile(o) {
   const tag = o.href ? 'a' : o.margin ? 'button' : 'div', attrs = o.href ? ` href="${esc(o.href)}"` : o.margin ? ` type="button" data-margin-tile="1"` : '';
-  return `<${tag} class="kt${o.lead ? ' lead' : ''}${o.solid ? ' solid' : ''}${o.margin ? ` rag-${o.margin.cls}` : ''}"${attrs}${o.noIn ? '' : ' data-in'} style="--d:${o.d || 0}ms"><span class="kl"><span>${esc(o.label)}</span>${o.margin ? '<em class="chev">Breakdown</em>' : ''}</span><b${o.still ? '' : ` data-count data-delay="${o.d || 0}"`}>${esc(o.big)}</b><span class="kc">${o.sub || ''}</span>${o.spark && o.spark.length > 1 ? sparkBars(o.spark) : ''}</${tag}>`;
+  return `<${tag} class="kt${o.lead ? ' lead' : ''}${o.solid ? ' solid' : ''}${o.warn ? ' rag-r' : ''}${o.margin ? ` rag-${o.margin.cls}` : ''}"${attrs}${o.noIn ? '' : ' data-in'} style="--d:${o.d || 0}ms"><span class="kl"><span>${esc(o.label)}</span>${o.margin ? '<em class="chev">Breakdown</em>' : ''}</span><b${o.still ? '' : ` data-count data-delay="${o.d || 0}"`}>${esc(o.big)}</b><span class="kc">${o.sub || ''}</span>${o.spark && o.spark.length > 1 ? sparkBars(o.spark) : ''}</${tag}>`;
 }
 
 // the pill: the app's one definition of a margin (margin.js marginBand). Tap for the pop-out.

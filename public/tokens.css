@@ -44,6 +44,8 @@
   /* ── brand: R4 Services green from r4services.com (top bar, buttons), links and the tap affordance ── */
   --brand:      #0e5116;
   --brand-2:    #1a6b24;
+  --k-win: #1b5e20; --k-win-bg: #dcefdc; --k-price: #8a5200; --k-price-bg: #fdeccb; --k-cross: #0f6b63; --k-cross-bg: #dcefec;   /* kinds of opportunity: never blue, which means better */
+  --k-round: #5c635e; --k-round-bg: #eceeec; --k-box: #6b3fa0; --k-box-bg: #efe7f8; --k-route: #6d4c41; --k-route-bg: #efe6e2;
   --on-brand:   #ffffff;   /* text on a brand fill */
   --r4-bright:  #38b449;   /* the green of the R4 mark: fills and lines only, never text (2.7:1 on white) */
 

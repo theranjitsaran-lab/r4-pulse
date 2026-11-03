@@ -4,7 +4,7 @@
 //   GET  /api/sales/quotes                 the last 90 days of quotes
 //   POST /api/sales/quotes                 { level1?, prospect?, postcode?, lines: [{ code, name, units, visits, price, cost }], note? }
 //   GET  /api/sales/opportunities          every opportunity's latest state, by key
-//   POST /api/sales/opportunities          { key, level1, status, owner?, value?, note? }
+//   POST /api/sales/opportunities          { key, level1, status, owner?, value?, note?, next_step? }
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -14,7 +14,7 @@ const { query, USE_FIXTURES } = require('./db');
 const DIR = path.join(__dirname, '..', 'data');
 const read = f => { try { return JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8')); } catch { return []; } };
 const write = (f, rows) => { fs.mkdirSync(DIR, { recursive: true }); fs.writeFileSync(path.join(DIR, f), JSON.stringify(rows, null, 1)); };
-const STATUSES = ['open', 'contacted', 'quoted', 'won', 'lost'];
+const STATUSES = ['open', 'contacted', 'agreed', 'won', 'lost'];
 const num = v => { if (v == null || v === '') return null; const n = Number(v); return Number.isFinite(n) ? n : null; };
 
 function cleanQuote(b, who) {
@@ -27,9 +27,10 @@ function cleanQuote(b, who) {
     postcode: /^\d{5}$/.test(b.postcode || '') ? b.postcode : null, lines, note: b.note ? String(b.note).slice(0, 500) : null };
 }
 function cleanOpp(b, who) {
+  if (b.status === 'quoted') b = { ...b, status: 'agreed' };
   if (!b.key || !STATUSES.includes(b.status) || num(b.level1) == null) return null;
   return { key: String(b.key).slice(0, 60), level1: num(b.level1), status: b.status, owner: b.owner ? String(b.owner).slice(0, 40) : null,
-    value: num(b.value), note: b.note ? String(b.note).slice(0, 500) : null, who };
+    value: num(b.value), note: b.note ? String(b.note).slice(0, 500) : null, next_step: /^\d{4}-\d{2}-\d{2}$/.test(b.next_step || '') ? b.next_step : null, who };
 }
 
 async function quotes(days = 90) {
@@ -45,15 +46,15 @@ async function saveQuote(q) {
 // each key's latest row, with when it was first opened and when it was won or lost
 async function opportunities() {
   const rows = USE_FIXTURES ? read('opportunities.json')
-    : await query(`SELECT key, level1, owner, status, value::float, note, who, at::text FROM app.opportunity ORDER BY at`).catch(() => []);   // before sql/app_schema.sql is applied: nothing said yet
+    : await query(`SELECT key, level1, owner, status, value::float, note, next_step::text, who, at::text FROM app.opportunity ORDER BY at`).catch(() => []);   // before sql/app_schema.sql is applied: nothing said yet
   const by = {};
-  for (const r of rows) by[r.key] = { ...(by[r.key] || {}), ...r, first: (by[r.key] || {}).first || r.at };
+  for (const r of rows) by[r.key] = { ...(by[r.key] || {}), ...r, status: r.status === 'quoted' ? 'agreed' : r.status, first: (by[r.key] || {}).first || r.at };
   return by;
 }
 async function saveOpp(o) {
   if (USE_FIXTURES) { const rows = read('opportunities.json'); const row = { ...o, at: new Date().toISOString() }; rows.push(row); write('opportunities.json', rows); return row; }
-  const [row] = await query(`INSERT INTO app.opportunity (key, level1, owner, status, value, note, who) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING at::text`,
-    [o.key, o.level1, o.owner, o.status, o.value, o.note, o.who]);
+  const [row] = await query(`INSERT INTO app.opportunity (key, level1, owner, status, value, note, who, next_step) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING at::text`,
+    [o.key, o.level1, o.owner, o.status, o.value, o.note, o.who, o.next_step]);
   return { ...o, ...row };
 }
 

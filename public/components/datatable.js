@@ -217,7 +217,7 @@ export function dataTable(el, o) {
     if (th) { const k = th.dataset.s; st.dir = st.sort === k ? -st.dir : -1; st.sort = k; keep(); draw(); return; }
     const tr = e.target.closest('tbody tr[data-i]');
     if (!tr || (e.target.closest('a') && !e.target.closest('[data-x]'))) return;
-    if ((o.expand || o.detail) && !e.target.closest('button, [data-inv-id]')) { toggle(tr); return; }
+    if ((o.expand || o.detail) && !e.target.closest('button, select, input, label, [data-inv-id]')) { toggle(tr); return; }
     if (o.onRow) o.onRow(o.rows[+tr.dataset.i], e);
   });
   table.addEventListener('keydown', e => {
