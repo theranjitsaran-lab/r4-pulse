@@ -22,7 +22,7 @@ export function drawPoints(el, pts) {
       if (T && checkNumbers(j.text, sheet).ok) el.innerHTML = `<ul class="lit">${pts.map((p, i) => liHtml(p, esc(T[p.key]), i)).join('')}</ul>`;
     }).catch(() => {});
 }
-export const litCard = (id, by = 'Pulse summary, from the figures below') => `<section class="h2-card lit-card" data-in><div id="${id}"></div><small class="lit-by">${esc(by)}</small></section>`;
+export const litCard = (id, by = 'Pulse summary, from the figures below', tour = '') => `<section class="h2-card lit-card"${tour ? ` data-tour="${tour}"` : ''} data-in><div id="${id}"></div><small class="lit-by">${esc(by)}</small></section>`;
 
 // a change: blue up, red down, grey flat
 export function chip(pct) {

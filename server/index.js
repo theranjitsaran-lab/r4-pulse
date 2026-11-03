@@ -42,6 +42,7 @@ auth.install(app);
 app.use('/api/log', require('./log'));
 app.use('/api/feedback', feedback.api);
 app.use('/api/sales', require('./sales').api);   // quotes and opportunity statuses
+app.use('/api/users', require('./users').api);   // who can sign in, for admins
 app.use('/api/settings', require('./settings').api);   // the cost model's assumptions, editable
 app.use('/api/summary', require('./summary'));
 app.use('/api/ask', require('./ask'));

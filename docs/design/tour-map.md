@@ -126,3 +126,7 @@ Choices: **Take the tour** (10 steps), **Price a new customer** (4), **Check an 
 1. New table `app.user_state` for `welcome_seen_version`, which you'd run, as with `next_step`.
 2. Two audiences as above, rather than hiding the tour's margin steps from everyone.
 3. Opportunities gets a step, in place of the mock-up's "Tap any figure".
+
+## As built, 3 November 2026
+
+Superseded where it differs above: there is one audience, not two. Everyone signed in sees margins and every view (Theran, 3 November 2026), so the margin steps are for everyone. Only an admin sees Settings, so the full tour has one admin-only step on the gear: ten steps for an admin, nine for everyone else. The steps are in `public/components/tourdata.js`; `npm run tour` runs every one at desk and phone.

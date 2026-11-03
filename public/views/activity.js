@@ -18,6 +18,7 @@ import { densityByPostcode } from '/components/jobview.js';
 import { allocate, mapSvg, loadBasemap, basemapNow, loadRoadnet, roadPath, YARD, miles } from '/components/routemap.js';
 import { likelyRound, FAR_MILES, MIN_VISITS } from '/components/opsdata.js';
 import { OWNERS, ownerName } from '/components/opps.js';
+import { phoneFold, isPhone } from '/components/phonekit.js';
 
 const PERIODS = ['day', 'week', 'month', 'q', 'h', 'y'];
 const routeName = r => /\d/.test(r || '') ? r : titleCase(r);
@@ -71,7 +72,7 @@ export async function render(main, A, params) {
   <div class="rt h2 ac ops">
     <div class="top">
       <div><h1>Operations</h1><div class="seg rt-tabs"><a href="#activity" class="on">Routes</a><a href="#numbers?tab=warehouse">Warehouse</a></div></div>
-      <div class="ops-ctl">
+      <div class="ops-ctl" data-tour="ops-period">
         <div class="seg" id="op-period" role="group" aria-label="Period"></div>
         <label class="ops-cmp" id="op-cmpl"><input type="checkbox" id="op-cmp"> Compare with the period before</label>
         <div class="day" id="op-day" hidden><button id="rt-prev" aria-label="Previous day"></button><b id="rt-day"></b><button id="rt-next" aria-label="Next day"></button></div>
@@ -82,21 +83,21 @@ export async function render(main, A, params) {
     <section class="h2-card rt-mapcard" data-in>
       <div class="rt-maphead"><div class="h2-ch"><h2 id="rt-map-t"></h2><small id="rt-map-s"></small></div>
         <div class="seg" id="rt-layer" role="group" aria-label="Show on the map"><button data-l="routes">Routes</button><button data-l="add">Where to add customers</button><button data-l="cost">${costsVisible() ? 'Costly to serve' : 'Far areas'}</button></div></div>
-      <div class="ops-mapgrid"><div class="ops-mapwrap"><div id="rt-map"></div><div class="c-tip" id="op-tip" hidden></div><div class="h2-key" id="rt-map-key"></div></div><div class="ops-side" id="op-side"></div></div>
+      <div class="ops-mapgrid"><div class="ops-mapwrap"><div id="rt-map"></div><div class="c-tip" id="op-tip" hidden></div><div class="h2-key" id="rt-map-key"></div></div>${phoneFold('the list beside the map', '<div class="ops-side" id="op-side"></div>')}</div>
     </section>
     <div class="ops-view" id="op-period-view">
       <section class="h2-card" data-in><div class="h2-ch"><h2 id="op-routes-h"></h2><small>Services per route day is the density measure: more work on the same drive. Tap a route to pick it out on the map.</small></div><div id="op-routes"></div></section>
     </div>
     <div class="ops-view" id="op-day-view" hidden>
       <section class="h2-card" data-in><div class="h2-ch"><h2 id="rt-routes-h">By route</h2><small id="rt-routes-s"></small></div><div id="rt-routes"></div></section>
-      <div class="two">
+      ${phoneFold('the week and what is booked', `<div class="two">
         <section class="h2-card" data-in><div class="h2-ch"><h2 id="rt-week-h">The week</h2></div><div id="rt-week"></div></section>
         <section class="h2-card" data-in><div class="h2-ch"><h2 id="rt-ahead-h">Booked after the latest day</h2></div><div id="rt-ahead"></div></section>
-      </div>
+      </div>`)}
     </div>
-    <section class="h2-card" data-in id="op-dense"></section>
+    ${phoneFold('how dense the work is', '<section class="h2-card" data-in id="op-dense"></section>')}
     <section class="h2-card" data-in id="op-costly"></section>
-    <section class="h2-card" data-in id="op-bands"></section>
+    ${phoneFold('distance from the yard', '<section class="h2-card" data-in id="op-bands"></section>')}
   </div>`;
   const $ = id => main.querySelector('#' + id), root = main.querySelector('.ops');
 
@@ -352,11 +353,11 @@ export async function render(main, A, params) {
     const p = V.period, cmp = comparing(), rows = V.routes, top = Math.max(1, ...rows.map(r => r.perDay));
     $('op-routes-h').textContent = `Routes in ${p.inName}`;
     const pick = r => { st.focus = st.focus === r.route ? null : r.route; st.lens = 'routes'; drawMap(); keepLink(); $('rt-map').scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); };
-    dataTable($('op-routes'), { key: 'oproutes', ns: 'r_', noun: 'routes', who: whoAmI(), rows, plain: true, opens: true, onRow: pick,
+    dataTable($('op-routes'), { key: 'oproutes', ns: 'r_', noun: 'routes', who: whoAmI(), rows, plain: true, opens: true, onRow: pick, phone: 'cards',
       cols: [
         { k: 'route', l: 'Route', name: true, text: true, get: r => routeName(r.route), fmt: r => `<b>${esc(routeName(r.route))}</b>${r.driver ? ` <small>usually ${esc(r.driver)}</small>` : ''}` },
-        { k: 'perDay', l: 'Services per route day', short: 'A route day', def: true, get: r => r.perDay, total: rs => { const d = rs.reduce((t, r) => t + r.routeDays, 0); return d ? Fmt.fixed(rs.reduce((t, r) => t + r.services, 0) / d, 1) : ''; }, fmt: r => `<span class="ops-bar" aria-hidden="true"><i style="width:${(r.perDay / top * 100).toFixed(1)}%"></i></span>${Fmt.fixed(r.perDay, 1)}` },
-        { k: 'services', l: 'Services', def: true, sorted: true, get: r => r.services, total: 'sum', fmt: r => n0(r.services) },
+        { k: 'perDay', l: 'Services per route day', short: 'A route day', card: 'full', def: true, get: r => r.perDay, total: rs => { const d = rs.reduce((t, r) => t + r.routeDays, 0); return d ? Fmt.fixed(rs.reduce((t, r) => t + r.services, 0) / d, 1) : ''; }, fmt: r => `<span class="ops-bar" aria-hidden="true"><i style="width:${(r.perDay / top * 100).toFixed(1)}%"></i></span>${Fmt.fixed(r.perDay, 1)}` },
+        { k: 'services', l: 'Services', card: 'lead', def: true, sorted: true, get: r => r.services, total: 'sum', fmt: r => n0(r.services) },
         { k: 'routeDays', l: 'Route days', def: true, get: r => r.routeDays, total: 'sum', fmt: r => n0(r.routeDays) },
         ...(cmp ? [{ k: 'chg', l: `On ${p.prevName}`, def: true, get: r => r.prev ? r.routeDays - r.prev.routeDays : null, fmt: r => { if (!r.prev) return 'new'; const d = r.routeDays - r.prev.routeDays; return d ? `${d > 0 ? '+' : '−'}${Math.abs(d)}` : 'level'; } }] : []),
         { k: 'stops', l: 'Stops', def: true, get: r => r.stops, total: 'sum', fmt: r => n0(r.stops) },
@@ -383,14 +384,14 @@ export async function render(main, A, params) {
       <div class="src">${costs ? 'Route cost is each area\'s share of its real route days, by minutes, est. Revenue is bin and ITAD work at the site, shared across a sub-account\'s postcodes by services, est. The margin takes off route cost and plant. A move is sized on its own; they are never added. ' : ''}Twelve months of Veri-Shred done orders. <a class="how-link chev" href="#how">How it's calculated</a></div>`;
     const area = { k: 'postcode', l: 'Area', name: true, text: true, get: a => a.postcode, fmt: a => `<b>${esc(a.postcode)}</b> <small>${esc(titleCase(a.who[0].name))}${a.who.length > 1 ? ` and ${a.who.length - 1} more` : ''}</small>` };
     const mi = { k: 'miles', l: 'Miles', def: true, get: a => a.miles, fmt: a => Fmt.fixed(a.miles, 0) }, vis = { k: 'visits', l: 'Visits', def: true, get: a => a.visits, total: 'sum', fmt: a => n0(a.visits) };
-    const o = { key: 'opcostly', ns: 'c_', noun: 'areas', who: whoAmI(), rows: list, plain: true, search: a => a.postcode + ' ' + a.who.map(w => w.name).join(' '), placeholder: 'Find a postcode or customer' };
+    const o = { key: 'opcostly', ns: 'c_', noun: 'areas', who: whoAmI(), rows: list, plain: true, phone: 'cards', ...(isPhone() ? { page: 3 } : {}), search: a => a.postcode + ' ' + a.who.map(w => w.name).join(' '), placeholder: 'Find a postcode or customer' };
     if (!costs) { dataTable(el.querySelector('#op-costly-t'), { ...o, cols: [area, mi, { ...vis, sorted: true }, { k: 'services', l: 'Services', def: true, get: a => a.services, total: 'sum', fmt: a => n0(a.services) }] }); return; }
     dataTable(el.querySelector('#op-costly-t'), { ...o, opens: true, onRow: openArea, cols: [area, mi, vis,
       { k: 'perVisit', l: 'Cost a visit, est.', short: 'Cost', def: true, get: a => a.perVisit, fmt: a => money0(a.perVisit) },
       { k: 'revenuePerVisit', l: 'Revenue a visit, est.', short: 'Revenue', def: true, get: a => a.revenuePerVisit, fmt: a => money0(a.revenuePerVisit) },
       { k: 'margin', l: 'Margin', def: true, get: a => a.margin, fmt: a => ragLabel(R, a.margin) },
-      { k: 'cost', l: 'Route time a year, est.', short: 'A year', def: true, sorted: true, get: a => a.cost, total: 'sum', totalFmt: v => money0(v), fmt: a => money0(a.cost) },
-      { k: 'best', l: 'Best move', def: true, text: true, get: a => a.best ? a.best.title : 'No change needed', fmt: a => a.best ? esc(a.best.title) : '<span class="sub">No change needed</span>' },
+      { k: 'cost', l: 'Route time a year, est.', short: 'A year', card: 'lead', def: true, sorted: true, get: a => a.cost, total: 'sum', totalFmt: v => money0(v), fmt: a => money0(a.cost) },
+      { k: 'best', l: 'Best move', card: 'full', def: true, text: true, get: a => a.best ? a.best.title : 'No change needed', fmt: a => a.best ? esc(a.best.title) : '<span class="sub">No change needed</span>' },
       { k: 'saving', l: 'Saving a year, est.', short: 'Saving', def: true, get: a => a.best ? a.best.saving : 0, fmt: a => a.best ? money0(a.best.saving) : '—' },
     ] });
   }

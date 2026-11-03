@@ -106,7 +106,7 @@ async function main() {
     // what R4 users are sent, and the months' costs against the year they were split from
     const logA = await fetch(base + '/login', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ name: 'footadm', password: pass }) });
     const adm = await (await fetch(`${base}/api/view/numbers`, { headers: { cookie: (logA.headers.get('set-cookie') || '').split(';')[0] } })).json().then(j => j.data !== undefined ? j.data : j);
-    say(numbers.lineCosts == null && numbers.margin == null ? 'PASS' : 'FAIL', 'C ', 'Money sends an owner no monthly costs and no margin table; admins get both');
+    say(numbers.lineCosts != null && numbers.margin != null ? 'PASS' : 'FAIL', 'C ', 'Everyone signed in is sent the monthly costs and the margin table, not only admins');
     const G = adm.lineGrid, C = adm.lineCosts, pricedI = G.months.map((x, i) => C.priced[i] ? i : -1).filter(i => i >= 0).slice(-12);
     for (const l of adm.margin.lines) {
       const c = C.costs[l.family]; if (!c || !l.cost) continue;

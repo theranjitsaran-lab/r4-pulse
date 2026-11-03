@@ -32,13 +32,13 @@ export function accountTable(host, { key, VW, C, R, B, P, extra = [], series = f
   const base = (r, m) => { const i = at.get(m), t = r.m[i] || 0; return which === 'storage' ? (r.s ? r.s[i] : 0) : which === 'service' ? t - (r.s ? r.s[i] : 0) : t; };
   const monthMargin = (r, m) => r.pc == null ? 0 : base(r, m) * r.pc;
   const maxK = Math.max(1, ...rows.flatMap(r => r.pc == null ? [] : am.months.slice(-12).map(m => Math.abs((r.m[at.get(m)] || 0) * r.pc))));
-  const name = { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` };
+  const name = { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a data-tour="account-link" href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a>` };
   const marginCol = (st) => {
     const k = st.f.mv === 'k', list = st.f.line;
     const of = r => { const f = list && r.fam ? r.fam[list] : null; return list ? (f ? { m: f.revenue - f.cost, rev: f.revenue } : null) : r.pc == null ? null : { m: r.margin, rev: r.revenue }; };
     let i = 0;
     return { k: 'pc', l: `${k ? '$K margin' : 'Margin'} est.`, short: k ? '$K' : 'Margin', def: true, cls: 'dt-rag', get: r => { const v = of(r); return !v ? null : k ? v.m : v.rev > 0 ? v.m / v.rev : null; }, csv: r => { const v = of(r); return !v ? '' : k ? v.m : v.rev > 0 ? v.m / v.rev : ''; },
-      fmt: r => { const v = of(r); if (!v) return '—'; const p = v.rev > 0 ? v.m / v.rev : null; return ragPill(R, p, k ? signedK(v.m) : p == null ? '—' : pctS(p), `class-x data-x="margin" data-id="${r.level1}"`, i++); },
+      fmt: r => { const v = of(r); if (!v) return '—'; const p = v.rev > 0 ? v.m / v.rev : null; return ragPill(R, p, k ? signedK(v.m) : p == null ? '—' : pctS(p), `class-x data-tour="margin" data-x="margin" data-id="${r.level1}"`, i++); },
       totalHtml: list2 => { const t = list2.reduce((a, r) => { const v = of(r); return v ? { m: a.m + v.m, rev: a.rev + v.rev } : a; }, { m: 0, rev: 0 }); return k ? signedK(t.m) : t.rev > 0 ? pctS(t.m / t.rev) : '—'; } };
   };
   const cols = st => { mode = st.f.mv === 'k' ? 'k' : 'pc'; which = st.f.sv || 'all'; return [name, ...(costs ? [marginCol(st)] : []), ...extra]; };

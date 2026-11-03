@@ -1,8 +1,9 @@
 // Home's Chicago map: postcode districts shaded by twelve months of done services, and last week's real routes moving
 // out from the yard and back. Shading: activity.postcodes on the Census districts in public/data/zones.json. Routes:
-// done orders in recorded stop order (activity.orders), joined along the main roads; not GPS, which was never captured
+// done orders in the likely stop order (activity.orders), joined along the main roads; not GPS, which was never captured
 // (data rule 8). Counts: activity.routeDays. busiest, lastWeek, periodRoutes, districtActivity and busiestFacts have
 // no DOM, for the tests. The note is written from busiestFacts and checked like every other summary.
+import { likelyRound } from './opsdata.js';
 import { YARD, miles, roadPath, loadRoadnet, loadBasemap } from './routemap.js';
 import { areaFrame, landLayer, yardMark, scaleBar } from './areamap.js';
 import { getJson, esc, titleCase } from './data.js';
@@ -58,8 +59,8 @@ export function periodRoutes(A, Z, dates) {
   for (const x of by.values()) {
     const seen = new Set();
     for (const date of dates) {
-      const stops = [];
-      for (const o of (orders.get(date + '|' + x.route) || []).slice().sort((a, b) => (a.seq ?? 1e9) - (b.seq ?? 1e9))) if (Z[o.postcode] && stops[stops.length - 1] !== o.postcode) stops.push(o.postcode);
+      // the driven order is not recorded (CLAUDE.md data rule 13)
+      const stops = likelyRound((orders.get(date + '|' + x.route) || []).map(o => o.postcode), Z);
       const key = stops.join();
       if (stops.length && !seen.has(key)) { seen.add(key); x.days.push({ date, stops }); }
     }

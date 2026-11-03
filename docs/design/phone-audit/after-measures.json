@@ -1,0 +1,9883 @@
+{
+ "iphone": {
+  "today": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 2248,
+   "screens": 2.7,
+   "words": 374,
+   "small": [
+    {
+     "k": "b",
+     "size": 12,
+     "n": 6,
+     "eg": "Activity"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 6,
+     "eg": "60426"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 5,
+     "eg": "October's work → November bill (est.)"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Accounts"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 3,
+     "eg": "+ up to $88K: 3 jobs to check"
+    },
+    {
+     "k": "span.h2-sm",
+     "size": 12,
+     "n": 3,
+     "eg": "To the list"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Today"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "span.h2-d.flat",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 4%"
+    },
+    {
+     "k": "p.h2-tie.late",
+     "size": 12,
+     "n": 1,
+     "eg": "VCK now holds $638K: $6K posted since th"
+    },
+    {
+     "k": "span.h2-eyebrow",
+     "size": 12,
+     "n": 1,
+     "eg": "Friday 30 Oct"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Shading: Veri-Shred done services by pos"
+    },
+    {
+     "k": "div.h2-foot",
+     "size": 12,
+     "n": 1,
+     "eg": "est. means estimated · Citadel held apar"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span",
+     "size": 14,
+     "n": 7,
+     "eg": "Value of work: October is 1% ahead of Se"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "+ up to $88K: 3 jobs to check"
+    },
+    {
+     "k": "p.h2-tie.late",
+     "size": 12,
+     "n": 1,
+     "eg": "VCK now holds $638K: $6K posted since th"
+    },
+    {
+     "k": "p.hm-say",
+     "size": 13,
+     "n": 1,
+     "eg": "60426 near Harvey is the busiest postcod"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Shading: Veri-Shred done services by pos"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 34,
+   "under44": [
+    {
+     "k": "a",
+     "n": 1,
+     "w": 184,
+     "h": 36
+    }
+   ],
+   "closePairs": 23,
+   "tiles": [
+    {
+     "size": 28,
+     "top": 546,
+     "label": false,
+     "wide": 358
+    },
+    {
+     "size": 22,
+     "top": 621,
+     "label": false,
+     "wide": 175
+    },
+    {
+     "size": 22,
+     "top": 621,
+     "label": false,
+     "wide": 175
+    }
+   ],
+   "tilesPerRow": 1,
+   "answerBottom": 714,
+   "firstScreen": true,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [],
+   "maps": [
+    {
+     "w": 332,
+     "h": 365,
+     "pctOfWidth": 94
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "accounts": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 2222,
+   "screens": 2.6,
+   "words": 778,
+   "small": [
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Invoiced in VCK, October"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "on September, level on a year ago"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy, 35% or more"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 3,
+     "eg": "Aug 26"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 2,
+     "eg": "▼ 6%"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the figures below"
+    },
+    {
+     "k": "span.kchip.up",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 4%"
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "span.dt-p",
+     "size": 12,
+     "n": 1,
+     "eg": "Margin"
+    },
+    {
+     "k": "th.dt-sum",
+     "size": 12,
+     "n": 1,
+     "eg": "YTD"
+    },
+    {
+     "k": "th.on",
+     "size": 12,
+     "n": 1,
+     "eg": "12 months ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Sales as invoiced, Citadel held apart fr"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "$85K a month below their own run. The bi"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "Cross-sell is worth up to $140K a month"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 1,
+     "eg": "a month, if each bought like its peers"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 1,
+     "eg": "more than 25% and $5K below the row’s ow"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Sales as invoiced, Citadel held apart fr"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 175,
+   "under44": [],
+   "closePairs": 153,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 487,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 487,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 630,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 630,
+     "label": false,
+     "wide": 173
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 743,
+   "firstScreen": true,
+   "tables": [
+    {
+     "box": 330,
+     "table": 516,
+     "rows": 51,
+     "cols": 7,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "month-grid": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 1877,
+   "screens": 2.2,
+   "words": 731,
+   "small": [
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "Margin est.:"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy, 35% or more"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 3,
+     "eg": "Aug 26"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. A shaded month is more th"
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "span.dt-p",
+     "size": 12,
+     "n": 1,
+     "eg": "Margin"
+    },
+    {
+     "k": "th.dt-sum",
+     "size": 12,
+     "n": 1,
+     "eg": "YTD"
+    },
+    {
+     "k": "th.on",
+     "size": 12,
+     "n": 1,
+     "eg": "12 months ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Invoice month, posted runs. Storage bill"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 2,
+     "eg": "at least 10% below their own run. The bi"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. A shaded month is more th"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 1,
+     "eg": "more than 25% and $5K below the row’s ow"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Invoice month, posted runs. Storage bill"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 174,
+   "under44": [],
+   "closePairs": 155,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [
+    {
+     "box": 330,
+     "table": 516,
+     "rows": 51,
+     "cols": 7,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "cross-sell": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 3381,
+   "screens": 4,
+   "words": 841,
+   "small": [
+    {
+     "k": "span.peer",
+     "size": 12,
+     "n": 50,
+     "eg": "Public body"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 6,
+     "eg": "Storage"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "th.dt-sum.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Not bought yet ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "if the largest 200 accounts bought each "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 118,
+   "under44": [],
+   "closePairs": 63,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [
+    {
+     "box": 330,
+     "table": 723,
+     "rows": 50,
+     "cols": 8,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "customer": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 2496,
+   "screens": 3,
+   "words": 829,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 11,
+     "eg": "Invoiced a month, from VCK. Tap a month "
+    },
+    {
+     "k": "text",
+     "size": 11,
+     "n": 10,
+     "eg": "$142K"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 5,
+     "eg": "Today"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 5,
+     "eg": "Line"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "Invoiced, last twelve months"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "57% storage, 43% service"
+    },
+    {
+     "k": "i.md-kind",
+     "size": 12,
+     "n": 4,
+     "eg": "Price"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 3,
+     "eg": "Pulse summary, from the figures below"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 2,
+     "eg": "A year est., each on its own. They overl"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 1,
+     "eg": "▼ 47%"
+    },
+    {
+     "k": "em.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "Breakdown"
+    },
+    {
+     "k": "span.chip.warn",
+     "size": 12,
+     "n": 1,
+     "eg": "check the unit"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 11,
+     "eg": "Invoiced a month, from VCK. Tap a month "
+    },
+    {
+     "k": "span.sub",
+     "size": 13,
+     "n": 8,
+     "eg": "$43.48, book median $65.00, cheaper than"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "running at $40K a month against $75K; 57"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 3,
+     "eg": "Low on retrieval and refile for its size"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 2,
+     "eg": "A year est., each on its own. They overl"
+    },
+    {
+     "k": "div.sub.ws1b",
+     "size": 13,
+     "n": 2,
+     "eg": "$406 a year per 1,000 boxes, the median "
+    },
+    {
+     "k": "div.sig",
+     "size": 13,
+     "n": 2,
+     "eg": "Slipping: $40K a month over the last thr"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p",
+     "size": 14,
+     "n": 1,
+     "eg": "Its Department of Finance alone covers r"
+    },
+    {
+     "k": "p.cp-reading",
+     "size": 14,
+     "n": 1,
+     "eg": "Public-body records follow retention sch"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": ", researched 3 Nov 2026. The reading is "
+    },
+    {
+     "k": "p.cp-served",
+     "size": 14,
+     "n": 1,
+     "eg": "Served at 60620, 6.2 mi from the yard: 2"
+    },
+    {
+     "k": "div.ws1p",
+     "size": 14,
+     "n": 1,
+     "eg": "The case for them: 148,621 of their boxe"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 43,
+   "under44": [
+    {
+     "k": "a",
+     "n": 9,
+     "w": 63,
+     "h": 16
+    },
+    {
+     "k": "a.chev",
+     "n": 1,
+     "w": 41,
+     "h": 20
+    }
+   ],
+   "closePairs": 5,
+   "tiles": [
+    {
+     "size": 28,
+     "top": 397,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 28,
+     "top": 397,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 28,
+     "top": 529,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 28,
+     "top": 529,
+     "label": false,
+     "wide": 173
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 646,
+   "firstScreen": true,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [
+    {
+     "cls": "kbars",
+     "w": 332,
+     "h": 83,
+     "labels": 10,
+     "collide": 0,
+     "label": 11
+    }
+   ],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "quote": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 3350,
+   "screens": 4,
+   "words": 749,
+   "small": [
+    {
+     "k": "text",
+     "size": 12,
+     "n": 12,
+     "eg": "Yard"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 9,
+     "eg": "Price"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 4,
+     "eg": "1 bin a visit, 52 visits a year"
+    },
+    {
+     "k": "label",
+     "size": 12,
+     "n": 3,
+     "eg": "Customer"
+    },
+    {
+     "k": "span.y",
+     "size": 12,
+     "n": 3,
+     "eg": "−$114 a year left est., on $4K"
+    },
+    {
+     "k": "span.pq-lab",
+     "size": 12,
+     "n": 2,
+     "eg": "Bins each visit"
+    },
+    {
+     "k": "p.hint",
+     "size": 12,
+     "n": 2,
+     "eg": "A new customer: one bin, emptied weekly."
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account's usual invoiced rate over "
+    },
+    {
+     "k": "span.dt-p",
+     "size": 12,
+     "n": 2,
+     "eg": "Under"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Quote"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small#k-price-s",
+     "size": 12,
+     "n": 1,
+     "eg": "a bin, 1 bin a visit"
+    },
+    {
+     "k": "small#k-rev-s",
+     "size": 12,
+     "n": 1,
+     "eg": "52 visits a year"
+    },
+    {
+     "k": "span.pq-tag.loss",
+     "size": 12,
+     "n": 1,
+     "eg": "Thin, losing money"
+    },
+    {
+     "k": "span#p-site-lab",
+     "size": 12,
+     "n": 1,
+     "eg": "Minutes on site a visit"
+    },
+    {
+     "k": "span#p-price-unit",
+     "size": 12,
+     "n": 1,
+     "eg": "a bin"
+    },
+    {
+     "k": "div.pq-note",
+     "size": 12,
+     "n": 1,
+     "eg": "In the middle half"
+    },
+    {
+     "k": "div.pq-bl",
+     "size": 12,
+     "n": 1,
+     "eg": "median $85.00, middle half $85.00 to $11"
+    },
+    {
+     "k": "small#p-where-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Tap the map or type a postcode. Until th"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Routes join recorded stops in order alon"
+    },
+    {
+     "k": "small#p-goes-s",
+     "size": 12,
+     "n": 1,
+     "eg": "As asked: a visit, est."
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Same customer, same site. Tap one to try"
+    },
+    {
+     "k": "span.pq-best",
+     "size": 12,
+     "n": 1,
+     "eg": "Best for R4"
+    },
+    {
+     "k": "span.hint",
+     "size": 12,
+     "n": 1,
+     "eg": "As asked: $4K revenue and −$114 left a y"
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Service"
+    },
+    {
+     "k": "th.on",
+     "size": 12,
+     "n": 1,
+     "eg": "▼"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 3,
+     "eg": "1 bin a visit, 52 visits a year"
+    },
+    {
+     "k": "p.hint",
+     "size": 12,
+     "n": 2,
+     "eg": "A new customer: one bin, emptied weekly."
+    },
+    {
+     "k": "li",
+     "size": 13,
+     "n": 2,
+     "eg": "Choose a place to see the routes near it"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account's usual invoiced rate over "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small#p-where-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Tap the map or type a postcode. Until th"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Routes join recorded stops in order alon"
+    },
+    {
+     "k": "p",
+     "size": 13,
+     "n": 1,
+     "eg": "At what a minute of the route day costs."
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Same customer, same site. Tap one to try"
+    },
+    {
+     "k": "span.hint",
+     "size": 12,
+     "n": 1,
+     "eg": "As asked: $4K revenue and −$114 left a y"
+    },
+    {
+     "k": "p.pq-explain",
+     "size": 14,
+     "n": 1,
+     "eg": "Not about this quote: it looks across ev"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 67,
+   "under44": [
+    {
+     "k": "button",
+     "n": 4,
+     "w": 69,
+     "h": 36
+    }
+   ],
+   "closePairs": 45,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 141,
+     "label": false,
+     "wide": 177
+    },
+    {
+     "size": 22,
+     "top": 141,
+     "label": false,
+     "wide": 177
+    },
+    {
+     "size": 22,
+     "top": 212,
+     "label": false,
+     "wide": 177
+    },
+    {
+     "size": 22,
+     "top": 212,
+     "label": false,
+     "wide": 177
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 279,
+   "firstScreen": true,
+   "tables": [
+    {
+     "box": 330,
+     "table": 330,
+     "rows": 32,
+     "cols": 3,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [
+    {
+     "cls": "",
+     "w": 332,
+     "h": 87,
+     "labels": 10,
+     "collide": 2,
+     "label": 12
+    }
+   ],
+   "maps": [
+    {
+     "w": 332,
+     "h": 349,
+     "pctOfWidth": 89
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "operations": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 4823,
+   "screens": 5.7,
+   "words": 478,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 14,
+     "eg": "Services per route day is the density me"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Services done"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kchip.flat",
+     "size": 12,
+     "n": 4,
+     "eg": "0%"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "on May to Jul"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 2,
+     "eg": "Yard"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Operations"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Aug to Oct. Thicker, darker lines are th"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    },
+    {
+     "k": "a.how-link.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "How it's calculated"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "19.6 a route day, level with May to Jul,"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 2,
+     "eg": "Services per route day is the density me"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Aug to Oct. Thicker, darker lines are th"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 40,
+   "under44": [
+    {
+     "k": "input#op-cmp",
+     "n": 1,
+     "w": 20,
+     "h": 20
+    }
+   ],
+   "closePairs": 13,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 579,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 579,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 682,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 682,
+     "label": false,
+     "wide": 173
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 792,
+   "firstScreen": false,
+   "tables": [
+    {
+     "box": 332,
+     "table": 332,
+     "rows": 9,
+     "cols": 5,
+     "pinned": false,
+     "rowH": 23,
+     "font": 15
+    },
+    {
+     "box": 332,
+     "table": 332,
+     "rows": 3,
+     "cols": 9,
+     "pinned": false,
+     "rowH": 45,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [
+    {
+     "w": 332,
+     "h": 332,
+     "pctOfWidth": 85
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "operations-day": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 3725,
+   "screens": 4.4,
+   "words": 452,
+   "small": [
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Services done"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 7,
+     "eg": "MRS"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "on the Friday before"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 2,
+     "eg": "▼ 43%"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 2,
+     "eg": "Yard"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Operations"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "span.kchip.up",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 40%"
+    },
+    {
+     "k": "span.kchip.flat",
+     "size": 12,
+     "n": 1,
+     "eg": "+3 pts"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Angel ran thin. Tap a route to follow it"
+    },
+    {
+     "k": "small#rt-routes-s",
+     "size": 12,
+     "n": 1,
+     "eg": "The tick is normal for this route, its 8"
+    },
+    {
+     "k": "span.chip.warn",
+     "size": 12,
+     "n": 1,
+     "eg": "thin"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    },
+    {
+     "k": "a.how-link.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "How it's calculated"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.sub",
+     "size": 13,
+     "n": 4,
+     "eg": "22 of 28 done, 5 stops, 3 customers"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 2,
+     "eg": "▼ 18% on the 60 normal for these routes."
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Angel ran thin. Tap a route to follow it"
+    },
+    {
+     "k": "small#rt-routes-s",
+     "size": 12,
+     "n": 1,
+     "eg": "The tick is normal for this route, its 8"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Highest route cost first. Tap one for th"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 38,
+   "under44": [
+    {
+     "k": "input#op-cmp",
+     "n": 1,
+     "w": 20,
+     "h": 20
+    }
+   ],
+   "closePairs": 16,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 573,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 573,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 698,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 698,
+     "label": false,
+     "wide": 173
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 829,
+   "firstScreen": false,
+   "tables": [
+    {
+     "box": 332,
+     "table": 332,
+     "rows": 3,
+     "cols": 9,
+     "pinned": false,
+     "rowH": 45,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [
+    {
+     "w": 332,
+     "h": 332,
+     "pctOfWidth": 85
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "warehouse": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 2279,
+   "screens": 2.7,
+   "words": 345,
+   "small": [
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Boxes in storage"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 8,
+     "eg": "0"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "billed, on a year ago"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 3,
+     "eg": "One square for every 1,000 boxes, larges"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 3,
+     "eg": "VCK boxes in storage, all in Chicago. El"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Operations"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the figures below"
+    },
+    {
+     "k": "span.kchip.up",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 3%"
+    },
+    {
+     "k": "a.how-link.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "Overdue boxes by account"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "The bill carries 3% more than a year ago"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 3,
+     "eg": "One square for every 1,000 boxes, larges"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 2,
+     "eg": "At least 256,591 boxes could be shredded"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 2,
+     "eg": "VCK boxes in storage, all in Chicago. El"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 16,
+   "under44": [],
+   "closePairs": 5,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 490,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 490,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 615,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 615,
+     "label": false,
+     "wide": 173
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 706,
+   "firstScreen": true,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [
+    {
+     "cls": "",
+     "w": 332,
+     "h": 205,
+     "labels": 8,
+     "collide": 0,
+     "label": 12
+    }
+   ],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "opportunities": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 5227,
+   "screens": 6.2,
+   "words": 478,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 22,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 9,
+     "eg": "Worth a year"
+    },
+    {
+     "k": "span.op-kind.k-slip",
+     "size": 12,
+     "n": 6,
+     "eg": "Win back"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "each account once, at its best move"
+    },
+    {
+     "k": "span.op-kind.k-price",
+     "size": 12,
+     "n": 3,
+     "eg": "Price gap"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Opportunities"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the list below"
+    },
+    {
+     "k": "button.dt-chip",
+     "size": 12,
+     "n": 1,
+     "eg": "Open and in play ×"
+    },
+    {
+     "k": "span.op-kind.k-cross",
+     "size": 12,
+     "n": 1,
+     "eg": "Cross-sell"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.op-short",
+     "size": 13,
+     "n": 9,
+     "eg": "Down $35K a month in total (service down"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "$2.1M a year and $2.6M of one-offs sit u"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.op-how",
+     "size": 14,
+     "n": 1,
+     "eg": "One row per account, the single best mov"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "3 public bodies pay under the book for s"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 72,
+   "under44": [],
+   "closePairs": 8,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 480,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 480,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 601,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 601,
+     "label": false,
+     "wide": 173
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 710,
+   "firstScreen": true,
+   "tables": [
+    {
+     "box": 332,
+     "table": 332,
+     "rows": 10,
+     "cols": 8,
+     "pinned": false,
+     "rowH": 45,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "settings": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 4731,
+   "screens": 5.6,
+   "words": 1153,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 45,
+     "eg": "everyone sees them; this says how sure t"
+    },
+    {
+     "k": "span.fl",
+     "size": 12,
+     "n": 12,
+     "eg": "provisional"
+    },
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 12,
+     "eg": "7028 Bldg Exp and 7335660 Maintenance pa"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 5,
+     "eg": "Today"
+    },
+    {
+     "k": "label.us-f",
+     "size": 12,
+     "n": 5,
+     "eg": "Access"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "A route day"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "A password needs at least 10 characters."
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 32,
+     "eg": "everyone sees them; this says how sure t"
+    },
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 11,
+     "eg": "7028 Bldg Exp and 7335660 Maintenance pa"
+    },
+    {
+     "k": "p.hint",
+     "size": 13,
+     "n": 2,
+     "eg": "The assumptions behind every cost on scr"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "span",
+     "size": 14,
+     "n": 1,
+     "eg": "Off: margins read \"Costs modelled, provi"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "A password needs at least 10 characters."
+    },
+    {
+     "k": "b",
+     "size": 14,
+     "n": 1,
+     "eg": "City of Chicago | Department of Technolo"
+    },
+    {
+     "k": "span.v",
+     "size": 14,
+     "n": 1,
+     "eg": "B2 219.3, B3 34.9, B4 121.7, B6 15.7, al"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 74,
+   "under44": [],
+   "closePairs": 12,
+   "tiles": [
+    {
+     "size": 16,
+     "top": 1248,
+     "label": false,
+     "wide": 175
+    },
+    {
+     "size": 16,
+     "top": 1248,
+     "label": false,
+     "wide": 175
+    },
+    {
+     "size": 16,
+     "top": 1339,
+     "label": false,
+     "wide": 175
+    },
+    {
+     "size": 16,
+     "top": 1339,
+     "label": false,
+     "wide": 175
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 1465,
+   "firstScreen": false,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 16,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "how": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 2106,
+   "screens": 2.5,
+   "words": 509,
+   "small": [
+    {
+     "k": "a",
+     "size": 12,
+     "n": 5,
+     "eg": "Today"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "the share of boxes; R4 has still to name"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "p",
+     "size": 14,
+     "n": 18,
+     "eg": "Invoiced in VCK means posted invoices, d"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.how-lede",
+     "size": 14,
+     "n": 1,
+     "eg": "Refreshed daily from VCK (billing and pr"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "the share of boxes; R4 has still to name"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 10,
+   "under44": [],
+   "closePairs": 4,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "line-of-business": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 2702,
+   "screens": 3.2,
+   "words": 271,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 14,
+     "eg": "September"
+    },
+    {
+     "k": "text",
+     "size": 11,
+     "n": 9,
+     "eg": "$421K"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 6,
+     "eg": "10%"
+    },
+    {
+     "k": "em.pg",
+     "size": 12,
+     "n": 4,
+     "eg": "Price gap"
+    },
+    {
+     "k": "span.kchip.flat",
+     "size": 12,
+     "n": 2,
+     "eg": "0%"
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "$389K, 63% of the month"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 1,
+     "eg": "▼ 4%"
+    },
+    {
+     "k": "em.xs",
+     "size": 12,
+     "n": 1,
+     "eg": "Cross-sell"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 5,
+     "eg": "$0.142 a box against $0.228 on 228,403 b"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "the five largest accounts hold 30% of $4"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "$380K to $421K a month over the year:"
+    },
+    {
+     "k": "p.ld-flag",
+     "size": 13,
+     "n": 1,
+     "eg": "Imperial Motors spends $281 a year on st"
+    },
+    {
+     "k": "p.src",
+     "size": 13,
+     "n": 1,
+     "eg": "Twelve months by the line's priced work,"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 12,
+   "under44": [],
+   "closePairs": 2,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [
+    {
+     "cls": "kbars",
+     "w": 358,
+     "h": 77,
+     "labels": 9,
+     "collide": 0,
+     "label": 11
+    }
+   ],
+   "maps": [],
+   "panel": {
+    "w": 390,
+    "top": 20,
+    "bottom": 746,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": 664,
+    "footH": 82,
+    "bodyH": 567,
+    "navOver": false,
+    "insetBottom": "12px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "margin-drawer": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 1877,
+   "screens": 2.2,
+   "words": 217,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 12,
+     "eg": "Revenue"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 6,
+     "eg": "Normal"
+    },
+    {
+     "k": "span.md-ask.mid",
+     "size": 12,
+     "n": 5,
+     "eg": "Conversation"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "billed"
+    },
+    {
+     "k": "span.md-ask.easy",
+     "size": 12,
+     "n": 2,
+     "eg": "Easy"
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Margin, last twelve months, est."
+    },
+    {
+     "k": "span.cd-conf.c1",
+     "size": 12,
+     "n": 1,
+     "eg": "Costs modelled, provisional"
+    },
+    {
+     "k": "p.md-odd",
+     "size": 12,
+     "n": 1,
+     "eg": "Plus $7,875 billed with no matching work"
+    },
+    {
+     "k": "i",
+     "size": 12,
+     "n": 1,
+     "eg": "Best"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.md-fxt",
+     "size": 14,
+     "n": 2,
+     "eg": "Retrieval and handling: move to its peer"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 1,
+     "eg": "est.: they cost 2.5 times what they bill"
+    },
+    {
+     "k": "p.md-odd",
+     "size": 12,
+     "n": 1,
+     "eg": "Plus $7,875 billed with no matching work"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "They overlap, so they do not add up"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 20,
+   "under44": [
+    {
+     "k": "button.pop-ask",
+     "n": 1,
+     "w": 83,
+     "h": 40
+    }
+   ],
+   "closePairs": 22,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "panel": {
+    "w": 390,
+    "top": 20,
+    "bottom": 746,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": 685,
+    "footH": 61,
+    "bodyH": 588,
+    "navOver": false,
+    "insetBottom": "8px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "cross-sell-drill": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 4738,
+   "screens": 5.6,
+   "words": 1027,
+   "small": [
+    {
+     "k": "span.peer",
+     "size": 12,
+     "n": 50,
+     "eg": "Public body"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Buys now, 12 months"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 6,
+     "eg": "Storage"
+    },
+    {
+     "k": "span.cd-val",
+     "size": 12,
+     "n": 5,
+     "eg": "$8K now, $51K for its size"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "$407K of it storage, 228,403 boxes. $285"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "th.dt-sum.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Not bought yet ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 6,
+     "eg": "if the largest 200 accounts bought each "
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 2,
+     "eg": "Biggest gap: destruction, not bought yet"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 1,
+     "eg": "$407K of it storage, 228,403 boxes. $285"
+    },
+    {
+     "k": "h3",
+     "size": 13,
+     "n": 1,
+     "eg": "Each service line: what it buys against "
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 1,
+     "eg": "Storage left out: at $407K it would flat"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 123,
+   "under44": [],
+   "closePairs": 54,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 1206,
+     "label": false,
+     "wide": 136
+    },
+    {
+     "size": 22,
+     "top": 1206,
+     "label": false,
+     "wide": 136
+    },
+    {
+     "size": 22,
+     "top": 1395,
+     "label": false,
+     "wide": 136
+    },
+    {
+     "size": 22,
+     "top": 1395,
+     "label": false,
+     "wide": 136
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 1504,
+   "firstScreen": false,
+   "tables": [
+    {
+     "box": 330,
+     "table": 723,
+     "rows": 51,
+     "cols": 8,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "opportunity-open": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 7282,
+   "screens": 8.6,
+   "words": 815,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 30,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 9,
+     "eg": "Worth a year"
+    },
+    {
+     "k": "span.op-kind.k-slip",
+     "size": 12,
+     "n": 7,
+     "eg": "Win back"
+    },
+    {
+     "k": "summary",
+     "size": 12,
+     "n": 6,
+     "eg": "A way to open"
+    },
+    {
+     "k": "span.op-kind.k-price",
+     "size": 12,
+     "n": 5,
+     "eg": "Price gap"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "each account once, at its best move"
+    },
+    {
+     "k": "span.op-kind.k-cross",
+     "size": 12,
+     "n": 3,
+     "eg": "Cross-sell"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Opportunities"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the list below"
+    },
+    {
+     "k": "button.dt-chip",
+     "size": 12,
+     "n": 1,
+     "eg": "Open and in play ×"
+    },
+    {
+     "k": "span.op-kind.k-overdue",
+     "size": 12,
+     "n": 1,
+     "eg": "Overdue boxes"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "p",
+     "size": 13,
+     "n": 12,
+     "eg": "$40K a month over the last three months "
+    },
+    {
+     "k": "span.op-short",
+     "size": 13,
+     "n": 9,
+     "eg": "Down $35K a month in total (service down"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "$2.1M a year and $2.6M of one-offs sit u"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.op-how",
+     "size": 14,
+     "n": 1,
+     "eg": "One row per account, the single best mov"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "3 public bodies pay under the book for s"
+    },
+    {
+     "k": "p.op-over",
+     "size": 13,
+     "n": 1,
+     "eg": "These overlap: if the overdue boxes are "
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 85,
+   "under44": [],
+   "closePairs": 17,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 480,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 480,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 601,
+     "label": false,
+     "wide": 173
+    },
+    {
+     "size": 22,
+     "top": 601,
+     "label": false,
+     "wide": 173
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 710,
+   "firstScreen": true,
+   "tables": [
+    {
+     "box": 332,
+     "table": 332,
+     "rows": 11,
+     "cols": 8,
+     "pinned": false,
+     "rowH": 45,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "costly-drawer": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 5202,
+   "screens": 6.2,
+   "words": 197,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 8,
+     "eg": "Cost a visit, est."
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "29 miles from the yard, 54 visits in twe"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "p",
+     "size": 13,
+     "n": 4,
+     "eg": "$88 a visit covers what its drive costs "
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "78% of it the drive: $10,667 of route ti"
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "29 miles from the yard, 54 visits in twe"
+    },
+    {
+     "k": "h3",
+     "size": 13,
+     "n": 1,
+     "eg": "It is healthy: nothing needs to change. "
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 4,
+   "under44": [],
+   "closePairs": 0,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [
+    {
+     "w": 332,
+     "h": 332,
+     "pctOfWidth": 85
+    }
+   ],
+   "panel": {
+    "w": 390,
+    "top": 20,
+    "bottom": 746,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": 664,
+    "footH": 82,
+    "bodyH": 567,
+    "navOver": false,
+    "insetBottom": "12px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "ask": {
+   "w": 390,
+   "h": 844,
+   "over": 0,
+   "pageH": 2248,
+   "screens": 2.7,
+   "words": 37,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Answers from the app's own figures"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "button",
+     "size": 13,
+     "n": 1,
+     "eg": "What happens if customers shred their el"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 6,
+   "under44": [
+    {
+     "k": "button",
+     "n": 1,
+     "w": 40,
+     "h": 44
+    }
+   ],
+   "closePairs": 0,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [],
+   "maps": [
+    {
+     "w": 332,
+     "h": 365,
+     "pctOfWidth": 94
+    }
+   ],
+   "panel": {
+    "w": 390,
+    "top": 20,
+    "bottom": 746,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": null,
+    "footH": null,
+    "bodyH": 580,
+    "navOver": false,
+    "insetBottom": "0px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     55,
+     73,
+     57,
+     83,
+     99
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "errors": []
+ },
+ "small": {
+  "today": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 2253,
+   "screens": 3.4,
+   "words": 374,
+   "small": [
+    {
+     "k": "b",
+     "size": 12,
+     "n": 6,
+     "eg": "Activity"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 6,
+     "eg": "60426"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 5,
+     "eg": "October's work → November bill (est.)"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Accounts"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 3,
+     "eg": "+ up to $88K: 3 jobs to check"
+    },
+    {
+     "k": "span.h2-sm",
+     "size": 12,
+     "n": 3,
+     "eg": "To the list"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Today"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "span.h2-d.flat",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 4%"
+    },
+    {
+     "k": "p.h2-tie.late",
+     "size": 12,
+     "n": 1,
+     "eg": "VCK now holds $638K: $6K posted since th"
+    },
+    {
+     "k": "span.h2-eyebrow",
+     "size": 12,
+     "n": 1,
+     "eg": "Friday 30 Oct"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Shading: Veri-Shred done services by pos"
+    },
+    {
+     "k": "div.h2-foot",
+     "size": 12,
+     "n": 1,
+     "eg": "est. means estimated · Citadel held apar"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span",
+     "size": 14,
+     "n": 7,
+     "eg": "Value of work: October is 1% ahead of Se"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "+ up to $88K: 3 jobs to check"
+    },
+    {
+     "k": "p.h2-tie.late",
+     "size": 12,
+     "n": 1,
+     "eg": "VCK now holds $638K: $6K posted since th"
+    },
+    {
+     "k": "p.hm-say",
+     "size": 13,
+     "n": 1,
+     "eg": "60426 near Harvey is the busiest postcod"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Shading: Veri-Shred done services by pos"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 34,
+   "under44": [],
+   "closePairs": 25,
+   "tiles": [
+    {
+     "size": 28,
+     "top": 546,
+     "label": false,
+     "wide": 343
+    },
+    {
+     "size": 22,
+     "top": 621,
+     "label": false,
+     "wide": 168
+    },
+    {
+     "size": 22,
+     "top": 621,
+     "label": false,
+     "wide": 168
+    }
+   ],
+   "tilesPerRow": 1,
+   "answerBottom": 714,
+   "firstScreen": false,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [],
+   "maps": [
+    {
+     "w": 317,
+     "h": 349,
+     "pctOfWidth": 93
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "accounts": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 2165,
+   "screens": 3.2,
+   "words": 778,
+   "small": [
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Invoiced in VCK, October"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "on September, level on a year ago"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy, 35% or more"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 3,
+     "eg": "Aug 26"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 2,
+     "eg": "▼ 6%"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the figures below"
+    },
+    {
+     "k": "span.kchip.up",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 4%"
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "span.dt-p",
+     "size": 12,
+     "n": 1,
+     "eg": "Margin"
+    },
+    {
+     "k": "th.dt-sum",
+     "size": 12,
+     "n": 1,
+     "eg": "YTD"
+    },
+    {
+     "k": "th.on",
+     "size": 12,
+     "n": 1,
+     "eg": "12 months ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Sales as invoiced, Citadel held apart fr"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "$85K a month below their own run. The bi"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "Cross-sell is worth up to $140K a month"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 1,
+     "eg": "a month, if each bought like its peers"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 1,
+     "eg": "more than 25% and $5K below the row’s ow"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Sales as invoiced, Citadel held apart fr"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 175,
+   "under44": [],
+   "closePairs": 150,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 487,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 487,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 648,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 648,
+     "label": false,
+     "wide": 166
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 761,
+   "firstScreen": false,
+   "tables": [
+    {
+     "box": 315,
+     "table": 516,
+     "rows": 51,
+     "cols": 7,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "month-grid": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 1801,
+   "screens": 2.7,
+   "words": 731,
+   "small": [
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "Margin est.:"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy, 35% or more"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 3,
+     "eg": "Aug 26"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. A shaded month is more th"
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "span.dt-p",
+     "size": 12,
+     "n": 1,
+     "eg": "Margin"
+    },
+    {
+     "k": "th.dt-sum",
+     "size": 12,
+     "n": 1,
+     "eg": "YTD"
+    },
+    {
+     "k": "th.on",
+     "size": 12,
+     "n": 1,
+     "eg": "12 months ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Invoice month, posted runs. Storage bill"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 2,
+     "eg": "at least 10% below their own run. The bi"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. A shaded month is more th"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 1,
+     "eg": "more than 25% and $5K below the row’s ow"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Invoice month, posted runs. Storage bill"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 174,
+   "under44": [],
+   "closePairs": 157,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [
+    {
+     "box": 315,
+     "table": 516,
+     "rows": 51,
+     "cols": 7,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "cross-sell": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 3451,
+   "screens": 5.2,
+   "words": 841,
+   "small": [
+    {
+     "k": "span.peer",
+     "size": 12,
+     "n": 50,
+     "eg": "Public body"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 6,
+     "eg": "Storage"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "th.dt-sum.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Not bought yet ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "if the largest 200 accounts bought each "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 118,
+   "under44": [],
+   "closePairs": 71,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [
+    {
+     "box": 315,
+     "table": 723,
+     "rows": 50,
+     "cols": 8,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "customer": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 2581,
+   "screens": 3.9,
+   "words": 829,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 11,
+     "eg": "Invoiced a month, from VCK. Tap a month "
+    },
+    {
+     "k": "text",
+     "size": 11,
+     "n": 10,
+     "eg": "$142K"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 5,
+     "eg": "Today"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 5,
+     "eg": "Line"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "Invoiced, last twelve months"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "57% storage, 43% service"
+    },
+    {
+     "k": "i.md-kind",
+     "size": 12,
+     "n": 4,
+     "eg": "Price"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 3,
+     "eg": "Pulse summary, from the figures below"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 2,
+     "eg": "A year est., each on its own. They overl"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 1,
+     "eg": "▼ 47%"
+    },
+    {
+     "k": "em.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "Breakdown"
+    },
+    {
+     "k": "span.chip.warn",
+     "size": 12,
+     "n": 1,
+     "eg": "check the unit"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 11,
+     "eg": "Invoiced a month, from VCK. Tap a month "
+    },
+    {
+     "k": "span.sub",
+     "size": 13,
+     "n": 8,
+     "eg": "$43.48, book median $65.00, cheaper than"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "running at $40K a month against $75K; 57"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 3,
+     "eg": "Low on retrieval and refile for its size"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 2,
+     "eg": "A year est., each on its own. They overl"
+    },
+    {
+     "k": "div.sub.ws1b",
+     "size": 13,
+     "n": 2,
+     "eg": "$406 a year per 1,000 boxes, the median "
+    },
+    {
+     "k": "div.sig",
+     "size": 13,
+     "n": 2,
+     "eg": "Slipping: $40K a month over the last thr"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p",
+     "size": 14,
+     "n": 1,
+     "eg": "Its Department of Finance alone covers r"
+    },
+    {
+     "k": "p.cp-reading",
+     "size": 14,
+     "n": 1,
+     "eg": "Public-body records follow retention sch"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": ", researched 3 Nov 2026. The reading is "
+    },
+    {
+     "k": "p.cp-served",
+     "size": 14,
+     "n": 1,
+     "eg": "Served at 60620, 6.2 mi from the yard: 2"
+    },
+    {
+     "k": "div.ws1p",
+     "size": 14,
+     "n": 1,
+     "eg": "The case for them: 148,621 of their boxe"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 43,
+   "under44": [
+    {
+     "k": "a",
+     "n": 9,
+     "w": 63,
+     "h": 16
+    },
+    {
+     "k": "a.chev",
+     "n": 1,
+     "w": 41,
+     "h": 20
+    }
+   ],
+   "closePairs": 9,
+   "tiles": [
+    {
+     "size": 28,
+     "top": 417,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 28,
+     "top": 417,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 28,
+     "top": 563,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 28,
+     "top": 563,
+     "label": false,
+     "wide": 166
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 697,
+   "firstScreen": false,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 16,
+   "charts": [
+    {
+     "cls": "kbars",
+     "w": 317,
+     "h": 79,
+     "labels": 10,
+     "collide": 0,
+     "label": 11
+    }
+   ],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "quote": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 3393,
+   "screens": 5.1,
+   "words": 749,
+   "small": [
+    {
+     "k": "text",
+     "size": 12,
+     "n": 12,
+     "eg": "Yard"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 9,
+     "eg": "Price"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 4,
+     "eg": "1 bin a visit, 52 visits a year"
+    },
+    {
+     "k": "label",
+     "size": 12,
+     "n": 3,
+     "eg": "Customer"
+    },
+    {
+     "k": "span.y",
+     "size": 12,
+     "n": 3,
+     "eg": "−$114 a year left est., on $4K"
+    },
+    {
+     "k": "span.pq-lab",
+     "size": 12,
+     "n": 2,
+     "eg": "Bins each visit"
+    },
+    {
+     "k": "p.hint",
+     "size": 12,
+     "n": 2,
+     "eg": "A new customer: one bin, emptied weekly."
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account's usual invoiced rate over "
+    },
+    {
+     "k": "span.dt-p",
+     "size": 12,
+     "n": 2,
+     "eg": "Under"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Quote"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small#k-price-s",
+     "size": 12,
+     "n": 1,
+     "eg": "a bin, 1 bin a visit"
+    },
+    {
+     "k": "small#k-rev-s",
+     "size": 12,
+     "n": 1,
+     "eg": "52 visits a year"
+    },
+    {
+     "k": "span.pq-tag.loss",
+     "size": 12,
+     "n": 1,
+     "eg": "Thin, losing money"
+    },
+    {
+     "k": "span#p-site-lab",
+     "size": 12,
+     "n": 1,
+     "eg": "Minutes on site a visit"
+    },
+    {
+     "k": "span#p-price-unit",
+     "size": 12,
+     "n": 1,
+     "eg": "a bin"
+    },
+    {
+     "k": "div.pq-note",
+     "size": 12,
+     "n": 1,
+     "eg": "In the middle half"
+    },
+    {
+     "k": "div.pq-bl",
+     "size": 12,
+     "n": 1,
+     "eg": "median $85.00, middle half $85.00 to $11"
+    },
+    {
+     "k": "small#p-where-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Tap the map or type a postcode. Until th"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Routes join recorded stops in order alon"
+    },
+    {
+     "k": "small#p-goes-s",
+     "size": 12,
+     "n": 1,
+     "eg": "As asked: a visit, est."
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Same customer, same site. Tap one to try"
+    },
+    {
+     "k": "span.pq-best",
+     "size": 12,
+     "n": 1,
+     "eg": "Best for R4"
+    },
+    {
+     "k": "span.hint",
+     "size": 12,
+     "n": 1,
+     "eg": "As asked: $4K revenue and −$114 left a y"
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Service"
+    },
+    {
+     "k": "th.on",
+     "size": 12,
+     "n": 1,
+     "eg": "▼"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 3,
+     "eg": "1 bin a visit, 52 visits a year"
+    },
+    {
+     "k": "p.hint",
+     "size": 12,
+     "n": 2,
+     "eg": "A new customer: one bin, emptied weekly."
+    },
+    {
+     "k": "li",
+     "size": 13,
+     "n": 2,
+     "eg": "Choose a place to see the routes near it"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account's usual invoiced rate over "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small#p-where-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Tap the map or type a postcode. Until th"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Routes join recorded stops in order alon"
+    },
+    {
+     "k": "p",
+     "size": 13,
+     "n": 1,
+     "eg": "At what a minute of the route day costs."
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Same customer, same site. Tap one to try"
+    },
+    {
+     "k": "span.hint",
+     "size": 12,
+     "n": 1,
+     "eg": "As asked: $4K revenue and −$114 left a y"
+    },
+    {
+     "k": "p.pq-explain",
+     "size": 14,
+     "n": 1,
+     "eg": "Not about this quote: it looks across ev"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 67,
+   "under44": [
+    {
+     "k": "button",
+     "n": 4,
+     "w": 69,
+     "h": 36
+    }
+   ],
+   "closePairs": 50,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 141,
+     "label": false,
+     "wide": 170
+    },
+    {
+     "size": 22,
+     "top": 141,
+     "label": false,
+     "wide": 170
+    },
+    {
+     "size": 22,
+     "top": 212,
+     "label": false,
+     "wide": 170
+    },
+    {
+     "size": 22,
+     "top": 212,
+     "label": false,
+     "wide": 170
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 279,
+   "firstScreen": true,
+   "tables": [
+    {
+     "box": 315,
+     "table": 315,
+     "rows": 32,
+     "cols": 3,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [
+    {
+     "cls": "",
+     "w": 317,
+     "h": 83,
+     "labels": 10,
+     "collide": 2,
+     "label": 12
+    }
+   ],
+   "maps": [
+    {
+     "w": 317,
+     "h": 333,
+     "pctOfWidth": 89
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "operations": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 4826,
+   "screens": 7.2,
+   "words": 478,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 14,
+     "eg": "Services per route day is the density me"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Services done"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kchip.flat",
+     "size": 12,
+     "n": 4,
+     "eg": "0%"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "on May to Jul"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 2,
+     "eg": "Yard"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Operations"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Aug to Oct. Thicker, darker lines are th"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    },
+    {
+     "k": "a.how-link.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "How it's calculated"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "19.6 a route day, level with May to Jul,"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 2,
+     "eg": "Services per route day is the density me"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Aug to Oct. Thicker, darker lines are th"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 40,
+   "under44": [
+    {
+     "k": "input#op-cmp",
+     "n": 1,
+     "w": 20,
+     "h": 20
+    }
+   ],
+   "closePairs": 13,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 579,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 579,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 682,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 682,
+     "label": false,
+     "wide": 166
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 792,
+   "firstScreen": false,
+   "tables": [
+    {
+     "box": 317,
+     "table": 317,
+     "rows": 9,
+     "cols": 5,
+     "pinned": false,
+     "rowH": 23,
+     "font": 15
+    },
+    {
+     "box": 317,
+     "table": 317,
+     "rows": 3,
+     "cols": 9,
+     "pinned": false,
+     "rowH": 45,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [
+    {
+     "w": 317,
+     "h": 317,
+     "pctOfWidth": 85
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "operations-day": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 3710,
+   "screens": 5.6,
+   "words": 452,
+   "small": [
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Services done"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 7,
+     "eg": "MRS"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "on the Friday before"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 2,
+     "eg": "▼ 43%"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 2,
+     "eg": "Yard"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Operations"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "span.kchip.up",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 40%"
+    },
+    {
+     "k": "span.kchip.flat",
+     "size": 12,
+     "n": 1,
+     "eg": "+3 pts"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Angel ran thin. Tap a route to follow it"
+    },
+    {
+     "k": "small#rt-routes-s",
+     "size": 12,
+     "n": 1,
+     "eg": "The tick is normal for this route, its 8"
+    },
+    {
+     "k": "span.chip.warn",
+     "size": 12,
+     "n": 1,
+     "eg": "thin"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    },
+    {
+     "k": "a.how-link.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "How it's calculated"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.sub",
+     "size": 13,
+     "n": 4,
+     "eg": "22 of 28 done, 5 stops, 3 customers"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 2,
+     "eg": "▼ 18% on the 60 normal for these routes."
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Angel ran thin. Tap a route to follow it"
+    },
+    {
+     "k": "small#rt-routes-s",
+     "size": 12,
+     "n": 1,
+     "eg": "The tick is normal for this route, its 8"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Highest route cost first. Tap one for th"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 38,
+   "under44": [
+    {
+     "k": "input#op-cmp",
+     "n": 1,
+     "w": 20,
+     "h": 20
+    }
+   ],
+   "closePairs": 16,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 573,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 573,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 698,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 698,
+     "label": false,
+     "wide": 166
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 829,
+   "firstScreen": false,
+   "tables": [
+    {
+     "box": 317,
+     "table": 317,
+     "rows": 3,
+     "cols": 9,
+     "pinned": false,
+     "rowH": 45,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [
+    {
+     "w": 317,
+     "h": 317,
+     "pctOfWidth": 85
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "warehouse": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 2317,
+   "screens": 3.5,
+   "words": 345,
+   "small": [
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Boxes in storage"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 8,
+     "eg": "0"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "billed, on a year ago"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 3,
+     "eg": "One square for every 1,000 boxes, larges"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 3,
+     "eg": "VCK boxes in storage, all in Chicago. El"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Operations"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the figures below"
+    },
+    {
+     "k": "span.kchip.up",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 3%"
+    },
+    {
+     "k": "a.how-link.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "Overdue boxes by account"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "The bill carries 3% more than a year ago"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 3,
+     "eg": "One square for every 1,000 boxes, larges"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 2,
+     "eg": "At least 256,591 boxes could be shredded"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 2,
+     "eg": "VCK boxes in storage, all in Chicago. El"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 16,
+   "under44": [],
+   "closePairs": 5,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 490,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 490,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 615,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 615,
+     "label": false,
+     "wide": 166
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 706,
+   "firstScreen": false,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [
+    {
+     "cls": "",
+     "w": 317,
+     "h": 205,
+     "labels": 8,
+     "collide": 0,
+     "label": 12
+    }
+   ],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "opportunities": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 5272,
+   "screens": 7.9,
+   "words": 478,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 22,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 9,
+     "eg": "Worth a year"
+    },
+    {
+     "k": "span.op-kind.k-slip",
+     "size": 12,
+     "n": 6,
+     "eg": "Win back"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "each account once, at its best move"
+    },
+    {
+     "k": "span.op-kind.k-price",
+     "size": 12,
+     "n": 3,
+     "eg": "Price gap"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Opportunities"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the list below"
+    },
+    {
+     "k": "button.dt-chip",
+     "size": 12,
+     "n": 1,
+     "eg": "Open and in play ×"
+    },
+    {
+     "k": "span.op-kind.k-cross",
+     "size": 12,
+     "n": 1,
+     "eg": "Cross-sell"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.op-short",
+     "size": 13,
+     "n": 9,
+     "eg": "Down $35K a month in total (service down"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "$2.1M a year and $2.6M of one-offs sit u"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.op-how",
+     "size": 14,
+     "n": 1,
+     "eg": "One row per account, the single best mov"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "3 public bodies pay under the book for s"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 72,
+   "under44": [],
+   "closePairs": 8,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 480,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 480,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 601,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 601,
+     "label": false,
+     "wide": 166
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 710,
+   "firstScreen": false,
+   "tables": [
+    {
+     "box": 317,
+     "table": 317,
+     "rows": 10,
+     "cols": 8,
+     "pinned": false,
+     "rowH": 45,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "settings": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 4833,
+   "screens": 7.2,
+   "words": 1153,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 45,
+     "eg": "everyone sees them; this says how sure t"
+    },
+    {
+     "k": "span.fl",
+     "size": 12,
+     "n": 12,
+     "eg": "provisional"
+    },
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 12,
+     "eg": "7028 Bldg Exp and 7335660 Maintenance pa"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 5,
+     "eg": "Today"
+    },
+    {
+     "k": "label.us-f",
+     "size": 12,
+     "n": 5,
+     "eg": "Access"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "A route day"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "A password needs at least 10 characters."
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 32,
+     "eg": "everyone sees them; this says how sure t"
+    },
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 11,
+     "eg": "7028 Bldg Exp and 7335660 Maintenance pa"
+    },
+    {
+     "k": "p.hint",
+     "size": 13,
+     "n": 2,
+     "eg": "The assumptions behind every cost on scr"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "span",
+     "size": 14,
+     "n": 1,
+     "eg": "Off: margins read \"Costs modelled, provi"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "A password needs at least 10 characters."
+    },
+    {
+     "k": "b",
+     "size": 14,
+     "n": 1,
+     "eg": "City of Chicago | Department of Technolo"
+    },
+    {
+     "k": "span.v",
+     "size": 14,
+     "n": 1,
+     "eg": "B2 219.3, B3 34.9, B4 121.7, B6 15.7, al"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 74,
+   "under44": [],
+   "closePairs": 12,
+   "tiles": [
+    {
+     "size": 16,
+     "top": 1248,
+     "label": false,
+     "wide": 168
+    },
+    {
+     "size": 16,
+     "top": 1248,
+     "label": false,
+     "wide": 168
+    },
+    {
+     "size": 16,
+     "top": 1339,
+     "label": false,
+     "wide": 168
+    },
+    {
+     "size": 16,
+     "top": 1339,
+     "label": false,
+     "wide": 168
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 1465,
+   "firstScreen": false,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 16,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "how": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 2106,
+   "screens": 3.2,
+   "words": 509,
+   "small": [
+    {
+     "k": "a",
+     "size": 12,
+     "n": 5,
+     "eg": "Today"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "the share of boxes; R4 has still to name"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "p",
+     "size": 14,
+     "n": 18,
+     "eg": "Invoiced in VCK means posted invoices, d"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.how-lede",
+     "size": 14,
+     "n": 1,
+     "eg": "Refreshed daily from VCK (billing and pr"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "the share of boxes; R4 has still to name"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 10,
+   "under44": [],
+   "closePairs": 4,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "line-of-business": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 2644,
+   "screens": 4,
+   "words": 271,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 14,
+     "eg": "September"
+    },
+    {
+     "k": "text",
+     "size": 11,
+     "n": 9,
+     "eg": "$421K"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 6,
+     "eg": "10%"
+    },
+    {
+     "k": "em.pg",
+     "size": 12,
+     "n": 4,
+     "eg": "Price gap"
+    },
+    {
+     "k": "span.kchip.flat",
+     "size": 12,
+     "n": 2,
+     "eg": "0%"
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "$389K, 63% of the month"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 1,
+     "eg": "▼ 4%"
+    },
+    {
+     "k": "em.xs",
+     "size": 12,
+     "n": 1,
+     "eg": "Cross-sell"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 5,
+     "eg": "$0.142 a box against $0.228 on 228,403 b"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "the five largest accounts hold 30% of $4"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "$380K to $421K a month over the year:"
+    },
+    {
+     "k": "p.ld-flag",
+     "size": 13,
+     "n": 1,
+     "eg": "Imperial Motors spends $281 a year on st"
+    },
+    {
+     "k": "p.src",
+     "size": 13,
+     "n": 1,
+     "eg": "Twelve months by the line's priced work,"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 12,
+   "under44": [],
+   "closePairs": 1,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [
+    {
+     "cls": "kbars",
+     "w": 343,
+     "h": 74,
+     "labels": 9,
+     "collide": 0,
+     "label": 11
+    }
+   ],
+   "maps": [],
+   "panel": {
+    "w": 375,
+    "top": 20,
+    "bottom": 594,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": 512,
+    "footH": 82,
+    "bodyH": 415,
+    "navOver": false,
+    "insetBottom": "12px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "margin-drawer": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 1801,
+   "screens": 2.7,
+   "words": 217,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 12,
+     "eg": "Revenue"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 6,
+     "eg": "Normal"
+    },
+    {
+     "k": "span.md-ask.mid",
+     "size": 12,
+     "n": 5,
+     "eg": "Conversation"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "billed"
+    },
+    {
+     "k": "span.md-ask.easy",
+     "size": 12,
+     "n": 2,
+     "eg": "Easy"
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Margin, last twelve months, est."
+    },
+    {
+     "k": "span.cd-conf.c1",
+     "size": 12,
+     "n": 1,
+     "eg": "Costs modelled, provisional"
+    },
+    {
+     "k": "p.md-odd",
+     "size": 12,
+     "n": 1,
+     "eg": "Plus $7,875 billed with no matching work"
+    },
+    {
+     "k": "i",
+     "size": 12,
+     "n": 1,
+     "eg": "Best"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.md-fxt",
+     "size": 14,
+     "n": 2,
+     "eg": "Retrieval and handling: move to its peer"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 1,
+     "eg": "est.: they cost 2.5 times what they bill"
+    },
+    {
+     "k": "p.md-odd",
+     "size": 12,
+     "n": 1,
+     "eg": "Plus $7,875 billed with no matching work"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "They overlap, so they do not add up"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 20,
+   "under44": [
+    {
+     "k": "button.pop-ask",
+     "n": 1,
+     "w": 83,
+     "h": 40
+    }
+   ],
+   "closePairs": 22,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "panel": {
+    "w": 375,
+    "top": 20,
+    "bottom": 594,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": 533,
+    "footH": 61,
+    "bodyH": 436,
+    "navOver": false,
+    "insetBottom": "8px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "cross-sell-drill": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 4844,
+   "screens": 7.3,
+   "words": 1027,
+   "small": [
+    {
+     "k": "span.peer",
+     "size": 12,
+     "n": 50,
+     "eg": "Public body"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Buys now, 12 months"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 6,
+     "eg": "Storage"
+    },
+    {
+     "k": "span.cd-val",
+     "size": 12,
+     "n": 5,
+     "eg": "$8K now, $51K for its size"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "$407K of it storage, 228,403 boxes. $285"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "th.dt-sum.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Not bought yet ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 6,
+     "eg": "if the largest 200 accounts bought each "
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 2,
+     "eg": "Biggest gap: destruction, not bought yet"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 1,
+     "eg": "$407K of it storage, 228,403 boxes. $285"
+    },
+    {
+     "k": "h3",
+     "size": 13,
+     "n": 1,
+     "eg": "Each service line: what it buys against "
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 1,
+     "eg": "Storage left out: at $407K it would flat"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 123,
+   "under44": [],
+   "closePairs": 59,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 1258,
+     "label": false,
+     "wide": 129
+    },
+    {
+     "size": 22,
+     "top": 1258,
+     "label": false,
+     "wide": 129
+    },
+    {
+     "size": 22,
+     "top": 1447,
+     "label": false,
+     "wide": 129
+    },
+    {
+     "size": 22,
+     "top": 1447,
+     "label": false,
+     "wide": 129
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 1574,
+   "firstScreen": false,
+   "tables": [
+    {
+     "box": 315,
+     "table": 723,
+     "rows": 51,
+     "cols": 8,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "opportunity-open": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 7327,
+   "screens": 11,
+   "words": 815,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 30,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 9,
+     "eg": "Worth a year"
+    },
+    {
+     "k": "span.op-kind.k-slip",
+     "size": 12,
+     "n": 7,
+     "eg": "Win back"
+    },
+    {
+     "k": "summary",
+     "size": 12,
+     "n": 6,
+     "eg": "A way to open"
+    },
+    {
+     "k": "span.op-kind.k-price",
+     "size": 12,
+     "n": 5,
+     "eg": "Price gap"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "each account once, at its best move"
+    },
+    {
+     "k": "span.op-kind.k-cross",
+     "size": 12,
+     "n": 3,
+     "eg": "Cross-sell"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Opportunities"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the list below"
+    },
+    {
+     "k": "button.dt-chip",
+     "size": 12,
+     "n": 1,
+     "eg": "Open and in play ×"
+    },
+    {
+     "k": "span.op-kind.k-overdue",
+     "size": 12,
+     "n": 1,
+     "eg": "Overdue boxes"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "p",
+     "size": 13,
+     "n": 12,
+     "eg": "$40K a month over the last three months "
+    },
+    {
+     "k": "span.op-short",
+     "size": 13,
+     "n": 9,
+     "eg": "Down $35K a month in total (service down"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "$2.1M a year and $2.6M of one-offs sit u"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.op-how",
+     "size": 14,
+     "n": 1,
+     "eg": "One row per account, the single best mov"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "3 public bodies pay under the book for s"
+    },
+    {
+     "k": "p.op-over",
+     "size": 13,
+     "n": 1,
+     "eg": "These overlap: if the overdue boxes are "
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 85,
+   "under44": [],
+   "closePairs": 25,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 480,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 480,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 601,
+     "label": false,
+     "wide": 166
+    },
+    {
+     "size": 22,
+     "top": 601,
+     "label": false,
+     "wide": 166
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 710,
+   "firstScreen": false,
+   "tables": [
+    {
+     "box": 317,
+     "table": 317,
+     "rows": 11,
+     "cols": 8,
+     "pinned": false,
+     "rowH": 45,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "costly-drawer": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 5209,
+   "screens": 7.8,
+   "words": 197,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 8,
+     "eg": "Cost a visit, est."
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "29 miles from the yard, 54 visits in twe"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "p",
+     "size": 13,
+     "n": 4,
+     "eg": "$88 a visit covers what its drive costs "
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "78% of it the drive: $10,667 of route ti"
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "29 miles from the yard, 54 visits in twe"
+    },
+    {
+     "k": "h3",
+     "size": 13,
+     "n": 1,
+     "eg": "It is healthy: nothing needs to change. "
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 4,
+   "under44": [],
+   "closePairs": 0,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [
+    {
+     "w": 317,
+     "h": 317,
+     "pctOfWidth": 85
+    }
+   ],
+   "panel": {
+    "w": 375,
+    "top": 20,
+    "bottom": 594,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": 512,
+    "footH": 82,
+    "bodyH": 415,
+    "navOver": false,
+    "insetBottom": "12px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "ask": {
+   "w": 375,
+   "h": 667,
+   "over": 0,
+   "pageH": 2253,
+   "screens": 3.4,
+   "words": 37,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Answers from the app's own figures"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "button",
+     "size": 13,
+     "n": 1,
+     "eg": "What happens if customers shred their el"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 6,
+   "under44": [
+    {
+     "k": "button",
+     "n": 1,
+     "w": 40,
+     "h": 44
+    }
+   ],
+   "closePairs": 0,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [],
+   "maps": [
+    {
+     "w": 317,
+     "h": 349,
+     "pctOfWidth": 93
+    }
+   ],
+   "panel": {
+    "w": 375,
+    "top": 20,
+    "bottom": 594,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": null,
+    "footH": null,
+    "bodyH": 428,
+    "navOver": false,
+    "insetBottom": "0px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     52,
+     70,
+     54,
+     80,
+     96
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "errors": []
+ },
+ "large": {
+  "today": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 2199,
+   "screens": 2.4,
+   "words": 374,
+   "small": [
+    {
+     "k": "b",
+     "size": 12,
+     "n": 6,
+     "eg": "Activity"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 6,
+     "eg": "60426"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 5,
+     "eg": "October's work → November bill (est.)"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Accounts"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 3,
+     "eg": "+ up to $88K: 3 jobs to check"
+    },
+    {
+     "k": "span.h2-sm",
+     "size": 12,
+     "n": 3,
+     "eg": "To the list"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Today"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "span.h2-d.flat",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 4%"
+    },
+    {
+     "k": "p.h2-tie.late",
+     "size": 12,
+     "n": 1,
+     "eg": "VCK now holds $638K: $6K posted since th"
+    },
+    {
+     "k": "span.h2-eyebrow",
+     "size": 12,
+     "n": 1,
+     "eg": "Friday 30 Oct"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Shading: Veri-Shred done services by pos"
+    },
+    {
+     "k": "div.h2-foot",
+     "size": 12,
+     "n": 1,
+     "eg": "est. means estimated · Citadel held apar"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span",
+     "size": 14,
+     "n": 7,
+     "eg": "Value of work: October is 1% ahead of Se"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "+ up to $88K: 3 jobs to check"
+    },
+    {
+     "k": "p.h2-tie.late",
+     "size": 12,
+     "n": 1,
+     "eg": "VCK now holds $638K: $6K posted since th"
+    },
+    {
+     "k": "p.hm-say",
+     "size": 13,
+     "n": 1,
+     "eg": "60426 near Harvey is the busiest postcod"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Shading: Veri-Shred done services by pos"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 34,
+   "under44": [
+    {
+     "k": "a",
+     "n": 1,
+     "w": 224,
+     "h": 36
+    }
+   ],
+   "closePairs": 27,
+   "tiles": [
+    {
+     "size": 28,
+     "top": 486,
+     "label": false,
+     "wide": 398
+    },
+    {
+     "size": 22,
+     "top": 561,
+     "label": false,
+     "wide": 195
+    },
+    {
+     "size": 22,
+     "top": 561,
+     "label": false,
+     "wide": 195
+    }
+   ],
+   "tilesPerRow": 1,
+   "answerBottom": 640,
+   "firstScreen": true,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [],
+   "maps": [
+    {
+     "w": 372,
+     "h": 409,
+     "pctOfWidth": 95
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "accounts": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 2230,
+   "screens": 2.4,
+   "words": 778,
+   "small": [
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Invoiced in VCK, October"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "on September, level on a year ago"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy, 35% or more"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 3,
+     "eg": "Aug 26"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 2,
+     "eg": "▼ 6%"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the figures below"
+    },
+    {
+     "k": "span.kchip.up",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 4%"
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "span.dt-p",
+     "size": 12,
+     "n": 1,
+     "eg": "Margin"
+    },
+    {
+     "k": "th.dt-sum",
+     "size": 12,
+     "n": 1,
+     "eg": "YTD"
+    },
+    {
+     "k": "th.on",
+     "size": 12,
+     "n": 1,
+     "eg": "12 months ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Sales as invoiced, Citadel held apart fr"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "$85K a month below their own run. The bi"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "Cross-sell is worth up to $140K a month"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 1,
+     "eg": "a month, if each bought like its peers"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 1,
+     "eg": "more than 25% and $5K below the row’s ow"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Sales as invoiced, Citadel held apart fr"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 175,
+   "under44": [],
+   "closePairs": 143,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 467,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 467,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 610,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 610,
+     "label": false,
+     "wide": 193
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 724,
+   "firstScreen": true,
+   "tables": [
+    {
+     "box": 370,
+     "table": 516,
+     "rows": 51,
+     "cols": 7,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "month-grid": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 1904,
+   "screens": 2,
+   "words": 731,
+   "small": [
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "Margin est.:"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy, 35% or more"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 3,
+     "eg": "Aug 26"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. A shaded month is more th"
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "span.dt-p",
+     "size": 12,
+     "n": 1,
+     "eg": "Margin"
+    },
+    {
+     "k": "th.dt-sum",
+     "size": 12,
+     "n": 1,
+     "eg": "YTD"
+    },
+    {
+     "k": "th.on",
+     "size": 12,
+     "n": 1,
+     "eg": "12 months ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Invoice month, posted runs. Storage bill"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 2,
+     "eg": "at least 10% below their own run. The bi"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. A shaded month is more th"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 1,
+     "eg": "more than 25% and $5K below the row’s ow"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Invoice month, posted runs. Storage bill"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 174,
+   "under44": [],
+   "closePairs": 149,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [
+    {
+     "box": 370,
+     "table": 516,
+     "rows": 51,
+     "cols": 7,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "cross-sell": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 3342,
+   "screens": 3.6,
+   "words": 841,
+   "small": [
+    {
+     "k": "span.peer",
+     "size": 12,
+     "n": 50,
+     "eg": "Public body"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 6,
+     "eg": "Storage"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "th.dt-sum.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Not bought yet ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "if the largest 200 accounts bought each "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 118,
+   "under44": [],
+   "closePairs": 71,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [
+    {
+     "box": 370,
+     "table": 723,
+     "rows": 50,
+     "cols": 8,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "customer": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 2441,
+   "screens": 2.6,
+   "words": 829,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 11,
+     "eg": "Invoiced a month, from VCK. Tap a month "
+    },
+    {
+     "k": "text",
+     "size": 11,
+     "n": 10,
+     "eg": "$142K"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 5,
+     "eg": "Today"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 5,
+     "eg": "Line"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "Invoiced, last twelve months"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "57% storage, 43% service"
+    },
+    {
+     "k": "i.md-kind",
+     "size": 12,
+     "n": 4,
+     "eg": "Price"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 3,
+     "eg": "Pulse summary, from the figures below"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 2,
+     "eg": "A year est., each on its own. They overl"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 1,
+     "eg": "▼ 47%"
+    },
+    {
+     "k": "em.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "Breakdown"
+    },
+    {
+     "k": "span.chip.warn",
+     "size": 12,
+     "n": 1,
+     "eg": "check the unit"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 11,
+     "eg": "Invoiced a month, from VCK. Tap a month "
+    },
+    {
+     "k": "span.sub",
+     "size": 13,
+     "n": 8,
+     "eg": "$43.48, book median $65.00, cheaper than"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "running at $40K a month against $75K; 57"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 3,
+     "eg": "Low on retrieval and refile for its size"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 2,
+     "eg": "A year est., each on its own. They overl"
+    },
+    {
+     "k": "div.sub.ws1b",
+     "size": 13,
+     "n": 2,
+     "eg": "$406 a year per 1,000 boxes, the median "
+    },
+    {
+     "k": "div.sig",
+     "size": 13,
+     "n": 2,
+     "eg": "Slipping: $40K a month over the last thr"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p",
+     "size": 14,
+     "n": 1,
+     "eg": "Its Department of Finance alone covers r"
+    },
+    {
+     "k": "p.cp-reading",
+     "size": 14,
+     "n": 1,
+     "eg": "Public-body records follow retention sch"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": ", researched 3 Nov 2026. The reading is "
+    },
+    {
+     "k": "p.cp-served",
+     "size": 14,
+     "n": 1,
+     "eg": "Served at 60620, 6.2 mi from the yard: 2"
+    },
+    {
+     "k": "div.ws1p",
+     "size": 14,
+     "n": 1,
+     "eg": "The case for them: 148,621 of their boxe"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 43,
+   "under44": [
+    {
+     "k": "a",
+     "n": 9,
+     "w": 63,
+     "h": 16
+    },
+    {
+     "k": "a.chev",
+     "n": 1,
+     "w": 41,
+     "h": 20
+    }
+   ],
+   "closePairs": 5,
+   "tiles": [
+    {
+     "size": 28,
+     "top": 397,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 28,
+     "top": 397,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 28,
+     "top": 507,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 28,
+     "top": 507,
+     "label": false,
+     "wide": 193
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 624,
+   "firstScreen": true,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [
+    {
+     "cls": "kbars",
+     "w": 372,
+     "h": 93,
+     "labels": 10,
+     "collide": 0,
+     "label": 11
+    }
+   ],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "quote": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 3322,
+   "screens": 3.6,
+   "words": 749,
+   "small": [
+    {
+     "k": "text",
+     "size": 12,
+     "n": 12,
+     "eg": "Yard"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 9,
+     "eg": "Price"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 4,
+     "eg": "1 bin a visit, 52 visits a year"
+    },
+    {
+     "k": "label",
+     "size": 12,
+     "n": 3,
+     "eg": "Customer"
+    },
+    {
+     "k": "span.y",
+     "size": 12,
+     "n": 3,
+     "eg": "−$114 a year left est., on $4K"
+    },
+    {
+     "k": "span.pq-lab",
+     "size": 12,
+     "n": 2,
+     "eg": "Bins each visit"
+    },
+    {
+     "k": "p.hint",
+     "size": 12,
+     "n": 2,
+     "eg": "A new customer: one bin, emptied weekly."
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account's usual invoiced rate over "
+    },
+    {
+     "k": "span.dt-p",
+     "size": 12,
+     "n": 2,
+     "eg": "Under"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Quote"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small#k-price-s",
+     "size": 12,
+     "n": 1,
+     "eg": "a bin, 1 bin a visit"
+    },
+    {
+     "k": "small#k-rev-s",
+     "size": 12,
+     "n": 1,
+     "eg": "52 visits a year"
+    },
+    {
+     "k": "span.pq-tag.loss",
+     "size": 12,
+     "n": 1,
+     "eg": "Thin, losing money"
+    },
+    {
+     "k": "span#p-site-lab",
+     "size": 12,
+     "n": 1,
+     "eg": "Minutes on site a visit"
+    },
+    {
+     "k": "span#p-price-unit",
+     "size": 12,
+     "n": 1,
+     "eg": "a bin"
+    },
+    {
+     "k": "div.pq-note",
+     "size": 12,
+     "n": 1,
+     "eg": "In the middle half"
+    },
+    {
+     "k": "div.pq-bl",
+     "size": 12,
+     "n": 1,
+     "eg": "median $85.00, middle half $85.00 to $11"
+    },
+    {
+     "k": "small#p-where-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Tap the map or type a postcode. Until th"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Routes join recorded stops in order alon"
+    },
+    {
+     "k": "small#p-goes-s",
+     "size": 12,
+     "n": 1,
+     "eg": "As asked: a visit, est."
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Same customer, same site. Tap one to try"
+    },
+    {
+     "k": "span.pq-best",
+     "size": 12,
+     "n": 1,
+     "eg": "Best for R4"
+    },
+    {
+     "k": "span.hint",
+     "size": 12,
+     "n": 1,
+     "eg": "As asked: $4K revenue and −$114 left a y"
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Service"
+    },
+    {
+     "k": "th.on",
+     "size": 12,
+     "n": 1,
+     "eg": "▼"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 3,
+     "eg": "1 bin a visit, 52 visits a year"
+    },
+    {
+     "k": "p.hint",
+     "size": 12,
+     "n": 2,
+     "eg": "A new customer: one bin, emptied weekly."
+    },
+    {
+     "k": "li",
+     "size": 13,
+     "n": 2,
+     "eg": "Choose a place to see the routes near it"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account's usual invoiced rate over "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small#p-where-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Tap the map or type a postcode. Until th"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Routes join recorded stops in order alon"
+    },
+    {
+     "k": "p",
+     "size": 13,
+     "n": 1,
+     "eg": "At what a minute of the route day costs."
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Same customer, same site. Tap one to try"
+    },
+    {
+     "k": "span.hint",
+     "size": 12,
+     "n": 1,
+     "eg": "As asked: $4K revenue and −$114 left a y"
+    },
+    {
+     "k": "p.pq-explain",
+     "size": 14,
+     "n": 1,
+     "eg": "Not about this quote: it looks across ev"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 67,
+   "under44": [
+    {
+     "k": "button",
+     "n": 4,
+     "w": 69,
+     "h": 36
+    }
+   ],
+   "closePairs": 45,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 141,
+     "label": false,
+     "wide": 197
+    },
+    {
+     "size": 22,
+     "top": 141,
+     "label": false,
+     "wide": 197
+    },
+    {
+     "size": 22,
+     "top": 212,
+     "label": false,
+     "wide": 197
+    },
+    {
+     "size": 22,
+     "top": 212,
+     "label": false,
+     "wide": 197
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 279,
+   "firstScreen": true,
+   "tables": [
+    {
+     "box": 370,
+     "table": 370,
+     "rows": 32,
+     "cols": 3,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [
+    {
+     "cls": "",
+     "w": 372,
+     "h": 98,
+     "labels": 10,
+     "collide": 1,
+     "label": 12
+    }
+   ],
+   "maps": [
+    {
+     "w": 372,
+     "h": 391,
+     "pctOfWidth": 91
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "operations": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 4721,
+   "screens": 5.1,
+   "words": 478,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 14,
+     "eg": "Services per route day is the density me"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Services done"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kchip.flat",
+     "size": 12,
+     "n": 4,
+     "eg": "0%"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "on May to Jul"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 2,
+     "eg": "Yard"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Operations"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Aug to Oct. Thicker, darker lines are th"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    },
+    {
+     "k": "a.how-link.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "How it's calculated"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "19.6 a route day, level with May to Jul,"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 2,
+     "eg": "Services per route day is the density me"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Aug to Oct. Thicker, darker lines are th"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 40,
+   "under44": [
+    {
+     "k": "input#op-cmp",
+     "n": 1,
+     "w": 20,
+     "h": 20
+    }
+   ],
+   "closePairs": 19,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 560,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 560,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 663,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 663,
+     "label": false,
+     "wide": 193
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 754,
+   "firstScreen": true,
+   "tables": [
+    {
+     "box": 372,
+     "table": 372,
+     "rows": 9,
+     "cols": 5,
+     "pinned": false,
+     "rowH": 23,
+     "font": 15
+    },
+    {
+     "box": 372,
+     "table": 372,
+     "rows": 3,
+     "cols": 9,
+     "pinned": false,
+     "rowH": 45,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [
+    {
+     "w": 372,
+     "h": 372,
+     "pctOfWidth": 87
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "operations-day": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 3643,
+   "screens": 3.9,
+   "words": 452,
+   "small": [
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Services done"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 7,
+     "eg": "MRS"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "on the Friday before"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 3,
+     "eg": "Healthy"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 2,
+     "eg": "▼ 43%"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 2,
+     "eg": "Yard"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Operations"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "span.kchip.up",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 40%"
+    },
+    {
+     "k": "span.kchip.flat",
+     "size": 12,
+     "n": 1,
+     "eg": "+3 pts"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Angel ran thin. Tap a route to follow it"
+    },
+    {
+     "k": "small#rt-routes-s",
+     "size": 12,
+     "n": 1,
+     "eg": "The tick is normal for this route, its 8"
+    },
+    {
+     "k": "span.chip.warn",
+     "size": 12,
+     "n": 1,
+     "eg": "thin"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    },
+    {
+     "k": "a.how-link.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "How it's calculated"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.sub",
+     "size": 13,
+     "n": 4,
+     "eg": "22 of 28 done, 5 stops, 3 customers"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 2,
+     "eg": "▼ 18% on the 60 normal for these routes."
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary for the period, from the f"
+    },
+    {
+     "k": "small#rt-map-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Angel ran thin. Tap a route to follow it"
+    },
+    {
+     "k": "small#rt-routes-s",
+     "size": 12,
+     "n": 1,
+     "eg": "The tick is normal for this route, its 8"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Highest route cost first. Tap one for th"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Route cost is each area's share of its r"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 38,
+   "under44": [
+    {
+     "k": "input#op-cmp",
+     "n": 1,
+     "w": 20,
+     "h": 20
+    }
+   ],
+   "closePairs": 22,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 573,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 573,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 698,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 698,
+     "label": false,
+     "wide": 193
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 811,
+   "firstScreen": true,
+   "tables": [
+    {
+     "box": 372,
+     "table": 372,
+     "rows": 3,
+     "cols": 9,
+     "pinned": false,
+     "rowH": 45,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [
+    {
+     "w": 372,
+     "h": 372,
+     "pctOfWidth": 87
+    }
+   ],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "warehouse": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 2104,
+   "screens": 2.3,
+   "words": 345,
+   "small": [
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Boxes in storage"
+    },
+    {
+     "k": "text",
+     "size": 12,
+     "n": 8,
+     "eg": "0"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "billed, on a year ago"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 3,
+     "eg": "One square for every 1,000 boxes, larges"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 3,
+     "eg": "VCK boxes in storage, all in Chicago. El"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Operations"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the figures below"
+    },
+    {
+     "k": "span.kchip.up",
+     "size": 12,
+     "n": 1,
+     "eg": "▲ 3%"
+    },
+    {
+     "k": "a.how-link.chev",
+     "size": 12,
+     "n": 1,
+     "eg": "Overdue boxes by account"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "The bill carries 3% more than a year ago"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 3,
+     "eg": "One square for every 1,000 boxes, larges"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 2,
+     "eg": "At least 256,591 boxes could be shredded"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 2,
+     "eg": "VCK boxes in storage, all in Chicago. El"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 16,
+   "under44": [],
+   "closePairs": 5,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 431,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 431,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 534,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 534,
+     "label": false,
+     "wide": 193
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 626,
+   "firstScreen": true,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [
+    {
+     "cls": "",
+     "w": 372,
+     "h": 207,
+     "labels": 8,
+     "collide": 0,
+     "label": 12
+    }
+   ],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "opportunities": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 5134,
+   "screens": 5.5,
+   "words": 478,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 22,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 9,
+     "eg": "Worth a year"
+    },
+    {
+     "k": "span.op-kind.k-slip",
+     "size": 12,
+     "n": 6,
+     "eg": "Win back"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "each account once, at its best move"
+    },
+    {
+     "k": "span.op-kind.k-price",
+     "size": 12,
+     "n": 3,
+     "eg": "Price gap"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Opportunities"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the list below"
+    },
+    {
+     "k": "button.dt-chip",
+     "size": 12,
+     "n": 1,
+     "eg": "Open and in play ×"
+    },
+    {
+     "k": "span.op-kind.k-cross",
+     "size": 12,
+     "n": 1,
+     "eg": "Cross-sell"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.op-short",
+     "size": 13,
+     "n": 9,
+     "eg": "Down $35K a month in total (service down"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "$2.1M a year and $2.6M of one-offs sit u"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.op-how",
+     "size": 14,
+     "n": 1,
+     "eg": "One row per account, the single best mov"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "3 public bodies pay under the book for s"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 72,
+   "under44": [],
+   "closePairs": 8,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 477,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 477,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 598,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 598,
+     "label": false,
+     "wide": 193
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 707,
+   "firstScreen": true,
+   "tables": [
+    {
+     "box": 372,
+     "table": 372,
+     "rows": 10,
+     "cols": 8,
+     "pinned": false,
+     "rowH": 23,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "settings": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 4014,
+   "screens": 4.3,
+   "words": 1153,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 45,
+     "eg": "everyone sees them; this says how sure t"
+    },
+    {
+     "k": "span.fl",
+     "size": 12,
+     "n": 12,
+     "eg": "provisional"
+    },
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 12,
+     "eg": "7028 Bldg Exp and 7335660 Maintenance pa"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 5,
+     "eg": "Today"
+    },
+    {
+     "k": "label.us-f",
+     "size": 12,
+     "n": 5,
+     "eg": "Access"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "A route day"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "A password needs at least 10 characters."
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 32,
+     "eg": "everyone sees them; this says how sure t"
+    },
+    {
+     "k": "span.d",
+     "size": 12,
+     "n": 11,
+     "eg": "7028 Bldg Exp and 7335660 Maintenance pa"
+    },
+    {
+     "k": "p.hint",
+     "size": 13,
+     "n": 2,
+     "eg": "The assumptions behind every cost on scr"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "span",
+     "size": 14,
+     "n": 1,
+     "eg": "Off: margins read \"Costs modelled, provi"
+    },
+    {
+     "k": "p.src",
+     "size": 12,
+     "n": 1,
+     "eg": "A password needs at least 10 characters."
+    },
+    {
+     "k": "b",
+     "size": 14,
+     "n": 1,
+     "eg": "City of Chicago | Department of Technolo"
+    },
+    {
+     "k": "span.v",
+     "size": 14,
+     "n": 1,
+     "eg": "B2 219.3, B3 34.9, B4 121.7, B6 15.7, al"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 74,
+   "under44": [],
+   "closePairs": 17,
+   "tiles": [
+    {
+     "size": 16,
+     "top": 1209,
+     "label": false,
+     "wide": 195
+    },
+    {
+     "size": 16,
+     "top": 1209,
+     "label": false,
+     "wide": 195
+    },
+    {
+     "size": 16,
+     "top": 1300,
+     "label": false,
+     "wide": 195
+    },
+    {
+     "size": 16,
+     "top": 1300,
+     "label": false,
+     "wide": 195
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 1411,
+   "firstScreen": false,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 16,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "how": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 1959,
+   "screens": 2.1,
+   "words": 509,
+   "small": [
+    {
+     "k": "a",
+     "size": 12,
+     "n": 5,
+     "eg": "Today"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "the share of boxes; R4 has still to name"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "p",
+     "size": 14,
+     "n": 18,
+     "eg": "Invoiced in VCK means posted invoices, d"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.how-lede",
+     "size": 14,
+     "n": 1,
+     "eg": "Refreshed daily from VCK (billing and pr"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "the share of boxes; R4 has still to name"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 10,
+   "under44": [],
+   "closePairs": 4,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "line-of-business": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 2691,
+   "screens": 2.9,
+   "words": 271,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 14,
+     "eg": "September"
+    },
+    {
+     "k": "text",
+     "size": 11,
+     "n": 9,
+     "eg": "$421K"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 6,
+     "eg": "10%"
+    },
+    {
+     "k": "em.pg",
+     "size": 12,
+     "n": 4,
+     "eg": "Price gap"
+    },
+    {
+     "k": "span.kchip.flat",
+     "size": 12,
+     "n": 2,
+     "eg": "0%"
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "$389K, 63% of the month"
+    },
+    {
+     "k": "span.kchip.down",
+     "size": 12,
+     "n": 1,
+     "eg": "▼ 4%"
+    },
+    {
+     "k": "em.xs",
+     "size": 12,
+     "n": 1,
+     "eg": "Cross-sell"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 5,
+     "eg": "$0.142 a box against $0.228 on 228,403 b"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "the five largest accounts hold 30% of $4"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "$380K to $421K a month over the year:"
+    },
+    {
+     "k": "p.ld-flag",
+     "size": 13,
+     "n": 1,
+     "eg": "Imperial Motors spends $281 a year on st"
+    },
+    {
+     "k": "p.src",
+     "size": 13,
+     "n": 1,
+     "eg": "Twelve months by the line's priced work,"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 12,
+   "under44": [],
+   "closePairs": 1,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [
+    {
+     "cls": "kbars",
+     "w": 398,
+     "h": 85,
+     "labels": 9,
+     "collide": 0,
+     "label": 11
+    }
+   ],
+   "maps": [],
+   "panel": {
+    "w": 430,
+    "top": 20,
+    "bottom": 822,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": 740,
+    "footH": 82,
+    "bodyH": 643,
+    "navOver": false,
+    "insetBottom": "12px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "margin-drawer": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 1904,
+   "screens": 2,
+   "words": 217,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 12,
+     "eg": "Revenue"
+    },
+    {
+     "k": "span.rag.static",
+     "size": 12,
+     "n": 6,
+     "eg": "Normal"
+    },
+    {
+     "k": "span.md-ask.mid",
+     "size": 12,
+     "n": 5,
+     "eg": "Conversation"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 4,
+     "eg": "billed"
+    },
+    {
+     "k": "span.md-ask.easy",
+     "size": 12,
+     "n": 2,
+     "eg": "Easy"
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "Margin, last twelve months, est."
+    },
+    {
+     "k": "span.cd-conf.c1",
+     "size": 12,
+     "n": 1,
+     "eg": "Costs modelled, provisional"
+    },
+    {
+     "k": "p.md-odd",
+     "size": 12,
+     "n": 1,
+     "eg": "Plus $7,875 billed with no matching work"
+    },
+    {
+     "k": "i",
+     "size": 12,
+     "n": 1,
+     "eg": "Best"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "span.md-fxt",
+     "size": 14,
+     "n": 2,
+     "eg": "Retrieval and handling: move to its peer"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 1,
+     "eg": "est.: they cost 2.5 times what they bill"
+    },
+    {
+     "k": "p.md-odd",
+     "size": 12,
+     "n": 1,
+     "eg": "Plus $7,875 billed with no matching work"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "They overlap, so they do not add up"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 20,
+   "under44": [
+    {
+     "k": "button.pop-ask",
+     "n": 1,
+     "w": 83,
+     "h": 40
+    }
+   ],
+   "closePairs": 16,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "panel": {
+    "w": 430,
+    "top": 20,
+    "bottom": 822,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": 761,
+    "footH": 61,
+    "bodyH": 664,
+    "navOver": false,
+    "insetBottom": "8px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "cross-sell-drill": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 4641,
+   "screens": 5,
+   "words": 1027,
+   "small": [
+    {
+     "k": "span.peer",
+     "size": 12,
+     "n": 50,
+     "eg": "Public body"
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 8,
+     "eg": "Buys now, 12 months"
+    },
+    {
+     "k": "th",
+     "size": 12,
+     "n": 6,
+     "eg": "Storage"
+    },
+    {
+     "k": "span.cd-val",
+     "size": 12,
+     "n": 5,
+     "eg": "$8K now, $51K for its size"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "$407K of it storage, 228,403 boxes. $285"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Accounts"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "th.tl",
+     "size": 12,
+     "n": 1,
+     "eg": "Account"
+    },
+    {
+     "k": "th.dt-sum.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Not bought yet ▼"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "div",
+     "size": 13,
+     "n": 6,
+     "eg": "if the largest 200 accounts bought each "
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 2,
+     "eg": "Biggest gap: destruction, not bought yet"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary. Comparable accounts: the "
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 1,
+     "eg": "$407K of it storage, 228,403 boxes. $285"
+    },
+    {
+     "k": "h3",
+     "size": 13,
+     "n": 1,
+     "eg": "Each service line: what it buys against "
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 1,
+     "eg": "Storage left out: at $407K it would flat"
+    },
+    {
+     "k": "div.src",
+     "size": 12,
+     "n": 1,
+     "eg": "Comparable: the same kind of organisatio"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 123,
+   "under44": [],
+   "closePairs": 54,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 1167,
+     "label": false,
+     "wide": 156
+    },
+    {
+     "size": 22,
+     "top": 1167,
+     "label": false,
+     "wide": 156
+    },
+    {
+     "size": 22,
+     "top": 1320,
+     "label": false,
+     "wide": 156
+    },
+    {
+     "size": 22,
+     "top": 1320,
+     "label": false,
+     "wide": 156
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 1429,
+   "firstScreen": false,
+   "tables": [
+    {
+     "box": 370,
+     "table": 723,
+     "rows": 51,
+     "cols": 8,
+     "pinned": true,
+     "rowH": 44,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "opportunity-open": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 7189,
+   "screens": 7.7,
+   "words": 815,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 30,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "span",
+     "size": 12,
+     "n": 9,
+     "eg": "Worth a year"
+    },
+    {
+     "k": "span.op-kind.k-slip",
+     "size": 12,
+     "n": 7,
+     "eg": "Win back"
+    },
+    {
+     "k": "summary",
+     "size": 12,
+     "n": 6,
+     "eg": "A way to open"
+    },
+    {
+     "k": "span.op-kind.k-price",
+     "size": 12,
+     "n": 5,
+     "eg": "Price gap"
+    },
+    {
+     "k": "a",
+     "size": 12,
+     "n": 4,
+     "eg": "Today"
+    },
+    {
+     "k": "span.kc",
+     "size": 12,
+     "n": 4,
+     "eg": "each account once, at its best move"
+    },
+    {
+     "k": "span.op-kind.k-cross",
+     "size": 12,
+     "n": 3,
+     "eg": "Cross-sell"
+    },
+    {
+     "k": "a.on",
+     "size": 12,
+     "n": 1,
+     "eg": "Opportunities"
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "small.lit-by",
+     "size": 12,
+     "n": 1,
+     "eg": "Pulse summary, from the list below"
+    },
+    {
+     "k": "button.dt-chip",
+     "size": 12,
+     "n": 1,
+     "eg": "Open and in play ×"
+    },
+    {
+     "k": "span.op-kind.k-overdue",
+     "size": 12,
+     "n": 1,
+     "eg": "Overdue boxes"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "p",
+     "size": 13,
+     "n": 12,
+     "eg": "$40K a month over the last three months "
+    },
+    {
+     "k": "span.op-short",
+     "size": 13,
+     "n": 9,
+     "eg": "Down $35K a month in total (service down"
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "$2.1M a year and $2.6M of one-offs sit u"
+    },
+    {
+     "k": "small",
+     "size": 12,
+     "n": 2,
+     "eg": "Each account once, at its best move, at "
+    },
+    {
+     "k": "div.stamp.late",
+     "size": 12,
+     "n": 1,
+     "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
+    },
+    {
+     "k": "p.op-how",
+     "size": 14,
+     "n": 1,
+     "eg": "One row per account, the single best mov"
+    },
+    {
+     "k": "b",
+     "size": 15,
+     "n": 1,
+     "eg": "3 public bodies pay under the book for s"
+    },
+    {
+     "k": "p.op-over",
+     "size": 13,
+     "n": 1,
+     "eg": "These overlap: if the overdue boxes are "
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 85,
+   "under44": [],
+   "closePairs": 14,
+   "tiles": [
+    {
+     "size": 22,
+     "top": 477,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 477,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 598,
+     "label": false,
+     "wide": 193
+    },
+    {
+     "size": 22,
+     "top": 598,
+     "label": false,
+     "wide": 193
+    }
+   ],
+   "tilesPerRow": 2,
+   "answerBottom": 707,
+   "firstScreen": true,
+   "tables": [
+    {
+     "box": 372,
+     "table": 372,
+     "rows": 11,
+     "cols": 8,
+     "pinned": false,
+     "rowH": 23,
+     "font": 15
+    }
+   ],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [],
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "costly-drawer": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 5118,
+   "screens": 5.5,
+   "words": 197,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 8,
+     "eg": "Cost a visit, est."
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "29 miles from the yard, 54 visits in twe"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "p",
+     "size": 13,
+     "n": 4,
+     "eg": "$88 a visit covers what its drive costs "
+    },
+    {
+     "k": "div",
+     "size": 13,
+     "n": 3,
+     "eg": "78% of it the drive: $10,667 of route ti"
+    },
+    {
+     "k": "small.pop-s",
+     "size": 12,
+     "n": 1,
+     "eg": "29 miles from the yard, 54 visits in twe"
+    },
+    {
+     "k": "h3",
+     "size": 13,
+     "n": 1,
+     "eg": "It is healthy: nothing needs to change. "
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 4,
+   "under44": [],
+   "closePairs": 0,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": 12,
+   "charts": [],
+   "maps": [
+    {
+     "w": 372,
+     "h": 372,
+     "pctOfWidth": 87
+    }
+   ],
+   "panel": {
+    "w": 430,
+    "top": 20,
+    "bottom": 822,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": 740,
+    "footH": 82,
+    "bodyH": 643,
+    "navOver": false,
+    "insetBottom": "12px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "ask": {
+   "w": 430,
+   "h": 932,
+   "over": 0,
+   "pageH": 2199,
+   "screens": 2.4,
+   "words": 37,
+   "small": [
+    {
+     "k": "small",
+     "size": 12,
+     "n": 1,
+     "eg": "Answers from the app's own figures"
+    }
+   ],
+   "bodySmall": [
+    {
+     "k": "button",
+     "size": 13,
+     "n": 1,
+     "eg": "What happens if customers shred their el"
+    }
+   ],
+   "past": 0,
+   "pastEg": [],
+   "targets": 6,
+   "under44": [
+    {
+     "k": "button",
+     "n": 1,
+     "w": 40,
+     "h": 44
+    }
+   ],
+   "closePairs": 0,
+   "tiles": [],
+   "tilesPerRow": 0,
+   "answerBottom": null,
+   "firstScreen": null,
+   "tables": [],
+   "marginL": 16,
+   "marginR": 16,
+   "minGap": null,
+   "charts": [],
+   "maps": [
+    {
+     "w": 372,
+     "h": 409,
+     "pctOfWidth": 95
+    }
+   ],
+   "panel": {
+    "w": 430,
+    "top": 20,
+    "bottom": 822,
+    "close": [
+     44,
+     44
+    ],
+    "footTop": null,
+    "footH": null,
+    "bodyH": 656,
+    "navOver": false,
+    "insetBottom": "0px"
+   },
+   "nav": {
+    "tabs": 5,
+    "h": 69,
+    "tabW": [
+     63,
+     81,
+     65,
+     91,
+     107
+    ],
+    "label": [
+     12,
+     12,
+     12,
+     12,
+     12
+    ],
+    "truncated": [],
+    "iconH": 24,
+    "navOverflow": 0
+   },
+   "mastH": 80
+  },
+  "errors": []
+ }
+}

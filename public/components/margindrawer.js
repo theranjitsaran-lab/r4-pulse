@@ -125,7 +125,7 @@ export async function openDrawer({ level1, name, R, row = null, B = null, family
     });
     const foot = document.querySelector('.pop .pop-x');
     if (foot) {
-      foot.innerHTML = fixes.real[0] ? `<label class="cd-owner">Owner <select data-md-owner>${OWNERS.map(o => `<option value="${o}"${o === whoAmI() ? ' selected' : ''}>${esc(ownerName(o))}</option>`).join('')}</select></label><button type="button" class="pq-btn cd-go" data-md-top>Send the top fix to Opportunities</button>` : '';
+      foot.innerHTML = fixes.real[0] ? `<label class="cd-owner"><span class="h2-lg">Owner </span><select data-md-owner aria-label="Owner">${OWNERS.map(o => `<option value="${o}"${o === whoAmI() ? ' selected' : ''}>${esc(ownerName(o))}</option>`).join('')}</select></label><button type="button" class="pq-btn cd-go" data-md-top aria-label="Send the top fix to Opportunities"><span class="h2-lg">Send the top fix to Opportunities</span><span class="h2-sm">Send top fix</span></button>` : '';
       const go = foot.querySelector('[data-md-top]');
       if (go) go.addEventListener('click', () => sendFix(fixes.real[0], foot.querySelector('[data-md-owner]').value, go));
     }

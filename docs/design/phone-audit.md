@@ -115,3 +115,17 @@ Phase 1, 3 November 2026, on branch `design/iterate-in-code` at `5090ab1`. Every
 - **Map zoom isn't built.** Your rule asks for it to be reachable. Pinch on an SVG needs real code, not CSS; I'd treat it as its own step. Say if it's wanted now.
 - **Real devices:** this is a browser emulating phones. Safe-area insets and the keyboard can only be confirmed on an actual iPhone.
 - **Sloplint:** rules 56, 67 and 73 from earlier pages will still show after this work.
+
+## Result, 3 November 2026
+
+Built on `design/iterate-in-code`; the desk was compared with the commit before it, screen by screen: same boxes and same words, apart from the changes asked for. `node scripts/phone_audit.cjs --tag=after` writes `after-measures.json`; `before-after.png` shows the ten worst, side by side.
+
+Text sizes changed from the rule above, by Theran's call: not all text bigger. At phone width only: tile figures at least 22px; names and values people scan 15 to 16px; controls 14px; longer text 13px at line-height 1.5; sources and chart labels stay 12px; card gaps at least 12px.
+
+Nothing scrolls sideways or runs past the edge at 375, 390 or 430, and the audit now fails if anything does. Controls under 44px across every view fell from over 1,000 to under 20.
+
+Left, on purpose:
+- The Compare tick is 20px; its whole label is the tap target.
+- A link inside a sentence, such as the source on "Who they are", keeps its text height.
+- Quote's save and copy row and the Ask send button are within 8px of 44, and the Margin drawer's Ask is 40px, to keep its footer on one line.
+- Long pages: Opportunities is longer as cards (4 to about 6 screens) because every owner, status and next step stays on the card; it shows 10 and then Show all. Map zoom is a separate step.

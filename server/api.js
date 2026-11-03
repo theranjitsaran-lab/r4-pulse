@@ -108,7 +108,13 @@ router.get('/customer/:id/routeday/:date', async (req, res) => {
 router.get('/me', async (req, res) => {
   const S = require('./settings');
   await S.ensure().catch(() => {});
-  res.json({ ...req.session.user, costs: S.seesCosts(req) });
+  const Users = require('./users'), { pm, ...me } = req.session.user;
+  res.json({ ...me, costs: S.seesCosts(req), owners: Users.owners(), welcome: await Users.seen(me.name).catch(() => 0) });
+});
+router.post('/me/welcome', async (req, res) => {
+  const v = Number((req.body || {}).version);
+  if (!Number.isInteger(v) || v < 0) return res.status(400).json({ error: 'a version is required' });
+  try { await require('./users').setSeen(req.session.user.name, v); res.json({ ok: true }); } catch (e) { res.status(500).json({ error: 'That did not save.' }); }
 });
 
 module.exports = router;

@@ -2,6 +2,7 @@
 // figures, tied to VCK; lines of business as one list, each row one comparison and a tap for the rest; yesterday;
 // three things to act on, each with its owner; the weeks. Everything analytical lives on its own tab.
 // Every figure from components/home2data.js, which the Ask sheet (server/ask.js) reads too.
+import { phoneFold } from '/components/phonekit.js';
 import * as Fmt from '/components/format.js';
 import { money0, moneyK, sparkline } from '/components/chart.js';
 import { getJson, titleCase, esc } from '/components/data.js';
@@ -57,7 +58,7 @@ export async function render(main, P) {
       <a class="h2-kpi" data-in style="--d:310ms" href="#opportunities"><span>Gap to $1.0M</span><b data-count data-delay="560">${moneyK(m.gap)}</b><small>a month${m.next && m.next.jobCount ? ', before jobs to check' : ''}</small></a>
     </section>${tieLine(V.tie)}`;
 
-  const sumCard = `<section class="h2-card h2-sum" data-in>
+  const sumCard = `<section class="h2-card h2-sum" data-tour="hero" data-in>
       <h1 class="h2-head" id="h2-head"></h1>${tracking(m)}${changedNote ? `<p class="h2-by">${esc(changedNote)}</p>` : ''}
       <ul class="h2-bul" id="h2-bul"></ul>
     </section>`;
@@ -85,10 +86,10 @@ export async function render(main, P) {
   const mapCard = `<section class="h2-card h2-mapc" id="h2-map" data-in><h2 id="hm-title">Where the work is</h2><p class="hm-sum" id="hm-sum" aria-live="polite"></p>
       <div class="hm-days" id="hm-days" role="group" aria-label="Day"></div><div class="hm-routes" id="hm-chips" role="group" aria-label="Route"></div>
       <div class="hm-grid"><div class="hm-stage"><div id="hm-svg"><p class="sub">Loading the map…</p></div><div class="hm-tip" id="hm-tip" role="status"></div><div class="hm-key" id="hm-key"></div></div>
-      <div class="hm-side"><p class="hm-say" id="hm-say"></p><ol class="hm-top" id="hm-top"></ol></div></div>
-      <p class="src">Shading: Veri-Shred done services by postcode district, last twelve months, on the Census's postcode areas. Dashed lines: last week's routes from the yard and back, one per driver, in recorded stop order, joined along the main roads. Not GPS, which was never captured.</p></section>`;
+      <div class="hm-side"><p class="hm-say" id="hm-say"></p>${phoneFold('the busiest postcodes', '<ol class="hm-top" id="hm-top"></ol>')}</div></div>
+      <p class="src">Shading: Veri-Shred done services by postcode district, last twelve months, on the Census's postcode areas. Dashed lines: last week's routes from the yard and back, one per driver, in the likely stop order, joined along the main roads. Not GPS, which was never captured.</p></section>`;
 
-  main.innerHTML = `<div class="h2">${sumCard}${kpis}<div class="h2-split">${segCard}<div class="h2-stack">${yesterday}${weeks}${acts}</div></div>${mapCard}
+  main.innerHTML = `<div class="h2">${sumCard}${kpis}<div class="h2-split">${segCard ? phoneFold('the lines of business', segCard) : ''}<div class="h2-stack">${yesterday}${phoneFold('the last weeks', weeks)}${acts}</div></div>${mapCard}
     <div class="h2-foot">${esc(LABELS.estWord)} · Citadel held apart</div>
   </div>`;
 

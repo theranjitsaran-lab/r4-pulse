@@ -22,6 +22,7 @@
 //     inTotal  which rows the total counts, where one is held apart
 //     opens    the row opens something through onRow: it takes the keyboard too
 //     plain    only search, filters and CSV: for a table inside a drawer
+//     phone    'cards': at phone width each row is a card, using these same columns; col.card 'lead' is the value beside the name, 'full' a line of its own
 import * as Fmt from './format.js';
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
@@ -117,6 +118,7 @@ export function dataTable(el, o) {
   const views = () => [...(o.views || []), ...loadSaved(o.who, o.key)];
   el.classList.add('dt');
   if (o.plain) el.classList.add('dt-plain');
+  if (o.phone === 'cards') el.classList.add('dt-cards');
   el.innerHTML = `<div class="dt-tools">
       ${o.search ? `<input class="dt-find" type="search" placeholder="${esc(o.placeholder || 'Find')}" aria-label="${esc(o.placeholder || 'Find')}" value="${esc(st.q)}">` : ''}
       <button type="button" class="dt-ftoggle" aria-expanded="false">More</button>
@@ -153,19 +155,20 @@ export function dataTable(el, o) {
     const vs = views(), cur = stateQuery({ ...st, cols: null, sort: null }, ns);
     $('.dt-views').innerHTML = `<option value="">Saved views</option>${vs.map((v, i) => `<option value="${i}" ${v.q === cur && cur ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}${(o.filters || []).length || st.q ? '<option value="save">Save this view…</option>' : ''}`;
     // the table
-    const tdCls = c => `${c.text || c.name ? 'tl' : ''}${c.est ? ' est' : ''}${c.first ? ' dt-sum' : ''}${c.cls ? ' ' + c.cls : ''}`;
+    const tdCls = c => `${c.text || c.name ? 'tl' : ''}${c.est ? ' est' : ''}${c.first ? ' dt-sum' : ''}${c.cls ? ' ' + c.cls : ''}${c.card ? ' c-' + c.card : ''}`;
+    const lab = c => o.phone === 'cards' && !c.name ? ` data-l="${esc(c.short || c.l)}"` : '';
     const label = c => c.short ? `<span class="dt-l">${esc(c.l)}</span><span class="dt-p">${esc(c.short)}</span>` : esc(c.l);
     const head = cols.map(c => `<th class="${tdCls(c)}${c === col ? ' on' : ''}" data-k="${esc(c.k)}" ${c.month ? `data-m="${c.month}"` : ''} ${c.get ? `data-s="${c.k}" tabindex="0"` : ''}>${label(c)}${c.est ? ' <span class="dt-est">est.</span>' : ''}${c === col ? ((st.sort ? st.dir : col.text ? 1 : -1) === 1 ? ' ▲' : ' ▼') : ''}</th>`).join('');
     const num = v => v == null || v === '' || isNaN(v) ? '' : ` data-v="${Number(v)}"`;
     const childCell = (c, ch) => { const v = c.month ? ch.values[c.month] || 0 : c.ms ? c.ms.reduce((t, m) => t + (ch.values[m] || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(ch.name) : v == null ? '' : v ? kOnly(v) : '—'}</td>`; };
     const body = sorted.slice(0, shown).map(r => {
       const open = opened.get(r), kids = open && o.detail ? `<tr class="dt-detail"><td colspan="${cols.length}">${o.detail(r, st)}</td></tr>` : open === FAILED ? `<tr class="dt-detail"><td colspan="${cols.length}">These lines could not be read just now. Close this row and open it again to retry.</td></tr>` : Array.isArray(open) ? open.map(ch => `<tr class="dt-child">${cols.map(c => childCell(c, ch)).join('')}</tr>`).join('') : '';
-      return `<tr data-i="${index.get(r)}"${o.inTotal && !o.inTotal(r) ? ' data-out="1"' : ''}${o.expand || o.detail ? ` tabindex="0" aria-expanded="${!!open}"` : o.opens ? ' tabindex="0" class="dt-opens"' : ''}>${cols.map(c => `<td class="${tdCls(c)}${c.cellCls ? ' ' + c.cellCls(r) : ''}"${c.cellStyle ? ` style="${c.cellStyle(r)}"` : ''}${c.name && c.get ? ` title="${esc(c.get(r))}"` : ''}${c.total === 'sum' ? num(c.get(r)) : ''}>${c.name && (o.expand || o.detail) ? `<span class="dt-caret">${open ? '▾' : '▸'}</span>` : ''}${c.fmt ? c.fmt(r) : esc(c.get ? c.get(r) ?? '—' : '')}</td>`).join('')}</tr>${kids}`;
+      return `<tr data-i="${index.get(r)}"${o.inTotal && !o.inTotal(r) ? ' data-out="1"' : ''}${o.expand || o.detail ? ` tabindex="0" aria-expanded="${!!open}"` : o.opens ? ' tabindex="0" class="dt-opens"' : ''}>${cols.map(c => `<td${lab(c)} class="${tdCls(c)}${c.cellCls ? ' ' + c.cellCls(r) : ''}"${c.cellStyle ? ` style="${c.cellStyle(r)}"` : ''}${c.name && c.get ? ` title="${esc(c.get(r))}"` : ''}${c.total === 'sum' ? num(c.get(r)) : ''}>${c.name && (o.expand || o.detail) ? `<span class="dt-caret">${open ? '▾' : '▸'}</span>` : ''}${c.fmt ? c.fmt(r) : esc(c.get ? c.get(r) ?? '—' : '')}</td>`).join('')}</tr>${kids}`;
     }).join('');
     const restRows = o.rest ? sorted.slice(shown) : [], restCounted = o.inTotal ? restRows.filter(o.inTotal) : restRows;
     const rest = restRows.length ? `<tr class="dt-rest" data-rest="1">${cols.map(c => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(restCounted, c)) : ''}>${c.name ? `All other ${esc(o.noun || 'rows')} (${Fmt.grouped(restRows.length)})` : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(restCounted, c)) : Fmt.grouped(sumOf(restCounted, c))) : ''}</td>`).join('')}</tr>` : '';
     const hasTotal = cols.some(c => c.total), counted = o.inTotal ? rows.filter(o.inTotal) : rows;
-    const foot = hasTotal ? `<tfoot><tr>${cols.map((c, i) => `<td class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(counted, c)) : ''}>${i === 0 ? esc(o.totalLabel || 'Total') : c.totalHtml ? c.totalHtml(counted) : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(counted, c)) : Fmt.grouped(sumOf(counted, c))) : typeof c.total === 'function' ? c.total(counted) : ''}</td>`).join('')}</tr>${refNow ? `<tr class="dt-ref">${cols.map(c => { const v = c.month ? refNow.get(c.month) : c.ms ? c.ms.reduce((t, m) => t + (refNow.get(m) || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(refNow.label) : v == null ? '' : kOnly(v)}</td>`; }).join('')}</tr>` : ''}</tfoot>` : '';
+    const foot = hasTotal ? `<tfoot><tr>${cols.map((c, i) => `<td${c.total ? lab(c) : ''} class="${tdCls(c)}"${c.total === 'sum' ? num(sumOf(counted, c)) : ''}>${i === 0 ? esc(o.totalLabel || 'Total') : c.totalHtml ? c.totalHtml(counted) : c.total === 'sum' ? (c.totalFmt ? c.totalFmt(sumOf(counted, c)) : Fmt.grouped(sumOf(counted, c))) : typeof c.total === 'function' ? c.total(counted) : ''}</td>`).join('')}</tr>${refNow ? `<tr class="dt-ref">${cols.map(c => { const v = c.month ? refNow.get(c.month) : c.ms ? c.ms.reduce((t, m) => t + (refNow.get(m) || 0), 0) : null; return `<td class="${tdCls(c)}"${v == null ? '' : num(v)}>${c.name ? esc(refNow.label) : v == null ? '' : kOnly(v)}</td>`; }).join('')}</tr>` : ''}</tfoot>` : '';
     table.innerHTML = `<thead><tr>${head}</tr></thead><tbody>${body ? body + rest : `<tr><td class="tl" colspan="${cols.length}">Nothing matches these filters.</td></tr>`}</tbody>${foot}`;
     $('.dt-more').innerHTML = rows.length > shown ? `<button type="button" class="linkbtn">Show all ${Fmt.grouped(rows.length)} ›</button>` : '';
     if (o.onDraw) o.onDraw(st, rows);

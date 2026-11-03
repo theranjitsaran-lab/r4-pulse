@@ -32,7 +32,7 @@ const SECTIONS = () => [
     'Eligible boxes are past their retention review, with no permanent or hold flag. "Not billed" compares boxes held with those on the latest storage bill.',
     'An account counts as dormant when it has no invoice in the last twelve months. R4\'s own accounts and placeholders are left out.',
   ]],
-  ...(costsVisible() ? [['Costs (admins only)', [
+  ...(costsVisible() ? [['Costs', [
     'Every cost is an estimate from a named rate, on Settings with the assumptions behind it, and all are provisional until the ledger is restated over the same twelve months.',
   ]]] : []),
 ];
@@ -47,6 +47,6 @@ export async function render(main, S) {
     <h1>How it's calculated</h1>
     <p class="how-lede">Refreshed daily from VCK (billing and pricing) and Veri-Shred (operations).</p>
     ${SECTIONS().map(([h, ps]) => `<section class="h2-card"><div class="h2-ch"><h2>${esc(h)}</h2></div>${ps.map(p => `<p>${esc(p)}</p>`).join('')}</section>`).join('')}
-    ${codes.length ? `<section class="h2-card"><div class="h2-ch"><h2>Box types, as VCK holds them</h2><small>the share of boxes; R4 has still to name these codes</small></div><p>${codes.map(([k, v]) => `${esc(k || 'none')} ${Fmt.pct(v / total)}`).join(' · ')}</p></section>` : ''}
+    ${codes.length ? `<section class="h2-card"><div class="h2-ch"><h2>Box types, as VCK holds them</h2><small>the share of boxes; R4 has still to name these codes</small></div><p>${codes.map(([k, v]) => `${esc(k || 'none')} ${Fmt.pct(v / total)}`).join(', ')}</p></section>` : ''}
   </div>`;
 }

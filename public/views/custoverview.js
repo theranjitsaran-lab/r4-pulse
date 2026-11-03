@@ -15,6 +15,7 @@ import { LABELS, changeWord, isLumpy } from '/components/metrics.js';
 import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
 import { accountTable } from '/components/accttable.js';
 import { litCard, drawPoints, tile, chip, chipText } from '/components/lit.js';
+import { phoneFold } from '/components/phonekit.js';
 import { openLine } from '/components/linedrawer.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
@@ -56,16 +57,16 @@ export async function render(main, C, params, tabs) {
       <div class="lob-list">${seg.rows.map((s, i) => `<button type="button" class="lob-row" data-line="${s.key}"><i class="l${i + 1}"></i><span>${esc(s.name)}</span><b>${moneyK(s.lm)}</b>${chip(s.lmPct) || '<span></span>'}<em class="chev"></em></button>`).join('')}</div></section>` : '';
 
   const movedCol = (title, tone, kind, list, val, more = '') => { const mx = Math.max(1, ...list.map(r => Math.abs(val(r)))); return `<div class="mv-col"><h3><span><span class="light ${tone}"></span>${title}</span>${more}</h3>${list.map((r, i) => { const v = val(r); return `<a class="mv-row" href="#customer/${r.level1}"><span>${esc(titleCase(r.customer))}</span><b class="${kind}">${kind === 'lgst' ? moneyK(v) : signedK(v)}</b><i class="${kind}" style="--s:${(Math.abs(v) / mx).toFixed(3)};--i:${i}"></i></a>`; }).join('')}<small>${kind === 'lgst' ? 'a month' : kind === 'up' ? 'a month on its own run' : 'a month below its own run'}</small></div>`; };
-  const moved = `<section class="h2-card" data-in><div class="h2-ch"><h2>Who moved</h2><small>Last three months against each account's own year before</small></div><div class="mv-grid">
+  const moved = `<section class="h2-card" data-tour="moved" data-in><div class="h2-ch"><h2>Who moved</h2><small>Last three months against each account's own year before</small></div><div class="mv-grid">
     ${movedCol('Largest', 'g', 'lgst', cust.top, r => r.last3)}${movedCol('Rising', 'g', 'up', cust.rising, r => r.d)}${movedCol('Slipping', 'r', 'down', cust.falling, r => r.d, `<a class="chev" href="#customers?view=slipping">All ${cust.slipping}</a>`)}</div></section>`;
 
   main.innerHTML = `<div class="cust c2 h2 ac">
     <h1>Accounts</h1>
     ${tabs}
-    ${litCard('ac-lit')}
+    ${litCard('ac-lit', undefined, 'accounts-lit')}
     ${kpis}
-    ${lobCard}
-    ${moved}
+    ${lobCard ? phoneFold('the book by line', lobCard) : ''}
+    ${phoneFold('who moved', moved)}
     <section class="h2-card c2-tablecard" data-in>
       <div id="c2-dt"></div>
       <div class="src">Sales as invoiced, Citadel held apart from totals${costsVisible() ? '. Margin and cost a unit est. are modelled from GL pools over twelve months, provisional' : ''}. Tap an account for its lines, a month for its invoices.</div>

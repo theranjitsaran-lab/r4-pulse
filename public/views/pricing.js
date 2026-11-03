@@ -71,7 +71,7 @@ export async function render(main, PR, params) {
   main.innerHTML = `
   <div class="pr pr2 pq h2">
     <h1>Quote</h1>
-    <section class="pq-kpis" aria-label="This quote, est." aria-live="polite">
+    <section class="pq-kpis" data-tour="q-figures" aria-label="This quote, est." aria-live="polite">
       <div class="h2-kpi"><span>Price</span><b id="k-price"></b><small id="k-price-s"></small></div>
       <div class="h2-kpi"><span>Revenue a year</span><b id="k-rev"></b><small id="k-rev-s"></small></div>
       ${costs ? `<div class="h2-kpi"><span>Margin a year est.</span><b id="k-mar"></b><small>after what it costs to serve</small></div>
@@ -81,7 +81,7 @@ export async function render(main, PR, params) {
     <div class="pq-main">
     <div class="pq-left">
     <section class="h2-card" data-in aria-labelledby="pq-what">
-      <div class="h2-ch"><h2 id="pq-what">1. What are we quoting?</h2></div>
+      <div class="h2-ch" data-tour="q-what"><h2 id="pq-what">1. What are we quoting?</h2></div>
       <div class="pq-what">
         <label>Customer<input id="p-cust" list="p-cust-l" type="search" placeholder="A name, or leave blank for a new one" autocomplete="off"><datalist id="p-cust-l">${customers.map(([, n]) => `<option value="${esc(n)}"></option>`).join('')}</datalist></label>
         <label>Service<select id="p-code">${[...svcByName].map(([n, c]) => `<option value="${esc(c)}">${esc(n)}</option>`).join('')}</select></label>
@@ -106,7 +106,7 @@ export async function render(main, PR, params) {
       <p class="hint" id="p-hint"></p>
     </section>
     <section class="h2-card" data-in aria-labelledby="pq-where" id="p-where">
-      <div class="pq-mh"><div class="h2-ch"><h2 id="pq-where">2. Where is it?</h2><small id="p-where-s">Tap the map or type a postcode</small></div>
+      <div class="pq-mh" data-tour="q-where"><div class="h2-ch"><h2 id="pq-where">2. Where is it?</h2><small id="p-where-s">Tap the map or type a postcode</small></div>
         <form class="pq-pc" id="p-pcf"><label>Postcode<input id="p-pc" inputmode="numeric" maxlength="5" placeholder="e.g. 60617"></label><button type="submit" class="pq-btn">Find</button></form></div>
       <div id="p-map"></div>
       <p class="hint" id="p-map-msg" role="status"></p>
@@ -124,7 +124,7 @@ export async function render(main, PR, params) {
     </div>
 
     <section class="h2-card" data-in aria-labelledby="pq-opt">
-      <div class="h2-ch"><h2 id="pq-opt">4. Better ways to price it</h2><small>Same customer, same site. Tap one to try it.</small></div>
+      <div class="h2-ch" data-tour="q-better"><h2 id="pq-opt">4. Better ways to price it</h2><small>Same customer, same site. Tap one to try it.</small></div>
       <div class="pq-opts" id="p-opts"></div>
       <div class="pq-foot"><span class="hint" id="p-year"></span><span class="pq-acts"><button type="button" class="pq-btn" id="p-ask">Ask about this price</button><button type="button" class="q-add" id="q-add">Add this line to the quote</button></span></div>
     </section>

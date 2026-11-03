@@ -47,6 +47,7 @@
   --k-win: #1b5e20; --k-win-bg: #dcefdc; --k-price: #8a5200; --k-price-bg: #fdeccb; --k-cross: #0f6b63; --k-cross-bg: #dcefec;   /* kinds of opportunity: never blue, which means better */
   --k-round: #5c635e; --k-round-bg: #eceeec; --k-box: #6b3fa0; --k-box-bg: #efe7f8; --k-route: #6d4c41; --k-route-bg: #efe6e2;
   --md-p1: #1b5e20; --md-p2: #4f8f53; --md-p3: #8fbf92; --md-p4: #c4ddc5; --md-p5: #7d847f;   /* the kinds of cost, darkest the largest */
+  --veil: #1d211e8c;   /* behind the welcome and the tour */
   --on-brand:   #ffffff;   /* text on a brand fill */
   --r4-bright:  #38b449;   /* the green of the R4 mark: fills and lines only, never text (2.7:1 on white) */
 

@@ -9,6 +9,7 @@ import { dataTable } from '/components/datatable.js';
 import { accountFilters } from '/components/acctfilters.js';
 import { whoAmI } from '/components/access.js';
 import { getJson } from '/components/data.js';
+import { phoneFold, isPhone } from '/components/phonekit.js';
 import { litCard, drawPoints, tile } from '/components/lit.js';
 import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
 import { CONFIDENCE } from '/components/whitespace.js';
@@ -38,12 +39,12 @@ export async function render(main, params, C) {
     <div><h1>Opportunities</h1><p class="op-how">One row per account, the single best move first: what it’s worth, who owns it, where it’s got to.</p></div>
     ${litCard('op-lit', 'Pulse summary, from the list below')}
     <section class="ktiles" id="op-tiles" data-in></section>
-    <section class="h2-card" data-in><div class="h2-ch"><h2>Where the list has got to</h2><small>Each account once, at its best move, at the status of whichever move is furthest along.</small></div><div class="op-pipe" id="op-pipe"></div></section>
+    <section class="h2-card" data-tour="opp-pipe" data-in><div class="h2-ch"><h2>Where the list has got to</h2><small>Each account once, at its best move, at the status of whichever move is furthest along.</small></div><div class="op-pipe" id="op-pipe"></div></section>
     <section class="h2-card" data-in><div class="h2-ch"><h2>What kind of money it is</h2><small>Each account at its best yearly move; overdue boxes apart, as a one-off. Tap a kind to filter the list.</small></div><div class="op-kinds" id="op-kbar" aria-hidden="true"></div><div class="op-kkey" id="op-kkey" role="group" aria-label="Filter by kind"></div></section>
     <section class="h2-card c2-tablecard" data-in>
       <div id="op-t"></div>
       <p class="op-msg" id="op-msg" role="status"></p>
-      <div class="src">$ a year is each account's best move, once: moves on an account overlap, so they do not add up. Overdue-box destruction is a one-off that needs the client's sign-off, so it has its own column and never adds to the yearly figure. Cross-sell is est. at what comparable accounts spend, price gaps at the book's median, win-back at the drop on the account's own run, rate rounds at the typical 8%. Three marks: its own billing or the book median. Two: comparable accounts of its kind. One: the whole book or few comparable accounts.</div>
+      ${phoneFold('how these are worked out', `<div class="src">$ a year is each account's best move, once: moves on an account overlap, so they do not add up. Overdue-box destruction is a one-off that needs the client's sign-off, so it has its own column and never adds to the yearly figure. Cross-sell is est. at what comparable accounts spend, price gaps at the book's median, win-back at the drop on the account's own run, rate rounds at the typical 8%. Three marks: its own billing or the book median. Two: comparable accounts of its kind. One: the whole book or few comparable accounts.</div>`)}
     </section>
   </div>`;
   const root = main.querySelector('.op'), $ = id => main.querySelector('#' + id), host = $('op-t');
@@ -97,7 +98,7 @@ export async function render(main, params, C) {
   const fit = () => { const box = host.querySelector('.dt-scroll'); if (box) box.style.setProperty('--cd-w', box.clientWidth + 'px'); };
   const onResize = () => { if (!root.isConnected) { removeEventListener('resize', onResize); return; } fit(); };
   addEventListener('resize', onResize);
-  T = dataTable(host, { key: 'opportunities', who: whoAmI(), rows: G.rows, noun: 'accounts', placeholder: 'Find an account', search: a => a.name,
+  T = dataTable(host, { key: 'opportunities', who: whoAmI(), phone: 'cards', ...(isPhone() ? { page: 10 } : {}), rows: G.rows, noun: 'accounts', placeholder: 'Find an account', search: a => a.name,
     defaults: { state: 'active' },
     filters: [
       { k: 'kind', l: 'Kind', hidden: true, options: Object.entries(KINDS), test: (a, v) => inKind(a, v) },
@@ -108,8 +109,8 @@ export async function render(main, params, C) {
     totalLabel: 'Each account once',
     cols: [
       { k: 'name', l: 'Account', name: true, text: true, get: a => a.name, fmt: a => `<a href="#customer/${a.level1}">${esc(a.name)}</a>${a.items.length > 1 ? ` <small>${a.items.length} moves</small>` : ''}` },
-      { k: 'best', l: 'Best move', fixed: true, text: true, cls: 'op-best', fmt: a => { const b = stateOf(a).best; return `${pill(b.kind)}<span class="op-short" title="${esc(b.reason)}">${esc(b.short || b.reason)}</span>`; }, csv: a => { const b = stateOf(a).best; return `${KINDS[b.kind]}: ${b.reason}`; } },
-      { k: 'year', l: '$ a year', short: '$ a year', fixed: true, sorted: true, get: a => a.largest, total: 'sum', totalFmt: moneyK, fmt: a => { const top = Math.max(1, G.rows[0] ? Math.max(...G.rows.map(x => x.largest)) : 1), b = stateOf(a).best; return a.largest ? `<span class="op-worth"><span class="op-bar" aria-hidden="true"><i style="--s:${(a.largest / top).toFixed(3)}"></i></span>${moneyK(a.largest)}${b.modelled ? ' est.' : ''}</span>` : '—'; } },
+      { k: 'best', l: 'Best move', card: 'full', fixed: true, text: true, cls: 'op-best', fmt: a => { const b = stateOf(a).best; return `${pill(b.kind)}<span class="op-short" title="${esc(b.reason)}">${esc(b.short || b.reason)}</span>`; }, csv: a => { const b = stateOf(a).best; return `${KINDS[b.kind]}: ${b.reason}`; } },
+      { k: 'year', l: '$ a year', short: '$ a year', card: 'lead', fixed: true, sorted: true, get: a => a.largest, total: 'sum', totalFmt: moneyK, fmt: a => { const top = Math.max(1, G.rows[0] ? Math.max(...G.rows.map(x => x.largest)) : 1), b = stateOf(a).best; return a.largest ? `<span class="op-worth"><span class="op-bar" aria-hidden="true"><i style="--s:${(a.largest / top).toFixed(3)}"></i></span>${moneyK(a.largest)}${b.modelled ? ' est.' : ''}</span>` : '—'; } },
       { k: 'once', l: 'One-off', fixed: true, get: a => a.once, total: 'sum', totalFmt: moneyK, fmt: a => a.once ? moneyK(a.once) : '—' },
       { k: 'conf', l: 'How sure', fixed: true, get: a => stateOf(a).conf, csv: a => stateOf(a).conf, fmt: a => dots(stateOf(a).conf) },
       { k: 'owner', l: 'Owner', fixed: true, text: true, get: a => stateOf(a).owner || '', csv: a => ownerName(stateOf(a).owner), fmt: a => { const s = stateOf(a), own = s.owner; return `<select class="op-own${own ? '' : ' none'}" data-op-key="${esc(s.lead.key)}" aria-label="Owner for ${esc(a.name)}"><option value="">Assign</option>${allOwners.map(o => `<option value="${esc(o)}"${o === own ? ' selected' : ''}>${esc(ownerName(o))}</option>`).join('')}</select>`; } },

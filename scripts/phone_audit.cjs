@@ -46,10 +46,15 @@ const measure = (panelSel) => {
   out.words = words;
   out.small = [...small].map(([k, v]) => ({ k, ...v })).sort((a, b) => b.n - a.n);
   out.bodySmall = [...body].map(([k, v]) => ({ k, ...v })).sort((a, b) => b.n - a.n);
+  // anything past the right edge that is not in something meant to scroll: overflow clip hides it from scrollWidth
+  const scrolls = e => { for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) { const o = getComputedStyle(a).overflowX; if (o === 'auto' || o === 'scroll') return true; } return false; };
+  const past = [...scope.querySelectorAll('*')].filter(e => { const r = e.getBoundingClientRect(); return r.width && r.right > innerWidth + 1 && getComputedStyle(e).visibility !== 'hidden' && !e.closest('svg') && !scrolls(e); });
+  out.past = past.length; out.pastEg = past.slice(0, 4).map(nameOf);
   // tap targets
   const targets = [...scope.querySelectorAll('a[href], button, select, input:not([type=hidden]), summary, [role=button], tr[tabindex]')].filter(seen);
   const under = new Map(), rects = targets.map(el => ({ el, r: el.getBoundingClientRect() }));
-  for (const { el, r } of rects) if (r.width < 44 || r.height < 44) { const k = nameOf(el), x = under.get(k) || { n: 0, w: Math.round(r.width), h: Math.round(r.height) }; x.n++; under.set(k, x); }
+  const hitH = (el, r) => { const a = getComputedStyle(el, '::after'); return a.content && a.content !== 'none' && a.position === 'absolute' ? Math.max(r.height, parseFloat(a.height) || 0) : r.height; }, hitW = (el, r) => { const a = getComputedStyle(el, '::after'); return a.content && a.content !== 'none' && a.position === 'absolute' ? Math.max(r.width, parseFloat(a.width) || 0) : r.width; };
+  for (const { el, r } of rects) if (hitW(el, r) < 44 || hitH(el, r) < 43.5) { const k = nameOf(el), x = under.get(k) || { n: 0, w: Math.round(r.width), h: Math.round(r.height) }; x.n++; under.set(k, x); }
   out.targets = targets.length;
   out.under44 = [...under].map(([k, v]) => ({ k, ...v })).sort((a, b) => b.n - a.n);
   let close = 0; const lim = rects.slice(0, 250), Y = scrollY;
@@ -104,18 +109,22 @@ const measure = (panelSel) => {
       all[name] = {};
       for (const [key, hash2, sel, act, panel] of VIEWS) {
         try {
-          await page.goto('about:blank'); await page.goto(base + '/' + hash2); await page.waitForSelector(sel); await wait(1300);
+          await page.goto('about:blank'); await page.goto(base + '/' + hash2); await page.waitForSelector(sel, { state: 'attached' }); await wait(1300);
+          if (act) for (const b of await page.$$('.ph-fold:not(.open) > .ph-show')) { if (await b.evaluate((e, q) => !!e.parentElement.querySelector(q), sel)) await b.click(); }
           if (act) { await act(page); await wait(900); }
           all[name][key] = await page.evaluate(measure, panel || null);
           const file = path.join(OUT, `${TAG ? TAG + '-' : ''}${key}-${w}.png`);
           if (panel) await page.screenshot({ path: file });
-          else { await page.addStyleTag({ content: '.mast{position:static!important} @media(max-width:700px){#nav{position:absolute!important;top:0;bottom:auto!important;display:none!important}}' }); await page.screenshot({ path: file, fullPage: true }); }
+          else { for (let y = 0, H = await page.evaluate(() => document.documentElement.scrollHeight); y < H; y += 500) { await page.evaluate(v => scrollTo(0, v), y); await wait(120); } await page.evaluate(() => scrollTo(0, 0)); await page.addStyleTag({ content: '.mast{position:static!important} @media(max-width:700px){#nav{position:absolute!important;top:0;bottom:auto!important;display:none!important}}' }); await page.screenshot({ path: file, fullPage: true }); }
         } catch (e) { all[name][key] = { error: e.message.slice(0, 160) }; }
-        console.log(`${name} ${key}: ${all[name][key].error || `${all[name][key].screens} screens, over ${all[name][key].over}, ${all[name][key].under44.reduce((t, x) => t + x.n, 0)} small targets`}`);
+        console.log(`${name} ${key}: ${all[name][key].error || `${all[name][key].screens} screens, over ${all[name][key].over}, past edge ${all[name][key].past} ${(all[name][key].pastEg || []).join(' ')}, ${all[name][key].under44.reduce((t, x) => t + x.n, 0)} small targets`}`);
       }
       all[name].errors = errs;
       await ctx.close();
     }
   } finally { await browser.close(); server.kill(); }
   fs.writeFileSync(path.join(OUT, `${TAG ? TAG + '-' : ''}measures.json`), JSON.stringify(all, null, 1));
+  // nothing scrolls sideways or runs past the edge, at any size
+  const sideways = Object.entries(all).flatMap(([n, vs]) => Object.entries(vs).filter(([, x]) => x && (x.over > 0 || x.past > 0)).map(([v]) => `${n} ${v}`));
+  if (sideways.length) { console.log('FAIL past the edge: ' + sideways.join(', ')); process.exitCode = 1; }
 })().catch(e => { console.error(e); process.exit(1); });

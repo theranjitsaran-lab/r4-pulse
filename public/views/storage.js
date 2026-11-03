@@ -10,6 +10,7 @@ import { dataTable } from '/components/datatable.js';
 import { isInternal, SIZE_BANDS, inBand } from '/components/metrics.js';
 import { whoAmI } from '/components/access.js';
 import { litCard, drawPoints, tile, chip } from '/components/lit.js';
+import { phoneFold } from '/components/phonekit.js';
 import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
 
 const CSS = `
@@ -86,12 +87,12 @@ export async function render(main, tabs) {
     </section>
     <section class="h2-card" data-in>
       <div class="h2-ch"><h2>Shredding the eligible boxes would bill about ${moneyK(E.once)} once and end ${moneyK(E.lost)} a month of storage est.</h2><small>Destruction at the book's median fee, ${Fmt.money(E.perBox || 0, { dp: 2 })} a box; storage at each account's own rate per box.</small></div>
-      <div id="wh-elig"></div>
+      ${phoneFold('the accounts', '<div id="wh-elig"></div>')}
       <div class="src"><a class="how-link chev" href="#customers?view=destruction">Overdue boxes by account</a></div>
     </section>
     <section class="h2-card nb" data-in>
       <div class="h2-ch"><h2>${n0(SP.activeBoxes)} boxes at ${SP.active.length} current accounts are not on the ${NB.month ? mon(NB.month) : 'latest'} storage bill</h2><small>${nbTop ? `${esc(titleCase(nbTop.customer))} alone has ${n0(nbTop.gap)}. ` : ''}It may be timing or prepaid storage; Anne to confirm before anyone calls.</small></div>
-      <div id="wh-nb"></div>
+      ${phoneFold('the accounts', '<div id="wh-nb"></div>')}
       <div class="src">Current means invoiced in the last twelve months. Another ${SP.dormant.length} dormant accounts hold ${n0(SP.dormantBoxes)} boxes, under the filter.${SP.internalBoxes ? ` R4's own and placeholder accounts (${n0(SP.internalBoxes)} boxes) are left out.` : ''}</div>
     </section>
     <section class="h2-card" id="wh-trend" data-in></section>

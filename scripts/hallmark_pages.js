@@ -73,7 +73,7 @@ async function run(role, width, browser, base, pass, name) {
     await page.waitForFunction(() => { const m = document.querySelector('#main'); return m && m.innerText.length > 40 && !m.querySelector('.sk'); }, null, { timeout: 60000 }).catch(() => errors.push('never finished loading'));
     await page.waitForTimeout(500);
     // everything a person can open, so a figure folded away is still counted
-    await page.evaluate(() => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+    await page.evaluate(() => { document.querySelectorAll('details').forEach(d => { d.open = true; }); document.querySelectorAll('.ph-fold').forEach(f => f.classList.add('open')); });
     for (let i = 0; i < 6; i++) {
       const more = await page.$('.dt-more .linkbtn'); if (!more) break;
       await more.click(); await page.waitForTimeout(150);

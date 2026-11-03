@@ -200,3 +200,7 @@ diagnostic narrative, never in the cost of service.
 | **Provisional costs** | Where route costs are under review, Pricing judges against the book only: no below-cost verdict, no margin. Margin keeps Check routes |
 | **This month's bill** | From the run, else the posted invoices (`P.posted`) when the KPI rebuild has not run since, else shown as posted with the total to follow |
 | **Go live** | Render's outbound addresses go on Trusted Sources (Theran, 26 October) |
+
+## Who sees what (3 November 2026)
+
+Theran, on the access question: everyone signed in sees margins and every view, and can work the lists. Only an admin sees and uses Settings. This replaces costs being hidden from R4 users until signed off. The `Costs are final` setting now only says how sure the margins are: off reads provisional. Theran is the admin; Trisha and Anne are users. Users are added and changed on Settings, and AUTH_USERS stays as the starting list so an admin can always get in. Passwords are set by an admin and passed on in person, as Pulse sends no email; someone changing their own password is not built.

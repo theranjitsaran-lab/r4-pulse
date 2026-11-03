@@ -14,6 +14,7 @@ import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components
 import { billNow, serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippingAccounts, stoppedAccounts, risingAccounts, CROSS_SELL_DEPTH, PRICED } from '/components/levers.js';
 import { buildWhitespace, LINES, lineCodes } from '/components/whitespace.js';
 import { drillData, drillHtml, wireDrill } from '/components/crossdrill.js';
+import { phoneFold, isPhone } from '/components/phonekit.js';
 import { openExplainer } from '/components/explain.js';
 import { conversationCandidates } from '/components/lists.js';
 import { LABELS } from '/components/metrics.js';
@@ -227,7 +228,7 @@ async function whitespace(main, C, params) {
     ${tabsHtml('whitespace')}
     ${litCard('ws-lit', 'Pulse summary. Comparable accounts: the same kind of organisation at a similar storage size, on R4\'s own books.')}
     <section class="h2-card" data-in>
-      <div class="ragkey"><span>A plain figure buys it, twelve months</span><span class="xs">+$</span><span>does not buy it yet: what comparable accounts spend a year est.</span><span class="lowc">$</span><span>buys it, but low for its size</span></div>
+      ${phoneFold('what the colours mean', `<div class="ragkey"><span>A plain figure buys it, twelve months</span><span class="xs">+$</span><span>does not buy it yet: what comparable accounts spend a year est.</span><span class="lowc">$</span><span>buys it, but low for its size</span></div>`)}
       <div id="ws-t"></div>
       <div class="src">Comparable: the same kind of organisation, read from the account's name because the database holds no industry, with a third to three times its boxes, or its spend if it does not store. Where fewer than five qualify it widens to the same kind at any size, then to the whole book, and says so. A ceiling at the median comparable, not a forecast. Tap an account to see why.</div>
     </section>
@@ -252,11 +253,11 @@ async function whitespace(main, C, params) {
     });
   };
   dataTable(main.querySelector('#ws-t'), { key: 'crosssell', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows, noun: 'accounts', placeholder: 'Find an account', search: r => r.customer, totalLabel: 'Total', detail: why, onDraw,
-    cols: [
+    cols: (c => isPhone() ? [c[0], c[c.length - 1], ...c.slice(1, -1)] : c)([
       { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a><span class="peer">${esc(r.kind)}</span>` },
       ...LINES.map(x => ({ k: x.key, l: x.short || x.name, fixed: true, get: r => opp(r, x), fmt: r => tile1(r, x), total: 'sum', totalFmt: v => '+' + moneyK(v) })),
       { k: 'opp', l: 'Not bought yet', fixed: true, first: true, sorted: true, get: r => r.opp, fmt: r => r.opp > 0 ? '+' + moneyK(r.opp) : 'buys all', total: 'sum', totalFmt: v => '+' + moneyK(v) },
-    ],
+    ]),
   });
   acPlay(main);
 }

@@ -2,6 +2,8 @@
 // question for Mike, who changed it last, and its effect on two reference figures. Admin users can
 // change them (server/settings.js); every screen and Ask then cost with the new values. Below, the
 // rates themselves (model/rates.js), read-only, with their derivation and confidence.
+import { phoneFold } from '/components/phonekit.js';
+import { drawUsers } from '/components/usersadmin.js';
 import * as Fmt from '/components/format.js';
 import { esc } from '/components/data.js';
 import { money0 } from '/components/chart.js';
@@ -51,7 +53,7 @@ function draw(main, S) {
     return `<li class="st-row">
       <div class="st-what"><b>${esc(n[0])}</b><span>${esc(n[2])}</span><span class="st-q">For Mike: ${esc(q)}</span></div>
       <div class="st-val">${input}${S.canEdit ? `<button type="button" class="st-save" data-k="${k}">Save</button>` : ''}
-        <small>${esc(n[1])} · default ${esc(fmt(k, d))}${k !== 'deliveryMatch' ? ` · ${esc(fmt(k, b[0]))} to ${esc(fmt(k, b[1]))}` : ''}${last ? ` · set by ${esc(last.who)} on ${esc(when(last.at))}` : ''}</small>
+        <small>${esc(n[1])}, default ${esc(fmt(k, d))}${k !== 'deliveryMatch' ? `, ${esc(fmt(k, b[0]))} to ${esc(fmt(k, b[1]))}` : ''}${last ? `, set by ${esc(last.who)} on ${esc(when(last.at))}` : ''}</small>
         <span class="st-msg hint" data-for="${k}"></span></div>
     </li>`;
   };
@@ -59,19 +61,21 @@ function draw(main, S) {
   main.innerHTML = `<div class="st">
     <h1>Settings</h1>
     <p class="hint">The assumptions behind every cost on screen. ${S.canEdit ? 'Change one and save: every screen and Ask use it at once.' : 'Only an admin can change them.'}${S.saveable ? '' : ' <b>Changes cannot be saved yet:</b> the settings table is created by the one-off setup on the PC (sql/setup_2026_11.sql).'}</p>
-    <section class="h2-card" data-rv><div class="h2-ch"><h2>Costs and margins</h2><small>for R4 users; admins always see them</small></div>
-      <ul class="st-list"><li class="st-row"><div class="st-what"><b>Costs are final</b><span>Off: margins, the Action column, the price P&amp;L and below-cost lists are hidden from everyone but admins. On: everyone sees them.</span></div>
-      <div class="st-val"><select data-k="costsFinal" ${S.canEdit ? '' : 'disabled'}><option value="0" ${S.values.costsFinal ? '' : 'selected'}>Off: hidden from R4 users</option><option value="1" ${S.values.costsFinal ? 'selected' : ''}>On: released to R4 users</option></select>${S.canEdit ? '<button type="button" class="st-save" data-k="costsFinal">Save</button>' : ''}<span class="st-msg hint" data-for="costsFinal"></span></div></li></ul></section>
+    <section class="h2-card" data-rv><div class="h2-ch"><h2>Costs and margins</h2><small>everyone sees them; this says how sure they are</small></div>
+      <ul class="st-list"><li class="st-row"><div class="st-what"><b>Costs are final</b><span>Off: margins read &quot;Costs modelled, provisional&quot;. On: the cost model is signed off, and they read &quot;Costs modelled&quot;.</span></div>
+      <div class="st-val"><select data-k="costsFinal" ${S.canEdit ? '' : 'disabled'}><option value="0" ${S.values.costsFinal ? '' : 'selected'}>Off: provisional</option><option value="1" ${S.values.costsFinal ? 'selected' : ''}>On: signed off</option></select>${S.canEdit ? '<button type="button" class="st-save" data-k="costsFinal">Save</button>' : ''}<span class="st-msg hint" data-for="costsFinal"></span></div></li></ul></section>
+    ${S.canEdit ? '<section class="h2-card" data-rv id="st-users"></section>' : ''}
     ${refHtml}
-    ${GROUPS.map(g => `<section class="h2-card" data-rv><div class="h2-ch"><h2>${esc(g.title)}</h2><small>${esc(g.sub)}</small></div>
+    ${GROUPS.map(g => phoneFold(g.title, `<section class="h2-card" data-rv><div class="h2-ch"><h2>${esc(g.title)}</h2><small>${esc(g.sub)}</small></div>
       <ul class="st-list">${g.keys.map(([k, u, q]) => row(k, u, q)).join('')}</ul>
       ${g.title === 'Box deliveries' && del && del.customerDays ? `<p class="src">${del.on ? `${Fmt.grouped(del.placed)} of ${Fmt.grouped(del.customerDays)} customer delivery days placed on a shred route that day, ${del.accounts} accounts, ${esc(String(del.from))} to ${esc(String(del.to))} (VCK code 01). ${del.noPostcode ? `${Fmt.grouped(del.noPostcode)} could not be placed for want of a postcode (the customer has no Veri-Shred address; VCK holds none)` : ''}${del.noPostcode && del.noRoute ? '; ' : ''}${del.noRoute ? `${Fmt.grouped(del.noRoute)} fell on a date no route ran` : ''}${del.noPostcode || del.noRoute ? ': those stay at the average visit, under review.' : ''}` : 'Off: deliveries are left out of the route days, and delivery and pickup stay at the average visit, under review.'}</p>` : ''}
-    </section>`).join('')}
+    </section>`)).join('')}
     ${pcCard(S)}
-    ${S.history && S.history.length ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Changes</h2><small>newest first</small></div><ul class="st-hist">${S.history.map(h => `<li><span>${/^pc:/.test(h.key) ? `Postcode for account ${esc(h.key.slice(3))}: <b>${+h.value ? esc(String(Math.round(h.value)).padStart(5, '0')) : 'removed'}</b>` : `${esc((S.notes[h.key] || [h.key])[0])}: <b>${esc(fmt(h.key, h.value))}</b>`}</span><span>${esc(h.who)} · ${esc(when(h.at))}</span></li>`).join('')}</ul></section>` : ''}
-    <section class="h2-card" data-rv><details class="fold"><summary><h3>The rates</h3><span class="sub">ledger costs over twelve months' volumes · open</span></summary>
+    ${S.history && S.history.length ? `<section class="h2-card" data-rv><div class="h2-ch"><h2>Changes</h2><small>newest first</small></div><ul class="st-hist">${S.history.map(h => `<li><span>${/^pc:/.test(h.key) ? `Postcode for account ${esc(h.key.slice(3))}: <b>${+h.value ? esc(String(Math.round(h.value)).padStart(5, '0')) : 'removed'}</b>` : `${esc((S.notes[h.key] || [h.key])[0])}: <b>${esc(fmt(h.key, h.value))}</b>`}</span><span>${esc(h.who)}, ${esc(when(h.at))}</span></li>`).join('')}</ul></section>` : ''}
+    <section class="h2-card" data-rv><details class="fold"><summary><h3>The rates</h3><span class="sub">ledger costs over twelve months' volumes, open</span></summary>
       <ul class="st-rates">${S.rates.map(r => `<li><b>${esc(r.key)}</b><span class="v">${typeof r.value === 'number' ? esc(+Fmt.fixed(r.value, 4) + '') : esc(Object.entries(r.value).map(([k, v]) => `${k} ${v}`).join(', '))} <small>${esc(r.unit || '')}</small></span><span class="fl">${esc(r.flag || '')}</span><span class="d">${esc(r.derivation || '')}</span></li>`).join('')}</ul></details></section>
   </div>`;
+  drawUsers(main.querySelector('#st-users'));
 
   // a postcode for a delivery account with none in the data
   main.querySelectorAll('.st-pc-save').forEach(b => b.addEventListener('click', async () => {
@@ -114,7 +118,7 @@ function pcCard(S) {
   const b = d.basis || {};
   return `<section class="h2-card" data-rv><div class="h2-ch"><h2>${d.noPostcode ? `${Fmt.grouped(d.noPostcode)} delivery days have no address` : 'Delivery addresses'}</h2><small>type a postcode and those deliveries are placed on that day's route</small></div>
     <p class="hint">Placed so far: ${Fmt.grouped(b.site || 0)} at the site's own address, ${Fmt.grouped(b.account || 0)} at the account's usual address, ${Fmt.grouped(b.typed || 0)} at a postcode typed here. VCK's own addresses are not in the daily push; adding its address table would fill this list without typing.</p>
-    <ul class="st-list">${(d.missing || []).slice(0, 25).map(m => row(m.level1, m.name, `${m.days} delivery day${m.days === 1 ? '' : 's'}${m.revenue ? `, $${Fmt.grouped(m.revenue)} of delivery revenue` : ''} · account ${m.level1}`)).join('')}
-    ${typed.map(t => row(t.level1, t.name, `postcode typed here · account ${t.level1} · clear the box and save to remove`, t.postcode)).join('')}</ul>
+    <ul class="st-list">${(d.missing || []).slice(0, 25).map(m => row(m.level1, m.name, `${m.days} delivery day${m.days === 1 ? '' : 's'}${m.revenue ? `, $${Fmt.grouped(m.revenue)} of delivery revenue` : ''}, account ${m.level1}`)).join('')}
+    ${typed.map(t => row(t.level1, t.name, `postcode typed here, account ${t.level1}, clear the box and save to remove`, t.postcode)).join('')}</ul>
   </section>`;
 }

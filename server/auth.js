@@ -1,9 +1,8 @@
-// Users come from AUTH_USERS = "name:bcryptHash:role,name:bcryptHash:role".
-// Roles: owner (Trisha), ops (Mike), billing (Anne), admin (Theran). Every screen is
-// visible to every role for now; the role is recorded so that can change later.
+// The starting users come from AUTH_USERS = "name:bcryptHash:role,name:bcryptHash:role"; an admin adds and changes them on Settings
+// (server/users.js). Every signed-in user sees every screen but Settings, which is for admins.
 'use strict';
-const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const Users = require('./users');
 
 function parseUsers(raw) {
   return (raw || '')
@@ -47,7 +46,7 @@ button{margin-top:var(--sp-5);width:100%;padding:var(--sp-3);background:var(--he
 </form></main></body></html>`;
 
 function install(app) {
-  const users = parseUsers(process.env.AUTH_USERS);
+  Users.init(parseUsers(process.env.AUTH_USERS)).catch(e => console.warn('users:', e.message));
   if (!process.env.SESSION_SECRET) throw new Error('SESSION_SECRET is not set');
 
   app.set('trust proxy', 1);
@@ -64,11 +63,15 @@ function install(app) {
     if (!body || !sig) return null;
     const want = Buffer.from(mac(body)), got = Buffer.from(sig);
     if (want.length !== got.length || !crypto.timingSafeEqual(want, got)) return null;
-    try { const u = JSON.parse(Buffer.from(body, 'base64url').toString()); return u.exp > Date.now() ? u : null; } catch { return null; }
+    try {
+      const u = JSON.parse(Buffer.from(body, 'base64url').toString()), now = Users.find(u.name);
+      // switched off, or the password has changed, ends the session; access is read fresh, so a change takes effect at once
+      return u.exp > Date.now() && now && now.active && u.pm === Users.passMark(now) ? { ...u, role: now.role } : null;
+    } catch { return null; }
   };
   app.use((req, res, next) => {
     const u = read(req);
-    req.session = { user: u ? { name: u.name, role: u.role } : null, destroy: cb => { res.clearCookie(COOKIE, { path: '/' }); cb(); } };
+    req.session = { user: u ? { name: u.name, role: u.role, pm: u.pm } : null, destroy: cb => { res.clearCookie(COOKIE, { path: '/' }); cb(); } };
     if (u && u.exp - Date.now() < LIFE - RENEW) issue(res, req.session.user);
     next();
   });
@@ -76,11 +79,11 @@ function install(app) {
   app.get('/login', (req, res) => res.type('html').send(LOGIN_PAGE(null)));
   app.post('/login', (req, res) => {
     const { name = '', password = '' } = req.body || {};
-    const u = users.find(x => x.name.toLowerCase() === String(name).trim().toLowerCase());
-    if (!u || !bcrypt.compareSync(String(password), u.hash)) {
+    const u = Users.check(name, password);
+    if (!u) {
       return res.status(401).type('html').send(LOGIN_PAGE('That name and password do not match.'));
     }
-    issue(res, { name: u.name, role: u.role });
+    issue(res, { name: u.name, role: u.role, pm: Users.passMark(u) });
     res.redirect('/');
   });
   app.post('/logout', (req, res) => req.session.destroy(() => res.redirect('/login')));

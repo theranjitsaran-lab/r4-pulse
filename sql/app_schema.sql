@@ -75,3 +75,18 @@ CREATE TABLE IF NOT EXISTS app.setting (
   id bigserial PRIMARY KEY, key text NOT NULL, value numeric NOT NULL, who text NOT NULL,
   at timestamptz NOT NULL DEFAULT now());
 CREATE INDEX IF NOT EXISTS setting_key ON app.setting (key, at DESC);
+
+-- Who can sign in beyond AUTH_USERS, and what each has seen (server/users.js). One row per change, the latest winning. Hashes only.
+CREATE TABLE IF NOT EXISTS app.app_user (
+  id bigserial PRIMARY KEY, login text NOT NULL, hash text NOT NULL, role text NOT NULL, active boolean NOT NULL DEFAULT true, who text NOT NULL,
+  at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS app_user_login ON app.app_user (login, at DESC);
+CREATE TABLE IF NOT EXISTS app.user_state (
+  id bigserial PRIMARY KEY, login text NOT NULL, welcome_seen_version integer NOT NULL, at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS user_state_login ON app.user_state (login, at DESC);
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'r4_pulse_app') THEN
+    GRANT SELECT, INSERT ON app.app_user, app.user_state TO r4_pulse_app;
+    GRANT USAGE ON SEQUENCE app.app_user_id_seq, app.user_state_id_seq TO r4_pulse_app;
+  END IF;
+END $$;
