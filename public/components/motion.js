@@ -6,6 +6,8 @@ const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 let release;
 const introDone = new Promise(r => { release = r; });
 export const whenIntroDone = () => introDone;
+// this page load is a fresh sign-in (server/auth.js), read before intro.js tidies the address
+export const justSignedIn = typeof location !== 'undefined' && new URLSearchParams(location.search).has('signin');
 export const endIntro = () => release();
 
 // Every [data-rv] inside root rises into place in document order, a stagger apart.

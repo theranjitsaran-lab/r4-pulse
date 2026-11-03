@@ -3,6 +3,7 @@
 import { WELCOME, stepsFor, TOUR_VERSION } from './tourdata.js';
 import { welcomeSeen, setWelcomeSeen, isAdmin } from './access.js';
 import { openFoldsFor, isPhone } from './phonekit.js';
+import { justSignedIn } from './motion.js';
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -15,7 +16,10 @@ let wEl = null, back = null, tour = null;
 function closeWelcome(keepBack) {
   if (!wEl) return;
   if (wEl.querySelector('#wl-never').checked) setWelcomeSeen(TOUR_VERSION);
-  else { try { sessionStorage.setItem(SKIP, '1'); } catch (e) {} }
+  else {
+    if (welcomeSeen() >= TOUR_VERSION) setWelcomeSeen(0);
+    try { sessionStorage.setItem(SKIP, '1'); } catch (e) {}
+  }
   wEl.remove(); wEl = null; document.documentElement.classList.remove('ask-open');
   if (!keepBack && back && back.isConnected && back.focus) back.focus();
 }
@@ -27,10 +31,10 @@ export function openWelcome() {
     <header><p class="wl-kick"><span class="light g" aria-hidden="true"></span>Welcome to R4 Pulse</p><h2 id="wl-t">${esc(WELCOME.title)}</h2><p id="wl-d">${esc(WELCOME.text)}</p></header>
     <div class="wl-boxes">${WELCOME.boxes.map(([t, b]) => `<div><b>${esc(t)}</b><span>${esc(b)}</span></div>`).join('')}</div>
     <div class="wl-paths"><h3>Where would you like to start?</h3>${WELCOME.choices.map(([k, t, s], i) => `<button type="button" class="wl-path${i ? '' : ' go'}" data-tour-start="${k}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[k]}"/></svg><span><b>${esc(t)}</b><small>${esc(s)}</small></span><em>${stepsFor(k, isAdmin()).length} steps</em></button>`).join('')}</div>
-    <footer><label class="wl-never"><input type="checkbox" id="wl-never"${welcomeSeen() >= TOUR_VERSION ? ' checked' : ''}> Don't show this again</label><button type="button" class="linkbtn" id="wl-skip">Skip for now</button></footer>
+    <footer><label class="wl-never"><input type="checkbox" id="wl-never"${welcomeSeen() >= TOUR_VERSION ? ' checked' : ''}> Don't show this again</label><a class="linkbtn" id="wl-guide" href="#how">Read how each screen works</a><button type="button" class="linkbtn" id="wl-skip">Skip for now</button></footer>
   </section>`;
   document.body.appendChild(wEl); document.documentElement.classList.add('ask-open');
-  wEl.addEventListener('click', ev => { const p = ev.target.closest('[data-tour-start]'); if (p) { closeWelcome(true); start(p.dataset.tourStart); return; } if (ev.target.closest('#wl-skip') || ev.target.classList.contains('wl-veil')) closeWelcome(); });
+  wEl.addEventListener('click', ev => { const p = ev.target.closest('[data-tour-start]'); if (p) { closeWelcome(true); start(p.dataset.tourStart); return; } if (ev.target.closest('#wl-skip, #wl-guide') || ev.target.classList.contains('wl-veil')) closeWelcome(); });
   wEl.addEventListener('keydown', ev => { trap(wEl, ev); if (ev.key === 'Escape') closeWelcome(); });
   wEl.querySelector('.wl-path').focus();
 }
@@ -129,6 +133,8 @@ function place() {
 
 // first sign-in: once the first screen is up, unless they have said so already. An automated browser asks for it with ?welcome=1.
 export function maybeWelcome() {
+  // Skip for now lasts until the next sign-in, and a tab can pass from one person to the next
+  if (justSignedIn) { try { sessionStorage.removeItem(SKIP); } catch (e) {} }
   const asked = new URLSearchParams(location.search).get('welcome') === '1';
   if (!asked && (navigator.webdriver || skipped())) return;
   if (welcomeSeen() >= TOUR_VERSION) return;

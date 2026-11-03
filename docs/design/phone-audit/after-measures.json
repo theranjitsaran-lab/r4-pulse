@@ -199,8 +199,8 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 2222,
-   "screens": 2.6,
+   "pageH": 2098,
+   "screens": 2.5,
    "words": 778,
    "small": [
     {
@@ -334,37 +334,68 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 175,
-   "under44": [],
-   "closePairs": 153,
+   "targets": 172,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 516,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    },
+    {
+     "k": "button.rag.g",
+     "n": 43,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.a",
+     "n": 5,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.r",
+     "n": 2,
+     "w": 60,
+     "h": 22
+    }
+   ],
+   "closePairs": 250,
    "tiles": [
     {
      "size": 22,
      "top": 487,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
      "top": 487,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 630,
+     "top": 618,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 630,
+     "top": 618,
      "label": false,
-     "wide": 173
+     "wide": 175
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 743,
+   "answerBottom": 723,
    "firstScreen": true,
    "tables": [
     {
@@ -373,8 +404,8 @@
      "rows": 51,
      "cols": 7,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -521,8 +552,39 @@
    "past": 0,
    "pastEg": [],
    "targets": 174,
-   "under44": [],
-   "closePairs": 155,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 516,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    },
+    {
+     "k": "button.rag.g",
+     "n": 43,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.a",
+     "n": 5,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.r",
+     "n": 2,
+     "w": 60,
+     "h": 22
+    }
+   ],
+   "closePairs": 252,
    "tiles": [],
    "tilesPerRow": 0,
    "answerBottom": null,
@@ -534,8 +596,8 @@
      "rows": 51,
      "cols": 7,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -570,8 +632,8 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 3381,
-   "screens": 4,
+   "pageH": 2881,
+   "screens": 3.4,
    "words": 841,
    "small": [
     {
@@ -658,8 +720,21 @@
    "past": 0,
    "pastEg": [],
    "targets": 118,
-   "under44": [],
-   "closePairs": 63,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 710,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    }
+   ],
+   "closePairs": 112,
    "tiles": [],
    "tilesPerRow": 0,
    "answerBottom": null,
@@ -667,12 +742,12 @@
    "tables": [
     {
      "box": 330,
-     "table": 723,
+     "table": 710,
      "rows": 50,
      "cols": 8,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -707,8 +782,8 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 2496,
-   "screens": 3,
+   "pageH": 2472,
+   "screens": 2.9,
    "words": 829,
    "small": [
     {
@@ -893,35 +968,35 @@
      "h": 20
     }
    ],
-   "closePairs": 5,
+   "closePairs": 7,
    "tiles": [
     {
      "size": 28,
      "top": 397,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 28,
      "top": 397,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 28,
-     "top": 529,
+     "top": 513,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 28,
-     "top": 529,
+     "top": 513,
      "label": false,
-     "wide": 173
+     "wide": 175
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 646,
+   "answerBottom": 622,
    "firstScreen": true,
    "tables": [],
    "marginL": 16,
@@ -1205,6 +1280,12 @@
    "targets": 67,
    "under44": [
     {
+     "k": "tr.dt-opens",
+     "n": 32,
+     "w": 330,
+     "h": 34
+    },
+    {
      "k": "button",
      "n": 4,
      "w": 69,
@@ -1248,8 +1329,8 @@
      "rows": 32,
      "cols": 3,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -1299,7 +1380,7 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 4823,
+   "pageH": 4785,
    "screens": 5.7,
    "words": 478,
    "small": [
@@ -1437,30 +1518,30 @@
      "size": 22,
      "top": 579,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
      "top": 579,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 682,
+     "top": 670,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 682,
+     "top": 670,
      "label": false,
-     "wide": 173
+     "wide": 175
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 792,
-   "firstScreen": false,
+   "answerBottom": 754,
+   "firstScreen": true,
    "tables": [
     {
      "box": 332,
@@ -1519,7 +1600,7 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 3725,
+   "pageH": 3687,
    "screens": 4.4,
    "words": 452,
    "small": [
@@ -1693,29 +1774,29 @@
      "size": 22,
      "top": 573,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
      "top": 573,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 698,
+     "top": 686,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 698,
+     "top": 686,
      "label": false,
-     "wide": 173
+     "wide": 175
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 829,
+   "answerBottom": 791,
    "firstScreen": false,
    "tables": [
     {
@@ -1766,7 +1847,7 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 2279,
+   "pageH": 2259,
    "screens": 2.7,
    "words": 345,
    "small": [
@@ -1879,29 +1960,29 @@
      "size": 22,
      "top": 490,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
      "top": 490,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 615,
+     "top": 603,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 615,
+     "top": 603,
      "label": false,
-     "wide": 173
+     "wide": 175
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 706,
+   "answerBottom": 686,
    "firstScreen": true,
    "tables": [],
    "marginL": 16,
@@ -1945,8 +2026,8 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 5227,
-   "screens": 6.2,
+   "pageH": 5165,
+   "screens": 6.1,
    "words": 478,
    "small": [
     {
@@ -2056,37 +2137,44 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 72,
-   "under44": [],
+   "targets": 70,
+   "under44": [
+    {
+     "k": "a",
+     "n": 10,
+     "w": 103,
+     "h": 20
+    }
+   ],
    "closePairs": 8,
    "tiles": [
     {
      "size": 22,
      "top": 480,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
      "top": 480,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 601,
+     "top": 589,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 601,
+     "top": 589,
      "label": false,
-     "wide": 173
+     "wide": 175
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 710,
+   "answerBottom": 690,
    "firstScreen": true,
    "tables": [
     {
@@ -2133,7 +2221,7 @@
    "over": 0,
    "pageH": 4731,
    "screens": 5.6,
-   "words": 1153,
+   "words": 1156,
    "small": [
     {
      "k": "small",
@@ -2236,9 +2324,9 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 74,
+   "targets": 75,
    "under44": [],
-   "closePairs": 12,
+   "closePairs": 15,
    "tiles": [
     {
      "size": 16,
@@ -2301,9 +2389,9 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 2106,
-   "screens": 2.5,
-   "words": 509,
+   "pageH": 1245,
+   "screens": 1.5,
+   "words": 2021,
    "small": [
     {
      "k": "a",
@@ -2316,20 +2404,20 @@
      "size": 12,
      "n": 1,
      "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
-    },
-    {
-     "k": "small",
-     "size": 12,
-     "n": 1,
-     "eg": "the share of boxes; R4 has still to name"
     }
    ],
    "bodySmall": [
     {
      "k": "p",
      "size": 14,
-     "n": 18,
-     "eg": "Invoiced in VCK means posted invoices, d"
+     "n": 58,
+     "eg": "Today: how is the month going? Accounts:"
+    },
+    {
+     "k": "small",
+     "size": 14,
+     "n": 9,
+     "eg": "The five tabs, the top bar and the colou"
     },
     {
      "k": "div.stamp.late",
@@ -2342,19 +2430,13 @@
      "size": 14,
      "n": 1,
      "eg": "Refreshed daily from VCK (billing and pr"
-    },
-    {
-     "k": "small",
-     "size": 12,
-     "n": 1,
-     "eg": "the share of boxes; R4 has still to name"
     }
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 10,
+   "targets": 19,
    "under44": [],
-   "closePairs": 4,
+   "closePairs": 9,
    "tiles": [],
    "tilesPerRow": 0,
    "answerBottom": null,
@@ -2392,8 +2474,8 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 2702,
-   "screens": 3.2,
+   "pageH": 2578,
+   "screens": 3.1,
    "words": 271,
    "small": [
     {
@@ -2690,8 +2772,8 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 4738,
-   "screens": 5.6,
+   "pageH": 4204,
+   "screens": 5,
    "words": 1027,
    "small": [
     {
@@ -2820,46 +2902,59 @@
    "past": 0,
    "pastEg": [],
    "targets": 123,
-   "under44": [],
-   "closePairs": 54,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 710,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    }
+   ],
+   "closePairs": 102,
    "tiles": [
     {
      "size": 22,
-     "top": 1206,
+     "top": 1196,
      "label": false,
      "wide": 136
     },
     {
      "size": 22,
-     "top": 1206,
+     "top": 1196,
      "label": false,
      "wide": 136
     },
     {
      "size": 22,
-     "top": 1395,
+     "top": 1359,
      "label": false,
      "wide": 136
     },
     {
      "size": 22,
-     "top": 1395,
+     "top": 1359,
      "label": false,
      "wide": 136
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 1504,
+   "answerBottom": 1460,
    "firstScreen": false,
    "tables": [
     {
      "box": 330,
-     "table": 723,
+     "table": 710,
      "rows": 51,
      "cols": 8,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -2894,7 +2989,7 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 7282,
+   "pageH": 7220,
    "screens": 8.6,
    "words": 815,
    "small": [
@@ -3029,37 +3124,44 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 85,
-   "under44": [],
+   "targets": 83,
+   "under44": [
+    {
+     "k": "a",
+     "n": 10,
+     "w": 103,
+     "h": 20
+    }
+   ],
    "closePairs": 17,
    "tiles": [
     {
      "size": 22,
      "top": 480,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
      "top": 480,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 601,
+     "top": 589,
      "label": false,
-     "wide": 173
+     "wide": 175
     },
     {
      "size": 22,
-     "top": 601,
+     "top": 589,
      "label": false,
-     "wide": 173
+     "wide": 175
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 710,
+   "answerBottom": 690,
    "firstScreen": true,
    "tables": [
     {
@@ -3104,8 +3206,8 @@
    "w": 390,
    "h": 844,
    "over": 0,
-   "pageH": 5202,
-   "screens": 6.2,
+   "pageH": 5164,
+   "screens": 6.1,
    "words": 197,
    "small": [
     {
@@ -3211,7 +3313,7 @@
    "over": 0,
    "pageH": 2248,
    "screens": 2.7,
-   "words": 37,
+   "words": 123,
    "small": [
     {
      "k": "small",
@@ -3221,6 +3323,18 @@
     }
    ],
    "bodySmall": [
+    {
+     "k": "li",
+     "size": 14,
+     "n": 4,
+     "eg": "The month, the gap to $1.0M, the lines o"
+    },
+    {
+     "k": "p",
+     "size": 14,
+     "n": 2,
+     "eg": "Answers come only from Pulse's figures, "
+    },
     {
      "k": "button",
      "size": 13,
@@ -3488,8 +3602,8 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 2165,
-   "screens": 3.2,
+   "pageH": 1971,
+   "screens": 3,
    "words": 778,
    "small": [
     {
@@ -3623,37 +3737,68 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 175,
-   "under44": [],
-   "closePairs": 150,
+   "targets": 172,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 516,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    },
+    {
+     "k": "button.rag.g",
+     "n": 43,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.a",
+     "n": 5,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.r",
+     "n": 2,
+     "w": 60,
+     "h": 22
+    }
+   ],
+   "closePairs": 250,
    "tiles": [
     {
      "size": 22,
      "top": 487,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
      "top": 487,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 648,
+     "top": 618,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 648,
+     "top": 618,
      "label": false,
-     "wide": 166
+     "wide": 168
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 761,
+   "answerBottom": 723,
    "firstScreen": false,
    "tables": [
     {
@@ -3662,8 +3807,8 @@
      "rows": 51,
      "cols": 7,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -3810,8 +3955,39 @@
    "past": 0,
    "pastEg": [],
    "targets": 174,
-   "under44": [],
-   "closePairs": 157,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 516,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    },
+    {
+     "k": "button.rag.g",
+     "n": 43,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.a",
+     "n": 5,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.r",
+     "n": 2,
+     "w": 60,
+     "h": 22
+    }
+   ],
+   "closePairs": 257,
    "tiles": [],
    "tilesPerRow": 0,
    "answerBottom": null,
@@ -3823,8 +3999,8 @@
      "rows": 51,
      "cols": 7,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -3859,8 +4035,8 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 3451,
-   "screens": 5.2,
+   "pageH": 2951,
+   "screens": 4.4,
    "words": 841,
    "small": [
     {
@@ -3947,8 +4123,21 @@
    "past": 0,
    "pastEg": [],
    "targets": 118,
-   "under44": [],
-   "closePairs": 71,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 710,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    }
+   ],
+   "closePairs": 120,
    "tiles": [],
    "tilesPerRow": 0,
    "answerBottom": null,
@@ -3956,12 +4145,12 @@
    "tables": [
     {
      "box": 315,
-     "table": 723,
+     "table": 710,
      "rows": 50,
      "cols": 8,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -3996,8 +4185,8 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 2581,
-   "screens": 3.9,
+   "pageH": 2529,
+   "screens": 3.8,
    "words": 829,
    "small": [
     {
@@ -4188,29 +4377,29 @@
      "size": 28,
      "top": 417,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 28,
      "top": 417,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 28,
-     "top": 563,
+     "top": 537,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 28,
-     "top": 563,
+     "top": 537,
      "label": false,
-     "wide": 166
+     "wide": 168
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 697,
+   "answerBottom": 645,
    "firstScreen": false,
    "tables": [],
    "marginL": 16,
@@ -4494,6 +4683,12 @@
    "targets": 67,
    "under44": [
     {
+     "k": "tr.dt-opens",
+     "n": 32,
+     "w": 315,
+     "h": 34
+    },
+    {
      "k": "button",
      "n": 4,
      "w": 69,
@@ -4537,8 +4732,8 @@
      "rows": 32,
      "cols": 3,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -4588,7 +4783,7 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 4826,
+   "pageH": 4806,
    "screens": 7.2,
    "words": 478,
    "small": [
@@ -4726,29 +4921,29 @@
      "size": 22,
      "top": 579,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
      "top": 579,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 682,
+     "top": 670,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 682,
+     "top": 670,
      "label": false,
-     "wide": 166
+     "wide": 168
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 792,
+   "answerBottom": 772,
    "firstScreen": false,
    "tables": [
     {
@@ -4808,8 +5003,8 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 3710,
-   "screens": 5.6,
+   "pageH": 3690,
+   "screens": 5.5,
    "words": 452,
    "small": [
     {
@@ -4982,29 +5177,29 @@
      "size": 22,
      "top": 573,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
      "top": 573,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 698,
+     "top": 686,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 698,
+     "top": 686,
      "label": false,
-     "wide": 166
+     "wide": 168
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 829,
+   "answerBottom": 809,
    "firstScreen": false,
    "tables": [
     {
@@ -5055,8 +5250,8 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 2317,
-   "screens": 3.5,
+   "pageH": 2297,
+   "screens": 3.4,
    "words": 345,
    "small": [
     {
@@ -5168,29 +5363,29 @@
      "size": 22,
      "top": 490,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
      "top": 490,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 615,
+     "top": 603,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 615,
+     "top": 603,
      "label": false,
-     "wide": 166
+     "wide": 168
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 706,
+   "answerBottom": 686,
    "firstScreen": false,
    "tables": [],
    "marginL": 16,
@@ -5234,8 +5429,8 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 5272,
-   "screens": 7.9,
+   "pageH": 5210,
+   "screens": 7.8,
    "words": 478,
    "small": [
     {
@@ -5345,37 +5540,44 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 72,
-   "under44": [],
+   "targets": 70,
+   "under44": [
+    {
+     "k": "a",
+     "n": 9,
+     "w": 103,
+     "h": 20
+    }
+   ],
    "closePairs": 8,
    "tiles": [
     {
      "size": 22,
      "top": 480,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
      "top": 480,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 601,
+     "top": 589,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 601,
+     "top": 589,
      "label": false,
-     "wide": 166
+     "wide": 168
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 710,
+   "answerBottom": 690,
    "firstScreen": false,
    "tables": [
     {
@@ -5422,7 +5624,7 @@
    "over": 0,
    "pageH": 4833,
    "screens": 7.2,
-   "words": 1153,
+   "words": 1156,
    "small": [
     {
      "k": "small",
@@ -5525,9 +5727,9 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 74,
+   "targets": 75,
    "under44": [],
-   "closePairs": 12,
+   "closePairs": 13,
    "tiles": [
     {
      "size": 16,
@@ -5590,9 +5792,9 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 2106,
-   "screens": 3.2,
-   "words": 509,
+   "pageH": 1245,
+   "screens": 1.9,
+   "words": 2021,
    "small": [
     {
      "k": "a",
@@ -5605,20 +5807,20 @@
      "size": 12,
      "n": 1,
      "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
-    },
-    {
-     "k": "small",
-     "size": 12,
-     "n": 1,
-     "eg": "the share of boxes; R4 has still to name"
     }
    ],
    "bodySmall": [
     {
      "k": "p",
      "size": 14,
-     "n": 18,
-     "eg": "Invoiced in VCK means posted invoices, d"
+     "n": 58,
+     "eg": "Today: how is the month going? Accounts:"
+    },
+    {
+     "k": "small",
+     "size": 14,
+     "n": 9,
+     "eg": "The five tabs, the top bar and the colou"
     },
     {
      "k": "div.stamp.late",
@@ -5631,19 +5833,13 @@
      "size": 14,
      "n": 1,
      "eg": "Refreshed daily from VCK (billing and pr"
-    },
-    {
-     "k": "small",
-     "size": 12,
-     "n": 1,
-     "eg": "the share of boxes; R4 has still to name"
     }
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 10,
+   "targets": 19,
    "under44": [],
-   "closePairs": 4,
+   "closePairs": 9,
    "tiles": [],
    "tilesPerRow": 0,
    "answerBottom": null,
@@ -5681,8 +5877,8 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 2644,
-   "screens": 4,
+   "pageH": 2450,
+   "screens": 3.7,
    "words": 271,
    "small": [
     {
@@ -5979,8 +6175,8 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 4844,
-   "screens": 7.3,
+   "pageH": 4310,
+   "screens": 6.5,
    "words": 1027,
    "small": [
     {
@@ -6109,46 +6305,59 @@
    "past": 0,
    "pastEg": [],
    "targets": 123,
-   "under44": [],
-   "closePairs": 59,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 710,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    }
+   ],
+   "closePairs": 107,
    "tiles": [
     {
      "size": 22,
-     "top": 1258,
+     "top": 1248,
      "label": false,
      "wide": 129
     },
     {
      "size": 22,
-     "top": 1258,
+     "top": 1248,
      "label": false,
      "wide": 129
     },
     {
      "size": 22,
-     "top": 1447,
+     "top": 1429,
      "label": false,
      "wide": 129
     },
     {
      "size": 22,
-     "top": 1447,
+     "top": 1429,
      "label": false,
      "wide": 129
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 1574,
+   "answerBottom": 1530,
    "firstScreen": false,
    "tables": [
     {
      "box": 315,
-     "table": 723,
+     "table": 710,
      "rows": 51,
      "cols": 8,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -6183,8 +6392,8 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 7327,
-   "screens": 11,
+   "pageH": 7265,
+   "screens": 10.9,
    "words": 815,
    "small": [
     {
@@ -6318,37 +6527,44 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 85,
-   "under44": [],
-   "closePairs": 25,
+   "targets": 83,
+   "under44": [
+    {
+     "k": "a",
+     "n": 9,
+     "w": 103,
+     "h": 20
+    }
+   ],
+   "closePairs": 23,
    "tiles": [
     {
      "size": 22,
      "top": 480,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
      "top": 480,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 601,
+     "top": 589,
      "label": false,
-     "wide": 166
+     "wide": 168
     },
     {
      "size": 22,
-     "top": 601,
+     "top": 589,
      "label": false,
-     "wide": 166
+     "wide": 168
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 710,
+   "answerBottom": 690,
    "firstScreen": false,
    "tables": [
     {
@@ -6393,7 +6609,7 @@
    "w": 375,
    "h": 667,
    "over": 0,
-   "pageH": 5209,
+   "pageH": 5189,
    "screens": 7.8,
    "words": 197,
    "small": [
@@ -6500,7 +6716,7 @@
    "over": 0,
    "pageH": 2253,
    "screens": 3.4,
-   "words": 37,
+   "words": 123,
    "small": [
     {
      "k": "small",
@@ -6510,6 +6726,18 @@
     }
    ],
    "bodySmall": [
+    {
+     "k": "li",
+     "size": 14,
+     "n": 4,
+     "eg": "The month, the gap to $1.0M, the lines o"
+    },
+    {
+     "k": "p",
+     "size": 14,
+     "n": 2,
+     "eg": "Answers come only from Pulse's figures, "
+    },
     {
      "k": "button",
      "size": 13,
@@ -6528,7 +6756,7 @@
      "h": 44
     }
    ],
-   "closePairs": 0,
+   "closePairs": 1,
    "tiles": [],
    "tilesPerRow": 0,
    "answerBottom": null,
@@ -6784,8 +7012,8 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 2230,
-   "screens": 2.4,
+   "pageH": 2050,
+   "screens": 2.2,
    "words": 778,
    "small": [
     {
@@ -6919,37 +7147,68 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 175,
-   "under44": [],
-   "closePairs": 143,
+   "targets": 172,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 516,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    },
+    {
+     "k": "button.rag.g",
+     "n": 43,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.a",
+     "n": 5,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.r",
+     "n": 2,
+     "w": 60,
+     "h": 22
+    }
+   ],
+   "closePairs": 246,
    "tiles": [
     {
      "size": 22,
      "top": 467,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
      "top": 467,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 610,
+     "top": 598,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 610,
+     "top": 598,
      "label": false,
-     "wide": 193
+     "wide": 195
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 724,
+   "answerBottom": 704,
    "firstScreen": true,
    "tables": [
     {
@@ -6958,8 +7217,8 @@
      "rows": 51,
      "cols": 7,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -7106,8 +7365,39 @@
    "past": 0,
    "pastEg": [],
    "targets": 174,
-   "under44": [],
-   "closePairs": 149,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 516,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    },
+    {
+     "k": "button.rag.g",
+     "n": 43,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.a",
+     "n": 5,
+     "w": 60,
+     "h": 22
+    },
+    {
+     "k": "button.rag.r",
+     "n": 2,
+     "w": 60,
+     "h": 22
+    }
+   ],
+   "closePairs": 246,
    "tiles": [],
    "tilesPerRow": 0,
    "answerBottom": null,
@@ -7119,8 +7409,8 @@
      "rows": 51,
      "cols": 7,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -7155,8 +7445,8 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 3342,
-   "screens": 3.6,
+   "pageH": 2842,
+   "screens": 3,
    "words": 841,
    "small": [
     {
@@ -7243,8 +7533,21 @@
    "past": 0,
    "pastEg": [],
    "targets": 118,
-   "under44": [],
-   "closePairs": 71,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 710,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    }
+   ],
+   "closePairs": 129,
    "tiles": [],
    "tilesPerRow": 0,
    "answerBottom": null,
@@ -7252,12 +7555,12 @@
    "tables": [
     {
      "box": 370,
-     "table": 723,
+     "table": 710,
      "rows": 50,
      "cols": 8,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -7292,7 +7595,7 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 2441,
+   "pageH": 2421,
    "screens": 2.6,
    "words": 829,
    "small": [
@@ -7484,29 +7787,29 @@
      "size": 28,
      "top": 397,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 28,
      "top": 397,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 28,
-     "top": 507,
+     "top": 495,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 28,
-     "top": 507,
+     "top": 495,
      "label": false,
-     "wide": 193
+     "wide": 195
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 624,
+   "answerBottom": 604,
    "firstScreen": true,
    "tables": [],
    "marginL": 16,
@@ -7790,6 +8093,12 @@
    "targets": 67,
    "under44": [
     {
+     "k": "tr.dt-opens",
+     "n": 32,
+     "w": 370,
+     "h": 34
+    },
+    {
      "k": "button",
      "n": 4,
      "w": 69,
@@ -7833,8 +8142,8 @@
      "rows": 32,
      "cols": 3,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -7884,8 +8193,8 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 4721,
-   "screens": 5.1,
+   "pageH": 4701,
+   "screens": 5,
    "words": 478,
    "small": [
     {
@@ -8022,29 +8331,29 @@
      "size": 22,
      "top": 560,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
      "top": 560,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 663,
+     "top": 651,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 663,
+     "top": 651,
      "label": false,
-     "wide": 193
+     "wide": 195
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 754,
+   "answerBottom": 734,
    "firstScreen": true,
    "tables": [
     {
@@ -8104,8 +8413,8 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 3643,
-   "screens": 3.9,
+   "pageH": 3579,
+   "screens": 3.8,
    "words": 452,
    "small": [
     {
@@ -8278,29 +8587,29 @@
      "size": 22,
      "top": 573,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
      "top": 573,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 698,
+     "top": 664,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 698,
+     "top": 664,
      "label": false,
-     "wide": 193
+     "wide": 195
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 811,
+   "answerBottom": 747,
    "firstScreen": true,
    "tables": [
     {
@@ -8351,8 +8660,8 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 2104,
-   "screens": 2.3,
+   "pageH": 2084,
+   "screens": 2.2,
    "words": 345,
    "small": [
     {
@@ -8464,29 +8773,29 @@
      "size": 22,
      "top": 431,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
      "top": 431,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 534,
+     "top": 522,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 534,
+     "top": 522,
      "label": false,
-     "wide": 193
+     "wide": 195
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 626,
+   "answerBottom": 606,
    "firstScreen": true,
    "tables": [],
    "marginL": 16,
@@ -8530,8 +8839,8 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 5134,
-   "screens": 5.5,
+   "pageH": 5072,
+   "screens": 5.4,
    "words": 478,
    "small": [
     {
@@ -8641,37 +8950,44 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 72,
-   "under44": [],
+   "targets": 70,
+   "under44": [
+    {
+     "k": "a",
+     "n": 10,
+     "w": 103,
+     "h": 20
+    }
+   ],
    "closePairs": 8,
    "tiles": [
     {
      "size": 22,
      "top": 477,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
      "top": 477,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 598,
+     "top": 586,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 598,
+     "top": 586,
      "label": false,
-     "wide": 193
+     "wide": 195
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 707,
+   "answerBottom": 687,
    "firstScreen": true,
    "tables": [
     {
@@ -8718,7 +9034,7 @@
    "over": 0,
    "pageH": 4014,
    "screens": 4.3,
-   "words": 1153,
+   "words": 1156,
    "small": [
     {
      "k": "small",
@@ -8821,9 +9137,9 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 74,
+   "targets": 75,
    "under44": [],
-   "closePairs": 17,
+   "closePairs": 18,
    "tiles": [
     {
      "size": 16,
@@ -8886,9 +9202,9 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 1959,
-   "screens": 2.1,
-   "words": 509,
+   "pageH": 1203,
+   "screens": 1.3,
+   "words": 2021,
    "small": [
     {
      "k": "a",
@@ -8901,20 +9217,20 @@
      "size": 12,
      "n": 1,
      "eg": "Data to Fri, 30 Oct · late: Veri-Shred h"
-    },
-    {
-     "k": "small",
-     "size": 12,
-     "n": 1,
-     "eg": "the share of boxes; R4 has still to name"
     }
    ],
    "bodySmall": [
     {
      "k": "p",
      "size": 14,
-     "n": 18,
-     "eg": "Invoiced in VCK means posted invoices, d"
+     "n": 58,
+     "eg": "Today: how is the month going? Accounts:"
+    },
+    {
+     "k": "small",
+     "size": 14,
+     "n": 9,
+     "eg": "The five tabs, the top bar and the colou"
     },
     {
      "k": "div.stamp.late",
@@ -8927,19 +9243,13 @@
      "size": 14,
      "n": 1,
      "eg": "Refreshed daily from VCK (billing and pr"
-    },
-    {
-     "k": "small",
-     "size": 12,
-     "n": 1,
-     "eg": "the share of boxes; R4 has still to name"
     }
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 10,
+   "targets": 19,
    "under44": [],
-   "closePairs": 4,
+   "closePairs": 14,
    "tiles": [],
    "tilesPerRow": 0,
    "answerBottom": null,
@@ -8977,8 +9287,8 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 2691,
-   "screens": 2.9,
+   "pageH": 2511,
+   "screens": 2.7,
    "words": 271,
    "small": [
     {
@@ -9275,8 +9585,8 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 4641,
-   "screens": 5,
+   "pageH": 4125,
+   "screens": 4.4,
    "words": 1027,
    "small": [
     {
@@ -9405,46 +9715,59 @@
    "past": 0,
    "pastEg": [],
    "targets": 123,
-   "under44": [],
-   "closePairs": 54,
+   "under44": [
+    {
+     "k": "tr",
+     "n": 50,
+     "w": 710,
+     "h": 34
+    },
+    {
+     "k": "a",
+     "n": 50,
+     "w": 96,
+     "h": 19
+    }
+   ],
+   "closePairs": 102,
    "tiles": [
     {
      "size": 22,
-     "top": 1167,
+     "top": 1157,
      "label": false,
      "wide": 156
     },
     {
      "size": 22,
-     "top": 1167,
+     "top": 1157,
      "label": false,
      "wide": 156
     },
     {
      "size": 22,
-     "top": 1320,
+     "top": 1302,
      "label": false,
      "wide": 156
     },
     {
      "size": 22,
-     "top": 1320,
+     "top": 1302,
      "label": false,
      "wide": 156
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 1429,
+   "answerBottom": 1403,
    "firstScreen": false,
    "tables": [
     {
      "box": 370,
-     "table": 723,
+     "table": 710,
      "rows": 51,
      "cols": 8,
      "pinned": true,
-     "rowH": 44,
-     "font": 15
+     "rowH": 34,
+     "font": 14
     }
    ],
    "marginL": 16,
@@ -9479,8 +9802,8 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 7189,
-   "screens": 7.7,
+   "pageH": 7127,
+   "screens": 7.6,
    "words": 815,
    "small": [
     {
@@ -9614,37 +9937,44 @@
    ],
    "past": 0,
    "pastEg": [],
-   "targets": 85,
-   "under44": [],
-   "closePairs": 14,
+   "targets": 83,
+   "under44": [
+    {
+     "k": "a",
+     "n": 10,
+     "w": 103,
+     "h": 20
+    }
+   ],
+   "closePairs": 11,
    "tiles": [
     {
      "size": 22,
      "top": 477,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
      "top": 477,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 598,
+     "top": 586,
      "label": false,
-     "wide": 193
+     "wide": 195
     },
     {
      "size": 22,
-     "top": 598,
+     "top": 586,
      "label": false,
-     "wide": 193
+     "wide": 195
     }
    ],
    "tilesPerRow": 2,
-   "answerBottom": 707,
+   "answerBottom": 687,
    "firstScreen": true,
    "tables": [
     {
@@ -9689,7 +10019,7 @@
    "w": 430,
    "h": 932,
    "over": 0,
-   "pageH": 5118,
+   "pageH": 5098,
    "screens": 5.5,
    "words": 197,
    "small": [
@@ -9796,7 +10126,7 @@
    "over": 0,
    "pageH": 2199,
    "screens": 2.4,
-   "words": 37,
+   "words": 123,
    "small": [
     {
      "k": "small",
@@ -9806,6 +10136,18 @@
     }
    ],
    "bodySmall": [
+    {
+     "k": "li",
+     "size": 14,
+     "n": 4,
+     "eg": "The month, the gap to $1.0M, the lines o"
+    },
+    {
+     "k": "p",
+     "size": 14,
+     "n": 2,
+     "eg": "Answers come only from Pulse's figures, "
+    },
     {
      "k": "button",
      "size": 13,

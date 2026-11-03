@@ -1,9 +1,9 @@
 // The opening: on a white sheet, a green scan line reads R4's barcode logo into view, "Pulse" slides in
-// beside it, a pulse line runs across, and the sheet lifts away to the screen underneath. Once a
-// day, never under reduced motion, and a tap or key skips it. It stays at least MIN ms
+// beside it, a pulse line runs across, and the sheet lifts away to the screen underneath. On every
+// sign-in and the first visit of a day, never under reduced motion, and a tap or key skips it. It stays at least MIN ms
 // and until the first screen is drawn. The logo is R4's own (public/brand/r4-logo.png, from
 // r4services.com); a vector from R4 replaces that file and nothing else.
-import { endIntro } from './motion.js';
+import { endIntro, justSignedIn } from './motion.js';
 
 const MIN = 900;
 const KEY = 'r4-intro-day';
@@ -17,7 +17,8 @@ const seen = () => { try { return localStorage.getItem(KEY) === today(); } catch
 const mark = () => { try { localStorage.setItem(KEY, today()); } catch { /* private window */ } };
 
 export function playIntro() {
-  const skip = matchMedia('(prefers-reduced-motion: reduce)').matches || seen();
+  if (justSignedIn) history.replaceState(null, '', location.pathname + location.hash);
+  const skip = matchMedia('(prefers-reduced-motion: reduce)').matches || (seen() && !justSignedIn);
   if (skip) { endIntro(); return { ready() {} }; }
   mark();
   const el = document.createElement('div');

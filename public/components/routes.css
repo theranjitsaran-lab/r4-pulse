@@ -64,6 +64,15 @@
 .nb-lines-note { font-size: var(--fs-tiny); color: var(--ink-3); }
 .how { max-width: calc(var(--u) * 190); display: grid; gap: var(--sp-3); }
 .how-lede { margin: 0; color: var(--ink-3); }
+.how-sec > summary { display: grid; gap: 2px; min-height: var(--sp-8); align-content: center; padding-left: var(--sp-5); position: relative; cursor: pointer; list-style: none; }
+.how-sec > summary::-webkit-details-marker { display: none; }
+.how-sec > summary::before { content: ""; position: absolute; left: 2px; top: 50%; width: 7px; height: 7px; margin-top: -4px; border-right: 2px solid var(--brand); border-bottom: 2px solid var(--brand); transform: rotate(-45deg); transition: transform 150ms var(--ease-out); }
+.how-sec[open] > summary::before { transform: rotate(45deg); }
+.how-sec > summary:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.how-sec > summary h2 { margin: 0; }
+.how-sec > summary small { font-size: var(--fs-sm); color: var(--ink-3); }
+.how-sec h3 { margin: var(--sp-4) 0 0; font-size: var(--fs-sm); font-weight: 600; color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .how-sec > summary::before { transition: none; } }
 .how p { margin: var(--sp-2) 0 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--ink-2); }
 .how-link { color: var(--brand); font-weight: 600; text-decoration: none; }
 .rt-maphead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--sp-3); }
