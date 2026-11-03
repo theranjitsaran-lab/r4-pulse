@@ -91,6 +91,7 @@ export async function render(main, PR, params) {
         <div id="p-binbox"><span class="pq-lab">Bins each visit</span><div class="pq-step"><button type="button" id="p-minus" aria-label="Fewer bins">−</button><output id="p-bins"></output><button type="button" id="p-plus" aria-label="More bins">+</button></div></div>
         <div id="p-freqbox"><span class="pq-lab">How often</span><div class="pq-pills" id="p-freq" role="group" aria-label="How often"></div></div>
         <label id="p-unitbox" hidden><span id="p-units-lab">Units a year</span><input id="p-units" inputmode="decimal"></label>
+        <label id="p-jobsbox" hidden>Jobs a year<input id="p-jobs" inputmode="decimal"></label>
         <label id="p-sitebox"><span id="p-site-lab">Minutes on site a visit</span><input id="p-site" inputmode="decimal"></label>
       </div>
       <div class="pq-price">
@@ -116,12 +117,9 @@ export async function render(main, PR, params) {
     </div>
     <section class="h2-card pq-right" data-in aria-labelledby="pq-goes" id="p-goes">
       <div class="h2-ch"><h2 id="pq-goes">3. Where the price goes</h2><small id="p-goes-s"></small></div>
-      ${costs ? `<p class="pq-line" id="p-line"></p>
-      <div class="pq-stack" id="p-stack" role="img"></div>
-      <div class="pq-skey" id="p-skey"></div>
-      <details class="pq-notes" open><summary>What is in this cost</summary><div id="p-notes"></div></details>
-      <ul class="pq-why" id="p-why"></ul>
-      <p class="src" id="p-by"></p>` : `<div class="pending">${esc(NOT_READY)}</div>`}
+      ${costs ? `<div class="pq-stack" id="p-stack" role="img"></div>
+      <div class="pq-rows" id="p-notes"></div>
+      <ul class="pq-why" id="p-why"></ul>` : `<div class="pending">${esc(NOT_READY)}</div>`}
     </section>
     </div>
 
@@ -158,7 +156,7 @@ export async function render(main, PR, params) {
   showCode();
   $('p-cust').addEventListener('focus', e => e.target.select());
   const isBin = () => (SERVICES[st.code] || {}).fam === 'bin';
-  const hasPlace = () => ['bin', 'trip', 'itad'].includes((SERVICES[st.code] || {}).fam);
+  const hasPlace = () => ['bin', 'trip', 'itad', 'truck'].includes((SERVICES[st.code] || {}).fam);
   const dec = () => st.code === 'STO' ? 3 : 2;
   const aUnit = u => (/^h/.test(u) ? 'an ' : 'a ') + u;
 
@@ -175,6 +173,7 @@ export async function render(main, PR, params) {
       else { st.visits = 52; st.bins = 1; st.units = 52; }
     } else if (svc && svc.fam === 'itad') { const l = st.level1 && linesOf(st.level1).find(x => x.servcode === st.code); st.visits = l ? l.days : Math.max(1, Math.ceil(st.units / 4000)); }
     else if (svc && svc.fam === 'trip') { if (svc.rush && !mine) st.units = 1; st.visits = st.units; }
+    else if (svc && svc.fam === 'truck') { const l = st.level1 && linesOf(st.level1).find(x => x.servcode === st.code); st.visits = l && l.days ? l.days : 1; $('p-jobs').value = st.visits; }
     if (st.level1 && QR && QR.acctPc[st.level1] && Z[QR.acctPc[st.level1]]) st.postcode = QR.acctPc[st.level1];
     $('p-pc').value = st.postcode || '';
     setMiles();
@@ -196,6 +195,7 @@ export async function render(main, PR, params) {
   const allOptions = () => { const near = nearNow(); return { near, list: quoteOptions(R, { ...st }, context(near)) }; };
   const chosen = () => { const { list } = allOptions(); return list.find(o => o.id === st.opt && !o.off) || list[0]; };
 
+  const openRows = new Set();
   let lastPc = null, firstMap = true, sumTimer = null, sumSeq = 0;
   function update() {
     const { near, list } = allOptions();
@@ -203,7 +203,7 @@ export async function render(main, PR, params) {
     const o = list.find(x => x.id === st.opt) || list[0], svc = SERVICES[st.code], s = bandNow(), unit = svc ? svc.unit : 'unit', bin = isBin();
     // what is being quoted
     const trip = !!svc && svc.fam === 'trip';
-    $('p-binbox').hidden = !bin; $('p-freqbox').hidden = !bin; $('p-unitbox').hidden = bin; $('p-modebox').hidden = !trip; $('p-sitebox').hidden = !bin && !trip;
+    $('p-binbox').hidden = !bin; $('p-freqbox').hidden = !bin; $('p-unitbox').hidden = bin; $('p-modebox').hidden = !trip; $('p-sitebox').hidden = !bin && !trip; $('p-jobsbox').hidden = svc.fam !== 'truck';
     $('p-mode').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === st.mode)));
     // time on site: pre-filled from the model until someone changes it; a job on a trip reads in hours
     if (bin || trip) {
@@ -231,7 +231,7 @@ export async function render(main, PR, params) {
     countTo($('k-price'), os.price, v => Fmt.money(v, { dp: dec() }));
     $('k-price-s').textContent = bin ? `a bin, ${Fmt.fixed(os.bins, os.bins % 1 ? 1 : 0)} bin${os.bins === 1 ? '' : 's'} a visit` : trip ? (st.mode === 'dedicated' && o.id !== 'ride' ? 'a trip, a dedicated vehicle' : 'a trip, on a run') : aUnit(unit);
     countTo($('k-rev'), o.yrev, moneyK);
-    $('k-rev-s').textContent = trip ? `${Fmt.num(os.visits)} trip${os.visits === 1 ? '' : 's'} a year` : os.visits ? `${Fmt.num(os.visits)} visits a year` : `${Fmt.num(os.units)} ${svc && svc.fam === 'storage' ? 'box-months' : os.units === 1 ? unit : unit + 's'} a year`;
+    $('k-rev-s').textContent = svc && svc.fam === 'truck' ? `${Fmt.num(os.units)} hour${os.units === 1 ? '' : 's'}, ${Fmt.num(os.visits)} job${os.visits === 1 ? '' : 's'} a year` : trip ? `${Fmt.num(os.visits)} trip${os.visits === 1 ? '' : 's'} a year` : os.visits ? `${Fmt.num(os.visits)} visits a year` : `${Fmt.num(os.units)} ${svc && svc.fam === 'storage' ? 'box-months' : os.units === 1 ? unit : unit + 's'} a year`;
     if (costs) {
       const lab = marginLabel(R, o.m);
       countTo($('k-mar'), o.year ?? 0, mk); $('k-mar').classList.toggle('is-bad', (o.year ?? 0) < 0);
@@ -251,24 +251,24 @@ export async function render(main, PR, params) {
     // where the price goes
     if (costs) {
       if (o.c) {
-        const p = o.parts, rev = o.rev, cost = p.cost, left = rev - cost, tot = Math.max(rev, cost, .01), perWord = trip ? 'trip' : os.visits ? 'visit' : unit;
+        const p = o.parts, rev = o.rev, cost = p.cost, left = rev - cost, tot = Math.max(rev, cost, .01), perWord = trip ? 'trip' : svc && svc.fam === 'truck' ? 'job' : os.visits ? 'visit' : unit;
         $('p-goes-s').textContent = `${o.t}: ${aUnit(perWord)}, est.`;
-        $('p-line').textContent = `At ${Fmt.money(os.price, { dp: dec() })} ${bin ? 'a bin' : aUnit(unit)}, R4 ${left >= 0 ? 'keeps' : 'is short by'} ${Fmt.money(Math.abs(left), { dp: 2 })} ${aUnit(perWord)}, ${mk(o.year)} a year on ${mk(o.yrev)} of revenue.`;
         const segs = [['q-s-t', 'Getting there', p.travel], ['q-s-s', 'Time on site', p.time], ['q-s-p', 'Shredding', p.plant], ['q-s-o', p.otherName, p.other]].filter(x => x[2] > .005);
         let at = 0;
         const bar = segs.map(([cls, , v]) => { const h = `<i class="${cls}" style="transform:translateX(${(at / tot * 100).toFixed(2)}%) scaleX(${(v / tot).toFixed(4)})"></i>`; at += v; return h; }).join('');
         const last = left >= 0 ? `<i class="q-s-l" style="transform:translateX(${(at / tot * 100).toFixed(2)}%) scaleX(${(left / tot).toFixed(4)})"></i>` : `<i class="q-s-x" style="transform:translateX(${(rev / tot * 100).toFixed(2)}%) scaleX(${(-left / tot).toFixed(4)})"></i>`;
         $('p-stack').innerHTML = bar + last;
         $('p-stack').setAttribute('aria-label', `${segs.map(x => `${x[1]} ${Fmt.money(x[2], { dp: 2 })}`).join(', ')}, ${left >= 0 ? 'left for R4' : 'short'} ${Fmt.money(Math.abs(left), { dp: 2 })}`);
-        $('p-skey').innerHTML = [...segs.map(([cls, n, v]) => [cls, n, Fmt.money(v, { dp: 2 })]), [left >= 0 ? 'q-s-l' : 'q-s-x', left >= 0 ? 'Left for R4' : 'Short', Fmt.money(Math.abs(left), { dp: 2 })]].map(([cls, n, v]) => `<span><i class="${cls}"></i>${esc(n)}<b>${esc(v)}</b></span>`).join('');
-        const notes = costNotes(R, o, { jobs: svc && svc.fam && ['driver', 'centre'].includes(svc.fam) ? jobStats(M.lines, st.code) : null });
+        const notes = costNotes(R, o, { jobs: svc && ['driver', 'centre', 'truck'].includes(svc.fam) ? jobStats(M.lines, st.code) : null });
         const d2 = v => v < .1 ? Fmt.money(v, { dp: 4 }) : Fmt.money(v, { dp: 2 });
-        $('p-notes').innerHTML = notes.map(n => `<div class="pq-note1"><div class="h"><b>${esc(n.name)}${n.est ? ' est.' : ''}</b><b>${d2(n.amount)}</b></div><p>${esc(n.say)}</p>${n.parts.length ? `<ul>${n.parts.map(x => `<li><span>${esc(x.name)}</span><i style="--s:${x.share.toFixed(3)}"></i><span>${d2(x.amount)}</span></li>`).join('')}</ul>` : ''}</div>`).join('');
+        // which rows are open survives a change of price
+        main.querySelectorAll('#p-notes details').forEach(x => { if (x.open) openRows.add(x.dataset.n); else openRows.delete(x.dataset.n); });
+        $('p-notes').innerHTML = notes.map(n => `<details data-n="${esc(n.name)}" ${openRows.has(n.name) ? 'open' : ''}><summary><i class="${n.kind}"></i><span>${esc(n.name)}</span><b>${d2(n.amount)}</b></summary><p>${esc(n.say)}</p>${n.parts.length ? `<ul>${n.parts.map(x => `<li><span>${esc(x.name)}</span><i style="--s:${x.share.toFixed(3)}"></i><span>${d2(x.amount)}</span></li>`).join('')}</ul>` : ''}</details>`).join('')
+          + `<div class="pq-left1 ${left < 0 ? 'short' : ''}"><i class="${left >= 0 ? 'q-s-l' : 'q-s-x'}"></i><span>${left >= 0 ? 'Left for R4' : 'Short'}</span><b>${d2(Math.abs(left))}</b></div>`;
         drawSummary(o, list, near, s);
       } else {
         $('p-goes-s').textContent = '';
-        $('p-line').textContent = `A product or a fee, not work the cost model prices: ${mk(o.yrev)} of revenue a year, no cost shown.`;
-        $('p-stack').innerHTML = ''; $('p-skey').innerHTML = ''; $('p-notes').innerHTML = ''; $('p-why').innerHTML = ''; $('p-by').textContent = '';
+        $('p-stack').innerHTML = ''; $('p-notes').innerHTML = '<p class="hint">A product or a fee: the cost model does not price it.</p>'; $('p-why').innerHTML = '';
       }
     }
     // the four ways
@@ -287,12 +287,11 @@ export async function render(main, PR, params) {
   // the three points: the plain version at once; Claude's when it is back and every number in it is on the sheet
   function drawSummary(o, list, near, s) {
     const sheet = quoteFacts(o, list, { near, st: o.st, band: s });
-    const titles = { why: `Why the margin is ${pc(o.m || 0)}`, nearby: 'Who is already nearby', better: 'What would make it better' };
+    const titles = { nearby: 'Nearby', better: 'Better' };
     const paint = T => {
-      $('p-why').innerHTML = sheet.map((f, i) => `<li style="--n:${i}"><b>${esc(titles[f.key])}</b><p>${esc(T[f.key])}</p></li>`).join('');
+      $('p-why').innerHTML = sheet.map((f, i) => `<li style="--n:${i}"><b>${esc(titles[f.key])}</b> ${esc(T[f.key])}</li>`).join('');
     };
     paint(Object.fromEntries(sheet.map(f => [f.key, f.say])));
-    $('p-by').textContent = 'Written from the figures above.';
     const seq = ++sumSeq;
     clearTimeout(sumTimer);
     sumTimer = setTimeout(() => {
@@ -300,7 +299,7 @@ export async function render(main, PR, params) {
         .then(r => r.ok ? r.json() : null).then(j => {
           if (seq !== sumSeq || !j || j.source !== 'claude' || !main.isConnected) return;
           const T = parseQuote(j.text, sheet);
-          if (T && checkNumbers(j.text, sheet).ok) { paint(T); $('p-by').textContent = 'Pulse summary, checked against the figures above.'; }
+          if (T && checkNumbers(j.text, sheet).ok) paint(T);
         }).catch(() => {});
     }, 800);
   }
@@ -320,6 +319,7 @@ export async function render(main, PR, params) {
   $('p-units').addEventListener('input', () => { const v = num($('p-units')); if (v == null) return; st.units = v; if ((SERVICES[st.code] || {}).fam === 'trip') st.visits = v; st.opt = 'now'; update(); });
   $('p-mode').addEventListener('click', e => { const b = e.target.closest('button[data-m]'); if (!b) return; st.mode = b.dataset.m; st.opt = 'now'; update(); });
   $('p-site').addEventListener('input', () => { const v = num($('p-site')); st.siteMin = v == null || v <= 0 ? null : (SERVICES[st.code] || {}).fam === 'trip' ? v * 60 : v; st.opt = 'now'; update(); });
+  $('p-jobs').addEventListener('input', () => { const v = num($('p-jobs')); if (v == null || v <= 0) return; st.visits = v; st.opt = 'now'; update(); });
   const setBins = n => { st.bins = Math.max(1, Math.min(60, n)); st.units = st.bins * st.visits; st.opt = 'now'; update(); };
   $('p-minus').addEventListener('click', () => setBins(st.bins % 1 ? Math.floor(st.bins) : st.bins - 1));
   $('p-plus').addEventListener('click', () => setBins(st.bins % 1 ? Math.ceil(st.bins) : st.bins + 1));

@@ -324,3 +324,28 @@
 .pq-note1 li i { display: block; height: var(--sp-1); border-radius: var(--r-pill); background: var(--q-travel); transform-origin: left; transform: scaleX(var(--s)); }
 .pq-note1 li span:last-child { text-align: right; min-width: calc(var(--u) * 13); }
 @media (max-width: 640px) { .pq .h2-card { padding: var(--sp-3); } .pq-how label, .pq-how label input { width: 100%; } }
+
+/* where the price goes: the bar, one row a cost, a tap for its graph */
+.pq-rows { margin-top: var(--sp-2); font-size: var(--fs-sm); }
+.pq-rows summary, .pq-left1 { display: grid; grid-template-columns: var(--sp-3) minmax(0, 1fr) auto var(--sp-3); gap: var(--sp-2); align-items: center; padding: var(--sp-1) 0; border-top: var(--hair) solid var(--rule); }
+.pq-rows summary { cursor: pointer; list-style: none; }
+.pq-rows summary::-webkit-details-marker { display: none; }
+.pq-rows summary::after { content: "›"; color: var(--ink-4); text-align: right; transition: transform 150ms var(--ease-out); }
+.pq-rows details[open] summary::after { transform: rotate(90deg); }
+.pq-rows summary:hover { background: var(--well); }
+.pq-rows summary:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.pq-rows summary > i, .pq-left1 > i { width: var(--sp-3); height: var(--sp-3); border-radius: 2px; }
+.pq-rows b, .pq-left1 b { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.pq-left1 { font-weight: 600; color: var(--ink); }
+.pq-left1.short b, .pq-left1.short span { color: var(--bad); }
+.pq-rows details p { margin: 0 0 var(--sp-1) calc(var(--sp-3) + var(--sp-2)); color: var(--ink-3); font-size: var(--fs-label); }
+.pq-rows details ul { list-style: none; margin: 0 0 var(--sp-2) calc(var(--sp-3) + var(--sp-2)); padding: 0; display: grid; gap: 2px; font-size: var(--fs-label); }
+.pq-rows li { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr) auto; gap: var(--sp-2); align-items: center; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.pq-rows li i { display: block; height: var(--sp-1); border-radius: var(--r-pill); background: var(--q-travel); transform-origin: left; transform: scaleX(var(--s)); animation: md-grow 400ms var(--ease-out) backwards; }
+.pq-rows li span:last-child { text-align: right; min-width: calc(var(--u) * 13); }
+.pq .pq-why { margin-top: var(--sp-2); }
+.pq .pq-why li { font-size: var(--fs-label); color: var(--ink-2); padding: var(--sp-1) 0; }
+.pq .pq-why b { display: inline; font-size: inherit; margin-right: var(--sp-1); }
+@media (prefers-reduced-motion: reduce) { .pq-rows li i, .pq-rows summary::after { animation: none; transition: none; } }
+.pq-how #p-sitebox { width: calc(var(--u) * 37); } .pq-how #p-sitebox input { width: 100%; }
+@media (max-width: 640px) { .pq-how #p-sitebox { width: 100%; } }

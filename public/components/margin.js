@@ -67,7 +67,7 @@ export function flatFeeYear(lines) {
 // Returns { [family]: { revenue, cost, jobs, unallocated, why, working } } and noLine: invoiced service with no line.
 const ROUTE_NAMES = new Set(['Travel to site', 'Truck time', 'Time on site']);
 const sayDay = t => new Date(t + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-const UNIT_WORD = { 'Warehouse handling': 'movements', 'Box handling': 'boxes', 'Shred plant': 'lb', 'Plant throughput': 'devices', 'Driver time': 'hours', 'Service Centre time': 'hours' };
+const UNIT_WORD = { 'Truck hours': 'hours', 'Drive to the job': 'hours', 'Warehouse handling': 'movements', 'Box handling': 'boxes', 'Shred plant': 'lb', 'Plant throughput': 'devices', 'Driver time': 'hours', 'Service Centre time': 'hours' };
 const famKey = l => l && l.family && l.family !== 'none' ? l.family : 'other';
 export function accountJobs(R, acct, lines, orders, { daily = null, moveDaily = null } = {}) {
   const meta = new Map(lines.map(l => [l.servcode, l])), m = c => meta.get(c) || {};
@@ -107,7 +107,8 @@ export function accountJobs(R, acct, lines, orders, { daily = null, moveDaily = 
           say = () => `The model's average visit: ${money(amount)} over ${dayCount} job days. This line has no route days to read.`;
         }
       } else {
-        const pred = name === 'Warehouse handling' ? (i, x) => x.family === 'handling' && x.drives_cost
+        const pred = name === 'Truck hours' || name === 'Drive to the job' ? i => i.code === 'S0'
+          : name === 'Warehouse handling' ? (i, x) => x.family === 'handling' && x.drives_cost
           : name === 'Box handling' ? (i, x) => x.family === 'movement' && x.drives_cost && x.unit === 'box'
           : name === 'Plant throughput' ? (i, x) => x.family === 'itad' && x.drives_cost
           : name === 'Driver time' ? (i, x) => x.family === 'labour' && x.drives_cost && !CENTRE_HOURS.has(i.code)
@@ -219,9 +220,11 @@ export function accountCosts(R, a, lines) {
   const shredBoxes = units(l => l.family === 'shred' && l.drives_cost && (l.unit === 'box' || l.unit === 'cubic foot'));
   if (shredBoxes > 0) put('shred', R.costToServe('shred', shredBoxes, { unit: 'box' }));
   const centre = units(l => l.family === 'labour' && l.drives_cost && CENTRE_HOURS.has(l.servcode));
-  const driver = units(l => l.family === 'labour' && l.drives_cost && !CENTRE_HOURS.has(l.servcode));
+  const driver = units(l => l.family === 'labour' && l.drives_cost && !CENTRE_HOURS.has(l.servcode) && l.servcode !== 'S0');
   if (centre > 0) put('labour', R.costToServe('labour', centre, { isCentre: true }));
   if (driver > 0) put('labour', R.costToServe('labour', driver));
+  const truck = units(l => l.servcode === 'S0');
+  if (truck > 0) put('labour', R.costToServe('labour', truck, { truck: true, jobs: days(l => l.servcode === 'S0') || 1 }));
   return out;
 }
 
@@ -258,9 +261,11 @@ export function jobCost(R, items, meta, share = 1, day = null) {
   const shredBoxes = units((i, m) => m.family === 'shred' && m.drives_cost && (m.unit === 'box' || m.unit === 'cubic foot'));
   if (shredBoxes > 0) parts.push(R.costToServe('shred', shredBoxes, { unit: 'box' }));
   const centre = units((i, m) => m.family === 'labour' && m.drives_cost && CENTRE_HOURS.has(i.code));
-  const driver = units((i, m) => m.family === 'labour' && m.drives_cost && !CENTRE_HOURS.has(i.code));
+  const driver = units((i, m) => m.family === 'labour' && m.drives_cost && !CENTRE_HOURS.has(i.code) && i.code !== 'S0');
   if (centre > 0) parts.push(R.costToServe('labour', centre, { isCentre: true }));
   if (driver > 0) parts.push(R.costToServe('labour', driver));
+  const truck = units(i => i.code === 'S0');
+  if (truck > 0) parts.push(R.costToServe('labour', truck, { truck: true, jobs: 1 }));
 
   const ROUTE = new Set(['Travel to site', 'Truck time', 'Time on site']);
   const seen = new Set(), lines = [];
@@ -295,7 +300,7 @@ function dayLines(R, { day, alloc }, share) {
 export const PARTS = [
   ['space', 'Storage space', ['Warehouse space']],
   ['handling', 'Handling', ['Warehouse handling', 'Box handling']],
-  ['route', 'Route', ['Travel to site', 'Truck time', 'Time on site']],
+  ['route', 'Route', ['Travel to site', 'Truck time', 'Time on site', 'Truck hours', 'Drive to the job']],
   ['plant', 'Shred plant', ['Shred plant', 'Plant throughput']],
   ['labour', 'Labour', ['Driver time', 'Service Centre time']],
 ];

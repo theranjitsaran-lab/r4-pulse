@@ -295,6 +295,13 @@ function costToServe(family, units, opts) {
       }
       break;
     case 'labour': {
+      if (o.truck) {
+        // the shred truck on site: hours at the route-hour rate (driver, truck, Routeware), plus the drive there and back for each job
+        const hr = routeHourRate(), jobs = Math.max(1, o.jobs || 1), driveH = 2 * o.miles / SETTINGS.mph;
+        add('Truck hours', units * hr, `${units.toLocaleString('en-US')} hours at ${m2(hr)} a route hour.`);
+        add('Drive to the job', jobs * driveH * hr, `${jobs.toLocaleString('en-US')} ${jobs === 1 ? 'job' : 'jobs'}, ${o.miles.toFixed(1)} miles each way at ${SETTINGS.mph} mph, at ${m2(hr)} a route hour.`, 'estimate');
+        break;
+      }
       const h = o.isCentre ? RATES.centreHr : RATES.driverHr;
       add(o.isCentre ? 'Service Centre time' : 'Driver time', units * h.v,
         `${units.toLocaleString('en-US')} hours at ${m2(h.v)}. ${h.d}.`);

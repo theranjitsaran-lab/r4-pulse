@@ -22,7 +22,7 @@ export const SERVICES = {
   S4: { fam: 'itad', unit: 'device' }, S6: { fam: 'itad', unit: 'device' }, SR: { fam: 'itad', unit: 'device' },
   '01': { fam: 'trip', unit: 'trip' }, '02': { fam: 'handling', unit: 'box' },
   '90': { fam: 'trip', unit: 'trip', rush: true }, '20': { fam: 'handling', unit: 'box' }, '25': { fam: 'handling', unit: 'box' }, '30': { fam: 'handling', unit: 'box' }, '33': { fam: 'handling', unit: 'box' },
-  '55': { fam: 'driver', unit: 'hour' }, S0: { fam: 'driver', unit: 'hour' }, '54': { fam: 'centre', unit: 'hour' },
+  '55': { fam: 'driver', unit: 'hour' }, S0: { fam: 'truck', unit: 'hour' }, '54': { fam: 'centre', unit: 'hour' },
   STO: { fam: 'storage', unit: 'box a month' },
 };
 
@@ -66,6 +66,7 @@ export function lineCost(R, st, { acct = null, lines = [], Z = {} } = {}) {
   else if (svc.fam === 'itad') c = R.costToServe('itad', u, { visits: v, miles: mi });
   else if (svc.fam === 'shredlb') c = R.costToServe('shred', u);
   else if (svc.fam === 'shredbox') c = R.costToServe('shred', u, { unit: 'box' });
+  else if (svc.fam === 'truck') c = R.costToServe('labour', u, { truck: true, jobs: v || 1, miles: st.postcode && Z[st.postcode] ? dist(YARD, Z[st.postcode]) : mi });
   else if (svc.fam === 'driver') c = R.costToServe('labour', u);
   else if (svc.fam === 'centre') c = R.costToServe('labour', u, { isCentre: true });
   else if (svc.fam === 'storage') c = R.costToServe('storage', u / 12);
@@ -110,12 +111,12 @@ export function marginLabel(R, m) {
   return m < 0 ? { cls: 'loss', word: 'Loses money' } : m < R.SETTINGS.marginThin ? { cls: 'loss', word: 'Too thin' } : m < R.SETTINGS.marginHealthy ? { cls: 'thin', word: 'Thin' } : { cls: 'good', word: 'Healthy' };
 }
 
-const ROUTE_LINE = new Set(['Travel to site', 'Truck time']), PLANT_LINE = new Set(['Shred plant', 'Plant throughput']);
+const ROUTE_LINE = new Set(['Travel to site', 'Truck time', 'Drive to the job']), TIME_LINE = new Set(['Time on site', 'Truck hours']), PLANT_LINE = new Set(['Shred plant', 'Plant throughput']);
 // One line's cost cut up for the bar, for one visit (or one unit, for work with no visits)
 export function visitParts(c, per) {
   const sum = pred => c.lines.reduce((t, l) => pred(l[0]) ? t + l[1] : t, 0) / per;
-  const travel = sum(n => ROUTE_LINE.has(n)), time = sum(n => n === 'Time on site'), plant = sum(n => PLANT_LINE.has(n));
-  const rest = c.lines.filter(l => !ROUTE_LINE.has(l[0]) && l[0] !== 'Time on site' && !PLANT_LINE.has(l[0]) && l[1] > 0.005);
+  const travel = sum(n => ROUTE_LINE.has(n)), time = sum(n => TIME_LINE.has(n)), plant = sum(n => PLANT_LINE.has(n));
+  const rest = c.lines.filter(l => !ROUTE_LINE.has(l[0]) && !TIME_LINE.has(l[0]) && !PLANT_LINE.has(l[0]) && l[1] > 0.005);
   return { travel, time, plant, other: c.total / per - travel - time - plant, otherName: rest.length === 1 ? rest[0][0] : 'The work', cost: c.total / per };
 }
 
@@ -153,19 +154,15 @@ export function quoteOptions(R, st, { acct = null, lines = [], Z = {}, near = nu
   return list;
 }
 
-// The three summary points, from computed fields only: every figure as the screen shows it. line goes to Claude;
+// The summary's short points, from computed fields only: every figure as the screen shows it. line goes to Claude;
 // say is the plain version, shown first and whenever Claude is not there or fails the number check.
 export function quoteFacts(o, list, { near = null, st = null, band = null, unit = 'bin', basis = null } = {}) {
   const m2 = v => (v < 0 ? '−' : '') + Fmt.money(Math.abs(v), { dp: Math.abs(v) < 1 ? 3 : 2 }), mk = v => (v < 0 ? '−' : '') + Fmt.money(Math.abs(v), { short: true }), pc = v => (v < 0 ? '−' : '') + Fmt.pct(Math.abs(v));
-  const p = o.parts, how = { dedicated: 'as a vehicle of its own, there and back', nearby: 'on what real route days nearby cost', account: 'on its own route days', yard: 'as its own trip from the yard', ride: 'on what the stop adds to that route', book: "at the book's average stop, until a place is chosen" }[o.c.routeBasis] || 'on the cost model';
-  const place = !!o.c.routeBasis;
-  const parts = [p.travel > .005 ? `getting there ${m2(p.travel)}` : '', p.time > .005 ? `time on site ${m2(p.time)}` : '', p.plant > .005 ? `shredding ${m2(p.plant)}` : '', p.other > .005 ? `${p.otherName.toLowerCase()} ${m2(p.other)}` : ''].filter(Boolean).join(', ');
-  const why = `Costed ${how}: ${parts}, against ${m2(o.rev)} billed, which leaves ${pc(o.m || 0)} est.`;
-  const nearby = o.c.routeBasis === 'account' && near && !near.carries ? 'Costed on its own route days; no other route calls close by regularly.' : near ? (near.carries ? `${routeLabel(near.route)} already calls at ${near.postcode} on ${dayLabel(near.dow)}, ${near.miles < .05 ? 'the same postcode' : `${Fmt.fixed(near.miles, 1)} mi away`}, with ${Fmt.num(near.day ? near.day.customers : 0)} customers on that route.` : `No route calls within ${RIDE_MILES} mi regularly. The nearest that does is ${routeLabel(near.route)} on ${dayLabel(near.dow)}, ${Fmt.fixed(near.miles, 1)} mi away.`) : 'Choose a place to see the routes near it.';
+  const place = !!o.c.routeBasis && o.c.routeBasis !== 'average';
+  const nearby = near ? (near.carries ? `${routeLabel(near.route)} calls ${near.miles < .05 ? 'in this postcode' : `${Fmt.fixed(near.miles, 1)} mi away`} on ${dayLabel(near.dow)}, with ${Fmt.num(near.day ? near.day.customers : 0)} customers that day.` : `No regular route within ${RIDE_MILES} mi. Nearest: ${routeLabel(near.route)} on ${dayLabel(near.dow)}, ${Fmt.fixed(near.miles, 1)} mi.`) : 'Choose a place to see the routes near it.';
   const alt = list.filter(x => x !== o && !x.off && x.year != null).sort((a, b) => b.year - a.year)[0];
-  const better = alt && alt.year > o.year ? `${alt.t}: ${pc(alt.m || 0)} margin, ${mk(alt.year)} a year left, against ${mk(o.year)} this way est.` : 'This is already the strongest of the four est.';
-  const under = st && band && st.price < band.p25 ? ` At ${m2(st.price)} it is also under the ${m2(band.p25)} where the middle half starts.` : '';
-  return [{ key: 'why', line: why, say: why }, ...(place ? [{ key: 'nearby', line: nearby, say: nearby }] : []), { key: 'better', line: better + under, say: better + under }];
+  const better = alt && alt.year > o.year ? `${alt.t}: ${pc(alt.m || 0)} margin, ${mk(alt.year)} a year left est.` : 'This is already the strongest of the four est.';
+  return [...(place ? [{ key: 'nearby', line: nearby, say: nearby }] : []), { key: 'better', line: better, say: better }];
 }
 
 // A labour service's real jobs, from its priced lines: how long a job day runs, and what it bills an hour.
@@ -182,26 +179,27 @@ export function costNotes(R, o, { jobs = null } = {}) {
   if (!o.c) return [];
   const T = R.RATES, S = R.SETTINGS, b = o.c.routeBasis, hr = R.routeHourRate(), m2 = v => Fmt.money(v, { dp: 2 }), m4 = v => Fmt.money(v, { dp: 4 });
   const hourly = b === 'ride' || b === 'yard' || b === 'dedicated';
-  const routeSay = hourly ? `${m2(hr)} a route hour: the ${m2(T.routeDay.v)} route day over ${Fmt.fixed(S.routeHours, 1)} hours (Settings). It pays for the driver, the truck and Routeware.` : `Its share of real route days, by the minutes it adds to the day. A route day costs ${m2(T.routeDay.v)}: the driver, the truck and Routeware.`;
   const NOTE = {
-    'Warehouse space': [`R4's buildings and their upkeep, ${m4(T.facilities.v)} a box a month. It leaves out handling and delivery, which are costed when a box moves.`, 'facilities'],
-    'Warehouse handling': [`Pulling, refiling or moving one box inside the warehouse: ${m2(T.handling.v)} a movement. No truck in this.`, 'handling'],
-    'Box handling': [`Handling the boxes on the job: ${m2(T.handling.v)} a box.`, 'handling'],
-    'Shred plant': [`Running paper through the shredder: ${m4(T.shredPlant.v)} a pound. Provisional: this pool is still over what the books show.`, 'shred_plant'],
-    'Plant throughput': [`Taking devices through the plant: about ${T.lbPerItad.v} lb a unit at ${m4(T.shredPlant.v)} a pound.`, 'shred_plant'],
-    'Travel to site': [`${hourly ? 'There and back at ' + S.mph + ' mph. ' : ''}${o.c.topUp > 0 ? `Includes ${m2(o.c.topUp)} to reach the ${Fmt.fixed(S.dedicatedMinHours, 1)} hours a dedicated vehicle is costed at, at the least (Settings). ` : ''}${routeSay}`, 'route_day'],
-    'Truck time': [routeSay, 'route_day'],
-    'Time on site': [`The time spent at the customer${hourly ? `, at ${m2(hr)} a route hour` : ', at what a minute of that route day costs'}. Pre-filled at ${S.stopMin} minutes a stop and ${S.serviceMin} a service, unless changed above.`, 'route_day'],
-    'Driver time': [`${m2(T.driverHr.v)} is one driver's pay an hour with employer costs, from ADP. It leaves out the truck, fuel, the shredder and the drive to the job, so a truck job reads better than it is.`, null],
-    'Service Centre time': [`${m2(T.centreHr.v)} is one service-centre person's pay an hour with employer costs, from ADP. No truck or travel in this.`, null],
+    'Warehouse space': [`${m4(T.facilities.v)} a box a month. No handling or delivery.`, 'facilities'],
+    'Warehouse handling': [`${m2(T.handling.v)} a movement. No truck.`, 'handling'],
+    'Box handling': [`${m2(T.handling.v)} a box.`, 'handling'],
+    'Shred plant': [`${m4(T.shredPlant.v)} a pound.`, 'shred_plant'],
+    'Plant throughput': [`About ${T.lbPerItad.v} lb a unit at ${m4(T.shredPlant.v)} a pound.`, 'shred_plant'],
+    'Travel to site': [o.c.topUp > 0 ? `Tops up to the ${Fmt.fixed(S.dedicatedMinHours, 1)} hours a dedicated vehicle costs at least.` : hourly ? `There and back at ${m2(hr)} a route hour.` : 'Its share of real route days.', 'route_day'],
+    'Truck time': ['Its share of real route days.', 'route_day'],
+    'Time on site': [hourly ? `At ${m2(hr)} a route hour.` : `At what a minute of the route day costs.`, 'route_day'],
+    'Truck hours': [`${m2(hr)} a route hour: driver, truck and Routeware.`, 'route_day'],
+    'Drive to the job': [`There and back at ${m2(hr)} a route hour.`, 'route_day'],
+    'Driver time': [`${m2(T.driverHr.v)} an hour: a driver's pay with employer costs. No truck or travel.`, null],
+    'Service Centre time': [`${m2(T.centreHr.v)} an hour: pay with employer costs. No truck or travel.`, null],
   };
   return o.c.lines.filter(l => l[1] > 0.005).map(l => {
     const [say, pool] = NOTE[l[0]] || [String(l[2]).split('. ')[0] + '.', null], amount = l[1] / o.per;
-    const shown = l[0] === 'Time on site' && o.c.lines.some(x => ROUTE_LINE.has(x[0]));
-    const all = pool && !shown && R.poolBreakdown ? R.poolBreakdown(pool) : [], top = all.slice(0, 3), rest = all.slice(3).reduce((t, x) => t + x.share, 0);
+    const all = pool && R.poolBreakdown ? R.poolBreakdown(pool) : [], top = all.slice(0, 3), rest = all.slice(3).reduce((t, x) => t + x.share, 0);
     const parts = top.map(x => ({ name: x.name, share: x.share, amount: amount * x.share }));
     if (rest > 0.005) parts.push({ name: 'Everything else', share: rest, amount: amount * rest });
-    const job = (l[0] === 'Driver time' || l[0] === 'Service Centre time') && jobs ? ` Over twelve months, ${Fmt.num(jobs.accounts)} accounts: a job day runs a median ${Fmt.fixed(jobs.median, 1)} hours, the shortest ${Fmt.fixed(jobs.shortest, 1)}, billed about ${m2(jobs.perHour)} an hour. The data records no minimum charge.` : '';
-    return { name: l[0], amount, say: say + job, parts, est: !!l[3] };
+    const job = (l[0] === 'Driver time' || l[0] === 'Service Centre time' || l[0] === 'Truck hours') && jobs ? ` A job day runs about ${Fmt.fixed(jobs.median, 1)} hours, billed about ${m2(jobs.perHour)} an hour.` : '';
+    const kind = ROUTE_LINE.has(l[0]) ? 'q-s-t' : TIME_LINE.has(l[0]) ? 'q-s-s' : PLANT_LINE.has(l[0]) ? 'q-s-p' : 'q-s-o';
+    return { name: l[0], amount, say: say + job, parts, kind, est: !!l[3] };
   });
 }

@@ -119,12 +119,16 @@ test('Quote: real route days near it, never the whole average visit; four ways, 
     assert.equal(note.parts[0].name, '1301 W. 35th');
     assert.ok(Math.abs(note.parts.reduce((t, x) => t + x.amount, 0) - note.amount) < 1e-9);
     assert.ok(Math.abs(note.amount - R.RATES.facilities.v) < 1e-9, 'a box-month at the facilities rate');
+    // the shred truck: its hours at the route-hour rate, plus the drive; not a driver's pay alone
+    const hr = R.routeHourRate(), truck = Q.lineCost(R, { code: 'S0', units: 3, visits: 1, postcode: null, level1: null, miles: 10 }, { Z });
+    assert.ok(Math.abs(truck.total - (3 * hr + 2 * 10 / R.SETTINGS.mph * hr)) < 1e-6, 'three truck hours and one drive of ten miles each way');
+    assert.ok(!truck.lines.some(l => l[0] === 'Driver time'));
     const sheet = Q.quoteFacts(list[0], list, { near, st, band: { p25: 85, p75: 111.77 } });
-    assert.deepEqual(sheet.map(f => f.key), ['why', 'nearby', 'better']);
+    assert.deepEqual(sheet.map(f => f.key), ['nearby', 'better']);
     assert.ok(S.checkNumbers(sheet.map(f => f.say).join(' '), sheet).ok);
     assert.equal(S.checkNumbers('It keeps $999 a visit.', sheet).ok, false);
     assert.ok(S.parseQuote(sheet.map(f => '[' + f.key + '] ' + f.say).join(String.fromCharCode(10)), sheet));
-    assert.equal(S.parseQuote('[why] one line only', sheet), null);
+    assert.equal(S.parseQuote('[nearby] one line only', sheet), null);
   } finally { R.setRouteCosts(keep); }
 });
 
