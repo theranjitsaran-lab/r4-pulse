@@ -50,14 +50,15 @@ export function ragKey(R) {
   return `<span class="rag static g"><i></i>Healthy, ${p(S.marginHealthy)} or more</span><span class="rag static a"><i></i>Normal, ${p(S.marginThin)} or more</span><span class="rag static r"><i></i>Thin, under ${p(S.marginThin)}</span>`;
 }
 
-// Twelve months as bars on one axis, an own-run line if given. rows: [{ m: 'YYYY-MM-01', v, attrs }]
+// Twelve months as bars on one axis, an own-run line if given. rows: [{ m: 'YYYY-MM-01', v, attrs, prev }]; prev marks the same month a year before
 const short = m => new Date(m + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' });
-export function barsSvg(rows, { ref = null, refLabel = '', est = false, height = 140, fmt = v => Fmt.money(v, { short: true }), label = '' } = {}) {
-  const W = 560, H = height, base = H - 18, top = 12, m = Math.max(1, ...rows.map(r => r.v), ref || 0), step = (W - 34) / rows.length, bw = Math.min(24, step * .62), y = v => base - Math.max(0, v) / m * (base - top);
-  let g = `<line class="b-ax" x1="34" x2="${W}" y1="${base}" y2="${base}"/><text class="b-t" x="30" y="${top + 4}" text-anchor="end">${esc(fmt(m))}</text><text class="b-t" x="30" y="${base + 3}" text-anchor="end">$0</text>`;
+export function barsSvg(rows, { ref = null, refLabel = '', est = false, height = 140, fmt = v => Fmt.money(v, { short: true }), label = '', tip = null } = {}) {
+  const W = 560, H = height, base = H - 18, top = 12, m = Math.max(1, ...rows.map(r => Math.max(r.v, r.prev || 0)), ref || 0), step = (W - 34) / rows.length, bw = Math.min(24, step * .62), y = v => base - Math.max(0, v) / m * (base - top);
+  let g = `<line class="b-ax" x1="34" x2="${W}" y1="${base}" y2="${base}"/><text class="b-t" x="30" y="${top + 4}" text-anchor="end">${esc(fmt(m))}</text><text class="b-t" x="30" y="${base + 3}" text-anchor="end">${esc(fmt(0))}</text>`;
   rows.forEach((r, i) => {
     const x = 34 + i * step + (step - bw) / 2, h = Math.max(1, base - y(r.v));
-    g += `<rect class="${i === rows.length - 1 ? (est ? 'e' : 'f') : 'c'}" x="${x.toFixed(1)}" y="${(base - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" style="--i:${i}" ${r.attrs || ''}><title>${esc(short(r.m))}: ${esc(Fmt.money(r.v))}</title></rect>`;
+    g += `<rect class="${i === rows.length - 1 ? (est ? 'e' : 'f') : 'c'}" x="${x.toFixed(1)}" y="${(base - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" style="--i:${i}" ${r.attrs || ''}><title>${esc(short(r.m))}: ${esc(tip ? tip(r) : Fmt.money(r.v))}</title></rect>`;
+    if (r.prev != null) g += `<line class="b-prev" x1="${(x - 2).toFixed(1)}" x2="${(x + bw + 2).toFixed(1)}" y1="${y(r.prev).toFixed(1)}" y2="${y(r.prev).toFixed(1)}" style="--i:${i}"/>`;
     if (i % 2 === 0 || i === rows.length - 1) g += `<text class="b-t" x="${(x + bw / 2).toFixed(1)}" y="${H - 4}" text-anchor="middle">${esc(short(r.m))}</text>`;
   });
   if (ref != null) g += `<line class="b-ref" x1="34" x2="${W}" y1="${y(ref).toFixed(1)}" y2="${y(ref).toFixed(1)}"/><text class="b-rl" x="38" y="${(y(ref) - 4).toFixed(1)}">${esc(refLabel)}</text>`;

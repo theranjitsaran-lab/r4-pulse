@@ -1,0 +1,5411 @@
+{
+ "snapshotAt": "2026-11-03T13:18:53.458Z",
+ "data": [
+  {
+   "level1": 1,
+   "postcode": "60602",
+   "revenue": 522.02,
+   "pounds": 5663
+  },
+  {
+   "level1": 50,
+   "postcode": "60601",
+   "revenue": 1239.0499999999997,
+   "pounds": 1265
+  },
+  {
+   "level1": 55,
+   "postcode": "60609",
+   "revenue": 1473.94,
+   "pounds": 2765
+  },
+  {
+   "level1": 70,
+   "postcode": "60185",
+   "revenue": 672.6400000000001,
+   "pounds": 14815
+  },
+  {
+   "level1": 70,
+   "postcode": "60525",
+   "revenue": 2714.2200000000003,
+   "pounds": 5362
+  },
+  {
+   "level1": 78,
+   "postcode": "60130",
+   "revenue": 259.24,
+   "pounds": 340
+  },
+  {
+   "level1": 78,
+   "postcode": "60525",
+   "revenue": 322.95000000000005,
+   "pounds": 425
+  },
+  {
+   "level1": 197,
+   "postcode": "60018",
+   "revenue": 170.93555555555554,
+   "pounds": 115
+  },
+  {
+   "level1": 197,
+   "postcode": "60463",
+   "revenue": 85.46777777777778,
+   "pounds": 57.5
+  },
+  {
+   "level1": 197,
+   "postcode": "60601",
+   "revenue": 2820.436666666667,
+   "pounds": 1897.4999999999998
+  },
+  {
+   "level1": 207,
+   "postcode": "60603",
+   "revenue": 783.83,
+   "pounds": 1173
+  },
+  {
+   "level1": 225,
+   "postcode": "60601",
+   "revenue": 1328.85,
+   "pounds": 2753
+  },
+  {
+   "level1": 434,
+   "postcode": "60007",
+   "revenue": 1059.8700000000001,
+   "pounds": 1052
+  },
+  {
+   "level1": 493,
+   "postcode": "60606",
+   "revenue": 853.6600000000001,
+   "pounds": 1367
+  },
+  {
+   "level1": 941,
+   "postcode": "60602",
+   "revenue": 2791.72,
+   "pounds": 4990
+  },
+  {
+   "level1": 947,
+   "postcode": "60606",
+   "revenue": 4841.92,
+   "pounds": 6396
+  },
+  {
+   "level1": 1078,
+   "postcode": "60440",
+   "revenue": 40.26,
+   "pounds": 160
+  },
+  {
+   "level1": 1078,
+   "postcode": "60532",
+   "revenue": 10935.793812949643,
+   "pounds": 26505.21043165469
+  },
+  {
+   "level1": 1078,
+   "postcode": "60563",
+   "revenue": 19.77539568345324,
+   "pounds": 47.929856115107924
+  },
+  {
+   "level1": 1078,
+   "postcode": "60606",
+   "revenue": 39.55079136690647,
+   "pounds": 95.85971223021586
+  },
+  {
+   "level1": 1080,
+   "postcode": "60601",
+   "revenue": 2249.38,
+   "pounds": 2134
+  },
+  {
+   "level1": 1323,
+   "postcode": "60611",
+   "revenue": 95.2,
+   "pounds": 177
+  },
+  {
+   "level1": 1327,
+   "postcode": "60606",
+   "revenue": 644.18,
+   "pounds": 908
+  },
+  {
+   "level1": 1490,
+   "postcode": "60053",
+   "revenue": 755.48,
+   "pounds": 420
+  },
+  {
+   "level1": 1619,
+   "postcode": "60613",
+   "revenue": 258.15999999999997,
+   "pounds": 100
+  },
+  {
+   "level1": 1732,
+   "postcode": "60611",
+   "revenue": 178,
+   "pounds": 204
+  },
+  {
+   "level1": 1754,
+   "postcode": "60091",
+   "revenue": 67.77,
+   "pounds": 54149
+  },
+  {
+   "level1": 1758,
+   "postcode": "60660",
+   "revenue": 28933.539999999997,
+   "pounds": 5280
+  },
+  {
+   "level1": 1779,
+   "postcode": "60606",
+   "revenue": 17983.66,
+   "pounds": 10898
+  },
+  {
+   "level1": 1779,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 419
+  },
+  {
+   "level1": 1888,
+   "postcode": "60610",
+   "revenue": 11508.14,
+   "pounds": 163
+  },
+  {
+   "level1": 2345,
+   "postcode": "60606",
+   "revenue": 3275.370000000001,
+   "pounds": 8372
+  },
+  {
+   "level1": 2906,
+   "postcode": "60610",
+   "revenue": 112.81,
+   "pounds": 125
+  },
+  {
+   "level1": 2920,
+   "postcode": "60661",
+   "revenue": 91.38,
+   "pounds": 251
+  },
+  {
+   "level1": 2924,
+   "postcode": "60477",
+   "revenue": 12826,
+   "pounds": 2698
+  },
+  {
+   "level1": 2940,
+   "postcode": "60601",
+   "revenue": 1009.93,
+   "pounds": 2209
+  },
+  {
+   "level1": 2948,
+   "postcode": "60126",
+   "revenue": 232.78129032258065,
+   "pounds": 114.96774193548386
+  },
+  {
+   "level1": 2948,
+   "postcode": "60142",
+   "revenue": 136.27075596816962,
+   "pounds": 29.44827586206897
+  },
+  {
+   "level1": 2948,
+   "postcode": "60192",
+   "revenue": 1090.1660477453568,
+   "pounds": 235.58620689655174
+  },
+  {
+   "level1": 2948,
+   "postcode": "60208",
+   "revenue": 349.1719354838709,
+   "pounds": 172.45161290322585
+  },
+  {
+   "level1": 2948,
+   "postcode": "60462",
+   "revenue": 136.27075596816968,
+   "pounds": 29.448275862068957
+  },
+  {
+   "level1": 2948,
+   "postcode": "60463",
+   "revenue": 136.27075596816968,
+   "pounds": 29.448275862068954
+  },
+  {
+   "level1": 2948,
+   "postcode": "60523",
+   "revenue": 1978.640967741935,
+   "pounds": 977.2258064516128
+  },
+  {
+   "level1": 2948,
+   "postcode": "60607",
+   "revenue": 101112.90092838209,
+   "pounds": 21850.620689655185
+  },
+  {
+   "level1": 2948,
+   "postcode": "60617",
+   "revenue": 116.39064516129031,
+   "pounds": 57.483870967741936
+  },
+  {
+   "level1": 2948,
+   "postcode": "60628",
+   "revenue": 136.27075596816962,
+   "pounds": 29.44827586206897
+  },
+  {
+   "level1": 2948,
+   "postcode": "60657",
+   "revenue": 116.39064516129032,
+   "pounds": 57.483870967741936
+  },
+  {
+   "level1": 2948,
+   "postcode": "60660",
+   "revenue": 814.7345161290325,
+   "pounds": 402.3870967741934
+  },
+  {
+   "level1": 2948,
+   "postcode": null,
+   "revenue": 122.63,
+   "pounds": 80
+  },
+  {
+   "level1": 2972,
+   "postcode": null,
+   "revenue": 1,
+   "pounds": 1118
+  },
+  {
+   "level1": 3041,
+   "postcode": "60601",
+   "revenue": 289.8,
+   "pounds": 430
+  },
+  {
+   "level1": 3315,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 4082
+  },
+  {
+   "level1": 3354,
+   "postcode": "60606",
+   "revenue": 442.28000000000003,
+   "pounds": 721
+  },
+  {
+   "level1": 3507,
+   "postcode": "60004",
+   "revenue": 12160.719999999996,
+   "pounds": 4750
+  },
+  {
+   "level1": 3507,
+   "postcode": "60101",
+   "revenue": 8142.570000000001,
+   "pounds": 3190
+  },
+  {
+   "level1": 3507,
+   "postcode": "60160",
+   "revenue": 2218.45,
+   "pounds": 2330
+  },
+  {
+   "level1": 3507,
+   "postcode": "60202",
+   "revenue": 7922.760000000002,
+   "pounds": 4130
+  },
+  {
+   "level1": 3507,
+   "postcode": "60406",
+   "revenue": 12433.759999999998,
+   "pounds": 5870
+  },
+  {
+   "level1": 3507,
+   "postcode": "60411",
+   "revenue": 2132.5400000000004,
+   "pounds": 1742
+  },
+  {
+   "level1": 3507,
+   "postcode": "60501",
+   "revenue": 1814.8500000000001,
+   "pounds": 1600
+  },
+  {
+   "level1": 3507,
+   "postcode": "60608",
+   "revenue": 17383.809999999987,
+   "pounds": 7435
+  },
+  {
+   "level1": 3507,
+   "postcode": "60609",
+   "revenue": 11876.839999999998,
+   "pounds": 4802
+  },
+  {
+   "level1": 3507,
+   "postcode": "60617",
+   "revenue": 3939.7500000000005,
+   "pounds": 2400
+  },
+  {
+   "level1": 3507,
+   "postcode": "60620",
+   "revenue": 738.81,
+   "pounds": 620
+  },
+  {
+   "level1": 3507,
+   "postcode": "60623",
+   "revenue": 4123.380000000001,
+   "pounds": 2340
+  },
+  {
+   "level1": 3507,
+   "postcode": "60624",
+   "revenue": 3016.2599999999998,
+   "pounds": 2446
+  },
+  {
+   "level1": 3507,
+   "postcode": "60626",
+   "revenue": 2483.28,
+   "pounds": 1200
+  },
+  {
+   "level1": 3507,
+   "postcode": "60629",
+   "revenue": 2617.4000000000005,
+   "pounds": 2000
+  },
+  {
+   "level1": 3507,
+   "postcode": "60632",
+   "revenue": 2507.79,
+   "pounds": 2463
+  },
+  {
+   "level1": 3507,
+   "postcode": "60637",
+   "revenue": 675.92,
+   "pounds": 260
+  },
+  {
+   "level1": 3507,
+   "postcode": "60638",
+   "revenue": 10277.760000000002,
+   "pounds": 4430
+  },
+  {
+   "level1": 3507,
+   "postcode": "60639",
+   "revenue": 2604.44,
+   "pounds": 930
+  },
+  {
+   "level1": 3507,
+   "postcode": "60647",
+   "revenue": 4230.47,
+   "pounds": 1540
+  },
+  {
+   "level1": 3507,
+   "postcode": "60651",
+   "revenue": 1450.49,
+   "pounds": 680
+  },
+  {
+   "level1": 3507,
+   "postcode": "60804",
+   "revenue": 2663.41,
+   "pounds": 2510
+  },
+  {
+   "level1": 3507,
+   "postcode": null,
+   "revenue": 51326.71000000003,
+   "pounds": 24223
+  },
+  {
+   "level1": 3520,
+   "postcode": "60601",
+   "revenue": 1120.8899999999999,
+   "pounds": 766
+  },
+  {
+   "level1": 3554,
+   "postcode": "60532",
+   "revenue": 549.7377777777778,
+   "pounds": 727.1111111111111
+  },
+  {
+   "level1": 3554,
+   "postcode": "60661",
+   "revenue": 687.1722222222222,
+   "pounds": 908.8888888888889
+  },
+  {
+   "level1": 3580,
+   "postcode": "60607",
+   "revenue": 0,
+   "pounds": 35347
+  },
+  {
+   "level1": 3628,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 0
+  },
+  {
+   "level1": 3849,
+   "postcode": "60606",
+   "revenue": 3255.08,
+   "pounds": 3618
+  },
+  {
+   "level1": 4089,
+   "postcode": "46307",
+   "revenue": 3367.255555555556,
+   "pounds": 3395.1851851851848
+  },
+  {
+   "level1": 4089,
+   "postcode": "60603",
+   "revenue": 5724.334444444445,
+   "pounds": 5771.814814814816
+  },
+  {
+   "level1": 4089,
+   "postcode": null,
+   "revenue": 1593.4499999999998,
+   "pounds": 0
+  },
+  {
+   "level1": 4418,
+   "postcode": "60603",
+   "revenue": 1498.1,
+   "pounds": 450
+  },
+  {
+   "level1": 4418,
+   "postcode": "60657",
+   "revenue": 108.86,
+   "pounds": 175
+  },
+  {
+   "level1": 4426,
+   "postcode": "60601",
+   "revenue": 294.042,
+   "pounds": 534.3
+  },
+  {
+   "level1": 4426,
+   "postcode": "60602",
+   "revenue": 294.042,
+   "pounds": 534.3
+  },
+  {
+   "level1": 4426,
+   "postcode": "60606",
+   "revenue": 392.056,
+   "pounds": 712.4
+  },
+  {
+   "level1": 4426,
+   "postcode": null,
+   "revenue": 190.2,
+   "pounds": 67
+  },
+  {
+   "level1": 4917,
+   "postcode": "60603",
+   "revenue": 1061.53,
+   "pounds": 580
+  },
+  {
+   "level1": 4928,
+   "postcode": "60603",
+   "revenue": 221.5,
+   "pounds": 513
+  },
+  {
+   "level1": 5021,
+   "postcode": "60301",
+   "revenue": 369.57000000000005,
+   "pounds": 180
+  },
+  {
+   "level1": 5035,
+   "postcode": "60173",
+   "revenue": 3614.6400000000003,
+   "pounds": 2251
+  },
+  {
+   "level1": 5035,
+   "postcode": null,
+   "revenue": 1466.3400000000001,
+   "pounds": 1622
+  },
+  {
+   "level1": 5064,
+   "postcode": "60602",
+   "revenue": 159.23,
+   "pounds": 282
+  },
+  {
+   "level1": 5094,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1874
+  },
+  {
+   "level1": 5152,
+   "postcode": "60611",
+   "revenue": 93.5,
+   "pounds": 199
+  },
+  {
+   "level1": 5174,
+   "postcode": "60602",
+   "revenue": 5536.840000000001,
+   "pounds": 2840
+  },
+  {
+   "level1": 5201,
+   "postcode": "60604",
+   "revenue": 3706.296,
+   "pounds": 5875.200000000001
+  },
+  {
+   "level1": 5201,
+   "postcode": "60606",
+   "revenue": 5559.443999999999,
+   "pounds": 8812.800000000001
+  },
+  {
+   "level1": 5244,
+   "postcode": "60804",
+   "revenue": 587.61,
+   "pounds": 18626
+  },
+  {
+   "level1": 5255,
+   "postcode": "60607",
+   "revenue": 278.26,
+   "pounds": 319
+  },
+  {
+   "level1": 5280,
+   "postcode": "60035",
+   "revenue": 194.54761904761904,
+   "pounds": 535.4761904761905
+  },
+  {
+   "level1": 5280,
+   "postcode": "60044",
+   "revenue": 3890.9523809523807,
+   "pounds": 10709.523809523811
+  },
+  {
+   "level1": 5292,
+   "postcode": "60060",
+   "revenue": 0,
+   "pounds": 0
+  },
+  {
+   "level1": 5292,
+   "postcode": "60632",
+   "revenue": 0,
+   "pounds": 0
+  },
+  {
+   "level1": 5292,
+   "postcode": "60643",
+   "revenue": 0,
+   "pounds": 0
+  },
+  {
+   "level1": 5292,
+   "postcode": "60646",
+   "revenue": 0,
+   "pounds": 0
+  },
+  {
+   "level1": 5292,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 0
+  },
+  {
+   "level1": 5326,
+   "postcode": "60603",
+   "revenue": 13886.929999999986,
+   "pounds": 18277
+  },
+  {
+   "level1": 5443,
+   "postcode": "60610",
+   "revenue": 476.61,
+   "pounds": 320
+  },
+  {
+   "level1": 5590,
+   "postcode": "60559",
+   "revenue": 1407.31,
+   "pounds": 3148
+  },
+  {
+   "level1": 5642,
+   "postcode": "60654",
+   "revenue": 513.01,
+   "pounds": 280
+  },
+  {
+   "level1": 5682,
+   "postcode": null,
+   "revenue": 1540.42,
+   "pounds": 2812
+  },
+  {
+   "level1": 5687,
+   "postcode": "46321",
+   "revenue": 25.14,
+   "pounds": 86
+  },
+  {
+   "level1": 5687,
+   "postcode": "46324",
+   "revenue": 186.78,
+   "pounds": 323
+  },
+  {
+   "level1": 5687,
+   "postcode": "46406",
+   "revenue": 225,
+   "pounds": 277
+  },
+  {
+   "level1": 5687,
+   "postcode": "60018",
+   "revenue": 93.39,
+   "pounds": 312
+  },
+  {
+   "level1": 5687,
+   "postcode": "60067",
+   "revenue": 106.32,
+   "pounds": 274.5
+  },
+  {
+   "level1": 5687,
+   "postcode": "60137",
+   "revenue": 93.39,
+   "pounds": 125
+  },
+  {
+   "level1": 5687,
+   "postcode": "60201",
+   "revenue": 100.56,
+   "pounds": 121
+  },
+  {
+   "level1": 5687,
+   "postcode": "60302",
+   "revenue": 0,
+   "pounds": 11766
+  },
+  {
+   "level1": 5687,
+   "postcode": "60402",
+   "revenue": 79.02,
+   "pounds": 182
+  },
+  {
+   "level1": 5687,
+   "postcode": "60426",
+   "revenue": 170,
+   "pounds": 574
+  },
+  {
+   "level1": 5687,
+   "postcode": "60443",
+   "revenue": 532.8,
+   "pounds": 0
+  },
+  {
+   "level1": 5687,
+   "postcode": "60513",
+   "revenue": 708.55,
+   "pounds": 1415
+  },
+  {
+   "level1": 5687,
+   "postcode": "60515",
+   "revenue": 93.39,
+   "pounds": 234
+  },
+  {
+   "level1": 5687,
+   "postcode": "60523",
+   "revenue": 172.41,
+   "pounds": 603
+  },
+  {
+   "level1": 5687,
+   "postcode": "60563",
+   "revenue": 106.32,
+   "pounds": 212
+  },
+  {
+   "level1": 5687,
+   "postcode": "60601",
+   "revenue": 1329.3,
+   "pounds": 821
+  },
+  {
+   "level1": 5687,
+   "postcode": "60604",
+   "revenue": 64.65,
+   "pounds": 139
+  },
+  {
+   "level1": 5687,
+   "postcode": "60605",
+   "revenue": 2877.3900000000003,
+   "pounds": 116
+  },
+  {
+   "level1": 5687,
+   "postcode": "60606",
+   "revenue": 50.28,
+   "pounds": 142
+  },
+  {
+   "level1": 5687,
+   "postcode": "60607",
+   "revenue": 64.65,
+   "pounds": 100
+  },
+  {
+   "level1": 5687,
+   "postcode": "60608",
+   "revenue": 275.85,
+   "pounds": 543
+  },
+  {
+   "level1": 5687,
+   "postcode": "60609",
+   "revenue": 367.8,
+   "pounds": 670
+  },
+  {
+   "level1": 5687,
+   "postcode": "60611",
+   "revenue": 2475.39,
+   "pounds": 3371
+  },
+  {
+   "level1": 5687,
+   "postcode": "60615",
+   "revenue": 50.28,
+   "pounds": 40
+  },
+  {
+   "level1": 5687,
+   "postcode": "60618",
+   "revenue": 186.78,
+   "pounds": 335
+  },
+  {
+   "level1": 5687,
+   "postcode": "60631",
+   "revenue": 84.76,
+   "pounds": 317
+  },
+  {
+   "level1": 5687,
+   "postcode": "60634",
+   "revenue": 85,
+   "pounds": 179
+  },
+  {
+   "level1": 5687,
+   "postcode": "60640",
+   "revenue": 266.4,
+   "pounds": 0
+  },
+  {
+   "level1": 5687,
+   "postcode": "60652",
+   "revenue": 106.32,
+   "pounds": 91
+  },
+  {
+   "level1": 5687,
+   "postcode": "60654",
+   "revenue": 106.32,
+   "pounds": 274.5
+  },
+  {
+   "level1": 5687,
+   "postcode": "60657",
+   "revenue": 353.4,
+   "pounds": 171
+  },
+  {
+   "level1": 5687,
+   "postcode": null,
+   "revenue": 2024.0400000000002,
+   "pounds": 7252
+  },
+  {
+   "level1": 5858,
+   "postcode": "60616",
+   "revenue": 16886.07,
+   "pounds": 29110
+  },
+  {
+   "level1": 5957,
+   "postcode": "60631",
+   "revenue": 1938.3500000000001,
+   "pounds": 938
+  },
+  {
+   "level1": 5993,
+   "postcode": "60604",
+   "revenue": 6381.3216393442635,
+   "pounds": 4209.3442622950815
+  },
+  {
+   "level1": 5993,
+   "postcode": "60656",
+   "revenue": 827.2083606557379,
+   "pounds": 545.6557377049181
+  },
+  {
+   "level1": 6008,
+   "postcode": "60607",
+   "revenue": 9153.720000000001,
+   "pounds": 6812
+  },
+  {
+   "level1": 6032,
+   "postcode": "60534",
+   "revenue": 8225.75,
+   "pounds": 3004
+  },
+  {
+   "level1": 6090,
+   "postcode": "60606",
+   "revenue": 274.19,
+   "pounds": 0
+  },
+  {
+   "level1": 6094,
+   "postcode": "60189",
+   "revenue": 52,
+   "pounds": 80
+  },
+  {
+   "level1": 6094,
+   "postcode": "60616",
+   "revenue": 4135,
+   "pounds": 3432
+  },
+  {
+   "level1": 6094,
+   "postcode": "60661",
+   "revenue": 276,
+   "pounds": 960
+  },
+  {
+   "level1": 6094,
+   "postcode": null,
+   "revenue": 153,
+   "pounds": 265
+  },
+  {
+   "level1": 6107,
+   "postcode": "60602",
+   "revenue": 311.0153846153846,
+   "pounds": 230.76923076923077
+  },
+  {
+   "level1": 6107,
+   "postcode": "60603",
+   "revenue": 497.6246153846154,
+   "pounds": 369.2307692307693
+  },
+  {
+   "level1": 6319,
+   "postcode": "60563",
+   "revenue": 492.00800000000004,
+   "pounds": 544
+  },
+  {
+   "level1": 6319,
+   "postcode": "60564",
+   "revenue": 123.00200000000001,
+   "pounds": 136
+  },
+  {
+   "level1": 6344,
+   "postcode": "60604",
+   "revenue": 2772.4866666666676,
+   "pounds": 5661.466666666665
+  },
+  {
+   "level1": 6344,
+   "postcode": "60614",
+   "revenue": 3351.233333333334,
+   "pounds": 7312.533333333333
+  },
+  {
+   "level1": 6344,
+   "postcode": null,
+   "revenue": 1025.61,
+   "pounds": 1997
+  },
+  {
+   "level1": 6365,
+   "postcode": "60601",
+   "revenue": 1540.48,
+   "pounds": 1280
+  },
+  {
+   "level1": 6380,
+   "postcode": "60606",
+   "revenue": 5905.780000000002,
+   "pounds": 11024
+  },
+  {
+   "level1": 6382,
+   "postcode": "60406",
+   "revenue": 159.52666666666673,
+   "pounds": 720.4444444444447
+  },
+  {
+   "level1": 6382,
+   "postcode": "60605",
+   "revenue": 79.76333333333338,
+   "pounds": 360.2222222222223
+  },
+  {
+   "level1": 6382,
+   "postcode": "60607",
+   "revenue": 79.76333333333338,
+   "pounds": 360.22222222222223
+  },
+  {
+   "level1": 6382,
+   "postcode": "60622",
+   "revenue": 169.95,
+   "pounds": 432
+  },
+  {
+   "level1": 6382,
+   "postcode": "60628",
+   "revenue": 159.52666666666673,
+   "pounds": 720.4444444444445
+  },
+  {
+   "level1": 6382,
+   "postcode": "60661",
+   "revenue": 3339.0700000000006,
+   "pounds": 14781.666666666668
+  },
+  {
+   "level1": 6479,
+   "postcode": "60616",
+   "revenue": 2164.89,
+   "pounds": 6075
+  },
+  {
+   "level1": 6505,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 457
+  },
+  {
+   "level1": 6517,
+   "postcode": "60604",
+   "revenue": 241.96,
+   "pounds": 180
+  },
+  {
+   "level1": 6526,
+   "postcode": "60605",
+   "revenue": 219.38,
+   "pounds": 599
+  },
+  {
+   "level1": 6526,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 85030
+  },
+  {
+   "level1": 6741,
+   "postcode": "60181",
+   "revenue": 372.39,
+   "pounds": 320
+  },
+  {
+   "level1": 6770,
+   "postcode": "60616",
+   "revenue": 295.59000000000003,
+   "pounds": 762
+  },
+  {
+   "level1": 6782,
+   "postcode": "60611",
+   "revenue": 49666.100000000006,
+   "pounds": 17041
+  },
+  {
+   "level1": 6866,
+   "postcode": "60606",
+   "revenue": 11105.6,
+   "pounds": 0
+  },
+  {
+   "level1": 6872,
+   "postcode": "60018",
+   "revenue": 25884.67000000001,
+   "pounds": 15560
+  },
+  {
+   "level1": 6954,
+   "postcode": "60706",
+   "revenue": 3037.95,
+   "pounds": 8015
+  },
+  {
+   "level1": 6964,
+   "postcode": "60446",
+   "revenue": 126.52000000000001,
+   "pounds": 160
+  },
+  {
+   "level1": 6964,
+   "postcode": "60563",
+   "revenue": 1356.8200000000002,
+   "pounds": 380
+  },
+  {
+   "level1": 6964,
+   "postcode": null,
+   "revenue": 648.9300000000001,
+   "pounds": 214
+  },
+  {
+   "level1": 6978,
+   "postcode": "60622",
+   "revenue": 493.34,
+   "pounds": 831
+  },
+  {
+   "level1": 6981,
+   "postcode": "60611",
+   "revenue": 2084.02,
+   "pounds": 660
+  },
+  {
+   "level1": 7001,
+   "postcode": "60201",
+   "revenue": 4951.790357142857,
+   "pounds": 3946.821428571429
+  },
+  {
+   "level1": 7001,
+   "postcode": "60654",
+   "revenue": 183.39964285714285,
+   "pounds": 146.17857142857144
+  },
+  {
+   "level1": 7041,
+   "postcode": "60606",
+   "revenue": 2619.44,
+   "pounds": 840
+  },
+  {
+   "level1": 7050,
+   "postcode": "60607",
+   "revenue": 403.45,
+   "pounds": 340
+  },
+  {
+   "level1": 7056,
+   "postcode": "60654",
+   "revenue": 13370.85,
+   "pounds": 23591
+  },
+  {
+   "level1": 7112,
+   "postcode": "60611",
+   "revenue": 65.88,
+   "pounds": 290
+  },
+  {
+   "level1": 7164,
+   "postcode": "53158",
+   "revenue": 256.1857142857143,
+   "pounds": 400.00000000000006
+  },
+  {
+   "level1": 7164,
+   "postcode": "60661",
+   "revenue": 102.47428571428571,
+   "pounds": 160
+  },
+  {
+   "level1": 7808,
+   "postcode": "60606",
+   "revenue": 20276.809999999998,
+   "pounds": 3536
+  },
+  {
+   "level1": 7908,
+   "postcode": "60185",
+   "revenue": 28919.58999999999,
+   "pounds": 11230
+  },
+  {
+   "level1": 7944,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 158
+  },
+  {
+   "level1": 7985,
+   "postcode": "60411",
+   "revenue": 373.85,
+   "pounds": 495
+  },
+  {
+   "level1": 7992,
+   "postcode": null,
+   "revenue": 125.91,
+   "pounds": 80
+  },
+  {
+   "level1": 7997,
+   "postcode": "60601",
+   "revenue": 28912.691666666666,
+   "pounds": 720
+  },
+  {
+   "level1": 7997,
+   "postcode": "60641",
+   "revenue": 5782.538333333333,
+   "pounds": 144
+  },
+  {
+   "level1": 8021,
+   "postcode": "60606",
+   "revenue": 832.27,
+   "pounds": 1570
+  },
+  {
+   "level1": 8126,
+   "postcode": "60527",
+   "revenue": 1827.19,
+   "pounds": 3629
+  },
+  {
+   "level1": 8133,
+   "postcode": "60606",
+   "revenue": 424.26,
+   "pounds": 1992
+  },
+  {
+   "level1": 8153,
+   "postcode": "60602",
+   "revenue": 294.5,
+   "pounds": 752
+  },
+  {
+   "level1": 8153,
+   "postcode": "60620",
+   "revenue": 1068,
+   "pounds": 4044
+  },
+  {
+   "level1": 8178,
+   "postcode": "60601",
+   "revenue": 2105.83,
+   "pounds": 1883
+  },
+  {
+   "level1": 8250,
+   "postcode": "60602",
+   "revenue": 950.11,
+   "pounds": 1531
+  },
+  {
+   "level1": 8257,
+   "postcode": "60654",
+   "revenue": 315.65999999999997,
+   "pounds": 477
+  },
+  {
+   "level1": 8379,
+   "postcode": "60603",
+   "revenue": 614.82,
+   "pounds": 480
+  },
+  {
+   "level1": 8385,
+   "postcode": "60126",
+   "revenue": 0,
+   "pounds": 804
+  },
+  {
+   "level1": 8389,
+   "postcode": "60606",
+   "revenue": 390,
+   "pounds": 2633
+  },
+  {
+   "level1": 8394,
+   "postcode": "60606",
+   "revenue": 951.67,
+   "pounds": 2732
+  },
+  {
+   "level1": 8415,
+   "postcode": "60602",
+   "revenue": 171,
+   "pounds": 0
+  },
+  {
+   "level1": 8433,
+   "postcode": "60601",
+   "revenue": 719.05,
+   "pounds": 460
+  },
+  {
+   "level1": 8460,
+   "postcode": "60523",
+   "revenue": 93.78166666666665,
+   "pounds": 59.999999999999986
+  },
+  {
+   "level1": 8460,
+   "postcode": "60606",
+   "revenue": 468.9083333333334,
+   "pounds": 300
+  },
+  {
+   "level1": 8493,
+   "postcode": "60660",
+   "revenue": 5414.98,
+   "pounds": 0
+  },
+  {
+   "level1": 8496,
+   "postcode": "60602",
+   "revenue": 974.49,
+   "pounds": 770
+  },
+  {
+   "level1": 8509,
+   "postcode": "60602",
+   "revenue": 291,
+   "pounds": 1063
+  },
+  {
+   "level1": 8509,
+   "postcode": "60608",
+   "revenue": 60,
+   "pounds": 276
+  },
+  {
+   "level1": 8509,
+   "postcode": "60612",
+   "revenue": 1130.142857142857,
+   "pounds": 3730.285714285714
+  },
+  {
+   "level1": 8509,
+   "postcode": "60632",
+   "revenue": 177.75,
+   "pounds": 576.75
+  },
+  {
+   "level1": 8509,
+   "postcode": "60640",
+   "revenue": 59.25,
+   "pounds": 192.25
+  },
+  {
+   "level1": 8509,
+   "postcode": "60646",
+   "revenue": 120,
+   "pounds": 235
+  },
+  {
+   "level1": 8509,
+   "postcode": "60652",
+   "revenue": 297.8571428571429,
+   "pounds": 910.7142857142857
+  },
+  {
+   "level1": 8509,
+   "postcode": null,
+   "revenue": 300,
+   "pounds": 945
+  },
+  {
+   "level1": 8515,
+   "postcode": "60523",
+   "revenue": 612.85,
+   "pounds": 1038
+  },
+  {
+   "level1": 8522,
+   "postcode": "60654",
+   "revenue": 293.56,
+   "pounds": 336
+  },
+  {
+   "level1": 8637,
+   "postcode": "60513",
+   "revenue": 1954.9199999999998,
+   "pounds": 3543
+  },
+  {
+   "level1": 8673,
+   "postcode": "60803",
+   "revenue": 305.76,
+   "pounds": 410
+  },
+  {
+   "level1": 8676,
+   "postcode": "60618",
+   "revenue": 4088.3799999999997,
+   "pounds": 1022
+  },
+  {
+   "level1": 8689,
+   "postcode": "60610",
+   "revenue": 72.5925925925926,
+   "pounds": 202.74074074074076
+  },
+  {
+   "level1": 8689,
+   "postcode": "60611",
+   "revenue": 3135.7407407407404,
+   "pounds": 13950.925925925927
+  },
+  {
+   "level1": 8689,
+   "postcode": "60628",
+   "revenue": 480,
+   "pounds": 1501
+  },
+  {
+   "level1": 8689,
+   "postcode": "60804",
+   "revenue": 1306.6666666666667,
+   "pounds": 3649.3333333333335
+  },
+  {
+   "level1": 8689,
+   "postcode": null,
+   "revenue": 605,
+   "pounds": 1832
+  },
+  {
+   "level1": 8695,
+   "postcode": "60527",
+   "revenue": 238.83,
+   "pounds": 521
+  },
+  {
+   "level1": 8735,
+   "postcode": "60604",
+   "revenue": 126.25,
+   "pounds": 0
+  },
+  {
+   "level1": 8782,
+   "postcode": "60130",
+   "revenue": 1298.75,
+   "pounds": 1170
+  },
+  {
+   "level1": 8812,
+   "postcode": "46319",
+   "revenue": 1131.51,
+   "pounds": 1764
+  },
+  {
+   "level1": 8826,
+   "postcode": "60642",
+   "revenue": 230.36,
+   "pounds": 260
+  },
+  {
+   "level1": 8895,
+   "postcode": "60068",
+   "revenue": 505.69,
+   "pounds": 822
+  },
+  {
+   "level1": 8897,
+   "postcode": "60647",
+   "revenue": 2196.61,
+   "pounds": 3336
+  },
+  {
+   "level1": 8927,
+   "postcode": "60630",
+   "revenue": 135.77,
+   "pounds": 506
+  },
+  {
+   "level1": 8966,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 548
+  },
+  {
+   "level1": 8972,
+   "postcode": "60601",
+   "revenue": 260.13,
+   "pounds": 140
+  },
+  {
+   "level1": 8984,
+   "postcode": "60654",
+   "revenue": 1942.09,
+   "pounds": 1770
+  },
+  {
+   "level1": 8987,
+   "postcode": "60527",
+   "revenue": 1955.17,
+   "pounds": 760
+  },
+  {
+   "level1": 8991,
+   "postcode": "60634",
+   "revenue": 4431.989999999999,
+   "pounds": 6660
+  },
+  {
+   "level1": 9113,
+   "postcode": "60601",
+   "revenue": 360.53000000000003,
+   "pounds": 160
+  },
+  {
+   "level1": 9236,
+   "postcode": "60007",
+   "revenue": 148.83,
+   "pounds": 229
+  },
+  {
+   "level1": 9355,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 4119
+  },
+  {
+   "level1": 9376,
+   "postcode": "60638",
+   "revenue": 165.15,
+   "pounds": 146
+  },
+  {
+   "level1": 9379,
+   "postcode": "60130",
+   "revenue": 985.4363999999999,
+   "pounds": 343.19999999999993
+  },
+  {
+   "level1": 9379,
+   "postcode": "60525",
+   "revenue": 909.6335999999999,
+   "pounds": 316.8
+  },
+  {
+   "level1": 9403,
+   "postcode": "60201",
+   "revenue": 3589.219999999999,
+   "pounds": 6664
+  },
+  {
+   "level1": 9416,
+   "postcode": "60606",
+   "revenue": 1451.44,
+   "pounds": 3331
+  },
+  {
+   "level1": 9490,
+   "postcode": "60714",
+   "revenue": 3651.6400000000012,
+   "pounds": 1200
+  },
+  {
+   "level1": 9506,
+   "postcode": "60463",
+   "revenue": 5728.050000000001,
+   "pounds": 13260
+  },
+  {
+   "level1": 9589,
+   "postcode": "60614",
+   "revenue": 1590.56,
+   "pounds": 2640
+  },
+  {
+   "level1": 9611,
+   "postcode": "60607",
+   "revenue": 214.82999999999998,
+   "pounds": 240
+  },
+  {
+   "level1": 9622,
+   "postcode": "60104",
+   "revenue": 192.20444444444445,
+   "pounds": 155.62962962962962
+  },
+  {
+   "level1": 9622,
+   "postcode": "60155",
+   "revenue": 864.9200000000002,
+   "pounds": 700.3333333333331
+  },
+  {
+   "level1": 9622,
+   "postcode": "60164",
+   "revenue": 1537.6355555555556,
+   "pounds": 1245.0370370370367
+  },
+  {
+   "level1": 9640,
+   "postcode": "60655",
+   "revenue": 0,
+   "pounds": 9988
+  },
+  {
+   "level1": 9657,
+   "postcode": "60659",
+   "revenue": 238.15999999999997,
+   "pounds": 240
+  },
+  {
+   "level1": 9679,
+   "postcode": null,
+   "revenue": 220.57,
+   "pounds": 503
+  },
+  {
+   "level1": 9692,
+   "postcode": "60622",
+   "revenue": 285,
+   "pounds": 848
+  },
+  {
+   "level1": 9730,
+   "postcode": "60606",
+   "revenue": 109.14999999999999,
+   "pounds": 423
+  },
+  {
+   "level1": 9761,
+   "postcode": "60611",
+   "revenue": 103.12,
+   "pounds": 80
+  },
+  {
+   "level1": 9777,
+   "postcode": "60609",
+   "revenue": 0,
+   "pounds": 100
+  },
+  {
+   "level1": 9786,
+   "postcode": "60805",
+   "revenue": 2389.100000000001,
+   "pounds": 7155
+  },
+  {
+   "level1": 9790,
+   "postcode": "60607",
+   "revenue": 433.6700000000001,
+   "pounds": 882
+  },
+  {
+   "level1": 9792,
+   "postcode": "60631",
+   "revenue": 333.74,
+   "pounds": 372
+  },
+  {
+   "level1": 9829,
+   "postcode": "60605",
+   "revenue": 1172.24,
+   "pounds": 572
+  },
+  {
+   "level1": 9838,
+   "postcode": "60016",
+   "revenue": 122.62,
+   "pounds": 120
+  },
+  {
+   "level1": 9849,
+   "postcode": "60606",
+   "revenue": 23649.59000000002,
+   "pounds": 62517
+  },
+  {
+   "level1": 10037,
+   "postcode": "60606",
+   "revenue": 4156.79,
+   "pounds": 1040
+  },
+  {
+   "level1": 10086,
+   "postcode": "60606",
+   "revenue": 78.22,
+   "pounds": 50
+  },
+  {
+   "level1": 10189,
+   "postcode": "60606",
+   "revenue": 107.72,
+   "pounds": 100
+  },
+  {
+   "level1": 10193,
+   "postcode": "60706",
+   "revenue": 830.5,
+   "pounds": 2197
+  },
+  {
+   "level1": 10236,
+   "postcode": "60640",
+   "revenue": 103.73,
+   "pounds": 80
+  },
+  {
+   "level1": 10277,
+   "postcode": "60622",
+   "revenue": 719.05,
+   "pounds": 280
+  },
+  {
+   "level1": 10302,
+   "postcode": "60609",
+   "revenue": 111.6,
+   "pounds": 141
+  },
+  {
+   "level1": 10308,
+   "postcode": "60606",
+   "revenue": 403.21999999999997,
+   "pounds": 570
+  },
+  {
+   "level1": 10363,
+   "postcode": "60602",
+   "revenue": 208.14,
+   "pounds": 100.66666666666666
+  },
+  {
+   "level1": 10363,
+   "postcode": "60605",
+   "revenue": 416.28,
+   "pounds": 201.33333333333331
+  },
+  {
+   "level1": 10398,
+   "postcode": "60601",
+   "revenue": 773.1700000000004,
+   "pounds": 1761
+  },
+  {
+   "level1": 10450,
+   "postcode": "60646",
+   "revenue": 899.6200000000001,
+   "pounds": 1530
+  },
+  {
+   "level1": 10471,
+   "postcode": "60607",
+   "revenue": 1501.8600000000001,
+   "pounds": 1980
+  },
+  {
+   "level1": 10517,
+   "postcode": "60202",
+   "revenue": 68.11,
+   "pounds": 80
+  },
+  {
+   "level1": 10534,
+   "postcode": "60601",
+   "revenue": 315.97,
+   "pounds": 145
+  },
+  {
+   "level1": 10562,
+   "postcode": "60527",
+   "revenue": 229.26999999999998,
+   "pounds": 220
+  },
+  {
+   "level1": 10615,
+   "postcode": "60609",
+   "revenue": 2211.299999999999,
+   "pounds": 909
+  },
+  {
+   "level1": 10672,
+   "postcode": "60601",
+   "revenue": 216.2,
+   "pounds": 541
+  },
+  {
+   "level1": 10701,
+   "postcode": "60018",
+   "revenue": 334.46999999999997,
+   "pounds": 200
+  },
+  {
+   "level1": 10739,
+   "postcode": "60611",
+   "revenue": 175,
+   "pounds": 80
+  },
+  {
+   "level1": 10782,
+   "postcode": "60607",
+   "revenue": 661.7200000000001,
+   "pounds": 2434
+  },
+  {
+   "level1": 10785,
+   "postcode": "60608",
+   "revenue": 804.8199999999999,
+   "pounds": 1638
+  },
+  {
+   "level1": 10787,
+   "postcode": "60610",
+   "revenue": 1523.3200000000002,
+   "pounds": 1703
+  },
+  {
+   "level1": 10888,
+   "postcode": "60622",
+   "revenue": 225.19,
+   "pounds": 140
+  },
+  {
+   "level1": 10890,
+   "postcode": "60606",
+   "revenue": 92.87,
+   "pounds": 80
+  },
+  {
+   "level1": 11010,
+   "postcode": "60607",
+   "revenue": 301.04477611940297,
+   "pounds": 3815.5820895522393
+  },
+  {
+   "level1": 11010,
+   "postcode": "60653",
+   "revenue": 4741.455223880596,
+   "pounds": 60095.41791044777
+  },
+  {
+   "level1": 11016,
+   "postcode": "60602",
+   "revenue": 2665.5,
+   "pounds": 4635
+  },
+  {
+   "level1": 11027,
+   "postcode": "60643",
+   "revenue": 2753.23,
+   "pounds": 1180
+  },
+  {
+   "level1": 11096,
+   "postcode": "60148",
+   "revenue": 78,
+   "pounds": 160
+  },
+  {
+   "level1": 11146,
+   "postcode": "60607",
+   "revenue": 112.71000000000001,
+   "pounds": 160
+  },
+  {
+   "level1": 11165,
+   "postcode": "60611",
+   "revenue": 314.69000000000005,
+   "pounds": 160
+  },
+  {
+   "level1": 11223,
+   "postcode": "60602",
+   "revenue": 230.56,
+   "pounds": 454
+  },
+  {
+   "level1": 11241,
+   "postcode": "60602",
+   "revenue": 1684.6599999999999,
+   "pounds": 1350
+  },
+  {
+   "level1": 11252,
+   "postcode": "60126",
+   "revenue": 79.01,
+   "pounds": 132
+  },
+  {
+   "level1": 11257,
+   "postcode": "60619",
+   "revenue": 83.07,
+   "pounds": 190
+  },
+  {
+   "level1": 11341,
+   "postcode": "60612",
+   "revenue": 1286.7,
+   "pounds": 800
+  },
+  {
+   "level1": 11365,
+   "postcode": "60602",
+   "revenue": 262,
+   "pounds": 719
+  },
+  {
+   "level1": 11399,
+   "postcode": "60610",
+   "revenue": 166.25,
+   "pounds": 1950
+  },
+  {
+   "level1": 11401,
+   "postcode": "60062",
+   "revenue": 793.24,
+   "pounds": 460
+  },
+  {
+   "level1": 11406,
+   "postcode": "60606",
+   "revenue": 859.7939999999999,
+   "pounds": 450
+  },
+  {
+   "level1": 11406,
+   "postcode": "60642",
+   "revenue": 573.1959999999999,
+   "pounds": 300
+  },
+  {
+   "level1": 11423,
+   "postcode": null,
+   "revenue": 501.63,
+   "pounds": 1791
+  },
+  {
+   "level1": 11425,
+   "postcode": "60603",
+   "revenue": 500.74999999999994,
+   "pounds": 744
+  },
+  {
+   "level1": 11442,
+   "postcode": "60612",
+   "revenue": 693.49,
+   "pounds": 1258
+  },
+  {
+   "level1": 11456,
+   "postcode": "60491",
+   "revenue": 0,
+   "pounds": 2147
+  },
+  {
+   "level1": 11464,
+   "postcode": "60409",
+   "revenue": 81.24,
+   "pounds": 186
+  },
+  {
+   "level1": 11466,
+   "postcode": "60602",
+   "revenue": 92.57,
+   "pounds": 158
+  },
+  {
+   "level1": 11474,
+   "postcode": "60148",
+   "revenue": 63.36,
+   "pounds": 225
+  },
+  {
+   "level1": 11474,
+   "postcode": "60473",
+   "revenue": 126.72,
+   "pounds": 450
+  },
+  {
+   "level1": 11511,
+   "postcode": "60630",
+   "revenue": 162.48,
+   "pounds": 487
+  },
+  {
+   "level1": 11524,
+   "postcode": "60657",
+   "revenue": 510.84000000000003,
+   "pounds": 1378
+  },
+  {
+   "level1": 11541,
+   "postcode": "60609",
+   "revenue": 477.4,
+   "pounds": 281
+  },
+  {
+   "level1": 11544,
+   "postcode": "60473",
+   "revenue": 2088.856060606061,
+   "pounds": 5489.393939393939
+  },
+  {
+   "level1": 11544,
+   "postcode": "60609",
+   "revenue": 668.4339393939395,
+   "pounds": 1756.6060606060607
+  },
+  {
+   "level1": 11560,
+   "postcode": "60126",
+   "revenue": 162.48,
+   "pounds": 112
+  },
+  {
+   "level1": 11608,
+   "postcode": null,
+   "revenue": 4939.68,
+   "pounds": 0
+  },
+  {
+   "level1": 11614,
+   "postcode": "60712",
+   "revenue": 221.56,
+   "pounds": 420
+  },
+  {
+   "level1": 11625,
+   "postcode": null,
+   "revenue": 81.24,
+   "pounds": 141
+  },
+  {
+   "level1": 11637,
+   "postcode": "60515",
+   "revenue": 804.09875,
+   "pounds": 637
+  },
+  {
+   "level1": 11637,
+   "postcode": "60516",
+   "revenue": 114.87125,
+   "pounds": 91
+  },
+  {
+   "level1": 11642,
+   "postcode": "60018",
+   "revenue": 682.5326666666664,
+   "pounds": 251.99999999999994
+  },
+  {
+   "level1": 11642,
+   "postcode": "60608",
+   "revenue": 780.0373333333333,
+   "pounds": 288
+  },
+  {
+   "level1": 11676,
+   "postcode": null,
+   "revenue": 100.98,
+   "pounds": 214
+  },
+  {
+   "level1": 11693,
+   "postcode": null,
+   "revenue": 2346.75,
+   "pounds": 5342
+  },
+  {
+   "level1": 11726,
+   "postcode": "60601",
+   "revenue": 4223.839999999998,
+   "pounds": 5962
+  },
+  {
+   "level1": 11733,
+   "postcode": null,
+   "revenue": 880.1500000000001,
+   "pounds": 1328
+  },
+  {
+   "level1": 11756,
+   "postcode": "60517",
+   "revenue": 943.99,
+   "pounds": 480
+  },
+  {
+   "level1": 11774,
+   "postcode": "60641",
+   "revenue": 3382.8,
+   "pounds": 241
+  },
+  {
+   "level1": 11778,
+   "postcode": "60438",
+   "revenue": 214.95999999999998,
+   "pounds": 466
+  },
+  {
+   "level1": 11788,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 5753
+  },
+  {
+   "level1": 11800,
+   "postcode": "60043",
+   "revenue": 1174.8700000000001,
+   "pounds": 840
+  },
+  {
+   "level1": 11804,
+   "postcode": "60409",
+   "revenue": 187,
+   "pounds": 425
+  },
+  {
+   "level1": 11816,
+   "postcode": null,
+   "revenue": 1797.8799999999999,
+   "pounds": 3346
+  },
+  {
+   "level1": 11826,
+   "postcode": "60601",
+   "revenue": 1626.26,
+   "pounds": 2100
+  },
+  {
+   "level1": 11830,
+   "postcode": "60025",
+   "revenue": 302.94,
+   "pounds": 816
+  },
+  {
+   "level1": 11848,
+   "postcode": null,
+   "revenue": 415.3,
+   "pounds": 837
+  },
+  {
+   "level1": 11852,
+   "postcode": "60517",
+   "revenue": 57.87,
+   "pounds": 80
+  },
+  {
+   "level1": 11874,
+   "postcode": "60501",
+   "revenue": 0,
+   "pounds": 813
+  },
+  {
+   "level1": 11890,
+   "postcode": "60653",
+   "revenue": 50.41,
+   "pounds": 0
+  },
+  {
+   "level1": 11898,
+   "postcode": "60804",
+   "revenue": 319.17,
+   "pounds": 456
+  },
+  {
+   "level1": 11902,
+   "postcode": "60610",
+   "revenue": 1087.9099999999999,
+   "pounds": 889
+  },
+  {
+   "level1": 11920,
+   "postcode": "60608",
+   "revenue": 1364.7099999999998,
+   "pounds": 1340
+  },
+  {
+   "level1": 11954,
+   "postcode": "60805",
+   "revenue": 71.04,
+   "pounds": 124
+  },
+  {
+   "level1": 11956,
+   "postcode": "60602",
+   "revenue": 681.76,
+   "pounds": 640
+  },
+  {
+   "level1": 11986,
+   "postcode": "60487",
+   "revenue": 533.34,
+   "pounds": 601
+  },
+  {
+   "level1": 12047,
+   "postcode": null,
+   "revenue": 443.12,
+   "pounds": 877
+  },
+  {
+   "level1": 12057,
+   "postcode": null,
+   "revenue": 100,
+   "pounds": 0
+  },
+  {
+   "level1": 12092,
+   "postcode": "60630",
+   "revenue": 1874.5299999999997,
+   "pounds": 1275
+  },
+  {
+   "level1": 12116,
+   "postcode": "60004",
+   "revenue": 321.2825836216839,
+   "pounds": 1217.1856978085352
+  },
+  {
+   "level1": 12116,
+   "postcode": "60005",
+   "revenue": 89.9591234140715,
+   "pounds": 340.8119953863896
+  },
+  {
+   "level1": 12116,
+   "postcode": "60606",
+   "revenue": 5159.798292964251,
+   "pounds": 19548.002306805083
+  },
+  {
+   "level1": 12116,
+   "postcode": null,
+   "revenue": 1125,
+   "pounds": 0
+  },
+  {
+   "level1": 12120,
+   "postcode": "60601",
+   "revenue": 332.34000000000003,
+   "pounds": 231
+  },
+  {
+   "level1": 12128,
+   "postcode": "60045",
+   "revenue": 758.0731578947368,
+   "pounds": 1573.8947368421052
+  },
+  {
+   "level1": 12128,
+   "postcode": "60601",
+   "revenue": 4043.056842105262,
+   "pounds": 8394.105263157895
+  },
+  {
+   "level1": 12152,
+   "postcode": "60077",
+   "revenue": 69.74,
+   "pounds": 80
+  },
+  {
+   "level1": 12170,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 240
+  },
+  {
+   "level1": 12191,
+   "postcode": "60616",
+   "revenue": 865.3699999999999,
+   "pounds": 800
+  },
+  {
+   "level1": 12211,
+   "postcode": "60638",
+   "revenue": 85.445,
+   "pounds": 187.16666666666663
+  },
+  {
+   "level1": 12211,
+   "postcode": "60641",
+   "revenue": 427.225,
+   "pounds": 935.8333333333335
+  },
+  {
+   "level1": 12229,
+   "postcode": "60616",
+   "revenue": 335.6,
+   "pounds": 313
+  },
+  {
+   "level1": 12235,
+   "postcode": "60637",
+   "revenue": 124.03,
+   "pounds": 258
+  },
+  {
+   "level1": 12239,
+   "postcode": "60657",
+   "revenue": 466.08,
+   "pounds": 400
+  },
+  {
+   "level1": 12268,
+   "postcode": null,
+   "revenue": 1165.8000000000002,
+   "pounds": 0
+  },
+  {
+   "level1": 12288,
+   "postcode": null,
+   "revenue": 2340,
+   "pounds": 10583
+  },
+  {
+   "level1": 12309,
+   "postcode": "60601",
+   "revenue": 773.6999999999999,
+   "pounds": 1898
+  },
+  {
+   "level1": 12309,
+   "postcode": null,
+   "revenue": 1261.76,
+   "pounds": 2602
+  },
+  {
+   "level1": 12319,
+   "postcode": "60409",
+   "revenue": 502.16,
+   "pounds": 776
+  },
+  {
+   "level1": 12323,
+   "postcode": "60601",
+   "revenue": 521,
+   "pounds": 711
+  },
+  {
+   "level1": 12329,
+   "postcode": "60612",
+   "revenue": 283.3,
+   "pounds": 240
+  },
+  {
+   "level1": 12331,
+   "postcode": "60137",
+   "revenue": 246.01,
+   "pounds": 1000
+  },
+  {
+   "level1": 12335,
+   "postcode": "60609",
+   "revenue": 846.67,
+   "pounds": 440
+  },
+  {
+   "level1": 12364,
+   "postcode": "60654",
+   "revenue": 489.6,
+   "pounds": 996
+  },
+  {
+   "level1": 12379,
+   "postcode": "60657",
+   "revenue": 671.38,
+   "pounds": 1679
+  },
+  {
+   "level1": 12387,
+   "postcode": null,
+   "revenue": 251.08,
+   "pounds": 296
+  },
+  {
+   "level1": 12428,
+   "postcode": "46323",
+   "revenue": 502.16,
+   "pounds": 1130
+  },
+  {
+   "level1": 12432,
+   "postcode": "60439",
+   "revenue": 865.37,
+   "pounds": 560
+  },
+  {
+   "level1": 12452,
+   "postcode": "60634",
+   "revenue": 251.08,
+   "pounds": 551
+  },
+  {
+   "level1": 12456,
+   "postcode": "60008",
+   "revenue": 50.21600000000001,
+   "pounds": 1501.4
+  },
+  {
+   "level1": 12456,
+   "postcode": "60175",
+   "revenue": 50.21600000000001,
+   "pounds": 1501.4
+  },
+  {
+   "level1": 12456,
+   "postcode": "60607",
+   "revenue": 100.43200000000002,
+   "pounds": 3002.8
+  },
+  {
+   "level1": 12456,
+   "postcode": "60714",
+   "revenue": 50.21600000000001,
+   "pounds": 1501.4
+  },
+  {
+   "level1": 12459,
+   "postcode": "60661",
+   "revenue": 483.85999999999996,
+   "pounds": 544
+  },
+  {
+   "level1": 12465,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1215
+  },
+  {
+   "level1": 12482,
+   "postcode": "60649",
+   "revenue": 468.9,
+   "pounds": 628
+  },
+  {
+   "level1": 12488,
+   "postcode": "60606",
+   "revenue": 125.54,
+   "pounds": 239
+  },
+  {
+   "level1": 12513,
+   "postcode": "60620",
+   "revenue": 409.44,
+   "pounds": 0
+  },
+  {
+   "level1": 12517,
+   "postcode": "60606",
+   "revenue": 310.15,
+   "pounds": 755
+  },
+  {
+   "level1": 12530,
+   "postcode": "60409",
+   "revenue": 1025.2000000000003,
+   "pounds": 4760
+  },
+  {
+   "level1": 12530,
+   "postcode": "60422",
+   "revenue": 2108.12,
+   "pounds": 23665.864197530867
+  },
+  {
+   "level1": 12530,
+   "postcode": "60426",
+   "revenue": 30319.57,
+   "pounds": 104532
+  },
+  {
+   "level1": 12530,
+   "postcode": "60430",
+   "revenue": 0,
+   "pounds": 1884.938271604938
+  },
+  {
+   "level1": 12530,
+   "postcode": "60438",
+   "revenue": 222.09,
+   "pounds": 1120
+  },
+  {
+   "level1": 12530,
+   "postcode": "60452",
+   "revenue": 0,
+   "pounds": 471.23456790123464
+  },
+  {
+   "level1": 12530,
+   "postcode": "60473",
+   "revenue": 0,
+   "pounds": 2184.814814814815
+  },
+  {
+   "level1": 12530,
+   "postcode": "60477",
+   "revenue": 1379.8600000000001,
+   "pounds": 12650
+  },
+  {
+   "level1": 12530,
+   "postcode": "60643",
+   "revenue": 0,
+   "pounds": 1028.1481481481483
+  },
+  {
+   "level1": 12530,
+   "postcode": null,
+   "revenue": 548.1200000000001,
+   "pounds": 0
+  },
+  {
+   "level1": 12532,
+   "postcode": "60609",
+   "revenue": 861.53,
+   "pounds": 845
+  },
+  {
+   "level1": 12545,
+   "postcode": "60827",
+   "revenue": 114.13,
+   "pounds": 143
+  },
+  {
+   "level1": 12558,
+   "postcode": "60605",
+   "revenue": 797.54125,
+   "pounds": 522.5
+  },
+  {
+   "level1": 12558,
+   "postcode": "60657",
+   "revenue": 362.51875000000007,
+   "pounds": 237.5
+  },
+  {
+   "level1": 12568,
+   "postcode": "60439",
+   "revenue": 601.51,
+   "pounds": 800
+  },
+  {
+   "level1": 12572,
+   "postcode": "60609",
+   "revenue": 19201.520000000008,
+   "pounds": 38011
+  },
+  {
+   "level1": 12589,
+   "postcode": "60527",
+   "revenue": 8758.17,
+   "pounds": 6408
+  },
+  {
+   "level1": 12595,
+   "postcode": null,
+   "revenue": 1920.8799999999997,
+   "pounds": 780
+  },
+  {
+   "level1": 12601,
+   "postcode": "46304",
+   "revenue": 676.5999999999999,
+   "pounds": 2494.7895833333337
+  },
+  {
+   "level1": 12601,
+   "postcode": "46307",
+   "revenue": 5236,
+   "pounds": 27740
+  },
+  {
+   "level1": 12601,
+   "postcode": "46383",
+   "revenue": 538.17,
+   "pounds": 3055.775
+  },
+  {
+   "level1": 12601,
+   "postcode": "46410",
+   "revenue": 0,
+   "pounds": 103.94375
+  },
+  {
+   "level1": 12601,
+   "postcode": "60062",
+   "revenue": 182.16,
+   "pounds": 1050
+  },
+  {
+   "level1": 12601,
+   "postcode": "60409",
+   "revenue": 385.10999999999996,
+   "pounds": 6045.804166666665
+  },
+  {
+   "level1": 12601,
+   "postcode": "60422",
+   "revenue": 47.36,
+   "pounds": 40
+  },
+  {
+   "level1": 12601,
+   "postcode": "60451",
+   "revenue": 266.53,
+   "pounds": 13154.085416666669
+  },
+  {
+   "level1": 12601,
+   "postcode": "60462",
+   "revenue": 3036.2,
+   "pounds": 36443.53125
+  },
+  {
+   "level1": 12601,
+   "postcode": "60473",
+   "revenue": 296.66999999999996,
+   "pounds": 2312.9583333333335
+  },
+  {
+   "level1": 12601,
+   "postcode": "60521",
+   "revenue": 214.27999999999997,
+   "pounds": 2770
+  },
+  {
+   "level1": 12601,
+   "postcode": "60527",
+   "revenue": 1480.35,
+   "pounds": 9895.833333333332
+  },
+  {
+   "level1": 12601,
+   "postcode": "60561",
+   "revenue": 37.07,
+   "pounds": 70
+  },
+  {
+   "level1": 12601,
+   "postcode": "60565",
+   "revenue": 90.20000000000002,
+   "pounds": 820
+  },
+  {
+   "level1": 12601,
+   "postcode": "60605",
+   "revenue": 222.09,
+   "pounds": 3135.070833333333
+  },
+  {
+   "level1": 12601,
+   "postcode": "60607",
+   "revenue": 444.2899999999999,
+   "pounds": 9603.664583333335
+  },
+  {
+   "level1": 12601,
+   "postcode": "60611",
+   "revenue": 1776.9399999999998,
+   "pounds": 12952.820833333331
+  },
+  {
+   "level1": 12601,
+   "postcode": "60615",
+   "revenue": 154.67335714285716,
+   "pounds": 3027.130952380952
+  },
+  {
+   "level1": 12601,
+   "postcode": "60637",
+   "revenue": 292.47664285714285,
+   "pounds": 2180.6169642857144
+  },
+  {
+   "level1": 12601,
+   "postcode": "60643",
+   "revenue": 88.88,
+   "pounds": 3615.916666666667
+  },
+  {
+   "level1": 12601,
+   "postcode": "60649",
+   "revenue": 444.2899999999999,
+   "pounds": 6266.058333333333
+  },
+  {
+   "level1": 12601,
+   "postcode": "60653",
+   "revenue": 394.68,
+   "pounds": 1370
+  },
+  {
+   "level1": 12601,
+   "postcode": null,
+   "revenue": 123199.45000000001,
+   "pounds": 0
+  },
+  {
+   "level1": 12607,
+   "postcode": "60559",
+   "revenue": 114.13,
+   "pounds": 248
+  },
+  {
+   "level1": 12626,
+   "postcode": "60422",
+   "revenue": 49.20000000000001,
+   "pounds": 520
+  },
+  {
+   "level1": 12626,
+   "postcode": "60540",
+   "revenue": 90.19999999999997,
+   "pounds": 500
+  },
+  {
+   "level1": 12626,
+   "postcode": "60601",
+   "revenue": 545.3000000000002,
+   "pounds": 3007
+  },
+  {
+   "level1": 12626,
+   "postcode": "60611",
+   "revenue": 373.1000000000001,
+   "pounds": 1376
+  },
+  {
+   "level1": 12626,
+   "postcode": "60615",
+   "revenue": 764.6499999999997,
+   "pounds": 1770
+  },
+  {
+   "level1": 12626,
+   "postcode": "60637",
+   "revenue": 11339.370000000226,
+   "pounds": 63650
+  },
+  {
+   "level1": 12626,
+   "postcode": "61350",
+   "revenue": 31.980000000000008,
+   "pounds": 204
+  },
+  {
+   "level1": 12626,
+   "postcode": null,
+   "revenue": 321.85000000000014,
+   "pounds": 3626
+  },
+  {
+   "level1": 12630,
+   "postcode": "60402",
+   "revenue": 5822.920000000003,
+   "pounds": 3323
+  },
+  {
+   "level1": 12660,
+   "postcode": null,
+   "revenue": 102.36,
+   "pounds": 45
+  },
+  {
+   "level1": 12705,
+   "postcode": "60631",
+   "revenue": 255,
+   "pounds": 683
+  },
+  {
+   "level1": 12736,
+   "postcode": "60305",
+   "revenue": 4969.659999999999,
+   "pounds": 7254
+  },
+  {
+   "level1": 12742,
+   "postcode": "60606",
+   "revenue": 3831.345660377359,
+   "pounds": 2418.5660377358486
+  },
+  {
+   "level1": 12742,
+   "postcode": "60607",
+   "revenue": 3420.8443396226417,
+   "pounds": 2159.4339622641514
+  },
+  {
+   "level1": 12758,
+   "postcode": "60610",
+   "revenue": 301.56,
+   "pounds": 581
+  },
+  {
+   "level1": 12800,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 264
+  },
+  {
+   "level1": 12826,
+   "postcode": "60559",
+   "revenue": 86.11,
+   "pounds": 129
+  },
+  {
+   "level1": 12831,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 0
+  },
+  {
+   "level1": 12886,
+   "postcode": "60606",
+   "revenue": 353.09,
+   "pounds": 2113
+  },
+  {
+   "level1": 12904,
+   "postcode": "60601",
+   "revenue": 511.82000000000005,
+   "pounds": 567
+  },
+  {
+   "level1": 12925,
+   "postcode": "60532",
+   "revenue": 104.26,
+   "pounds": 174
+  },
+  {
+   "level1": 12945,
+   "postcode": "60202",
+   "revenue": 145.8,
+   "pounds": 160
+  },
+  {
+   "level1": 13004,
+   "postcode": "60610",
+   "revenue": 620.55,
+   "pounds": 746
+  },
+  {
+   "level1": 13041,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 2145
+  },
+  {
+   "level1": 13064,
+   "postcode": "60637",
+   "revenue": 0,
+   "pounds": 1575
+  },
+  {
+   "level1": 13069,
+   "postcode": "60608",
+   "revenue": 881.8900000000001,
+   "pounds": 1649
+  },
+  {
+   "level1": 13086,
+   "postcode": null,
+   "revenue": 2768,
+   "pounds": 1050
+  },
+  {
+   "level1": 13147,
+   "postcode": null,
+   "revenue": 880,
+   "pounds": 2268
+  },
+  {
+   "level1": 13153,
+   "postcode": "60104",
+   "revenue": 170,
+   "pounds": 638
+  },
+  {
+   "level1": 13157,
+   "postcode": "60609",
+   "revenue": 344.44,
+   "pounds": 600
+  },
+  {
+   "level1": 13161,
+   "postcode": "60602",
+   "revenue": 150,
+   "pounds": 271
+  },
+  {
+   "level1": 13166,
+   "postcode": "60429",
+   "revenue": 0,
+   "pounds": 2856
+  },
+  {
+   "level1": 13178,
+   "postcode": null,
+   "revenue": 1126.6599999999999,
+   "pounds": 2428
+  },
+  {
+   "level1": 13240,
+   "postcode": "60606",
+   "revenue": 3187.0099999999998,
+   "pounds": 6467
+  },
+  {
+   "level1": 13264,
+   "postcode": "60628",
+   "revenue": 234.82,
+   "pounds": 638
+  },
+  {
+   "level1": 13290,
+   "postcode": "60563",
+   "revenue": 754.7500000000001,
+   "pounds": 313.3333333333333
+  },
+  {
+   "level1": 13290,
+   "postcode": "60657",
+   "revenue": 1509.5000000000002,
+   "pounds": 626.6666666666667
+  },
+  {
+   "level1": 13318,
+   "postcode": "60607",
+   "revenue": 773.61,
+   "pounds": 424
+  },
+  {
+   "level1": 13373,
+   "postcode": "60707",
+   "revenue": 0,
+   "pounds": 225
+  },
+  {
+   "level1": 13378,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 536
+  },
+  {
+   "level1": 13384,
+   "postcode": "60659",
+   "revenue": 578.3399999999999,
+   "pounds": 0
+  },
+  {
+   "level1": 13397,
+   "postcode": "60602",
+   "revenue": 917.15,
+   "pounds": 260
+  },
+  {
+   "level1": 13401,
+   "postcode": "60523",
+   "revenue": 281.89,
+   "pounds": 1462
+  },
+  {
+   "level1": 13406,
+   "postcode": null,
+   "revenue": 940,
+   "pounds": 0
+  },
+  {
+   "level1": 13424,
+   "postcode": "60619",
+   "revenue": 112.6,
+   "pounds": 325
+  },
+  {
+   "level1": 13444,
+   "postcode": "60606",
+   "revenue": 93.5,
+   "pounds": 237
+  },
+  {
+   "level1": 13475,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1088
+  },
+  {
+   "level1": 13485,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1544
+  },
+  {
+   "level1": 13487,
+   "postcode": "60619",
+   "revenue": 250.5,
+   "pounds": 476
+  },
+  {
+   "level1": 13533,
+   "postcode": "60515",
+   "revenue": 192.8076923076923,
+   "pounds": 78.46153846153847
+  },
+  {
+   "level1": 13533,
+   "postcode": "60563",
+   "revenue": 642.6923076923077,
+   "pounds": 261.53846153846155
+  },
+  {
+   "level1": 13535,
+   "postcode": null,
+   "revenue": 100.98,
+   "pounds": 114
+  },
+  {
+   "level1": 13542,
+   "postcode": "60026",
+   "revenue": 616.41,
+   "pounds": 2607
+  },
+  {
+   "level1": 13558,
+   "postcode": "60606",
+   "revenue": 2024.44,
+   "pounds": 240
+  },
+  {
+   "level1": 13572,
+   "postcode": "60607",
+   "revenue": 665.8199999999999,
+   "pounds": 440
+  },
+  {
+   "level1": 13594,
+   "postcode": "60611",
+   "revenue": 138.57,
+   "pounds": 160
+  },
+  {
+   "level1": 13608,
+   "postcode": "60477",
+   "revenue": 161.02,
+   "pounds": 160
+  },
+  {
+   "level1": 13610,
+   "postcode": "60644",
+   "revenue": 763.02,
+   "pounds": 820
+  },
+  {
+   "level1": 13647,
+   "postcode": "60606",
+   "revenue": 936.61,
+   "pounds": 1830
+  },
+  {
+   "level1": 13663,
+   "postcode": null,
+   "revenue": 125,
+   "pounds": 3508
+  },
+  {
+   "level1": 13665,
+   "postcode": null,
+   "revenue": 150.14,
+   "pounds": 292
+  },
+  {
+   "level1": 13669,
+   "postcode": "60449",
+   "revenue": 0,
+   "pounds": 750
+  },
+  {
+   "level1": 13672,
+   "postcode": null,
+   "revenue": 181.5,
+   "pounds": 444
+  },
+  {
+   "level1": 13690,
+   "postcode": null,
+   "revenue": 100.98,
+   "pounds": 399
+  },
+  {
+   "level1": 13694,
+   "postcode": "60642",
+   "revenue": 338.04,
+   "pounds": 607
+  },
+  {
+   "level1": 13708,
+   "postcode": "60603",
+   "revenue": 187,
+   "pounds": 481
+  },
+  {
+   "level1": 13735,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 501
+  },
+  {
+   "level1": 13739,
+   "postcode": "60463",
+   "revenue": 0,
+   "pounds": 3675
+  },
+  {
+   "level1": 13774,
+   "postcode": "60181",
+   "revenue": 100.98,
+   "pounds": 271
+  },
+  {
+   "level1": 13800,
+   "postcode": "60602",
+   "revenue": 326.5,
+   "pounds": 1123
+  },
+  {
+   "level1": 13809,
+   "postcode": "60610",
+   "revenue": 838.44,
+   "pounds": 24
+  },
+  {
+   "level1": 13849,
+   "postcode": "60614",
+   "revenue": 71.5,
+   "pounds": 225
+  },
+  {
+   "level1": 13884,
+   "postcode": "60181",
+   "revenue": 280.15000000000003,
+   "pounds": 700
+  },
+  {
+   "level1": 13915,
+   "postcode": null,
+   "revenue": 57.2,
+   "pounds": 0
+  },
+  {
+   "level1": 13975,
+   "postcode": "60609",
+   "revenue": 187,
+   "pounds": 418
+  },
+  {
+   "level1": 14015,
+   "postcode": "60628",
+   "revenue": 536,
+   "pounds": 1254
+  },
+  {
+   "level1": 14049,
+   "postcode": "60527",
+   "revenue": 212.39,
+   "pounds": 401
+  },
+  {
+   "level1": 14080,
+   "postcode": "60608",
+   "revenue": 1121.4857142857143,
+   "pounds": 2103.4285714285716
+  },
+  {
+   "level1": 14080,
+   "postcode": "60612",
+   "revenue": 186.9142857142857,
+   "pounds": 350.57142857142856
+  },
+  {
+   "level1": 14084,
+   "postcode": null,
+   "revenue": 266.72,
+   "pounds": 440
+  },
+  {
+   "level1": 14100,
+   "postcode": "60302",
+   "revenue": 170,
+   "pounds": 5158
+  },
+  {
+   "level1": 14125,
+   "postcode": "60606",
+   "revenue": 95.63,
+   "pounds": 127
+  },
+  {
+   "level1": 14137,
+   "postcode": null,
+   "revenue": 561,
+   "pounds": 1296
+  },
+  {
+   "level1": 14142,
+   "postcode": "60448",
+   "revenue": 722,
+   "pounds": 1486
+  },
+  {
+   "level1": 14162,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 100
+  },
+  {
+   "level1": 14172,
+   "postcode": "60653",
+   "revenue": 372.52,
+   "pounds": 50
+  },
+  {
+   "level1": 14187,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 233
+  },
+  {
+   "level1": 14201,
+   "postcode": null,
+   "revenue": 248.4,
+   "pounds": 100
+  },
+  {
+   "level1": 14209,
+   "postcode": "60602",
+   "revenue": 429,
+   "pounds": 861
+  },
+  {
+   "level1": 14236,
+   "postcode": "60647",
+   "revenue": 119.49000000000001,
+   "pounds": 20
+  },
+  {
+   "level1": 14239,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 208
+  },
+  {
+   "level1": 14259,
+   "postcode": "60069",
+   "revenue": 0,
+   "pounds": 5035
+  },
+  {
+   "level1": 14264,
+   "postcode": "60654",
+   "revenue": 809.16,
+   "pounds": 322.2
+  },
+  {
+   "level1": 14264,
+   "postcode": "60657",
+   "revenue": 539.4399999999999,
+   "pounds": 214.8
+  },
+  {
+   "level1": 14286,
+   "postcode": null,
+   "revenue": 272,
+   "pounds": 909
+  },
+  {
+   "level1": 14299,
+   "postcode": "60601",
+   "revenue": 85,
+   "pounds": 293
+  },
+  {
+   "level1": 14305,
+   "postcode": "60609",
+   "revenue": 65,
+   "pounds": 59
+  },
+  {
+   "level1": 14332,
+   "postcode": "60610",
+   "revenue": 187,
+   "pounds": 200
+  },
+  {
+   "level1": 14346,
+   "postcode": "60637",
+   "revenue": 374,
+   "pounds": 701
+  },
+  {
+   "level1": 14383,
+   "postcode": "60484",
+   "revenue": 0,
+   "pounds": 1750
+  },
+  {
+   "level1": 14416,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 145
+  },
+  {
+   "level1": 14418,
+   "postcode": "60827",
+   "revenue": 85,
+   "pounds": 192
+  },
+  {
+   "level1": 14424,
+   "postcode": "60601",
+   "revenue": 170,
+   "pounds": 501
+  },
+  {
+   "level1": 14432,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 4241
+  },
+  {
+   "level1": 14444,
+   "postcode": "60602",
+   "revenue": 69.55,
+   "pounds": 112
+  },
+  {
+   "level1": 14450,
+   "postcode": "46321",
+   "revenue": 0,
+   "pounds": 330
+  },
+  {
+   "level1": 14452,
+   "postcode": "60622",
+   "revenue": 533,
+   "pounds": 287
+  },
+  {
+   "level1": 14454,
+   "postcode": "46402",
+   "revenue": 340,
+   "pounds": 887
+  },
+  {
+   "level1": 14460,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 621
+  },
+  {
+   "level1": 14464,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 54
+  },
+  {
+   "level1": 14466,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 91
+  },
+  {
+   "level1": 14468,
+   "postcode": null,
+   "revenue": 765,
+   "pounds": 2266
+  },
+  {
+   "level1": 14472,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1879
+  },
+  {
+   "level1": 14474,
+   "postcode": null,
+   "revenue": 1113,
+   "pounds": 156
+  },
+  {
+   "level1": 14476,
+   "postcode": "60609",
+   "revenue": 60,
+   "pounds": 171
+  },
+  {
+   "level1": 14478,
+   "postcode": null,
+   "revenue": 300,
+   "pounds": 0
+  },
+  {
+   "level1": 14480,
+   "postcode": "60303",
+   "revenue": 85,
+   "pounds": 274
+  },
+  {
+   "level1": 14483,
+   "postcode": "60641",
+   "revenue": 65,
+   "pounds": 175
+  },
+  {
+   "level1": 14485,
+   "postcode": "60646",
+   "revenue": 389,
+   "pounds": 72
+  },
+  {
+   "level1": 14487,
+   "postcode": "60555",
+   "revenue": 0,
+   "pounds": 240
+  },
+  {
+   "level1": 14489,
+   "postcode": "60523",
+   "revenue": 506,
+   "pounds": 460
+  },
+  {
+   "level1": 14491,
+   "postcode": null,
+   "revenue": 255,
+   "pounds": 461
+  },
+  {
+   "level1": 14493,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 123
+  },
+  {
+   "level1": 14495,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 142
+  },
+  {
+   "level1": 14497,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 191
+  },
+  {
+   "level1": 14499,
+   "postcode": "60609",
+   "revenue": 0,
+   "pounds": 240
+  },
+  {
+   "level1": 14501,
+   "postcode": "60601",
+   "revenue": 255,
+   "pounds": 784
+  },
+  {
+   "level1": 14503,
+   "postcode": null,
+   "revenue": 176,
+   "pounds": 265
+  },
+  {
+   "level1": 14505,
+   "postcode": null,
+   "revenue": 488,
+   "pounds": 1837
+  },
+  {
+   "level1": 14507,
+   "postcode": "60107",
+   "revenue": 0,
+   "pounds": 300
+  },
+  {
+   "level1": 14509,
+   "postcode": null,
+   "revenue": 975,
+   "pounds": 2625
+  },
+  {
+   "level1": 14513,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 4875
+  },
+  {
+   "level1": 14516,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 330
+  },
+  {
+   "level1": 14518,
+   "postcode": "60602",
+   "revenue": 61.19,
+   "pounds": 60
+  },
+  {
+   "level1": 14522,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 0
+  },
+  {
+   "level1": 14526,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 208
+  },
+  {
+   "level1": 14528,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 165
+  },
+  {
+   "level1": 14530,
+   "postcode": "60603",
+   "revenue": 85,
+   "pounds": 83
+  },
+  {
+   "level1": 14532,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1046
+  },
+  {
+   "level1": 14534,
+   "postcode": "60661",
+   "revenue": 0,
+   "pounds": 1220
+  },
+  {
+   "level1": 14536,
+   "postcode": "60629",
+   "revenue": 216.77999999999997,
+   "pounds": 280
+  },
+  {
+   "level1": 14538,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 22
+  },
+  {
+   "level1": 14541,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 533
+  },
+  {
+   "level1": 14545,
+   "postcode": null,
+   "revenue": 170,
+   "pounds": 174
+  },
+  {
+   "level1": 14548,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 105
+  },
+  {
+   "level1": 14550,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 629
+  },
+  {
+   "level1": 14552,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 176
+  },
+  {
+   "level1": 14554,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 2552
+  },
+  {
+   "level1": 14556,
+   "postcode": "60636",
+   "revenue": 255,
+   "pounds": 635
+  },
+  {
+   "level1": 14558,
+   "postcode": null,
+   "revenue": 440,
+   "pounds": 24485
+  },
+  {
+   "level1": 14560,
+   "postcode": "60614",
+   "revenue": 0,
+   "pounds": 648
+  },
+  {
+   "level1": 14562,
+   "postcode": null,
+   "revenue": 44,
+   "pounds": 0
+  },
+  {
+   "level1": 14564,
+   "postcode": "60035",
+   "revenue": 95,
+   "pounds": 184
+  },
+  {
+   "level1": 14566,
+   "postcode": "60618",
+   "revenue": 170,
+   "pounds": 925
+  },
+  {
+   "level1": 14569,
+   "postcode": "60465",
+   "revenue": 0,
+   "pounds": 200
+  },
+  {
+   "level1": 14573,
+   "postcode": "60601",
+   "revenue": 170,
+   "pounds": 389
+  },
+  {
+   "level1": 14576,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1995
+  },
+  {
+   "level1": 14578,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 186
+  },
+  {
+   "level1": 14580,
+   "postcode": null,
+   "revenue": 160,
+   "pounds": 209
+  },
+  {
+   "level1": 14582,
+   "postcode": "60169",
+   "revenue": 187.85000000000002,
+   "pounds": 478
+  },
+  {
+   "level1": 14584,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1268
+  },
+  {
+   "level1": 14586,
+   "postcode": "60621",
+   "revenue": 85,
+   "pounds": 171
+  },
+  {
+   "level1": 14589,
+   "postcode": "60160",
+   "revenue": 255,
+   "pounds": 949
+  },
+  {
+   "level1": 14591,
+   "postcode": null,
+   "revenue": 170,
+   "pounds": 282
+  },
+  {
+   "level1": 14593,
+   "postcode": null,
+   "revenue": 336,
+   "pounds": 335
+  },
+  {
+   "level1": 14595,
+   "postcode": "60202",
+   "revenue": 85,
+   "pounds": 126
+  },
+  {
+   "level1": 14597,
+   "postcode": null,
+   "revenue": 170,
+   "pounds": 438
+  },
+  {
+   "level1": 14600,
+   "postcode": "60642",
+   "revenue": 85,
+   "pounds": 152
+  },
+  {
+   "level1": 14602,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 297
+  },
+  {
+   "level1": 14604,
+   "postcode": "60515",
+   "revenue": 490,
+   "pounds": 1539
+  },
+  {
+   "level1": 14606,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 75
+  },
+  {
+   "level1": 14608,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 69
+  },
+  {
+   "level1": 14610,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 36
+  },
+  {
+   "level1": 14612,
+   "postcode": "60614",
+   "revenue": 1927.5,
+   "pounds": 2285
+  },
+  {
+   "level1": 14613,
+   "postcode": "60606",
+   "revenue": 219.20999999999998,
+   "pounds": 120
+  },
+  {
+   "level1": 14616,
+   "postcode": "60091",
+   "revenue": 57.852,
+   "pounds": 48
+  },
+  {
+   "level1": 14616,
+   "postcode": "60642",
+   "revenue": 173.55599999999998,
+   "pounds": 144
+  },
+  {
+   "level1": 14616,
+   "postcode": "60656",
+   "revenue": 57.852000000000004,
+   "pounds": 48
+  },
+  {
+   "level1": 14618,
+   "postcode": null,
+   "revenue": 170,
+   "pounds": 1824
+  },
+  {
+   "level1": 14620,
+   "postcode": "60707",
+   "revenue": 506.2,
+   "pounds": 200
+  },
+  {
+   "level1": 14624,
+   "postcode": "60646",
+   "revenue": 560,
+   "pounds": 2014
+  },
+  {
+   "level1": 14626,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1512
+  },
+  {
+   "level1": 14628,
+   "postcode": "60563",
+   "revenue": 0,
+   "pounds": 200
+  },
+  {
+   "level1": 14632,
+   "postcode": null,
+   "revenue": 56,
+   "pounds": 126
+  },
+  {
+   "level1": 14636,
+   "postcode": "60649",
+   "revenue": 65,
+   "pounds": 321
+  },
+  {
+   "level1": 14640,
+   "postcode": null,
+   "revenue": 150,
+   "pounds": 350
+  },
+  {
+   "level1": 14642,
+   "postcode": "60559",
+   "revenue": 255,
+   "pounds": 654
+  },
+  {
+   "level1": 14644,
+   "postcode": "60657",
+   "revenue": 85,
+   "pounds": 111
+  },
+  {
+   "level1": 14646,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 200
+  },
+  {
+   "level1": 14650,
+   "postcode": "60188",
+   "revenue": 85,
+   "pounds": 338
+  },
+  {
+   "level1": 14654,
+   "postcode": null,
+   "revenue": 255,
+   "pounds": 730
+  },
+  {
+   "level1": 14656,
+   "postcode": null,
+   "revenue": 202,
+   "pounds": 0
+  },
+  {
+   "level1": 14658,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 315
+  },
+  {
+   "level1": 14660,
+   "postcode": "60654",
+   "revenue": 595,
+   "pounds": 1294
+  },
+  {
+   "level1": 14662,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 119
+  },
+  {
+   "level1": 14664,
+   "postcode": "60615",
+   "revenue": 105,
+   "pounds": 74
+  },
+  {
+   "level1": 14666,
+   "postcode": null,
+   "revenue": 65,
+   "pounds": 0
+  },
+  {
+   "level1": 14670,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 725
+  },
+  {
+   "level1": 14672,
+   "postcode": "60616",
+   "revenue": 85,
+   "pounds": 300
+  },
+  {
+   "level1": 14674,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 457
+  },
+  {
+   "level1": 14676,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1347
+  },
+  {
+   "level1": 14679,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 103
+  },
+  {
+   "level1": 14681,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 98
+  },
+  {
+   "level1": 14683,
+   "postcode": null,
+   "revenue": 215,
+   "pounds": 276
+  },
+  {
+   "level1": 14685,
+   "postcode": "60632",
+   "revenue": 85,
+   "pounds": 245
+  },
+  {
+   "level1": 14687,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 778
+  },
+  {
+   "level1": 14689,
+   "postcode": "60605",
+   "revenue": 862.8900000000001,
+   "pounds": 1862
+  },
+  {
+   "level1": 14691,
+   "postcode": "60491",
+   "revenue": 0,
+   "pounds": 655
+  },
+  {
+   "level1": 14693,
+   "postcode": "60661",
+   "revenue": 340,
+   "pounds": 539
+  },
+  {
+   "level1": 14695,
+   "postcode": "60637",
+   "revenue": 0,
+   "pounds": 5250
+  },
+  {
+   "level1": 14697,
+   "postcode": "60148",
+   "revenue": 170,
+   "pounds": 304
+  },
+  {
+   "level1": 14699,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 504
+  },
+  {
+   "level1": 14701,
+   "postcode": null,
+   "revenue": 595,
+   "pounds": 2035
+  },
+  {
+   "level1": 14703,
+   "postcode": "60610",
+   "revenue": 85,
+   "pounds": 128
+  },
+  {
+   "level1": 14705,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1219
+  },
+  {
+   "level1": 14707,
+   "postcode": "60466",
+   "revenue": 5.660649819494587,
+   "pounds": 59.584837545126355
+  },
+  {
+   "level1": 14707,
+   "postcode": "60615",
+   "revenue": 33.96389891696751,
+   "pounds": 357.5090252707582
+  },
+  {
+   "level1": 14707,
+   "postcode": "60649",
+   "revenue": 1528.3754512635385,
+   "pounds": 16087.906137184116
+  },
+  {
+   "level1": 14709,
+   "postcode": "60561",
+   "revenue": 253,
+   "pounds": 164
+  },
+  {
+   "level1": 14711,
+   "postcode": null,
+   "revenue": 4800,
+   "pounds": 2275
+  },
+  {
+   "level1": 14713,
+   "postcode": "60616",
+   "revenue": 85,
+   "pounds": 194
+  },
+  {
+   "level1": 14713,
+   "postcode": "60653",
+   "revenue": 85,
+   "pounds": 194
+  },
+  {
+   "level1": 14715,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1301
+  },
+  {
+   "level1": 14717,
+   "postcode": null,
+   "revenue": 368,
+   "pounds": 631
+  },
+  {
+   "level1": 14719,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 502
+  },
+  {
+   "level1": 14721,
+   "postcode": null,
+   "revenue": 91.38,
+   "pounds": 94
+  },
+  {
+   "level1": 14723,
+   "postcode": "60653",
+   "revenue": 149.38,
+   "pounds": 251
+  },
+  {
+   "level1": 14725,
+   "postcode": "60607",
+   "revenue": 581,
+   "pounds": 308
+  },
+  {
+   "level1": 14728,
+   "postcode": null,
+   "revenue": 170,
+   "pounds": 250
+  },
+  {
+   "level1": 14730,
+   "postcode": "60657",
+   "revenue": 605,
+   "pounds": 100
+  },
+  {
+   "level1": 14735,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 548
+  },
+  {
+   "level1": 14740,
+   "postcode": null,
+   "revenue": 1105,
+   "pounds": 3150
+  },
+  {
+   "level1": 14742,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 286
+  },
+  {
+   "level1": 14744,
+   "postcode": "60637",
+   "revenue": 735,
+   "pounds": 794
+  },
+  {
+   "level1": 14746,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 781
+  },
+  {
+   "level1": 14748,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 137
+  },
+  {
+   "level1": 14750,
+   "postcode": "60611",
+   "revenue": 340,
+   "pounds": 557
+  },
+  {
+   "level1": 14756,
+   "postcode": "60487",
+   "revenue": 0,
+   "pounds": 750
+  },
+  {
+   "level1": 14758,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 133
+  },
+  {
+   "level1": 14760,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 615
+  },
+  {
+   "level1": 14762,
+   "postcode": "60654",
+   "revenue": 170,
+   "pounds": 497
+  },
+  {
+   "level1": 14764,
+   "postcode": "60642",
+   "revenue": 2355,
+   "pounds": 673
+  },
+  {
+   "level1": 14776,
+   "postcode": "60638",
+   "revenue": 255,
+   "pounds": 687
+  },
+  {
+   "level1": 14780,
+   "postcode": "60631",
+   "revenue": 150,
+   "pounds": 233
+  },
+  {
+   "level1": 14782,
+   "postcode": "60661",
+   "revenue": 585,
+   "pounds": 797
+  },
+  {
+   "level1": 14784,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 2885
+  },
+  {
+   "level1": 14792,
+   "postcode": "60618",
+   "revenue": 280.17,
+   "pounds": 568
+  },
+  {
+   "level1": 14794,
+   "postcode": "60617",
+   "revenue": 85,
+   "pounds": 300
+  },
+  {
+   "level1": 14803,
+   "postcode": "60423",
+   "revenue": 425,
+   "pounds": 1182
+  },
+  {
+   "level1": 14807,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 250
+  },
+  {
+   "level1": 14809,
+   "postcode": null,
+   "revenue": 130,
+   "pounds": 350
+  },
+  {
+   "level1": 14811,
+   "postcode": null,
+   "revenue": 1029,
+   "pounds": 120
+  },
+  {
+   "level1": 14813,
+   "postcode": "60647",
+   "revenue": 255,
+   "pounds": 735
+  },
+  {
+   "level1": 14819,
+   "postcode": "60443",
+   "revenue": 2210,
+   "pounds": 0
+  },
+  {
+   "level1": 14827,
+   "postcode": null,
+   "revenue": 230,
+   "pounds": 0
+  },
+  {
+   "level1": 14835,
+   "postcode": "60608",
+   "revenue": 130,
+   "pounds": 324
+  },
+  {
+   "level1": 14845,
+   "postcode": "60604",
+   "revenue": 65,
+   "pounds": 149
+  },
+  {
+   "level1": 14853,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 205
+  },
+  {
+   "level1": 14857,
+   "postcode": "60607",
+   "revenue": 750,
+   "pounds": 1951
+  },
+  {
+   "level1": 14869,
+   "postcode": "60515",
+   "revenue": 85,
+   "pounds": 231
+  },
+  {
+   "level1": 14873,
+   "postcode": "60419",
+   "revenue": 354,
+   "pounds": 208
+  },
+  {
+   "level1": 14875,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 297
+  },
+  {
+   "level1": 14877,
+   "postcode": "60523",
+   "revenue": 2660,
+   "pounds": 0
+  },
+  {
+   "level1": 14879,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 465
+  },
+  {
+   "level1": 14881,
+   "postcode": null,
+   "revenue": 340,
+   "pounds": 534
+  },
+  {
+   "level1": 14884,
+   "postcode": "60602",
+   "revenue": 382.93,
+   "pounds": 1166
+  },
+  {
+   "level1": 14886,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 635
+  },
+  {
+   "level1": 14890,
+   "postcode": null,
+   "revenue": 1676,
+   "pounds": 0
+  },
+  {
+   "level1": 14892,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1139
+  },
+  {
+   "level1": 14894,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 146
+  },
+  {
+   "level1": 14896,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1759
+  },
+  {
+   "level1": 14898,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 278
+  },
+  {
+   "level1": 14900,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 1370
+  },
+  {
+   "level1": 14902,
+   "postcode": null,
+   "revenue": 814,
+   "pounds": 195
+  },
+  {
+   "level1": 14903,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1105
+  },
+  {
+   "level1": 14906,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 111
+  },
+  {
+   "level1": 14908,
+   "postcode": null,
+   "revenue": 772,
+   "pounds": 431
+  },
+  {
+   "level1": 14910,
+   "postcode": "60641",
+   "revenue": 19408,
+   "pounds": 11019
+  },
+  {
+   "level1": 14912,
+   "postcode": "60473",
+   "revenue": 85,
+   "pounds": 107
+  },
+  {
+   "level1": 14914,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 248
+  },
+  {
+   "level1": 14918,
+   "postcode": "46322",
+   "revenue": 85,
+   "pounds": 62
+  },
+  {
+   "level1": 14921,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1103
+  },
+  {
+   "level1": 14923,
+   "postcode": null,
+   "revenue": 170,
+   "pounds": 314
+  },
+  {
+   "level1": 14927,
+   "postcode": "60517",
+   "revenue": 170,
+   "pounds": 194
+  },
+  {
+   "level1": 14929,
+   "postcode": "60093",
+   "revenue": 85,
+   "pounds": 215
+  },
+  {
+   "level1": 14931,
+   "postcode": "60153",
+   "revenue": 85,
+   "pounds": 307
+  },
+  {
+   "level1": 14932,
+   "postcode": "60601",
+   "revenue": 170,
+   "pounds": 534
+  },
+  {
+   "level1": 14935,
+   "postcode": "60527",
+   "revenue": 170,
+   "pounds": 72
+  },
+  {
+   "level1": 14937,
+   "postcode": "60189",
+   "revenue": 85,
+   "pounds": 170
+  },
+  {
+   "level1": 14939,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1922
+  },
+  {
+   "level1": 14941,
+   "postcode": null,
+   "revenue": 5486,
+   "pounds": 752
+  },
+  {
+   "level1": 14943,
+   "postcode": "60565",
+   "revenue": 115,
+   "pounds": 175
+  },
+  {
+   "level1": 14946,
+   "postcode": null,
+   "revenue": 183.98,
+   "pounds": 220
+  },
+  {
+   "level1": 14948,
+   "postcode": null,
+   "revenue": 210,
+   "pounds": 328
+  },
+  {
+   "level1": 14952,
+   "postcode": "60411",
+   "revenue": 149,
+   "pounds": 60
+  },
+  {
+   "level1": 14955,
+   "postcode": "60429",
+   "revenue": 85,
+   "pounds": 177
+  },
+  {
+   "level1": 14959,
+   "postcode": null,
+   "revenue": 170,
+   "pounds": 1436
+  },
+  {
+   "level1": 14961,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 142
+  },
+  {
+   "level1": 14963,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 730
+  },
+  {
+   "level1": 14965,
+   "postcode": "60302",
+   "revenue": 85,
+   "pounds": 6067
+  },
+  {
+   "level1": 14967,
+   "postcode": "60641",
+   "revenue": 2897,
+   "pounds": 218
+  },
+  {
+   "level1": 14969,
+   "postcode": "60607",
+   "revenue": 291.2,
+   "pounds": 260
+  },
+  {
+   "level1": 14971,
+   "postcode": "60609",
+   "revenue": 85,
+   "pounds": 164
+  },
+  {
+   "level1": 14973,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1228
+  },
+  {
+   "level1": 14976,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 154
+  },
+  {
+   "level1": 14978,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 118
+  },
+  {
+   "level1": 14982,
+   "postcode": "60655",
+   "revenue": 85,
+   "pounds": 267
+  },
+  {
+   "level1": 14984,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 462
+  },
+  {
+   "level1": 14986,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 562
+  },
+  {
+   "level1": 14988,
+   "postcode": "60469",
+   "revenue": 85,
+   "pounds": 550
+  },
+  {
+   "level1": 14990,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 89
+  },
+  {
+   "level1": 14992,
+   "postcode": null,
+   "revenue": 90,
+   "pounds": 204
+  },
+  {
+   "level1": 14994,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 595
+  },
+  {
+   "level1": 14996,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 179
+  },
+  {
+   "level1": 14999,
+   "postcode": "60565",
+   "revenue": 85,
+   "pounds": 164
+  },
+  {
+   "level1": 15003,
+   "postcode": "60089",
+   "revenue": 1940,
+   "pounds": 321
+  },
+  {
+   "level1": 15005,
+   "postcode": null,
+   "revenue": 2980,
+   "pounds": 5400
+  },
+  {
+   "level1": 15009,
+   "postcode": "60611",
+   "revenue": 170,
+   "pounds": 282
+  },
+  {
+   "level1": 15011,
+   "postcode": "60025",
+   "revenue": 255,
+   "pounds": 808
+  },
+  {
+   "level1": 15013,
+   "postcode": "60560",
+   "revenue": 486,
+   "pounds": 0
+  },
+  {
+   "level1": 15015,
+   "postcode": "60202",
+   "revenue": 85,
+   "pounds": 140
+  },
+  {
+   "level1": 15017,
+   "postcode": "60174",
+   "revenue": 130,
+   "pounds": 350
+  },
+  {
+   "level1": 15019,
+   "postcode": "60625",
+   "revenue": 85,
+   "pounds": 143
+  },
+  {
+   "level1": 15021,
+   "postcode": null,
+   "revenue": 255,
+   "pounds": 674
+  },
+  {
+   "level1": 15023,
+   "postcode": "60805",
+   "revenue": 0,
+   "pounds": 2625
+  },
+  {
+   "level1": 15025,
+   "postcode": "60433",
+   "revenue": 325,
+   "pounds": 875
+  },
+  {
+   "level1": 15027,
+   "postcode": "60025",
+   "revenue": 85,
+   "pounds": 191
+  },
+  {
+   "level1": 15029,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 250
+  },
+  {
+   "level1": 15033,
+   "postcode": "60305",
+   "revenue": 697,
+   "pounds": 135
+  },
+  {
+   "level1": 15035,
+   "postcode": "60604",
+   "revenue": 85,
+   "pounds": 159
+  },
+  {
+   "level1": 15040,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 277
+  },
+  {
+   "level1": 15042,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 170
+  },
+  {
+   "level1": 15044,
+   "postcode": "60201",
+   "revenue": 85,
+   "pounds": 239
+  },
+  {
+   "level1": 15046,
+   "postcode": "60613",
+   "revenue": 85,
+   "pounds": 95
+  },
+  {
+   "level1": 15048,
+   "postcode": "60188",
+   "revenue": 85,
+   "pounds": 169
+  },
+  {
+   "level1": 15050,
+   "postcode": "60619",
+   "revenue": 65,
+   "pounds": 72
+  },
+  {
+   "level1": 15052,
+   "postcode": "60609",
+   "revenue": 190.4,
+   "pounds": 326
+  },
+  {
+   "level1": 15054,
+   "postcode": "60176",
+   "revenue": 65,
+   "pounds": 151
+  },
+  {
+   "level1": 15056,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 33
+  },
+  {
+   "level1": 15058,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 333
+  },
+  {
+   "level1": 15060,
+   "postcode": "60423",
+   "revenue": 510,
+   "pounds": 1269
+  },
+  {
+   "level1": 15062,
+   "postcode": "60477",
+   "revenue": 260,
+   "pounds": 600
+  },
+  {
+   "level1": 15064,
+   "postcode": "60611",
+   "revenue": 565,
+   "pounds": 241
+  },
+  {
+   "level1": 15066,
+   "postcode": "60472",
+   "revenue": 85,
+   "pounds": 86
+  },
+  {
+   "level1": 15068,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 288
+  },
+  {
+   "level1": 15070,
+   "postcode": "60429",
+   "revenue": 255,
+   "pounds": 504
+  },
+  {
+   "level1": 15072,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 158
+  },
+  {
+   "level1": 15074,
+   "postcode": "46311",
+   "revenue": 85,
+   "pounds": 150
+  },
+  {
+   "level1": 15076,
+   "postcode": null,
+   "revenue": 255,
+   "pounds": 244
+  },
+  {
+   "level1": 15078,
+   "postcode": null,
+   "revenue": 201,
+   "pounds": 251
+  },
+  {
+   "level1": 15082,
+   "postcode": null,
+   "revenue": 128,
+   "pounds": 0
+  },
+  {
+   "level1": 15084,
+   "postcode": "60108",
+   "revenue": 170,
+   "pounds": 359
+  },
+  {
+   "level1": 15086,
+   "postcode": "60461",
+   "revenue": 425,
+   "pounds": 1053
+  },
+  {
+   "level1": 15088,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 215
+  },
+  {
+   "level1": 15090,
+   "postcode": "60652",
+   "revenue": 85,
+   "pounds": 242
+  },
+  {
+   "level1": 15092,
+   "postcode": "60402",
+   "revenue": 65,
+   "pounds": 122
+  },
+  {
+   "level1": 15097,
+   "postcode": "46321",
+   "revenue": 85,
+   "pounds": 108
+  },
+  {
+   "level1": 15107,
+   "postcode": "60137",
+   "revenue": 65,
+   "pounds": 175
+  },
+  {
+   "level1": 15109,
+   "postcode": "60707",
+   "revenue": 170,
+   "pounds": 680
+  },
+  {
+   "level1": 15111,
+   "postcode": "60615",
+   "revenue": 362,
+   "pounds": 350
+  },
+  {
+   "level1": 15113,
+   "postcode": null,
+   "revenue": 220,
+   "pounds": 0
+  },
+  {
+   "level1": 15115,
+   "postcode": "60613",
+   "revenue": 340,
+   "pounds": 571
+  },
+  {
+   "level1": 15117,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 153
+  },
+  {
+   "level1": 15119,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 250
+  },
+  {
+   "level1": 15121,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 194
+  },
+  {
+   "level1": 15123,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 158
+  },
+  {
+   "level1": 15125,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 162
+  },
+  {
+   "level1": 15127,
+   "postcode": "60609",
+   "revenue": 85,
+   "pounds": 284
+  },
+  {
+   "level1": 15129,
+   "postcode": null,
+   "revenue": 1984,
+   "pounds": 1
+  },
+  {
+   "level1": 15131,
+   "postcode": "60449",
+   "revenue": 1950,
+   "pounds": 4500
+  },
+  {
+   "level1": 15135,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 161
+  },
+  {
+   "level1": 15137,
+   "postcode": null,
+   "revenue": 236,
+   "pounds": 2800
+  },
+  {
+   "level1": 15139,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 251
+  },
+  {
+   "level1": 15143,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1208
+  },
+  {
+   "level1": 15145,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 228
+  },
+  {
+   "level1": 15147,
+   "postcode": "60422",
+   "revenue": 340,
+   "pounds": 674
+  },
+  {
+   "level1": 15149,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 128
+  },
+  {
+   "level1": 15151,
+   "postcode": "60611",
+   "revenue": 340,
+   "pounds": 596
+  },
+  {
+   "level1": 15153,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 189
+  },
+  {
+   "level1": 15155,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 150
+  },
+  {
+   "level1": 15157,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 767
+  },
+  {
+   "level1": 15159,
+   "postcode": "60657",
+   "revenue": 130,
+   "pounds": 350
+  },
+  {
+   "level1": 15161,
+   "postcode": "60425",
+   "revenue": 255,
+   "pounds": 443
+  },
+  {
+   "level1": 15163,
+   "postcode": null,
+   "revenue": 3208,
+   "pounds": 406
+  },
+  {
+   "level1": 15165,
+   "postcode": "60007",
+   "revenue": 170,
+   "pounds": 500
+  },
+  {
+   "level1": 15167,
+   "postcode": null,
+   "revenue": 1944,
+   "pounds": 1343
+  },
+  {
+   "level1": 15171,
+   "postcode": "60302",
+   "revenue": 85,
+   "pounds": 144
+  },
+  {
+   "level1": 15173,
+   "postcode": "60611",
+   "revenue": 150,
+   "pounds": 377
+  },
+  {
+   "level1": 15179,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 76
+  },
+  {
+   "level1": 15181,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 20
+  },
+  {
+   "level1": 15185,
+   "postcode": "46321",
+   "revenue": 386,
+   "pounds": 331
+  },
+  {
+   "level1": 15187,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 175
+  },
+  {
+   "level1": 15189,
+   "postcode": "60564",
+   "revenue": 195,
+   "pounds": 450
+  },
+  {
+   "level1": 15191,
+   "postcode": "60076",
+   "revenue": 0,
+   "pounds": 2250
+  },
+  {
+   "level1": 15193,
+   "postcode": "60526",
+   "revenue": 1119.5,
+   "pounds": 280
+  },
+  {
+   "level1": 15195,
+   "postcode": null,
+   "revenue": 2261,
+   "pounds": 975
+  },
+  {
+   "level1": 15198,
+   "postcode": null,
+   "revenue": 168,
+   "pounds": 0
+  },
+  {
+   "level1": 15200,
+   "postcode": "60137",
+   "revenue": 424,
+   "pounds": 853
+  },
+  {
+   "level1": 15202,
+   "postcode": "60402",
+   "revenue": 85,
+   "pounds": 300
+  },
+  {
+   "level1": 15204,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 131
+  },
+  {
+   "level1": 15206,
+   "postcode": "46402",
+   "revenue": 0,
+   "pounds": 14833
+  },
+  {
+   "level1": 15208,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 263
+  },
+  {
+   "level1": 15210,
+   "postcode": "60614",
+   "revenue": 60,
+   "pounds": 0
+  },
+  {
+   "level1": 15217,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 689
+  },
+  {
+   "level1": 15219,
+   "postcode": "60185",
+   "revenue": 645,
+   "pounds": 2530
+  },
+  {
+   "level1": 15221,
+   "postcode": "60603",
+   "revenue": 85,
+   "pounds": 167
+  },
+  {
+   "level1": 15223,
+   "postcode": "60803",
+   "revenue": 0,
+   "pounds": 748
+  },
+  {
+   "level1": 15227,
+   "postcode": "60640",
+   "revenue": 85,
+   "pounds": 52
+  },
+  {
+   "level1": 15229,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 139
+  },
+  {
+   "level1": 15231,
+   "postcode": "60175",
+   "revenue": 0,
+   "pounds": 200
+  },
+  {
+   "level1": 15233,
+   "postcode": "60611",
+   "revenue": 72.8,
+   "pounds": 80
+  },
+  {
+   "level1": 15235,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 301
+  },
+  {
+   "level1": 15238,
+   "postcode": "60616",
+   "revenue": 340,
+   "pounds": 800
+  },
+  {
+   "level1": 15240,
+   "postcode": null,
+   "revenue": 170,
+   "pounds": 402
+  },
+  {
+   "level1": 15242,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1657
+  },
+  {
+   "level1": 15244,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 108
+  },
+  {
+   "level1": 15248,
+   "postcode": "60607",
+   "revenue": 85,
+   "pounds": 170
+  },
+  {
+   "level1": 15250,
+   "postcode": "60617",
+   "revenue": 0,
+   "pounds": 1080
+  },
+  {
+   "level1": 15253,
+   "postcode": "60641",
+   "revenue": 85,
+   "pounds": 201
+  },
+  {
+   "level1": 15255,
+   "postcode": "60622",
+   "revenue": 85,
+   "pounds": 114
+  },
+  {
+   "level1": 15257,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1410
+  },
+  {
+   "level1": 15261,
+   "postcode": null,
+   "revenue": 170,
+   "pounds": 302
+  },
+  {
+   "level1": 15263,
+   "postcode": "60162",
+   "revenue": 85,
+   "pounds": 97
+  },
+  {
+   "level1": 15265,
+   "postcode": null,
+   "revenue": 65,
+   "pounds": 119
+  },
+  {
+   "level1": 15269,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 489
+  },
+  {
+   "level1": 15271,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 1847
+  },
+  {
+   "level1": 15273,
+   "postcode": null,
+   "revenue": 120,
+   "pounds": 0
+  },
+  {
+   "level1": 15277,
+   "postcode": "60647",
+   "revenue": 170,
+   "pounds": 395
+  },
+  {
+   "level1": 15279,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 40
+  },
+  {
+   "level1": 15281,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 144
+  },
+  {
+   "level1": 15283,
+   "postcode": "60202",
+   "revenue": 85,
+   "pounds": 165
+  },
+  {
+   "level1": 15285,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 3566
+  },
+  {
+   "level1": 15287,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 416
+  },
+  {
+   "level1": 15289,
+   "postcode": null,
+   "revenue": 1191,
+   "pounds": 1813
+  },
+  {
+   "level1": 15291,
+   "postcode": null,
+   "revenue": 7132,
+   "pounds": 0
+  },
+  {
+   "level1": 15293,
+   "postcode": null,
+   "revenue": 85,
+   "pounds": 111
+  },
+  {
+   "level1": 15295,
+   "postcode": "60602",
+   "revenue": 765,
+   "pounds": 1836
+  },
+  {
+   "level1": 15300,
+   "postcode": "60169",
+   "revenue": 4215,
+   "pounds": 7076
+  },
+  {
+   "level1": 15302,
+   "postcode": "60406",
+   "revenue": 255,
+   "pounds": 737
+  },
+  {
+   "level1": 15304,
+   "postcode": "60614",
+   "revenue": 0,
+   "pounds": 270
+  },
+  {
+   "level1": 15306,
+   "postcode": null,
+   "revenue": 191.26,
+   "pounds": 225
+  },
+  {
+   "level1": 15308,
+   "postcode": "60630",
+   "revenue": 286.88,
+   "pounds": 819
+  },
+  {
+   "level1": 15312,
+   "postcode": "60423",
+   "revenue": 0,
+   "pounds": 270
+  },
+  {
+   "level1": 15315,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 225
+  },
+  {
+   "level1": 15319,
+   "postcode": null,
+   "revenue": 0,
+   "pounds": 793
+  },
+  {
+   "level1": 15321,
+   "postcode": null,
+   "revenue": 170,
+   "pounds": 354
+  },
+  {
+   "level1": 15327,
+   "postcode": "60611",
+   "revenue": 85,
+   "pounds": 120
+  },
+  {
+   "level1": 15329,
+   "postcode": "60609",
+   "revenue": 816,
+   "pounds": 0
+  }
+ ]
+}

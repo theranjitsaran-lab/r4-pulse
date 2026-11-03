@@ -19,7 +19,7 @@ const say = (state, n, text) => { if (state === 'FAIL') fails++; console.log(`${
 // every table as drawn: each column adds to the total row, unfiltered and searched; with months, each row's
 // and the total's YTD and 12 months equal their months
 const TABLES = [['Accounts', '#customers?view=overview&span=12', 'chicago'], ['Opportunities', '#opportunities', 'chicago'], ['Month grid', '#customers?view=grid&span=12', 'chicago'], ['Cross-sell', '#customers?view=whitespace', 'chicago'],
-  ['Warehouse', '#numbers?tab=warehouse', 'west'], ['Long way round', '#activity', '60'], ['Price gaps', '#pricing', 'box']];
+  ['Warehouse', '#numbers?tab=warehouse', 'west'], ['Costly to serve', '#activity?lens=cost', '60'], ['Price gaps', '#pricing', 'box']];
 const readTable = t => {
   const n = x => Number(x.dataset.v);
   const head = [...t.querySelectorAll('thead th')], rows = [...t.querySelectorAll('tbody tr[data-i], tbody tr[data-rest]')];
@@ -61,7 +61,7 @@ async function tables(base, pass) {
       for (const stage of ['all', 'searched']) {
         const dts = await page.$$('.dt');
         for (const d of dts) {
-          if (stage === 'searched') { await (await d.$('.dt-find')).fill(term); await page.waitForTimeout(100); }
+          if (stage === 'searched') { const find = await d.$('.dt-find'); if (!find) continue; await find.fill(term); await page.waitForTimeout(100); }
           const hasRest = await d.$('tr[data-rest]');
           if (hasRest) {
             for (const i of [0, 1, 2]) { const trs = await d.$$('tbody tr[aria-expanded]'); if (trs[i]) { await (await trs[i].$('.dt-caret')).click(); await page.waitForTimeout(250); } }

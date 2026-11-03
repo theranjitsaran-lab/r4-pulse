@@ -390,6 +390,38 @@ async function routestops() {
     GROUP BY 1, 2, 3 ORDER BY 1, 2, 4 NULLS LAST, 3`, [anchor.latest_done]);
 }
 
+// Operations: every done stop since route days are complete (January 2025; checked 3 November 2026), with who drove it.
+// The stop order is not here on purpose: rorder is one number for the whole day, and porder and sorder run no closer to a
+// sensible round than a shuffle (checked 3 November 2026), so components/opsdata.js draws the shortest likely round.
+async function routehistory() {
+  const [anchor] = await query(`SELECT max(date)::text AS latest_done FROM v_route_day WHERE services_done > 0`);
+  return query(`
+    SELECT NULLIF(date, '')::date::text AS date, route, NULLIF(slocid, '') AS stop, min(NULLIF(driver, '')) AS driver,
+           min(NULLIF(level1, '')::int) AS level1, min(left(coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')), 5)) AS postcode, count(*)::int AS services
+    FROM vs_service_orders
+    WHERE billable = 'true' AND NULLIF(route, '') IS NOT NULL AND route <> '--'
+      AND NULLIF(date, '')::date >= '2025-01-01' AND NULLIF(date, '')::date <= $1::date
+    GROUP BY 1, 2, 3 ORDER BY 1, 2, 3`, [anchor.latest_done]);
+}
+
+// Operations: what route work billed in twelve months by work date, and the plant pounds on S5 (data rule 6). A sub-account's
+// lines (levelid) are shared across its postcodes by the services done at each; one with no done services has no postcode.
+async function arearevenue() {
+  const [anchor] = await query(`SELECT max(date)::text AS latest_done FROM v_route_day WHERE services_done > 0`);
+  return query(`
+    WITH vs AS (SELECT NULLIF(levelid, '')::int AS levelid, left(coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')), 5) AS postcode, count(*)::float AS n
+                FROM vs_service_orders
+                WHERE billable = 'true' AND coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')) ~ '^[0-9]{5}' AND NULLIF(levelid, '') IS NOT NULL
+                  AND NULLIF(date, '')::date > $1::date - 365 AND NULLIF(date, '')::date <= $1::date GROUP BY 1, 2),
+    site AS (SELECT levelid, postcode, n / sum(n) OVER (PARTITION BY levelid) AS share FROM vs)
+    SELECT p.level1, site.postcode,
+           sum(CASE WHEN sf.family IN ('bin', 'itad') THEN p.totamt * coalesce(site.share, 1) ELSE 0 END)::float AS revenue,
+           sum(CASE WHEN s.servcode = 'S5' THEN p.units * coalesce(site.share, 1) ELSE 0 END)::float AS pounds
+    FROM priced_lines p JOIN servcode s USING (servcodeid) LEFT JOIN model.service_family sf ON sf.servcode = s.servcode LEFT JOIN site ON site.levelid = p.levelid
+    WHERE p.level1 <> 6714 AND p.wodate > $1::date - 365 AND p.wodate <= $1::date AND (sf.family IN ('bin', 'itad') OR s.servcode = 'S5')
+    GROUP BY 1, 2 ORDER BY 1, 2`, [anchor.latest_done]);
+}
+
 // Box deliveries and pickups, twelve months: VCK delivery lines (service code 01) by day and account,
 // with a postcode for placing them on that day's shred route (components/routecost.js). VCK holds no
 // addresses (checked 1 November 2026: the only addresses in the database are Veri-Shred's stops), so:
@@ -606,4 +638,4 @@ async function invoices() {
   return { rows };
 }
 
-module.exports = { invoices, customerInvoices, pulse, activity, pricing, calls, margin, customers, drill, customerDrill, customerJobs, jobs, storage, segments, linework, routestops, deliverydays, gl, accountmonths, accountlines };
+module.exports = { routehistory, arearevenue, invoices, customerInvoices, pulse, activity, pricing, calls, margin, customers, drill, customerDrill, customerJobs, jobs, storage, segments, linework, routestops, deliverydays, gl, accountmonths, accountlines };

@@ -15,7 +15,7 @@ const { seesCosts } = require('./settings');
 
 const router = express.Router();
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework', 'linegrid', 'metrics'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
+const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework', 'linegrid', 'metrics', 'opsdata'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
 
 async function callsLog() {
   if (USE_FIXTURES) { try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'calls_log.json'), 'utf8')); } catch { return []; } }
@@ -73,6 +73,25 @@ router.get('/customers', async (req, res) => {
 router.get('/routecost', async (req, res) => {
   try { const D = await data(); send(req, res, D.RC || { accounts: {}, postcodes: {}, days: 0 }); }
   catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Operations for one period (components/opsdata.js), cached until the data moves. Modelled costs, margins and moves go only
+// to those who see costs; everyone else gets the same page without them.
+let opsBase = { stamp: null, periods: new Map(), costly: null, months: null };
+const NO_COST = ({ costPerService, ...rest }) => rest;
+router.get('/operations', async (req, res) => {
+  try {
+    const [D, L] = await Promise.all([data(), load()]), O = L.opsdata, st = stamp(D), RH = D.RH || [];
+    if (opsBase.stamp !== st) opsBase = { stamp: st, periods: new Map(), costly: O.costlyAreas({ rc: D.RC, AR: D.AR, M: D.M, Z: D.Z, R: D.R }), months: O.density(O.opsMonths(RH, D.R)) };
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(req.query.date || '') ? req.query.date : null, P = O.periods(D.A.latestDone, date), key = P[req.query.p] ? req.query.p : 'q', ck = key + '|' + (key === 'day' || key === 'week' ? date : '');
+    if (!opsBase.periods.has(ck)) opsBase.periods.set(ck, O.opsPeriod(RH, D.Z, D.R, P[key]));
+    const V = opsBase.periods.get(ck), costs = seesCosts(req);
+    const tabs = Object.values(P).map(p => ({ key: p.key, label: p.label, compare: p.compare, why: p.why || null }));
+    if (costs) return send(req, res, { ...V, tabs, costly: opsBase.costly, density: opsBase.months, points: O.opsPoints(V, opsBase.costly), costs: true });
+    const costly = opsBase.costly.map(a => ({ postcode: a.postcode, miles: a.miles, visits: a.visits, services: a.services, who: a.who }));
+    const density = { ...opsBase.months, rows: opsBase.months.rows.map(({ cost, before, ...r }) => ({ ...r, before: before ? { perDay: before.perDay } : null })) };
+    send(req, res, { ...V, tabs, now: NO_COST(V.now), prev: V.prev && NO_COST(V.prev), year: V.year && NO_COST(V.year), costly, density, points: O.opsPoints(V, null), costs: false });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // The Quote screen's map: the regular stops by weekday and route, each route's latest such day in stop order, each

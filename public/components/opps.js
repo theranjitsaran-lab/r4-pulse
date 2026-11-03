@@ -5,6 +5,7 @@
 //   slip    down on its own run over three months: the monthly drop, a year (levers.js)
 //   round   no rate moved in two years: the typical 8% on its service (lists.js)
 //   overdue boxes past retention review: destruction once at the median R3 fee (levers.js)
+//   route   a far area sent from Operations, sized there (opsdata.js costlyAreas) and held in app.opportunity
 // Each has a key (kind:level1[:line]), a value a year, a reason, a draft opener, and, from
 // app.opportunity (server/sales.js), an owner and a status.
 //   opportunities({ C, PR, CA, M }, statuses) → { rows, totals, won }
@@ -17,7 +18,7 @@ import { moveReason } from './series.js';
 
 const CITADEL = 6714;
 export const KINDS = {
-  cross: 'Cross-sell', price: 'Price gap', slip: 'Win back', round: 'Rate round', overdue: 'Overdue boxes',
+  cross: 'Cross-sell', price: 'Price gap', slip: 'Win back', round: 'Rate round', overdue: 'Overdue boxes', route: 'Route',
 };
 export const STATUSES = ['open', 'contacted', 'quoted', 'won', 'lost'];
 const k$ = v => Fmt.money(v, { short: 'hyphen' });
@@ -77,6 +78,14 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
       short: `${Fmt.num(r.boxes)} boxes past their review; needs client sign-off`,
       reason: `${Fmt.num(r.boxes)} boxes past their retention review: ${k$(r.once)} of destruction once, ending ${k$(r.lost * 12)} a year of storage. A one-off, and it needs the client's sign-off.`,
       opener: OPENERS.overdue(name, { boxes: Math.round(r.boxes) }) });
+  }
+  // far areas sent from Operations: only what someone sent, as they sent it
+  const nameOf = new Map(((M && M.accounts) || []).map(a => [a.level1, a.customer]));
+  for (const [key, st] of Object.entries(statuses)) {
+    if (!key.startsWith('route:') || !nameOf.has(st.level1)) continue;
+    const name = titleCase(nameOf.get(st.level1));
+    push({ key, kind: 'route', level1: st.level1, name, value: st.value, modelled: true, short: st.note || 'A far area sent from Operations', reason: st.note || 'A far area sent from Operations.',
+      opener: `We have been looking at how we serve your site at ${key.split(':')[2]}. Could we talk through the visit schedule?` });
   }
   // what the team has said about each
   for (const r of rows) {

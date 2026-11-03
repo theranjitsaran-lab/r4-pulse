@@ -40,7 +40,7 @@ export function districtLayer(S, P) {
   }
   return out;
 }
-export const zoneKey = () => `<div class="hm-key"><span>Fewer services</span>${[1, 2, 3, 4, 5].map(i => `<i class="z${i}"></i>`).join('')}<span>More, across R4 in twelve months</span></div>`;
+export const zoneKey = (over = 'across R4 in twelve months') => `<div class="hm-key"><span>Fewer services</span>${[1, 2, 3, 4, 5].map(i => `<i class="z${i}"></i>`).join('')}<span>More, ${esc(over)}</span></div>`;
 
 // One route, masked so it can draw out from the yard: the casing and the dashes go in the masked group.
 export const routeLayer = (n, line, cls = '', title = '') => { const d = pathD(line); return `<path class="hm-case ${cls}" data-n="${n}" d="${d}"/><path class="hm-route ${cls}" data-n="${n}" d="${d}">${title ? `<title>${esc(title)}</title>` : ''}</path>`; };

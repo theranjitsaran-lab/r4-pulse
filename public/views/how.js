@@ -24,6 +24,7 @@ const SECTIONS = () => [
   ['Operations', [
     `${LABELS.veriShred} Booked work is not counted until it is done.`,
     `Normal for a day is that weekday's median over 8 weeks; ${LABELS.normalRoute} is the route's own 8-week median.`,
+    'The order drivers made their stops in was never recorded, so a route on a map is the shortest likely round between its postcodes, along the main roads. A far area\'s cost is its share of the real route days it was served on, by minutes; its revenue is the bin and ITAD work billed at that site.',
     'Distances are miles from the 35th Street yard, measured from the centre of each postcode, or along main roads where a route is drawn. Drivers\' GPS was never captured.',
   ]],
   ['Warehouse', [

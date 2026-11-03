@@ -13,7 +13,7 @@ const role = (process.argv.find(a => a.startsWith('--role=')) || '--role=owner')
 const drill = require('../fixtures/drill.json').data.accounts.filter(a => a.level1 !== 6714).sort((a, b) => b.visits.length - a.visits.length);
 const SCREENS = ['#pulse', '#customers', '#customers?view=overview', '#customers?view=conversations', '#opportunities', '#customers?view=grid', '#customers?view=whitespace', '#customers?view=margin',
   '#customers?view=slipping', '#customers?view=gaps', '#customers?view=rounds', '#customers?view=destruction', '#customers?view=overview&line=bin', `#customer/${drill[0].level1}`, '#customer/12530',
-  '#pricing', '#pricing?code=B3', '#activity', '#numbers?tab=warehouse', '#how', '#settings', '#classic'];
+  '#pricing', '#pricing?code=B3', '#activity', '#activity?p=day', '#activity?p=week', '#activity?p=y', '#activity?p=q&cmp=1', '#activity?p=q&lens=add', '#activity?p=q&lens=cost', '#numbers?tab=warehouse', '#how', '#settings', '#classic'];
 
 // what R4 users must not see while costs are not final
 const COSTS = [/\bMargin\b(?!\s+Margins arrive)/, /Renegotiate/, /\bRe-route\b/, /\bDrop\b/, /below cost/i, /Cost est\./, /cost to serve(?! not ready)/i, /to serve est\./, /of revenue kept/, /Left, provisional/, /Gross margin(?! by line of business\s+Not costed)/, /How to improve the margin/, /saves about/, /Route time est\./];
