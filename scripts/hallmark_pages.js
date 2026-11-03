@@ -78,6 +78,8 @@ async function run(role, width, browser, base, pass, name) {
       const more = await page.$('.dt-more .linkbtn'); if (!more) break;
       await more.click(); await page.waitForTimeout(150);
     }
+    // the Cross-sell drill-down, open, so the checker reads it as a person sees it
+    if (key === 'accounts-cross-sell') { await page.click('#ws-t tbody tr[data-i]'); await page.waitForTimeout(1000); }
     await page.waitForTimeout(200);
     results[key] = await page.evaluate(facts);
     results[key].errors = errors;

@@ -21,6 +21,7 @@ export const KINDS = {
   cross: 'Cross-sell', price: 'Price gap', slip: 'Win back', round: 'Rate round', overdue: 'Overdue boxes', route: 'Route',
 };
 export const STATUSES = ['open', 'contacted', 'quoted', 'won', 'lost'];
+export const OWNERS = ['Mike Kelly', 'Anne Sterne', 'Trisha Rooney'];
 const k$ = v => Fmt.money(v, { short: 'hyphen' });
 const lineName = Object.fromEntries(LINES.map(l => [l.key, l.name]));
 const lc = n => n === 'ITAD' ? n : n.toLowerCase();
@@ -79,8 +80,16 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
       reason: `${Fmt.num(r.boxes)} boxes past their retention review: ${k$(r.once)} of destruction once, ending ${k$(r.lost * 12)} a year of storage. A one-off, and it needs the client's sign-off.`,
       opener: OPENERS.overdue(name, { boxes: Math.round(r.boxes) }) });
   }
-  // far areas sent from Operations: only what someone sent, as they sent it
+  // sent from another screen: only what someone sent, as they sent it. A far area from Operations; a cross-sell gap the list
+  // above does not carry, because the account is below its 120 or the line is bought but low for its size
   const nameOf = new Map(((M && M.accounts) || []).map(a => [a.level1, a.customer]));
+  const have = new Set(rows.map(r => r.key));
+  for (const [key, st] of Object.entries(statuses)) {
+    if (!key.startsWith('cross:') || have.has(key) || !nameOf.has(st.level1)) continue;
+    const name = titleCase(nameOf.get(st.level1)), line = key.split(':')[2];
+    push({ key, kind: 'cross', level1: st.level1, name, line, value: st.value, modelled: true, short: st.note || 'Sent from Cross-sell', reason: st.note || 'Sent from Cross-sell.',
+      opener: `We look after some of your work already. Could we talk about ${lc(lineName[line] || 'the rest of it')} on the same visit?` });
+  }
   for (const [key, st] of Object.entries(statuses)) {
     if (!key.startsWith('route:') || !nameOf.has(st.level1)) continue;
     const name = titleCase(nameOf.get(st.level1));

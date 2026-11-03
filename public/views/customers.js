@@ -11,8 +11,9 @@ import { buildMargins, marginBand, marginSummary, marginAction, accountLines, ac
 import { costOrders, jobHtml, drawRouteBlock, jobPlace, densityByPostcode } from '/components/jobview.js';
 import { loadRoadnet } from '/components/routemap.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
-import { billNow, serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippingAccounts, stoppedAccounts, risingAccounts, CROSS_SELL_DEPTH } from '/components/levers.js';
+import { billNow, serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippingAccounts, stoppedAccounts, risingAccounts, CROSS_SELL_DEPTH, PRICED } from '/components/levers.js';
 import { buildWhitespace, LINES } from '/components/whitespace.js';
+import { drillData, drillHtml, wireDrill } from '/components/crossdrill.js';
 import { openExplainer } from '/components/explain.js';
 import { conversationCandidates } from '/components/lists.js';
 import { LABELS } from '/components/metrics.js';
@@ -233,8 +234,25 @@ async function whitespace(main, C, params) {
   </div>`;
   drawPoints(main.querySelector('#ws-lit'), pts);
   const opp = (r, x) => { const c = r.cells[x.key]; return !c.have && c.opp > 0 ? c.opp : 0; };
-  const why = r => { const ns = LINES.map(x => r.cells[x.key]).filter(c => c.note && (c.low || (!c.have && c.opp > 0))).sort((a, b) => (b.opp || 0) - (a.opp || 0)); return `<div class="ws-why">${ns.map(c => `<p>${esc(c.note)}</p>`).join('') || '<p>Buys every line at about what comparable accounts do.</p>'}</div>`; };
-  dataTable(main.querySelector('#ws-t'), { key: 'crosssell', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows, noun: 'accounts', placeholder: 'Find an account', search: r => r.customer, totalLabel: 'Total', detail: why,
+  // the drill-down: each account's own run, the code Quote opens on for each line, and what has been sent already
+  const seen = new Set(), SR = seriesOf(C), kinds = new Map();
+  for (const [list, kind] of [[slippingAccounts(C), 'slipping'], [stoppedAccounts(C), 'stopped'], [risingAccounts(C), 'rising']]) for (const a of list) kinds.set(a.level1, kind);
+  const quote = {};
+  for (const x of LINES) { const by = {}; for (const l of M.lines) if (l.family === x.key && PRICED.includes(l.servcode)) by[l.servcode] = (by[l.servcode] || 0) + l.revenue; const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0]; if (top) quote[x.key] = top[0]; }
+  const said = await fetch('/api/sales/opportunities', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(j => (j && j.data) || {}).catch(() => ({}));
+  const drill = r => { const s = SR.get(r.level1); return drillData(r, s ? { move: s.move, kind: kinds.get(r.level1) || 'level' } : null); };
+  const why = r => drillHtml(drill(r), { fresh: !seen.has(r.level1), quote });
+  // kept to the width of the table's window, so it stays on screen however far the table has scrolled
+  const fit = () => { const box = main.querySelector('#ws-t .dt-scroll'); if (box) box.style.setProperty('--cd-w', box.clientWidth + 'px'); };
+  addEventListener('resize', fit);
+  const onDraw = () => {
+    fit(); seen.clear();
+    main.querySelectorAll('#ws-t .cd').forEach(el => {
+      const id = +el.dataset.cd, r = rows.find(x => x.level1 === id), d = drill(r);
+      seen.add(id); drawPoints(el.querySelector('[data-cd-pts]'), d.points); wireDrill(el, d, said);
+    });
+  };
+  dataTable(main.querySelector('#ws-t'), { key: 'crosssell', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows, noun: 'accounts', placeholder: 'Find an account', search: r => r.customer, totalLabel: 'Total', detail: why, onDraw,
     cols: [
       { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a><span class="peer">${esc(r.kind)}</span>` },
       ...LINES.map(x => ({ k: x.key, l: x.short || x.name, fixed: true, get: r => opp(r, x), fmt: r => tile1(r, x), total: 'sum', totalFmt: v => '+' + moneyK(v) })),

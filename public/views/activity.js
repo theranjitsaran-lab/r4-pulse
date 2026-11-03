@@ -17,9 +17,9 @@ import { loadZones, bookShading, districtLayer, routeLayer, maskFor, maskId, pla
 import { densityByPostcode } from '/components/jobview.js';
 import { allocate, mapSvg, loadBasemap, basemapNow, loadRoadnet, roadPath, YARD, miles } from '/components/routemap.js';
 import { likelyRound, FAR_MILES, MIN_VISITS } from '/components/opsdata.js';
+import { OWNERS } from '/components/opps.js';
 
 const PERIODS = ['day', 'week', 'month', 'q', 'h', 'y'];
-const OWNERS = ['Mike Kelly', 'Anne Sterne', 'Trisha Rooney'];
 const routeName = r => /\d/.test(r || '') ? r : titleCase(r);
 const dlabel = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' });
 const dshort = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' });

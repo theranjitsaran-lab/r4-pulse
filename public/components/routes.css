@@ -168,7 +168,7 @@
 .ops-opts p { grid-column: 1 / -1; margin: var(--sp-1) 0 0; font-size: var(--fs-label); color: var(--ink-2); }
 .ops-opts em { font-style: normal; font-weight: 600; font-variant-numeric: tabular-nums; }
 .ops-send { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
-.ops-send select { font: inherit; font-size: var(--fs-label); padding: var(--sp-1) var(--sp-2); border: var(--hair) solid var(--rule-3); border-radius: var(--r); background: var(--surface); color: var(--ink); }
+.ops-send select { font: inherit; font-size: var(--fs-label); padding: var(--sp-1) var(--sp-2); border: var(--hair) solid var(--ink-4); border-radius: var(--r); background: var(--surface); color: var(--ink); }
 .ops-send select:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
 .ops-sent { font-size: var(--fs-label); color: var(--ink-2); }
 @media (max-width: 860px) {
