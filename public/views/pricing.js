@@ -9,7 +9,7 @@ import { strip, stripStats } from '/components/strip.js';
 import { getJson, loadRates, titleCase, esc } from '/components/data.js';
 import { unitSuspect } from '/components/levers.js';
 import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
-import { SERVICES, nearestRoute, marginLabel, quoteOptions, quoteFacts, routeLabel, dayLabel, RIDE_MILES } from '/components/quote.js';
+import { SERVICES, nearestRoute, marginLabel, quoteOptions, quoteFacts, costNotes, jobStats, defaultSite, routeLabel, dayLabel, RIDE_MILES } from '/components/quote.js';
 import { costsVisible, NOT_READY, whoAmI } from '/components/access.js';
 import { openPop, closePop } from '/components/pop.js';
 import { dataTable } from '/components/datatable.js';
@@ -66,7 +66,7 @@ export async function render(main, PR, params) {
   const linesOf = id => M.lines.filter(l => l.level1 === id);
   const costs = costsVisible();
 
-  const st = { level1: params.level1 ? Number(params.level1) : null, code: codes.includes(params.code) ? params.code : 'B2', price: null, units: null, visits: null, bins: 1, miles: R.RATES.avgMiles.v, postcode: /^\d{5}$/.test(params.postcode || '') ? params.postcode : null, opt: 'now', own: null };
+  const st = { level1: params.level1 ? Number(params.level1) : null, code: codes.includes(params.code) ? params.code : 'B2', price: null, units: null, visits: null, bins: 1, mode: 'run', siteMin: null, miles: R.RATES.avgMiles.v, postcode: /^\d{5}$/.test(params.postcode || '') ? params.postcode : null, opt: 'now', own: null };
 
   main.innerHTML = `
   <div class="pr pr2 pq h2">
@@ -78,14 +78,20 @@ export async function render(main, PR, params) {
       <div class="h2-kpi lead"><span>Margin est.</span><b id="k-pct"></b><small><span class="pq-tag" id="k-tag"></span></small></div>` : ''}
     </section>
 
+    <div class="pq-main">
+    <div class="pq-left">
     <section class="h2-card" data-in aria-labelledby="pq-what">
       <div class="h2-ch"><h2 id="pq-what">1. What are we quoting?</h2></div>
       <div class="pq-what">
         <label>Customer<input id="p-cust" list="p-cust-l" type="search" placeholder="A name, or leave blank for a new one" autocomplete="off"><datalist id="p-cust-l">${customers.map(([, n]) => `<option value="${esc(n)}"></option>`).join('')}</datalist></label>
         <label>Service<select id="p-code">${[...svcByName].map(([n, c]) => `<option value="${esc(c)}">${esc(n)}</option>`).join('')}</select></label>
+      </div>
+      <div class="pq-how">
+        <div id="p-modebox" hidden><span class="pq-lab">How it goes</span><div class="pq-pills" id="p-mode" role="group" aria-label="How it goes"><button type="button" data-m="run">Add to a run</button><button type="button" data-m="dedicated">Dedicated vehicle</button></div></div>
         <div id="p-binbox"><span class="pq-lab">Bins each visit</span><div class="pq-step"><button type="button" id="p-minus" aria-label="Fewer bins">−</button><output id="p-bins"></output><button type="button" id="p-plus" aria-label="More bins">+</button></div></div>
         <div id="p-freqbox"><span class="pq-lab">How often</span><div class="pq-pills" id="p-freq" role="group" aria-label="How often"></div></div>
         <label id="p-unitbox" hidden><span id="p-units-lab">Units a year</span><input id="p-units" inputmode="decimal"></label>
+        <label id="p-sitebox"><span id="p-site-lab">Minutes on site a visit</span><input id="p-site" inputmode="decimal"></label>
       </div>
       <div class="pq-price">
         <label><span>Price<span id="p-price-unit"></span></span><input id="p-price" inputmode="decimal"></label>
@@ -98,25 +104,25 @@ export async function render(main, PR, params) {
       </div>
       <p class="hint" id="p-hint"></p>
     </section>
-
-    <div class="pq-split">
-      <section class="h2-card" data-in aria-labelledby="pq-where" id="p-where">
-        <div class="pq-mh"><div class="h2-ch"><h2 id="pq-where">2. Where is it?</h2><small id="p-where-s">Tap the map or type a postcode</small></div>
-          <form class="pq-pc" id="p-pcf"><label>Postcode<input id="p-pc" inputmode="numeric" maxlength="5" placeholder="e.g. 60617"></label><button type="submit" class="pq-btn">Find</button></form></div>
-        <div id="p-map"></div>
-        <p class="hint" id="p-map-msg" role="status"></p>
-        ${zoneKey()}
-        <div class="pq-mk"><span><i class="r"></i>The route day that passes nearby</span><span><i class="o"></i>On its own, from the yard</span></div>
-        <p class="src">Routes join recorded stops in order along the main roads, from postcode centres. Not GPS, which was never captured.</p>
-      </section>
-      <section class="h2-card" data-in aria-labelledby="pq-goes" id="p-goes">
-        <div class="h2-ch"><h2 id="pq-goes">3. Where the price goes</h2><small id="p-goes-s"></small></div>
-        ${costs ? `<p class="pq-line" id="p-line"></p>
-        <div class="pq-stack" id="p-stack" role="img"></div>
-        <div class="pq-skey" id="p-skey"></div>
-        <ul class="pq-why" id="p-why"></ul>
-        <p class="src" id="p-by"></p>` : `<div class="pending">${esc(NOT_READY)}</div>`}
-      </section>
+    <section class="h2-card" data-in aria-labelledby="pq-where" id="p-where">
+      <div class="pq-mh"><div class="h2-ch"><h2 id="pq-where">2. Where is it?</h2><small id="p-where-s">Tap the map or type a postcode</small></div>
+        <form class="pq-pc" id="p-pcf"><label>Postcode<input id="p-pc" inputmode="numeric" maxlength="5" placeholder="e.g. 60617"></label><button type="submit" class="pq-btn">Find</button></form></div>
+      <div id="p-map"></div>
+      <p class="hint" id="p-map-msg" role="status"></p>
+      ${zoneKey()}
+      <div class="pq-mk"><span><i class="r"></i>The route day that passes nearby</span><span><i class="o"></i>On its own, from the yard</span></div>
+      <p class="src">Routes join recorded stops in order along the main roads, from postcode centres. Not GPS, which was never captured.</p>
+    </section>
+    </div>
+    <section class="h2-card pq-right" data-in aria-labelledby="pq-goes" id="p-goes">
+      <div class="h2-ch"><h2 id="pq-goes">3. Where the price goes</h2><small id="p-goes-s"></small></div>
+      ${costs ? `<p class="pq-line" id="p-line"></p>
+      <div class="pq-stack" id="p-stack" role="img"></div>
+      <div class="pq-skey" id="p-skey"></div>
+      <details class="pq-notes" open><summary>What is in this cost</summary><div id="p-notes"></div></details>
+      <ul class="pq-why" id="p-why"></ul>
+      <p class="src" id="p-by"></p>` : `<div class="pending">${esc(NOT_READY)}</div>`}
+    </section>
     </div>
 
     <section class="h2-card" data-in aria-labelledby="pq-opt">
@@ -132,7 +138,6 @@ export async function render(main, PR, params) {
 
     <section class="h2-card" data-in>
       <details class="fold"><summary><h3 id="p-strip-title">Every account on this service</h3><span class="sub" id="p-strip-sub"></span></summary><div id="p-strip" style="margin-top:var(--sp-3)"></div><div class="src" id="p-strip-src"></div></details>
-      ${costs ? '<details class="fold"><summary><h3 id="p-cost-title">How the cost is worked out</h3><span class="sub">est. cost model</span></summary><div id="p-cost" style="margin-top:var(--sp-3)"></div></details>' : ''}
     </section>
 
     <section class="h2-card book" data-in>
@@ -155,27 +160,28 @@ export async function render(main, PR, params) {
   const isBin = () => (SERVICES[st.code] || {}).fam === 'bin';
   const hasPlace = () => ['bin', 'trip', 'itad'].includes((SERVICES[st.code] || {}).fam);
   const dec = () => st.code === 'STO' ? 3 : 2;
+  const aUnit = u => (/^h/.test(u) ? 'an ' : 'a ') + u;
 
   // defaults from the account's own data, or one bin emptied weekly for a new customer
   function prefill() {
     const svc = SERVICES[st.code], rows = book[st.code].rows, mine = rows.find(r => r.level1 === st.level1), a = acctOf.get(st.level1);
     const own = R.routeFor && R.routeFor(st.level1);
-    st.opt = 'now'; st.own = null;
+    st.opt = 'now'; st.own = null; st.siteMin = null; st.mode = svc && svc.rush ? 'dedicated' : 'run';
     st.units = mine ? Math.round(mine.units) : Math.round(median(rows.map(r => r.units)));
-    st.price = mine ? mine.v : median(rows.map(r => r.v));
+    st.price = mine ? mine.v : bandNow().median;
     st.visits = null;
     if (svc && svc.fam === 'bin') {
       if (mine && (own || (a && a.visits))) { st.visits = own ? own.days : a.visits; st.own = st.visits; st.bins = st.units / st.visits; }
       else { st.visits = 52; st.bins = 1; st.units = 52; }
     } else if (svc && svc.fam === 'itad') { const l = st.level1 && linesOf(st.level1).find(x => x.servcode === st.code); st.visits = l ? l.days : Math.max(1, Math.ceil(st.units / 4000)); }
-    else if (svc && svc.fam === 'trip') st.visits = st.units;
+    else if (svc && svc.fam === 'trip') { if (svc.rush && !mine) st.units = 1; st.visits = st.units; }
     if (st.level1 && QR && QR.acctPc[st.level1] && Z[QR.acctPc[st.level1]]) st.postcode = QR.acctPc[st.level1];
     $('p-pc').value = st.postcode || '';
     setMiles();
     $('p-units').value = st.units;
     $('p-price').value = Fmt.fixed(st.price, dec());
     $('p-units-lab').textContent = !svc ? 'Units a year' : svc.fam === 'storage' ? 'Box-months a year' : svc.unit[0].toUpperCase() + svc.unit.slice(1) + 's a year';
-    $('p-hint').textContent = mine ? `Pays ${Fmt.money(mine.v, { dp: dec() })} today, pre-filled${isBin() && st.own ? `, on its ${Fmt.num(st.own)} visits in twelve months` : ''}.` : st.level1 ? 'No rate on this service yet: a quote.' : isBin() ? 'A new customer: one bin, emptied weekly. Change what you need.' : "A new customer at the typical account's volume.";
+    $('p-hint').textContent = mine ? `Pays ${Fmt.money(mine.v, { dp: dec() })} today, pre-filled${isBin() && st.own ? `, on its ${Fmt.num(st.own)} visits in twelve months` : ''}.` : st.level1 ? 'No rate on this service yet: a quote.' : isBin() ? 'A new customer: one bin, emptied weekly. Change what you need.' : svc && svc.rush ? 'A rush: one trip on a vehicle of its own. Switch to a run to compare.' : "A new customer at the typical account's volume.";
     drawFreq();
   }
   const setMiles = () => { if (st.postcode && Z[st.postcode]) st.miles = Math.round(dist(YARD, Z[st.postcode]) * 10) / 10; };
@@ -196,18 +202,25 @@ export async function render(main, PR, params) {
     if (st.opt !== 'now' && (list.find(o => o.id === st.opt) || {}).off) st.opt = 'now';
     const o = list.find(x => x.id === st.opt) || list[0], svc = SERVICES[st.code], s = bandNow(), unit = svc ? svc.unit : 'unit', bin = isBin();
     // what is being quoted
-    $('p-binbox').hidden = !bin; $('p-freqbox').hidden = !bin; $('p-unitbox').hidden = bin;
+    const trip = !!svc && svc.fam === 'trip';
+    $('p-binbox').hidden = !bin; $('p-freqbox').hidden = !bin; $('p-unitbox').hidden = bin; $('p-modebox').hidden = !trip; $('p-sitebox').hidden = !bin && !trip;
+    $('p-mode').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === st.mode)));
+    // time on site: pre-filled from the model until someone changes it; a job on a trip reads in hours
+    if (bin || trip) {
+      const mins = st.siteMin ?? defaultSite(R, bin ? st.bins : 1);
+      $('p-site-lab').textContent = trip ? 'Hours on site a trip' : 'Minutes on site a visit';
+      if (document.activeElement !== $('p-site')) $('p-site').value = trip ? Fmt.fixed(mins / 60, 2) : Fmt.fixed(mins, 0);
+    }
     $('p-bins').textContent = Fmt.fixed(st.bins, st.bins % 1 ? 1 : 0);
     $('p-minus').disabled = st.bins <= 1;
     $('p-freq').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.v === st.visits)));
-    $('p-price-unit').textContent = bin ? ' a bin' : ` a ${unit}`;
+    $('p-price-unit').textContent = bin ? ' a bin' : ` ${aUnit(unit)}`;
     // the band: the real middle half and median for this service
     const lo = Math.max(0, Math.min(s.p25 * .5, st.price)), hi = Math.max(s.p75 * 1.6, st.price), pos = v => (v - lo) / (hi - lo || 1) * 100;
     const sl = $('p-slide'); sl.min = lo; sl.max = hi; if (document.activeElement !== sl) sl.value = st.price;
     $('p-bmid').style.cssText = `left:${pos(s.p25).toFixed(2)}%;width:${Math.max(.6, pos(s.p75) - pos(s.p25)).toFixed(2)}%`;
     $('p-bmed').style.left = pos(s.median).toFixed(2) + '%';
-    $('p-bmedl').style.left = Math.min(82, Math.max(14, pos(s.median))).toFixed(2) + '%';
-    const nm = s.weighted ? 'box-weighted median' : 'median';
+        const nm = s.weighted ? 'box-weighted median' : 'median';
     $('p-bmedl').textContent = `${nm} ${Fmt.money(s.median, { dp: dec() })}, middle half ${Fmt.money(s.p25, { dp: dec() })} to ${Fmt.money(s.p75, { dp: dec() })}`;
     const note = $('p-note'), under = st.price < s.p25, over = st.price > s.p75;
     note.textContent = under ? 'Under most accounts' : over ? 'Above most accounts' : 'In the middle half';
@@ -216,9 +229,9 @@ export async function render(main, PR, params) {
     // the four figures
     const os = o.st;
     countTo($('k-price'), os.price, v => Fmt.money(v, { dp: dec() }));
-    $('k-price-s').textContent = bin ? `a bin, ${Fmt.fixed(os.bins, os.bins % 1 ? 1 : 0)} bin${os.bins === 1 ? '' : 's'} a visit` : `a ${unit}`;
+    $('k-price-s').textContent = bin ? `a bin, ${Fmt.fixed(os.bins, os.bins % 1 ? 1 : 0)} bin${os.bins === 1 ? '' : 's'} a visit` : trip ? (st.mode === 'dedicated' && o.id !== 'ride' ? 'a trip, a dedicated vehicle' : 'a trip, on a run') : aUnit(unit);
     countTo($('k-rev'), o.yrev, moneyK);
-    $('k-rev-s').textContent = os.visits ? `${Fmt.num(os.visits)} visits a year` : `${Fmt.num(os.units)} ${svc && svc.fam === 'storage' ? 'box-months' : unit + 's'} a year`;
+    $('k-rev-s').textContent = trip ? `${Fmt.num(os.visits)} trip${os.visits === 1 ? '' : 's'} a year` : os.visits ? `${Fmt.num(os.visits)} visits a year` : `${Fmt.num(os.units)} ${svc && svc.fam === 'storage' ? 'box-months' : os.units === 1 ? unit : unit + 's'} a year`;
     if (costs) {
       const lab = marginLabel(R, o.m);
       countTo($('k-mar'), o.year ?? 0, mk); $('k-mar').classList.toggle('is-bad', (o.year ?? 0) < 0);
@@ -227,32 +240,35 @@ export async function render(main, PR, params) {
       $('k-tag').className = 'pq-tag ' + lab.cls; $('k-tag').textContent = lab.word || 'not costed';
     }
     // where
-    $('p-where').hidden = !hasPlace(); main.querySelector('.pq-split').classList.toggle('one', !hasPlace());
+    $('p-where').hidden = !hasPlace();
     const moved = lastPc !== st.postcode, useRoute = o.c && o.c.routeBasis === 'ride';
     if (hasPlace() && QR) {
-      drawQuoteMap($('p-map'), { Z, base, zones, shading, postcode: st.postcode, near, useRoute: useRoute || (o.c && o.c.routeBasis !== 'yard' && near && near.carries), onPick: pick, moved: moved && !!st.postcode, first: firstMap });
+      drawQuoteMap($('p-map'), { Z, base, zones, shading, postcode: st.postcode, near, useRoute: useRoute || (o.c && !['yard', 'dedicated'].includes(o.c.routeBasis) && near && near.carries), onPick: pick, moved: moved && !!st.postcode, first: firstMap });
       firstMap = false;
-      $('p-where-s').textContent = !st.postcode ? "Tap the map or type a postcode. Until then it is costed at the book's average stop." : near && near.carries ? `${routeLabel(near.route)} calls ${near.miles < .05 ? 'in this postcode' : `${Fmt.fixed(near.miles, 1)} mi away`} on ${dayLabel(near.dow)}` : o.c && o.c.routeBasis === 'nearby' ? `No route calls within ${RIDE_MILES} mi regularly. Costed on the occasional stops nearby.` : `No route calls within ${RIDE_MILES} mi: on its own from the yard`;
+      $('p-where-s').textContent = o.c && o.c.routeBasis === 'dedicated' ? `A vehicle of its own, there and back from the yard${st.postcode ? `, ${Fmt.fixed(st.miles, 1)} road miles each way` : ''}` : !st.postcode ? "Tap the map or type a postcode. Until then it is costed at the book's average stop." : near && near.carries ? `${routeLabel(near.route)} calls ${near.miles < .05 ? 'in this postcode' : `${Fmt.fixed(near.miles, 1)} mi away`} on ${dayLabel(near.dow)}` : o.c && o.c.routeBasis === 'nearby' ? `No route calls within ${RIDE_MILES} mi regularly. Costed on the occasional stops nearby.` : `No route calls within ${RIDE_MILES} mi: on its own from the yard`;
     }
     lastPc = st.postcode;
     // where the price goes
     if (costs) {
       if (o.c) {
-        const p = o.parts, rev = o.rev, cost = p.cost, left = rev - cost, tot = Math.max(rev, cost, .01), perWord = os.visits ? 'visit' : unit;
-        $('p-goes-s').textContent = `${o.t}: a ${perWord}, est.`;
-        $('p-line').textContent = `At ${Fmt.money(os.price, { dp: dec() })} ${bin ? 'a bin' : `a ${unit}`}, R4 ${left >= 0 ? 'keeps' : 'is short by'} ${Fmt.money(Math.abs(left), { dp: 2 })} a ${perWord}, ${mk(o.year)} a year on ${mk(o.yrev)} of revenue.`;
-        const segs = [['q-s-t', 'Getting there', p.travel], ['q-s-s', 'Time on site', p.time], ['q-s-p', 'Shredding', p.plant], ['q-s-o', 'The work', p.other]].filter(x => x[2] > .005);
+        const p = o.parts, rev = o.rev, cost = p.cost, left = rev - cost, tot = Math.max(rev, cost, .01), perWord = trip ? 'trip' : os.visits ? 'visit' : unit;
+        $('p-goes-s').textContent = `${o.t}: ${aUnit(perWord)}, est.`;
+        $('p-line').textContent = `At ${Fmt.money(os.price, { dp: dec() })} ${bin ? 'a bin' : aUnit(unit)}, R4 ${left >= 0 ? 'keeps' : 'is short by'} ${Fmt.money(Math.abs(left), { dp: 2 })} ${aUnit(perWord)}, ${mk(o.year)} a year on ${mk(o.yrev)} of revenue.`;
+        const segs = [['q-s-t', 'Getting there', p.travel], ['q-s-s', 'Time on site', p.time], ['q-s-p', 'Shredding', p.plant], ['q-s-o', p.otherName, p.other]].filter(x => x[2] > .005);
         let at = 0;
         const bar = segs.map(([cls, , v]) => { const h = `<i class="${cls}" style="transform:translateX(${(at / tot * 100).toFixed(2)}%) scaleX(${(v / tot).toFixed(4)})"></i>`; at += v; return h; }).join('');
         const last = left >= 0 ? `<i class="q-s-l" style="transform:translateX(${(at / tot * 100).toFixed(2)}%) scaleX(${(left / tot).toFixed(4)})"></i>` : `<i class="q-s-x" style="transform:translateX(${(rev / tot * 100).toFixed(2)}%) scaleX(${(-left / tot).toFixed(4)})"></i>`;
         $('p-stack').innerHTML = bar + last;
         $('p-stack').setAttribute('aria-label', `${segs.map(x => `${x[1]} ${Fmt.money(x[2], { dp: 2 })}`).join(', ')}, ${left >= 0 ? 'left for R4' : 'short'} ${Fmt.money(Math.abs(left), { dp: 2 })}`);
         $('p-skey').innerHTML = [...segs.map(([cls, n, v]) => [cls, n, Fmt.money(v, { dp: 2 })]), [left >= 0 ? 'q-s-l' : 'q-s-x', left >= 0 ? 'Left for R4' : 'Short', Fmt.money(Math.abs(left), { dp: 2 })]].map(([cls, n, v]) => `<span><i class="${cls}"></i>${esc(n)}<b>${esc(v)}</b></span>`).join('');
+        const notes = costNotes(R, o, { jobs: svc && svc.fam && ['driver', 'centre'].includes(svc.fam) ? jobStats(M.lines, st.code) : null });
+        const d2 = v => v < .1 ? Fmt.money(v, { dp: 4 }) : Fmt.money(v, { dp: 2 });
+        $('p-notes').innerHTML = notes.map(n => `<div class="pq-note1"><div class="h"><b>${esc(n.name)}${n.est ? ' est.' : ''}</b><b>${d2(n.amount)}</b></div><p>${esc(n.say)}</p>${n.parts.length ? `<ul>${n.parts.map(x => `<li><span>${esc(x.name)}</span><i style="--s:${x.share.toFixed(3)}"></i><span>${d2(x.amount)}</span></li>`).join('')}</ul>` : ''}</div>`).join('');
         drawSummary(o, list, near, s);
       } else {
         $('p-goes-s').textContent = '';
         $('p-line').textContent = `A product or a fee, not work the cost model prices: ${mk(o.yrev)} of revenue a year, no cost shown.`;
-        $('p-stack').innerHTML = ''; $('p-skey').innerHTML = ''; $('p-why').innerHTML = ''; $('p-by').textContent = '';
+        $('p-stack').innerHTML = ''; $('p-skey').innerHTML = ''; $('p-notes').innerHTML = ''; $('p-why').innerHTML = ''; $('p-by').textContent = '';
       }
     }
     // the four ways
@@ -260,15 +276,12 @@ export async function render(main, PR, params) {
     $('p-opts').innerHTML = list.map(x => `<button type="button" class="pq-opt" data-o="${x.id}" aria-pressed="${x.id === o.id}" ${x.off ? 'disabled' : ''}>${x.best && costs ? '<span class="pq-best">Best for R4</span>' : ''}<span class="t">${esc(x.t)}</span><span class="d">${esc(x.off || x.d)}</span>${costs && !x.off && x.m != null ? `<span class="m ${x.m < 0 ? 'is-bad' : ''}">${pc(x.m)}</span><span class="y">${mk(x.year)} a year left est., on ${mk(x.yrev)}</span><span class="pq-mbar"><i class="${x.year < 0 ? 'neg' : ''}" style="--s:${Math.max(.02, Math.abs(x.year) / maxY).toFixed(3)}"></i></span>` : !x.off ? `<span class="y">${mk(x.yrev)} a year</span>` : ''}</button>`).join('');
     $('p-year').textContent = costs && o.year != null ? `${o.t}: ${mk(o.yrev)} revenue and ${mk(o.year)} left a year, est.` : `${o.t}: ${mk(o.yrev)} a year.`;
     const who = st.level1 ? (customers.find(x => x[0] === st.level1) || [0, ''])[1] : 'For a new customer';
-    $('p-ask').dataset.q = `${who}: is ${Fmt.money(os.price, { dp: dec() })} a ${unit} right for ${st.code === 'STO' ? 'storage' : titleCase(book[st.code].name)}${st.postcode ? ` in ${st.postcode}` : ''}, and how do we improve the margin?`;
+    $('p-ask').dataset.q = `${who}: is ${Fmt.money(os.price, { dp: dec() })} ${aUnit(unit)} right for ${st.code === 'STO' ? 'storage' : titleCase(book[st.code].name)}${st.postcode ? ` in ${st.postcode}` : ''}, and how do we improve the margin?`;
     // the working, one tap away
     const rows = book[st.code].rows, vals = rows.map(r => ({ v: r.v, name: r.name, w: st.code === 'STO' ? r.units : undefined }));
     $('p-strip-sub').textContent = `${s.n} accounts, ${nm} ${Fmt.money(s.median, { dp: dec() })}`;
     strip($('p-strip'), { values: vals, cost: costs && o.c ? o.c.total / Math.max(1, os.units) : null, price: os.price, named: rows.slice().sort((a, b) => b.revenue - a.revenue).slice(0, 5).map(r => r.name), fmt: v => Fmt.money(v, { dp: dec() }) });
     $('p-strip-src').textContent = st.code === 'STO' ? 'Storage billed ÷ boxes in the latest month, weighted by boxes, from VCK' : "Each account's usual invoiced rate over the last 13 months, from VCK";
-    if (costs) {
-      $('p-cost').innerHTML = o.c ? o.c.lines.map(l => { const i = l[2].indexOf('. '), head = i > 0 ? l[2].slice(0, i + 1) : l[2], rest = i > 0 ? l[2].slice(i + 2) : ''; return `<div class="line"><span>${esc(l[0])}${l[3] ? ' est.' : ''}</span><span class="v">${money0(l[1])}</span><span class="d">${esc(head)}${rest ? ` ${esc(rest)}` : ''}</span></div>`; }).join('') + `<div class="line total"><span>A year</span><span class="v">${money0(o.c.total)}</span></div>` : '<p class="nocost">A product or a fee, not work the cost model prices.</p>';
-    }
   }
 
   // the three points: the plain version at once; Claude's when it is back and every number in it is on the sheet
@@ -305,6 +318,8 @@ export async function render(main, PR, params) {
   $('p-price').addEventListener('input', () => { const v = num($('p-price')); if (v == null) return; st.price = v; st.opt = 'now'; update(); });
   $('p-slide').addEventListener('input', () => { st.price = Number($('p-slide').value); st.opt = 'now'; $('p-price').value = Fmt.fixed(st.price, dec()); update(); });
   $('p-units').addEventListener('input', () => { const v = num($('p-units')); if (v == null) return; st.units = v; if ((SERVICES[st.code] || {}).fam === 'trip') st.visits = v; st.opt = 'now'; update(); });
+  $('p-mode').addEventListener('click', e => { const b = e.target.closest('button[data-m]'); if (!b) return; st.mode = b.dataset.m; st.opt = 'now'; update(); });
+  $('p-site').addEventListener('input', () => { const v = num($('p-site')); st.siteMin = v == null || v <= 0 ? null : (SERVICES[st.code] || {}).fam === 'trip' ? v * 60 : v; st.opt = 'now'; update(); });
   const setBins = n => { st.bins = Math.max(1, Math.min(60, n)); st.units = st.bins * st.visits; st.opt = 'now'; update(); };
   $('p-minus').addEventListener('click', () => setBins(st.bins % 1 ? Math.floor(st.bins) : st.bins - 1));
   $('p-plus').addEventListener('click', () => setBins(st.bins % 1 ? Math.ceil(st.bins) : st.bins + 1));
@@ -386,7 +401,7 @@ export async function render(main, PR, params) {
       ${!Q.level1 ? `<label class="q-who">Prospect<input id="q-prospect" value="${esc(Q.prospect || '')}" placeholder="Company name"></label>` : `<p class="hint">For ${esc(nameOf(Q.level1))}${Q.postcode ? ` · ${esc(Q.postcode)}` : ''}</p>`}
       <table class="q-t"><thead><tr><th>Line</th><th class="v">A year</th><th class="v">Price</th><th class="v">Revenue</th>${costsVisible() ? '<th class="v">Margin est.</th>' : ''}<th></th></tr></thead><tbody>
       ${Q.lines.map((l, i) => { const r = l.price * l.units, m = l.cost == null ? null : r - l.cost; return `<tr>
-        <td>${esc(l.name)}${!costsVisible() ? '' : l.basis === 'average' ? '<small>route cost under review</small>' : ['account', 'postcode', 'nearby'].includes(l.basis) ? '<small>from real route days</small>' : l.basis === 'ride' ? '<small>what the stop adds to that route</small>' : l.basis === 'yard' ? '<small>its own trip from the yard</small>' : l.basis === 'book' ? "<small>at the book's average stop</small>" : l.basis === 'none' ? '<small>a fee: not costed</small>' : ''}</td>
+        <td>${esc(l.name)}${!costsVisible() ? '' : l.basis === 'average' ? '<small>route cost under review</small>' : l.basis === 'dedicated' ? '<small>a vehicle of its own</small>' : ['account', 'postcode', 'nearby'].includes(l.basis) ? '<small>from real route days</small>' : l.basis === 'ride' ? '<small>what the stop adds to that route</small>' : l.basis === 'yard' ? '<small>its own trip from the yard</small>' : l.basis === 'book' ? "<small>at the book's average stop</small>" : l.basis === 'none' ? '<small>a fee: not costed</small>' : ''}</td>
         <td class="v">${Fmt.num(l.units)} ${esc(l.unit)}s</td><td class="v">${Fmt.money(l.price, { dp: dec(l) })}</td><td class="v">${money0(r)}</td>
         ${!costsVisible() ? '' : `<td class="v ${m != null && m < 0 && l.basis !== 'average' ? 'is-bad' : ''}">${m == null ? '—' : (m < 0 ? '−' : '') + money0(Math.abs(m))}${m != null && r > 0 ? `<small>${Fmt.pct(m / r)}</small>` : ''}</td>`}
         <td><button class="q-x" type="button" data-i="${i}" aria-label="Remove ${esc(l.name)}">×</button></td></tr>`; }).join('')}

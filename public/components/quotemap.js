@@ -16,7 +16,7 @@ const along = (a, b, F) => { const r = roadPath(a, b); return (r ? r.pts : [a, b
 
 export function drawQuoteMap(el, { Z, base, zones, shading, postcode, near, useRoute, onPick, moved = false, first = false }) {
   if (!el) return;
-  const W = Math.max(300, Math.min(1100, el.clientWidth || 700)), H = Math.round(W < 500 ? W * 1.05 : W * 0.72);
+  const W = Math.max(300, Math.min(1100, el.clientWidth || 700)), H = Math.round(W < 500 ? W * 1.05 : W * 0.6);
   const book = [...shading.shade.keys()].map(c => Z[c]).filter(Boolean), pt = postcode ? Z[postcode] : null;
   let F = areaFrame(book, W, H, { pad: 20, trim: .12 });
   if (pt && !F.inside(F.P(pt), -20)) F = areaFrame([...book, pt], W, H, { pad: 28, trim: 0 });

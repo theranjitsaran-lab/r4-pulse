@@ -104,6 +104,21 @@ test('Quote: real route days near it, never the whole average visit; four ways, 
     assert.equal(Q.quoteOptions(R, { ...st, postcode: '60617' }, { Z, near: { ...near, carries: false }, band: { p25: 85, p75: 111.77 } })[1].off != null, true);
     const fewer = list[2];
     assert.ok(Math.abs(fewer.yrev - list[0].yrev) < 1 && fewer.st.visits === 26, 'the same bins on half the visits');
+    // delivery: on a run, or a vehicle of its own; a time on site given moves the cost; a rush starts dedicated
+    const trip = { code: '90', price: 44, units: 1, visits: 1, bins: 1, postcode: '60617', level1: null, mode: 'dedicated', siteMin: null };
+    const ded = Q.lineCost(R, trip, { Z }), run = Q.lineCost(R, { ...trip, mode: 'run' }, { Z }), long = Q.lineCost(R, { ...trip, siteMin: 120 }, { Z });
+    assert.equal(ded.routeBasis, 'dedicated'); assert.equal(run.routeBasis, 'nearby');
+    assert.ok(ded.total >= R.routeHourRate() * R.SETTINGS.dedicatedMinHours - 0.01, 'a dedicated vehicle costs at least its least hours');
+    const drive = long.total - R.routeHourRate() * 2;
+    assert.ok(long.total > ded.total && Math.abs(drive - long.lines.find(l => l[0] === 'Travel to site')[1]) < 0.01, 'two hours on site at the route-hour rate, on top of the drive');
+    const binSite = Q.lineCost(R, { ...st, postcode: '60617', siteMin: 30 }, { Z });
+    assert.ok(binSite.total > place.total, 'a longer visit costs more');
+    // what is in a cost: storage's largest parts add up with the rest to the cost
+    const stoO = Q.quoteOptions(R, { code: 'STO', price: .22, units: 3684, visits: null, bins: 1 }, { Z, band: { p25: .14, p75: .45 } })[0];
+    const note = Q.costNotes(R, stoO)[0];
+    assert.equal(note.parts[0].name, '1301 W. 35th');
+    assert.ok(Math.abs(note.parts.reduce((t, x) => t + x.amount, 0) - note.amount) < 1e-9);
+    assert.ok(Math.abs(note.amount - R.RATES.facilities.v) < 1e-9, 'a box-month at the facilities rate');
     const sheet = Q.quoteFacts(list[0], list, { near, st, band: { p25: 85, p75: 111.77 } });
     assert.deepEqual(sheet.map(f => f.key), ['why', 'nearby', 'better']);
     assert.ok(S.checkNumbers(sheet.map(f => f.say).join(' '), sheet).ok);

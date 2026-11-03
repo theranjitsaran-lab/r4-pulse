@@ -63,6 +63,19 @@ const MODEL = {
 
 const PROVISIONAL = `provisional — GL annualised from ${MODEL.gl.months} months, restate when the monthly P&L to Aug 2026 arrives`;
 
+// What sits inside a pool, in plain words, for the Quote screen. Facilities is one pool in the model; its GL detail is
+// in sql/model_schema.sql: the four buildings under 7028 Bldg Exp, then maintenance payroll.
+const POOL_PARTS = {
+  facilities: [['1301 W. 35th', 832815.24], ['3716 S. Iron', 674522.47], ['2723 W. 47th', 245976.32], ['Maintenance payroll', 153068.16], ['3551 S. Iron', 24489.46]],
+};
+const POOL_NAMES = { warehouse_perm: 'Warehouse payroll', warehouse_temp: 'Temporary labour', warehouse_supplies: 'Warehouse supplies', warehouse_equipment: 'Warehouse equipment', shred_maintenance: 'Shredder maintenance', shred_payroll: 'Shredding payroll', drivers: 'Drivers\' pay', vehicles: 'Trucks', route_software: 'Routeware', uniforms: 'Uniforms' };
+// a rate's parts, largest first, each with its share of the rate
+function poolBreakdown(rate) {
+  const rows = POOL_PARTS[rate] || MODEL.splits.filter(x => x[1] === rate).map(([p, , share]) => [POOL_NAMES[p] || p, MODEL.pools[p].amount * share]);
+  const total = rows.reduce((t, r) => t + r[1], 0);
+  return rows.map(([name, v]) => ({ name, share: v / total })).sort((a, b) => b.share - a.share);
+}
+
 // Rates not built from a pool. They keep their own source.
 const FIXED = {
   driverHr:   { v: 32.49, u: '$ per hour', c: 'measured',
@@ -151,19 +164,20 @@ async function loadFromDb(query) {
 // its day is by time instead: its drive minutes (its detour in road miles at mph) plus its drop
 // minutes (stopMin at each stop and serviceMin a service), scaled so a day's stops add up to the
 // route day. Three assumptions, all `assumed`, for Mike to check (31 October 2026).
-const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliveryMatch: 1, costsFinal: 0, routeHours: 8.5, marginHealthy: 0.35, marginThin: 0.15, postcodes: {} };
+const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliveryMatch: 1, costsFinal: 0, routeHours: 8.5, dedicatedMinHours: 2, marginHealthy: 0.35, marginThin: 0.15, postcodes: {} };
 const TIME_NOTES = {
   mph: ['Average city speed between stops', 'assumed', 'Chicago streets with a box truck; the main roads give the miles, this turns them into minutes.'],
   stopMin: ['Minutes at each stop before any service', 'assumed', 'Park, walk in, sign, walk out.'],
   serviceMin: ['Minutes a service', 'assumed', 'Swap one bin, or one pickup or delivery line.'],
   split: ['Travel share of a route day, where there are no route days', 'assumed', 'Prices a visit at the book\'s average: a new account with no postcode, a line with no route days.'],
   routeHours: ['Hours in a route day', 'assumed', 'Turns the route day\'s cost into a route-hour rate, for what one more stop adds to a route that runs anyway. Hours were never captured, so this is the eight to nine hours a route day is said to run.'],
+  dedicatedMinHours: ['Least hours a dedicated vehicle is costed at', 'assumed', 'A truck and driver pulled out for one job cost at least this, however close the job is.'],
   marginHealthy: ['Margin that reads Healthy on a quote', 'assumed', 'At or above this a quote reads Healthy.'],
   marginThin: ['Margin that reads Thin on a quote', 'assumed', 'At or above this and below Healthy it reads Thin; below this Too thin; below zero Loses money.'],
   deliveryMatch: ['Box deliveries ride the shred routes, placed by location', 'observed', 'Deliveries go on the shred trucks (Theran, 1 November 2026). VCK does not say which route, so each is placed on the route that passed closest to it that day, and shares that day by minutes.'],
 };
 // Settings anyone can change on the Settings screen (server/settings.js): the bounds a value must sit in.
-const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], split: [0.1, 0.8], deliveryMatch: [0, 1], costsFinal: [0, 1], routeHours: [4, 14], marginHealthy: [0.05, 0.9], marginThin: [0.01, 0.8] };
+const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], split: [0.1, 0.8], deliveryMatch: [0, 1], costsFinal: [0, 1], routeHours: [4, 14], dedicatedMinHours: [0, 8], marginHealthy: [0.05, 0.9], marginThin: [0.01, 0.8] };
 
 // The account's real route-day cost, set once the route days are costed (server: server/routecost.js;
 // browser: loadRates in components/data.js). { accounts: { level1: { cost, travel, onsite, services,
@@ -240,7 +254,7 @@ function costToServe(family, units, opts) {
       if (o.route && o.route.services > 0 && visits > 0) {
         // the account's deliveries, placed on that day's shred routes by location, a trip at a time
         const r = o.route, ts = r.travel / r.services, os = r.onsite / r.services;
-        add('Travel to site', visits * ts, `${visits} ${visits === 1 ? 'trip' : 'trips'} at ${m2(ts)}, from its ${r.days} delivery day${r.days === 1 ? '' : 's'} (${r.from} to ${r.to}): each delivery placed on the shred route that passed closest that day, sharing its ${m0(routeDayNow())} by minutes.`, 'route');
+        add('Travel to site', visits * ts, r.label ? `${visits} ${visits === 1 ? 'trip' : 'trips'} at ${m2(ts)}, ${r.label}.` : `${visits} ${visits === 1 ? 'trip' : 'trips'} at ${m2(ts)}, from its ${r.days} delivery day${r.days === 1 ? '' : 's'} (${r.from} to ${r.to}): each delivery placed on the shred route that passed closest that day, sharing its ${m0(routeDayNow())} by minutes.`, 'route');
         add('Time on site', visits * os, `${visits} ${visits === 1 ? 'trip' : 'trips'} at ${m2(os)}: ${SETTINGS.stopMin} minutes a stop and ${SETTINGS.serviceMin} a trip.`, 'route');
       } else routeLines('visits');
       add('Box handling', units * RATES.handling.v,
@@ -309,7 +323,7 @@ function isModelled(family) {
   return family === 'bin' || family === 'itad' || family === 'movement' || family === 'shred';
 }
 
-const api = { RATES, MODEL, SETTINGS, TIME_NOTES, SETTING_BOUNDS, setRouteCosts, routeFor, routeCostsNow, movementFor, routeDayNow, routeHourRate, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
+const api = { RATES, MODEL, SETTINGS, TIME_NOTES, SETTING_BOUNDS, setRouteCosts, routeFor, routeCostsNow, movementFor, routeDayNow, routeHourRate, poolBreakdown, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 if (typeof window !== 'undefined') window.R4RATES = api;

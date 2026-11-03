@@ -18,6 +18,7 @@ const GROUPS = [
   ] },
   { title: 'Quotes', sub: 'what one more stop adds to a route, and how a quote\'s margin is labelled', keys: [
     ['routeHours', 'hours', 'How long does a route day really run, yard to yard?'],
+    ['dedicatedMinHours', 'hours', 'When a truck goes out for one job, what is the least time it really takes?'],
     ['marginHealthy', 'share', 'At what margin would you call a quote healthy?'],
     ['marginThin', 'share', 'Below what margin is a quote too thin to take?'],
   ] },
