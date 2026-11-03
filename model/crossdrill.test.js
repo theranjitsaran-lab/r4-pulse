@@ -67,3 +67,12 @@ test('the three points carry the trend, and slipping is said before any sale', a
   assert.ok(/history/.test(drillData(r, null).points[1].lead));
   assert.strictEqual(drillData(r).points.length, 3);
 });
+
+test("R4's own accounts and placeholders are neither sold to nor sized from", async () => {
+  const { W, LINES } = await load();
+  const { isInternal } = await import('../public/components/metrics.js');
+  assert.ok(M.accounts.some(a => isInternal(a.customer)), 'the snapshot has some to leave out');
+  assert.ok(!W.rows.some(r => isInternal(r.customer)), 'none on a row');
+  for (const r of W.rows) for (const x of LINES) for (const p of r.cells[x.key].peers || []) assert.ok(!isInternal(p.customer), `${p.customer} used as a comparable`);
+  for (const k of Object.values(W.rates)) for (const p of k.examples || []) assert.ok(!isInternal(p.customer));
+});

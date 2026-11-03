@@ -20,7 +20,7 @@ const [{ f, t }] = (await c.query(`SELECT (max(month) - interval '11 months')::d
 console.log(`The row's twelve months: ${f} up to ${t}`);
 // each account's spend by line, from the fixture's own lines, for working the method again
 const spend = new Map();
-for (const a of M.accounts) { if (a.level1 === CITADEL) continue; spend.set(a.level1, { boxes: a.boxes || 0, storage: Math.max(0, a.storage_revenue || 0) }); }
+for (const a of M.accounts) { if (a.level1 === CITADEL || isInternal(a.customer)) continue; spend.set(a.level1, { boxes: a.boxes || 0, storage: Math.max(0, a.storage_revenue || 0) }); }
 for (const l of M.lines) { const s = spend.get(l.level1); if (s && LINES.some(x => x.key === l.family) && l.family !== 'storage') s[l.family] = (s[l.family] || 0) + l.revenue; }
 const rawNames = ['CITY OF CHICAGO', 'CHICAGO PUBLIC SCHOOLS', 'ICU MEDICAL'];
 for (const name of rawNames) {
@@ -55,9 +55,9 @@ for (const name of rawNames) {
 // the book
 const gaps = W.rows.flatMap(r => { const d = drillData(r); return d.top ? [d.conf] : []; });
 console.log(`\nHow sure, by each account's biggest gap, ${gaps.length} accounts: high ${gaps.filter(x => x === 3).length}, medium ${gaps.filter(x => x === 2).length}, low ${gaps.filter(x => x === 1).length}`);
-const clean = buildWhitespace({ ...M, accounts: M.accounts.filter(a => !isInternal(a.customer)) }, { exclude: [CITADEL], top: CROSS_SELL_DEPTH });
-console.log(`Placeholder accounts: ${M.accounts.filter(a => isInternal(a.customer)).map(a => a.customer).join(', ')}`);
-console.log(`Not-bought total with them ${W.total.toFixed(0)}, without ${clean.total.toFixed(0)}; ITAD whole-book comparables ${W.rows.flatMap(r => LINES.map(x => r.cells[x.key])).find(k => k.basisLevel === 'book' && k.peerCount === 19) ? 19 : '-'}`);
+const counted = W.rows.filter(r => isInternal(r.customer)).length;
+say('placeholder accounts among the rows', counted, 0, 0);
+console.log(`Not-bought total ${W.total.toFixed(0)}, ${(W.total / 12).toFixed(0)} a month`);
 await c.end();
 console.log(bad ? `\n${bad} did not tie` : '\nall tie');
 process.exit(bad ? 1 : 0);

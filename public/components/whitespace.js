@@ -11,6 +11,7 @@
 
 import * as Fmt from './format.js';
 import { accountKind, kindPlural } from './acctkind.js';
+import { isInternal } from './metrics.js';
 export const LINES = [
   { key: 'storage',  name: 'Storage',      by: 'ratio' },
   { key: 'handling', name: 'Retrieval and refile', short: 'Retrieval', by: 'boxes' },
@@ -34,7 +35,8 @@ export function buildWhitespace(M, { exclude = [], top = 40 } = {}) {
   const skip = new Set(exclude);
   const acc = new Map();
   for (const a of M.accounts) {
-    if (skip.has(a.level1)) continue;
+    // R4's own accounts and placeholders are neither a customer to sell to nor a comparable to size from (3 November 2026)
+    if (skip.has(a.level1) || isInternal(a.customer)) continue;
     acc.set(a.level1, { level1: a.level1, customer: a.customer, kind: accountKind(a.customer), boxes: a.boxes || 0, billed: Math.max(0, a.storage_revenue || 0) + Math.max(0, a.service_revenue || 0), spend: { storage: Math.max(0, a.storage_revenue || 0) } });
   }
   for (const l of M.lines) {
