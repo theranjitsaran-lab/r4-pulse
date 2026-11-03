@@ -69,10 +69,17 @@ export function placeDeliveries(days, deliveries, Z, typed = {}) {
       out.noPostcode++;
       const m = out.missing[d.level1] || (out.missing[d.level1] = { level1: d.level1, days: 0, revenue: 0 });
       m.days++; m.revenue += d.revenue;
-      continue;
     }
     const routes = byDate.get(d.date);
     if (!routes || !routes.length) { out.noRoute++; continue; }
+    // no postcode: it still rode a truck that day, so it takes its share of the fullest route and the average detour,
+    // rather than a cost on top of route days already shared out in full
+    if (!pt) {
+      const day = routes.reduce((a, b) => b.stops.length > a.stops.length ? b : a);
+      day.stops.push({ stop: 'D' + d.level1, level1: d.level1, postcode: null, pt: null, services: d.trips || 1, pounds: 0, delivery: true, orders: d.orders });
+      out.unlocated = (out.unlocated || 0) + 1;
+      continue;
+    }
     let best = null;
     for (const day of routes) {
       const pts = [YARD, ...day.stops.filter(s => s.pt).map(s => s.pt), YARD];
@@ -94,7 +101,9 @@ export function placeDeliveries(days, deliveries, Z, typed = {}) {
 
 export function routeCosts(R, rows, Z, deliveries = []) {
   const days = daysFrom(rows, Z);
-  const accounts = {}, postcodes = {}, movement = {};
+  const accounts = {}, postcodes = {}, movement = {}, daily = {}, moveDaily = {};
+  // an account's share of one date, for its jobs (margin.js accountJobs): by level1, then date
+  const onDay = (o, s, date) => { const by = o[s.level1] || (o[s.level1] = {}), x = by[date] || (by[date] = { cost: 0, travel: 0, onsite: 0, services: 0 }); x.cost += s.cost; x.travel += s.travel; x.onsite += s.onsite; x.services += s.services || 0; };
   let services = 0, stops = 0, roundMin = 0;
   const on = !!R.SETTINGS.deliveryMatch && (deliveries || []).length > 0;
   const dels = on ? placeDeliveries(days, deliveries, Z, R.SETTINGS.postcodes || {}) : null;
@@ -105,12 +114,14 @@ export function routeCosts(R, rows, Z, deliveries = []) {
     for (const s of day.stops) {
       stops++; services += s.services || 0;
       if (s.delivery) {   // a box delivery placed on this route: its share is delivery and pickup's
+        onDay(moveDaily, s, day.date);
         const x = movement[s.level1] || (movement[s.level1] = { cost: 0, travel: 0, onsite: 0, services: 0, days: 0, from: day.date, to: day.date });
         x.cost += s.cost; x.travel += s.travel; x.onsite += s.onsite; x.services += s.services || 0;
         if (!seenMove.has(s.level1)) { seenMove.add(s.level1); x.days++; x.to = day.date; }
         continue;
       }
       if (s.level1 != null) {
+        onDay(daily, s, day.date);
         const x = accounts[s.level1] || (accounts[s.level1] = { cost: 0, travel: 0, onsite: 0, services: 0, pounds: 0, stops: 0, days: 0, detour: 0, from: day.date, to: day.date });
         x.cost += s.cost; x.travel += s.travel; x.onsite += s.onsite; x.services += s.services || 0; x.pounds += s.pounds || 0; x.stops++; x.detour += s.detour || 0;
         if (!seenAcc.has(s.level1)) { seenAcc.add(s.level1); x.days++; x.to = day.date; }
@@ -127,7 +138,7 @@ export function routeCosts(R, rows, Z, deliveries = []) {
   const r2 = v => Math.round(v * 100) / 100;
   for (const o of [...Object.values(accounts), ...Object.values(postcodes), ...Object.values(movement)]) for (const f of ['cost', 'travel', 'onsite', 'detour', 'pounds']) if (o[f] != null) o[f] = r2(o[f]);
   const dates = (deliveries || []).map(d => d.date).filter(Boolean).sort();
-  return {
+  const out = {
     from: days.length ? days[0].date : null, to: days.length ? days[days.length - 1].date : null,
     days: days.length, stops, services, accounts, postcodes, movement,
     deliveries: { on, ...(dels || {}), customerDays: dels ? dels.placed + dels.noPostcode + dels.noRoute : null, accounts: Object.keys(movement).length,
@@ -136,6 +147,9 @@ export function routeCosts(R, rows, Z, deliveries = []) {
     avgRoundHours: days.length ? roundMin / days.length / 60 : null,
     settings: { ...R.SETTINGS },
   };
+  // the working by day stays on the server: not enumerable, so never sent with view/routecost
+  for (const [k, v] of Object.entries({ daily, moveDaily, dayList: days })) Object.defineProperty(out, k, { value: v, enumerable: false });
+  return out;
 }
 
 // What a bin service costs in a postcode: its own route days when it has at least MIN services,
@@ -158,6 +172,23 @@ export function postcodeCost(rc, postcode, Z) {
   return n >= MIN_SERVICES ? out(near, 'near') : (own && own.services > 0 ? out([own], 'postcode') : null);
 }
 
+// What real route days cost near a place: every stop within NEAR miles pooled, whatever its size (back-tested on 20
+// accounts, 2 November 2026: within 11% in total, about a third out on any one account; scripts/quote_backtest.mjs).
+export function nearbyCost(rc, postcode, Z, mi = NEAR) {
+  if (!rc || !rc.postcodes) return null;
+  const pc = pc5(postcode), at = Z && Z[pc];
+  if (!at) return null;
+  return pooled(Object.entries(rc.postcodes).filter(([p, v]) => v.stops > 0 && Z[p] && miles(at, Z[p]) <= mi).map(([, v]) => v), rc, 'near', pc);
+}
+// the whole book's stop, until a place is chosen
+export const bookCost = rc => rc && rc.postcodes ? pooled(Object.values(rc.postcodes).filter(v => v.stops > 0), rc, 'book', null) : null;
+function pooled(list, rc, basis, postcode) {
+  const t = list.reduce((a, p) => ({ travel: a.travel + p.travel, onsite: a.onsite + p.onsite, services: a.services + p.services, stops: a.stops + p.stops, days: a.days + p.days }), { travel: 0, onsite: 0, services: 0, stops: 0, days: 0 });
+  if (!t.stops) return null;
+  const S = rc.settings || {}, mins = t.stops * (S.stopMin ?? 8) + t.services * (S.serviceMin ?? 3);
+  return { travelPerStop: t.travel / t.stops, perMinute: mins > 0 ? t.onsite / mins : 0, services: t.services, stops: t.stops, days: t.days, postcodes: list.length, basis, postcode };
+}
+
 // A quote's route cost from a postcode's real days: each visit is one stop, carrying the stop's drive
 // share there and its minutes on site at what a minute on site cost there (stopMin, plus serviceMin
 // for each bin on the visit). Returned as costToServe's route option.
@@ -165,7 +196,7 @@ export function quoteRoute(pcCost, units, visits, S) {
   if (!pcCost || !(units > 0)) return null;
   const v = Math.max(1, visits || units), k = units / v;
   const travel = v * pcCost.travelPerStop, onsite = v * pcCost.perMinute * ((S.stopMin ?? 8) + (S.serviceMin ?? 3) * k);
-  const where = pcCost.basis === 'postcode' ? `stops in ${pcCost.postcode}` : `stops within ${NEAR} miles of ${pcCost.postcode} (${pcCost.postcodes} postcodes)`;
+  const where = pcCost.basis === 'postcode' ? `stops in ${pcCost.postcode}` : pcCost.basis === 'book' ? 'stops across the book' : `stops within ${NEAR} miles of ${pcCost.postcode} (${pcCost.postcodes} postcodes)`;
   return { services: units, travel, onsite, days: pcCost.days,
     label: `${Math.round(v)} visits, each costed as the ${Fmt.grouped(pcCost.stops)} real ${where} cost: ${Fmt.money(pcCost.travelPerStop, { dp: 2 })} of drive time a stop, ${Fmt.money(pcCost.perMinute, { dp: 2 })} a minute on site` };
 }

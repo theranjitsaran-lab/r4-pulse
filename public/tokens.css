@@ -24,7 +24,10 @@
   --ink-5:      #aeaeb2;   /* modelled mark, dashed borders */
 
   /* ── surfaces ── */
-  --ground:     #ffffff;   /* page: white, always */
+  --ground:     #ffffff;   /* page: white */
+  --canvas:     #ecf0ec;   /* Home's page, behind its white cards */
+  --card-ring:  #dde3dd;   /* the edge of a card on the canvas */
+  --lead-ring:  #b9d3bb;   /* the lead tile's outline */
   --surface:    #ffffff;   /* card */
   --well:       #f6f8f6;   /* inset: source lines, opened rows */
   --well-2:     #ececf0;   /* tracks, empty bars */
@@ -41,6 +44,10 @@
   /* ── brand: R4 Services green from r4services.com (top bar, buttons), links and the tap affordance ── */
   --brand:      #0e5116;
   --brand-2:    #1a6b24;
+  --k-win: #1b5e20; --k-win-bg: #dcefdc; --k-price: #8a5200; --k-price-bg: #fdeccb; --k-cross: #0f6b63; --k-cross-bg: #dcefec;   /* kinds of opportunity: never blue, which means better */
+  --k-round: #5c635e; --k-round-bg: #eceeec; --k-box: #6b3fa0; --k-box-bg: #efe7f8; --k-route: #6d4c41; --k-route-bg: #efe6e2;
+  --md-p1: #1b5e20; --md-p2: #4f8f53; --md-p3: #8fbf92; --md-p4: #c4ddc5; --md-p5: #7d847f;   /* the kinds of cost, darkest the largest */
+  --veil: #1d211e8c;   /* behind the welcome and the tour */
   --on-brand:   #ffffff;   /* text on a brand fill */
   --r4-bright:  #38b449;   /* the green of the R4 mark: fills and lines only, never text (2.7:1 on white) */
 
@@ -66,6 +73,7 @@
   --flag-up:    #1a5a8a;   /* a month well above it */
   --flag-up-bg: #e1edf6;
   --warn:       #9a5c00;   /* below median; the thin day (text-safe amber) */
+  --warn-on-canvas: #8a5200;   /* the same word on Home's canvas: 4.5:1 or more */
   --bad:        #c62f2f;   /* below cost; down */
   --bad-bg:     #fdecec;
   --warn-bg:    #fdf3e2;
@@ -76,7 +84,7 @@
   --f-brand:    "Average Sans", var(--f-sans);   /* the "Pulse" wordmark only (27 October 2026) */
   --f-body:     var(--f-sans);
   --f-narrow:   var(--f-sans);
-  --f-num:      ui-monospace, "SF Mono", SFMono-Regular, Consolas, Menlo, monospace;   /* the tables' figures; system, nothing fetched */
+  --f-num:      var(--f-sans);   /* the tables' figures: the system sans with tabular figures */
   --w-head:     600;       /* every title and figure; 400 for text, nothing else */
 
   --fs-source:  12px;
@@ -111,11 +119,19 @@
   --hero-accent: #8fd99a;  /* the pulse line, the known part of the bill */
 
   /* ── maps: a quiet outline under the route, the lake the one landmark; never a series colour ── */
+  --q-travel: #7d847f; --q-time: #a3aaa5; --q-plant: #c7ccc8; --q-other: #dfe3df;   /* where a quote's price goes */
+  --rag-g: #dcefdc; --rag-g-ink: #1b5e20; --rag-a: #fdeccb; --rag-a-ink: #8a5200; --rag-r: #f9dcdc; --rag-r-ink: #b42020;   /* Healthy, Normal, Thin */
+  --up-bg: #e4edf9; --up-ink: #1f5fbf; --down-bg: #fbe6e6; --down-ink: #c62828;   /* a change chip */
+  --light-g: #4caf50; --light-a: #e0a030; --light-r: #c62828;   /* the summary's lights */
+  --l1: #1b5e20; --l2: #3f8f44; --l3: #6fae73; --l4: #a3cba6; --l5: #cfe3d0; --l6: #7d847f; --l7: #a8aea9; --l8: #d3d7d4;   /* lines of business: green ramp and greys */
+  --mk1: #e6f0e6; --mk2: #c9e1ca; --mk3: #9ac79d; --mk4: #4f9a55; --mk5: #1b5e20; --mkn1: #fbe6e6; --mkn2: #f6cccc; --mkn3: #efabab; --mkn4: #d96a6a; --mkn5: #b42020;   /* $K margin cells */
+  --xs-bg: #e3f1e4; --xs-ink: #1b5e20; --xs-ring: #9cc89f; --low-ring: #e9c27a;
   --map-water:  #e6edf3;
   --map-land:   #fbfbfc;
   --map-border: #dedee3;   /* county lines */
   --map-road:   #cfcfd5;   /* the interstates */
   --map-place:  #8e8e93;   /* town names: decoration, not data */
+  --zone-1: #fdf3ec; --zone-2: #fbe3d4; --zone-3: #f8d0b8; --zone-4: #f3b796; --zone-5: #e99a72;   /* postcode districts, quiet to busy */
 
   /* ── route work: done services in ink, so green and red stay free for above and below the norm ── */
   --heat:    #6c6c71;
@@ -179,6 +195,7 @@
   --r:    10px;
   --r-lg: 16px;
   --row-h: 44px;           /* a tap target, not a ledger line */
+  --shadow-card: 0 1px 2px #1d211e0d, 0 6px 16px -10px #1d211e29;   /* a card on the canvas */
   --shadow-sm:  0 1px 2px rgba(0, 0, 0, .08);   /* the selected segment */
   --shadow-pop: 0 4px 20px rgba(0, 0, 0, .14);  /* a tooltip */
   --shadow-dialog: 0 20px 60px rgba(0, 0, 0, .25); /* the explainer */

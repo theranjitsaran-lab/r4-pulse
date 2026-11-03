@@ -54,6 +54,16 @@ each other line: one or two short sentences, at most 30 words, starting with its
 
 Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. Keep the word "est." after an estimated figure. If the data is stale, say so in the headline. British spelling, US dollars, no markdown, no bullet characters.`;
 
+// The Quote screen's points, one a line, each starting with its key
+export const QUOTE_SYSTEM = `You write short points beside the figures on a screen, for the people who run R4 Services, a Chicago records-management and shredding firm. From the facts you are given (each starts with its key in square brackets), write one line for each fact, in the order given, and nothing else. Each line starts with its key in square brackets, then one plain sentence of at most 16 words saying what the fact says.
+
+Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. Keep the word "est." after an estimated figure. British spelling, no markdown, no bullet characters.`;
+export function parseQuote(text, sheet) {
+  const out = {};
+  for (const l of String(text).split('\n').map(x => x.trim()).filter(Boolean)) { const m = l.match(/^\[(\w+)\]\s*(.+)$/); if (m && sheet.some(f => f.key === m[1])) out[m[1]] = m[2]; }
+  return sheet.every(f => out[f.key]) ? out : null;
+}
+
 export function home2SheetText(sheet) { return sheet.map(f => `- [${f.key}] ${f.line}`).join('\n'); }
 
 export function parseHome2(text, sheet) {
@@ -68,6 +78,11 @@ export function templateHome2(sheet) {
   const lead = sheet.find(f => f.lead) || sheet[0];
   return [lead.say || lead.line, ...sheet.filter(f => f.bullet).slice(0, 4).map(f => `[${f.key}] ${f.say || f.line}`)].join('\n');
 }
+
+// Home's map: where the work is, from the postcode facts.
+export const MAP_SYSTEM = `You write a short note under a map for the CEO of R4 Services, a Chicago records-management and shredding firm: where the company's shredding and service work is busiest over the last twelve months. In two or three short sentences, say where it is busiest and how concentrated it is, and say so plainly if one customer accounts for the busiest postcode. Keep every postcode, town and customer name a fact names.
+
+Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. British spelling, no markdown, no bullet characters.`;
 
 // A line of business in one month, for its pop-out (views/home2.js): the note above the figures.
 export const LINE_SYSTEM = `You write a short note for the CEO of R4 Services, a Chicago records-management and shredding firm, about one line of business in one month. From the facts, in two or three plain sentences, say how the month compares with the month before and the trend, and name the customers driving it up and down. Use only numbers that appear in the facts, written exactly as they appear. Do not calculate new figures. Keep the word "est." after an estimated figure. British spelling, US dollars, no bullet points, no headings, no markdown.`;

@@ -8,6 +8,9 @@ import { getJson } from '/components/data.js';
 import { carryHash } from '/components/acctfilters.js';
 import { playIntro } from '/components/intro.js';
 import { loadAccess, costsVisible, isAdmin, landing } from '/components/access.js';
+import { openWelcome, maybeWelcome } from '/components/tour.js';
+import { whenIntroDone } from '/components/motion.js';
+import '/components/phonekit.js';
 import { freshStamp } from '/components/metrics.js';
 import { wireInvoices } from '/components/invoices.js';
 import { openAsk } from '/components/ask.js';
@@ -19,7 +22,7 @@ const ROUTES = {
   customers: { view: 'customers', api: 'customers', nav: 'customers' },
   customer:  { view: 'customer',  api: 'customers', nav: 'customers' },
   pricing:   { view: 'pricing',   api: 'pricing',   nav: 'pricing' },
-  numbers:   { view: 'numbers',   api: 'view/numbers', nav: 'numbers' },
+  numbers:   { view: 'numbers',   api: 'pulse', nav: 'activity' },   // Warehouse only: the Money page came out on 3 November 2026
   settings:  { view: 'settings',  api: 'settings',  nav: 'settings' },
   activity:  { view: 'activity',  api: 'activity',  nav: 'activity' },
   opportunities: { view: 'customers', api: 'customers', nav: 'opportunities', params: { view: 'opportunities' } },
@@ -57,6 +60,7 @@ async function show() {
     location.replace('#opportunities' + (u.toString() ? '?' + u : ''));
     return;
   }
+  if (name === 'numbers' && params.tab !== 'warehouse') { location.replace('#customers'); return; }
   const route = ROUTES[name];
   document.querySelectorAll('#nav a, .mast-gear').forEach(a => a.classList.toggle('on', a.dataset.screen === route.nav));
   main.innerHTML = '<div class="sk" role="status" aria-label="Loading"><i class="sk-h"></i><div class="sk-tiles"><i></i><i></i><i></i><i></i></div><i class="sk-c"></i><i class="sk-c"></i></div>';
@@ -120,7 +124,7 @@ document.getElementById('mast-ask').addEventListener('click', () => ask());
 fetch('/health/data').then(r => r.json()).then(h => {
   const el = document.getElementById('stamp'), s = freshStamp(h, h.today || new Date().toISOString().slice(0, 10));
   if (!el || !s) return;
-  el.textContent = s.text; el.classList.toggle('late', s.late); el.hidden = false;
+  el.textContent = s.text; el.title = s.text; el.classList.toggle('late', s.late); el.hidden = false;
 }).catch(() => {});
 // any screen can open it, with a question to send: dispatchEvent(new CustomEvent('open-ask', { detail: { ask } }))
 addEventListener('open-ask', e => ask(e.detail && e.detail.ask));
@@ -130,7 +134,9 @@ loadAccess().then(() => {
   document.querySelectorAll('[data-screen="settings"]').forEach(a => { a.hidden = !isAdmin(); });
   if (!location.hash && landing()) history.replaceState(null, '', landing());
   show();
+  whenIntroDone().then(maybeWelcome);
 });
+document.getElementById('mast-help').addEventListener('click', openWelcome);
 
 // the top tabs keep search, filters and the months switch where they apply
 document.getElementById('nav')?.addEventListener('click', e => {

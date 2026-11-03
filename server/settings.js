@@ -94,7 +94,7 @@ api.post('/', async (req, res) => {
   } catch (e) { res.status(500).json({ error: saveable ? e.message : 'Changes cannot be saved until the setup SQL has been applied on the PC.' }); }
 });
 
-// margins and advice built on them: admins, until the model is signed off and released here
-const seesCosts = req => !!(req.session && req.session.user && (req.session.user.role === 'admin' || R.SETTINGS.costsFinal));
+// margins and advice built on them
+const seesCosts = req => !!(req.session && req.session.user);   // everyone signed in (Theran, 3 November 2026); only Settings is admin only
 
 module.exports = { api, load, ensure, seesCosts };

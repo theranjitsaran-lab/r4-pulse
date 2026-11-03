@@ -11,7 +11,7 @@
 // the units that drive it: storage a box a month, bins a service, ITAD a device, retrieval a box
 // moved, delivery a trip, labour an hour, destruction a pound (or a box where it is billed by the box).
 import { seriesOf } from './series.js';
-import { buildMargins, accountCosts } from './margin.js';
+import { buildMargins, accountCosts, costParts } from './margin.js';
 import { serviceGaps, storageGaps, CITADEL, CROSS_SELL_DEPTH } from './levers.js';
 import { buildWhitespace } from './whitespace.js';
 
@@ -90,7 +90,7 @@ export function customerBook({ C, M, PR, R }) {
       ytd, ytdPct: ytd != null && ytdLy ? ch(ytd, ytdLy) : null,
       spark: t ? t.slice(-13) : null,
       revenue: m.revenue, cost: m.cost, margin: m.margin, pc: m.revenue > 0 ? m.margin / m.revenue : null,
-      review: m.cost > 0 && routeCost > 0.5 * m.cost, routeCost,
+      review: m.cost > 0 && routeCost > 0.5 * m.cost, routeCost, parts: costParts(Object.values(costs).flat().flatMap(x => x.lines)),
       opp: opp.has(a.level1) ? opp.get(a.level1).opp : 0, oppRow: opp.get(a.level1) || null,
       gap: gap.get(a.level1) || 0,
       boxes: a.boxes || 0, visits: a.visits || 0, bins: a.bins || 0,

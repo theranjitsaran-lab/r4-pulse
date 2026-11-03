@@ -1,5 +1,5 @@
 {
- "snapshotAt": "2026-11-01T19:55:54.771Z",
+ "snapshotAt": "2026-11-03T13:15:22.251Z",
  "data": [
   {
    "date": "2025-11-03",
@@ -32,7 +32,7 @@
    "date": "2025-11-03",
    "level1": 4274,
    "orders": 1,
-   "trips": 91,
+   "trips": 1,
    "revenue": 223.62,
    "postcode": null,
    "basis": null
@@ -50,7 +50,7 @@
    "date": "2025-11-03",
    "level1": 6008,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 42.73,
    "postcode": "60607",
    "basis": "account"
@@ -77,7 +77,7 @@
    "date": "2025-11-03",
    "level1": 8515,
    "orders": 1,
-   "trips": 16,
+   "trips": 1,
    "revenue": 146.23,
    "postcode": "60523",
    "basis": "site"
@@ -113,7 +113,7 @@
    "date": "2025-11-04",
    "level1": 1138,
    "orders": 1,
-   "trips": 14,
+   "trips": 1,
    "revenue": 144.89,
    "postcode": null,
    "basis": null
@@ -122,7 +122,7 @@
    "date": "2025-11-04",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 30.24,
    "postcode": "60606",
    "basis": "site"
@@ -158,7 +158,7 @@
    "date": "2025-11-04",
    "level1": 8405,
    "orders": 1,
-   "trips": 14,
+   "trips": 1,
    "revenue": 88.02,
    "postcode": null,
    "basis": null
@@ -176,7 +176,7 @@
    "date": "2025-11-04",
    "level1": 10398,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 48.21,
    "postcode": "60601",
    "basis": "site"
@@ -185,7 +185,7 @@
    "date": "2025-11-04",
    "level1": 12128,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 76.23,
    "postcode": "60601",
    "basis": "site"
@@ -239,7 +239,7 @@
    "date": "2025-11-05",
    "level1": 8107,
    "orders": 1,
-   "trips": 9,
+   "trips": 1,
    "revenue": 27.65,
    "postcode": null,
    "basis": null
@@ -257,7 +257,7 @@
    "date": "2025-11-05",
    "level1": 9403,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 42.35,
    "postcode": "60201",
    "basis": "account"
@@ -266,7 +266,7 @@
    "date": "2025-11-05",
    "level1": 12736,
    "orders": 1,
-   "trips": 46,
+   "trips": 1,
    "revenue": 123.94,
    "postcode": "60305",
    "basis": "account"
@@ -275,7 +275,7 @@
    "date": "2025-11-06",
    "level1": 1138,
    "orders": 1,
-   "trips": 17,
+   "trips": 1,
    "revenue": 165.99,
    "postcode": null,
    "basis": null
@@ -284,7 +284,7 @@
    "date": "2025-11-06",
    "level1": 2940,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 49.91,
    "postcode": "60601",
    "basis": "site"
@@ -320,7 +320,7 @@
    "date": "2025-11-06",
    "level1": 7137,
    "orders": 1,
-   "trips": 22.999,
+   "trips": 0.999,
    "revenue": 75.09,
    "postcode": null,
    "basis": null
@@ -428,7 +428,7 @@
    "date": "2025-11-10",
    "level1": 1138,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 102.67,
    "postcode": null,
    "basis": null
@@ -446,7 +446,7 @@
    "date": "2025-11-10",
    "level1": 3197,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 88.91,
    "postcode": "60606",
    "basis": "account"
@@ -455,7 +455,7 @@
    "date": "2025-11-10",
    "level1": 3849,
    "orders": 1,
-   "trips": 21,
+   "trips": 1,
    "revenue": 200.78,
    "postcode": "60606",
    "basis": "account"
@@ -527,7 +527,7 @@
    "date": "2025-11-11",
    "level1": 1138,
    "orders": 1,
-   "trips": 26,
+   "trips": 1,
    "revenue": 229.32,
    "postcode": null,
    "basis": null
@@ -545,7 +545,7 @@
    "date": "2025-11-11",
    "level1": 2345,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 34.56,
    "postcode": "60606",
    "basis": "site"
@@ -590,7 +590,7 @@
    "date": "2025-11-12",
    "level1": 941,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 75.49,
    "postcode": "60602",
    "basis": "site"
@@ -599,7 +599,7 @@
    "date": "2025-11-12",
    "level1": 947,
    "orders": 2,
-   "trips": 10,
+   "trips": 2,
    "revenue": 122.32,
    "postcode": "60606",
    "basis": "site"
@@ -608,7 +608,7 @@
    "date": "2025-11-12",
    "level1": 1138,
    "orders": 1,
-   "trips": 17,
+   "trips": 1,
    "revenue": 165.99,
    "postcode": null,
    "basis": null
@@ -617,7 +617,7 @@
    "date": "2025-11-12",
    "level1": 6778,
    "orders": 1,
-   "trips": 24,
+   "trips": 3,
    "revenue": 173.99,
    "postcode": null,
    "basis": null
@@ -653,7 +653,7 @@
    "date": "2025-11-13",
    "level1": 2904,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 67.55,
    "postcode": null,
    "basis": null
@@ -698,7 +698,7 @@
    "date": "2025-11-13",
    "level1": 8493,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 101.25,
    "postcode": "60659",
    "basis": "site"
@@ -716,7 +716,7 @@
    "date": "2025-11-13",
    "level1": 9113,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 22.59,
    "postcode": "60601",
    "basis": "account"
@@ -734,7 +734,7 @@
    "date": "2025-11-13",
    "level1": 9703,
    "orders": 1,
-   "trips": 19,
+   "trips": 1,
    "revenue": 82.24,
    "postcode": null,
    "basis": null
@@ -770,7 +770,7 @@
    "date": "2025-11-14",
    "level1": 1754,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 21.36,
    "postcode": "60091",
    "basis": "site"
@@ -815,7 +815,7 @@
    "date": "2025-11-14",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 39.89,
    "postcode": "60201",
    "basis": "account"
@@ -833,7 +833,7 @@
    "date": "2025-11-14",
    "level1": 8389,
    "orders": 1,
-   "trips": 12.999,
+   "trips": 1.999,
    "revenue": 60.29,
    "postcode": "60606",
    "basis": "account"
@@ -896,7 +896,7 @@
    "date": "2025-11-18",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 45.8,
    "postcode": "60606",
    "basis": "site"
@@ -905,7 +905,7 @@
    "date": "2025-11-18",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 30.24,
    "postcode": "60606",
    "basis": "site"
@@ -1049,7 +1049,7 @@
    "date": "2025-11-20",
    "level1": 6008,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 42.73,
    "postcode": "60607",
    "basis": "account"
@@ -1058,7 +1058,7 @@
    "date": "2025-11-20",
    "level1": 7137,
    "orders": 1,
-   "trips": 13.999,
+   "trips": 0.999,
    "revenue": 52.8,
    "postcode": null,
    "basis": null
@@ -1103,7 +1103,7 @@
    "date": "2025-11-21",
    "level1": 1,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 31.54,
    "postcode": "60602",
    "basis": "site"
@@ -1130,7 +1130,7 @@
    "date": "2025-11-24",
    "level1": 78,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 58.27,
    "postcode": "60130",
    "basis": "site"
@@ -1139,7 +1139,7 @@
    "date": "2025-11-24",
    "level1": 1138,
    "orders": 1,
-   "trips": 23,
+   "trips": 1,
    "revenue": 208.21,
    "postcode": null,
    "basis": null
@@ -1157,7 +1157,7 @@
    "date": "2025-11-24",
    "level1": 2904,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 67.55,
    "postcode": null,
    "basis": null
@@ -1193,7 +1193,7 @@
    "date": "2025-11-24",
    "level1": 10615,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 84.78,
    "postcode": "60440",
    "basis": "site"
@@ -1256,7 +1256,7 @@
    "date": "2025-11-25",
    "level1": 9113,
    "orders": 1,
-   "trips": 12,
+   "trips": 1,
    "revenue": 46.08,
    "postcode": "60601",
    "basis": "site"
@@ -1292,7 +1292,7 @@
    "date": "2025-12-01",
    "level1": 62,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 93.34,
    "postcode": null,
    "basis": null
@@ -1301,7 +1301,7 @@
    "date": "2025-12-01",
    "level1": 941,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 123.68,
    "postcode": "60602",
    "basis": "site"
@@ -1310,7 +1310,7 @@
    "date": "2025-12-01",
    "level1": 947,
    "orders": 2,
-   "trips": 4,
+   "trips": 2,
    "revenue": 85.85,
    "postcode": "60606",
    "basis": "site"
@@ -1337,7 +1337,7 @@
    "date": "2025-12-01",
    "level1": 8107,
    "orders": 3,
-   "trips": 10,
+   "trips": 3,
    "revenue": 51.75,
    "postcode": null,
    "basis": null
@@ -1364,7 +1364,7 @@
    "date": "2025-12-01",
    "level1": 8389,
    "orders": 2,
-   "trips": 11,
+   "trips": 2,
    "revenue": 60.63,
    "postcode": "60606",
    "basis": "account"
@@ -1391,7 +1391,7 @@
    "date": "2025-12-01",
    "level1": 9403,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 42.55,
    "postcode": "60201",
    "basis": "account"
@@ -1409,7 +1409,7 @@
    "date": "2025-12-02",
    "level1": 2345,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 34.72,
    "postcode": "60606",
    "basis": "site"
@@ -1445,7 +1445,7 @@
    "date": "2025-12-02",
    "level1": 7137,
    "orders": 1,
-   "trips": 6,
+   "trips": 2,
    "revenue": 33.13,
    "postcode": null,
    "basis": null
@@ -1490,7 +1490,7 @@
    "date": "2025-12-02",
    "level1": 13240,
    "orders": 1,
-   "trips": 35,
+   "trips": 1,
    "revenue": 194.34,
    "postcode": "60606",
    "basis": "account"
@@ -1499,7 +1499,7 @@
    "date": "2025-12-03",
    "level1": 78,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 58.54,
    "postcode": "60130",
    "basis": "account"
@@ -1688,7 +1688,7 @@
    "date": "2025-12-08",
    "level1": 1,
    "orders": 2,
-   "trips": 7,
+   "trips": 2,
    "revenue": 46.04,
    "postcode": "60602",
    "basis": "site"
@@ -1706,7 +1706,7 @@
    "date": "2025-12-08",
    "level1": 6008,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 51.14,
    "postcode": "60607",
    "basis": "account"
@@ -1742,7 +1742,7 @@
    "date": "2025-12-09",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 30.38,
    "postcode": "60606",
    "basis": "site"
@@ -1769,7 +1769,7 @@
    "date": "2025-12-09",
    "level1": 7137,
    "orders": 1,
-   "trips": 15,
+   "trips": 1,
    "revenue": 55.54,
    "postcode": null,
    "basis": null
@@ -1805,7 +1805,7 @@
    "date": "2025-12-10",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 46.01,
    "postcode": "60606",
    "basis": "site"
@@ -1841,7 +1841,7 @@
    "date": "2025-12-10",
    "level1": 4274,
    "orders": 1,
-   "trips": 57,
+   "trips": 1,
    "revenue": 146.78,
    "postcode": null,
    "basis": null
@@ -1913,7 +1913,7 @@
    "date": "2025-12-10",
    "level1": 11066,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 73.79,
    "postcode": null,
    "basis": null
@@ -1949,7 +1949,7 @@
    "date": "2025-12-11",
    "level1": 7137,
    "orders": 2,
-   "trips": 9,
+   "trips": 3,
    "revenue": 61.3,
    "postcode": null,
    "basis": null
@@ -2003,7 +2003,7 @@
    "date": "2025-12-12",
    "level1": 947,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 52.19,
    "postcode": "60606",
    "basis": "site"
@@ -2021,7 +2021,7 @@
    "date": "2025-12-12",
    "level1": 7001,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 44.47,
    "postcode": "60201",
    "basis": "account"
@@ -2030,7 +2030,7 @@
    "date": "2025-12-12",
    "level1": 8405,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 40.08,
    "postcode": null,
    "basis": null
@@ -2057,7 +2057,7 @@
    "date": "2025-12-15",
    "level1": 1,
    "orders": 1,
-   "trips": 14,
+   "trips": 1,
    "revenue": 49.04,
    "postcode": "60602",
    "basis": "site"
@@ -2111,7 +2111,7 @@
    "date": "2025-12-16",
    "level1": 947,
    "orders": 2,
-   "trips": 6,
+   "trips": 2,
    "revenue": 92.02,
    "postcode": "60606",
    "basis": "site"
@@ -2120,7 +2120,7 @@
    "date": "2025-12-16",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 30.38,
    "postcode": "60606",
    "basis": "site"
@@ -2174,7 +2174,7 @@
    "date": "2025-12-16",
    "level1": 11322,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 31.14,
    "postcode": null,
    "basis": null
@@ -2183,7 +2183,7 @@
    "date": "2025-12-17",
    "level1": 62,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 100.42,
    "postcode": null,
    "basis": null
@@ -2192,7 +2192,7 @@
    "date": "2025-12-17",
    "level1": 947,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 52.19,
    "postcode": "60606",
    "basis": "site"
@@ -2201,7 +2201,7 @@
    "date": "2025-12-17",
    "level1": 1078,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 33.13,
    "postcode": "60532",
    "basis": "account"
@@ -2210,7 +2210,7 @@
    "date": "2025-12-17",
    "level1": 1138,
    "orders": 1,
-   "trips": 28,
+   "trips": 1,
    "revenue": 244.52,
    "postcode": null,
    "basis": null
@@ -2264,7 +2264,7 @@
    "date": "2025-12-17",
    "level1": 10398,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 48.21,
    "postcode": "60601",
    "basis": "site"
@@ -2273,7 +2273,7 @@
    "date": "2025-12-17",
    "level1": 11322,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 31.14,
    "postcode": null,
    "basis": null
@@ -2300,7 +2300,7 @@
    "date": "2025-12-18",
    "level1": 6778,
    "orders": 1,
-   "trips": 24,
+   "trips": 3,
    "revenue": 174.8,
    "postcode": null,
    "basis": null
@@ -2318,7 +2318,7 @@
    "date": "2025-12-18",
    "level1": 8405,
    "orders": 1,
-   "trips": 17,
+   "trips": 1,
    "revenue": 101.62,
    "postcode": null,
    "basis": null
@@ -2354,7 +2354,7 @@
    "date": "2025-12-18",
    "level1": 11322,
    "orders": 1,
-   "trips": 21,
+   "trips": 1,
    "revenue": 100.2,
    "postcode": null,
    "basis": null
@@ -2381,7 +2381,7 @@
    "date": "2025-12-19",
    "level1": 947,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 58.36,
    "postcode": "60606",
    "basis": "site"
@@ -2435,7 +2435,7 @@
    "date": "2025-12-22",
    "level1": 1354,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 81.44,
    "postcode": null,
    "basis": null
@@ -2453,7 +2453,7 @@
    "date": "2025-12-22",
    "level1": 8991,
    "orders": 1,
-   "trips": 15,
+   "trips": 1,
    "revenue": 140.04,
    "postcode": "60634",
    "basis": "site"
@@ -2462,7 +2462,7 @@
    "date": "2025-12-23",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 30.38,
    "postcode": "60606",
    "basis": "site"
@@ -2498,7 +2498,7 @@
    "date": "2025-12-23",
    "level1": 8456,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 70.46,
    "postcode": null,
    "basis": null
@@ -2516,7 +2516,7 @@
    "date": "2025-12-24",
    "level1": 3849,
    "orders": 1,
-   "trips": 14,
+   "trips": 1,
    "revenue": 150.96,
    "postcode": "60606",
    "basis": "account"
@@ -2570,7 +2570,7 @@
    "date": "2025-12-26",
    "level1": 6872,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 48.16,
    "postcode": "60018",
    "basis": "account"
@@ -2579,7 +2579,7 @@
    "date": "2025-12-26",
    "level1": 7137,
    "orders": 1,
-   "trips": 4.999,
+   "trips": 2.999,
    "revenue": 30.66,
    "postcode": null,
    "basis": null
@@ -2606,7 +2606,7 @@
    "date": "2025-12-29",
    "level1": 1,
    "orders": 1,
-   "trips": 28,
+   "trips": 1,
    "revenue": 83.73,
    "postcode": "60602",
    "basis": "site"
@@ -2615,7 +2615,7 @@
    "date": "2025-12-29",
    "level1": 3315,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 71.69,
    "postcode": null,
    "basis": null
@@ -2651,7 +2651,7 @@
    "date": "2025-12-30",
    "level1": 2345,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 34.72,
    "postcode": "60606",
    "basis": "site"
@@ -2669,7 +2669,7 @@
    "date": "2025-12-31",
    "level1": 78,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 73.45,
    "postcode": "60130",
    "basis": "site"
@@ -2705,7 +2705,7 @@
    "date": "2025-12-31",
    "level1": 11322,
    "orders": 1,
-   "trips": 41,
+   "trips": 1,
    "revenue": 181.44,
    "postcode": null,
    "basis": null
@@ -2732,7 +2732,7 @@
    "date": "2026-01-02",
    "level1": 5794,
    "orders": 1,
-   "trips": 25,
+   "trips": 1,
    "revenue": 227.84,
    "postcode": null,
    "basis": null
@@ -2759,7 +2759,7 @@
    "date": "2026-01-05",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 50.02,
    "postcode": "60606",
    "basis": "site"
@@ -2813,7 +2813,7 @@
    "date": "2026-01-06",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 30.94,
    "postcode": "60606",
    "basis": "site"
@@ -2858,7 +2858,7 @@
    "date": "2026-01-06",
    "level1": 8700,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 110.61,
    "postcode": null,
    "basis": null
@@ -2930,7 +2930,7 @@
    "date": "2026-01-07",
    "level1": 8700,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 89.55,
    "postcode": null,
    "basis": null
@@ -2975,7 +2975,7 @@
    "date": "2026-01-08",
    "level1": 8107,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 17.9,
    "postcode": null,
    "basis": null
@@ -3020,7 +3020,7 @@
    "date": "2026-01-08",
    "level1": 10398,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 49.04,
    "postcode": "60601",
    "basis": "site"
@@ -3038,7 +3038,7 @@
    "date": "2026-01-08",
    "level1": 13240,
    "orders": 1,
-   "trips": 36,
+   "trips": 1,
    "revenue": 216.28,
    "postcode": "60606",
    "basis": "account"
@@ -3065,7 +3065,7 @@
    "date": "2026-01-09",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 43.57,
    "postcode": "60201",
    "basis": "account"
@@ -3101,7 +3101,7 @@
    "date": "2026-01-09",
    "level1": 11322,
    "orders": 1,
-   "trips": 31,
+   "trips": 1,
    "revenue": 153.21,
    "postcode": null,
    "basis": null
@@ -3110,7 +3110,7 @@
    "date": "2026-01-12",
    "level1": 1,
    "orders": 1,
-   "trips": 21,
+   "trips": 1,
    "revenue": 72.17,
    "postcode": "60602",
    "basis": "site"
@@ -3128,7 +3128,7 @@
    "date": "2026-01-12",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 50.02,
    "postcode": "60606",
    "basis": "site"
@@ -3146,7 +3146,7 @@
    "date": "2026-01-12",
    "level1": 5236,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 29.45,
    "postcode": null,
    "basis": null
@@ -3191,7 +3191,7 @@
    "date": "2026-01-12",
    "level1": 8515,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 121.98,
    "postcode": "60523",
    "basis": "site"
@@ -3209,7 +3209,7 @@
    "date": "2026-01-13",
    "level1": 941,
    "orders": 1,
-   "trips": 19,
+   "trips": 1,
    "revenue": 203.84,
    "postcode": "60602",
    "basis": "site"
@@ -3218,7 +3218,7 @@
    "date": "2026-01-13",
    "level1": 947,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 76.86,
    "postcode": "60606",
    "basis": "site"
@@ -3245,7 +3245,7 @@
    "date": "2026-01-13",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 30.94,
    "postcode": "60606",
    "basis": "site"
@@ -3299,7 +3299,7 @@
    "date": "2026-01-14",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 50.02,
    "postcode": "60606",
    "basis": "site"
@@ -3308,7 +3308,7 @@
    "date": "2026-01-14",
    "level1": 1891,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 41.78,
    "postcode": null,
    "basis": null
@@ -3344,7 +3344,7 @@
    "date": "2026-01-14",
    "level1": 7137,
    "orders": 1,
-   "trips": 19,
+   "trips": 1,
    "revenue": 71.18,
    "postcode": null,
    "basis": null
@@ -3479,7 +3479,7 @@
    "date": "2026-01-15",
    "level1": 13446,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 67.78,
    "postcode": null,
    "basis": null
@@ -3488,7 +3488,7 @@
    "date": "2026-01-15",
    "level1": 13542,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 137.07,
    "postcode": "60026",
    "basis": "site"
@@ -3515,7 +3515,7 @@
    "date": "2026-01-16",
    "level1": 4274,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 27,
    "postcode": null,
    "basis": null
@@ -3569,7 +3569,7 @@
    "date": "2026-01-20",
    "level1": 2345,
    "orders": 2,
-   "trips": 4,
+   "trips": 2,
    "revenue": 57.46,
    "postcode": "60606",
    "basis": "site"
@@ -3596,7 +3596,7 @@
    "date": "2026-01-20",
    "level1": 8107,
    "orders": 2,
-   "trips": 9,
+   "trips": 3,
    "revenue": 37.75,
    "postcode": null,
    "basis": null
@@ -3614,7 +3614,7 @@
    "date": "2026-01-20",
    "level1": 9113,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 27.72,
    "postcode": "60601",
    "basis": "site"
@@ -3632,7 +3632,7 @@
    "date": "2026-01-20",
    "level1": 11322,
    "orders": 1,
-   "trips": 31,
+   "trips": 1,
    "revenue": 153.21,
    "postcode": null,
    "basis": null
@@ -3659,7 +3659,7 @@
    "date": "2026-01-21",
    "level1": 5682,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 76.18,
    "postcode": null,
    "basis": null
@@ -3668,7 +3668,7 @@
    "date": "2026-01-21",
    "level1": 7137,
    "orders": 1,
-   "trips": 11,
+   "trips": 2,
    "revenue": 49.54,
    "postcode": null,
    "basis": null
@@ -3731,7 +3731,7 @@
    "date": "2026-01-22",
    "level1": 1399,
    "orders": 1,
-   "trips": 13,
+   "trips": 1,
    "revenue": 172.37,
    "postcode": null,
    "basis": null
@@ -3740,7 +3740,7 @@
    "date": "2026-01-22",
    "level1": 1732,
    "orders": 1,
-   "trips": 11,
+   "trips": 2,
    "revenue": 129.46,
    "postcode": "60611",
    "basis": "site"
@@ -3794,7 +3794,7 @@
    "date": "2026-01-22",
    "level1": 10398,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 41.08,
    "postcode": "60601",
    "basis": "site"
@@ -3830,7 +3830,7 @@
    "date": "2026-01-23",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 43.57,
    "postcode": "60201",
    "basis": "account"
@@ -3839,7 +3839,7 @@
    "date": "2026-01-23",
    "level1": 8178,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 80.55,
    "postcode": "60602",
    "basis": "site"
@@ -3902,7 +3902,7 @@
    "date": "2026-01-26",
    "level1": 8394,
    "orders": 1,
-   "trips": 17,
+   "trips": 1,
    "revenue": 63.22,
    "postcode": "60606",
    "basis": "site"
@@ -3947,7 +3947,7 @@
    "date": "2026-01-27",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 30.94,
    "postcode": "60606",
    "basis": "site"
@@ -3974,7 +3974,7 @@
    "date": "2026-01-27",
    "level1": 8405,
    "orders": 1,
-   "trips": 14,
+   "trips": 1,
    "revenue": 96.17,
    "postcode": null,
    "basis": null
@@ -4001,7 +4001,7 @@
    "date": "2026-01-27",
    "level1": 11544,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 61.35,
    "postcode": "60473",
    "basis": "site"
@@ -4010,7 +4010,7 @@
    "date": "2026-01-28",
    "level1": 947,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 63.44,
    "postcode": "60606",
    "basis": "site"
@@ -4037,7 +4037,7 @@
    "date": "2026-01-28",
    "level1": 6008,
    "orders": 1,
-   "trips": 12,
+   "trips": 1,
    "revenue": 82.36,
    "postcode": "60607",
    "basis": "account"
@@ -4091,7 +4091,7 @@
    "date": "2026-01-29",
    "level1": 1399,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 110.34,
    "postcode": null,
    "basis": null
@@ -4109,7 +4109,7 @@
    "date": "2026-01-29",
    "level1": 3197,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 65.03,
    "postcode": "60606",
    "basis": "account"
@@ -4145,7 +4145,7 @@
    "date": "2026-01-29",
    "level1": 8515,
    "orders": 1,
-   "trips": 9,
+   "trips": 1,
    "revenue": 106.86,
    "postcode": "60523",
    "basis": "site"
@@ -4163,7 +4163,7 @@
    "date": "2026-01-29",
    "level1": 11322,
    "orders": 1,
-   "trips": 31,
+   "trips": 1,
    "revenue": 153.21,
    "postcode": null,
    "basis": null
@@ -4199,7 +4199,7 @@
    "date": "2026-01-30",
    "level1": 8107,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 21.8,
    "postcode": null,
    "basis": null
@@ -4226,7 +4226,7 @@
    "date": "2026-01-30",
    "level1": 9403,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 50.6,
    "postcode": "60201",
    "basis": "account"
@@ -4244,7 +4244,7 @@
    "date": "2026-02-02",
    "level1": 947,
    "orders": 2,
-   "trips": 7,
+   "trips": 2,
    "revenue": 107.26,
    "postcode": "60606",
    "basis": "site"
@@ -4271,7 +4271,7 @@
    "date": "2026-02-02",
    "level1": 6008,
    "orders": 1,
-   "trips": 9.999,
+   "trips": 1.999,
    "revenue": 73.8,
    "postcode": "60607",
    "basis": "account"
@@ -4289,7 +4289,7 @@
    "date": "2026-02-02",
    "level1": 6866,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 122.55,
    "postcode": "60606",
    "basis": "site"
@@ -4307,7 +4307,7 @@
    "date": "2026-02-02",
    "level1": 8389,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 28.12,
    "postcode": "60606",
    "basis": "account"
@@ -4361,7 +4361,7 @@
    "date": "2026-02-03",
    "level1": 1354,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 72.86,
    "postcode": null,
    "basis": null
@@ -4379,7 +4379,7 @@
    "date": "2026-02-03",
    "level1": 3197,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 89.54,
    "postcode": "60606",
    "basis": "account"
@@ -4397,7 +4397,7 @@
    "date": "2026-02-03",
    "level1": 7137,
    "orders": 1,
-   "trips": 34,
+   "trips": 1,
    "revenue": 112.29,
    "postcode": null,
    "basis": null
@@ -4478,7 +4478,7 @@
    "date": "2026-02-04",
    "level1": 62,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 94.26,
    "postcode": null,
    "basis": null
@@ -4496,7 +4496,7 @@
    "date": "2026-02-04",
    "level1": 1399,
    "orders": 1,
-   "trips": 9,
+   "trips": 1,
    "revenue": 137.57,
    "postcode": null,
    "basis": null
@@ -4505,7 +4505,7 @@
    "date": "2026-02-04",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.08,
    "postcode": "60606",
    "basis": "site"
@@ -4523,7 +4523,7 @@
    "date": "2026-02-04",
    "level1": 3197,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 65.34,
    "postcode": "60606",
    "basis": "account"
@@ -4541,7 +4541,7 @@
    "date": "2026-02-04",
    "level1": 6872,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.6,
    "postcode": "60018",
    "basis": "account"
@@ -4568,7 +4568,7 @@
    "date": "2026-02-04",
    "level1": 8991,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 99.86,
    "postcode": "60634",
    "basis": "site"
@@ -4622,7 +4622,7 @@
    "date": "2026-02-05",
    "level1": 6008,
    "orders": 1,
-   "trips": 12,
+   "trips": 1,
    "revenue": 82.76,
    "postcode": "60607",
    "basis": "account"
@@ -4649,7 +4649,7 @@
    "date": "2026-02-05",
    "level1": 7137,
    "orders": 2,
-   "trips": 13,
+   "trips": 3,
    "revenue": 77.83,
    "postcode": null,
    "basis": null
@@ -4685,7 +4685,7 @@
    "date": "2026-02-05",
    "level1": 10398,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 41.08,
    "postcode": "60601",
    "basis": "site"
@@ -4712,7 +4712,7 @@
    "date": "2026-02-06",
    "level1": 1327,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 93.49,
    "postcode": "60606",
    "basis": "site"
@@ -4721,7 +4721,7 @@
    "date": "2026-02-06",
    "level1": 3197,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 57.27,
    "postcode": "60606",
    "basis": "account"
@@ -4739,7 +4739,7 @@
    "date": "2026-02-06",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 43.77,
    "postcode": "60201",
    "basis": "account"
@@ -4784,7 +4784,7 @@
    "date": "2026-02-06",
    "level1": 9403,
    "orders": 1,
-   "trips": 28,
+   "trips": 1,
    "revenue": 146.65,
    "postcode": "60201",
    "basis": "account"
@@ -4793,7 +4793,7 @@
    "date": "2026-02-06",
    "level1": 11544,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 61.64,
    "postcode": "60473",
    "basis": "site"
@@ -4883,7 +4883,7 @@
    "date": "2026-02-10",
    "level1": 947,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 57,
    "postcode": "60606",
    "basis": "site"
@@ -4892,7 +4892,7 @@
    "date": "2026-02-10",
    "level1": 2345,
    "orders": 2,
-   "trips": 4,
+   "trips": 2,
    "revenue": 57.72,
    "postcode": "60606",
    "basis": "site"
@@ -4910,7 +4910,7 @@
    "date": "2026-02-10",
    "level1": 6008,
    "orders": 1,
-   "trips": 83.002,
+   "trips": 3.002,
    "revenue": 401.07,
    "postcode": "60607",
    "basis": "site"
@@ -4982,7 +4982,7 @@
    "date": "2026-02-11",
    "level1": 941,
    "orders": 1,
-   "trips": 20,
+   "trips": 1,
    "revenue": 213.5,
    "postcode": "60602",
    "basis": "site"
@@ -5009,7 +5009,7 @@
    "date": "2026-02-11",
    "level1": 8389,
    "orders": 2,
-   "trips": 4,
+   "trips": 2,
    "revenue": 36.39,
    "postcode": "60606",
    "basis": "account"
@@ -5063,7 +5063,7 @@
    "date": "2026-02-12",
    "level1": 6008,
    "orders": 1,
-   "trips": 16,
+   "trips": 2,
    "revenue": 100.68,
    "postcode": "60607",
    "basis": "account"
@@ -5072,7 +5072,7 @@
    "date": "2026-02-12",
    "level1": 7137,
    "orders": 2,
-   "trips": 39,
+   "trips": 2,
    "revenue": 145.76,
    "postcode": null,
    "basis": null
@@ -5108,7 +5108,7 @@
    "date": "2026-02-12",
    "level1": 11322,
    "orders": 1,
-   "trips": 13,
+   "trips": 1,
    "revenue": 74,
    "postcode": null,
    "basis": null
@@ -5171,7 +5171,7 @@
    "date": "2026-02-17",
    "level1": 947,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 57,
    "postcode": "60606",
    "basis": "site"
@@ -5180,7 +5180,7 @@
    "date": "2026-02-17",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.08,
    "postcode": "60606",
    "basis": "site"
@@ -5261,7 +5261,7 @@
    "date": "2026-02-18",
    "level1": 11322,
    "orders": 1,
-   "trips": 26,
+   "trips": 1,
    "revenue": 131.72,
    "postcode": null,
    "basis": null
@@ -5288,7 +5288,7 @@
    "date": "2026-02-19",
    "level1": 5035,
    "orders": 1,
-   "trips": 19,
+   "trips": 1,
    "revenue": 152.56,
    "postcode": "60173",
    "basis": "account"
@@ -5297,7 +5297,7 @@
    "date": "2026-02-19",
    "level1": 6008,
    "orders": 1,
-   "trips": 72.999,
+   "trips": 1.999,
    "revenue": 356.23,
    "postcode": "60607",
    "basis": "account"
@@ -5306,7 +5306,7 @@
    "date": "2026-02-19",
    "level1": 8107,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 17.9,
    "postcode": null,
    "basis": null
@@ -5342,7 +5342,7 @@
    "date": "2026-02-20",
    "level1": 1354,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 64.79,
    "postcode": null,
    "basis": null
@@ -5378,7 +5378,7 @@
    "date": "2026-02-20",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 43.77,
    "postcode": "60201",
    "basis": "account"
@@ -5387,7 +5387,7 @@
    "date": "2026-02-20",
    "level1": 8107,
    "orders": 2,
-   "trips": 40,
+   "trips": 2,
    "revenue": 100.15,
    "postcode": null,
    "basis": null
@@ -5423,7 +5423,7 @@
    "date": "2026-02-23",
    "level1": 2345,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 66.6,
    "postcode": "60606",
    "basis": "site"
@@ -5504,7 +5504,7 @@
    "date": "2026-02-23",
    "level1": 12128,
    "orders": 1,
-   "trips": 34,
+   "trips": 1,
    "revenue": 231.09,
    "postcode": "60601",
    "basis": "site"
@@ -5522,7 +5522,7 @@
    "date": "2026-02-24",
    "level1": 50,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 54.54,
    "postcode": "60601",
    "basis": "site"
@@ -5531,7 +5531,7 @@
    "date": "2026-02-24",
    "level1": 947,
    "orders": 1,
-   "trips": 37,
+   "trips": 1,
    "revenue": 279.46,
    "postcode": "60606",
    "basis": "site"
@@ -5540,7 +5540,7 @@
    "date": "2026-02-24",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.08,
    "postcode": "60606",
    "basis": "site"
@@ -5567,7 +5567,7 @@
    "date": "2026-02-24",
    "level1": 6344,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 28.9,
    "postcode": "60614",
    "basis": "account"
@@ -5639,7 +5639,7 @@
    "date": "2026-02-25",
    "level1": 6008,
    "orders": 1,
-   "trips": 47,
+   "trips": 1,
    "revenue": 239.67,
    "postcode": "60607",
    "basis": "account"
@@ -5702,7 +5702,7 @@
    "date": "2026-02-26",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 50.26,
    "postcode": "60606",
    "basis": "site"
@@ -5711,7 +5711,7 @@
    "date": "2026-02-26",
    "level1": 2023,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 53.55,
    "postcode": null,
    "basis": null
@@ -5783,7 +5783,7 @@
    "date": "2026-02-27",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 50.26,
    "postcode": "60606",
    "basis": "site"
@@ -5819,7 +5819,7 @@
    "date": "2026-02-27",
    "level1": 9113,
    "orders": 1,
-   "trips": 13,
+   "trips": 1,
    "revenue": 53.55,
    "postcode": "60601",
    "basis": "account"
@@ -5873,7 +5873,7 @@
    "date": "2026-03-02",
    "level1": 8456,
    "orders": 1,
-   "trips": 17,
+   "trips": 1,
    "revenue": 168.93,
    "postcode": null,
    "basis": null
@@ -5900,7 +5900,7 @@
    "date": "2026-03-03",
    "level1": 493,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 53.52,
    "postcode": "60606",
    "basis": "site"
@@ -5909,7 +5909,7 @@
    "date": "2026-03-03",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.23,
    "postcode": "60606",
    "basis": "site"
@@ -5927,7 +5927,7 @@
    "date": "2026-03-03",
    "level1": 8107,
    "orders": 2,
-   "trips": 12,
+   "trips": 2,
    "revenue": 45.55,
    "postcode": null,
    "basis": null
@@ -5999,7 +5999,7 @@
    "date": "2026-03-04",
    "level1": 947,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 70.81,
    "postcode": "60606",
    "basis": "site"
@@ -6026,7 +6026,7 @@
    "date": "2026-03-04",
    "level1": 6008,
    "orders": 1,
-   "trips": 22,
+   "trips": 1,
    "revenue": 128.18,
    "postcode": "60607",
    "basis": "account"
@@ -6053,7 +6053,7 @@
    "date": "2026-03-04",
    "level1": 8405,
    "orders": 1,
-   "trips": 17,
+   "trips": 1,
    "revenue": 111.55,
    "postcode": null,
    "basis": null
@@ -6071,7 +6071,7 @@
    "date": "2026-03-05",
    "level1": 947,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 57.27,
    "postcode": "60606",
    "basis": "site"
@@ -6098,7 +6098,7 @@
    "date": "2026-03-05",
    "level1": 6008,
    "orders": 1,
-   "trips": 24,
+   "trips": 1,
    "revenue": 137.19,
    "postcode": "60607",
    "basis": "account"
@@ -6179,7 +6179,7 @@
    "date": "2026-03-05",
    "level1": 12034,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 54.34,
    "postcode": "60603",
    "basis": "account"
@@ -6188,7 +6188,7 @@
    "date": "2026-03-06",
    "level1": 1354,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 65.1,
    "postcode": null,
    "basis": null
@@ -6215,7 +6215,7 @@
    "date": "2026-03-06",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 43.98,
    "postcode": "60201",
    "basis": "account"
@@ -6251,7 +6251,7 @@
    "date": "2026-03-06",
    "level1": 8991,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 92.69,
    "postcode": "60634",
    "basis": "site"
@@ -6350,7 +6350,7 @@
    "date": "2026-03-10",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.23,
    "postcode": "60606",
    "basis": "site"
@@ -6368,7 +6368,7 @@
    "date": "2026-03-10",
    "level1": 6008,
    "orders": 1,
-   "trips": 47,
+   "trips": 1,
    "revenue": 240.79,
    "postcode": "60607",
    "basis": "account"
@@ -6413,7 +6413,7 @@
    "date": "2026-03-11",
    "level1": 1754,
    "orders": 1,
-   "trips": 32,
+   "trips": 1,
    "revenue": 99.14,
    "postcode": "60091",
    "basis": "site"
@@ -6440,7 +6440,7 @@
    "date": "2026-03-11",
    "level1": 8133,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 34.94,
    "postcode": "60606",
    "basis": "site"
@@ -6521,7 +6521,7 @@
    "date": "2026-03-12",
    "level1": 7137,
    "orders": 1,
-   "trips": 9,
+   "trips": 2,
    "revenue": 44.55,
    "postcode": null,
    "basis": null
@@ -6539,7 +6539,7 @@
    "date": "2026-03-12",
    "level1": 9113,
    "orders": 2,
-   "trips": 4,
+   "trips": 2,
    "revenue": 46.83,
    "postcode": "60601",
    "basis": "account"
@@ -6575,7 +6575,7 @@
    "date": "2026-03-13",
    "level1": 941,
    "orders": 1,
-   "trips": 21,
+   "trips": 1,
    "revenue": 223.25,
    "postcode": "60602",
    "basis": "site"
@@ -6602,7 +6602,7 @@
    "date": "2026-03-13",
    "level1": 6008,
    "orders": 1,
-   "trips": 19,
+   "trips": 1,
    "revenue": 114.67,
    "postcode": "60607",
    "basis": "account"
@@ -6701,7 +6701,7 @@
    "date": "2026-03-17",
    "level1": 70,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 73.62,
    "postcode": "60525",
    "basis": "account"
@@ -6710,7 +6710,7 @@
    "date": "2026-03-17",
    "level1": 947,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 104.67,
    "postcode": "60606",
    "basis": "site"
@@ -6719,7 +6719,7 @@
    "date": "2026-03-17",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.23,
    "postcode": "60606",
    "basis": "site"
@@ -6773,7 +6773,7 @@
    "date": "2026-03-17",
    "level1": 8178,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 73.2,
    "postcode": "60602",
    "basis": "site"
@@ -6791,7 +6791,7 @@
    "date": "2026-03-17",
    "level1": 8900,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 62.05,
    "postcode": null,
    "basis": null
@@ -6818,7 +6818,7 @@
    "date": "2026-03-18",
    "level1": 50,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 69.29,
    "postcode": "60601",
    "basis": "site"
@@ -6872,7 +6872,7 @@
    "date": "2026-03-18",
    "level1": 7137,
    "orders": 1,
-   "trips": 18.999,
+   "trips": 0.999,
    "revenue": 71.87,
    "postcode": null,
    "basis": null
@@ -6998,7 +6998,7 @@
    "date": "2026-03-20",
    "level1": 2345,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 35.69,
    "postcode": "60606",
    "basis": "site"
@@ -7016,7 +7016,7 @@
    "date": "2026-03-20",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 43.98,
    "postcode": "60201",
    "basis": "account"
@@ -7043,7 +7043,7 @@
    "date": "2026-03-20",
    "level1": 12128,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 55.55,
    "postcode": "60601",
    "basis": "site"
@@ -7061,7 +7061,7 @@
    "date": "2026-03-23",
    "level1": 947,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 64.04,
    "postcode": "60606",
    "basis": "site"
@@ -7124,7 +7124,7 @@
    "date": "2026-03-24",
    "level1": 1,
    "orders": 1,
-   "trips": 38,
+   "trips": 1,
    "revenue": 119.09,
    "postcode": "60602",
    "basis": "site"
@@ -7133,7 +7133,7 @@
    "date": "2026-03-24",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.23,
    "postcode": "60606",
    "basis": "site"
@@ -7169,7 +7169,7 @@
    "date": "2026-03-24",
    "level1": 6008,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 56.12,
    "postcode": "60607",
    "basis": "account"
@@ -7232,7 +7232,7 @@
    "date": "2026-03-24",
    "level1": 9403,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 59.82,
    "postcode": "60201",
    "basis": "account"
@@ -7241,7 +7241,7 @@
    "date": "2026-03-24",
    "level1": 10429,
    "orders": 1,
-   "trips": 12,
+   "trips": 1,
    "revenue": 136.51,
    "postcode": "60607",
    "basis": "site"
@@ -7286,7 +7286,7 @@
    "date": "2026-03-25",
    "level1": 5682,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 95.42,
    "postcode": null,
    "basis": null
@@ -7295,7 +7295,7 @@
    "date": "2026-03-25",
    "level1": 6008,
    "orders": 1,
-   "trips": 33,
+   "trips": 1,
    "revenue": 177.73,
    "postcode": "60607",
    "basis": "account"
@@ -7349,7 +7349,7 @@
    "date": "2026-03-26",
    "level1": 7137,
    "orders": 1,
-   "trips": 7,
+   "trips": 2,
    "revenue": 39.1,
    "postcode": null,
    "basis": null
@@ -7358,7 +7358,7 @@
    "date": "2026-03-26",
    "level1": 8389,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 24.27,
    "postcode": "60606",
    "basis": "account"
@@ -7367,7 +7367,7 @@
    "date": "2026-03-26",
    "level1": 8900,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 62.05,
    "postcode": null,
    "basis": null
@@ -7394,7 +7394,7 @@
    "date": "2026-03-27",
    "level1": 1327,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 62.88,
    "postcode": "60606",
    "basis": "site"
@@ -7448,7 +7448,7 @@
    "date": "2026-03-30",
    "level1": 1,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 26.62,
    "postcode": "60602",
    "basis": "site"
@@ -7511,7 +7511,7 @@
    "date": "2026-03-30",
    "level1": 8389,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 40.22,
    "postcode": "60606",
    "basis": "account"
@@ -7547,7 +7547,7 @@
    "date": "2026-03-31",
    "level1": 947,
    "orders": 1,
-   "trips": 21,
+   "trips": 1,
    "revenue": 172.4,
    "postcode": "60606",
    "basis": "site"
@@ -7556,7 +7556,7 @@
    "date": "2026-03-31",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.23,
    "postcode": "60606",
    "basis": "site"
@@ -7583,7 +7583,7 @@
    "date": "2026-03-31",
    "level1": 8405,
    "orders": 1,
-   "trips": 9,
+   "trips": 1,
    "revenue": 72.94,
    "postcode": null,
    "basis": null
@@ -7601,7 +7601,7 @@
    "date": "2026-03-31",
    "level1": 13346,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 76.33,
    "postcode": "60603",
    "basis": "site"
@@ -7610,7 +7610,7 @@
    "date": "2026-04-01",
    "level1": 1,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 24.73,
    "postcode": "60602",
    "basis": "site"
@@ -7628,7 +7628,7 @@
    "date": "2026-04-01",
    "level1": 2940,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 90.5,
    "postcode": "60601",
    "basis": "site"
@@ -7637,7 +7637,7 @@
    "date": "2026-04-01",
    "level1": 5201,
    "orders": 1,
-   "trips": 13.999,
+   "trips": 0.999,
    "revenue": 127.86,
    "postcode": "60604",
    "basis": "site"
@@ -7646,7 +7646,7 @@
    "date": "2026-04-01",
    "level1": 5280,
    "orders": 1,
-   "trips": 61,
+   "trips": 1,
    "revenue": 340,
    "postcode": "60044",
    "basis": "site"
@@ -7655,7 +7655,7 @@
    "date": "2026-04-01",
    "level1": 6344,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 50.45,
    "postcode": "60604",
    "basis": "site"
@@ -7700,7 +7700,7 @@
    "date": "2026-04-01",
    "level1": 8900,
    "orders": 1,
-   "trips": 16,
+   "trips": 1,
    "revenue": 152.19,
    "postcode": null,
    "basis": null
@@ -7727,7 +7727,7 @@
    "date": "2026-04-01",
    "level1": 10398,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 41.08,
    "postcode": "60601",
    "basis": "site"
@@ -7781,7 +7781,7 @@
    "date": "2026-04-02",
    "level1": 8107,
    "orders": 1,
-   "trips": 12,
+   "trips": 1,
    "revenue": 34.52,
    "postcode": null,
    "basis": null
@@ -7790,7 +7790,7 @@
    "date": "2026-04-02",
    "level1": 8493,
    "orders": 1,
-   "trips": 14,
+   "trips": 1,
    "revenue": 137.53,
    "postcode": "60659",
    "basis": "site"
@@ -7826,7 +7826,7 @@
    "date": "2026-04-03",
    "level1": 50,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 71.7,
    "postcode": "60601",
    "basis": "site"
@@ -7862,7 +7862,7 @@
    "date": "2026-04-03",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 45.52,
    "postcode": "60201",
    "basis": "account"
@@ -7871,7 +7871,7 @@
    "date": "2026-04-03",
    "level1": 7137,
    "orders": 1,
-   "trips": 31.999,
+   "trips": 0.999,
    "revenue": 111.12,
    "postcode": null,
    "basis": null
@@ -7889,7 +7889,7 @@
    "date": "2026-04-03",
    "level1": 8178,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 67.36,
    "postcode": "60602",
    "basis": "site"
@@ -7916,7 +7916,7 @@
    "date": "2026-04-06",
    "level1": 5201,
    "orders": 1,
-   "trips": 20,
+   "trips": 1,
    "revenue": 164.77,
    "postcode": "60604",
    "basis": "account"
@@ -7952,7 +7952,7 @@
    "date": "2026-04-07",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.26,
    "postcode": "60606",
    "basis": "site"
@@ -7961,7 +7961,7 @@
    "date": "2026-04-07",
    "level1": 1354,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 109.3,
    "postcode": null,
    "basis": null
@@ -7970,7 +7970,7 @@
    "date": "2026-04-07",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.32,
    "postcode": "60606",
    "basis": "site"
@@ -8015,7 +8015,7 @@
    "date": "2026-04-07",
    "level1": 8515,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 127.43,
    "postcode": "60523",
    "basis": "site"
@@ -8051,7 +8051,7 @@
    "date": "2026-04-08",
    "level1": 2906,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 72.77,
    "postcode": "60610",
    "basis": "site"
@@ -8078,7 +8078,7 @@
    "date": "2026-04-08",
    "level1": 7137,
    "orders": 1,
-   "trips": 6.999,
+   "trips": 1.999,
    "revenue": 40.46,
    "postcode": null,
    "basis": null
@@ -8114,7 +8114,7 @@
    "date": "2026-04-08",
    "level1": 9113,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 27.72,
    "postcode": "60601",
    "basis": "account"
@@ -8141,7 +8141,7 @@
    "date": "2026-04-09",
    "level1": 3197,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 67.93,
    "postcode": "60606",
    "basis": "account"
@@ -8177,7 +8177,7 @@
    "date": "2026-04-09",
    "level1": 8900,
    "orders": 1,
-   "trips": 24,
+   "trips": 1,
    "revenue": 210.84,
    "postcode": null,
    "basis": null
@@ -8213,7 +8213,7 @@
    "date": "2026-04-10",
    "level1": 50,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 66.71,
    "postcode": "60601",
    "basis": "site"
@@ -8222,7 +8222,7 @@
    "date": "2026-04-10",
    "level1": 1003,
    "orders": 1,
-   "trips": 38,
+   "trips": 7,
    "revenue": 360.98,
    "postcode": null,
    "basis": null
@@ -8267,7 +8267,7 @@
    "date": "2026-04-10",
    "level1": 8006,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 30.01,
    "postcode": null,
    "basis": null
@@ -8294,7 +8294,7 @@
    "date": "2026-04-10",
    "level1": 13446,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 63.26,
    "postcode": null,
    "basis": null
@@ -8312,7 +8312,7 @@
    "date": "2026-04-13",
    "level1": 1,
    "orders": 1,
-   "trips": 19,
+   "trips": 1,
    "revenue": 69.77,
    "postcode": "60602",
    "basis": "site"
@@ -8321,7 +8321,7 @@
    "date": "2026-04-13",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.26,
    "postcode": "60606",
    "basis": "site"
@@ -8339,7 +8339,7 @@
    "date": "2026-04-13",
    "level1": 4274,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 29.26,
    "postcode": null,
    "basis": null
@@ -8366,7 +8366,7 @@
    "date": "2026-04-13",
    "level1": 7137,
    "orders": 2,
-   "trips": 14.999,
+   "trips": 1.999,
    "revenue": 86.58,
    "postcode": null,
    "basis": null
@@ -8375,7 +8375,7 @@
    "date": "2026-04-13",
    "level1": 8900,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 115.53,
    "postcode": null,
    "basis": null
@@ -8411,7 +8411,7 @@
    "date": "2026-04-14",
    "level1": 941,
    "orders": 1,
-   "trips": 25,
+   "trips": 1,
    "revenue": 267.25,
    "postcode": "60602",
    "basis": "site"
@@ -8429,7 +8429,7 @@
    "date": "2026-04-14",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.32,
    "postcode": "60606",
    "basis": "site"
@@ -8492,7 +8492,7 @@
    "date": "2026-04-15",
    "level1": 947,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 66.28,
    "postcode": "60606",
    "basis": "site"
@@ -8519,7 +8519,7 @@
    "date": "2026-04-15",
    "level1": 5201,
    "orders": 1,
-   "trips": 46,
+   "trips": 1,
    "revenue": 324.72,
    "postcode": "60604",
    "basis": "account"
@@ -8564,7 +8564,7 @@
    "date": "2026-04-16",
    "level1": 6872,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 54.7,
    "postcode": "60018",
    "basis": "account"
@@ -8627,7 +8627,7 @@
    "date": "2026-04-17",
    "level1": 3197,
    "orders": 2,
-   "trips": 14,
+   "trips": 4,
    "revenue": 186.18,
    "postcode": "60606",
    "basis": "account"
@@ -8654,7 +8654,7 @@
    "date": "2026-04-17",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 45.52,
    "postcode": "60201",
    "basis": "account"
@@ -8663,7 +8663,7 @@
    "date": "2026-04-17",
    "level1": 7137,
    "orders": 1,
-   "trips": 25.999,
+   "trips": 2.999,
    "revenue": 94.15,
    "postcode": null,
    "basis": null
@@ -8717,7 +8717,7 @@
    "date": "2026-04-20",
    "level1": 8900,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 64.21,
    "postcode": null,
    "basis": null
@@ -8735,7 +8735,7 @@
    "date": "2026-04-21",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.32,
    "postcode": "60606",
    "basis": "site"
@@ -8753,7 +8753,7 @@
    "date": "2026-04-21",
    "level1": 7137,
    "orders": 1,
-   "trips": 11.999,
+   "trips": 0.999,
    "revenue": 54.6,
    "postcode": null,
    "basis": null
@@ -8798,7 +8798,7 @@
    "date": "2026-04-22",
    "level1": 1,
    "orders": 1,
-   "trips": 49,
+   "trips": 1,
    "revenue": 154.21,
    "postcode": "60602",
    "basis": "site"
@@ -8843,7 +8843,7 @@
    "date": "2026-04-22",
    "level1": 7137,
    "orders": 1,
-   "trips": 5,
+   "trips": 2,
    "revenue": 34.82,
    "postcode": null,
    "basis": null
@@ -8960,7 +8960,7 @@
    "date": "2026-04-23",
    "level1": 11544,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 64.09,
    "postcode": "60473",
    "basis": "site"
@@ -9005,7 +9005,7 @@
    "date": "2026-04-27",
    "level1": 50,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 56.72,
    "postcode": "60601",
    "basis": "site"
@@ -9014,7 +9014,7 @@
    "date": "2026-04-27",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.26,
    "postcode": "60606",
    "basis": "site"
@@ -9032,7 +9032,7 @@
    "date": "2026-04-27",
    "level1": 3197,
    "orders": 2,
-   "trips": 5,
+   "trips": 2,
    "revenue": 119.08,
    "postcode": "60606",
    "basis": "account"
@@ -9041,7 +9041,7 @@
    "date": "2026-04-27",
    "level1": 5201,
    "orders": 1,
-   "trips": 44,
+   "trips": 1,
    "revenue": 312.42,
    "postcode": "60604",
    "basis": "account"
@@ -9059,7 +9059,7 @@
    "date": "2026-04-27",
    "level1": 8389,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 49.87,
    "postcode": "60606",
    "basis": "account"
@@ -9077,7 +9077,7 @@
    "date": "2026-04-28",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.32,
    "postcode": "60606",
    "basis": "site"
@@ -9095,7 +9095,7 @@
    "date": "2026-04-28",
    "level1": 3197,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 59.54,
    "postcode": "60606",
    "basis": "account"
@@ -9113,7 +9113,7 @@
    "date": "2026-04-28",
    "level1": 7137,
    "orders": 1,
-   "trips": 25.999,
+   "trips": 0.999,
    "revenue": 94.16,
    "postcode": null,
    "basis": null
@@ -9131,7 +9131,7 @@
    "date": "2026-04-28",
    "level1": 8700,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 56.88,
    "postcode": null,
    "basis": null
@@ -9149,7 +9149,7 @@
    "date": "2026-04-29",
    "level1": 947,
    "orders": 1,
-   "trips": 13,
+   "trips": 1,
    "revenue": 122.35,
    "postcode": "60606",
    "basis": "site"
@@ -9176,7 +9176,7 @@
    "date": "2026-04-29",
    "level1": 5201,
    "orders": 1,
-   "trips": 20,
+   "trips": 1,
    "revenue": 164.77,
    "postcode": "60604",
    "basis": "account"
@@ -9284,7 +9284,7 @@
    "date": "2026-04-30",
    "level1": 9113,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 24.85,
    "postcode": "60601",
    "basis": "site"
@@ -9320,7 +9320,7 @@
    "date": "2026-05-01",
    "level1": 3197,
    "orders": 1,
-   "trips": 5,
+   "trips": 2,
    "revenue": 76.49,
    "postcode": "60606",
    "basis": "account"
@@ -9338,7 +9338,7 @@
    "date": "2026-05-01",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 45.62,
    "postcode": "60201",
    "basis": "account"
@@ -9347,7 +9347,7 @@
    "date": "2026-05-01",
    "level1": 7137,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 43.39,
    "postcode": null,
    "basis": null
@@ -9401,7 +9401,7 @@
    "date": "2026-05-04",
    "level1": 1754,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 24.66,
    "postcode": "60091",
    "basis": "site"
@@ -9419,7 +9419,7 @@
    "date": "2026-05-04",
    "level1": 6008,
    "orders": 1,
-   "trips": 32,
+   "trips": 2,
    "revenue": 179.67,
    "postcode": "60607",
    "basis": "account"
@@ -9428,7 +9428,7 @@
    "date": "2026-05-04",
    "level1": 6344,
    "orders": 1,
-   "trips": 13,
+   "trips": 1,
    "revenue": 59.32,
    "postcode": "60614",
    "basis": "account"
@@ -9491,7 +9491,7 @@
    "date": "2026-05-05",
    "level1": 1354,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 92.74,
    "postcode": null,
    "basis": null
@@ -9500,7 +9500,7 @@
    "date": "2026-05-05",
    "level1": 1891,
    "orders": 1,
-   "trips": 14,
+   "trips": 1,
    "revenue": 88.4,
    "postcode": null,
    "basis": null
@@ -9509,7 +9509,7 @@
    "date": "2026-05-05",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.39,
    "postcode": "60606",
    "basis": "site"
@@ -9527,7 +9527,7 @@
    "date": "2026-05-05",
    "level1": 8107,
    "orders": 1,
-   "trips": 15,
+   "trips": 1,
    "revenue": 40.55,
    "postcode": null,
    "basis": null
@@ -9554,7 +9554,7 @@
    "date": "2026-05-05",
    "level1": 9696,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 57.73,
    "postcode": null,
    "basis": null
@@ -9608,7 +9608,7 @@
    "date": "2026-05-06",
    "level1": 7137,
    "orders": 2,
-   "trips": 12.999,
+   "trips": 2.999,
    "revenue": 78.3,
    "postcode": null,
    "basis": null
@@ -9644,7 +9644,7 @@
    "date": "2026-05-06",
    "level1": 9113,
    "orders": 1,
-   "trips": 16,
+   "trips": 1,
    "revenue": 62.16,
    "postcode": "60601",
    "basis": "account"
@@ -9698,7 +9698,7 @@
    "date": "2026-05-07",
    "level1": 3197,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 68.08,
    "postcode": "60606",
    "basis": "account"
@@ -9707,7 +9707,7 @@
    "date": "2026-05-07",
    "level1": 4295,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 93.16,
    "postcode": null,
    "basis": null
@@ -9716,7 +9716,7 @@
    "date": "2026-05-07",
    "level1": 6344,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 33.03,
    "postcode": "60604",
    "basis": "site"
@@ -9734,7 +9734,7 @@
    "date": "2026-05-07",
    "level1": 7050,
    "orders": 1,
-   "trips": 13,
+   "trips": 1,
    "revenue": 95.68,
    "postcode": "60607",
    "basis": "site"
@@ -9824,7 +9824,7 @@
    "date": "2026-05-08",
    "level1": 8405,
    "orders": 2,
-   "trips": 28,
+   "trips": 2,
    "revenue": 206.38,
    "postcode": null,
    "basis": null
@@ -9869,7 +9869,7 @@
    "date": "2026-05-08",
    "level1": 13284,
    "orders": 1,
-   "trips": 87,
+   "trips": 1,
    "revenue": 496.54,
    "postcode": null,
    "basis": null
@@ -9887,7 +9887,7 @@
    "date": "2026-05-11",
    "level1": 1,
    "orders": 1,
-   "trips": 34,
+   "trips": 1,
    "revenue": 112.24,
    "postcode": "60602",
    "basis": "site"
@@ -9923,7 +9923,7 @@
    "date": "2026-05-11",
    "level1": 8006,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 33.77,
    "postcode": null,
    "basis": null
@@ -9968,7 +9968,7 @@
    "date": "2026-05-12",
    "level1": 947,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 66.42,
    "postcode": "60606",
    "basis": "site"
@@ -9977,7 +9977,7 @@
    "date": "2026-05-12",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.39,
    "postcode": "60606",
    "basis": "site"
@@ -10031,7 +10031,7 @@
    "date": "2026-05-13",
    "level1": 50,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 56.85,
    "postcode": "60601",
    "basis": "site"
@@ -10058,7 +10058,7 @@
    "date": "2026-05-13",
    "level1": 7137,
    "orders": 1,
-   "trips": 9,
+   "trips": 1,
    "revenue": 46.23,
    "postcode": null,
    "basis": null
@@ -10112,7 +10112,7 @@
    "date": "2026-05-13",
    "level1": 13230,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 37.72,
    "postcode": null,
    "basis": null
@@ -10139,7 +10139,7 @@
    "date": "2026-05-14",
    "level1": 4418,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 118.03,
    "postcode": "60603",
    "basis": "site"
@@ -10220,7 +10220,7 @@
    "date": "2026-05-15",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 45.62,
    "postcode": "60201",
    "basis": "account"
@@ -10274,7 +10274,7 @@
    "date": "2026-05-18",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.37,
    "postcode": "60606",
    "basis": "site"
@@ -10310,7 +10310,7 @@
    "date": "2026-05-19",
    "level1": 1,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 44.54,
    "postcode": "60602",
    "basis": "site"
@@ -10319,7 +10319,7 @@
    "date": "2026-05-19",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.39,
    "postcode": "60606",
    "basis": "site"
@@ -10373,7 +10373,7 @@
    "date": "2026-05-19",
    "level1": 12034,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 42.42,
    "postcode": "60603",
    "basis": "account"
@@ -10382,7 +10382,7 @@
    "date": "2026-05-20",
    "level1": 947,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 59.4,
    "postcode": "60606",
    "basis": "site"
@@ -10481,7 +10481,7 @@
    "date": "2026-05-21",
    "level1": 7137,
    "orders": 1,
-   "trips": 17,
+   "trips": 1,
    "revenue": 68.89,
    "postcode": null,
    "basis": null
@@ -10580,7 +10580,7 @@
    "date": "2026-05-22",
    "level1": 9703,
    "orders": 1,
-   "trips": 28,
+   "trips": 1,
    "revenue": 112.53,
    "postcode": null,
    "basis": null
@@ -10616,7 +10616,7 @@
    "date": "2026-05-26",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.39,
    "postcode": "60606",
    "basis": "site"
@@ -10652,7 +10652,7 @@
    "date": "2026-05-26",
    "level1": 8257,
    "orders": 1,
-   "trips": 24,
+   "trips": 1,
    "revenue": 230.62,
    "postcode": "60654",
    "basis": "site"
@@ -10706,7 +10706,7 @@
    "date": "2026-05-27",
    "level1": 1354,
    "orders": 1,
-   "trips": 15,
+   "trips": 1,
    "revenue": 168.4,
    "postcode": null,
    "basis": null
@@ -10751,7 +10751,7 @@
    "date": "2026-05-27",
    "level1": 8107,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 22.46,
    "postcode": null,
    "basis": null
@@ -10832,7 +10832,7 @@
    "date": "2026-05-28",
    "level1": 12034,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 56.37,
    "postcode": "60603",
    "basis": "account"
@@ -10841,7 +10841,7 @@
    "date": "2026-05-28",
    "level1": 13542,
    "orders": 1,
-   "trips": 13,
+   "trips": 1,
    "revenue": 176.61,
    "postcode": "60026",
    "basis": "site"
@@ -10868,7 +10868,7 @@
    "date": "2026-05-29",
    "level1": 5201,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 60.33,
    "postcode": "60604",
    "basis": "account"
@@ -10886,7 +10886,7 @@
    "date": "2026-05-29",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 45.62,
    "postcode": "60201",
    "basis": "account"
@@ -10922,7 +10922,7 @@
    "date": "2026-05-29",
    "level1": 9703,
    "orders": 1,
-   "trips": 41,
+   "trips": 1,
    "revenue": 153.22,
    "postcode": null,
    "basis": null
@@ -10940,7 +10940,7 @@
    "date": "2026-06-01",
    "level1": 1754,
    "orders": 1,
-   "trips": 89,
+   "trips": 1,
    "revenue": 250.76,
    "postcode": "60091",
    "basis": "site"
@@ -10958,7 +10958,7 @@
    "date": "2026-06-01",
    "level1": 5794,
    "orders": 1,
-   "trips": 21,
+   "trips": 1,
    "revenue": 211.52,
    "postcode": null,
    "basis": null
@@ -11030,7 +11030,7 @@
    "date": "2026-06-02",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 33.12,
    "postcode": "60606",
    "basis": "site"
@@ -11048,7 +11048,7 @@
    "date": "2026-06-02",
    "level1": 5201,
    "orders": 1,
-   "trips": 9.999,
+   "trips": 1.999,
    "revenue": 105.81,
    "postcode": "60604",
    "basis": "site"
@@ -11111,7 +11111,7 @@
    "date": "2026-06-03",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 53.54,
    "postcode": "60606",
    "basis": "site"
@@ -11147,7 +11147,7 @@
    "date": "2026-06-03",
    "level1": 7137,
    "orders": 1,
-   "trips": 21.999,
+   "trips": 0.999,
    "revenue": 84.89,
    "postcode": null,
    "basis": null
@@ -11156,7 +11156,7 @@
    "date": "2026-06-03",
    "level1": 8107,
    "orders": 1,
-   "trips": 14,
+   "trips": 1,
    "revenue": 38.54,
    "postcode": null,
    "basis": null
@@ -11192,7 +11192,7 @@
    "date": "2026-06-04",
    "level1": 1327,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 83.15,
    "postcode": "60606",
    "basis": "site"
@@ -11201,7 +11201,7 @@
    "date": "2026-06-04",
    "level1": 2906,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 83.33,
    "postcode": "60610",
    "basis": "site"
@@ -11282,7 +11282,7 @@
    "date": "2026-06-04",
    "level1": 10398,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 53.02,
    "postcode": "60601",
    "basis": "site"
@@ -11291,7 +11291,7 @@
    "date": "2026-06-04",
    "level1": 12459,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 52.23,
    "postcode": "60661",
    "basis": "site"
@@ -11354,7 +11354,7 @@
    "date": "2026-06-05",
    "level1": 9113,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 33.46,
    "postcode": "60601",
    "basis": "account"
@@ -11381,7 +11381,7 @@
    "date": "2026-06-05",
    "level1": 13346,
    "orders": 1,
-   "trips": 9,
+   "trips": 1,
    "revenue": 71.82,
    "postcode": "60603",
    "basis": "site"
@@ -11390,7 +11390,7 @@
    "date": "2026-06-08",
    "level1": 947,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 67.91,
    "postcode": "60606",
    "basis": "site"
@@ -11426,7 +11426,7 @@
    "date": "2026-06-08",
    "level1": 8389,
    "orders": 1,
-   "trips": 17.999,
+   "trips": 0.999,
    "revenue": 84.95,
    "postcode": "60606",
    "basis": "account"
@@ -11453,7 +11453,7 @@
    "date": "2026-06-08",
    "level1": 13542,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 67.72,
    "postcode": "60026",
    "basis": "site"
@@ -11462,7 +11462,7 @@
    "date": "2026-06-09",
    "level1": 50,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 58.12,
    "postcode": "60601",
    "basis": "site"
@@ -11471,7 +11471,7 @@
    "date": "2026-06-09",
    "level1": 947,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 67.91,
    "postcode": "60606",
    "basis": "site"
@@ -11480,7 +11480,7 @@
    "date": "2026-06-09",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 33.12,
    "postcode": "60606",
    "basis": "site"
@@ -11534,7 +11534,7 @@
    "date": "2026-06-09",
    "level1": 9703,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 49.93,
    "postcode": null,
    "basis": null
@@ -11579,7 +11579,7 @@
    "date": "2026-06-10",
    "level1": 5993,
    "orders": 1,
-   "trips": 16,
+   "trips": 1,
    "revenue": 149.93,
    "postcode": "60604",
    "basis": "site"
@@ -11642,7 +11642,7 @@
    "date": "2026-06-11",
    "level1": 947,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 82.27,
    "postcode": "60606",
    "basis": "site"
@@ -11651,7 +11651,7 @@
    "date": "2026-06-11",
    "level1": 5201,
    "orders": 2,
-   "trips": 7.999,
+   "trips": 2.999,
    "revenue": 142.27,
    "postcode": "60604",
    "basis": "site"
@@ -11705,7 +11705,7 @@
    "date": "2026-06-12",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 46.64,
    "postcode": "60201",
    "basis": "account"
@@ -11804,7 +11804,7 @@
    "date": "2026-06-16",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 33.12,
    "postcode": "60606",
    "basis": "site"
@@ -11822,7 +11822,7 @@
    "date": "2026-06-16",
    "level1": 5201,
    "orders": 2,
-   "trips": 7,
+   "trips": 2,
    "revenue": 135.95,
    "postcode": "60604",
    "basis": "account"
@@ -11858,7 +11858,7 @@
    "date": "2026-06-16",
    "level1": 12034,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 57.63,
    "postcode": "60603",
    "basis": "account"
@@ -11867,7 +11867,7 @@
    "date": "2026-06-16",
    "level1": 13240,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 74.48,
    "postcode": "60606",
    "basis": "account"
@@ -11876,7 +11876,7 @@
    "date": "2026-06-16",
    "level1": 13446,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 64.84,
    "postcode": null,
    "basis": null
@@ -11948,7 +11948,7 @@
    "date": "2026-06-17",
    "level1": 9696,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 48.29,
    "postcode": null,
    "basis": null
@@ -11984,7 +11984,7 @@
    "date": "2026-06-18",
    "level1": 6344,
    "orders": 1,
-   "trips": 21,
+   "trips": 1,
    "revenue": 84.55,
    "postcode": "60614",
    "basis": "account"
@@ -12164,7 +12164,7 @@
    "date": "2026-06-23",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 33.12,
    "postcode": "60606",
    "basis": "site"
@@ -12236,7 +12236,7 @@
    "date": "2026-06-24",
    "level1": 8515,
    "orders": 1,
-   "trips": 14,
+   "trips": 1,
    "revenue": 154.86,
    "postcode": "60523",
    "basis": "site"
@@ -12371,7 +12371,7 @@
    "date": "2026-06-26",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 46.64,
    "postcode": "60201",
    "basis": "account"
@@ -12452,7 +12452,7 @@
    "date": "2026-06-29",
    "level1": 9703,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 56.19,
    "postcode": null,
    "basis": null
@@ -12488,7 +12488,7 @@
    "date": "2026-06-30",
    "level1": 70,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 69.78,
    "postcode": "60525",
    "basis": "account"
@@ -12497,7 +12497,7 @@
    "date": "2026-06-30",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 33.12,
    "postcode": "60606",
    "basis": "site"
@@ -12515,7 +12515,7 @@
    "date": "2026-06-30",
    "level1": 3849,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 82.84,
    "postcode": "60606",
    "basis": "account"
@@ -12551,7 +12551,7 @@
    "date": "2026-07-01",
    "level1": 70,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 67.33,
    "postcode": "60525",
    "basis": "account"
@@ -12569,7 +12569,7 @@
    "date": "2026-07-01",
    "level1": 2552,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 61.42,
    "postcode": null,
    "basis": null
@@ -12632,7 +12632,7 @@
    "date": "2026-07-01",
    "level1": 11994,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 74.33,
    "postcode": null,
    "basis": null
@@ -12641,7 +12641,7 @@
    "date": "2026-07-02",
    "level1": 947,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 79.39,
    "postcode": "60606",
    "basis": "site"
@@ -12686,7 +12686,7 @@
    "date": "2026-07-02",
    "level1": 7137,
    "orders": 1,
-   "trips": 20.999,
+   "trips": 0.999,
    "revenue": 79.13,
    "postcode": null,
    "basis": null
@@ -12776,7 +12776,7 @@
    "date": "2026-07-06",
    "level1": 2940,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 97.78,
    "postcode": "60601",
    "basis": "site"
@@ -12812,7 +12812,7 @@
    "date": "2026-07-06",
    "level1": 12128,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 68.5,
    "postcode": "60601",
    "basis": "site"
@@ -12821,7 +12821,7 @@
    "date": "2026-07-07",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.96,
    "postcode": "60606",
    "basis": "site"
@@ -12848,7 +12848,7 @@
    "date": "2026-07-07",
    "level1": 9703,
    "orders": 1,
-   "trips": 20,
+   "trips": 1,
    "revenue": 87.49,
    "postcode": null,
    "basis": null
@@ -12884,7 +12884,7 @@
    "date": "2026-07-07",
    "level1": 13230,
    "orders": 1,
-   "trips": 22,
+   "trips": 1,
    "revenue": 81.92,
    "postcode": null,
    "basis": null
@@ -12893,7 +12893,7 @@
    "date": "2026-07-08",
    "level1": 1732,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 97.9,
    "postcode": "60611",
    "basis": "account"
@@ -12911,7 +12911,7 @@
    "date": "2026-07-08",
    "level1": 5201,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 59.51,
    "postcode": "60604",
    "basis": "account"
@@ -12929,7 +12929,7 @@
    "date": "2026-07-08",
    "level1": 5993,
    "orders": 1,
-   "trips": 41,
+   "trips": 1,
    "revenue": 316.54,
    "postcode": "60604",
    "basis": "site"
@@ -13001,7 +13001,7 @@
    "date": "2026-07-09",
    "level1": 947,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 58.6,
    "postcode": "60606",
    "basis": "site"
@@ -13037,7 +13037,7 @@
    "date": "2026-07-09",
    "level1": 8405,
    "orders": 1,
-   "trips": 26,
+   "trips": 1,
    "revenue": 158.6,
    "postcode": null,
    "basis": null
@@ -13082,7 +13082,7 @@
    "date": "2026-07-09",
    "level1": 12034,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 55.61,
    "postcode": "60603",
    "basis": "account"
@@ -13100,7 +13100,7 @@
    "date": "2026-07-10",
    "level1": 3576,
    "orders": 1,
-   "trips": 31,
+   "trips": 1,
    "revenue": 328.31,
    "postcode": null,
    "basis": null
@@ -13118,7 +13118,7 @@
    "date": "2026-07-10",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 45,
    "postcode": "60201",
    "basis": "account"
@@ -13127,7 +13127,7 @@
    "date": "2026-07-10",
    "level1": 7137,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 28.83,
    "postcode": null,
    "basis": null
@@ -13208,7 +13208,7 @@
    "date": "2026-07-14",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.96,
    "postcode": "60606",
    "basis": "site"
@@ -13271,7 +13271,7 @@
    "date": "2026-07-14",
    "level1": 10398,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 49.04,
    "postcode": "60601",
    "basis": "site"
@@ -13289,7 +13289,7 @@
    "date": "2026-07-15",
    "level1": 947,
    "orders": 1,
-   "trips": 50,
+   "trips": 1,
    "revenue": 377.38,
    "postcode": "60606",
    "basis": "site"
@@ -13298,7 +13298,7 @@
    "date": "2026-07-15",
    "level1": 5201,
    "orders": 2,
-   "trips": 6,
+   "trips": 2,
    "revenue": 125.1,
    "postcode": "60604",
    "basis": "site"
@@ -13316,7 +13316,7 @@
    "date": "2026-07-15",
    "level1": 6008,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 66.63,
    "postcode": "60607",
    "basis": "account"
@@ -13334,7 +13334,7 @@
    "date": "2026-07-15",
    "level1": 8107,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 22.46,
    "postcode": null,
    "basis": null
@@ -13397,7 +13397,7 @@
    "date": "2026-07-16",
    "level1": 12034,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 69.37,
    "postcode": "60603",
    "basis": "account"
@@ -13487,7 +13487,7 @@
    "date": "2026-07-20",
    "level1": 12128,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 74.33,
    "postcode": "60601",
    "basis": "site"
@@ -13496,7 +13496,7 @@
    "date": "2026-07-21",
    "level1": 50,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 56.08,
    "postcode": "60601",
    "basis": "site"
@@ -13514,7 +13514,7 @@
    "date": "2026-07-21",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.96,
    "postcode": "60606",
    "basis": "site"
@@ -13523,7 +13523,7 @@
    "date": "2026-07-21",
    "level1": 2552,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 69.72,
    "postcode": null,
    "basis": null
@@ -13532,7 +13532,7 @@
    "date": "2026-07-21",
    "level1": 6008,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 62.02,
    "postcode": "60607",
    "basis": "account"
@@ -13577,7 +13577,7 @@
    "date": "2026-07-21",
    "level1": 12034,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 69.37,
    "postcode": "60603",
    "basis": "account"
@@ -13586,7 +13586,7 @@
    "date": "2026-07-22",
    "level1": 947,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 58.6,
    "postcode": "60606",
    "basis": "site"
@@ -13604,7 +13604,7 @@
    "date": "2026-07-22",
    "level1": 2552,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 127.78,
    "postcode": null,
    "basis": null
@@ -13649,7 +13649,7 @@
    "date": "2026-07-22",
    "level1": 7137,
    "orders": 1,
-   "trips": 17.999,
+   "trips": 0.999,
    "revenue": 70.75,
    "postcode": null,
    "basis": null
@@ -13694,7 +13694,7 @@
    "date": "2026-07-23",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 51.67,
    "postcode": "60606",
    "basis": "site"
@@ -13775,7 +13775,7 @@
    "date": "2026-07-23",
    "level1": 12034,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 60.19,
    "postcode": "60603",
    "basis": "account"
@@ -13784,7 +13784,7 @@
    "date": "2026-07-23",
    "level1": 13230,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 28.83,
    "postcode": null,
    "basis": null
@@ -13820,7 +13820,7 @@
    "date": "2026-07-24",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 45,
    "postcode": "60201",
    "basis": "account"
@@ -13829,7 +13829,7 @@
    "date": "2026-07-24",
    "level1": 7137,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 28.83,
    "postcode": null,
    "basis": null
@@ -13838,7 +13838,7 @@
    "date": "2026-07-24",
    "level1": 8006,
    "orders": 1,
-   "trips": 7,
+   "trips": 2,
    "revenue": 44.24,
    "postcode": null,
    "basis": null
@@ -13928,7 +13928,7 @@
    "date": "2026-07-28",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 31.96,
    "postcode": "60606",
    "basis": "site"
@@ -13937,7 +13937,7 @@
    "date": "2026-07-28",
    "level1": 7137,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 34.42,
    "postcode": null,
    "basis": null
@@ -13991,7 +13991,7 @@
    "date": "2026-07-28",
    "level1": 12034,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 46.43,
    "postcode": "60603",
    "basis": "account"
@@ -14000,7 +14000,7 @@
    "date": "2026-07-28",
    "level1": 13240,
    "orders": 1,
-   "trips": 30,
+   "trips": 1,
    "revenue": 192.04,
    "postcode": "60606",
    "basis": "account"
@@ -14009,7 +14009,7 @@
    "date": "2026-07-29",
    "level1": 1,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 43.93,
    "postcode": "60602",
    "basis": "site"
@@ -14090,7 +14090,7 @@
    "date": "2026-07-30",
    "level1": 947,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 58.6,
    "postcode": "60606",
    "basis": "site"
@@ -14117,7 +14117,7 @@
    "date": "2026-07-30",
    "level1": 8107,
    "orders": 1,
-   "trips": 9,
+   "trips": 1,
    "revenue": 28.49,
    "postcode": null,
    "basis": null
@@ -14162,7 +14162,7 @@
    "date": "2026-07-30",
    "level1": 15177,
    "orders": 1,
-   "trips": 17,
+   "trips": 1,
    "revenue": 198,
    "postcode": null,
    "basis": null
@@ -14171,7 +14171,7 @@
    "date": "2026-07-31",
    "level1": 50,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 56.08,
    "postcode": "60601",
    "basis": "site"
@@ -14189,7 +14189,7 @@
    "date": "2026-07-31",
    "level1": 6008,
    "orders": 1,
-   "trips": 80,
+   "trips": 1,
    "revenue": 398.48,
    "postcode": "60607",
    "basis": "account"
@@ -14198,7 +14198,7 @@
    "date": "2026-07-31",
    "level1": 8107,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 30.5,
    "postcode": null,
    "basis": null
@@ -14288,7 +14288,7 @@
    "date": "2026-08-04",
    "level1": 947,
    "orders": 2,
-   "trips": 6,
+   "trips": 2,
    "revenue": 112.27,
    "postcode": "60606",
    "basis": "site"
@@ -14297,7 +14297,7 @@
    "date": "2026-08-04",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.54,
    "postcode": "60606",
    "basis": "site"
@@ -14432,7 +14432,7 @@
    "date": "2026-08-05",
    "level1": 12128,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 87.55,
    "postcode": "60601",
    "basis": "site"
@@ -14441,7 +14441,7 @@
    "date": "2026-08-06",
    "level1": 2902,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 67.81,
    "postcode": null,
    "basis": null
@@ -14450,7 +14450,7 @@
    "date": "2026-08-06",
    "level1": 2940,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 82.67,
    "postcode": "60601",
    "basis": "site"
@@ -14477,7 +14477,7 @@
    "date": "2026-08-06",
    "level1": 7137,
    "orders": 1,
-   "trips": 5,
+   "trips": 2,
    "revenue": 35.05,
    "postcode": null,
    "basis": null
@@ -14531,7 +14531,7 @@
    "date": "2026-08-06",
    "level1": 13446,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 71.28,
    "postcode": null,
    "basis": null
@@ -14558,7 +14558,7 @@
    "date": "2026-08-07",
    "level1": 6008,
    "orders": 1,
-   "trips": 12,
+   "trips": 1,
    "revenue": 86.62,
    "postcode": "60607",
    "basis": "account"
@@ -14594,7 +14594,7 @@
    "date": "2026-08-07",
    "level1": 9113,
    "orders": 1,
-   "trips": 14,
+   "trips": 1,
    "revenue": 56.42,
    "postcode": "60601",
    "basis": "account"
@@ -14612,7 +14612,7 @@
    "date": "2026-08-10",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.61,
    "postcode": "60606",
    "basis": "site"
@@ -14630,7 +14630,7 @@
    "date": "2026-08-10",
    "level1": 7001,
    "orders": 1,
-   "trips": 17,
+   "trips": 1,
    "revenue": 116.22,
    "postcode": "60201",
    "basis": "account"
@@ -14684,7 +14684,7 @@
    "date": "2026-08-11",
    "level1": 1399,
    "orders": 1,
-   "trips": 11,
+   "trips": 1,
    "revenue": 162.63,
    "postcode": null,
    "basis": null
@@ -14693,7 +14693,7 @@
    "date": "2026-08-11",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.54,
    "postcode": "60606",
    "basis": "site"
@@ -14774,7 +14774,7 @@
    "date": "2026-08-11",
    "level1": 13240,
    "orders": 1,
-   "trips": 31,
+   "trips": 1,
    "revenue": 200.85,
    "postcode": "60606",
    "basis": "account"
@@ -14828,7 +14828,7 @@
    "date": "2026-08-12",
    "level1": 8405,
    "orders": 1,
-   "trips": 23,
+   "trips": 1,
    "revenue": 146.39,
    "postcode": null,
    "basis": null
@@ -14837,7 +14837,7 @@
    "date": "2026-08-12",
    "level1": 8515,
    "orders": 1,
-   "trips": 9,
+   "trips": 1,
    "revenue": 112.38,
    "postcode": "60523",
    "basis": "site"
@@ -14864,7 +14864,7 @@
    "date": "2026-08-13",
    "level1": 1,
    "orders": 1,
-   "trips": 12,
+   "trips": 1,
    "revenue": 50.4,
    "postcode": "60602",
    "basis": "site"
@@ -14873,7 +14873,7 @@
    "date": "2026-08-13",
    "level1": 7137,
    "orders": 1,
-   "trips": 16.999,
+   "trips": 0.999,
    "revenue": 69.2,
    "postcode": null,
    "basis": null
@@ -14909,7 +14909,7 @@
    "date": "2026-08-14",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.61,
    "postcode": "60606",
    "basis": "site"
@@ -14972,7 +14972,7 @@
    "date": "2026-08-17",
    "level1": 1,
    "orders": 1,
-   "trips": 48,
+   "trips": 1,
    "revenue": 152.41,
    "postcode": "60602",
    "basis": "site"
@@ -14981,7 +14981,7 @@
    "date": "2026-08-17",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.61,
    "postcode": "60606",
    "basis": "site"
@@ -14990,7 +14990,7 @@
    "date": "2026-08-17",
    "level1": 8107,
    "orders": 1,
-   "trips": 33,
+   "trips": 1,
    "revenue": 76.73,
    "postcode": null,
    "basis": null
@@ -15017,7 +15017,7 @@
    "date": "2026-08-18",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.54,
    "postcode": "60606",
    "basis": "site"
@@ -15044,7 +15044,7 @@
    "date": "2026-08-18",
    "level1": 8107,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 16.43,
    "postcode": null,
    "basis": null
@@ -15062,7 +15062,7 @@
    "date": "2026-08-18",
    "level1": 8700,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 94.16,
    "postcode": null,
    "basis": null
@@ -15071,7 +15071,7 @@
    "date": "2026-08-18",
    "level1": 10398,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 45.06,
    "postcode": "60601",
    "basis": "site"
@@ -15080,7 +15080,7 @@
    "date": "2026-08-18",
    "level1": 13240,
    "orders": 1,
-   "trips": 33,
+   "trips": 1,
    "revenue": 211.49,
    "postcode": "60606",
    "basis": "account"
@@ -15089,7 +15089,7 @@
    "date": "2026-08-19",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.61,
    "postcode": "60606",
    "basis": "site"
@@ -15098,7 +15098,7 @@
    "date": "2026-08-19",
    "level1": 1399,
    "orders": 1,
-   "trips": 9,
+   "trips": 1,
    "revenue": 144,
    "postcode": null,
    "basis": null
@@ -15143,7 +15143,7 @@
    "date": "2026-08-19",
    "level1": 7137,
    "orders": 1,
-   "trips": 19.999,
+   "trips": 0.999,
    "revenue": 77.73,
    "postcode": null,
    "basis": null
@@ -15197,7 +15197,7 @@
    "date": "2026-08-20",
    "level1": 1,
    "orders": 1,
-   "trips": 13,
+   "trips": 1,
    "revenue": 53.23,
    "postcode": "60602",
    "basis": "site"
@@ -15206,7 +15206,7 @@
    "date": "2026-08-20",
    "level1": 1399,
    "orders": 1,
-   "trips": 9,
+   "trips": 1,
    "revenue": 144,
    "postcode": null,
    "basis": null
@@ -15287,7 +15287,7 @@
    "date": "2026-08-21",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 45.82,
    "postcode": "60201",
    "basis": "account"
@@ -15323,7 +15323,7 @@
    "date": "2026-08-21",
    "level1": 15225,
    "orders": 1,
-   "trips": 47,
+   "trips": 1,
    "revenue": 240.8,
    "postcode": null,
    "basis": null
@@ -15332,7 +15332,7 @@
    "date": "2026-08-24",
    "level1": 1399,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 153.32,
    "postcode": null,
    "basis": null
@@ -15404,7 +15404,7 @@
    "date": "2026-08-25",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.61,
    "postcode": "60606",
    "basis": "site"
@@ -15413,7 +15413,7 @@
    "date": "2026-08-25",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.54,
    "postcode": "60606",
    "basis": "site"
@@ -15422,7 +15422,7 @@
    "date": "2026-08-25",
    "level1": 5035,
    "orders": 1,
-   "trips": 17,
+   "trips": 1,
    "revenue": 147.3,
    "postcode": "60173",
    "basis": "account"
@@ -15503,7 +15503,7 @@
    "date": "2026-08-26",
    "level1": 2552,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 62.54,
    "postcode": null,
    "basis": null
@@ -15512,7 +15512,7 @@
    "date": "2026-08-26",
    "level1": 2924,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 78.93,
    "postcode": "60477",
    "basis": "site"
@@ -15548,7 +15548,7 @@
    "date": "2026-08-26",
    "level1": 9113,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 33.46,
    "postcode": "60601",
    "basis": "account"
@@ -15593,7 +15593,7 @@
    "date": "2026-08-27",
    "level1": 493,
    "orders": 1,
-   "trips": 12,
+   "trips": 1,
    "revenue": 128.02,
    "postcode": "60606",
    "basis": "site"
@@ -15602,7 +15602,7 @@
    "date": "2026-08-27",
    "level1": 5201,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 72.98,
    "postcode": "60604",
    "basis": "site"
@@ -15629,7 +15629,7 @@
    "date": "2026-08-27",
    "level1": 7137,
    "orders": 1,
-   "trips": 7,
+   "trips": 1,
    "revenue": 40.74,
    "postcode": null,
    "basis": null
@@ -15665,7 +15665,7 @@
    "date": "2026-08-27",
    "level1": 12034,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 61.28,
    "postcode": "60603",
    "basis": "account"
@@ -15674,7 +15674,7 @@
    "date": "2026-08-27",
    "level1": 12459,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 46.34,
    "postcode": "60661",
    "basis": "site"
@@ -15683,7 +15683,7 @@
    "date": "2026-08-28",
    "level1": 78,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 75.46,
    "postcode": "60130",
    "basis": "account"
@@ -15692,7 +15692,7 @@
    "date": "2026-08-28",
    "level1": 947,
    "orders": 2,
-   "trips": 55,
+   "trips": 2,
    "revenue": 458.01,
    "postcode": "60606",
    "basis": "site"
@@ -15719,7 +15719,7 @@
    "date": "2026-08-28",
    "level1": 5035,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 66.79,
    "postcode": "60173",
    "basis": "account"
@@ -15755,7 +15755,7 @@
    "date": "2026-08-28",
    "level1": 8900,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 57.26,
    "postcode": null,
    "basis": null
@@ -15800,7 +15800,7 @@
    "date": "2026-08-31",
    "level1": 10231,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 35.6,
    "postcode": null,
    "basis": null
@@ -15818,7 +15818,7 @@
    "date": "2026-09-01",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.68,
    "postcode": "60606",
    "basis": "site"
@@ -15836,7 +15836,7 @@
    "date": "2026-09-01",
    "level1": 6008,
    "orders": 1,
-   "trips": 12,
+   "trips": 1,
    "revenue": 87.01,
    "postcode": "60607",
    "basis": "account"
@@ -15863,7 +15863,7 @@
    "date": "2026-09-01",
    "level1": 8700,
    "orders": 1,
-   "trips": 8,
+   "trips": 1,
    "revenue": 94.59,
    "postcode": null,
    "basis": null
@@ -15899,7 +15899,7 @@
    "date": "2026-09-02",
    "level1": 78,
    "orders": 1,
-   "trips": 30.999,
+   "trips": 0.999,
    "revenue": 306.95,
    "postcode": "60130",
    "basis": "site"
@@ -15908,7 +15908,7 @@
    "date": "2026-09-02",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.84,
    "postcode": "60606",
    "basis": "site"
@@ -15935,7 +15935,7 @@
    "date": "2026-09-02",
    "level1": 8006,
    "orders": 1,
-   "trips": 7,
+   "trips": 2,
    "revenue": 45.24,
    "postcode": null,
    "basis": null
@@ -15944,7 +15944,7 @@
    "date": "2026-09-02",
    "level1": 8107,
    "orders": 1,
-   "trips": 17,
+   "trips": 1,
    "revenue": 44.57,
    "postcode": null,
    "basis": null
@@ -15971,7 +15971,7 @@
    "date": "2026-09-02",
    "level1": 8394,
    "orders": 1,
-   "trips": 13,
+   "trips": 1,
    "revenue": 58.14,
    "postcode": "60606",
    "basis": "site"
@@ -16016,7 +16016,7 @@
    "date": "2026-09-02",
    "level1": 13240,
    "orders": 1,
-   "trips": 32,
+   "trips": 1,
    "revenue": 207.09,
    "postcode": "60606",
    "basis": "account"
@@ -16034,7 +16034,7 @@
    "date": "2026-09-03",
    "level1": 7137,
    "orders": 1,
-   "trips": 15.999,
+   "trips": 0.999,
    "revenue": 66.65,
    "postcode": null,
    "basis": null
@@ -16043,7 +16043,7 @@
    "date": "2026-09-03",
    "level1": 8107,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 22.46,
    "postcode": null,
    "basis": null
@@ -16088,7 +16088,7 @@
    "date": "2026-09-04",
    "level1": 947,
    "orders": 2,
-   "trips": 4,
+   "trips": 2,
    "revenue": 98.59,
    "postcode": "60606",
    "basis": "site"
@@ -16133,7 +16133,7 @@
    "date": "2026-09-04",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 46.02,
    "postcode": "60201",
    "basis": "account"
@@ -16178,7 +16178,7 @@
    "date": "2026-09-07",
    "level1": 8107,
    "orders": 1,
-   "trips": 13,
+   "trips": 1,
    "revenue": 36.53,
    "postcode": null,
    "basis": null
@@ -16205,7 +16205,7 @@
    "date": "2026-09-08",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.84,
    "postcode": "60606",
    "basis": "site"
@@ -16223,7 +16223,7 @@
    "date": "2026-09-08",
    "level1": 6008,
    "orders": 1,
-   "trips": 10,
+   "trips": 2,
    "revenue": 77.59,
    "postcode": "60607",
    "basis": "account"
@@ -16241,7 +16241,7 @@
    "date": "2026-09-08",
    "level1": 8700,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 64.94,
    "postcode": null,
    "basis": null
@@ -16268,7 +16268,7 @@
    "date": "2026-09-09",
    "level1": 1,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 27.85,
    "postcode": "60602",
    "basis": "site"
@@ -16322,7 +16322,7 @@
    "date": "2026-09-09",
    "level1": 10398,
    "orders": 1,
-   "trips": 6,
+   "trips": 1,
    "revenue": 49.04,
    "postcode": "60601",
    "basis": "site"
@@ -16349,7 +16349,7 @@
    "date": "2026-09-10",
    "level1": 1,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 44.93,
    "postcode": "60602",
    "basis": "site"
@@ -16367,7 +16367,7 @@
    "date": "2026-09-10",
    "level1": 2948,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 73.98,
    "postcode": "60607",
    "basis": "site"
@@ -16394,7 +16394,7 @@
    "date": "2026-09-10",
    "level1": 6008,
    "orders": 1,
-   "trips": 50,
+   "trips": 1,
    "revenue": 266.13,
    "postcode": "60607",
    "basis": "account"
@@ -16439,7 +16439,7 @@
    "date": "2026-09-11",
    "level1": 947,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 102.45,
    "postcode": "60606",
    "basis": "site"
@@ -16448,7 +16448,7 @@
    "date": "2026-09-11",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.68,
    "postcode": "60606",
    "basis": "site"
@@ -16610,7 +16610,7 @@
    "date": "2026-09-15",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.68,
    "postcode": "60606",
    "basis": "site"
@@ -16655,7 +16655,7 @@
    "date": "2026-09-15",
    "level1": 13240,
    "orders": 1,
-   "trips": 37,
+   "trips": 1,
    "revenue": 233.81,
    "postcode": "60606",
    "basis": "account"
@@ -16700,7 +16700,7 @@
    "date": "2026-09-16",
    "level1": 8405,
    "orders": 1,
-   "trips": 19,
+   "trips": 1,
    "revenue": 126.84,
    "postcode": null,
    "basis": null
@@ -16799,7 +16799,7 @@
    "date": "2026-09-18",
    "level1": 7001,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 46.02,
    "postcode": "60201",
    "basis": "account"
@@ -16844,7 +16844,7 @@
    "date": "2026-09-21",
    "level1": 1,
    "orders": 1,
-   "trips": 30,
+   "trips": 1,
    "revenue": 101.85,
    "postcode": "60602",
    "basis": "site"
@@ -16853,7 +16853,7 @@
    "date": "2026-09-21",
    "level1": 50,
    "orders": 1,
-   "trips": 5,
+   "trips": 1,
    "revenue": 67.45,
    "postcode": "60601",
    "basis": "site"
@@ -16862,7 +16862,7 @@
    "date": "2026-09-21",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.84,
    "postcode": "60606",
    "basis": "site"
@@ -16871,7 +16871,7 @@
    "date": "2026-09-21",
    "level1": 6008,
    "orders": 1,
-   "trips": 50,
+   "trips": 1,
    "revenue": 266.13,
    "postcode": "60607",
    "basis": "account"
@@ -16898,7 +16898,7 @@
    "date": "2026-09-22",
    "level1": 1,
    "orders": 1,
-   "trips": 54,
+   "trips": 1,
    "revenue": 170.16,
    "postcode": "60602",
    "basis": "site"
@@ -16907,7 +16907,7 @@
    "date": "2026-09-22",
    "level1": 947,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 52.84,
    "postcode": "60606",
    "basis": "site"
@@ -16925,7 +16925,7 @@
    "date": "2026-09-22",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.68,
    "postcode": "60606",
    "basis": "site"
@@ -16952,7 +16952,7 @@
    "date": "2026-09-22",
    "level1": 8107,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 18.44,
    "postcode": null,
    "basis": null
@@ -17015,7 +17015,7 @@
    "date": "2026-09-23",
    "level1": 6770,
    "orders": 1,
-   "trips": 4,
+   "trips": 1,
    "revenue": 22.02,
    "postcode": "60616",
    "basis": "account"
@@ -17060,7 +17060,7 @@
    "date": "2026-09-24",
    "level1": 5035,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 104.41,
    "postcode": "60173",
    "basis": "account"
@@ -17150,7 +17150,7 @@
    "date": "2026-09-25",
    "level1": 8700,
    "orders": 2,
-   "trips": 12,
+   "trips": 2,
    "revenue": 159.53,
    "postcode": null,
    "basis": null
@@ -17267,7 +17267,7 @@
    "date": "2026-09-29",
    "level1": 1138,
    "orders": 1,
-   "trips": 40,
+   "trips": 1,
    "revenue": 378.41,
    "postcode": null,
    "basis": null
@@ -17276,7 +17276,7 @@
    "date": "2026-09-29",
    "level1": 2345,
    "orders": 1,
-   "trips": 3,
+   "trips": 1,
    "revenue": 32.68,
    "postcode": "60606",
    "basis": "site"
@@ -17339,7 +17339,7 @@
    "date": "2026-09-30",
    "level1": 2552,
    "orders": 1,
-   "trips": 10,
+   "trips": 1,
    "revenue": 122.2,
    "postcode": null,
    "basis": null
@@ -17375,7 +17375,7 @@
    "date": "2026-09-30",
    "level1": 8700,
    "orders": 1,
-   "trips": 20,
+   "trips": 1,
    "revenue": 183.56,
    "postcode": null,
    "basis": null

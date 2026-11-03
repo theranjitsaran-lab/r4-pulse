@@ -37,7 +37,7 @@ export function serviceGaps(PR) {
     const worth = (meds[r.servcode] - r.modal_rate) * r.units / 12;
     const a = out.get(r.level1) || { level1: r.level1, customer: r.customer, worth: 0, top: null };
     a.worth += worth;
-    if (!a.top || worth > a.top.worth) a.top = { worth, service: r.service, rate: r.modal_rate, med: meds[r.servcode] };
+    if (!a.top || worth > a.top.worth) a.top = { worth, service: r.service, servcode: r.servcode, rate: r.modal_rate, med: meds[r.servcode] };
     out.set(r.level1, a);
   }
   return out;

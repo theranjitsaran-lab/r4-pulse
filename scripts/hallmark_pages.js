@@ -73,11 +73,15 @@ async function run(role, width, browser, base, pass, name) {
     await page.waitForFunction(() => { const m = document.querySelector('#main'); return m && m.innerText.length > 40 && !m.querySelector('.sk'); }, null, { timeout: 60000 }).catch(() => errors.push('never finished loading'));
     await page.waitForTimeout(500);
     // everything a person can open, so a figure folded away is still counted
-    await page.evaluate(() => document.querySelectorAll('details').forEach(d => { d.open = true; }));
+    await page.evaluate(() => { document.querySelectorAll('details').forEach(d => { d.open = true; }); document.querySelectorAll('.ph-fold').forEach(f => f.classList.add('open')); });
     for (let i = 0; i < 6; i++) {
       const more = await page.$('.dt-more .linkbtn'); if (!more) break;
       await more.click(); await page.waitForTimeout(150);
     }
+    // the Cross-sell drill-down, open, so the checker reads it as a person sees it
+    if (key === 'accounts-cross-sell') { await page.click('#ws-t tbody tr[data-i]'); await page.waitForTimeout(1000); }
+    if (key === 'accounts-grid') { await page.click('.dt-t tbody tr[data-i] button.rag'); await page.waitForSelector('.pop .md-ln', { timeout: 15000 }).catch(() => {}); await page.waitForTimeout(800); }
+    if (key === 'opportunities') { await page.click('#op-t tbody tr[data-i] td:first-child small'); await page.waitForTimeout(1000); }
     await page.waitForTimeout(200);
     results[key] = await page.evaluate(facts);
     results[key].errors = errors;

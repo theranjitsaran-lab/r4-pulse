@@ -17,6 +17,137 @@ test('a flat fee: the two IR accounts, not an account with priced bins or none a
   assert.equal(flatFeeYear([{ servcode: 'B2', revenue: 0, units: 5 }]), 0);
 });
 
+test('Home map: shares add up, billing-only postcodes are out, routes keep their recorded stop order', async () => {
+  const { busiest, lastWeek, periodRoutes, districtActivity, busiestFacts } = await import('../public/components/homemap.js');
+  const A = require('../fixtures/activity.json').data, Z = require('../public/data/zcta.json');
+  const B = busiest(A, Z, []);
+  assert.ok(Math.abs(B.rows.reduce((t, p) => t + p.share, 0) - 1) < 1e-9);
+  assert.ok(B.rows.every(p => !p.billing_only && Z[p.postcode]));
+  assert.ok(B.rows[0].services >= B.rows[1].services);
+  assert.ok(busiestFacts(B).every(f => f.line.length < 400));
+  const Zt = { a: [41.8, -87.6], b: [41.9, -87.7] }, R = (date, route, services_done) => ({ date, route, services_done });
+  const o = (date, route, seq, postcode, done = true) => ({ date, route, seq, postcode, done });
+  const T = { latestDone: '2026-10-30', routeDays: [R('2026-10-26', 'M', 3), R('2026-10-27', 'M', 3), R('2026-10-28', 'J', 1), R('2026-10-30', '--', 9), R('2026-10-30', 'M', 2), R('2026-10-19', 'M', 8)],
+    orders: [o('2026-10-26', 'M', 3, 'b'), o('2026-10-26', 'M', 1, 'a'), o('2026-10-26', 'M', 2, 'a'), o('2026-10-26', 'M', 4, 'b', false), o('2026-10-27', 'M', 1, 'a'), o('2026-10-27', 'M', 2, 'b'), o('2026-10-28', 'J', 1, 'b'), o('2026-10-30', 'M', 1, 'b')] };
+  assert.deepEqual(lastWeek(T), ['2026-10-26', '2026-10-27', '2026-10-28', '2026-10-30']);
+  const P = periodRoutes(T, Zt, lastWeek(T));
+  assert.deepEqual(P.map(r => [r.route, r.services]), [['M', 8], ['J', 1]]);
+  assert.deepEqual(P[0].days, [{ date: '2026-10-26', stops: ['a', 'b'] }, { date: '2026-10-30', stops: ['b'] }]);   // the same stops on the 27th draw once
+  assert.deepEqual(districtActivity(T, ['2026-10-26'], 'b'), { services: 1, routes: [{ route: 'M', n: 1 }] });
+  // the real week: routes add to the same count Operations shows
+  const W = lastWeek(A), RW = periodRoutes(A, Z, W);
+  assert.equal(W.length, 5);
+  assert.equal(RW.reduce((t, r) => t + r.services, 0), A.routeDays.filter(r => W.includes(r.date) && r.route && r.route !== '--').reduce((t, r) => t + r.services_done, 0));
+});
+
+test('Delivery: code 01 boxes are not trips, and a delivery with no postcode stays inside the route day', async () => {
+  const R = require('../model/rates'), { accountCosts } = await import('../public/components/margin.js'), { routeCosts } = await import('../public/components/routecost.js');
+  const lines = [{ level1: 1, servcode: '01', family: 'movement', unit: 'trip', drives_cost: true, units: 10, revenue: 200, days: 10 }, { level1: 1, servcode: '01B', family: 'movement', unit: 'box', drives_cost: true, units: 500, revenue: 1000, days: 10 }];
+  const c = accountCosts(R, { level1: 1, boxes: 0, bins: 0 }, lines).movement[0];
+  assert.equal(c.visits, 10);
+  assert.ok(Math.abs(c.lines.find(l => l[0] === 'Box handling')[1] - 500 * R.RATES.handling.v) < 1e-6);
+  const Z = { 60601: [41.88, -87.62] }, rows = [{ date: '2026-10-26', route: 'M', stop: 's1', seq: 1, level1: 2, postcode: '60601', services: 2, pounds: 0 }];
+  const was = R.SETTINGS.deliveryMatch; R.SETTINGS.deliveryMatch = 1;
+  const rc = routeCosts(R, rows, Z, [{ date: '2026-10-26', level1: 3, orders: 1, trips: 1, postcode: null, revenue: 10 }]);
+  R.SETTINGS.deliveryMatch = was;
+  assert.ok(rc.movement[3].cost > 0);
+  assert.ok(Math.abs(rc.movement[3].cost + rc.accounts[2].cost - R.RATES.routeDay.v) < 0.05);   // one route day, shared, not charged twice
+  assert.equal(rc.deliveries.noPostcode, 1);
+});
+
+test('Jobs add up: each line\'s jobs plus what is unallocated tie to the line, revenue and cost, for the three named accounts', async () => {
+  const fs = require('fs'), path = require('path'), R = require('../model/rates');
+  const jf = path.join(__dirname, '..', 'fixtures', 'jobs.json');
+  if (!fs.existsSync(jf)) return;
+  const read = n => JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'fixtures', n + '.json'), 'utf8')).data;
+  const { accountJobs, buildMargins } = await import('../public/components/margin.js'), { routeCosts } = await import('../public/components/routecost.js');
+  const Z = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'data', 'zcta.json'), 'utf8'));
+  const M = read('margin'), J = read('jobs'), rc = routeCosts(R, read('routestops'), Z, read('deliverydays'));
+  const keep = R.routeCostsNow(); R.setRouteCosts(rc);
+  try {
+    const book = buildMargins(R, M, {});
+    for (const id of [12601, 12530, 8153]) {
+      const a = M.accounts.find(x => x.level1 === id), lines = M.lines.filter(l => l.level1 === id), m = book.accounts.find(x => x.level1 === id);
+      const F = accountJobs(R, a, lines, J.accounts.find(x => x.level1 === id).orders, { daily: rc.daily[id] || {}, moveDaily: rc.moveDaily[id] || {} });
+      for (const [f, x] of Object.entries(F.fams)) {
+        const rev = x.jobs.reduce((t, j) => t + j.revenue, 0), cost = x.jobs.reduce((t, j) => t + j.cost, 0);
+        if (f !== 'storage') assert.ok(Math.abs(rev - x.revenue) < 1, id + ' ' + f + ' revenue ' + rev + ' against ' + x.revenue);
+        assert.ok(Math.abs(cost + x.unallocated - (m.fam[f] ? m.fam[f].cost : 0)) < 1, id + ' ' + f + ' cost ' + (cost + x.unallocated) + ' against ' + (m.fam[f] && m.fam[f].cost));
+        assert.ok(Math.abs(x.revenue - (m.fam[f] ? m.fam[f].revenue : 0)) < 1, id + ' ' + f + ' line revenue');
+      }
+    }
+  } finally { R.setRouteCosts(keep); }
+});
+
+test('Quote: real route days near it, never the whole average visit; four ways, the top one marked; every number in a summary checked', async () => {
+  const fs = require('fs'), path = require('path'), R = require('../model/rates');
+  const read = n => JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'fixtures', n + '.json'), 'utf8')).data, Z = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'data', 'zcta.json'), 'utf8'));
+  const Q = await import('../public/components/quote.js'), { routeCosts } = await import('../public/components/routecost.js'), S = await import('../public/components/summary.js');
+  const rc = routeCosts(R, read('routestops'), Z, read('deliverydays')), keep = R.routeCostsNow(); R.setRouteCosts(rc);
+  try {
+    const st = { code: 'B2', price: 85, units: 52, visits: 52, bins: 1, postcode: null, level1: null };
+    const book = Q.lineCost(R, st, { Z });
+    assert.equal(book.routeBasis, 'book');
+    assert.ok(book.total / 52 < 110, 'one 95 gal visit at the book stop: ' + book.total / 52);   // was $170.71: a whole average visit
+    const place = Q.lineCost(R, { ...st, postcode: '60617' }, { Z });
+    assert.equal(place.routeBasis, 'nearby');
+    // a stop several customers share counts for a new customer (level1 null), and one only this account has does not
+    const reg = { regular: [{ dow: 1, route: 'A', postcode: '60606', n: 9, solo: null, day: 'd1' }, { dow: 2, route: 'B', postcode: '60607', n: 9, solo: 7, day: 'd2' }], days: { d1: { stops: ['60606'], customers: 3 }, d2: { stops: ['60607'], customers: 1 } } };
+    assert.equal(Q.nearestRoute(reg, Z, '60606', null).route, 'A');
+    assert.equal(Q.nearestRoute(reg, Z, '60607', 7).route, 'A');
+    assert.deepEqual(['good', 'thin', 'loss', 'loss'], [.5, .2, .05, -.1].map(m => Q.marginLabel(R, m).cls));
+    assert.deepEqual(['Healthy', 'Normal', 'Thin', 'Thin, losing money'], [.5, .2, .05, -.1].map(m => Q.marginLabel(R, m).word));
+    const near = { route: 'MARK', dow: 5, postcode: '60617', miles: 1, carries: true, day: { stops: ['60617'], customers: 3 } };
+    const list = Q.quoteOptions(R, { ...st, postcode: '60617' }, { Z, near, band: { p25: 85, p75: 111.77 } });
+    assert.deepEqual(list.map(o => o.id), ['now', 'ride', 'fewer', 'band']);
+    assert.equal(list.filter(o => o.best).length, 1);
+    assert.equal(Q.quoteOptions(R, { ...st, postcode: '60617' }, { Z, near: { ...near, carries: false }, band: { p25: 85, p75: 111.77 } })[1].off != null, true);
+    const fewer = list[2];
+    assert.ok(Math.abs(fewer.yrev - list[0].yrev) < 1 && fewer.st.visits === 26, 'the same bins on half the visits');
+    // delivery: on a run, or a vehicle of its own; a time on site given moves the cost; a rush starts dedicated
+    const trip = { code: '90', price: 44, units: 1, visits: 1, bins: 1, postcode: '60617', level1: null, mode: 'dedicated', siteMin: null };
+    const ded = Q.lineCost(R, trip, { Z }), run = Q.lineCost(R, { ...trip, mode: 'run' }, { Z }), long = Q.lineCost(R, { ...trip, siteMin: 120 }, { Z });
+    assert.equal(ded.routeBasis, 'dedicated'); assert.equal(run.routeBasis, 'nearby');
+    assert.ok(ded.total >= R.routeHourRate() * R.SETTINGS.dedicatedMinHours - 0.01, 'a dedicated vehicle costs at least its least hours');
+    const drive = long.total - R.routeHourRate() * 2;
+    assert.ok(long.total > ded.total && Math.abs(drive - long.lines.find(l => l[0] === 'Travel to site')[1]) < 0.01, 'two hours on site at the route-hour rate, on top of the drive');
+    const binSite = Q.lineCost(R, { ...st, postcode: '60617', siteMin: 30 }, { Z });
+    assert.ok(binSite.total > place.total, 'a longer visit costs more');
+    // what is in a cost: storage's largest parts add up with the rest to the cost
+    const stoO = Q.quoteOptions(R, { code: 'STO', price: .22, units: 3684, visits: null, bins: 1 }, { Z, band: { p25: .14, p75: .45 } })[0];
+    const note = Q.costNotes(R, stoO)[0];
+    assert.equal(note.parts[0].name, '1301 W. 35th');
+    assert.ok(Math.abs(note.parts.reduce((t, x) => t + x.amount, 0) - note.amount) < 1e-9);
+    assert.ok(Math.abs(note.amount - R.RATES.facilities.v) < 1e-9, 'a box-month at the facilities rate');
+    // the shred truck: its hours at the route-hour rate, plus the drive; not a driver's pay alone
+    const hr = R.routeHourRate(), truck = Q.lineCost(R, { code: 'S0', units: 3, visits: 1, postcode: null, level1: null, miles: 10 }, { Z });
+    assert.ok(Math.abs(truck.total - (3 * hr + 2 * 10 / R.SETTINGS.mph * hr)) < 1e-6, 'three truck hours and one drive of ten miles each way');
+    assert.ok(!truck.lines.some(l => l[0] === 'Driver time'));
+    const sheet = Q.quoteFacts(list[0], list, { near, st, band: { p25: 85, p75: 111.77 } });
+    assert.deepEqual(sheet.map(f => f.key), ['nearby', 'better']);
+    assert.ok(S.checkNumbers(sheet.map(f => f.say).join(' '), sheet).ok);
+    assert.equal(S.checkNumbers('It keeps $999 a visit.', sheet).ok, false);
+    assert.ok(S.parseQuote(sheet.map(f => '[' + f.key + '] ' + f.say).join(String.fromCharCode(10)), sheet));
+    assert.equal(S.parseQuote('[nearby] one line only', sheet), null);
+  } finally { R.setRouteCosts(keep); }
+});
+
+test('One margin: Healthy, Normal, Thin from the two cut-offs; a comparable is the same kind at a similar size', async () => {
+  const R = require('../model/rates'), { marginBand } = await import('../public/components/margin.js'), { accountKind } = await import('../public/components/acctkind.js'), { buildWhitespace } = await import('../public/components/whitespace.js');
+  const S = R.SETTINGS;
+  assert.deepEqual([S.marginHealthy, S.marginHealthy - .01, S.marginThin, S.marginThin - .01, -.01].map(m => marginBand(R, m).word), ['Healthy', 'Normal', 'Normal', 'Thin', 'Thin, losing money']);
+  assert.deepEqual([S.marginHealthy, S.marginThin, 0].map(m => marginBand(R, m).cls), ['g', 'a', 'r']);
+  assert.equal(accountKind('KIRKLAND & ELLIS LLP'), 'Law firm'); assert.equal(accountKind('CITY OF CHICAGO'), 'Public body'); assert.equal(accountKind('INGALLS HOSPITAL'), 'Healthcare');
+  // six law firms of about the size: one buys little of a line, one none
+  const accounts = [], lines = [];
+  for (let i = 1; i <= 7; i++) { accounts.push({ level1: i, customer: 'FIRM ' + i + ' LLP', boxes: 10000 + i, storage_revenue: 50000 }); if (i <= 5) lines.push({ level1: i, servcode: 'R3', family: 'shred', unit: 'box', revenue: 10000 }); }
+  lines.push({ level1: 6, servcode: 'R3', family: 'shred', unit: 'box', revenue: 500 });
+  const W = buildWhitespace({ accounts, lines }, { top: 10 }), f = n => W.rows.find(r => r.level1 === n).cells.shred;
+  assert.equal(f(7).have, false); assert.ok(Math.abs(f(7).opp - 10000) < 50); assert.match(f(7).note, /law firms of a similar storage size/);
+  assert.equal(f(6).low, true); assert.ok(f(6).expected > 9000);
+  assert.ok(!f(1).low);
+});
+
 test('#20 shredding: Opportunities, Warehouse and Home count the same boxes for an account', async () => {
   const { opportunities } = await import('../public/components/opps.js');
   const { destructionView } = await import('../public/components/home2data.js');

@@ -320,12 +320,13 @@ async function margin() {
     WITH ${BOUNDS}, ${PL},
     truck AS (SELECT DISTINCT woid FROM l WHERE servcode = 'S0'),
     binday AS (SELECT DISTINCT level1, d FROM l WHERE servcode IN ${BIN_CODES}),
-    tagged AS (SELECT l.*, CASE WHEN servcode <> 'S5' THEN servcode
+    tagged AS (SELECT l.*, CASE WHEN servcode = '01' AND units > 1 THEN '01B'
+                                WHEN servcode <> 'S5' THEN servcode
                                 WHEN woid IN (SELECT woid FROM truck) THEN 'S5T'
                                 WHEN (level1, d) IN (SELECT level1, d FROM binday) THEN 'S5B'
                                 ELSE 'S5P' END AS code
                FROM l)
-    SELECT t.level1, t.code AS servcode, sf.family, sf.unit, coalesce(sf.drives_cost, false) AS drives_cost,
+    SELECT t.level1, t.code AS servcode, sf.family, CASE WHEN t.code = '01B' THEN 'box' ELSE sf.unit END AS unit, coalesce(sf.drives_cost, false) AS drives_cost,
            sum(t.units)::float AS units, sum(t.totamt)::float AS revenue, count(DISTINCT t.d)::int AS days
     FROM tagged t LEFT JOIN model.service_family sf ON sf.servcode = t.servcode
     GROUP BY 1, 2, 3, 4, 5
@@ -353,6 +354,7 @@ async function customerDrill(level1) {
     WHERE billable = 'true' AND NULLIF(level1, '')::int = $1
       AND NULLIF(date, '')::date >= b.f AND NULLIF(date, '')::date < b.t
     GROUP BY 1, 2 ORDER BY 1 DESC, 2 LIMIT 200`, [level1]);
+  // (customerJobs below is the same work over the margin's twelve months, every order, tagged as the margin query tags it.)
   // The whole route on each of the account's visit days, six months (about 130 working days), stop by stop in order: who else
   // the driver served, where, and how much, so a job's share of the day can be seen on a map.
   const routes = await query(`
@@ -388,6 +390,38 @@ async function routestops() {
     GROUP BY 1, 2, 3 ORDER BY 1, 2, 4 NULLS LAST, 3`, [anchor.latest_done]);
 }
 
+// Operations: every done stop since route days are complete (January 2025; checked 3 November 2026), with who drove it.
+// The stop order is not here on purpose: rorder is one number for the whole day, and porder and sorder run no closer to a
+// sensible round than a shuffle (checked 3 November 2026), so components/opsdata.js draws the shortest likely round.
+async function routehistory() {
+  const [anchor] = await query(`SELECT max(date)::text AS latest_done FROM v_route_day WHERE services_done > 0`);
+  return query(`
+    SELECT NULLIF(date, '')::date::text AS date, route, NULLIF(slocid, '') AS stop, min(NULLIF(driver, '')) AS driver,
+           min(NULLIF(level1, '')::int) AS level1, min(left(coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')), 5)) AS postcode, count(*)::int AS services
+    FROM vs_service_orders
+    WHERE billable = 'true' AND NULLIF(route, '') IS NOT NULL AND route <> '--'
+      AND NULLIF(date, '')::date >= '2025-01-01' AND NULLIF(date, '')::date <= $1::date
+    GROUP BY 1, 2, 3 ORDER BY 1, 2, 3`, [anchor.latest_done]);
+}
+
+// Operations: what route work billed in twelve months by work date, and the plant pounds on S5 (data rule 6). A sub-account's
+// lines (levelid) are shared across its postcodes by the services done at each; one with no done services has no postcode.
+async function arearevenue() {
+  const [anchor] = await query(`SELECT max(date)::text AS latest_done FROM v_route_day WHERE services_done > 0`);
+  return query(`
+    WITH vs AS (SELECT NULLIF(levelid, '')::int AS levelid, left(coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')), 5) AS postcode, count(*)::float AS n
+                FROM vs_service_orders
+                WHERE billable = 'true' AND coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')) ~ '^[0-9]{5}' AND NULLIF(levelid, '') IS NOT NULL
+                  AND NULLIF(date, '')::date > $1::date - 365 AND NULLIF(date, '')::date <= $1::date GROUP BY 1, 2),
+    site AS (SELECT levelid, postcode, n / sum(n) OVER (PARTITION BY levelid) AS share FROM vs)
+    SELECT p.level1, site.postcode,
+           sum(CASE WHEN sf.family IN ('bin', 'itad') THEN p.totamt * coalesce(site.share, 1) ELSE 0 END)::float AS revenue,
+           sum(CASE WHEN s.servcode = 'S5' THEN p.units * coalesce(site.share, 1) ELSE 0 END)::float AS pounds
+    FROM priced_lines p JOIN servcode s USING (servcodeid) LEFT JOIN model.service_family sf ON sf.servcode = s.servcode LEFT JOIN site ON site.levelid = p.levelid
+    WHERE p.level1 <> 6714 AND p.wodate > $1::date - 365 AND p.wodate <= $1::date AND (sf.family IN ('bin', 'itad') OR s.servcode = 'S5')
+    GROUP BY 1, 2 ORDER BY 1, 2`, [anchor.latest_done]);
+}
+
 // Box deliveries and pickups, twelve months: VCK delivery lines (service code 01) by day and account,
 // with a postcode for placing them on that day's shred route (components/routecost.js). VCK holds no
 // addresses (checked 1 November 2026: the only addresses in the database are Veri-Shred's stops), so:
@@ -408,7 +442,7 @@ async function deliverydays() {
            FROM vs_service_orders WHERE coalesce(NULLIF(s_zip, ''), NULLIF(zip, '')) ~ '^[0-9]{5}'),
     sub AS (SELECT DISTINCT ON (levelid) levelid, postcode FROM (SELECT levelid, postcode, count(*) AS n FROM vs WHERE levelid IS NOT NULL GROUP BY 1, 2) x ORDER BY levelid, n DESC),
     acc AS (SELECT DISTINCT ON (level1) level1, postcode FROM (SELECT level1, postcode, count(*) AS n FROM vs WHERE level1 IS NOT NULL GROUP BY 1, 2) x ORDER BY level1, n DESC)
-    SELECT l.d::text AS date, l.level1, count(DISTINCT l.woid)::int AS orders, sum(l.units)::float AS trips, sum(l.totamt)::float AS revenue,
+    SELECT l.d::text AS date, l.level1, count(DISTINCT l.woid)::int AS orders, sum(CASE WHEN l.units <= 1 THEN l.units ELSE 0 END)::float AS trips, sum(l.totamt)::float AS revenue,
            coalesce(min(sub.postcode), min(acc.postcode)) AS postcode,
            CASE WHEN min(sub.postcode) IS NOT NULL THEN 'site' WHEN min(acc.postcode) IS NOT NULL THEN 'account' END AS basis
     FROM l LEFT JOIN sub ON sub.levelid = l.levelid LEFT JOIN acc ON acc.level1 = l.level1
@@ -428,6 +462,33 @@ async function gl() {
 
 // Snapshot: the drill for the 50 largest accounts, and a check of data rule 9 (is the units field
 // on retrieval, return and destruction-pull lines a box barcode, or a count of boxes?).
+// Every job of one account over the margin's twelve months, uncapped: each order with its lines, the
+// lines tagged exactly as margin() tags them, so jobs add up to the lines the margin is built from.
+async function customerJobs(level1) {
+  return query(`
+    WITH ${BOUNDS}, ${PL},
+    truck AS (SELECT DISTINCT woid FROM l WHERE servcode = 'S0' AND level1 = $1),
+    binday AS (SELECT DISTINCT d FROM l WHERE servcode IN ${BIN_CODES} AND level1 = $1),
+    tagged AS (SELECT l.*, CASE WHEN servcode = '01' AND units > 1 THEN '01B'
+                                WHEN servcode <> 'S5' THEN servcode
+                                WHEN woid IN (SELECT woid FROM truck) THEN 'S5T'
+                                WHEN d IN (SELECT d FROM binday) THEN 'S5B'
+                                ELSE 'S5P' END AS code
+               FROM l WHERE level1 = $1)
+    SELECT woid, min(d)::text AS date, sum(totamt)::float AS revenue,
+           json_agg(json_build_object('code', code, 'units', units::float, 'revenue', totamt::float) ORDER BY totamt DESC, code, woservid) AS items
+    FROM tagged GROUP BY woid ORDER BY min(d) DESC, woid DESC`, [level1]);
+}
+
+// Offline: the jobs of the accounts the drill keeps.
+async function jobs() {
+  const top = await query(`SELECT level1 FROM invoices, (SELECT (max(month) - interval '11 months')::date AS f FROM kpi.monthly) b
+    WHERE COALESCE(invdate, billdate) >= b.f GROUP BY level1 ORDER BY sum(ret_tot + ser_tot) DESC, level1 LIMIT 50`);
+  const accounts = [];
+  for (const t of top) accounts.push({ level1: t.level1, orders: await customerJobs(t.level1) });
+  return { accounts };
+}
+
 async function drill() {
   const top = await query(`
     WITH ${BOUNDS}
@@ -577,4 +638,4 @@ async function invoices() {
   return { rows };
 }
 
-module.exports = { invoices, customerInvoices, pulse, activity, pricing, calls, margin, customers, drill, customerDrill, storage, segments, linework, routestops, deliverydays, gl, accountmonths, accountlines };
+module.exports = { routehistory, arearevenue, invoices, customerInvoices, pulse, activity, pricing, calls, margin, customers, drill, customerDrill, customerJobs, jobs, storage, segments, linework, routestops, deliverydays, gl, accountmonths, accountlines };

@@ -1,5 +1,5 @@
 {
- "snapshotAt": "2026-11-01T19:55:52.096Z",
+ "snapshotAt": "2026-11-03T13:15:07.999Z",
  "data": {
   "accounts": [
    {
@@ -194226,19 +194226,19 @@
   "unitsCheck": [
    {
     "servcode": "20",
-    "lines": 1740,
+    "lines": 1731,
     "min_units": 1,
     "max_units": 288,
     "median_units": 2,
-    "share_one": 0.49942528735632186
+    "share_one": 0.49740034662045063
    },
    {
     "servcode": "30",
-    "lines": 952,
+    "lines": 947,
     "min_units": 1,
     "max_units": 94,
     "median_units": 2,
-    "share_one": 0.3697478991596639
+    "share_one": 0.36958817317845827
    },
    {
     "servcode": "S1",

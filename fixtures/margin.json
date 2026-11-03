@@ -1,5 +1,5 @@
 {
- "snapshotAt": "2026-11-01T19:55:28.689Z",
+ "snapshotAt": "2026-11-03T13:14:37.142Z",
  "data": {
   "accounts": [
    {
@@ -23290,9 +23290,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 421,
-    "revenue": 1609.87,
+    "units": 27,
+    "revenue": 577.33,
     "days": 26
+   },
+   {
+    "level1": 1,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 394,
+    "revenue": 1032.54,
+    "days": 20
    },
    {
     "level1": 1,
@@ -23500,9 +23510,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 55,
-    "revenue": 1358.71,
+    "units": 25,
+    "revenue": 1259.47,
     "days": 25
+   },
+   {
+    "level1": 50,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 30,
+    "revenue": 99.24,
+    "days": 10
    },
    {
     "level1": 50,
@@ -23730,9 +23750,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 20,
-    "revenue": 433.33,
+    "units": 5,
+    "revenue": 346.54,
     "days": 5
+   },
+   {
+    "level1": 62,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 15,
+    "revenue": 86.79,
+    "days": 3
    },
    {
     "level1": 62,
@@ -23860,9 +23890,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 13,
-    "revenue": 380.11,
+    "units": 6,
+    "revenue": 348.19,
     "days": 6
+   },
+   {
+    "level1": 70,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 7,
+    "revenue": 31.92,
+    "days": 3
    },
    {
     "level1": 70,
@@ -24010,8 +24050,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 45.999,
-    "revenue": 572.67,
+    "units": 4.999,
+    "revenue": 270.1,
+    "days": 5
+   },
+   {
+    "level1": 78,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 41,
+    "revenue": 302.57,
     "days": 5
    },
    {
@@ -24470,9 +24520,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 17,
-    "revenue": 276.99,
+    "units": 4,
+    "revenue": 188.98,
     "days": 4
+   },
+   {
+    "level1": 493,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 13,
+    "revenue": 88.01,
+    "days": 2
    },
    {
     "level1": 493,
@@ -24590,9 +24650,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 102,
-    "revenue": 1158.69,
+    "units": 7,
+    "revenue": 384.42,
     "days": 7
+   },
+   {
+    "level1": 941,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 95,
+    "revenue": 774.27,
+    "days": 6
    },
    {
     "level1": 941,
@@ -24730,9 +24800,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 431,
-    "revenue": 6089.27,
+    "units": 95,
+    "revenue": 4172.38,
     "days": 88
+   },
+   {
+    "level1": 947,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 336,
+    "revenue": 1916.89,
+    "days": 55
    },
    {
     "level1": 947,
@@ -25000,9 +25080,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 46,
-    "revenue": 608.65,
+    "units": 15,
+    "revenue": 355.63,
     "days": 5
+   },
+   {
+    "level1": 1003,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 31,
+    "revenue": 253.02,
+    "days": 1
    },
    {
     "level1": 1003,
@@ -25330,8 +25420,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 3,
-    "revenue": 33.13,
+    "units": 1,
+    "revenue": 28.88,
+    "days": 1
+   },
+   {
+    "level1": 1078,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 2,
+    "revenue": 4.25,
     "days": 1
    },
    {
@@ -25560,8 +25660,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 173,
-    "revenue": 1640,
+    "units": 8,
+    "revenue": 493.26,
+    "days": 8
+   },
+   {
+    "level1": 1138,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 165,
+    "revenue": 1146.74,
     "days": 8
    },
    {
@@ -25750,8 +25860,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 18,
-    "revenue": 239.52,
+    "units": 3,
+    "revenue": 144.73,
+    "days": 3
+   },
+   {
+    "level1": 1327,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 15,
+    "revenue": 94.79,
     "days": 3
    },
    {
@@ -25850,8 +25970,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 45,
-    "revenue": 654.63,
+    "units": 7,
+    "revenue": 399.54,
+    "days": 7
+   },
+   {
+    "level1": 1354,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 38,
+    "revenue": 255.09,
     "days": 7
    },
    {
@@ -25940,8 +26070,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 67,
-    "revenue": 1024.23,
+    "units": 7,
+    "revenue": 476.23,
+    "days": 7
+   },
+   {
+    "level1": 1399,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 60,
+    "revenue": 548,
     "days": 7
    },
    {
@@ -26140,9 +26280,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 21,
-    "revenue": 386.74,
+    "units": 6,
+    "revenue": 271.75,
     "days": 5
+   },
+   {
+    "level1": 1732,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 15,
+    "revenue": 114.99,
+    "days": 2
    },
    {
     "level1": 1732,
@@ -26340,9 +26490,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 131,
-    "revenue": 453.38,
+    "units": 7,
+    "revenue": 134.26,
     "days": 7
+   },
+   {
+    "level1": 1754,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 124,
+    "revenue": 319.12,
+    "days": 4
    },
    {
     "level1": 1754,
@@ -27010,9 +27170,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 45,
-    "revenue": 867.68,
+    "units": 28,
+    "revenue": 793.92,
     "days": 28
+   },
+   {
+    "level1": 1891,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 17,
+    "revenue": 73.76,
+    "days": 2
    },
    {
     "level1": 1891,
@@ -27240,9 +27410,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 9,
-    "revenue": 340.56,
+    "units": 7,
+    "revenue": 333.34,
     "days": 7
+   },
+   {
+    "level1": 2023,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 2,
+    "revenue": 7.22,
+    "days": 1
    },
    {
     "level1": 2023,
@@ -27390,9 +27570,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 164,
-    "revenue": 1740.34,
+    "units": 54,
+    "revenue": 1465.18,
     "days": 52
+   },
+   {
+    "level1": 2345,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 110,
+    "revenue": 275.16,
+    "days": 49
    },
    {
     "level1": 2345,
@@ -27660,9 +27850,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 32,
-    "revenue": 490.97,
+    "units": 6,
+    "revenue": 315.14,
     "days": 6
+   },
+   {
+    "level1": 2552,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 26,
+    "revenue": 175.83,
+    "days": 5
    },
    {
     "level1": 2552,
@@ -27840,8 +28040,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 3,
-    "revenue": 67.81,
+    "units": 1,
+    "revenue": 59.37,
+    "days": 1
+   },
+   {
+    "level1": 2902,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 2,
+    "revenue": 8.44,
     "days": 1
    },
    {
@@ -27910,8 +28120,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 8,
-    "revenue": 135.1,
+    "units": 2,
+    "revenue": 103.36,
+    "days": 2
+   },
+   {
+    "level1": 2904,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 6,
+    "revenue": 31.74,
     "days": 2
    },
    {
@@ -28010,8 +28230,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 9,
-    "revenue": 156.1,
+    "units": 2,
+    "revenue": 112.69,
+    "days": 2
+   },
+   {
+    "level1": 2906,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 7,
+    "revenue": 43.41,
     "days": 2
    },
    {
@@ -28210,8 +28440,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 4,
-    "revenue": 78.93,
+    "units": 1,
+    "revenue": 59.37,
+    "days": 1
+   },
+   {
+    "level1": 2924,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 3,
+    "revenue": 19.56,
     "days": 1
    },
    {
@@ -28320,9 +28560,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 29,
-    "revenue": 555.04,
+    "units": 9,
+    "revenue": 422.21,
     "days": 9
+   },
+   {
+    "level1": 2940,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 20,
+    "revenue": 132.83,
+    "days": 4
    },
    {
     "level1": 2940,
@@ -28530,9 +28780,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 5,
-    "revenue": 127.71,
+    "units": 2,
+    "revenue": 108.07,
     "days": 2
+   },
+   {
+    "level1": 2948,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 3,
+    "revenue": 19.64,
+    "days": 1
    },
    {
     "level1": 2948,
@@ -29080,9 +29340,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 68,
-    "revenue": 1298,
+    "units": 23,
+    "revenue": 1020.14,
     "days": 17
+   },
+   {
+    "level1": 3197,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 45,
+    "revenue": 277.86,
+    "days": 11
    },
    {
     "level1": 3197,
@@ -29320,8 +29590,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 4,
-    "revenue": 71.69,
+    "units": 1,
+    "revenue": 58.01,
+    "days": 1
+   },
+   {
+    "level1": 3315,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 3,
+    "revenue": 13.68,
     "days": 1
    },
    {
@@ -29650,8 +29930,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 31,
-    "revenue": 328.31,
+    "units": 1,
+    "revenue": 74.39,
+    "days": 1
+   },
+   {
+    "level1": 3576,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 30,
+    "revenue": 253.92,
     "days": 1
    },
    {
@@ -29840,9 +30130,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 45,
-    "revenue": 662.18,
+    "units": 10,
+    "revenue": 406.68,
     "days": 6
+   },
+   {
+    "level1": 3849,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 35,
+    "revenue": 255.5,
+    "days": 3
    },
    {
     "level1": 3849,
@@ -30120,8 +30420,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 157,
-    "revenue": 426.66,
+    "units": 4,
+    "revenue": 89.92,
+    "days": 4
+   },
+   {
+    "level1": 4274,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 153,
+    "revenue": 336.74,
     "days": 4
    },
    {
@@ -30360,8 +30670,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 4,
-    "revenue": 93.16,
+    "units": 1,
+    "revenue": 75.41,
+    "days": 1
+   },
+   {
+    "level1": 4295,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 3,
+    "revenue": 17.75,
     "days": 1
    },
    {
@@ -30430,9 +30750,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 10,
-    "revenue": 231.67,
+    "units": 3,
+    "revenue": 178.62,
     "days": 3
+   },
+   {
+    "level1": 4418,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 7,
+    "revenue": 53.05,
+    "days": 1
    },
    {
     "level1": 4418,
@@ -31070,9 +31400,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 56,
-    "revenue": 787.34,
+    "units": 10,
+    "revenue": 531.69,
     "days": 10
+   },
+   {
+    "level1": 5035,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 46,
+    "revenue": 255.65,
+    "days": 4
    },
    {
     "level1": 5035,
@@ -31480,9 +31820,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 264.992,
-    "revenue": 5917.02,
+    "units": 95.992,
+    "revenue": 4947.23,
     "days": 82
+   },
+   {
+    "level1": 5201,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 169,
+    "revenue": 969.79,
+    "days": 12
    },
    {
     "level1": 5201,
@@ -31690,9 +32040,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 11,
-    "revenue": 233,
+    "units": 9,
+    "revenue": 228.58,
     "days": 9
+   },
+   {
+    "level1": 5236,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 2,
+    "revenue": 4.42,
+    "days": 1
    },
    {
     "level1": 5236,
@@ -31920,8 +32280,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 61,
-    "revenue": 340,
+    "units": 1,
+    "revenue": 45,
+    "days": 1
+   },
+   {
+    "level1": 5280,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 60,
+    "revenue": 295,
     "days": 1
    },
    {
@@ -32310,9 +32680,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 9,
-    "revenue": 238.6,
+    "units": 3,
+    "revenue": 201.62,
     "days": 3
+   },
+   {
+    "level1": 5682,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 6,
+    "revenue": 36.98,
+    "days": 2
    },
    {
     "level1": 5682,
@@ -32650,9 +33030,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 48,
-    "revenue": 545.71,
+    "units": 4,
+    "revenue": 218.01,
     "days": 4
+   },
+   {
+    "level1": 5794,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 44,
+    "revenue": 327.7,
+    "days": 2
    },
    {
     "level1": 5794,
@@ -32890,8 +33280,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 57,
-    "revenue": 466.47,
+    "units": 2,
+    "revenue": 98.6,
+    "days": 2
+   },
+   {
+    "level1": 5993,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 55,
+    "revenue": 367.87,
     "days": 2
    },
    {
@@ -32980,9 +33380,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 680,
-    "revenue": 3857.82,
+    "units": 33,
+    "revenue": 1023.19,
     "days": 26
+   },
+   {
+    "level1": 6008,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 647,
+    "revenue": 2834.63,
+    "days": 25
    },
    {
     "level1": 6008,
@@ -33560,9 +33970,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 55,
-    "revenue": 363.93,
+    "units": 9,
+    "revenue": 243.09,
     "days": 9
+   },
+   {
+    "level1": 6344,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 46,
+    "revenue": 120.84,
+    "days": 5
    },
    {
     "level1": 6344,
@@ -34560,9 +34980,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 5,
-    "revenue": 38.63,
+    "units": 2,
+    "revenue": 33.99,
     "days": 2
+   },
+   {
+    "level1": 6770,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 3,
+    "revenue": 4.64,
+    "days": 1
    },
    {
     "level1": 6770,
@@ -34640,8 +35070,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 48,
-    "revenue": 348.79,
+    "units": 6,
+    "revenue": 113.42,
+    "days": 2
+   },
+   {
+    "level1": 6778,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 42,
+    "revenue": 235.37,
     "days": 2
    },
    {
@@ -34830,8 +35270,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 11,
-    "revenue": 122.55,
+    "units": 1,
+    "revenue": 54.18,
+    "days": 1
+   },
+   {
+    "level1": 6866,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 10,
+    "revenue": 68.37,
     "days": 1
    },
    {
@@ -34910,9 +35360,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 10,
-    "revenue": 205.49,
+    "units": 4,
+    "revenue": 191.29,
     "days": 4
+   },
+   {
+    "level1": 6872,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 6,
+    "revenue": 14.2,
+    "days": 3
    },
    {
     "level1": 6872,
@@ -35230,9 +35690,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 79,
-    "revenue": 1047.94,
+    "units": 22,
+    "revenue": 870.24,
     "days": 22
+   },
+   {
+    "level1": 7001,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 57,
+    "revenue": 177.7,
+    "days": 21
    },
    {
     "level1": 7001,
@@ -35400,8 +35870,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 13,
-    "revenue": 95.68,
+    "units": 1,
+    "revenue": 40.61,
+    "days": 1
+   },
+   {
+    "level1": 7050,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 12,
+    "revenue": 55.07,
     "days": 1
    },
    {
@@ -35670,9 +36150,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 544.983,
-    "revenue": 2626.08,
+    "units": 69.983,
+    "revenue": 1415.85,
     "days": 49
+   },
+   {
+    "level1": 7137,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 475,
+    "revenue": 1210.23,
+    "days": 36
    },
    {
     "level1": 7137,
@@ -36210,9 +36700,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 22,
-    "revenue": 179.3,
+    "units": 7,
+    "revenue": 137.55,
     "days": 5
+   },
+   {
+    "level1": 8006,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 15,
+    "revenue": 41.75,
+    "days": 4
    },
    {
     "level1": 8006,
@@ -36310,9 +36810,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 254,
-    "revenue": 924.07,
+    "units": 39,
+    "revenue": 541.96,
     "days": 33
+   },
+   {
+    "level1": 8107,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 215,
+    "revenue": 382.11,
+    "days": 21
    },
    {
     "level1": 8107,
@@ -36470,8 +36980,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 11,
-    "revenue": 34.94,
+    "units": 1,
+    "revenue": 10.37,
+    "days": 1
+   },
+   {
+    "level1": 8133,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 10,
+    "revenue": 24.57,
     "days": 1
    },
    {
@@ -36900,9 +37420,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 15,
-    "revenue": 388.46,
+    "units": 6,
+    "revenue": 339.77,
     "days": 6
+   },
+   {
+    "level1": 8178,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 9,
+    "revenue": 48.69,
+    "days": 3
    },
    {
     "level1": 8178,
@@ -37050,9 +37580,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 25,
-    "revenue": 286.96,
+    "units": 2,
+    "revenue": 112.8,
     "days": 2
+   },
+   {
+    "level1": 8257,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 23,
+    "revenue": 174.16,
+    "days": 1
    },
    {
     "level1": 8257,
@@ -37290,9 +37830,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 91.998,
-    "revenue": 645.61,
+    "units": 29.998,
+    "revenue": 428.83,
     "days": 22
+   },
+   {
+    "level1": 8389,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 62,
+    "revenue": 216.78,
+    "days": 8
    },
    {
     "level1": 8389,
@@ -37690,8 +38240,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 30,
-    "revenue": 121.36,
+    "units": 2,
+    "revenue": 66.93,
+    "days": 2
+   },
+   {
+    "level1": 8394,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 28,
+    "revenue": 54.43,
     "days": 2
    },
    {
@@ -37870,9 +38430,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 171,
-    "revenue": 1187.38,
+    "units": 12,
+    "revenue": 465.79,
     "days": 11
+   },
+   {
+    "level1": 8405,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 159,
+    "revenue": 721.59,
+    "days": 10
    },
    {
     "level1": 8405,
@@ -38140,9 +38710,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 23,
-    "revenue": 293.57,
+    "units": 3,
+    "revenue": 158.23,
     "days": 3
+   },
+   {
+    "level1": 8456,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 20,
+    "revenue": 135.34,
+    "days": 2
    },
    {
     "level1": 8456,
@@ -38230,8 +38810,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 25,
-    "revenue": 238.78,
+    "units": 2,
+    "revenue": 92.98,
+    "days": 2
+   },
+   {
+    "level1": 8493,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 23,
+    "revenue": 145.8,
     "days": 2
    },
    {
@@ -38520,9 +39110,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 73,
-    "revenue": 930.28,
+    "units": 9,
+    "revenue": 488.57,
     "days": 9
+   },
+   {
+    "level1": 8515,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 64,
+    "revenue": 441.71,
+    "days": 6
    },
    {
     "level1": 8515,
@@ -39190,8 +39790,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 74,
-    "revenue": 853.82,
+    "units": 9,
+    "revenue": 444.86,
+    "days": 8
+   },
+   {
+    "level1": 8700,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 65,
+    "revenue": 408.96,
     "days": 8
    },
    {
@@ -39610,9 +40220,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 70,
-    "revenue": 924.56,
+    "units": 11,
+    "revenue": 544.27,
     "days": 11
+   },
+   {
+    "level1": 8900,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 59,
+    "revenue": 380.29,
+    "days": 7
    },
    {
     "level1": 8900,
@@ -39950,9 +40570,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 31,
-    "revenue": 389.15,
+    "units": 4,
+    "revenue": 215.06,
     "days": 4
+   },
+   {
+    "level1": 8991,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 27,
+    "revenue": 174.09,
+    "days": 3
    },
    {
     "level1": 8991,
@@ -40110,8 +40740,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 85,
-    "revenue": 434.84,
+    "units": 12,
+    "revenue": 259.76,
+    "days": 11
+   },
+   {
+    "level1": 9113,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 73,
+    "revenue": 175.08,
     "days": 11
    },
    {
@@ -40410,9 +41050,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 54,
-    "revenue": 411.61,
+    "units": 7,
+    "revenue": 230.93,
     "days": 7
+   },
+   {
+    "level1": 9403,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 47,
+    "revenue": 180.68,
+    "days": 5
    },
    {
     "level1": 9403,
@@ -41100,9 +41750,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 9,
-    "revenue": 148,
+    "units": 3,
+    "revenue": 126.88,
     "days": 3
+   },
+   {
+    "level1": 9696,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 6,
+    "revenue": 21.12,
+    "days": 2
    },
    {
     "level1": 9696,
@@ -41170,9 +41830,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 128,
-    "revenue": 603.9,
+    "units": 8,
+    "revenue": 248.44,
     "days": 8
+   },
+   {
+    "level1": 9703,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 120,
+    "revenue": 355.46,
+    "days": 6
    },
    {
     "level1": 9703,
@@ -41980,8 +42650,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 4,
-    "revenue": 35.6,
+    "units": 1,
+    "revenue": 27.6,
+    "days": 1
+   },
+   {
+    "level1": 10231,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 3,
+    "revenue": 8,
     "days": 1
    },
    {
@@ -42330,8 +43010,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 56,
-    "revenue": 464.86,
+    "units": 10,
+    "revenue": 325.18,
+    "days": 10
+   },
+   {
+    "level1": 10398,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 46,
+    "revenue": 139.68,
     "days": 10
    },
    {
@@ -42410,8 +43100,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 12,
-    "revenue": 136.51,
+    "units": 1,
+    "revenue": 63.63,
+    "days": 1
+   },
+   {
+    "level1": 10429,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 11,
+    "revenue": 72.88,
     "days": 1
    },
    {
@@ -42600,9 +43300,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 9,
-    "revenue": 135.06,
+    "units": 2,
+    "revenue": 100.56,
     "days": 2
+   },
+   {
+    "level1": 10615,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 7,
+    "revenue": 34.5,
+    "days": 1
    },
    {
     "level1": 10615,
@@ -43450,8 +44160,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 6,
-    "revenue": 73.79,
+    "units": 1,
+    "revenue": 50.64,
+    "days": 1
+   },
+   {
+    "level1": 11066,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 5,
+    "revenue": 23.15,
     "days": 1
    },
    {
@@ -43810,9 +44530,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 203,
-    "revenue": 1034.3,
+    "units": 10,
+    "revenue": 242.5,
     "days": 10
+   },
+   {
+    "level1": 11322,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 193,
+    "revenue": 791.8,
+    "days": 9
    },
    {
     "level1": 11322,
@@ -44470,9 +45200,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 12,
-    "revenue": 350.69,
+    "units": 6,
+    "revenue": 331.51,
     "days": 6
+   },
+   {
+    "level1": 11544,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 6,
+    "revenue": 19.18,
+    "days": 3
    },
    {
     "level1": 11544,
@@ -45580,8 +46320,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 6,
-    "revenue": 74.33,
+    "units": 1,
+    "revenue": 51.01,
+    "days": 1
+   },
+   {
+    "level1": 11994,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 5,
+    "revenue": 23.32,
     "days": 1
    },
    {
@@ -45620,9 +46370,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 75,
-    "revenue": 636.57,
+    "units": 12,
+    "revenue": 392.2,
     "days": 12
+   },
+   {
+    "level1": 12034,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 63,
+    "revenue": 244.37,
+    "days": 10
    },
    {
     "level1": 12034,
@@ -45880,9 +46640,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 82,
-    "revenue": 1498.26,
+    "units": 24,
+    "revenue": 1203.64,
     "days": 24
+   },
+   {
+    "level1": 12128,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 58,
+    "revenue": 294.62,
+    "days": 6
    },
    {
     "level1": 12128,
@@ -46670,9 +47440,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 8,
-    "revenue": 139.94,
+    "units": 3,
+    "revenue": 124.85,
     "days": 3
+   },
+   {
+    "level1": 12459,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 5,
+    "revenue": 15.09,
+    "days": 2
    },
    {
     "level1": 12459,
@@ -47640,8 +48420,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 46,
-    "revenue": 123.94,
+    "units": 1,
+    "revenue": 22.01,
+    "days": 1
+   },
+   {
+    "level1": 12736,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 45,
+    "revenue": 101.93,
     "days": 1
    },
    {
@@ -48380,8 +49170,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 31,
-    "revenue": 148.47,
+    "units": 3,
+    "revenue": 78.47,
+    "days": 3
+   },
+   {
+    "level1": 13230,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 28,
+    "revenue": 70,
     "days": 3
    },
    {
@@ -48410,8 +49210,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 241,
-    "revenue": 1530.38,
+    "units": 8,
+    "revenue": 364.85,
+    "days": 8
+   },
+   {
+    "level1": 13240,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 233,
+    "revenue": 1165.53,
     "days": 8
    },
    {
@@ -48590,8 +49400,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 87,
-    "revenue": 496.54,
+    "units": 1,
+    "revenue": 46.36,
+    "days": 1
+   },
+   {
+    "level1": 13284,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 86,
+    "revenue": 450.18,
     "days": 1
    },
    {
@@ -48680,8 +49500,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 20,
-    "revenue": 148.15,
+    "units": 2,
+    "revenue": 77.53,
+    "days": 2
+   },
+   {
+    "level1": 13346,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 18,
+    "revenue": 70.62,
     "days": 2
    },
    {
@@ -49050,8 +49880,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 18,
-    "revenue": 267.16,
+    "units": 4,
+    "revenue": 192.28,
+    "days": 4
+   },
+   {
+    "level1": 13446,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 14,
+    "revenue": 74.88,
     "days": 4
    },
    {
@@ -49330,9 +50170,19 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 27,
-    "revenue": 436.59,
+    "units": 4,
+    "revenue": 219.53,
     "days": 4
+   },
+   {
+    "level1": 13542,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 23,
+    "revenue": 217.06,
+    "days": 3
    },
    {
     "level1": 13542,
@@ -59720,8 +60570,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 17,
-    "revenue": 198,
+    "units": 1,
+    "revenue": 49.5,
+    "days": 1
+   },
+   {
+    "level1": 15177,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 16,
+    "revenue": 148.5,
     "days": 1
    },
    {
@@ -60430,8 +61290,18 @@
     "family": "movement",
     "unit": "trip",
     "drives_cost": true,
-    "units": 47,
-    "revenue": 240.8,
+    "units": 1,
+    "revenue": 39.2,
+    "days": 1
+   },
+   {
+    "level1": 15225,
+    "servcode": "01B",
+    "family": "movement",
+    "unit": "box",
+    "drives_cost": true,
+    "units": 46,
+    "revenue": 201.6,
     "days": 1
    },
    {

@@ -1,0 +1,143 @@
+/* The phone layout (3 November 2026). Loaded last; everything that changes a screen is inside the media query, so a desk does not move.
+   What people scan for gets bigger, longer text a point smaller with more air, every control 44px. Tokens only. */
+.ph-fold, .ph-body { display: contents; }
+.ph-show, .tap-tip { display: none; }
+.h2-sm { display: none; }
+
+@media (max-width: 700px) {
+  :root { --fs-body: 13px; --fs-sm: 14px; --fs-label: 13px; --fs-scan: 15px; --fs-num-ph: 22px; --tap: calc(var(--u) * 11); }
+  body { line-height: 1.5; }
+
+  /* the shared fold */
+  .ph-fold { display: block; min-width: 0; }
+  .ph-body { display: grid; gap: var(--sp-3); min-width: 0; }
+  .ph-fold:not(.open) > .ph-body { height: 0; overflow: hidden; visibility: hidden; }
+  .ph-show { display: block; width: 100%; min-height: var(--tap); padding: 0 var(--sp-4); border: var(--hair) solid var(--rule-2); border-radius: var(--r-lg); background: var(--surface); font: inherit; font-size: var(--fs-sm); font-weight: 600; color: var(--brand); text-align: left; cursor: pointer; }
+  .ph-fold.open > .ph-show { margin-bottom: var(--sp-3); }
+  .pq-btn.cd-a { white-space: nowrap; }
+  .ph-show:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .tap-tip { display: block; position: fixed; left: var(--sp-4); right: var(--sp-4); bottom: calc(var(--u) * 21); z-index: 40; padding: var(--sp-2) var(--sp-3); background: var(--ink); color: var(--surface); border-radius: var(--r); font-size: var(--fs-sm); pointer-events: none; transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out); }
+  html.js .tap-tip:not(.on) { opacity: 0; transform: translateY(6px); }
+
+  /* spacing */
+  .h2, .h2-split, .h2-stack, .ops-view { gap: var(--sp-3); }
+  .h2 { grid-template-columns: minmax(0, 1fr); }
+  .h2-split { display: grid; }
+  .h2-split > .h2-stack { order: -1; }
+  .src, p.src, .pop-b p, .cd-how { line-height: 1.5; }
+  .stamp { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* what people scan for */
+  .kt b { font-size: var(--fs-num-ph); }
+  .lit li { font-size: var(--fs-body); line-height: 1.5; }
+  .lit b { font-size: var(--fs-scan); }
+  .dt-t tbody td:first-child, .dt-t tbody td:first-child a { font-size: var(--fs-scan); }
+  .dt-t tbody td { font-size: var(--fs-sm); }
+  .mv-row, .lob-row, .h2-lr, .md-ln, .op-kkey button { font-size: var(--fs-scan); }
+  .mv-row b, .lob-row b, .h2-lr b, .md-lf b, .md-nm { font-size: var(--fs-scan); }
+  .md-fxt, .cd-nm { font-size: var(--fs-sm); }
+  .cd-val b, .md-fxv b, .mdh-k b { font-size: var(--fs-scan); }
+  .pop-b p, .cd-how, .op-move p, .md-fxb p { font-size: var(--fs-body); }
+
+  /* every control a full thumb */
+  .seg a, .seg button { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); }
+  .dt-t tbody td { height: var(--tap); }
+  .dt-f, .dt-views, .dt-find, .dt-ftoggle, .pq select, .pq input:not([type=range]):not([type=checkbox]), .st input, .st select, .us-f input, .us-f select, .cd-owner select, .ops-send select, .op-own, .op-stat, .op-next { min-height: var(--tap); font-size: 16px; }
+  .pq-btn, .linkbtn, .how-link, .st-save, .pop-ask { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); }
+  .h2-lr, .mv-row, .lob-row, .md-ln, .md-fxh, .op-kkey button, .ops-list button, .cp-fold > summary, .fold > summary, .op-open summary, .pq-rows summary, .ask-sugg button { min-height: var(--tap); }
+  .ops-cmp { min-height: var(--tap); } .ops-cmp input { width: var(--sp-5); height: var(--sp-5); }
+  .ask-x { width: var(--tap); height: var(--tap); }
+  .h2-acts .fb button { min-width: var(--tap); min-height: var(--tap); justify-content: center; align-items: center; }
+  .rt .day button { width: var(--tap); height: var(--tap); }
+  /* small to look at, a thumb to tap: the mark stays its size and its tap area does not */
+  .rag:not(.static), .mast-ask, .mast-gear, .mast-help, a.brand, .dt-t td a, .cp-line { position: relative; }
+  .rag:not(.static)::after, .mast-ask::after, .mast-gear::after, .mast-help::after, a.brand::after, .dt-t td a::after, .cp-line::after { content: ""; position: absolute; left: -6px; right: -6px; top: 50%; height: var(--tap); transform: translateY(-50%); }
+  .rag:not(.static) { min-height: calc(var(--u) * 7); }
+
+  /* the masthead's small marks: centred thumb areas, so neighbours do not overlap */
+  .mast-gear::after, .mast-right button.mast-help::after { left: 50%; right: auto; width: var(--tap); transform: translate(-50%, -50%); }
+  .mast-right button:not(.mast-ask):not(.mast-help) { min-height: var(--tap); }
+  .c2-viewpick, .q-add, #p-minus, #p-plus, .pop-ask, .pop-x .pq-btn, .dt-chip, .num.opp, .ask-send { min-height: var(--tap); }
+  #p-minus, #p-plus { min-width: var(--tap); }
+  #p-slide { height: var(--tap); }
+  .ops-cmp input { position: relative; }
+  .ops-cmp input::after { content: none; }
+
+  .q-acts button, .cp .seg button, .cp button:not(.rag) { min-height: var(--tap); }
+  .crumb a, .cp a.chev, .cp .cp-lines a, .pop-b a { position: relative; }
+  .crumb a::after, .cp a.chev::after, .cp .cp-lines a::after, .pop-b a::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: var(--tap); transform: translateY(-50%); }
+  .pop-f .pop-ask { min-height: var(--tap); } .ask-send, .ask form button { min-height: var(--tap); }
+
+  /* Today */
+  .h2-send { min-height: var(--tap); }
+
+  /* Cross-sell: what it could buy stays beside the name */
+  .ws .dt-t th:first-child, .ws .dt-t td:first-child { max-width: calc(var(--u) * 33); min-width: calc(var(--u) * 33); }
+  .ws .dt-t thead th:nth-child(2), .ws .dt-t tbody tr[data-i] td:nth-child(2), .ws .dt-t tfoot td:nth-child(2) { position: sticky; left: calc(var(--u) * 33); z-index: 1; background: var(--surface); box-shadow: inset calc(var(--hair) * -1) 0 0 var(--rule-4); }
+  .ws .dt-t thead th:nth-child(2) { z-index: 2; background: var(--well); }
+
+  /* the customer page: the answer, then who they are */
+  .cp-top { display: contents; }
+  .cp .crumb { order: -4; } .cp-head { order: -3; } .cp .lit-card { order: -2; } .cp .ktiles { order: -1; }
+
+  /* Operations */
+  .ops-ctl { flex-wrap: wrap; min-width: 0; max-width: 100%; }
+  .ops-ctl .seg { flex-wrap: nowrap; min-width: 0; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .ops-mapgrid { gap: var(--sp-3); }
+
+  /* Opportunities: where the list has got to, in a line */
+  .op-pipe { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(calc(var(--u) * 27), 1fr); grid-template-columns: none; overflow-x: auto; scrollbar-width: none; }
+
+  /* drawers: to the top, and the footer on one line */
+  .pop .ask-panel, .ask .ask-panel { top: var(--sp-5); }
+  .pop-f:has(.pop-x:not(:empty)) { flex-wrap: nowrap; gap: var(--sp-1); padding-top: var(--sp-2); padding-bottom: calc(var(--sp-2) + env(safe-area-inset-bottom)); }
+  .pop-f:has(.pop-x:not(:empty)) .pop-ask, .pop-x .cd-go { padding: 0 var(--sp-3); white-space: nowrap; }
+  .pop-x { flex-wrap: nowrap; gap: var(--sp-1); min-width: 0; }
+  .pop-x .cd-owner select { max-width: calc(var(--u) * 21); font-size: var(--fs-sm); }
+  .h2-lg { display: none; } .h2-sm { display: inline; }
+
+  /* a table that becomes cards: name and value first, sorted from the chips along the top */
+  .dt-cards .dt-scroll { overflow: visible; max-height: none; border: 0; }
+  .dt-cards .dt-t, .dt-cards .dt-t tbody, .dt-cards .dt-t tfoot { display: block; width: auto; min-width: 0; max-width: 100%; }
+  .dt-cards .dt-t thead { display: block; margin-bottom: var(--sp-2); }
+  .dt-cards .dt-t thead tr { display: flex; gap: var(--sp-1); overflow-x: auto; scrollbar-width: none; }
+  .dt-cards .dt-t thead th { position: static; display: inline-flex; align-items: center; flex: none; min-height: var(--tap); max-width: none; padding: 0 var(--sp-3); border: var(--hair) solid var(--rule-2); border-radius: var(--r-pill); background: var(--surface); white-space: nowrap; font-size: var(--fs-label); }
+  .dt-cards .dt-t tbody tr[data-i] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2) var(--sp-3); margin-bottom: var(--sp-2); padding: var(--sp-3); background: var(--surface); border: var(--hair) solid var(--rule-2); border-radius: var(--r); }
+  .dt-cards .dt-t tbody tr[data-i] td { display: block; position: static; height: auto; max-width: none; min-width: 0; padding: 0; border: 0; background: none; white-space: normal; text-align: left; overflow: visible; }
+  .dt-cards .dt-t td[data-l]::before { content: attr(data-l); display: block; font-size: var(--fs-tiny); font-weight: 400; color: var(--ink-3); }
+  .dt-cards .dt-t tbody tr[data-i] td:first-child { order: -2; font-weight: 600; }
+  .dt-cards .dt-t tbody tr[data-i] td.c-lead { order: -1; }
+  .dt-cards .dt-t tbody tr[data-i] td.c-lead { text-align: right; font-size: var(--fs-scan); font-weight: 650; }
+  .dt-cards .dt-t tbody td.c-lead::before { display: none; }
+  .dt-cards .dt-t tbody tr[data-i] td.c-full { grid-column: 1 / -1; }
+  .dt-cards .dt-t tbody td.c-full .op-short { display: block; max-width: none; margin: var(--sp-1) 0 0; font-size: var(--fs-body); color: var(--ink-2); }
+  .dt-cards .dt-t tbody td select, .dt-cards .dt-t tbody td input { width: 100%; box-sizing: border-box; }
+  .dt-cards .dt-t tr.dt-detail, .dt-cards .dt-t tr.dt-detail > td { display: block; }
+  .dt-cards .dt-t tr.dt-detail { margin: calc(var(--sp-1) * -1) 0 var(--sp-2); }
+  .dt-cards .cd { width: auto; position: static; }
+  .dt-cards .dt-t tfoot tr { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-1) var(--sp-3); padding: var(--sp-2) var(--sp-3); }
+  .dt-cards .dt-t tfoot td { position: static; display: block; border: 0; padding: 0; background: none; font-weight: 650; }
+  .dt-cards .dt-t tfoot td:empty { display: none; }
+  .dt-cards .op-worth { justify-content: flex-end; }
+  .dt-cards .op-worth .op-bar { display: none; }
+  .dt-cards .ops-bar { display: block; width: 100%; max-width: none; margin: 0 0 var(--sp-1); }
+}
+
+/* Settings › Users, at any width */
+.us-list { list-style: none; margin: 0; padding: 0; }
+.us-row { display: grid; grid-template-columns: minmax(0, 1.3fr) auto minmax(0, 1fr) auto; gap: var(--sp-2) var(--sp-3); align-items: end; padding: var(--sp-3) 0; border-top: var(--hair) solid var(--rule); }
+.us-row:first-child { border-top: 0; }
+.us-row.off .us-who b { color: var(--ink-4); text-decoration: line-through; }
+.us-who { align-self: center; } .us-who b { display: block; font-weight: 600; } .us-who small { font-size: var(--fs-tiny); color: var(--ink-3); }
+.us-f { display: grid; gap: 2px; font-size: var(--fs-tiny); color: var(--ink-3); min-width: 0; }
+.us-f input, .us-f select { font: inherit; font-size: var(--fs-sm); padding: var(--sp-1) var(--sp-2); border: var(--hair) solid var(--field-edge); border-radius: var(--r-sm); background: var(--surface); color: var(--ink); min-width: 0; }
+.us-f input:focus-visible, .us-f select:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.us-acts { display: flex; gap: var(--sp-1); flex-wrap: wrap; }
+.us-add { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: var(--sp-2) var(--sp-3); align-items: end; margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: var(--hair) solid var(--rule); }
+.us-add h3 { grid-column: 1 / -1; margin: 0; font-size: var(--fs-sm); font-weight: 600; }
+.us-msg { min-height: var(--sp-4); margin: var(--sp-2) 0 0; font-size: var(--fs-label); color: var(--ink-2); }
+.st-warn { color: var(--warn); font-weight: 600; }
+@media (max-width: 700px) {
+  .us-row, .us-add { grid-template-columns: minmax(0, 1fr); }
+  .us-acts .pq-btn, .us-add .pq-btn { flex: 1; }
+}

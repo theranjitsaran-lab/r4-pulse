@@ -197,6 +197,8 @@ export function destructionView(D, n = 5) {
 // ── the four points at the top of Home, each chosen by a rule and written as facts for the summary ──
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const money = v => Fmt.money(v, { short: 'abs' });
+// a point's light pulses when it needs attention: the month's work 5% or more behind, or an account down $5K a month or more
+const ALERT_WORK = 0.05, ALERT_CUSTOMER = 5000;
 const pc = v => Fmt.pct(v, { abs: true });
 const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase()).replace(/(?!^)\b(Of|And|The|For|In|At|On|To)\b/g, w => w.toLowerCase()).replace(/\b(Llp|Llc|Pc|Inc|Icu|Itad)\b/g, w => w.toUpperCase());
 
@@ -215,7 +217,7 @@ export function pointsView(D, { month: m, cust, cross, dens, lines }) {
     const dir = d == null || Math.abs(d) < 0.01 ? `level with ${mon(prev)}` : `${pc(d)} ${d > 0 ? 'ahead of' : 'behind'} ${mon(prev)}`;
     const parts = [up && `${up.name} up ${pc(up.pct)}`, down && `${down.name} down ${pc(down.pct)}`].filter(Boolean).join(', ');
     const say = `${LABELS.value}: ${mon(L)} is ${dir}${at} est.${parts ? `, ${parts}` : ''}. ${LABELS.volume}: ${m.vsLast == null ? '' : `${Math.abs(m.vsLast) < 0.02 ? 'level' : `${pc(m.vsLast)} ${m.vsLast > 0 ? 'ahead' : 'behind'}`}.`}`;
-    out.push({ key: 'activity', title: 'Activity', href: '#h2-lines', bullet: true, line: say, say });
+    out.push({ key: 'activity', title: 'Activity', href: '#h2-lines', bullet: true, alert: d != null && d <= -ALERT_WORK, line: say, say });
   }
   const fall = cust.falling[0];
   if (fall) {
@@ -223,7 +225,7 @@ export function pointsView(D, { month: m, cust, cross, dens, lines }) {
     const fresh = D.LW ? newestFall(D, new Set([...slippingAccounts(D.C), ...risingAccounts(D.C)].map(s => s.level1))) : null;
     const say = `${title(fall.customer)} is down ${money(fall.d)} a month in total on its own run${drv ? `, driven by ${drv.name.toLowerCase()}` : ''}.` +
       (fresh ? ` New in ${mon(fresh.month)}: ${title(fresh.customer)} fell ${money(fresh.d)}${fresh.est ? ' est.' : ''}${fresh.driver ? `, driven by ${fresh.driver.toLowerCase()}` : ''}.` : '');
-    out.push({ key: 'customer', title: 'Customer', href: `#customer/${fall.level1}`, bullet: true, line: say, say });
+    out.push({ key: 'customer', title: 'Customer', href: `#customer/${fall.level1}`, bullet: true, alert: fall.d <= -ALERT_CUSTOMER, line: say, say });
   }
   const c0 = cross.rows[0];
   if (c0) {

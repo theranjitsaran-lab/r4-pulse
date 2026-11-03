@@ -126,7 +126,7 @@ i.k.neutral, i.k.band { background: var(--s-citadel); }
 }
 
 /* ── distribution strip (strip.js) ── */
-.strip svg { display: block; width: 100%; height: auto; overflow: visible; }
+.pstrip svg { display: block; width: 100%; height: auto; overflow: visible; }
 .s-dot { stroke: var(--surface); stroke-width: 1.4; opacity: .6; fill: var(--ink-4); }
 .s-dot.is-bad { fill: var(--bad); } .s-dot.is-warn { fill: var(--warn); }
 .s-dot.named { opacity: 1; stroke-width: 2; r: 5.5; }

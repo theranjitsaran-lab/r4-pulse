@@ -6,11 +6,14 @@
 //   lineChart(el, { title, sub, source, series, band, notes, marks, yFormat, area, height })
 //     series  [{ name, cls: 'storage' | 'service' | 'neutral', points: [{ x: 'YYYY-MM-DD', y }] }]
 //     band    { name, points: [{ x, lo, hi }] }   Citadel held apart within a series
+//     axes    { y: 'what the axis counts' }: axis lines, a tick on every month, the axis named
+//     play    draw the marks in from the left, once; onPick: x => a tap on a month
 //   barChart(el, { title, sub, source, bars: [{ label, value, cls }], yFormat, height })
 //   sparkline(values, { w, h, cls })  →  an SVG string, last point marked
 'use strict';
 
 import * as Fmt from './format.js';
+import { drawIn } from './motion.js';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 export const money0 = v => Fmt.money(v);
@@ -51,6 +54,11 @@ export function lineChart(el, o) {
   let g = '';
   for (const v of tk) g += `<line class="${v === 0 ? 'c-zero' : 'c-grid'}" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/>
     <text class="c-axis" x="${L - 8}" y="${fy(v) + 4}" text-anchor="end">${yf(v)}</text>`;
+  if (o.axes) {
+    g += `<line class="c-ax" x1="${L}" x2="${L}" y1="${T}" y2="${H - B}"/><line class="c-ax" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/>`;
+    xs.forEach(x => { g += `<line class="c-ax" x1="${fx(x)}" x2="${fx(x)}" y1="${H - B}" y2="${H - B + 4}"/>`; });
+    if (o.axes.y) g += `<text class="c-axis" x="${L + 6}" y="${T - 4}">${esc(o.axes.y)}</text>`;
+  }
   const every = compact ? 6 : 3;
   xs.forEach((x, i) => {
     const last = i === xs.length - 1;
@@ -102,6 +110,8 @@ export function lineChart(el, o) {
   hit.addEventListener('mousemove', move);
   hit.addEventListener('touchmove', move, { passive: true });
   hit.addEventListener('mouseleave', () => { tip.hidden = true; cross.setAttribute('visibility', 'hidden'); });
+  if (o.onPick) { hit.style.cursor = 'pointer'; hit.addEventListener('click', ev => { const r = svg.getBoundingClientRect(), vx = (ev.clientX - r.left) * (W / r.width); o.onPick(xs[Math.max(0, Math.min(xs.length - 1, Math.round((vx - L) / (W - L - R) * (xs.length - 1))))]); }); }
+  if (o.play) drawIn(svg, { x: L - 6, y: T, w: W - L - R + 12, h: H - T - B });
 }
 
 export function barChart(el, o) {

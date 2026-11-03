@@ -1,29 +1,32 @@
-// Opportunities (#opportunities, the last tab): one row per account, largest first: its best move, what it is
-// worth, who owns it. A tap opens its other moves, each with its reason, a draft opener, an owner and a status.
-// The list is worked out on the server (components/opps.js via /api/view/opportunities); a status change is
-// written to app.opportunity (server/sales.js) and feeds "won this month" on Home.
-import { getJson, esc } from '/components/data.js';
+// Opportunities (#opportunities, the last tab): the list the team works. Three points, four tiles, where the list has got to, what
+// kind of money it is, then one row per account: its best move, what it is worth, how sure, who owns it, where it has got to, the next
+// step. A tap opens its moves, best first. Worked out on the server (components/opps.js via /api/view/opportunities); what the team
+// says is written to app.opportunity (server/sales.js), read fresh each visit so another person's change shows.
+import * as Fmt from '/components/format.js';
+import { esc } from '/components/data.js';
 import { moneyK } from '/components/chart.js';
-import { reveal } from '/components/motion.js';
 import { dataTable } from '/components/datatable.js';
 import { accountFilters } from '/components/acctfilters.js';
 import { whoAmI } from '/components/access.js';
-import { KINDS, STATUSES, byAccount, accountRow } from '/components/opps.js';
+import { getJson } from '/components/data.js';
+import { phoneFold, isPhone } from '/components/phonekit.js';
+import { litCard, drawPoints, tile } from '/components/lit.js';
+import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
+import { CONFIDENCE } from '/components/whitespace.js';
+import { KINDS, STATUSES, STATUS_NAMES, OWNERS, ownerName, byAccount, accountState, pipeline, kindMix, inKind, oppsPoints } from '/components/opps.js';
 
-const STATUS_NAMES = { open: 'Open', contacted: 'Contacted', quoted: 'Quoted', won: 'Won', lost: 'Lost' };
-const STATES = [['active', 'Open and in play'], ['open', 'Not started'], ['play', 'In play'], ['mine', 'Mine'], ['won', 'Won'], ['lost', 'Lost']];
+const STATES = [['active', 'Open and in play'], ['open', 'Open'], ['contacted', 'Contacted'], ['agreed', 'Agreed'], ['play', 'In play'], ['mine', 'Mine'], ['won', 'Won'], ['lost', 'Lost']];
+const when = r => { const m = r.kind === 'overdue' ? 'once' : r.modelled ? 'a year est.' : 'a year'; return r.stale ? 'when last sized' : m; };
+const dots = n => `<span class="cd-dots op-sure" role="img" aria-label="Confidence ${n} of 3: ${esc(CONFIDENCE[n])}" title="${esc(CONFIDENCE[n])}">${[1, 2, 3].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
+const pill = k => `<span class="op-kind k-${k}">${esc(KINDS[k])}</span>`;
 
 export async function render(main, params, C) {
   if (!main) return;
-  const [V, VW] = await Promise.all([getJson('view/opportunities'), getJson('view/customers')]);
-  const rows = V.rows, me = V.me;
-  const isOpen = r => r.status !== 'won' && r.status !== 'lost';
-  const inState = (x, s) => s === 'active' ? isOpen(x) : s === 'open' ? x.status === 'open' : s === 'play' ? x.status === 'contacted' || x.status === 'quoted' : s === 'mine' ? x.owner && x.owner === me && isOpen(x) : !s || x.status === s;
-  // the moves an account has left once the type, status and owner are chosen; its row is drawn from these
-  const movesIn = (a, st) => a.items.filter(x => (!st.f.kind || x.kind === st.f.kind) && inState(x, st.f.state) && (!st.f.owner || x.owner === st.f.owner));
-  const sumOf = list => list.reduce((t, r) => t + r.value, 0);
-  const play = rows.filter(r => r.status === 'contacted' || r.status === 'quoted'), mine = rows.filter(r => r.owner && r.owner === me && isOpen(r));
-  const owners = [...new Set(rows.map(r => r.owner).filter(Boolean))].sort();
+  // read fresh, not from the page's cache: someone else may have moved something
+  const [V, VW] = await Promise.all([fetch('/api/view/opportunities', { credentials: 'same-origin' }).then(r => { if (!r.ok) { const e = new Error(String(r.status)); e.status = r.status; throw e; } return r.json(); }).then(j => j.data), getJson('view/customers')]);
+  const rows = V.rows, me = V.me || whoAmI(), G = byAccount(rows);
+  const stateOf = a => accountState(a);
+  const inState = (s, v) => v === 'active' ? s.status !== 'won' && s.status !== 'lost' : v === 'play' ? s.status === 'contacted' || s.status === 'agreed' : v === 'mine' ? s.owner === me && s.status !== 'won' && s.status !== 'lost' : !v || s.status === v;
 
   // links saved before the filter bar
   if (params.kind || params.state) {
@@ -31,93 +34,127 @@ export async function render(main, params, C) {
     for (const k of ['kind', 'state']) if (u.get(k)) { u.set('f_' + k, u.get(k)); u.delete(k); }
     history.replaceState(null, '', '#opportunities?' + u);
   }
-  // what is already moving; nothing here until something is
-  const tiles = [
-    play.length ? `<button class="h2-kpi" data-state="play"><span>In play ›</span><b>${moneyK(sumOf(play))}</b><small>${play.length} contacted or quoted</small></button>` : '',
-    V.won.n ? `<div class="h2-kpi"><span>Won this month</span><b>${moneyK(V.won.value)}</b><small>${V.won.n} marked won</small></div>` : '',
-    mine.length ? `<button class="h2-kpi" data-state="mine"><span>Mine ›</span><b>${mine.length}</b><small>open, with you as owner</small></button>` : '',
-  ].filter(Boolean).join('');
 
-  main.innerHTML = `<div class="cust c2 op">
-    <h1>Opportunities</h1>
-    <p class="op-how">One row per account, largest first: the single best move, what it’s worth, who owns it.</p>
-    ${tiles ? `<section class="h2-kpis four" data-rv>${tiles}</section>` : ''}
-    <section class="h2-card c2-tablecard" data-rv>
+  main.innerHTML = `<div class="cust c2 h2 ac op">
+    <div><h1>Opportunities</h1><p class="op-how">One row per account, the single best move first: what it’s worth, who owns it, where it’s got to.</p></div>
+    ${litCard('op-lit', 'Pulse summary, from the list below')}
+    <section class="ktiles" id="op-tiles" data-in></section>
+    <section class="h2-card" data-tour="opp-pipe" data-in><div class="h2-ch"><h2>Where the list has got to</h2><small>Each account once, at its best move, at the status of whichever move is furthest along.</small></div><div class="op-pipe" id="op-pipe"></div></section>
+    <section class="h2-card" data-in><div class="h2-ch"><h2>What kind of money it is</h2><small>Each account at its best yearly move; overdue boxes apart, as a one-off. Tap a kind to filter the list.</small></div><div class="op-kinds" id="op-kbar" aria-hidden="true"></div><div class="op-kkey" id="op-kkey" role="group" aria-label="Filter by kind"></div></section>
+    <section class="h2-card c2-tablecard" data-in>
       <div id="op-t"></div>
-      <div class="src">$ a year is each account's largest move, once: moves on an account overlap, so they do not add up. Overdue-box destruction is a one-off and needs the client's sign-off, so it has its own column and never adds to the yearly figure · cross-sell est. at what comparable accounts spend on the line · price gaps at the book's median · win-back at the drop on the account's own run · rate rounds at the typical 8% · overdue boxes at the median destruction fee</div>
+      <p class="op-msg" id="op-msg" role="status"></p>
+      ${phoneFold('how these are worked out', `<div class="src">$ a year is each account's best move, once: moves on an account overlap, so they do not add up. Overdue-box destruction is a one-off that needs the client's sign-off, so it has its own column and never adds to the yearly figure. Cross-sell is est. at what comparable accounts spend, price gaps at the book's median, win-back at the drop on the account's own run, rate rounds at the typical 8%. Three marks: its own billing or the book median. Two: comparable accounts of its kind. One: the whole book or few comparable accounts.</div>`)}
     </section>
   </div>`;
+  const root = main.querySelector('.op'), $ = id => main.querySelector('#' + id), host = $('op-t');
 
-  const money = v => v ? moneyK(v) : '—';
-  const view = (a, st) => accountRow(movesIn(a, st));
-  const row = r => {
-    const priceLink = r.kind === 'price' || (r.kind === 'cross' && r.line === 'bin') ? `<a href="#pricing?level1=${r.level1}${r.line === 'storage' ? '&code=STO' : ''}">Price it ›</a>` : '';
-    return `<li class="op-row" data-key="${esc(r.key)}">
-      <button class="op-head" type="button" aria-expanded="false">
-        <span class="op-who"><b>${esc(KINDS[r.kind])}</b><small>${r.owner ? esc(r.owner) : ''}</small></span>
-        <span class="op-why">${esc(r.reason)}</span>
-        <span class="op-val">${moneyK(r.value)}${r.once ? ' once' : ''}${r.modelled ? ' est.' : ''}<small>${r.once ? '' : 'a year'}</small></span>
-        <span class="op-st st-${r.status}">${STATUS_NAMES[r.status]}</span>
-      </button>
-      <div class="op-body" hidden>
-        <p class="op-opener"><span class="lab">A way to open</span>“${esc(r.opener)}” <button type="button" class="op-copy">Copy</button></p>
-        <div class="op-acts">
-          <label>Status <select class="op-status">${STATUSES.map(s => `<option value="${s}" ${s === r.status ? 'selected' : ''}>${STATUS_NAMES[s]}</option>`).join('')}</select></label>
-          <label>Owner <input class="op-owner" value="${esc(r.owner || '')}" placeholder="${esc(me || 'name')}"></label>
-          ${me && r.owner !== me ? `<button type="button" class="op-mine">Make it mine</button>` : ''}
-          <span class="op-msg hint"></span>
-          <span class="op-links"><a href="#customer/${r.level1}">The customer ›</a>${priceLink}</span>
-        </div>
-      </div>
-    </li>`;
+  // ── the top of the page, redrawn when anything is saved ──
+  let shown = null, T = null;
+  const drawTop = () => {
+    const owned = G.rows.filter(a => stateOf(a).owner).length, top20 = G.rows.slice().sort((x, y) => y.largest - x.largest).slice(0, 20).reduce((t, a) => t + a.largest, 0);
+    $('op-tiles').innerHTML = `
+      ${tile({ still: true, noIn: true, lead: true, label: 'Worth a year', big: moneyK(G.largest), sub: 'each account once, at its best move' })}
+      ${tile({ still: true, noIn: true, label: 'One-off', big: moneyK(G.once), sub: 'overdue boxes, needs client sign-off' })}
+      ${tile({ still: true, noIn: true, label: 'Accounts with a move', big: Fmt.count(G.accounts), sub: `the largest 20 hold ${moneyK(top20)} a year` })}
+      ${tile({ still: true, noIn: true, warn: owned < G.accounts * .25, label: 'With an owner', big: `${Fmt.count(owned)} of ${Fmt.count(G.accounts)}`, sub: owned ? `${Fmt.count(G.accounts - owned)} still to assign` : 'no move is owned yet' })}`;
+    const P = pipeline(G);
+    $('op-pipe').innerHTML = P.map(s => `<div class="op-stage st-${s.status}${s.n ? ' has' : ''}"><span>${esc(s.name)}</span><b class="${shown && shown[s.status] !== s.n ? 'bump' : ''}">${Fmt.count(s.n)}</b><small>${s.value ? `${moneyK(s.value)} a year` : '$0'}</small></div>`).join('');
+    shown = Object.fromEntries(P.map(s => [s.status, s.n]));
+    const K = kindMix(G), yearly = K.filter(x => !x.once), f = T ? T.state.f.kind : new URLSearchParams(location.hash.split('?')[1] || '').get('f_kind');
+    $('op-kbar').innerHTML = yearly.map((x, i) => `<i class="k-${x.kind}" style="flex:${x.value.toFixed(0)} 0 0;--i:${i}"></i>`).join('');
+    $('op-kkey').innerHTML = K.map(x => `<button type="button" data-kind="${x.kind}" aria-pressed="${f === x.kind}"><i class="k-${x.kind}"></i>${esc(x.name)} <b>${moneyK(x.value)}${x.once ? ' once' : ''}</b><small>${Fmt.count(x.n)} ${x.n === 1 ? 'account' : 'accounts'}</small></button>`).join('');
+    const lit = $('op-lit'); lit.innerHTML = '<div></div>'; drawPoints(lit.firstChild, oppsPoints(G, moneyK));
   };
 
-  const G = byAccount(rows);
+  // ── the expanded account ──
+  const seen = new Set();
+  const detail = a => {
+    const t = stateOf(a), moves = a.items.slice().sort((x, y) => (y === t.best) - (x === t.best) || Number(!!x.stale) - Number(!!y.stale) || y.rank - x.rank);
+    const top = Math.max(1, ...moves.filter(m => !m.once).map(m => m.value)), over = moves.find(m => m.kind === 'overdue' && !m.stale), gap = moves.find(m => m.kind === 'price' && m.line === 'storage' && !m.stale);
+    const act = m => m.kind === 'slip' ? `<button type="button" class="pq-btn" data-op-ask="${esc(`Draft a call note for ${a.name}: ${m.reason}`)}">Draft a call note</button>`
+      : (m.kind === 'price' || m.kind === 'cross') && (m.code || m.line === 'storage') ? `<a class="pq-btn cd-a" href="#pricing?level1=${m.level1}&code=${esc(m.line === 'storage' ? 'STO' : m.code)}">Price it in Quote</a>`
+      : m.kind === 'route' ? '<a class="pq-btn cd-a" href="#activity?lens=cost">Open in Operations</a>'
+      : `<button type="button" class="pq-btn" data-op-ask="${esc(`${a.name}: ${m.reason} What should we do?`)}">Ask Pulse</button>`;
+    const fresh = !seen.has(a.level1);
+    return `<div class="cd op-dd${fresh ? ' in' : ''}" data-op="${a.level1}">
+      <div class="op-dhead"><span><b>${esc(a.name)}</b> <small>${Fmt.count(moves.length)} ${moves.length === 1 ? 'move' : 'moves'}, best first</small></span><a class="how-link chev" href="#customer/${a.level1}">Open the account</a></div>
+      <div class="op-moves">${moves.map((m, i) => `<article class="op-move${m === t.best ? ' top' : ''}${m.once ? ' once' : ''}${m.stale ? ' stale' : ''}" style="--i:${i}">
+        <div class="op-cv">${pill(m.kind)}${dots(m.conf || 1)}</div>
+        <div class="op-cv"><b>${moneyK(m.value)}</b><small>${esc(when(m))}</small></div>
+        <span class="op-bar" aria-hidden="true"><i style="--s:${(m.once ? 1 : Math.min(1, m.value / top)).toFixed(3)}"></i></span>
+        <p>${esc(m.reason)}</p>
+        ${m.opener ? `<details class="op-open"><summary>A way to open</summary><p>“${esc(m.opener)}”</p></details>` : ''}
+        <div class="op-cf"><small>${m === t.best ? 'Best move' : ''}${m.owner ? `${m === t.best ? ', ' : ''}with ${esc(ownerName(m.owner))}` : ''}</small>${act(m)}</div>
+      </article>`).join('')}</div>
+      ${over && gap ? `<p class="op-over">These overlap: if the overdue boxes are destroyed, storage falls by ${moneyK(over.ends)} a year, which shrinks the storage price gap.</p>` : ''}
+    </div>`;
+  };
+
+  // ── the table ──
+  const others = [...new Set(rows.map(r => r.owner).filter(o => o && !OWNERS.includes(o)))].sort();
+  const allOwners = [...OWNERS, ...others];
   const shared = accountFilters(VW, C).filter(f => f.k !== 'book').map(f => ({ ...f, hidden: true }));
-  const T = dataTable(main.querySelector('#op-t'), { key: 'opportunities', who: whoAmI(), rows: G.rows, noun: 'accounts', placeholder: 'Find an account', search: a => a.name,
+  const fit = () => { const box = host.querySelector('.dt-scroll'); if (box) box.style.setProperty('--cd-w', box.clientWidth + 'px'); };
+  const onResize = () => { if (!root.isConnected) { removeEventListener('resize', onResize); return; } fit(); };
+  addEventListener('resize', onResize);
+  T = dataTable(host, { key: 'opportunities', who: whoAmI(), phone: 'cards', ...(isPhone() ? { page: 10 } : {}), rows: G.rows, noun: 'accounts', placeholder: 'Find an account', search: a => a.name,
     defaults: { state: 'active' },
     filters: [
-      { k: 'kind', l: 'Type', chips: true, options: Object.entries(KINDS), test: (a, v, st) => movesIn(a, st).length > 0 },
-      { k: 'state', l: 'Status', options: STATES, test: (a, v, st) => movesIn(a, st).length > 0 },
-      ...(owners.length ? [{ k: 'owner', l: 'Owner', options: owners.map(o => [o, o]), test: (a, v, st) => movesIn(a, st).length > 0 }] : []),
+      { k: 'kind', l: 'Kind', hidden: true, options: Object.entries(KINDS), test: (a, v) => inKind(a, v) },
+      { k: 'owner', l: 'Owner', options: [['none', 'No owner'], ...allOwners.map(o => [o, ownerName(o)])], test: (a, v) => { const o = stateOf(a).owner; return v === 'none' ? !o : o === v; } },
+      { k: 'state', l: 'Status', options: STATES, test: (a, v) => inState(stateOf(a), v) },
       ...shared,
     ],
     totalLabel: 'Each account once',
-    cols: st => [
-      { k: 'name', l: 'Account', name: true, text: true, get: a => a.name, fmt: a => { const n = view(a, st).count; return `<a href="#customer/${a.level1}">${esc(a.name)}</a>${n > 1 ? ` <small>${n} moves</small>` : ''}`; } },
-      { k: 'best', l: 'Best move', fixed: true, text: true, cls: 'op-best', fmt: a => { const b = view(a, st).best; return b ? `<span class="op-pill">${esc(KINDS[b.kind])}</span><span class="op-short" title="${esc(b.reason)}">${esc(b.short || b.reason)}</span>` : ''; }, csv: a => { const b = view(a, st).best; return b ? `${KINDS[b.kind]}: ${b.reason}` : ''; } },
-      { k: 'year', l: '$ a year', short: '$ a year', fixed: true, sorted: true, get: a => view(a, st).year, total: 'sum', totalFmt: moneyK, fmt: a => { const x = view(a, st); return x.year ? `${moneyK(x.year)}${x.best.modelled ? ' est.' : ''}` : '—'; } },
-      { k: 'once', l: 'One-off', fixed: true, get: a => view(a, st).once, total: 'sum', totalFmt: moneyK, fmt: a => money(view(a, st).once) },
-      { k: 'owner', l: 'Owner', fixed: true, text: true, get: a => { const b = view(a, st).best; return b && b.owner ? b.owner : ''; }, fmt: a => { const b = view(a, st).best; return b && b.owner ? esc(b.owner) : '—'; } },
-      { k: 'status', l: 'Status', fixed: true, text: true, get: a => { const b = view(a, st).best; return b ? STATUS_NAMES[b.status] : ''; }, fmt: a => { const b = view(a, st).best; return b ? `<span class="op-st st-${b.status}">${STATUS_NAMES[b.status]}</span>` : ''; } },
+    cols: [
+      { k: 'name', l: 'Account', name: true, text: true, get: a => a.name, fmt: a => `<a href="#customer/${a.level1}">${esc(a.name)}</a>${a.items.length > 1 ? ` <small>${a.items.length} moves</small>` : ''}` },
+      { k: 'best', l: 'Best move', card: 'full', fixed: true, text: true, cls: 'op-best', fmt: a => { const b = stateOf(a).best; return `${pill(b.kind)}<span class="op-short" title="${esc(b.reason)}">${esc(b.short || b.reason)}</span>`; }, csv: a => { const b = stateOf(a).best; return `${KINDS[b.kind]}: ${b.reason}`; } },
+      { k: 'year', l: '$ a year', short: '$ a year', card: 'lead', fixed: true, sorted: true, get: a => a.largest, total: 'sum', totalFmt: moneyK, fmt: a => { const top = Math.max(1, G.rows[0] ? Math.max(...G.rows.map(x => x.largest)) : 1), b = stateOf(a).best; return a.largest ? `<span class="op-worth"><span class="op-bar" aria-hidden="true"><i style="--s:${(a.largest / top).toFixed(3)}"></i></span>${moneyK(a.largest)}${b.modelled ? ' est.' : ''}</span>` : '—'; } },
+      { k: 'once', l: 'One-off', fixed: true, get: a => a.once, total: 'sum', totalFmt: moneyK, fmt: a => a.once ? moneyK(a.once) : '—' },
+      { k: 'conf', l: 'How sure', fixed: true, get: a => stateOf(a).conf, csv: a => stateOf(a).conf, fmt: a => dots(stateOf(a).conf) },
+      { k: 'owner', l: 'Owner', fixed: true, text: true, get: a => stateOf(a).owner || '', csv: a => ownerName(stateOf(a).owner), fmt: a => { const s = stateOf(a), own = s.owner; return `<select class="op-own${own ? '' : ' none'}" data-op-key="${esc(s.lead.key)}" aria-label="Owner for ${esc(a.name)}"><option value="">Assign</option>${allOwners.map(o => `<option value="${esc(o)}"${o === own ? ' selected' : ''}>${esc(ownerName(o))}</option>`).join('')}</select>`; } },
+      { k: 'status', l: 'Status', fixed: true, text: true, get: a => stateOf(a).status, csv: a => STATUS_NAMES[stateOf(a).status], fmt: a => { const s = stateOf(a), by = s.lead.who && s.lead.at ? `Last changed by ${ownerName(s.lead.who)}, ${String(s.lead.at).slice(0, 10)}` : ''; return `<select class="op-stat s-${s.status}" data-op-key="${esc(s.lead.key)}" aria-label="Status for ${esc(a.name)}"${by ? ` title="${esc(by)}"` : ''}>${STATUSES.map(x => `<option value="${x}"${x === s.status ? ' selected' : ''}>${STATUS_NAMES[x]}</option>`).join('')}</select>`; } },
+      { k: 'next', l: 'Next step', fixed: true, text: true, get: a => stateOf(a).next || '', csv: a => stateOf(a).next || '', fmt: a => { const s = stateOf(a); return `<input type="date" class="op-next" data-op-key="${esc(s.lead.key)}" value="${esc(s.next || '')}" aria-label="Next step for ${esc(a.name)}">`; } },
     ],
-    detail: (a, st) => { const best = view(a, st).best, moves = movesIn(a, st).sort((x, y) => (y === best) - (x === best) || y.value - x.value); return `<div class="op-detail"><ul class="op-list">${moves.map(row).join('')}</ul></div>`; },
+    detail,
+    onDraw: () => {
+      fit(); seen.clear();
+      host.querySelectorAll('.op-dd').forEach(el => seen.add(+el.dataset.op));
+      if (T) drawKeyState();
+    },
   });
+  const drawKeyState = () => $('op-kkey').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(T.state.f.kind === b.dataset.kind)));
 
-  const host = main.querySelector('#op-t');
-  async function save(li, patch) {
-    const r = rows.find(x => x.key === li.dataset.key); if (!r) return;
-    const next = { status: r.status, owner: r.owner, ...patch };
-    const msg = li.querySelector('.op-msg'); msg.textContent = 'Saving…';
-    const res = await fetch('/api/sales/opportunities', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: r.key, level1: r.level1, status: next.status, owner: next.owner || null, value: r.value }) }).catch(() => null);
-    if (!res || !res.ok) { msg.textContent = 'Could not save just now.'; return; }
-    Object.assign(r, next, { at: new Date().toISOString() });
-    T.draw();
-    const again = host.querySelector(`.op-row[data-key="${CSS.escape(r.key)}"]`);
-    if (again) { again.querySelector('.op-body').hidden = false; again.querySelector('.op-head').setAttribute('aria-expanded', 'true'); again.querySelector('.op-msg').textContent = 'Saved.'; }
+  // ── saving: what the row shows moves at once; the top follows ──
+  const msg = $('op-msg');
+  async function save(el, patch) {
+    const r = rows.find(x => x.key === el.dataset.opKey); if (!r) return;
+    const next = { status: r.status, owner: r.owner, next: r.next, ...patch };
+    msg.textContent = 'Saving…';
+    const res = await fetch('/api/sales/opportunities', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: r.key, level1: r.level1, status: next.status, owner: next.owner || null, value: r.value, note: r.note || null, next_step: next.next || null }) }).catch(() => null);
+    if (!res || !res.ok) { msg.textContent = 'That did not save. Try again in a moment.'; T.draw(); return; }
+    Object.assign(r, next, { at: new Date().toISOString(), who: me });
+    msg.textContent = `Saved: ${r.name}.`;
+    const cls = el.className.split(' ')[0], level = r.level1;
+    T.draw(); drawTop();
+    const a = G.rows.find(x => x.level1 === level), again = a && [...host.querySelectorAll('.' + cls)].find(x => x.dataset.opKey === stateOf(a).lead.key);
+    if (again) again.focus();
   }
-  host.addEventListener('click', e => {
-    const li = e.target.closest('.op-row'); if (!li) return;
-    if (e.target.closest('.op-head')) { const b = li.querySelector('.op-body'), h = li.querySelector('.op-head'); b.hidden = !b.hidden; h.setAttribute('aria-expanded', String(!b.hidden)); }
-    if (e.target.closest('.op-copy')) { const r = rows.find(x => x.key === li.dataset.key); navigator.clipboard && navigator.clipboard.writeText(r.opener).then(() => { li.querySelector('.op-msg').textContent = 'Opener copied.'; }); }
-    if (e.target.closest('.op-mine')) { li.querySelector('.op-owner').value = me; save(li, { owner: me }); }
-  });
   host.addEventListener('change', e => {
-    const li = e.target.closest('.op-row'); if (!li) return;
-    if (e.target.matches('.op-status')) save(li, { status: e.target.value });
-    if (e.target.matches('.op-owner')) save(li, { owner: e.target.value.trim() || null });
+    const el = e.target; if (!el.dataset || !el.dataset.opKey) return;
+    if (el.matches('.op-own')) save(el, { owner: el.value || null });
+    if (el.matches('.op-stat')) save(el, { status: el.value });
+    if (el.matches('.op-next')) save(el, { next: el.value || null });
   });
-  main.querySelectorAll('.h2-kpis [data-state]').forEach(b => b.addEventListener('click', () => T.set('state', b.dataset.state)));
-  reveal(main.querySelector('.op'));
+  host.addEventListener('click', e => {
+    const q = e.target.closest('[data-op-ask]');
+    if (q) dispatchEvent(new CustomEvent('open-ask', { detail: { ask: q.dataset.opAsk } }));
+  });
+  $('op-kkey').addEventListener('click', e => { const b = e.target.closest('button[data-kind]'); if (!b) return; T.set('kind', T.state.f.kind === b.dataset.kind ? '' : b.dataset.kind); drawKeyState(); });
+
+  drawTop();
+  document.documentElement.classList.add('js');
+  if (firstPlay('r4-opps-played')) { root.classList.add('play'); whenIntroDone().then(() => playIn(root)); }
 }

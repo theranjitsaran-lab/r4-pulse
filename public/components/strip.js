@@ -83,9 +83,10 @@ export function strip(el, o) {
       <text class="s-name" x="${tx}" y="${cy}" text-anchor="${anc}">${esc(label)}</text>`;
   });
 
+  const close = cost != null && Math.abs(x(cost) - x(st.median)) < 150, lean = (v, other) => v < other ? 'end' : 'start';
   const ref = (v, lab, cls) => {
     if (v == null || v < lo || v > hi) return '';
-    const anc = x(v) < L + 40 ? 'start' : x(v) > W - R - 40 ? 'end' : 'middle';
+    const anc = close && cls === 'cost' ? lean(cost, st.median) : close && cls === 'median' ? lean(st.median, cost) : x(v) < L + 40 ? 'start' : x(v) > W - R - 40 ? 'end' : 'middle';
     return `<line class="s-ref ${cls}" x1="${x(v)}" y1="${TOP - 16}" x2="${x(v)}" y2="${H - BOT + 6}"/>
       <text class="s-reflab ${cls}" x="${x(v)}" y="${TOP - 22}" text-anchor="${anc}">${esc(lab)}</text>`;
   };
@@ -109,7 +110,7 @@ export function strip(el, o) {
     g += `<text class="s-tick" x="${tx}" y="${H - BOT + 52}" text-anchor="middle">${fmt(v)}</text>`;
   });
 
-  el.classList.add('strip');
+  el.classList.add('pstrip');
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(`Rates across ${st.n} accounts, with cost to serve, median${list != null ? ', list' : ''}${price != null ? ' and your price' : ''} marked`)}">${g}</svg>`;
   return st;
 }

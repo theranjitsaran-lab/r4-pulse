@@ -15,7 +15,7 @@ const { seesCosts } = require('./settings');
 
 const router = express.Router();
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework', 'linegrid', 'metrics'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
+const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework', 'linegrid', 'metrics', 'opsdata'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
 
 async function callsLog() {
   if (USE_FIXTURES) { try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'calls_log.json'), 'utf8')); } catch { return []; } }
@@ -54,15 +54,15 @@ router.get('/customers', async (req, res) => {
     const st = stamp(D);
     if (!custBase || custBase.stamp !== st) {
       const B = L.custbook.customerBook({ C: D.C, M: D.M, PR: D.PR, R: D.R });
-      const trimCell = c => c ? { have: c.have, opp: c.opp, basis: c.basis, spend: c.spend } : c;
+      const trimCell = c => c ? { have: c.have, opp: c.opp, basis: c.basis, spend: c.spend, low: c.low, expected: c.expected, note: c.note } : c;
       const rows = B.rows.map(r => {
         const { move, ...rest } = r;
         return { ...rest, oppRow: r.oppRow ? { opp: r.oppRow.opp, cells: Object.fromEntries(Object.entries(r.oppRow.cells).map(([k, c]) => [k, trimCell(c)])) } : null };
       });
       // the same rows with every cost taken out, for people who do not see costs yet
-      const plain = rows.map(({ cost, margin, pc, review, routeCost, ...r }) => ({ ...r, fam: Object.fromEntries(Object.entries(r.fam).map(([k, { cost: c, costPer, lines, ...f }]) => [k, f])), mfam: Object.fromEntries(Object.entries(r.mfam).map(([k, v]) => [k, { revenue: v.revenue }])) }));
+      const plain = rows.map(({ cost, margin, pc, review, routeCost, parts, ...r }) => ({ ...r, fam: Object.fromEntries(Object.entries(r.fam).map(([k, { cost: c, costPer, lines, ...f }]) => [k, f])), mfam: Object.fromEntries(Object.entries(r.mfam).map(([k, v]) => [k, { revenue: v.revenue }])) }));
       custBase = { stamp: st, plain, v: { rows, book: B.book, months: B.months, ws: { total: B.ws.total }, seg: L.home2data.segmentView({ P: D.P, A: D.A, SG: D.SG }),
-        am: D.AM ? { months: D.AM.months, rows: D.AM.accounts.map(a => ({ level1: a.level1, customer: a.customer, m: a.storage.map((s, i) => s + a.service[i]) })) } : null } };
+        am: D.AM ? { months: D.AM.months, rows: D.AM.accounts.map(a => ({ level1: a.level1, customer: a.customer, m: a.storage.map((s, i) => s + a.service[i]), s: a.storage })) } : null } };
     }
     send(req, res, seesCosts(req) ? custBase.v : { ...custBase.v, rows: custBase.plain, book: Object.fromEntries(Object.entries(custBase.v.book).map(([k, u]) => [k, Object.fromEntries(Object.entries(u).map(([n, b]) => [n, { price: b.price }]))])) });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -75,6 +75,54 @@ router.get('/routecost', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Operations for one period (components/opsdata.js), cached until the data moves. Modelled costs, margins and moves go only
+// to those who see costs; everyone else gets the same page without them.
+let opsBase = { stamp: null, periods: new Map(), costly: null, months: null };
+const NO_COST = ({ costPerService, ...rest }) => rest;
+router.get('/operations', async (req, res) => {
+  try {
+    const [D, L] = await Promise.all([data(), load()]), O = L.opsdata, st = stamp(D), RH = D.RH || [];
+    if (opsBase.stamp !== st) opsBase = { stamp: st, periods: new Map(), costly: O.costlyAreas({ rc: D.RC, AR: D.AR, M: D.M, Z: D.Z, R: D.R }), months: O.density(O.opsMonths(RH, D.R)) };
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(req.query.date || '') ? req.query.date : null, P = O.periods(D.A.latestDone, date), key = P[req.query.p] ? req.query.p : 'q', ck = key + '|' + (key === 'day' || key === 'week' ? date : '');
+    if (!opsBase.periods.has(ck)) opsBase.periods.set(ck, O.opsPeriod(RH, D.Z, D.R, P[key]));
+    const V = opsBase.periods.get(ck), costs = seesCosts(req);
+    const tabs = Object.values(P).map(p => ({ key: p.key, label: p.label, compare: p.compare, why: p.why || null }));
+    if (costs) return send(req, res, { ...V, tabs, costly: opsBase.costly, density: opsBase.months, points: O.opsPoints(V, opsBase.costly), costs: true });
+    const costly = opsBase.costly.map(a => ({ postcode: a.postcode, miles: a.miles, visits: a.visits, services: a.services, who: a.who }));
+    const density = { ...opsBase.months, rows: opsBase.months.rows.map(({ cost, before, ...r }) => ({ ...r, before: before ? { perDay: before.perDay } : null })) };
+    send(req, res, { ...V, tabs, now: NO_COST(V.now), prev: V.prev && NO_COST(V.prev), year: V.year && NO_COST(V.year), costly, density, points: O.opsPoints(V, null), costs: false });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// The Quote screen's map: the regular stops by weekday and route, each route's latest such day in stop order, each
+// account's usual postcode and the book's postcodes for the shading. No costs: route shares are on view/routecost.
+let quoteBase = null;
+router.get('/quote-routes', async (req, res) => {
+  try {
+    const D = await data(), st = stamp(D);
+    if (!quoteBase || quoteBase.stamp !== st) {
+      const reg = new Map(), dayOf = new Map(), pcs = new Map();
+      for (const d of (D.RC && D.RC.dayList) || []) {
+        const dow = new Date(d.date + 'T12:00:00Z').getUTCDay(), k = dow + '|' + d.route, dk = d.date + '|' + d.route, stops = d.stops.filter(s => !s.delivery && s.postcode);
+        for (const s of stops) {
+          const rk = k + '|' + s.postcode, x = reg.get(rk) || { dow, route: d.route, postcode: s.postcode, n: 0, who: new Set() };
+          x.n++; x.who.add(s.level1); x.day = dk; reg.set(rk, x);
+          if (s.level1 != null) { const m = pcs.get(s.level1) || new Map(); m.set(s.postcode, (m.get(s.postcode) || 0) + (s.services || 0)); pcs.set(s.level1, m); }
+        }
+        if (stops.length) dayOf.set(dk, { date: d.date, route: d.route, stops: [...new Set(stops.map(s => s.postcode))], customers: new Set(stops.map(s => s.level1)).size, services: stops.reduce((t, s) => t + (s.services || 0), 0) });
+      }
+      const regular = [...reg.values()].filter(x => x.n >= 4);
+      quoteBase = { stamp: st, v: {
+        regular: regular.map(x => ({ dow: x.dow, route: x.route, postcode: x.postcode, n: x.n, day: x.day, solo: x.who.size === 1 ? [...x.who][0] : null })),
+        days: Object.fromEntries(regular.map(x => [x.day, dayOf.get(x.day)])),
+        acctPc: Object.fromEntries([...pcs].map(([id, m]) => [id, [...m].sort((a, b) => b[1] - a[1])[0][0]])),
+        postcodes: ((D.A && D.A.postcodes) || []).map(({ postcode, services, customers, billing_only }) => ({ postcode, services, customers, billing_only })),
+      } };
+    }
+    send(req, res, quoteBase.v);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Customers › Opportunities: every opportunity (components/opps.js) with what the team has said about
 // it (server/sales.js), and what was won this month. The list is cached until the data moves; the
 // statuses are read fresh each time.
@@ -85,10 +133,7 @@ router.get('/opportunities', async (req, res) => {
     const st = stamp(D);
     if (!oppBase || oppBase.stamp !== st) oppBase = { stamp: st, v: L.opps.opportunities({ C: D.C, PR: D.PR, CA: D.CA, M: D.M }, {}) };
     const only = req.query.level1 != null ? Number(req.query.level1) : null;   // one customer's, for its page
-    const rows = oppBase.v.rows.filter(r => only == null || r.level1 === only).map(r => {
-      const s = statuses[r.key];
-      return s ? { ...r, status: s.status, owner: s.owner, at: s.at, note: s.note } : r;
-    });
+    const rows = L.opps.applyStatuses(oppBase.v.rows, statuses, D.M).filter(r => only == null || r.level1 === only);
     send(req, res, { rows, won: L.opps.wonIn(statuses), me: (req.session.user && req.session.user.name) || null });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -171,13 +216,22 @@ router.get('/home', async (req, res) => {
     };
     // the conversation candidates carry their signals; send only what the card shows
     team.anne.calls = team.anne.calls.map(c => ({ level1: c.level1, name: c.name, stake: c.stake, ev: c.sigs[0].ev }));
-    // selling: what was won this month, and what is in play (contacted or quoted), from Opportunities
-    const inPlay = Object.values(statuses).filter(x => x.status === 'contacted' || x.status === 'quoted');
+    // selling: what was won this month, and what is in play (contacted or agreed), from Opportunities
+    const inPlay = Object.values(statuses).filter(x => x.status === 'contacted' || x.status === 'agreed');
     const sell = { won: L.opps.wonIn(statuses), inPlay: { n: inPlay.length, value: inPlay.reduce((t, x) => t + (Number(x.value) || 0), 0) } };
     // what one more customer would save is a modelled route cost: not until costs are final
     const costs = seesCosts(req);
     const plain = costs ? base : { ...base, points: base.points.filter(p => p.key !== 'location') };
-    const actions = L.metrics.topActions({ lines: team.trisha.lines, calls: team.anne.calls });
+    // an action about an account can go on the list with its owner, at that account's best move
+    const st = stamp(D);
+    if (!oppBase || oppBase.stamp !== st) oppBase = { stamp: st, v: L.opps.opportunities({ C: D.C, PR: D.PR, CA: D.CA, M: D.M }, {}) };
+    const listed = L.opps.byAccount(L.opps.applyStatuses(oppBase.v.rows, statuses, D.M)).rows;
+    const actions = L.metrics.topActions({ lines: team.trisha.lines, calls: team.anne.calls }).map(i => {
+      const a = String(i.subject || '').startsWith('account:') ? listed.find(x => x.level1 === Number(i.subject.slice(8))) : null;
+      if (!a) return i;
+      const t = L.opps.accountState(a), m = t.lead;
+      return { ...i, move: { key: m.key, level1: m.level1, value: m.value, status: m.status, next: m.next, note: m.note, owner: t.owner } };
+    });
     send(req, res, { ...plain, actions, sell });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

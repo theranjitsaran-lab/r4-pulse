@@ -42,10 +42,12 @@ auth.install(app);
 app.use('/api/log', require('./log'));
 app.use('/api/feedback', feedback.api);
 app.use('/api/sales', require('./sales').api);   // quotes and opportunity statuses
+app.use('/api/users', require('./users').api);   // who can sign in, for admins
 app.use('/api/settings', require('./settings').api);   // the cost model's assumptions, editable
 app.use('/api/summary', require('./summary'));
 app.use('/api/ask', require('./ask'));
 app.use('/api/view', require('./views'));
+app.use('/api/customer', require('./who'));   // who an account is, researched once
 app.use('/api', api);
 // Static files gzipped, cached and preloaded (server/static.js); the cost model runs in the browser too
 // (Pricing, Margin): the same file, never a copy. express.static stays behind it for anything else.
@@ -59,7 +61,7 @@ const rates = require('../model/rates');
 // Live: warm every screen's query at start and whenever the data moves, so nobody waits on the database.
 const { clearCache } = require('./db');
 const queries = require('./queries');
-const WARM = ['pulse', 'activity', 'customers', 'pricing', 'calls', 'margin', 'storage', 'segments', 'routestops', 'deliverydays', 'gl', 'accountmonths', 'accountlines'];
+const WARM = ['routehistory', 'arearevenue', 'pulse', 'activity', 'customers', 'pricing', 'calls', 'margin', 'storage', 'segments', 'routestops', 'deliverydays', 'gl', 'accountmonths', 'accountlines'];
 async function warm() {
   for (const n of WARM) { if (!queries[n]) continue; const t = Date.now(); try { await cached(n, queries[n]); console.log(`warm ${n} ${Date.now() - t}ms`); } catch (e) { console.warn(`warm ${n}: ${e.message}`); } }
   try { await require('./screendata').data(); } catch (e) { console.warn('warm route costs:', e.message); }   // costs the route days once

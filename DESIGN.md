@@ -29,9 +29,10 @@ The locked system, written on 2 November 2026 from `public/tokens.css` and the D
 Type sizes run from `--fs-tiny` (12px, the floor: nothing on screen is smaller) through `--fs-sm` (13px, table cells and buttons) to `--fs-mega` (40px, Home's one hero figure). Spacing is a 4px unit, `--sp-1` to `--sp-12`.
 
 ## Colour rules
+- Home's page is `--canvas` #ecf0ec with white cards: 1px `--card-ring` #dde3dd and `--shadow-card`. The top bar stays white. The lead tile is white with a `--lead-ring` #b9d3bb outline.
 - `--brand` is for links, buttons and the top bar. `--r4-bright` is for fills and lines only, never text (2.7:1 on white).
 - The R4 logo's bars are black, so it always sits on white.
-- Green is the brand and never on a number. Status marks exceptions only and always comes with a word: red below cost and down, amber below median, blue for a delta that is up. Sound is ink.
+- Green is the brand and never on a number. Home's points each carry a small light: green and steady, red and pulsing when the point needs attention. Status marks exceptions only and always comes with a word: red below cost and down, amber below median, blue for a delta that is up. Sound is ink.
 - A delta wears colour only at a fifth or more (±20%). There is no arrow under 1%, and past 300% it reads "new" or "stopped".
 - A month-table cell is coloured only when more than 25% and $5K from its row's own 12-month average: red below, blue above.
 - Series colour follows the entity: storage blue, service orange, Citadel a neutral. Text never wears a series colour.
@@ -61,7 +62,19 @@ Every control shows a 2px `--brand` focus ring, instantly. A field's edge is `--
 Plain English, British spelling in prose, US dollar figures. One idea per row. Every number carries its comparison. Estimated figures carry "est." with the assumption named once nearby, and charts hatch them. A figure that can't be calculated yet is a dashed empty state with a one-line reason.
 
 ## Motion
-Entrances only, quick: `--t-slow` 260ms, `--t-draw` 480ms, `--rise` 8px. All of it is off under reduced motion.
+Other screens: entrances only, quick (`--t-slow` 260ms, `--t-draw` 480ms, `--rise` 8px).
+
+Home, by Theran's decision on 2 November 2026:
+- **Entrance, once a session** (sessionStorage), later visits show the end state: the hero fades up, the $1.0M bar fills, figures count up in step, summary lines and tiles stagger. On scroll, once: the 13 weeks and the line bars grow.
+- **State lights:** green breathes; red pings, only on a line over its threshold.
+- **Live route map:** district shading appears lightest to darkest, routes draw out from the yard, dashes march, a marker loops out and back and each stop pulses as it's reached. It pauses off screen or when the tab is hidden.
+- **Every other map follows Home's** (Theran, 2 November 2026; `components/mapkit.js`): the same district shading, always R4's done services over twelve months, so a district is one colour everywhere; routes as the marching dashed line drawn out from the yard, a marker going round and stops pulsing, paused off screen.
+- **Quote** (Theran, 3 November 2026): the four figures count to their new values whenever anything changes; pin drop, ring, route draw, stop pop and card bars grow on its map and cards.
+- **Accounts and customer pages** (Theran, 3 November 2026): lights on every summary, figures count up in the once-a-session entrance, bars grow, margin pills pop in, the drawer slides and the margin pop-out scales.
+- **Rules:** animate only transform, opacity and stroke-dashoffset; never `transition: all`; the real figures are in the HTML first; reduced motion shows end states and no loops.
+
+## Map
+Home's map is always open and defaults to last week, Monday to Friday. Postcode districts are shaded in light tints, a little deeper the busier, so the routes stay readable on top, from the Census's postcode areas (`public/data/zones.json`), with a hover or tap showing what's going on there. Routes are one per driver, from the yard and back in recorded stop order, joined along the main roads, and say they are not GPS.
 
 ## Exports
 `public/tokens.css` in this project.

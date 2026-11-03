@@ -18,7 +18,8 @@
     "contrast": "node scripts/contrast.js",
     "sweep": "node scripts/sweep.js",
     "speed": "node scripts/speed.js",
-    "footing": "node scripts/footing.js"
+    "footing": "node scripts/footing.js",
+    "tour": "node scripts/tour_check.cjs"
   },
   "engines": {
     "node": ">=20"

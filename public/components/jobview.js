@@ -10,6 +10,7 @@ import { routeDay, allocate, cheaper, mapSvg, NEAR_MILES, NEAR_DAYS, miles, YARD
 loadBasemap();   // the outline under the route maps, fetched once while the page is read
 import { jobCost, costParts, PARTS } from './margin.js';
 import { money0 } from './chart.js';
+import { loadZones, bookShading, playMap, zoneKey } from './mapkit.js';
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const title = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase()).replace(/\b(Llp|Llc|Inc|Pc|Itad|Cboe)\b/g, w => w.toUpperCase());
@@ -51,16 +52,16 @@ export function jobPlace(ctx) {
 const PART_CLS = { space: 'p-space', handling: 'p-hand', route: 'p-route', plant: 'p-plant', labour: 'p-lab' };
 
 // The job as HTML. items: the invoice lines shown; c: its cost (jobCost); svcName: code → name.
-export function jobHtml({ o, items, c, svcName, ctx, A }) {
+export function jobHtml({ o, items, c, svcName, ctx, A, basis: said = null }) {
   const rev = items.reduce((t, i) => t + (i.revenue || 0), 0), left = rev - c.total;
   const parts = costParts(c.lines), total = Math.max(rev, c.total, 1);
   const seg = (v, cls, label) => v > 0.5 ? `<i class="${cls}" style="width:${v / total * 100}%" title="${esc(label)} ${money0(v)}">${v / total > 0.12 ? money0(v) : ''}</i>` : '';
   const flat = !!(o && o.flatFee);
   const what = flat ? `On the account's flat fee: this order bills nothing of its own and costs about ${money0(c.total)} to serve. The fee is billed each month, on the orders that show a value.` : !c.total ? 'Nothing on this job carries a modelled cost: fees and charges with no volume behind them.'
     : `Billed ${money0(rev)} against about ${money0(c.total)} to serve, ${left >= 0 ? `leaving ${money0(left)}` : `${money0(-left)} short`}.`;
-  const basis = !c.route ? '' : c.real ? ' Its route cost is its real share of the route that day, below.'
+  const basis = said != null ? said : !c.route ? '' : c.real ? ' Its route cost is its real share of the route that day, below.'
     : ` Its route cost is the model's average visit: ${ctx === null && A ? 'this account was on no Veri-Shred route that day. Box deliveries and retrievals run on delivery routes, which are not in the data yet.' : 'the route lists for this date arrive with the next snapshot.'}`;
-  const inv = items.map(i => `<div class="jv-row"><span>${esc(title(svcName.get(String(i.code).replace(/^S5[BPT]$/, 'S5')) || i.code))} <small>${esc(i.code)} · ${n0(i.units)}</small></span><span class="num">${money0(i.revenue)}</span></div>`).join('');
+  const inv = items.map(i => `<div class="jv-row"><span>${esc(title(svcName.get(String(i.code).replace(/^S5[BPT]$/, 'S5')) || i.code))} <small>${esc(i.code)}, ${n0(i.units)}</small></span><span class="num">${money0(i.revenue)}</span></div>`).join('');
   return `<div class="jv">
     <div class="jv-bars">
       <span class="lab">Billed</span><div class="jv-bar"><i class="p-rev" style="width:${rev / total * 100}%">${rev / total > 0.12 ? money0(rev) : ''}</i></div>
@@ -88,18 +89,20 @@ export function drawRouteBlock(el, ctx, { R, A, Z }) {
   const c = cheaper(day, a, A.routeHistory && A.routeHistory.length ? A.routeHistory : A.routeDays, Z, A.postcodes);
   const me = a.me, nm = s => esc(title(s || '')), dens = c.density;
   el.innerHTML = `${head(`The route that day: ${esc(routeName(day.route))} on ${dayFmt(day.date)}, ${a.stops} stop${a.stops === 1 ? '' : 's'} for ${a.visits} customer${a.visits === 1 ? '' : 's'}, about ${Math.round(a.dayMiles)} ${a.road ? 'road ' : ''}miles est.`)}
-    <div class="rm-grid"><div class="rm-wrap"><div class="c-tip" hidden></div></div>
-      <ol class="rm-list">${day.stops.map((s, i) => `<li class="${s.mine ? 'me' : ''}" data-i="${i}"><span>${nm(s.company)}<small>${esc(s.postcode || 'no postcode')} · ${s.services} service${s.services === 1 ? '' : 's'}</small></span><span class="num">${money0(s.cost)}</span></li>`).join('')}</ol></div>
+    <div class="rm-grid"><div><div class="rm-wrap"><div class="c-tip" hidden></div></div>${zoneKey()}</div>
+      <ol class="rm-list">${day.stops.map((s, i) => `<li class="${s.mine ? 'me' : ''}" data-i="${i}"><span>${nm(s.company)}<small>${esc(s.postcode || 'no postcode')}, ${s.services} service${s.services === 1 ? '' : 's'}</small></span><span class="num">${money0(s.cost)}</span></li>`).join('')}</ol></div>
     <p class="jv-say">The account's share of the day: <b>${money0(me.cost)}</b> est., ${money0(me.travel)} of travel and ${money0(me.onsite)} on site. ${a.visits < a.model.visitsDay ? `The route made ${a.visits} visit${a.visits === 1 ? '' : 's'}, fewer than the usual ${Fmt.fixed(a.model.visitsDay, 2)} a day, so each carried more of it.` : `The route made ${a.visits} visits, more than the usual ${Fmt.fixed(a.model.visitsDay, 2)} a day, so each carried less than the model's ${money0(a.model.perVisit)}.`}${me.services ? ` That is ${money0(me.cost / me.services)} a service for its ${me.services}.` : ''}</p>
     ${head('What would have made it cheaper est.')}
     <ul class="rm-why">
       ${day.stops.filter(s => s.mine).length > 1 ? `<li>Its costliest stop was number ${c.n}, at ${esc(c.stop.postcode || 'an unplaced address')} (${money0(c.stop.cost)}); the rest is about that stop.</li>` : ''}
       ${c.nearby.length ? c.nearby.slice(0, 3).map(n => `<li>${esc(routeName(n.route))} was at ${esc(n.postcode)} on ${dayFmt(n.date)}, ${n.miles < 0.1 ? 'the same postcode' : `${Fmt.fixed(n.miles, 1)} miles away`}: carrying the stop on that route would have saved about <b>${money0(n.saving)}</b>.</li>`).join('') : `<li>No other route came within ${NEAR_MILES} miles within ${NEAR_DAYS} days either side.</li>`}
-      ${dens.length > 1 && c.stop.travel > 1 ? `<li>More customers at ${esc(c.stop.postcode || 'the stop')} on the same visit would share its travel: ${dens.map(x => `${x.k === 1 ? 'alone' : `with ${x.k - 1} more`} ${money0(x.perService)}`).join(' · ')} a service.${c.book && c.book.customers > 1 ? ` R4 served ${c.book.customers} customers at ${esc(c.stop.postcode)} over twelve months (${nm(c.book.names)}).` : ''}</li>` : ''}
+      ${dens.length > 1 && c.stop.travel > 1 ? `<li>More customers at ${esc(c.stop.postcode || 'the stop')} on the same visit would share its travel: ${dens.map(x => `${x.k === 1 ? 'alone' : `with ${x.k - 1} more`} ${money0(x.perService)}`).join(', ')} a service.${c.book && c.book.customers > 1 ? ` R4 served ${c.book.customers} customers at ${esc(c.stop.postcode)} over twelve months (${nm(c.book.names)}).` : ''}</li>` : ''}
     </ul>
-    <div class="src">Stops at Census postcode centres, ${a.road ? 'joined by the likely way along main roads (dashed where the roads give no way)' : 'joined by straight lines'}; no GPS was captured · a route day ${money0(a.total)}, shared between the stops by minutes: each stop's detour in ${a.road ? 'road' : 'straight-line'} miles at ${R.SETTINGS.mph} mph, plus ${R.SETTINGS.stopMin} minutes a stop and ${R.SETTINGS.serviceMin} a service (assumed, for Mike to check) (model/rates.js, provisional) · ${day.source === 'orders' ? 'from the route orders held offline' : 'Veri-Shred done orders'} · days that also delivered boxes are under-counted until delivery routes are in the data</div>`;
+    <div class="src">Stops at Census postcode centres, ${a.road ? 'joined by the likely way along main roads' : 'joined by straight lines'}; no GPS was captured, districts shaded by R4's done services over twelve months, a route day ${money0(a.total)}, shared between the stops by minutes: each stop's detour in ${a.road ? 'road' : 'straight-line'} miles at ${R.SETTINGS.mph} mph, plus ${R.SETTINGS.stopMin} minutes a stop and ${R.SETTINGS.serviceMin} a service (assumed, for Mike to check) (model/rates.js, provisional), ${day.source === 'orders' ? 'from the route orders held offline' : 'Veri-Shred done orders'}, days that also delivered boxes are under-counted until delivery routes are in the data</div>`;
   const tip = el.querySelector('.c-tip'), wrap = el.querySelector('.rm-wrap');
-  wrap.insertAdjacentHTML('afterbegin', mapSvg(day, { width: Math.max(280, Math.min(900, wrap.clientWidth || 560)), base: basemapNow() }));   // drawn at its on-screen width
+  Promise.all([loadBasemap(), loadZones()]).then(() => {
+  if (!wrap.isConnected) return;
+  wrap.insertAdjacentHTML('afterbegin', mapSvg(day, { width: Math.max(280, Math.min(900, wrap.clientWidth || 560)), base: basemapNow(), shading: bookShading(A, Z) }));   // drawn at its on-screen width
   const svg = wrap.querySelector('svg');
   const show = i => {
     const s = day.stops[i]; if (!s) return;
@@ -108,7 +111,7 @@ export function drawRouteBlock(el, ctx, { R, A, Z }) {
     const g = el.querySelector(`.rm-stop[data-i="${i}"]`);
     if (!g) { tip.hidden = true; return; }
     const r = g.getBoundingClientRect(), w = wrap.getBoundingClientRect();
-    tip.innerHTML = `<b>${i + 1}. ${nm(s.company)}</b><span>${esc(s.postcode || '')} · ${s.services} service${s.services === 1 ? '' : 's'}${s.pounds ? ` · ${n0(s.pounds)} lb` : ''}</span><span>share of the day <b>${money0(s.cost)}</b> est.</span><span>${money0(s.travel)} travel · ${money0(s.onsite)} on site</span>`;
+    tip.innerHTML = `<b>${i + 1}. ${nm(s.company)}</b><span>${esc(s.postcode || '')}, ${s.services} service${s.services === 1 ? '' : 's'}${s.pounds ? `, ${n0(s.pounds)} lb` : ''}</span><span>share of the day <b>${money0(s.cost)}</b> est.</span><span>${money0(s.travel)} travel, ${money0(s.onsite)} on site</span>`;
     tip.style.left = Math.max(90, Math.min(w.width - 90, r.left - w.left + r.width / 2)) + 'px';
     tip.hidden = false;
     const below = r.top - w.top < w.height / 2;
@@ -118,6 +121,8 @@ export function drawRouteBlock(el, ctx, { R, A, Z }) {
   el.querySelectorAll('.rm-stop').forEach(g => { g.addEventListener('mouseenter', () => show(+g.dataset.i)); g.addEventListener('click', () => show(+g.dataset.i)); });
   el.querySelectorAll('.rm-list li').forEach(li => { li.addEventListener('mouseenter', () => show(+li.dataset.i)); li.addEventListener('click', () => show(+li.dataset.i)); });
   svg.addEventListener('mouseleave', hide); el.querySelector('.rm-list').addEventListener('mouseleave', hide);
+  playMap(svg);
+  });
 }
 
 // Where more volume would cut cost: postcodes whose route visits carry few customers, ranked by what

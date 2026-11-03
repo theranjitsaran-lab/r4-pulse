@@ -1,15 +1,18 @@
 // The explain pop-out: a panel from the right on a desk, a sheet from the bottom on a phone. One open
 // at a time; Escape, the scrim, the close button or moving screen closes it. Content is HTML the
 // caller has escaped. A question in `ask` adds a button that hands it to the Ask sheet (app.js).
-let el = null;
+let el = null, closing = null;
 
-export function openPop({ title, sub = '', html, ask = null }) {
+export function openPop({ title, sub = '', html, ask = null, wide = false, size = null, onClose = null, foot = '' }) {
   if (!el) el = build();
+  el.classList.toggle('wide', wide); el.classList.toggle('mid', size === 'mid');
+  closing = onClose;
   el.querySelector('.pop-t').textContent = title;
   el.querySelector('.pop-s').textContent = sub;
   el.querySelector('.pop-b').innerHTML = html;
   const a = el.querySelector('.pop-ask');
   a.hidden = !ask; a.dataset.q = ask || '';
+  el.querySelector('.pop-x').innerHTML = foot;
   el.hidden = false;
   document.documentElement.classList.add('ask-open');
   requestAnimationFrame(() => el.classList.add('is-on'));
@@ -18,6 +21,7 @@ export function openPop({ title, sub = '', html, ask = null }) {
 
 export function closePop() {
   if (!el || el.hidden) return;
+  if (closing) { closing(); closing = null; }
   el.classList.remove('is-on');
   document.documentElement.classList.remove('ask-open');
   setTimeout(() => { if (!el.classList.contains('is-on')) el.hidden = true; }, 250);
@@ -31,7 +35,7 @@ function build() {
     <section class="ask-panel" role="dialog" aria-label="Explain this figure">
       <header><b class="pop-t"></b><small class="pop-s"></small><button class="ask-x" type="button" aria-label="Close">✕</button></header>
       <div class="pop-b"></div>
-      <footer class="pop-f"><button class="pop-ask" type="button">Ask why ›</button></footer>
+      <footer class="pop-f"><button class="pop-ask" type="button">Ask why ›</button><div class="pop-x"></div></footer>
     </section>`;
   document.body.appendChild(d);
   d.querySelector('.ask-x').addEventListener('click', closePop);

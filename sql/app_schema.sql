@@ -51,7 +51,8 @@ CREATE INDEX IF NOT EXISTS quote_at ON app.quote (at DESC);
 -- itself (its dollars and reason) is worked out from the data each day; this holds only what the team
 -- says about it, one row per change, the latest row being its state.
 --   key     kind:level1[:code], e.g. 'cross:3507:bin', 'price:2948:B2', 'slip:12530'
---   status  open · contacted · quoted · won · lost
+--   status  open · contacted · agreed · won · lost ('quoted' is an older word for agreed, read as agreed)
+--   next_step  the date of the next step, if there is one
 --   value   the dollars a year when the status was set, so "won this month" is what was won then
 CREATE TABLE IF NOT EXISTS app.opportunity (
   id         bigserial PRIMARY KEY,
@@ -65,9 +66,27 @@ CREATE TABLE IF NOT EXISTS app.opportunity (
   at         timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS opportunity_key ON app.opportunity (key, at DESC);
+ALTER TABLE app.opportunity ADD COLUMN IF NOT EXISTS next_step date;
+ALTER TABLE app.opportunity DROP CONSTRAINT IF EXISTS opportunity_status_check;
+ALTER TABLE app.opportunity ADD CONSTRAINT opportunity_status_check CHECK (status IN ('open', 'contacted', 'quoted', 'agreed', 'won', 'lost'));
 
 -- The cost model's assumptions, editable on Settings (server/settings.js): one row per change.
 CREATE TABLE IF NOT EXISTS app.setting (
   id bigserial PRIMARY KEY, key text NOT NULL, value numeric NOT NULL, who text NOT NULL,
   at timestamptz NOT NULL DEFAULT now());
 CREATE INDEX IF NOT EXISTS setting_key ON app.setting (key, at DESC);
+
+-- Who can sign in beyond AUTH_USERS, and what each has seen (server/users.js). One row per change, the latest winning. Hashes only.
+CREATE TABLE IF NOT EXISTS app.app_user (
+  id bigserial PRIMARY KEY, login text NOT NULL, hash text NOT NULL, role text NOT NULL, active boolean NOT NULL DEFAULT true, who text NOT NULL,
+  at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS app_user_login ON app.app_user (login, at DESC);
+CREATE TABLE IF NOT EXISTS app.user_state (
+  id bigserial PRIMARY KEY, login text NOT NULL, welcome_seen_version integer NOT NULL, at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS user_state_login ON app.user_state (login, at DESC);
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'r4_pulse_app') THEN
+    GRANT SELECT, INSERT ON app.app_user, app.user_state TO r4_pulse_app;
+    GRANT USAGE ON SEQUENCE app.app_user_id_seq, app.user_state_id_seq TO r4_pulse_app;
+  END IF;
+END $$;

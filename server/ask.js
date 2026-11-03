@@ -143,10 +143,10 @@ function tools(L, D, X = {}) {
         const O = L.opps.opportunities({ C: D.C, PR: D.PR, CA: D.CA, M: D.M }, X.statuses || {});
         let rows = O.rows.filter(r => (kind === 'all' || r.kind === kind) && (level1 == null || r.level1 === level1));
         rows = rows.filter(r => status === 'active' ? r.status !== 'won' && r.status !== 'lost' : r.status === status);
-        const play = O.rows.filter(r => r.status === 'contacted' || r.status === 'quoted');
+        const play = O.rows.filter(r => r.status === 'contacted' || r.status === 'agreed');
         return {
           won_this_month: `${moneyK(O.won.value)} across ${O.won.n} opportunities marked won`,
-          in_play: `${play.length} contacted or quoted, ${moneyK(play.reduce((t, r) => t + r.value, 0))} a year`,
+          in_play: `${play.length} contacted or agreed, ${moneyK(play.reduce((t, r) => t + r.value, 0))} a year`,
           matching: rows.length,
           rows: rows.slice(0, 12).map(r => ({ level1: r.level1, customer: r.name, kind: L.opps.KINDS[r.kind], value: `${moneyK(r.value)}${r.once ? ' once' : ' a year'}${r.modelled ? ' est.' : ''}`, reason: r.reason, status: r.status, owner: r.owner || 'nobody yet', opener: r.opener })),
         };
@@ -167,7 +167,7 @@ function tools(L, D, X = {}) {
           revenue_a_year: money0(rev), cost_a_year: `${money0(c.total)} est.`, margin_a_year: `${rev - c.total < 0 ? '−' : '+'}${money0(Math.abs(rev - c.total)).replace('−', '')} est.`,
           margin_share: rev > 0 ? `${Math.round((rev - c.total) / rev * 100)}% of revenue kept est.` : null,
           cost_a_unit: `$${c.perUnit.toFixed(2)} est.`,
-          route_cost_basis: bin ? { account: "the account's own route days", postcode: `real route days in and around ${st.postcode}`, average: 'the average visit, under review until delivery routes are in the data' }[c.routeBasis] : 'no route cost',
+          route_cost_basis: bin ? { account: "the account's own route days", nearby: `real route days within three miles of ${st.postcode}`, yard: 'its own trip from the yard, no route near it', book: "the book's average stop, no postcode given", average: 'the average visit, under review until delivery routes are in the data' }[c.routeBasis] : 'no route cost',
           lines: c.lines.map(l => `${l[0]}: ${money0(l[1])} (${String(l[2]).split('. ')[0]})`),
         };
       },
