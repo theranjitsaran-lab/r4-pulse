@@ -57,7 +57,7 @@ async function tables(base, pass) {
     for (const [name, hash, term, who] of [...TABLES.map(t => [...t, owner]), ['Money, margin (admin)', '#numbers?span=12&show=margin', 'bin', admin], ['Money, margin by kind (admin)', '#numbers?span=12&show=margin&group=ss', 'serv', admin]]) {
       const page = who;
       await page.goto('about:blank'); await page.goto(base + '/' + hash);
-      await page.waitForSelector('.dt-t tbody tr', { timeout: 30000 }); await page.waitForTimeout(400);
+      await page.waitForSelector('.dt-t tbody tr', { timeout: 30000, state: 'attached' }); await page.evaluate(() => document.querySelectorAll('details.pq-book').forEach(d => { d.open = true; })); await page.waitForTimeout(400);
       for (const stage of ['all', 'searched']) {
         const dts = await page.$$('.dt');
         for (const d of dts) {

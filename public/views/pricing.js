@@ -11,6 +11,7 @@ import { unitSuspect } from '/components/levers.js';
 import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
 import { SERVICES, nearestRoute, marginLabel, quoteOptions, quoteFacts, routeLabel, dayLabel, RIDE_MILES } from '/components/quote.js';
 import { costsVisible, NOT_READY, whoAmI } from '/components/access.js';
+import { openPop, closePop } from '/components/pop.js';
 import { dataTable } from '/components/datatable.js';
 import { isInternal } from '/components/metrics.js';
 import { YARD, dist, loadRoadnet, loadBasemap } from '/components/routemap.js';
@@ -135,9 +136,11 @@ export async function render(main, PR, params) {
     </section>
 
     <section class="h2-card book" data-in>
-      <div class="h2-ch"><h2 id="b-title">Invoiced against the book</h2><small>for each service, the share of its volume billed under the book's median, and what the median would add a year. Tap to price it</small></div>
-      <div id="b-rows"></div>
-      <div class="src">Each account's usual invoiced rate over the last 13 months, from VCK. Storage is weighted by boxes. List prices are not in the database, so the book's own median is the comparison</div>
+      <details class="fold pq-book"><summary><h3 id="b-title">Prices under the book</h3><span class="sub" id="b-sub"></span></summary>
+        <p class="pq-explain">Not about this quote: it looks across every account. "The book" is what R4's accounts really pay. For each service, the table counts the accounts paying under the middle price, and adds up what R4 would bill in a year if each of them moved up to it. It is the most there is to win, not a forecast. Tap a service to see the accounts behind its number.</p>
+        <div id="b-rows"></div>
+        <div class="src">Each account's usual invoiced rate over the last 13 months, from VCK. Storage is weighted by boxes. List prices are not in the database, so the book's own median is the comparison.</div>
+      </details>
     </section>
   </div>`;
 
@@ -316,19 +319,33 @@ export async function render(main, PR, params) {
     const under = rs.filter(r => r.v < st2.median && r.level1 !== CITADEL && !unitSuspect(r.v, st2.median));
     const vol = rs.reduce((t, r) => t + r.units, 0), uvol = under.reduce((t, r) => t + r.units, 0);
     const gap = under.reduce((t, r) => t + (st2.median - r.v) * r.units, 0);
-    return { code, name: code === 'STO' ? book[code].name : titleCase(book[code].name), n: rs.length, med: st2.median, share: vol ? uvol / vol : 0, gap, under: under.length };
+    const list = under.map(r => ({ ...r, worth: (st2.median - r.v) * r.units })).sort((x, y) => y.worth - x.worth);
+    return { code, name: code === 'STO' ? book[code].name : titleCase(book[code].name), n: rs.length, med: st2.median, share: vol ? uvol / vol : 0, gap, under: under.length, list, weighted };
   }).filter(r => r.n >= 20 && r.gap > 0).sort((a, b) => b.gap - a.gap);
-  $('b-title').textContent = bookRows.length ? `${bookRows[0].name} carries the biggest gap to the book: ${moneyK(bookRows[0].gap)} a year` : 'Invoiced against the book';
+  const bookTotal = bookRows.reduce((t, r) => t + r.gap, 0);
+  $('b-title').textContent = bookRows.length ? `Prices under the book: up to ${moneyK(bookTotal)} a year across ${bookRows.length} services` : 'Prices under the book';
+  $('b-sub').textContent = bookRows.length ? `largest: ${bookRows[0].name}, ${moneyK(bookRows[0].gap)}` : '';
+  // what is behind one service's number, and the five accounts that sway it most
+  function showGap(r) {
+    const d = r.code === 'STO' ? 3 : 2, f = v => Fmt.money(v, { dp: d }), top = r.list.slice(0, 5), rest = r.list.slice(5);
+    const sum = l => l.reduce((t, x) => t + x.worth, 0), topV = sum(top), max = Math.max(1, ...top.map(x => x.worth));
+    const unitWord = r.code === 'STO' ? 'a box a month' : 'a unit', row = x => `<tr><td class="tl"><a href="#customer/${x.level1}">${esc(x.name)}</a><small>pays ${f(x.v)} on ${Fmt.num(x.units)} ${r.code === 'STO' ? 'box-months' : 'units'} a year</small><i class="pq-sway" style="--s:${Math.max(.01, x.worth / max).toFixed(3)}"></i></td><td>+${moneyK(x.worth)}</td></tr>`;
+    openPop({ title: r.name, sub: `${Fmt.num(r.under)} of ${Fmt.num(r.n)} accounts pay under the ${r.weighted ? 'box-weighted ' : ''}median of ${f(r.med)} ${unitWord}`, ask: `Which accounts should we raise first on ${r.name}, and how?`, html: `
+      <p class="p2-lede">If those ${Fmt.num(r.under)} accounts moved up to ${f(r.med)}, R4 would bill <b>+${moneyK(r.gap)} a year</b>. That is the most there is to win, not a forecast.</p>
+      <h3>${top.length < r.list.length ? `The five that sway it most: ${Fmt.pct(topV / r.gap)} of the number` : 'The accounts behind it'}</h3>
+      <table class="p2-t"><thead><tr><th class="tl">Account</th><th>At the median, a year</th></tr></thead><tbody>${top.map(row).join('')}</tbody></table>
+      ${rest.length ? `<details class="fold"><summary><h3>The other ${Fmt.num(rest.length)} accounts</h3><span class="sub">+${moneyK(sum(rest))} between them</span></summary><table class="p2-t"><tbody>${rest.map(row).join('')}</tbody></table></details>` : ''}
+      <p class="p2-go"><button type="button" class="pq-btn" data-price="${esc(r.code)}">Price this service</button></p>
+      <p class="src">Each account's usual invoiced rate over the last 13 months, from VCK. A rate under a fifth of the median is left out as a likely unit mismatch.</p>` });
+    const b = document.querySelector('.pop .pop-b [data-price]');
+    if (b) b.addEventListener('click', () => { closePop(); st.code = r.code; showCode(); prefill(); update(); link(); window.scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' }); });
+  }
   dataTable($('b-rows'), { key: 'pricegaps', ns: 'g_', noun: 'services', who: whoAmI(), rows: bookRows, placeholder: 'Find a service', search: r => r.name,
-    onRow: r => {
-      st.code = r.code; showCode(); prefill(); update();
-      history.replaceState(null, '', `#pricing?${st.level1 ? 'level1=' + st.level1 + '&' : ''}code=${st.code}`);
-      window.scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' });
-    },
+    opens: true, plain: true, onRow: r => showGap(r),
     cols: [
       { k: 'name', l: 'Service', name: true, text: true, get: r => r.name, fmt: r => esc(r.name) },
-      { k: 'under', l: 'Accounts under', def: true, get: r => r.under, total: 'sum', fmt: r => r.under },
-      { k: 'gap', l: 'At the median, a year', def: true, sorted: true, get: r => r.gap, total: 'sum', totalFmt: v => '+' + moneyK(v), fmt: r => '+' + moneyK(r.gap) },
+      { k: 'under', l: 'Accounts under the median', short: 'Under', def: true, get: r => r.under, total: 'sum', fmt: r => r.under },
+      { k: 'gap', l: 'If they moved to the median, a year', short: 'At median', def: true, sorted: true, get: r => r.gap, total: 'sum', totalFmt: v => '+' + moneyK(v), fmt: r => '+' + moneyK(r.gap) },
       { k: 'med', l: 'Median', get: r => r.med, fmt: r => Fmt.money(r.med, { dp: r.code === 'STO' ? 3 : 2 }) },
       { k: 'n', l: 'Accounts', get: r => r.n, fmt: r => r.n },
       { k: 'share', l: 'Volume under', get: r => r.share, fmt: r => Fmt.pct(r.share) },

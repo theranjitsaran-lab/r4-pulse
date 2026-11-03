@@ -286,3 +286,11 @@
 }
 @media (prefers-reduced-motion: reduce) { .pq-stack i, .pq-opt, .q-ring.go, .q-pin.drop, .q-map.moved .q-stop, .pq-why li, .pq-mbar i { animation: none; transition: none; } }
 .pq .book .dt-scroll { max-height: none; }
+.pq-explain { margin: var(--sp-3) 0; max-width: var(--measure); color: var(--ink-2); font-size: var(--fs-sm); line-height: 1.5; }
+.pq .pq-book { margin-top: 0; border-top: 0; padding-top: 0; }
+.pq-sway { display: block; height: var(--sp-1); margin-top: var(--sp-1); border-radius: var(--r-pill); background: var(--brand); transform-origin: left; transform: scaleX(var(--s)); animation: md-grow 500ms var(--ease-out) backwards; }
+.pop-b details.fold { margin-top: var(--sp-3); }
+.pop-b details.fold summary { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3); cursor: pointer; }
+.pop-b details.fold summary h3 { margin: 0; }
+.pop-b .pq-btn { margin-top: var(--sp-2); }
+@media (prefers-reduced-motion: reduce) { .pq-sway { animation: none; } }
