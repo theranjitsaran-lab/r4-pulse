@@ -81,7 +81,7 @@ export async function render(main, PR, params) {
       <div class="h2-ch"><h2 id="pq-what">1. What are we quoting?</h2></div>
       <div class="pq-what">
         <label>Customer<input id="p-cust" list="p-cust-l" type="search" placeholder="A name, or leave blank for a new one" autocomplete="off"><datalist id="p-cust-l">${customers.map(([, n]) => `<option value="${esc(n)}"></option>`).join('')}</datalist></label>
-        <label>Service<input id="p-code" list="p-code-l" type="search" placeholder="Type a service" autocomplete="off"><datalist id="p-code-l">${[...svcByName.keys()].map(n => `<option value="${esc(n)}"></option>`).join('')}</datalist></label>
+        <label>Service<select id="p-code">${[...svcByName].map(([n, c]) => `<option value="${esc(c)}">${esc(n)}</option>`).join('')}</select></label>
         <div id="p-binbox"><span class="pq-lab">Bins each visit</span><div class="pq-step"><button type="button" id="p-minus" aria-label="Fewer bins">−</button><output id="p-bins"></output><button type="button" id="p-plus" aria-label="More bins">+</button></div></div>
         <div id="p-freqbox"><span class="pq-lab">How often</span><div class="pq-pills" id="p-freq" role="group" aria-label="How often"></div></div>
         <label id="p-unitbox" hidden><span id="p-units-lab">Units a year</span><input id="p-units" inputmode="decimal"></label>
@@ -145,9 +145,10 @@ export async function render(main, PR, params) {
   const stayPut = () => { const m = document.querySelector('.mast'); main.querySelector('.pq').style.setProperty('--pq-top', (m ? m.offsetHeight : 0) + 'px'); };
   stayPut(); addEventListener('resize', stayPut, { passive: true });
   $('p-cust').value = st.level1 ? (customers.find(x => x[0] === st.level1) || [0, ''])[1] : '';
-  const showCode = () => { $('p-code').value = svcName(st.code); };
+  // a service reached from the book table may not be on the list: it joins it
+  const showCode = () => { const el = $('p-code'); if (![...el.options].some(o => o.value === st.code)) el.add(new Option(svcName(st.code), st.code)); el.value = st.code; };
   showCode();
-  for (const id of ['p-cust', 'p-code']) $(id).addEventListener('focus', e => e.target.select());
+  $('p-cust').addEventListener('focus', e => e.target.select());
   const isBin = () => (SERVICES[st.code] || {}).fam === 'bin';
   const hasPlace = () => ['bin', 'trip', 'itad'].includes((SERVICES[st.code] || {}).fam);
   const dec = () => st.code === 'STO' ? 3 : 2;
@@ -296,7 +297,7 @@ export async function render(main, PR, params) {
     st.postcode = code; st.opt = 'now'; $('p-pc').value = code; setMiles(); link(); update();
   }
   $('p-cust').addEventListener('change', () => { st.level1 = byName.get($('p-cust').value.trim()) ?? null; prefill(); update(); link(); });
-  $('p-code').addEventListener('change', () => { const c = svcByName.get($('p-code').value.trim()); if (!c) { showCode(); return; } st.code = c; prefill(); update(); link(); });
+  $('p-code').addEventListener('change', () => { st.code = $('p-code').value; prefill(); update(); link(); });
   $('p-pcf').addEventListener('submit', e => { e.preventDefault(); const v = $('p-pc').value.trim(); if (/^\d{5}$/.test(v)) pick(v); else $('p-map-msg').textContent = 'A postcode has five figures.'; });
   $('p-price').addEventListener('input', () => { const v = num($('p-price')); if (v == null) return; st.price = v; st.opt = 'now'; update(); });
   $('p-slide').addEventListener('input', () => { st.price = Number($('p-slide').value); st.opt = 'now'; $('p-price').value = Fmt.fixed(st.price, dec()); update(); });
