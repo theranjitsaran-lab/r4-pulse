@@ -1,5 +1,5 @@
-// Routes — Mike, desktop first, 06:30. Map-led since 30 October 2026: the day's routes from the yard
-// over every postcode R4 visits, or where one more customer would save most.
+// Operations › Routes — Mike, desktop first, 06:30. Three lit points and four tiles, as Accounts, then the map: the day's
+// routes from the yard over every postcode R4 visits, or where one more customer would save most.
 // A day by route against each route's own norm; tap a route
 // for its stops in order with what each customer's work billed; the week as a grid; booked ahead.
 // From /api/activity (Veri-Shred service orders through v_route_day). Route-day margin waits for
@@ -16,6 +16,8 @@ import { titleCase, esc, loadRates } from '/components/data.js';
 import { routeNorms, LABELS, THIN } from '/components/metrics.js';
 import { costsVisible, whoAmI } from '/components/access.js';
 import { dataTable } from '/components/datatable.js';
+import { litCard, drawPoints, tile } from '/components/lit.js';
+import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
 import { areaFrame, landLayer, yardMark, scaleBar } from '/components/areamap.js';
 import { loadZones, bookShading, districtLayer, routeLayer, maskFor, maskId, playMap, zoneKey, seg } from '/components/mapkit.js';
 import { densityByPostcode } from '/components/jobview.js';
@@ -35,7 +37,7 @@ const dcls = v => v >= 0.2 ? 'up' : v <= -0.2 ? 'down' : 'flat';
 
 export async function render(main, A, params) {
   if (!main) return;
-  // Warehouse moved to Money; old links follow it
+  // Warehouse has its own route; old links follow it
   if (params.tab === 'warehouse') { location.replace('#numbers?tab=warehouse'); return; }
   const [R, Z, base] = await Promise.all([loadRates(), fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
     loadBasemap(), loadRoadnet(), loadZones()]);
@@ -48,28 +50,28 @@ export async function render(main, A, params) {
   const value = new Map(A.dayValues.map(v => [v.date + '|' + v.level1, v.value]));
 
   main.innerHTML = `
-  <div class="rt">
+  <div class="rt h2 ac">
     <div class="top">
-      <div><h1>Operations</h1><div class="sub">Done is what drivers confirmed in Veri-Shred; booked includes work not yet done. <a href="#numbers?tab=warehouse">Warehouse ›</a></div><div class="seg rt-tabs" style="margin-top:10px"><a href="#activity" class="on">Routes</a><a href="#activity?tab=warehouse">Warehouse</a></div></div>
+      <div><h1>Operations</h1><div class="seg rt-tabs"><a href="#activity" class="on">Routes</a><a href="#numbers?tab=warehouse">Warehouse</a></div></div>
       <div class="day"><button id="rt-prev" aria-label="Previous day">‹</button><b id="rt-day"></b><button id="rt-next" aria-label="Next day">›</button></div>
     </div>
-    <p class="rt-say" id="rt-say"></p>
-    <div class="sum" id="rt-sum"></div>
-    <div class="card"><div class="card-head"><h3 id="rt-routes-h">By route</h3><small>against ${LABELS.normalRoute} (its 8-week median)</small></div><div id="rt-routes"></div></div>
-    <details class="h2-card rt-mapcard" id="rt-mapd"><summary class="rt-mapsum">Show the map</summary>
+    ${litCard('rt-lit')}
+    <section class="ktiles" id="rt-sum"></section>
+    <section class="h2-card rt-mapcard" data-in>
       <div class="rt-maphead"><div class="h2-ch"><h2 id="rt-map-t"></h2><small id="rt-map-s"></small></div>
         <div class="seg" id="rt-layer"><button data-l="day" class="on">The day's routes</button><button data-l="add">Where to add customers</button></div></div>
       <div id="rt-map"></div><div class="h2-key" id="rt-map-key"></div>
-    </details>
+    </section>
+    <section class="h2-card" data-in><div class="h2-ch"><h2 id="rt-routes-h">By route</h2><small>The tick is ${LABELS.normalRoute}, its 8-week median. Done is what drivers confirmed in Veri-Shred.</small></div><div id="rt-routes"></div></section>
     <div class="two">
-      <div class="card"><div class="card-head"><h3 id="rt-week-h">The week</h3></div><div id="rt-week"></div></div>
-      <div class="stack">
-        <div class="card"><div class="card-head"><h3 id="rt-ahead-h">Booked after the latest day</h3></div><div id="rt-ahead"></div></div>
-      </div>
+      <section class="h2-card" data-in><div class="h2-ch"><h2 id="rt-week-h">The week</h2></div><div id="rt-week"></div></section>
+      <section class="h2-card" data-in><div class="h2-ch"><h2 id="rt-ahead-h">Booked after the latest day</h2></div><div id="rt-ahead"></div></section>
     </div>
-    <div class="card" style="margin-top:var(--sp-4)" id="rt-far"></div>
+    <section class="h2-card" data-in id="rt-far"></section>
   </div>`;
   const $ = id => main.querySelector('#' + id);
+  const aheadRows = real.filter(r => r.date > A.latestDone && r.services > 0), aheadDates = [...new Set(aheadRows.map(r => r.date))].sort().slice(0, 7);
+  const bookedAhead = aheadRows.filter(r => aheadDates.includes(r.date)).reduce((t, r) => t + r.services, 0);
 
   function drawDay() {
     norm = routeNorms(A, day);
@@ -82,27 +84,31 @@ export async function render(main, A, params) {
     const pounds = rows.reduce((t, r) => t + r.pounds, 0);
     const thin = rows.filter(r => r.services_done > 0 && norm[r.route] && r.services_done < THIN * norm[r.route].done);
     const age = Math.round((Date.now() - Date.parse(A.latestDone + 'T12:00:00Z')) / 864e5);
-    const stale = age > 2 ? `<span class="is-warn">The latest work in the data is ${esc(dlabel(A.latestDone))}, ${age} days ago: the daily refresh has not run since, so "booked" dates may already have passed.</span> ` : '';
-    $('rt-say').innerHTML = stale + (done ? `${esc(dlabel(day))}: ${Fmt.grouped(done)} services done on ${pl(rows.filter(r => r.services_done > 0).length, 'route')}${normDay ? `, <span class="delta ${dcls(done / normDay - 1)}">${pct(done / normDay - 1)}</span> on what is normal for these routes` : ''}.${thin.length ? ` <span class="is-warn">Thin: ${thin.map(r => `${esc(routeName(r.route))} (${r.services_done} against ${Math.round(norm[r.route].done)})`).join(', ')}.</span>` : ' No thin route.'}` : 'No work done on this day.');
+    const out = rows.filter(r => r.services_done > 0).length, dn = normDay ? done / normDay - 1 : null;
+    const pts = [
+      done ? { key: 'day', tone: dn != null && dn <= -.2 ? 'r' : 'g', lead: `${Fmt.grouped(done)} services done on ${pl(out, 'route')}${dn != null ? ',' : '.'}`, rest: dn != null ? `${pct(dn)} on the ${Math.round(normDay)} normal for these routes.` : '' } : { key: 'day', tone: 'a', lead: 'No work done on this day.', rest: '' },
+      thin.length ? { key: 'thin', tone: 'a', lead: `${pl(thin.length, 'route')} ran thin:`, rest: `${thin.map(r => `${routeName(r.route)} (${r.services_done} against ${Math.round(norm[r.route].done)})`).join(', ')}.` } : { key: 'thin', tone: 'g', lead: 'No thin route', rest: "against each route's own norm." },
+      { key: 'ahead', tone: age > 2 ? 'a' : 'g', lead: aheadDates.length ? `${Fmt.grouped(bookedAhead)} services are booked` : 'Nothing is booked', rest: aheadDates.length ? `over the next ${pl(aheadDates.length, 'day')}${age > 2 ? `; the data is ${age} days old, so some may have passed` : ''}.` : 'beyond the latest day.' },
+    ];
+    // a new element each day, so a slow reply for the day before cannot land on this one
+    $('rt-lit').innerHTML = '<div></div>'; drawPoints($('rt-lit').firstChild, pts);
     $('rt-sum').innerHTML = `
-      <div class="card"><div class="lab">Services done</div><div class="big">${Fmt.grouped(done)}</div><div class="sub">${normDay ? `<span class="delta ${dcls(done / normDay - 1)}">${pct(done / normDay - 1)}</span> on the ${Math.round(normDay)} normal for these routes` : ''}</div></div>
-      <div class="card"><div class="lab">Booked, not done</div><div class="big ${booked - done > done * .5 ? 'is-warn' : ''}">${Fmt.grouped(booked - done)}</div><div class="sub">of ${Fmt.grouped(booked)} booked</div></div>
-      <div class="card"><div class="lab">Routes out</div><div class="big">${rows.filter(r => r.services_done > 0).length}</div><div class="sub">${rows.reduce((t, r) => t + r.stops_done, 0)} stops done</div></div>
-      <div class="card"><div class="lab">Pounds recorded</div><div class="big">${Fmt.num(pounds)}</div><div class="sub">${pounds ? `${Fmt.pct(rows.reduce((t, r) => t + r.pounds_exec_default, 0) / pounds)} of it is executive bins at a set weight, not weighed` : 'none recorded'}</div></div>`;
+      ${tile({ still: true, lead: true, label: 'Services done', big: Fmt.grouped(done), sub: dn != null ? `<span class="delta ${dcls(dn)}">${pct(dn)}</span> on the ${Math.round(normDay)} normal` : '' })}
+      ${tile({ still: true, d: 80, label: 'Booked, not done', big: Fmt.grouped(booked - done), sub: `of ${Fmt.grouped(booked)} booked` })}
+      ${tile({ still: true, d: 160, label: 'Routes out', big: String(out), sub: `${rows.reduce((t, r) => t + r.stops_done, 0)} stops done` })}
+      ${tile({ still: true, d: 240, label: 'Pounds recorded', big: Fmt.num(pounds), sub: pounds ? `${Fmt.pct(rows.reduce((t, r) => t + r.pounds_exec_default, 0) / pounds)} at a set weight, not weighed` : 'none recorded' })}`;
 
     // each card title says what it found, not what it is
-    const out = rows.filter(r => r.services_done > 0).length;
     $('rt-routes-h').textContent = out ? `${pl(out, 'route')} out, ${thin.length ? `${thin.length} thin` : 'none thin'}` : 'No routes out';
     const max = Math.max(1, ...rows.map(r => Math.max(r.services_done, norm[r.route] ? norm[r.route].done : 0)));
     $('rt-routes').innerHTML = rows.map(r => {
       const n = norm[r.route], d = n ? r.services_done / n.done - 1 : null;
-      return `<div class="r" data-route="${esc(r.route)}">
+      return `<div class="r" role="button" tabindex="0" aria-expanded="false" data-route="${esc(r.route)}">
         <span class="nm">${esc(routeName(r.route))}<small>${esc(r.driver || '')}</small></span>
-        <span><span class="meter"><i style="width:${r.services_done / max * 100}%"></i>${n ? `<b style="left:${n.done / max * 100}%" title="normal ${Math.round(n.done)}"></b>` : ''}</span>
-          <span class="sub">${r.services_done} of ${r.services} done · ${pl(r.stops_done, 'stop')} · ${pl(r.customers, 'customer')} · ${pl(r.postcodes, 'postcode')}</span></span>
-        <span class="v who sub">${esc((r.postcode_list || '').split(' ').slice(0, 4).join(' '))}</span>
+        <span class="bw"><span class="meter"><i style="width:${r.services_done / max * 100}%"></i>${n ? `<b style="left:${n.done / max * 100}%" title="normal ${Math.round(n.done)}"></b>` : ''}</span>
+          <span class="sub">${r.services_done} of ${r.services} done, ${pl(r.stops_done, 'stop')}, ${pl(r.customers, 'customer')}</span></span>
         <span class="v">${d == null ? '' : `${r.services_done > 0 && d < THIN - 1 ? '<span class="chip warn">thin</span> ' : ''}<span class="delta ${dcls(d)}">${pct(d)}</span><span class="sub" style="display:block">normal ${Math.round(n.done)}</span>`}</span>
-        <span class="go">›</span></div><div class="stops" data-for="${esc(r.route)}" hidden></div>`;
+        <em class="go chev"></em></div><div class="stops" data-for="${esc(r.route)}" hidden></div>`;
     }).join('') || '<p class="sub">No routes ran on this day.</p>';
   }
 
@@ -118,9 +124,9 @@ export async function render(main, A, params) {
     return [...new Set(list)].filter(p => Z[p]);
   }
   function drawMap() {
-    const el = $('rt-map'), box = $('rt-mapd'); if (!el || !box || !box.open) return;
+    const el = $('rt-map'); if (!el) return;
     if (!pts.length) { el.innerHTML = '<div class="pending">The map is not available: the postcode centres did not load.</div>'; return; }
-    const W = Math.max(300, Math.min(1100, el.clientWidth || 700)), H = Math.round(W < 500 ? W * 1.0 : W * 0.52);
+    const W = Math.max(300, Math.min(1100, el.clientWidth || 700)), H = Math.round(W < 500 ? W * 1.0 : W * 0.46);
     const F = areaFrame(pts.map(p => p.pt), W, H);
     const shading = bookShading(A, Z);
     let g = landLayer(base, F) + districtLayer(shading, F.P), over = '', defs = '';
@@ -144,13 +150,13 @@ export async function render(main, A, params) {
       defs = maskFor(id, W, H, lines); g += `<g mask="url(#${id})">${routes.join('')}</g>` + over;
       const stops = rows.reduce((t, r) => t + r.stops_done, 0), pcs = new Set(rows.flatMap(r => routePath(r.route)));
       $('rt-map-t').textContent = `${dlabel(day)}: ${pl(rows.length, 'route')}, ${pl(stops, 'stop')} across ${pl(pcs.size, 'postcode')}`;
-      $('rt-map-s').textContent = hl ? `${routeName(hl)} in green · tap it again in the list to clear` : thinSet.size ? `${[...thinSet].map(routeName).join(', ')} ran thin · tap a route below to follow it` : 'tap a route below to follow it';
+      $('rt-map-s').textContent = hl ? `${routeName(hl)} in green. Tap it again below to clear.` : thinSet.size ? `${[...thinSet].map(routeName).join(', ')} ran thin. Tap a route below to follow it.` : 'Tap a route below to follow it.';
       $('rt-map-key').innerHTML = `<span><i class="k line"></i>a route, yard to its stops in order along the main roads</span><span><i class="k thinline"></i>thin against its own norm</span>${zoneKey()}`;
     } else {
       const save = densityByPostcode(R, A, Z, { top: 8 }).rows;
       save.forEach((r, i) => { const [x, y] = F.P(Z[r.postcode]); g += `<g class="h2-best" transform="translate(${Math.max(10, Math.min(W - 10, x)).toFixed(1)},${Math.max(10, Math.min(H - 10, y)).toFixed(1)})"><circle r="10"/><text y="4" text-anchor="middle">${i + 1}</text><title>${esc(r.postcode)}${costsVisible() ? `: one more customer saves about ${money0(r.saving)} a year est.` : ''}</title></g>`; });
       $('rt-map-t').textContent = costsVisible() ? `One more customer in these ${save.length} postcodes saves ${moneyK(save.reduce((t, r) => t + r.saving, 0))} a year est.` : `${save.length} postcodes where a second stop would share the most trips`;
-      $('rt-map-s').textContent = save.slice(0, 3).map((r, i) => `${i + 1}. ${r.postcode}, ${r.visits} visits a year, ${Math.round(r.miles)} mi`).join(' · ');
+      $('rt-map-s').textContent = save.slice(0, 3).map((r, i) => `${i + 1}. ${r.postcode}, ${r.visits} visits a year, ${Math.round(r.miles)} mi`).join('; ');
       $('rt-map-key').innerHTML = '<span><i class="k best"></i>' + (costsVisible() ? 'one more customer saves most' : 'a second stop would share the most trips') + '</span>' + zoneKey();
     }
     g += yardMark(F) + scaleBar(F);
@@ -189,7 +195,7 @@ export async function render(main, A, params) {
     const list = runs.map((s, i) => {
       const v = !seen.has(s.level1) ? value.get(day + '|' + s.level1) : null; seen.add(s.level1);
       if (v != null) anyValue = true;
-      return `<div class="stop"><span class="n">${i + 1}</span><span><a href="#customer/${s.level1}" style="color:inherit;text-decoration:none;font-weight:600">${esc(titleCase(s.company))}</a> <span class="sub">${s.stops > 1 ? s.stops + ' stops · ' : ''}${esc(s.postcode || '')}</span></span>
+      return `<div class="stop"><span class="n">${i + 1}</span><span><a href="#customer/${s.level1}" style="color:inherit;text-decoration:none;font-weight:600">${esc(titleCase(s.company))}</a> <span class="sub">${s.stops > 1 ? s.stops + ' stops, ' : ''}${esc(s.postcode || '')}</span></span>
         <span class="sub">${s.done} of ${s.n} done</span><span class="v">${v != null ? money0(v) : ''}</span></div>`;
     }).join('') + `<p class="sub" style="margin:var(--sp-2) 0 0">${anyValue ? 'Value is what that customer\'s work billed on the day, shown at its first stop.' : 'Work on this day is not billed yet: VCK prices it at the month\'s run.'}</p>`;
     if (!a) { box.innerHTML = list; return; }
@@ -222,9 +228,7 @@ export async function render(main, A, params) {
   }
 
   function drawAhead() {
-    const ahead = real.filter(r => r.date > A.latestDone && r.services > 0);
-    const dates = [...new Set(ahead.map(r => r.date))].sort().slice(0, 7);
-    const bookedAhead = ahead.filter(r => dates.includes(r.date)).reduce((t, r) => t + r.services, 0);
+    const ahead = aheadRows, dates = aheadDates;
     $('rt-ahead-h').textContent = dates.length ? `${Fmt.grouped(bookedAhead)} services booked over the next ${pl(dates.length, 'day')}` : 'Nothing booked ahead';
     $('rt-ahead').innerHTML = dates.map(d => {
       const rs = ahead.filter(r => r.date === d), tot = rs.reduce((t, r) => t + r.services, 0);
@@ -252,7 +256,7 @@ export async function render(main, A, params) {
       const c = R.costToServe('movement', 0, { visits: p.visits, miles: Math.round(mi * 10) / 10 });
       return { ...p, mi, cost: c.total, per: p.services ? c.total / p.services : null };
     });
-    if (!by.length) { el.innerHTML = '<div class="card-head"><h3>The long way round</h3></div><div class="pending">No postcodes on done orders in this window.</div>'; return; }
+    if (!by.length) { el.innerHTML = '<div class="h2-ch"><h2>The long way round</h2></div><div class="pending">No postcodes on done orders in this window.</div>'; return; }
     const total = by.reduce((t, p) => t + p.services, 0);
     const bands = [[0, 5, 'Within 5 miles'], [5, 10, '5 to 10'], [10, 20, '10 to 20'], [20, 35, '20 to 35'], [35, 999, 'Beyond 35']].map(([a, b, l]) => {
       const ps = by.filter(p => p.mi >= a && p.mi < b), sv = ps.reduce((t, p) => t + p.services, 0);
@@ -263,12 +267,11 @@ export async function render(main, A, params) {
     const rows = by.filter(p => !p.billing);
     const near10 = (bands[0].sv + bands[1].sv) / (total || 1);
     const window = pts ? 'twelve months' : `the ${Math.round((new Date(A.latestDone) - new Date(A.orders.map(o => o.date).sort()[0])) / 864e5) + 1} days to ${dshort(A.latestDone)}`;
-    el.innerHTML = `<div class="card-head"><h3>${Fmt.pct(near10)} of the work is within ten miles of the yard</h3><small>${esc(window)}</small></div>
-      <div class="sub">Done services by distance from 1301 W 35th St, as the crow flies.${pts ? '' : ' Three weeks of stops for now; the next snapshot brings a full year.'}</div>
+    el.innerHTML = `<div class="h2-ch"><h2>${Fmt.pct(near10)} of the work is within ten miles of the yard</h2><small>Done services over ${esc(window)}, by distance from 1301 W 35th St as the crow flies.${pts ? '' : ' Three weeks of stops for now; the next snapshot brings a full year.'}</small></div>
       <div class="bands">${bands.map(b => `<span>${b.l}</span><span class="bar"><i style="width:${b.share * 100}%"></i></span><span class="v">${Fmt.grouped(b.sv)}</span><span class="v sub">${Fmt.pct(b.share)}</span>`).join('')}</div>
-      <div class="card-head" style="margin-top:var(--sp-2)"><h3>The long way round</h3><small>${costsVisible() ? 'visit cost est. per service' : 'by visits a year'}</small></div>
+      <div class="h2-ch rt-far2"><h2>The long way round</h2><small>${costsVisible() ? 'Largest route time first, est.' : 'Most visits first'}</small></div>
       <div id="rt-far-t"></div>
-      <div class="src"><a class="how-link" href="#how">How it's calculated ›</a> · Veri-Shred done orders · postcode of the service address, else the billing address (an outlier may be a head office) · miles in a straight line from the yard, by postcode${costsVisible() ? " · route time from the cost model: a route day's travel share scaled for distance, plus time on site est. · route costs under review" : ''}</div>`;
+      <div class="src">Veri-Shred done orders. Postcode of the service address, else the billing address, so an outlier may be a head office.${costsVisible() ? ' Route time from the cost model est., under review.' : ''} <a class="how-link chev" href="#how">How it's calculated</a></div>`;
     dataTable(el.querySelector('#rt-far-t'), { key: 'longway', ns: 'far_', noun: 'areas', who: whoAmI(), rows, placeholder: 'Find a postcode or customer', search: p => p.pc + ' ' + p.names,
       defaults: { band: 'far' },
       filters: [{ k: 'band', l: 'Distance', options: [['near', 'Within 10 miles'], ['mid', '10 to 20 miles'], ['far', '20 miles or more']], test: (p, v) => v === 'near' ? p.mi < 10 : v === 'mid' ? p.mi >= 10 && p.mi < 20 : p.mi >= 20 }],
@@ -282,22 +285,27 @@ export async function render(main, A, params) {
       ] });
   }
 
-  $('rt-mapd').addEventListener('toggle', ev => { ev.target.querySelector('summary').textContent = ev.target.open ? 'Hide the map' : 'Show the map'; drawMap(); });
-  function redraw() { hl = null; drawDay(); drawWeek(); drawMap(); history.replaceState(null, '', `#activity?date=${day}`); }
+  // the entrance has played once a day changes, so what is redrawn stays visible
+  function redraw() { main.querySelector('.rt').classList.remove('play'); hl = null; drawDay(); drawWeek(); drawMap(); history.replaceState(null, '', `#activity?date=${day}`); }
   $('rt-layer').addEventListener('click', ev => { const b = ev.target.closest('button[data-l]'); if (!b) return; layer = b.dataset.l; main.querySelectorAll('#rt-layer button').forEach(x => x.classList.toggle('on', x === b)); drawMap(); });
   $('rt-prev').addEventListener('click', () => { const i = doneDays.indexOf(day); if (i > 0) { day = doneDays[i - 1]; redraw(); } });
   $('rt-next').addEventListener('click', () => { const i = doneDays.indexOf(day); if (i < doneDays.length - 1) { day = doneDays[i + 1]; redraw(); } });
   $('rt-week').addEventListener('click', ev => { const c = ev.target.closest('.c[data-d]'); if (c) { day = c.dataset.d; redraw(); } });
-  $('rt-routes').addEventListener('click', ev => {
+  const follow = ev => {
     if (ev.target.closest('a')) return;
     const row = ev.target.closest('.r'); if (!row) return;
     const box = main.querySelector(`.stops[data-for="${CSS.escape(row.dataset.route)}"]`);
     const open = !box.hidden;
     main.querySelectorAll('.stops').forEach(b => { b.hidden = true; b.innerHTML = ''; });
-    main.querySelectorAll('.r').forEach(r => r.classList.remove('open'));
+    main.querySelectorAll('.r').forEach(r => { r.classList.remove('open'); r.setAttribute('aria-expanded', 'false'); });
     hl = open ? null : row.dataset.route; if (layer === 'day') drawMap();
     if (open) return;
-    row.classList.add('open'); box.hidden = false; drawStops(row.dataset.route, box);
-  });
+    row.classList.add('open'); row.setAttribute('aria-expanded', 'true'); box.hidden = false; drawStops(row.dataset.route, box);
+  };
+  $('rt-routes').addEventListener('click', follow);
+  $('rt-routes').addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList.contains('r')) { ev.preventDefault(); follow(ev); } });
   drawDay(); drawWeek(); drawAhead(); drawFar(); drawMap();
+  document.documentElement.classList.add('js');
+  const root = main.querySelector('.rt');
+  if (firstPlay('r4-ops-played')) { root.classList.add('play'); whenIntroDone().then(() => playIn(root)); }
 }

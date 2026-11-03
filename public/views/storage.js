@@ -1,4 +1,4 @@
-// Routes › Warehouse — Mike and Anne. Who fills the building and in what state, what can be
+// Operations › Warehouse — Mike and Anne. Who fills the building and in what state, what can be
 // shredded and what that is worth, and boxes held that are not on a storage bill. From
 // /api/storage (storage_retention, status I) with pricing (rates) and margin (for the drill link).
 // Every box is at one location (CHI) and rack capacity is not in the data: no percent full.
@@ -9,9 +9,10 @@ import { byAccount, totals, cells, eligibleList, heldNotBilled, splitNotBilled, 
 import { dataTable } from '/components/datatable.js';
 import { isInternal, SIZE_BANDS, inBand } from '/components/metrics.js';
 import { whoAmI } from '/components/access.js';
+import { litCard, drawPoints, tile, chip } from '/components/lit.js';
+import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
 
 const CSS = `
-.wh .lede { font-size: 17px; line-height: 1.45; color: var(--ink-2); margin: 0 0 14px; max-width: var(--measure); }
 .wh .wgrid { display: block; width: 100%; height: auto; }
 .wh .wc.inuse { fill: color-mix(in srgb, var(--s-storage) 28%, var(--surface)); }
 .wh .wc.old { fill: var(--s-storage); }
@@ -51,7 +52,7 @@ export async function render(main, tabs) {
   let S, PR, MG;
   try { [S, PR, MG] = await Promise.all([getJson('storage'), getJson('pricing'), getJson('margin')]); }
   catch (e) {
-    main.innerHTML = `<div class="rt wh">${tabs}<div class="empty" style="border:1px dashed var(--rule-3);border-radius:var(--r);padding:18px"><b>Warehouse data is not in this snapshot yet.</b> It arrives with the next refresh.</div></div>`;
+    main.innerHTML = `<div class="rt h2 wh">${tabs}<div class="empty" style="border:1px dashed var(--rule-3);border-radius:var(--r);padding:18px"><b>Warehouse data is not in this snapshot yet.</b> It arrives with the next refresh.</div></div>`;
     return;
   }
   const acc = byAccount(S), T = totals(acc), G = cells(acc, 1000);
@@ -61,34 +62,42 @@ export async function render(main, tabs) {
   const m = S.months, last = m[m.length - 1], yearAgo = m[m.length - 13];
   const yoy = yearAgo ? last.boxes / yearAgo.boxes - 1 : null;
   const top = acc[0];
-  const say = `${n0(T.boxes)} boxes in storage${yoy != null ? `; the storage bill carried ${yoy >= 0 ? 'up' : 'down'} ${pc(Math.abs(yoy))} on a year ago` : ''}. At least <b>${n0(T.eligible)}</b> (${pc(T.eligible / T.boxes)}) are past their retention review and could be shredded today est., and ${pc(T.ten / T.boxes)} of the building is over ten years old. ${esc(titleCase(top.customer))} alone holds ${pc(top.boxes / T.boxes)}.`;
+  const pts = [
+    { key: 'held', tone: 'g', lead: `${n0(T.boxes)} boxes in storage.`, rest: `${yoy != null ? `The bill carries ${pc(Math.abs(yoy))} ${yoy >= 0 ? 'more' : 'fewer'} than a year ago. ` : ''}${titleCase(top.customer)} alone holds ${pc(top.boxes / T.boxes)}.` },
+    { key: 'shred', tone: 'a', lead: `At least ${n0(T.eligible)} boxes could be shredded today est.,`, rest: `${moneyK(E.once)} once and ${moneyK(E.lost)} a month of storage gone.` },
+    { key: 'bill', tone: 'a', lead: `${n0(SP.activeBoxes)} boxes are not on the storage bill`, rest: `at ${SP.active.length} current accounts. Anne to confirm before anyone calls.` },
+  ];
 
   main.innerHTML = `
-  <div class="rt wh">
+  <div class="rt h2 ac wh">
     ${tabs}
-    <p class="lede">${say}</p>
-    <div class="card">
-      <div class="card-head"><h3>The building by who fills it: one square for every ${Fmt.grouped(G.per)} boxes</h3><small>hover or tap a group</small></div>
+    ${litCard('wh-lit')}
+    <section class="ktiles">
+      ${tile({ still: true, lead: true, label: 'Boxes in storage', big: n0(T.boxes), sub: yoy != null ? `${chip(yoy)} billed, on a year ago` : '' })}
+      ${tile({ still: true, d: 80, label: 'Eligible to shred est.', big: n0(T.eligible), sub: `${pc(T.eligible / T.boxes)} of the building` })}
+      ${tile({ still: true, d: 160, label: 'Over ten years old', big: n0(T.ten), sub: `${pc(T.ten / T.boxes)} of the building` })}
+      ${tile({ still: true, d: 240, label: 'Not on the bill', big: n0(SP.activeBoxes), sub: `at ${SP.active.length} current accounts` })}
+    </section>
+    <section class="h2-card" data-in>
+      <div class="h2-ch"><h2>The building by who fills it</h2><small>One square for every ${Fmt.grouped(G.per)} boxes, largest accounts first. Hover or tap a group.</small></div>
       <div class="gwrap"><div id="wh-grid"></div><div class="c-tip" hidden></div></div>
       <div class="wkey">${STATES.map(([k, l]) => `<span><i style="background:${k === 'inuse' ? 'color-mix(in srgb, var(--s-storage) 28%, var(--surface))' : k === 'old' ? 'var(--s-storage)' : k === 'eligible' ? 'var(--s-service)' : 'var(--ink-4)'}"></i>${l} ${k0(T[k])}</span>`).join('')}</div>
-      <div class="src">VCK boxes in storage, all at one location (Chicago) · accounts largest first, those under ${Fmt.grouped(G.per)} boxes together at the end · eligible is review overdue less permanent and legal hold, at least est. · rack capacity is not in the data, so this shows what is held, not how full the building is</div>
-    </div>
-    <div class="cols">
-      <div class="card">
-        <div class="card-head"><h3>Shredding the eligible boxes would bill about ${moneyK(E.once)} once and end ${moneyK(E.lost)} a month of storage est.</h3></div>
-        <div id="wh-elig"></div>
-        <div class="src">Destruction at the book's median fee, ${Fmt.money(E.perBox || 0, { dp: 2 })} a box; storage at each account's own rate per box (else the book's median) · "pays back" is the months of lost storage the destruction bill covers · <a href="#customers?view=destruction" style="color:var(--brand)">Overdue boxes by account ›</a></div>
-      </div>
-      <div class="card nb">
-        <div class="card-head"><h3>${n0(SP.activeBoxes)} boxes at ${SP.active.length} current accounts are not on the ${NB.month ? mon(NB.month) : 'latest'} storage bill</h3></div>
-        <p class="sub" style="margin:0 0 8px">${nbTop ? `${esc(titleCase(nbTop.customer))} alone has ${n0(nbTop.gap)}. ` : ''}Current means invoiced in the last twelve months. Another ${SP.dormant.length} dormant accounts hold ${n0(SP.dormantBoxes)} boxes; the filter shows them.${SP.internalBoxes ? ` R4's own and placeholder accounts (${n0(SP.internalBoxes)} boxes) are left out.` : ''} It may be timing or prepaid storage; Anne to confirm before anyone calls.</p>
-        <div id="wh-nb"></div>
-        <div class="src">Held: boxes in storage · billed: boxes on the latest month's storage bill</div>
-      </div>
-    </div>
-    <div class="card" id="wh-trend" style="margin-top:14px"></div>
-    <p class="foot"><a class="how-link" href="#how">How it's calculated ›</a></p>
+      <div class="src">VCK boxes in storage, all in Chicago. Eligible is review overdue less permanent and legal hold, at least est. Rack capacity is not in the data, so this shows what is held, not how full the building is.</div>
+    </section>
+    <section class="h2-card" data-in>
+      <div class="h2-ch"><h2>Shredding the eligible boxes would bill about ${moneyK(E.once)} once and end ${moneyK(E.lost)} a month of storage est.</h2><small>Destruction at the book's median fee, ${Fmt.money(E.perBox || 0, { dp: 2 })} a box; storage at each account's own rate per box.</small></div>
+      <div id="wh-elig"></div>
+      <div class="src"><a class="how-link chev" href="#customers?view=destruction">Overdue boxes by account</a></div>
+    </section>
+    <section class="h2-card nb" data-in>
+      <div class="h2-ch"><h2>${n0(SP.activeBoxes)} boxes at ${SP.active.length} current accounts are not on the ${NB.month ? mon(NB.month) : 'latest'} storage bill</h2><small>${nbTop ? `${esc(titleCase(nbTop.customer))} alone has ${n0(nbTop.gap)}. ` : ''}It may be timing or prepaid storage; Anne to confirm before anyone calls.</small></div>
+      <div id="wh-nb"></div>
+      <div class="src">Current means invoiced in the last twelve months. Another ${SP.dormant.length} dormant accounts hold ${n0(SP.dormantBoxes)} boxes, under the filter.${SP.internalBoxes ? ` R4's own and placeholder accounts (${n0(SP.internalBoxes)} boxes) are left out.` : ''}</div>
+    </section>
+    <section class="h2-card" id="wh-trend" data-in></section>
+    <p class="foot"><a class="how-link chev" href="#how">How it's calculated</a></p>
   </div>`;
+  drawPoints(main.querySelector('#wh-lit'), pts);
 
   // the grid, drawn at its width, with a hover per account block
   const gEl = main.querySelector('#wh-grid'), wrap = main.querySelector('.gwrap'), tip = main.querySelector('.c-tip');
@@ -96,7 +105,7 @@ export async function render(main, tabs) {
   const show = (bi, ev) => {
     const b = G.blocks[bi]; if (!b) return;
     gEl.querySelectorAll('.wc').forEach(c => c.classList.toggle('dim', +c.dataset.b !== bi));
-    tip.innerHTML = `<b>${esc(titleCase(b.customer))}</b><span>${n0(b.boxes)} boxes, ${pc(b.boxes / T.boxes)} of the building</span><span>eligible to shred <b>${n0(b.eligible)}</b> est.</span><span>over ten years, review not due ${n0(b.old)} · protected ${n0(b.protected)}</span>${b.oldest ? `<span>oldest box received ${esc(b.oldest.slice(0, 4))}</span>` : ''}`;
+    tip.innerHTML = `<b>${esc(titleCase(b.customer))}</b><span>${n0(b.boxes)} boxes, ${pc(b.boxes / T.boxes)} of the building</span><span>eligible to shred <b>${n0(b.eligible)}</b> est.</span><span>over ten years, review not due ${n0(b.old)}</span><span>protected ${n0(b.protected)}</span>${b.oldest ? `<span>oldest box received ${esc(b.oldest.slice(0, 4))}</span>` : ''}`;
     const r = wrap.getBoundingClientRect(), x = (ev.touches ? ev.touches[0] : ev).clientX - r.left, y = (ev.touches ? ev.touches[0] : ev).clientY - r.top;
     tip.hidden = false;
     tip.style.left = Math.max(110, Math.min(r.width - 110, x)) + 'px';
@@ -128,7 +137,10 @@ export async function render(main, tabs) {
   if (m.length > 1) lineChart(main.querySelector('#wh-trend'), {
     title: yoy != null ? `The storage bill carried ${n0(last.boxes)} boxes in ${mon(last.month)}, ${yoy >= 0 ? 'up' : 'down'} ${Fmt.pct(Math.abs(yoy), { dp: 1 })} on a year ago` : 'Boxes on the storage bill',
     series: [{ name: 'Boxes billed', cls: 'storage', points: m.map(x => ({ x: x.month, y: x.boxes })) }],
-    yFormat: v => Fmt.num(v / 1000) + 'K', height: 220,
-    source: 'VCK · boxes on each month\'s storage bill',
+    yFormat: v => v ? Fmt.num(v / 1000) + 'K' : '0', height: 220,
+    source: 'VCK: boxes on each month\'s storage bill',
   });
+  document.documentElement.classList.add('js');
+  const root = main.querySelector('.wh');
+  if (firstPlay('r4-warehouse-played')) { root.classList.add('play'); whenIntroDone().then(() => playIn(root)); }
 }
