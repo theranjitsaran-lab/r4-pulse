@@ -167,7 +167,7 @@ function tools(L, D, X = {}) {
           revenue_a_year: money0(rev), cost_a_year: `${money0(c.total)} est.`, margin_a_year: `${rev - c.total < 0 ? '−' : '+'}${money0(Math.abs(rev - c.total)).replace('−', '')} est.`,
           margin_share: rev > 0 ? `${Math.round((rev - c.total) / rev * 100)}% of revenue kept est.` : null,
           cost_a_unit: `$${c.perUnit.toFixed(2)} est.`,
-          route_cost_basis: bin ? { account: "the account's own route days", postcode: `real route days in and around ${st.postcode}`, average: 'the average visit, under review until delivery routes are in the data' }[c.routeBasis] : 'no route cost',
+          route_cost_basis: bin ? { account: "the account's own route days", nearby: `real route days within three miles of ${st.postcode}`, yard: 'its own trip from the yard, no route near it', book: "the book's average stop, no postcode given", average: 'the average visit, under review until delivery routes are in the data' }[c.routeBasis] : 'no route cost',
           lines: c.lines.map(l => `${l[0]}: ${money0(l[1])} (${String(l[2]).split('. ')[0]})`),
         };
       },

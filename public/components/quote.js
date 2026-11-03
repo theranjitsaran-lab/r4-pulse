@@ -3,9 +3,15 @@
 //   SERVICES: the service codes the cost model prices, with their family and unit
 //   lineCost(R, { code, units, visits, miles, level1, postcode }, { acct, lines, Z })
 //     acct: the account's margin record (fixtures/margin.json accounts), lines: its priced lines
-//     returns costToServe's result with perUnit, and routeBasis for bins: 'account' (its own route
-//     days), 'postcode' (route days in and around the quote's postcode) or 'average' (the average visit)
-import { postcodeCost, quoteRoute } from './routecost.js';
+//     returns costToServe's result with perUnit, and routeBasis for bins: 'account' (its own route days), 'nearby'
+//     (route days within three miles), 'yard' (none near: its own trip), 'ride' (what the stop adds to one route),
+//     'book' (the book's stop, no place chosen yet). The last two run on the route-hour rate (Settings).
+//   nearestRoute · marginLabel · quoteOptions · visitParts · quoteFacts: the Quote screen's working, no DOM
+import { nearbyCost, bookCost, quoteRoute } from './routecost.js';
+import { miles, dist, YARD } from './routemap.js';
+import * as Fmt from './format.js';
+
+export const RIDE_MILES = 3.5;   // a route this close can carry the stop
 
 export const SERVICES = {
   B2: { fam: 'bin', unit: 'bin service', size: 'B2' }, B3: { fam: 'bin', unit: 'bin service', size: 'B3' },
@@ -26,14 +32,19 @@ export function lineCost(R, st, { acct = null, lines = [], Z = {} } = {}) {
   const u = Math.max(1, st.units || 1), v = st.visits || null, mi = st.miles || R.RATES.avgMiles.v;
   let c;
   if (svc.fam === 'bin') {
-    const a = acct;
-    const lb = a && a.main_bin === st.code ? lines.filter(l => l.servcode === 'S5B').reduce((t, l) => t + l.units, 0) : 0;
+    const a = acct, S = R.SETTINGS, vv = v || Math.max(1, Math.ceil(u / R.RATES.unitsVisit.v));
+    const lb = a ? lines.filter(l => l.servcode === 'S5B').reduce((t, l) => t + l.units, 0) : 0;
     const share = a && a.bins ? Math.min(1, u / a.bins) : 1;
-    // the route: the account's own route days, else what route days in the quote's postcode cost, else the average visit
-    const own = R.routeFor && R.routeFor(st.level1);
-    const route = own || (st.postcode && quoteRoute(postcodeCost(R.routeCostsNow(), st.postcode, Z), u, v, R.SETTINGS)) || null;
+    // the route: one given (riding a route), else the account's own route days, else the real days near the place,
+    // else its own trip from the yard, else the book's stop until a place is chosen
+    const own = R.routeFor && R.routeFor(st.level1), rc = R.routeCostsNow && R.routeCostsNow(), pt = st.postcode && Z[st.postcode];
+    let route = null, basis = 'average';
+    if (st.route) { route = st.route; basis = 'ride'; }
+    else if (own) { route = ownRoute(own, u, vv, S, lines, st.code, a); basis = 'account'; }
+    else if (pt) { const near = nearbyCost(rc, st.postcode, Z); if (near) { route = quoteRoute(near, u, vv, S); basis = 'nearby'; } else { route = hourRoute(R, dist(YARD, pt), u, vv, 'its own trip from the yard'); basis = 'yard'; } }
+    else { const book = bookCost(rc); if (book) { route = quoteRoute(book, u, vv, S); basis = 'book'; } }
     c = R.costToServe('bin', u, Object.assign({ visits: v, miles: mi, route }, lb > 0 ? { pounds: lb * share } : { binCode: svc.size }));
-    c.routeBasis = own ? 'account' : route ? 'postcode' : 'average';
+    c.routeBasis = basis;
   } else if (svc.fam === 'handling') c = R.costToServe('handling', u);
   else if (svc.fam === 'trip') { const own = R.movementFor && R.movementFor(st.level1); c = R.costToServe('movement', 0, { visits: v || u, miles: mi, route: own }); if (own) c.routeBasis = 'account'; }
   else if (svc.fam === 'itad') c = R.costToServe('itad', u, { visits: v, miles: mi });
@@ -44,4 +55,93 @@ export function lineCost(R, st, { acct = null, lines = [], Z = {} } = {}) {
   else if (svc.fam === 'storage') c = R.costToServe('storage', u / 12);
   if (svc.fam === 'trip' || svc.fam === 'storage') c.perUnit = c.total / u;
   return c;
+}
+
+// An account's own route days, a visit at a time, so fuller or fewer visits can be tried. Its line carries its share of
+// the visit where it buys other services too.
+function ownRoute(r, u, v, S, lines, code, a) {
+  const line = lines.find(l => l.servcode === code), share = a && a.bins && line ? Math.min(1, line.units / a.bins) : 1;
+  const visits = r.days || 1, mins = r.stops * S.stopMin + r.services * S.serviceMin, per = mins > 0 ? r.onsite / mins : 0;
+  return { services: u, days: r.days, from: r.from, to: r.to, travel: v * share * r.travel / visits, onsite: v * per * (share * S.stopMin * r.stops / visits + S.serviceMin * u / v) };
+}
+// A trip priced by the hour: there and back over the miles given, plus the time on site. Used for what one more stop
+// adds to a route that runs anyway, and for a place with no route near it.
+export function hourRoute(R, mi, u, v, label) {
+  const S = R.SETTINGS, hr = R.routeHourRate(), k = u / v;
+  return { services: u, days: null, label, travel: v * hr * (2 * mi / S.mph), onsite: v * hr * (S.stopMin + S.serviceMin * k) / 60 };
+}
+
+// The closest route that really calls there: regular stops are a route at a postcode four or more times a year on that
+// weekday. Road miles for the closest few; a route that only serves this account does not count.
+//   Q: the quote-routes view
+export function nearestRoute(Q, Z, postcode, level1 = null) {
+  const pt = Z[postcode]; if (!pt || !Q) return null;
+  const list = Q.regular.filter(x => Z[x.postcode] && (x.solo == null || x.solo !== level1)).map(x => ({ ...x, straight: miles(pt, Z[x.postcode]) })).sort((a, b) => a.straight - b.straight);
+  if (!list.length) return null;
+  const close = list.filter(x => x.straight <= list[0].straight + .5).slice(0, 12);
+  const best = close.map(x => ({ ...x, miles: x.postcode === postcode ? 0 : dist(Z[x.postcode], pt) })).sort((a, b) => a.miles - b.miles || b.n - a.n)[0];
+  const day = Q.days[best.day];
+  return { ...best, day, carries: best.miles <= RIDE_MILES };
+}
+
+// Healthy, Thin, Too thin, Loses money: the thresholds are on Settings
+export function marginLabel(R, m) {
+  if (m == null) return { cls: '', word: '' };
+  return m < 0 ? { cls: 'loss', word: 'Loses money' } : m < R.SETTINGS.marginThin ? { cls: 'loss', word: 'Too thin' } : m < R.SETTINGS.marginHealthy ? { cls: 'thin', word: 'Thin' } : { cls: 'good', word: 'Healthy' };
+}
+
+const ROUTE_LINE = new Set(['Travel to site', 'Truck time']), PLANT_LINE = new Set(['Shred plant', 'Plant throughput']);
+// One line's cost cut up for the bar, for one visit (or one unit, for work with no visits)
+export function visitParts(c, per) {
+  const sum = pred => c.lines.reduce((t, l) => pred(l[0]) ? t + l[1] : t, 0) / per;
+  const travel = sum(n => ROUTE_LINE.has(n)), time = sum(n => n === 'Time on site'), plant = sum(n => PLANT_LINE.has(n));
+  return { travel, time, plant, other: c.total / per - travel - time - plant, cost: c.total / per };
+}
+
+const WEEKDAY = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
+export const routeLabel = r => /\d/.test(r) ? r : r.charAt(0) + r.slice(1).toLowerCase();
+export const dayLabel = d => WEEKDAY[d];
+
+// The four ways to price it. st: { code, price, units, visits, bins, postcode, level1, miles }; band: { p25, p75 };
+// each option's own state, cost and year, the same function the summary and the tests read.
+export function quoteOptions(R, st, { acct = null, lines = [], Z = {}, near = null, band = null } = {}) {
+  const svc = SERVICES[st.code], bin = !!svc && svc.fam === 'bin', vis = st.visits;
+  const make = (id, t, d, s, off = null) => {
+    const c = lineCost(R, s, { acct, lines, Z }), per = s.visits || s.units || 1, rev = s.price * s.units;
+    const cost = c ? c.total : null, left = c ? rev - cost : null;
+    return { id, t, d, off, st: s, c, parts: c ? visitParts(c, per) : null, per, yrev: rev, year: left, m: c && rev > 0 ? left / rev : null, rev: s.price * s.units / per };
+  };
+  const unit = svc ? svc.unit : 'unit', list = [];
+  const label = bin ? `${Fmt.fixed(st.bins, st.bins % 1 ? 1 : 0)} bin${st.bins === 1 ? '' : 's'} a visit, ${Fmt.num(vis)} visits a year` : `${Fmt.num(st.units)} ${svc && svc.fam === 'storage' ? 'box-months' : unit + 's'} a year`;
+  list.push(make('now', 'As asked', label, st));
+  const can = bin && near && near.carries;
+  const rideName = near ? `Ride ${routeLabel(near.route)}'s ${dayLabel(near.dow)}` : 'Ride a route';
+  list.push(make('ride', rideName,
+    can ? `Booked on the route that calls ${near.miles < .05 ? 'in the same postcode' : `${Fmt.fixed(near.miles, 1)} mi away`}. Counts only what the stop adds: the route runs anyway.` : '',
+    can ? { ...st, route: hourRoute(R, near.miles, st.units, vis, `what the stop adds to ${routeLabel(near.route)}'s route`) } : st,
+    can ? null : !bin ? 'Only bin services ride a route here.' : !st.postcode ? 'Choose a place first.' : `No route calls within ${RIDE_MILES} mi.`));
+  const fv = bin && vis > 6 ? Math.max(6, Math.round(vis / 2)) : null;
+  list.push(make('fewer', 'Fewer, fuller visits', fv ? `${Fmt.fixed(st.units / fv, st.units / fv % 1 ? 1 : 0)} bins, ${Fmt.num(fv)} visits a year: the same bins, half the trips.` : '',
+    fv ? { ...st, visits: fv, bins: st.units / fv } : st, fv ? null : bin ? 'Already as few visits as this schedule allows.' : 'Only bin services have visits to cut.'));
+  const mid = band ? (band.p25 + band.p75) / 2 : null, dec = st.code === 'STO' ? 3 : 2;
+  list.push(make('band', 'Price in the band', mid && st.price < mid ? `${Fmt.money(mid, { dp: dec })}, the middle of what accounts pay (${Fmt.money(band.p25, { dp: dec })} to ${Fmt.money(band.p75, { dp: dec })}).` : '',
+    mid && st.price < mid ? { ...st, price: mid } : st, mid && st.price < mid ? null : 'Already at or above the middle of the band.'));
+  const open = list.filter(o => !o.off && o.year != null);
+  const top = open.length ? open.reduce((a, b) => b.year > a.year ? b : a) : null;
+  for (const o of list) o.best = o === top;
+  return list;
+}
+
+// The three summary points, from computed fields only: every figure as the screen shows it. line goes to Claude;
+// say is the plain version, shown first and whenever Claude is not there or fails the number check.
+export function quoteFacts(o, list, { near = null, st = null, band = null, unit = 'bin', basis = null } = {}) {
+  const m2 = v => (v < 0 ? '−' : '') + Fmt.money(Math.abs(v), { dp: 2 }), mk = v => (v < 0 ? '−' : '') + Fmt.money(Math.abs(v), { short: true }), pc = v => (v < 0 ? '−' : '') + Fmt.pct(Math.abs(v));
+  const p = o.parts, how = { nearby: 'on what real route days nearby cost', account: 'on its own route days', yard: 'as its own trip from the yard', ride: 'on what the stop adds to that route', book: "at the book's average stop, until a place is chosen" }[o.c.routeBasis] || 'on the cost model';
+  const parts = [p.travel > .5 ? `getting there ${m2(p.travel)}` : '', p.time > .5 ? `time on site ${m2(p.time)}` : '', p.plant > .5 ? `shredding ${m2(p.plant)}` : '', p.other > .5 ? `the work ${m2(p.other)}` : ''].filter(Boolean).join(', ');
+  const why = `Costed ${how}: ${parts}, against ${m2(o.rev)} billed, which leaves ${pc(o.m || 0)} est.`;
+  const nearby = o.c.routeBasis === 'account' && near && !near.carries ? 'Costed on its own route days; no other route calls close by regularly.' : near ? (near.carries ? `${routeLabel(near.route)} already calls at ${near.postcode} on ${dayLabel(near.dow)}, ${near.miles < .05 ? 'the same postcode' : `${Fmt.fixed(near.miles, 1)} mi away`}, with ${Fmt.num(near.day ? near.day.customers : 0)} customers on that route.` : `No route calls within ${RIDE_MILES} mi regularly. The nearest that does is ${routeLabel(near.route)} on ${dayLabel(near.dow)}, ${Fmt.fixed(near.miles, 1)} mi away.`) : 'Choose a place to see the routes near it.';
+  const alt = list.filter(x => x !== o && !x.off && x.year != null).sort((a, b) => b.year - a.year)[0];
+  const better = alt && alt.year > o.year ? `${alt.t}: ${pc(alt.m || 0)} margin, ${mk(alt.year)} a year left, against ${mk(o.year)} this way est.` : 'This is already the strongest of the four est.';
+  const under = st && band && st.price < band.p25 ? ` At ${m2(st.price)} it is also under the ${m2(band.p25)} where the middle half starts.` : '';
+  return [{ key: 'why', line: why, say: why }, { key: 'nearby', line: nearby, say: nearby }, { key: 'better', line: better + under, say: better + under }];
 }

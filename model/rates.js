@@ -151,16 +151,19 @@ async function loadFromDb(query) {
 // its day is by time instead: its drive minutes (its detour in road miles at mph) plus its drop
 // minutes (stopMin at each stop and serviceMin a service), scaled so a day's stops add up to the
 // route day. Three assumptions, all `assumed`, for Mike to check (31 October 2026).
-const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliveryMatch: 1, costsFinal: 0, postcodes: {} };
+const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliveryMatch: 1, costsFinal: 0, routeHours: 8.5, marginHealthy: 0.35, marginThin: 0.15, postcodes: {} };
 const TIME_NOTES = {
   mph: ['Average city speed between stops', 'assumed', 'Chicago streets with a box truck; the main roads give the miles, this turns them into minutes.'],
   stopMin: ['Minutes at each stop before any service', 'assumed', 'Park, walk in, sign, walk out.'],
   serviceMin: ['Minutes a service', 'assumed', 'Swap one bin, or one pickup or delivery line.'],
   split: ['Travel share of a route day, where there are no route days', 'assumed', 'Prices a visit at the book\'s average: a new account with no postcode, a line with no route days.'],
+  routeHours: ['Hours in a route day', 'assumed', 'Turns the route day\'s cost into a route-hour rate, for what one more stop adds to a route that runs anyway. Hours were never captured, so this is the eight to nine hours a route day is said to run.'],
+  marginHealthy: ['Margin that reads Healthy on a quote', 'assumed', 'At or above this a quote reads Healthy.'],
+  marginThin: ['Margin that reads Thin on a quote', 'assumed', 'At or above this and below Healthy it reads Thin; below this Too thin; below zero Loses money.'],
   deliveryMatch: ['Box deliveries ride the shred routes, placed by location', 'observed', 'Deliveries go on the shred trucks (Theran, 1 November 2026). VCK does not say which route, so each is placed on the route that passed closest to it that day, and shares that day by minutes.'],
 };
 // Settings anyone can change on the Settings screen (server/settings.js): the bounds a value must sit in.
-const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], split: [0.1, 0.8], deliveryMatch: [0, 1], costsFinal: [0, 1] };
+const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], split: [0.1, 0.8], deliveryMatch: [0, 1], costsFinal: [0, 1], routeHours: [4, 14], marginHealthy: [0.05, 0.9], marginThin: [0.01, 0.8] };
 
 // The account's real route-day cost, set once the route days are costed (server: server/routecost.js;
 // browser: loadRates in components/data.js). { accounts: { level1: { cost, travel, onsite, services,
@@ -173,6 +176,8 @@ function routeCostsNow() { return ROUTE; }
 function movementFor(level1) { const r = ROUTE.movement && ROUTE.movement[level1]; return ROUTE.deliveries && ROUTE.deliveries.on && r && r.services > 0 ? r : null; }
 // the cost of a route day (the same trucks carry deliveries, so it is never re-divided)
 function routeDayNow() { return RATES.routeDay.v; }
+// what an hour of a route costs: the route day over its hours (Settings)
+function routeHourRate() { return RATES.routeDay.v / SETTINGS.routeHours; }
 
 const FAMILIES = ['storage', 'handling', 'movement', 'bin', 'itad', 'shred', 'labour'];
 
@@ -304,7 +309,7 @@ function isModelled(family) {
   return family === 'bin' || family === 'itad' || family === 'movement' || family === 'shred';
 }
 
-const api = { RATES, MODEL, SETTINGS, TIME_NOTES, SETTING_BOUNDS, setRouteCosts, routeFor, routeCostsNow, movementFor, routeDayNow, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
+const api = { RATES, MODEL, SETTINGS, TIME_NOTES, SETTING_BOUNDS, setRouteCosts, routeFor, routeCostsNow, movementFor, routeDayNow, routeHourRate, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 if (typeof window !== 'undefined') window.R4RATES = api;

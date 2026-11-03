@@ -172,6 +172,23 @@ export function postcodeCost(rc, postcode, Z) {
   return n >= MIN_SERVICES ? out(near, 'near') : (own && own.services > 0 ? out([own], 'postcode') : null);
 }
 
+// What real route days cost near a place: every stop within NEAR miles pooled, whatever its size (back-tested on 20
+// accounts, 2 November 2026: within 11% in total, about a third out on any one account; scripts/quote_backtest.mjs).
+export function nearbyCost(rc, postcode, Z, mi = NEAR) {
+  if (!rc || !rc.postcodes) return null;
+  const pc = pc5(postcode), at = Z && Z[pc];
+  if (!at) return null;
+  return pooled(Object.entries(rc.postcodes).filter(([p, v]) => v.stops > 0 && Z[p] && miles(at, Z[p]) <= mi).map(([, v]) => v), rc, 'near', pc);
+}
+// the whole book's stop, until a place is chosen
+export const bookCost = rc => rc && rc.postcodes ? pooled(Object.values(rc.postcodes).filter(v => v.stops > 0), rc, 'book', null) : null;
+function pooled(list, rc, basis, postcode) {
+  const t = list.reduce((a, p) => ({ travel: a.travel + p.travel, onsite: a.onsite + p.onsite, services: a.services + p.services, stops: a.stops + p.stops, days: a.days + p.days }), { travel: 0, onsite: 0, services: 0, stops: 0, days: 0 });
+  if (!t.stops) return null;
+  const S = rc.settings || {}, mins = t.stops * (S.stopMin ?? 8) + t.services * (S.serviceMin ?? 3);
+  return { travelPerStop: t.travel / t.stops, perMinute: mins > 0 ? t.onsite / mins : 0, services: t.services, stops: t.stops, days: t.days, postcodes: list.length, basis, postcode };
+}
+
 // A quote's route cost from a postcode's real days: each visit is one stop, carrying the stop's drive
 // share there and its minutes on site at what a minute on site cost there (stopMin, plus serviceMin
 // for each bin on the visit). Returned as costToServe's route option.
@@ -179,7 +196,7 @@ export function quoteRoute(pcCost, units, visits, S) {
   if (!pcCost || !(units > 0)) return null;
   const v = Math.max(1, visits || units), k = units / v;
   const travel = v * pcCost.travelPerStop, onsite = v * pcCost.perMinute * ((S.stopMin ?? 8) + (S.serviceMin ?? 3) * k);
-  const where = pcCost.basis === 'postcode' ? `stops in ${pcCost.postcode}` : `stops within ${NEAR} miles of ${pcCost.postcode} (${pcCost.postcodes} postcodes)`;
+  const where = pcCost.basis === 'postcode' ? `stops in ${pcCost.postcode}` : pcCost.basis === 'book' ? 'stops across the book' : `stops within ${NEAR} miles of ${pcCost.postcode} (${pcCost.postcodes} postcodes)`;
   return { services: units, travel, onsite, days: pcCost.days,
     label: `${Math.round(v)} visits, each costed as the ${Fmt.grouped(pcCost.stops)} real ${where} cost: ${Fmt.money(pcCost.travelPerStop, { dp: 2 })} of drive time a stop, ${Fmt.money(pcCost.perMinute, { dp: 2 })} a minute on site` };
 }

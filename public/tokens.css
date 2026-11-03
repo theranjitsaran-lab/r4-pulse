@@ -115,6 +115,7 @@
   --hero-accent: #8fd99a;  /* the pulse line, the known part of the bill */
 
   /* ── maps: a quiet outline under the route, the lake the one landmark; never a series colour ── */
+  --q-travel: #7d847f; --q-time: #a3aaa5; --q-plant: #c7ccc8; --q-other: #dfe3df;   /* where a quote's price goes */
   --map-water:  #e6edf3;
   --map-land:   #fbfbfc;
   --map-border: #dedee3;   /* county lines */

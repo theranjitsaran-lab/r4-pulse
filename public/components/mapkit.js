@@ -74,11 +74,11 @@ export function vanLoop(svg, live, lit = () => true) {
 
 // Sets a drawn map going. Markup comes from routeLayer and maskFor; a stop that pulses carries data-n (its route) and
 // data-at (how far along it). reveal: the districts fade in and the routes draw out; else they are simply there.
-export function playMap(svg, { reveal = true, vans = Infinity } = {}) {
+export function playMap(svg, { reveal = true, vans = Infinity, fade = true } = {}) {
   if (!svg) return;
   const still = reduced(), routes = [...svg.querySelectorAll('.hm-route')];
   const animate = reveal && !still;
-  if (animate) svg.classList.add('fade');
+  if (animate && fade) svg.classList.add('fade');
   const live = () => svg.isConnected;
   const loop = vanLoop(svg, live);
   let g = svg.querySelector('.hm-vans');

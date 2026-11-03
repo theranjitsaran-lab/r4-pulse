@@ -16,11 +16,17 @@ const GROUPS = [
   { title: 'Where there are no route days', sub: 'a new account with no postcode, a line with no route days', keys: [
     ['split', 'share', 'Of a typical route day, how much is driving rather than at customers?'],
   ] },
+  { title: 'Quotes', sub: 'what one more stop adds to a route, and how a quote\'s margin is labelled', keys: [
+    ['routeHours', 'hours', 'How long does a route day really run, yard to yard?'],
+    ['marginHealthy', 'share', 'At what margin would you call a quote healthy?'],
+    ['marginThin', 'share', 'Below what margin is a quote too thin to take?'],
+  ] },
   { title: 'Box deliveries', sub: 'they ride the shred trucks; VCK has the date and customer but not the route', keys: [
     ['deliveryMatch', 'on/off', 'Are there days a delivery goes out on its own, not on a shred route?'],
   ] },
 ];
-const fmt = (k, v) => k === 'split' ? Fmt.pct(v) : k === 'deliveryMatch' ? (v ? 'On' : 'Off') : String(+Fmt.fixed(Number(v), 2));
+const SHARE = new Set(['split', 'marginHealthy', 'marginThin']);
+const fmt = (k, v) => SHARE.has(k) ? Fmt.pct(v) : k === 'deliveryMatch' ? (v ? 'On' : 'Off') : String(+Fmt.fixed(Number(v), 2));
 const when = s => s ? new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 
 export async function render(main, S) {
@@ -40,7 +46,7 @@ function draw(main, S) {
     const v = S.values[k], d = S.defaults[k], b = S.bounds[k], n = S.notes[k] || [k, 'assumed', ''], last = S.latest && S.latest[k];
     const input = k === 'deliveryMatch'
       ? `<select data-k="${k}" ${S.canEdit ? '' : 'disabled'}><option value="1" ${v ? 'selected' : ''}>On: placed on the closest route</option><option value="0" ${v ? '' : 'selected'}>Off: left out of the route days</option></select>`
-      : `<input data-k="${k}" inputmode="decimal" value="${k === 'split' ? Math.round(v * 100) : +Fmt.fixed(Number(v), 2)}" ${S.canEdit ? '' : 'disabled'}><span class="st-unit">${k === 'split' ? '%' : esc(unit)}</span>`;
+      : `<input data-k="${k}" inputmode="decimal" value="${SHARE.has(k) ? Math.round(v * 100) : +Fmt.fixed(Number(v), 2)}" ${S.canEdit ? '' : 'disabled'}><span class="st-unit">${SHARE.has(k) ? '%' : esc(unit)}</span>`;
     return `<li class="st-row">
       <div class="st-what"><b>${esc(n[0])}</b><span>${esc(n[2])}</span><span class="st-q">For Mike: ${esc(q)}</span></div>
       <div class="st-val">${input}${S.canEdit ? `<button type="button" class="st-save" data-k="${k}">Save</button>` : ''}
@@ -83,7 +89,7 @@ function draw(main, S) {
     const k = b.dataset.k, el = main.querySelector(`[data-k="${k}"]:not(button)`), msg = main.querySelector(`.st-msg[data-for="${k}"]`);
     let v = Number(String(el.value).replace(/[%\s]/g, ''));
     if (!Number.isFinite(v)) { msg.textContent = 'A number, please.'; return; }
-    if (k === 'split') v = v / 100;
+    if (SHARE.has(k)) v = v / 100;
     msg.textContent = 'Saving and re-costing…';
     const r = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: k, value: v }) }).catch(() => null);
     const j = r ? await r.json().catch(() => ({})) : {};

@@ -54,6 +54,16 @@ each other line: one or two short sentences, at most 30 words, starting with its
 
 Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. Keep the word "est." after an estimated figure. If the data is stale, say so in the headline. British spelling, US dollars, no markdown, no bullet characters.`;
 
+// The Quote screen's three points, one a line, each starting with its key
+export const QUOTE_SYSTEM = `You write three short points for Anne, who prices work at R4 Services, a Chicago records-management and shredding firm, beside a quote she is working on. From the facts you are given (each starts with its key in square brackets), write one line for each fact, in the order given, and nothing else. Each line starts with its key in square brackets, then one or two plain sentences of at most 28 words saying what the fact says.
+
+Use only numbers that appear in the facts, written exactly as they appear there. Do not calculate new figures, round differently or write numbers as words. Keep the word "est." after an estimated figure. British spelling, no markdown, no bullet characters.`;
+export function parseQuote(text, sheet) {
+  const out = {};
+  for (const l of String(text).split('\n').map(x => x.trim()).filter(Boolean)) { const m = l.match(/^\[(\w+)\]\s*(.+)$/); if (m && sheet.some(f => f.key === m[1])) out[m[1]] = m[2]; }
+  return sheet.every(f => out[f.key]) ? out : null;
+}
+
 export function home2SheetText(sheet) { return sheet.map(f => `- [${f.key}] ${f.line}`).join('\n'); }
 
 export function parseHome2(text, sheet) {

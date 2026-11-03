@@ -75,6 +75,35 @@ router.get('/routecost', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// The Quote screen's map: the regular stops by weekday and route, each route's latest such day in stop order, each
+// account's usual postcode and the book's postcodes for the shading. No costs: route shares are on view/routecost.
+let quoteBase = null;
+router.get('/quote-routes', async (req, res) => {
+  try {
+    const D = await data(), st = stamp(D);
+    if (!quoteBase || quoteBase.stamp !== st) {
+      const reg = new Map(), dayOf = new Map(), pcs = new Map();
+      for (const d of (D.RC && D.RC.dayList) || []) {
+        const dow = new Date(d.date + 'T12:00:00Z').getUTCDay(), k = dow + '|' + d.route, dk = d.date + '|' + d.route, stops = d.stops.filter(s => !s.delivery && s.postcode);
+        for (const s of stops) {
+          const rk = k + '|' + s.postcode, x = reg.get(rk) || { dow, route: d.route, postcode: s.postcode, n: 0, who: new Set() };
+          x.n++; x.who.add(s.level1); x.day = dk; reg.set(rk, x);
+          if (s.level1 != null) { const m = pcs.get(s.level1) || new Map(); m.set(s.postcode, (m.get(s.postcode) || 0) + (s.services || 0)); pcs.set(s.level1, m); }
+        }
+        if (stops.length) dayOf.set(dk, { date: d.date, route: d.route, stops: [...new Set(stops.map(s => s.postcode))], customers: new Set(stops.map(s => s.level1)).size, services: stops.reduce((t, s) => t + (s.services || 0), 0) });
+      }
+      const regular = [...reg.values()].filter(x => x.n >= 4);
+      quoteBase = { stamp: st, v: {
+        regular: regular.map(x => ({ dow: x.dow, route: x.route, postcode: x.postcode, n: x.n, day: x.day, solo: x.who.size === 1 ? [...x.who][0] : null })),
+        days: Object.fromEntries(regular.map(x => [x.day, dayOf.get(x.day)])),
+        acctPc: Object.fromEntries([...pcs].map(([id, m]) => [id, [...m].sort((a, b) => b[1] - a[1])[0][0]])),
+        postcodes: ((D.A && D.A.postcodes) || []).map(({ postcode, services, customers, billing_only }) => ({ postcode, services, customers, billing_only })),
+      } };
+    }
+    send(req, res, quoteBase.v);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Customers › Opportunities: every opportunity (components/opps.js) with what the team has said about
 // it (server/sales.js), and what was won this month. The list is cached until the data moves; the
 // statuses are read fresh each time.
