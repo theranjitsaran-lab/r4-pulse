@@ -84,7 +84,7 @@ function install(app) {
       return res.status(401).type('html').send(LOGIN_PAGE('That name and password do not match.'));
     }
     issue(res, { name: u.name, role: u.role, pm: Users.passMark(u) });
-    res.redirect('/');
+    res.redirect('/?signin=1');   // the intro plays on every sign-in (components/intro.js)
   });
   app.post('/logout', (req, res) => req.session.destroy(() => res.redirect('/login')));
 

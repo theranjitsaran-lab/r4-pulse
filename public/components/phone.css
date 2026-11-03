@@ -5,7 +5,7 @@
 .h2-sm { display: none; }
 
 @media (max-width: 700px) {
-  :root { --fs-body: 13px; --fs-sm: 14px; --fs-label: 13px; --fs-scan: 15px; --fs-num-ph: 22px; --tap: calc(var(--u) * 11); }
+  :root { --fs-body: 13px; --fs-sm: 14px; --fs-label: 13px; --fs-scan: 15px; --fs-num-ph: 22px; --tap: calc(var(--u) * 11); --row: calc(var(--u) * 8.5); }
   body { line-height: 1.5; }
 
   /* the shared fold */
@@ -31,8 +31,10 @@
   .kt b { font-size: var(--fs-num-ph); }
   .lit li { font-size: var(--fs-body); line-height: 1.5; }
   .lit b { font-size: var(--fs-scan); }
-  .dt-t tbody td:first-child, .dt-t tbody td:first-child a { font-size: var(--fs-scan); }
-  .dt-t tbody td { font-size: var(--fs-sm); }
+  .dt-t tbody td:first-child, .dt-t tbody td:first-child a { font-size: var(--fs-sm); }
+  .dt-t tbody td { font-size: var(--fs-label); }
+  .dt-cards .dt-t tbody td:first-child, .dt-cards .dt-t tbody td:first-child a { font-size: var(--fs-scan); }
+  .dt-cards .dt-t tbody td { font-size: var(--fs-sm); }
   .mv-row, .lob-row, .h2-lr, .md-ln, .op-kkey button { font-size: var(--fs-scan); }
   .mv-row b, .lob-row b, .h2-lr b, .md-lf b, .md-nm { font-size: var(--fs-scan); }
   .md-fxt, .cd-nm { font-size: var(--fs-sm); }
@@ -41,7 +43,8 @@
 
   /* every control a full thumb */
   .seg a, .seg button { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); }
-  .dt-t tbody td { height: var(--tap); }
+  /* tables stay compact (Theran, 3 November 2026): a row is the tap target, its marks fill the row and no more */
+  .dt-t tbody td { height: var(--row); padding-top: 0; padding-bottom: 0; }
   .dt-f, .dt-views, .dt-find, .dt-ftoggle, .pq select, .pq input:not([type=range]):not([type=checkbox]), .st input, .st select, .us-f input, .us-f select, .cd-owner select, .ops-send select, .op-own, .op-stat, .op-next { min-height: var(--tap); font-size: 16px; }
   .pq-btn, .linkbtn, .how-link, .st-save, .pop-ask { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); }
   .h2-lr, .mv-row, .lob-row, .md-ln, .md-fxh, .op-kkey button, .ops-list button, .cp-fold > summary, .fold > summary, .op-open summary, .pq-rows summary, .ask-sugg button { min-height: var(--tap); }
@@ -52,7 +55,12 @@
   /* small to look at, a thumb to tap: the mark stays its size and its tap area does not */
   .rag:not(.static), .mast-ask, .mast-gear, .mast-help, a.brand, .dt-t td a, .cp-line { position: relative; }
   .rag:not(.static)::after, .mast-ask::after, .mast-gear::after, .mast-help::after, a.brand::after, .dt-t td a::after, .cp-line::after { content: ""; position: absolute; left: -6px; right: -6px; top: 50%; height: var(--tap); transform: translateY(-50%); }
-  .rag:not(.static) { min-height: calc(var(--u) * 7); }
+  .rag:not(.static) { min-height: calc(var(--u) * 5.5); }
+  .dt-t .rag:not(.static)::after, .dt-t td a::after { height: var(--row); }
+  .c2-tablecard .dt:not(.dt-open) .dt-f { display: none; }
+  .ac .ktiles { gap: var(--sp-2); }
+  .ac .kt { padding: var(--sp-2) var(--sp-3); }
+  .c2-tablecard { padding-left: var(--sp-3); padding-right: var(--sp-3); }
 
   /* the masthead's small marks: centred thumb areas, so neighbours do not overlap */
   .mast-gear::after, .mast-right button.mast-help::after { left: 50%; right: auto; width: var(--tap); transform: translate(-50%, -50%); }

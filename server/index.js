@@ -17,7 +17,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Both before auth.install: no login. /health/data carries dates only, never a figure.
-app.get('/health', (req, res) => res.json({ ok: true, fixtures: USE_FIXTURES, preview: PREVIEW }));
+// Not ready until the screens' data is warm: Render keeps the old version serving until this says ok, so nobody waits after a deploy
+let warmed = USE_FIXTURES;
+app.get('/health', (req, res) => res.status(warmed ? 200 : 503).json({ ok: warmed, fixtures: USE_FIXTURES, preview: PREVIEW }));
 app.get('/health/data', async (req, res) => {
   if (USE_FIXTURES) { try { return res.json({ fixtures: true, done_work: require('../fixtures/activity.json').data.latestDone, today: new Date().toISOString().slice(0, 10) }); } catch { return res.json({ fixtures: true }); } }
   try {
@@ -59,7 +61,7 @@ const rates = require('../model/rates');
 
 // Live: derive the cost model from model.* before serving. Fixtures: the seed in rates.js.
 // Live: warm every screen's query at start and whenever the data moves, so nobody waits on the database.
-const { clearCache } = require('./db');
+const { replaceCache } = require('./db');
 const queries = require('./queries');
 const WARM = ['routehistory', 'arearevenue', 'pulse', 'activity', 'customers', 'pricing', 'calls', 'margin', 'storage', 'segments', 'routestops', 'deliverydays', 'gl', 'accountmonths', 'accountlines'];
 async function warm() {
@@ -72,13 +74,18 @@ async function watch() {
     const [r] = await query(`SELECT (SELECT max(NULLIF(date, '')) FROM vs_service_orders) AS a, (SELECT max(invdate)::text FROM invoices) AS b,
       (SELECT max(month)::text FROM kpi.monthly) AS c, (SELECT count(*) FROM invoices_current)::text AS d, (SELECT max(wodate)::text FROM priced_lines_current) AS e`);
     const now = JSON.stringify(r);
-    if (stamp && now !== stamp) { console.log('data moved: cache cleared'); clearCache(); warm(); }
+    if (stamp && now !== stamp) { console.log('data moved: reading it, then swapping'); await replaceCache(WARM.filter(n => queries[n]).map(n => [n, queries[n]])); await warm(); }
     stamp = now;
   } catch (e) { console.warn('freshness stamp:', e.message); }
 }
 
 (USE_FIXTURES ? Promise.resolve() : rates.loadFromDb(query)).then(() => require('./settings').load()).then(() => {
-  if (!USE_FIXTURES) { watch().then(warm); setInterval(watch, 10 * 60 * 1000); }
+  if (!USE_FIXTURES) {
+    const ready = () => { warmed = true; };
+    watch().then(warm).then(ready, ready);
+    setTimeout(ready, 5 * 60 * 1000);   // a slow database must not stop a deploy going live
+    setInterval(watch, 10 * 60 * 1000);
+  }
   app.listen(port, () => {
     console.log(`R4 Pulse on http://localhost:${port}  (${USE_FIXTURES ? 'fixtures' : 'live database'}; route day $${rates.RATES.routeDay.v.toFixed(2)})`);
   });

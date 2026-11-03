@@ -28,7 +28,7 @@ export const TOURS = {
     { tab: OPS, target: 'ops-period', title: 'Where the trucks went', body: 'Pick a period and compare it with the one before. Thicker lines are the corridors driven most. Warehouse is the tab beside it.' },
     { tab: OPPS, target: 'opp-pipe', title: 'What to do next', body: "One row per account, its best move first. Give it an owner and a status, and everyone sees where it's got to." },
     { tab: OPPS, target: 'gear', admin: true, title: 'Settings are yours, as an admin', body: 'The gear opens the cost assumptions and Users, where you add people and set passwords. Nobody else sees it.' },
-    { tab: OPPS, target: 'ask', title: 'Ask in plain words', body: '"Why is City of Chicago down?" Answers come from the same figures you see. Replay this tour from ? at any time.' },
+    { tab: OPPS, target: 'ask', title: 'Ask in plain words', body: "Ask about the month, any account, cross-sell or a quick quote. It uses only Pulse's figures and changes nothing. Replay this tour, or read the guide, from ? at any time." },
   ],
   quote: [
     { tab: QUOTE, target: 'q-what', whole: true, title: 'What are we quoting?', body: 'Pick the service, how many and how often. The slider shows the price against what other accounts pay.' },

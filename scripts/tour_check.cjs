@@ -13,7 +13,7 @@ const fail = m => { bad++; console.log('FAIL ' + m); };
 (async () => {
   for (const [f, v] of KEEP) if (v) fs.unlinkSync(f);
   const port = 3950 + Math.floor(Math.random() * 40), hash = bcrypt.hashSync('pw12345678', 8);
-  const server = spawn(process.execPath, ['server/index.js'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'], env: { ...process.env, PORT: String(port), USE_FIXTURES: '1', NODE_ENV: 'development', AUTH_USERS: `tourdesk:${hash}:admin,tourphone:${hash}:billing,tourone:${hash}:owner`, SESSION_SECRET: 'x'.repeat(32), ANTHROPIC_API_KEY: '', DATABASE_URL: '' } });
+  const server = spawn(process.execPath, ['server/index.js'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'], env: { ...process.env, PORT: String(port), USE_FIXTURES: '1', NODE_ENV: 'development', AUTH_USERS: `tourdesk:${hash}:admin,tourphone:${hash}:billing,tourone:${hash}:owner,tourtwo:${hash}:billing`, SESSION_SECRET: 'x'.repeat(32), ANTHROPIC_API_KEY: '', DATABASE_URL: '' } });
   await new Promise(ok => server.stdout.on('data', b => { if (String(b).includes('R4 Pulse on')) ok(); }));
   const base = `http://localhost:${port}`, browser = await chromium.launch();
   const signIn = async (who, w, h, pass = 'pw12345678') => { const ctx = await browser.newContext({ viewport: { width: w, height: h } }), p = await ctx.newPage(); p.setDefaultTimeout(45000); p.setDefaultNavigationTimeout(120000); p.errs = []; p.warns = []; p.on('pageerror', e => p.errs.push(e.message)); p.on('console', m => { if (m.type() === 'warning' && m.text().startsWith('tour:')) { p.warns.push(m.text()); console.log('  ' + m.text()); } }); await p.goto(base + '/login'); await p.fill('input[name=name]', who); await p.fill('input[name=password]', pass); await Promise.all([p.waitForNavigation(), p.click('button')]); await p.evaluate(() => { try { localStorage.setItem('r4-intro-day', new Date().toISOString().slice(0, 10)); } catch (e) {} }); return p; };
@@ -65,6 +65,28 @@ const fail = m => { bad++; console.log('FAIL ' + m); };
     if (await b.$('.wl')) fail('the welcome came back in a second browser');
     await b.click('#mast-help'); await b.waitForSelector('.wl');
     console.log("Don't show again: held after sign-out and in a second browser; ? still opens it");
+
+    // one tab passed between people: a skip belongs to that sign-in, and a reset always brings it back
+    const tabCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    await tabCtx.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => false }));
+    const tab = await tabCtx.newPage(); tab.setDefaultNavigationTimeout(120000);
+    const inAs = async who => { await tab.goto(base + '/login'); await tab.fill('input[name=name]', who); await tab.fill('input[name=password]', 'pw12345678'); await Promise.all([tab.waitForNavigation(), tab.click('button')]); return tab.waitForSelector('.wl', { timeout: 15000 }).then(() => true, () => false); };
+    const outOf = async () => { await tab.evaluate(() => { const f = document.createElement('form'); f.method = 'post'; f.action = '/logout'; document.body.appendChild(f); f.submit(); }); await tab.waitForURL('**/login'); };
+    const resetBy = async who => { const r = await signIn('tourdesk', 1280, 800); const st = await r.evaluate(async n => (await fetch('/api/users/' + n + '/welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).status, who); await r.context().close(); return st; };
+    if (!(await inAs('tourtwo'))) fail('a new user did not get the welcome');
+    await tab.click('#wl-skip'); await tab.waitForTimeout(300);
+    await tab.goto('about:blank'); await tab.goto(base + '/#pulse'); await tab.waitForTimeout(2500);
+    await outOf();
+    if (!(await inAs('tourone')) && (await resetBy('tourone')) !== 200) fail('reset failed');
+    if (!(await tab.$('.wl'))) { await outOf(); if (!(await inAs('tourone'))) fail('after a reset, the next person in the same tab got no welcome'); }
+    await tab.check('#wl-never'); await tab.click('#wl-skip'); await tab.waitForTimeout(500); await outOf();
+    if (await inAs('tourone')) fail("Don't show again did not hold in the same tab");
+    await outOf();
+    if ((await resetBy('tourone')) !== 200) fail('reset failed');
+    if (!(await inAs('tourone'))) fail('a reset did not bring the welcome back in the same tab');
+    await tab.check('#wl-never'); await tab.click('#wl-skip'); await tab.waitForTimeout(300);
+    await tabCtx.close();
+    console.log('one tab, two people: skip, reset and Don\'t show again each held');
 
     // who sees what
     const code = (p, url, body) => p.evaluate(async ([u, x]) => (await fetch(u, x ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(x) } : {})).status, [url, body]);

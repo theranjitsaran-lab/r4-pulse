@@ -35,14 +35,29 @@ async function query(text, params) {
 const TTL_MS = 12 * 60 * 60 * 1000;
 const cache = new Map();
 
+const reading = new Map();   // one read of a query at a time, however many screens ask for it
+function fetchFresh(key, fn) {
+  let p = reading.get(key);
+  if (!p) {
+    p = Promise.resolve().then(fn).then(value => { cache.set(key, { value, until: Date.now() + TTL_MS }); return value; }).finally(() => reading.delete(key));
+    reading.set(key, p);
+  }
+  return p;
+}
+// Nobody waits for a refresh: past its time a value is still served while a new one is read behind it.
 async function cached(key, fn) {
   const hit = cache.get(key);
-  if (hit && hit.until > Date.now()) return hit.value;
-  const value = await fn();
-  cache.set(key, { value, until: Date.now() + TTL_MS });
-  return value;
+  if (!hit) return fetchFresh(key, fn);
+  if (hit.until <= Date.now()) fetchFresh(key, fn).catch(e => console.warn(`refresh ${key}: ${e.message}`));
+  return hit.value;
 }
 
-function clearCache() { cache.clear(); }
+// The data has moved: read every named query first, then swap, so the screens keep the old figures until the new ones are all in.
+async function replaceCache(named) {
+  const fresh = [];
+  for (const [key, fn] of named) { try { fresh.push([key, await fn()]); } catch (e) { console.warn(`replace ${key}: ${e.message}`); const old = cache.get(key); if (old) fresh.push([key, old.value]); } }
+  cache.clear();
+  for (const [key, value] of fresh) cache.set(key, { value, until: Date.now() + TTL_MS });
+}
 
-module.exports = { query, cached, clearCache, USE_FIXTURES };
+module.exports = { query, cached, replaceCache, USE_FIXTURES };

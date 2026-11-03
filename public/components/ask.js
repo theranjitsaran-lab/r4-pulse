@@ -30,6 +30,9 @@ function build(suggestions) {
     <section class="ask-panel" role="dialog" aria-label="Ask about the figures">
       <header><b>Ask R4 Pulse</b><small>Answers from the app's own figures</small><button class="ask-x" type="button" aria-label="Close">✕</button></header>
       <div class="ask-log" aria-live="polite">
+        <div class="ask-can"><p><b>Ask in your own words.</b> Answers come only from Pulse's figures, and every number is checked against them.</p>
+          <ul><li>The month, the gap to $1.0M, the lines of business</li><li>Any account: what it buys, its margin and prices, what else it could buy</li><li>Who is largest, rising or slipping</li><li>Cross-sell, Opportunities, boxes eligible to shred, the P&amp;L</li><li>A quick quote: a service, how many, where</li></ul>
+          <p>It only reads, so it can't change an owner, a status or a price. If Pulse doesn't hold something, it says so.</p></div>
         <div class="ask-sugg">${suggestions.map(s => `<button type="button">${esc(s)}</button>`).join('')}</div>
       </div>
       <form class="ask-form"><textarea rows="1" placeholder="Ask about a customer, a line or the month…" aria-label="Your question"></textarea><button type="submit" aria-label="Send">↑</button></form>

@@ -19,7 +19,7 @@ export async function drawUsers(el) {
         <div class="us-who"><b>${esc(nameOf(u.name))}</b><small>${self ? 'You, ' : ''}${u.active ? '' : 'switched off, '}${u.at && u.who ? `last changed by ${esc(nameOf(u.who))}, ${esc(String(u.at).slice(0, 10))}` : 'from the starting list'}</small></div>
         <label class="us-f">Access <select data-role aria-label="Access for ${esc(nameOf(u.name))}" ${self ? 'disabled' : ''}><option value="user"${u.role === 'user' ? ' selected' : ''}>User</option><option value="admin"${u.role === 'admin' ? ' selected' : ''}>Admin</option></select></label>
         <label class="us-f">New password <input type="password" data-pass autocomplete="new-password" minlength="${D.minPassword}" aria-label="New password for ${esc(nameOf(u.name))}"></label>
-        <span class="us-acts"><button type="button" class="pq-btn" data-set>Set password</button>${u.seen ? '<button type="button" class="pq-btn" data-rewelcome>Show welcome again</button>' : ''}${self ? '' : `<button type="button" class="pq-btn" data-active="${u.active ? 0 : 1}">${u.active ? 'Switch off' : 'Switch on'}</button>`}</span>
+        <span class="us-acts"><button type="button" class="pq-btn" data-set>Set password</button><button type="button" class="pq-btn" data-rewelcome>Show welcome again</button>${self ? '' : `<button type="button" class="pq-btn" data-active="${u.active ? 0 : 1}">${u.active ? 'Switch off' : 'Switch on'}</button>`}</span>
       </li>`; }).join('')}</ul>
       <form class="us-add" autocomplete="off"><h3>Add a user</h3>
         <label class="us-f">Name <input name="name" required autocomplete="off" pattern="[A-Za-z0-9._\\-]{2,30}" title="2 to 30 letters or numbers, with no spaces"></label>

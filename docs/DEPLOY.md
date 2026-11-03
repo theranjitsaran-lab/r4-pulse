@@ -140,3 +140,7 @@ the emails need Render live; until then they still send, and the taps say the pa
 3. **Manual Deploy → Deploy latest commit.** Check `https://<service>.onrender.com/health/data`: dates,
    and `"stale": false` once the push and rebuild have run that morning.
 4. Sign in as each of Trisha, Anne and Mike once to confirm their logins.
+
+## Nobody waits after a deploy
+
+`/health` answers 503 until the screens' data is warm, about 25 seconds on this machine and longer on Render, and at most five minutes. Render keeps the old version serving until then. It is also why a deploy that cannot reach the database still goes live after five minutes rather than never. Afterwards the data refreshes behind the screens (`cached` and `replaceCache` in `server/db.js`): an expired value is served while a new one is read, and new data replaces old all at once.
