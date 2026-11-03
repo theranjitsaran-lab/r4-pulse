@@ -137,7 +137,7 @@ if (typeof document !== 'undefined') {
 export function tabsHtml(on) {
   const views = Object.entries(VIEWS).filter(([k, v]) => (!v.hidden || (k === on && k !== 'margin')));
   // a dropdown on a phone, so no tab is ever scrolled off the screen
-  return `<div class="bar"><div class="views on-desk"><div class="seg">${views.map(([k, v]) => `<a href="#customers?view=${k}" class="${k === on ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
+  return `<div class="bar" data-tour="a-tabs"><div class="views on-desk"><div class="seg">${views.map(([k, v]) => `<a href="#customers?view=${k}" class="${k === on ? 'on' : ''}">${esc(v.label)}</a>`).join('')}</div></div>
     <select class="on-phone c2-viewpick" aria-label="View">${views.map(([k, v]) => `<option value="${k}" ${k === on ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select></div>`;
 }
 
@@ -226,10 +226,10 @@ async function whitespace(main, C, params) {
   main.innerHTML = `<div class="cust c2 h2 ac ws">
     <h1>Accounts</h1>
     ${tabsHtml('whitespace')}
-    ${litCard('ws-lit', 'Pulse summary. Comparable accounts: the same kind of organisation at a similar storage size, on R4\'s own books.')}
+    ${litCard('ws-lit', 'Pulse summary. Comparable accounts: the same kind of organisation at a similar storage size, on R4\'s own books.', 'xs-lit')}
     <section class="h2-card" data-in>
-      ${phoneFold('what the colours mean', `<div class="ragkey"><span>A plain figure buys it, twelve months</span><span class="xs">+$</span><span>does not buy it yet: what comparable accounts spend a year est.</span><span class="lowc">$</span><span>buys it, but low for its size</span></div>`)}
-      <div id="ws-t"></div>
+      ${phoneFold('what the colours mean', `<div class="ragkey" data-tour="xs-key"><span>A plain figure buys it, twelve months</span><span class="xs">+$</span><span>does not buy it yet: what comparable accounts spend a year est.</span><span class="lowc">$</span><span>buys it, but low for its size</span></div>`)}
+      <div id="ws-t" data-tour="xs-table"></div>
       <div class="src">Comparable: the same kind of organisation, read from the account's name because the database holds no industry, with a third to three times its boxes, or its spend if it does not store. Where fewer than five qualify it widens to the same kind at any size, then to the whole book, and says so. A ceiling at the median comparable, not a forecast. Tap an account to see why.</div>
     </section>
   </div>`;

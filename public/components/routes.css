@@ -71,6 +71,7 @@
 .how-sec > summary:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .how-sec > summary h2 { margin: 0; }
 .how-sec > summary small { font-size: var(--fs-sm); color: var(--ink-3); }
+.how-show { margin-top: var(--sp-3); }
 .how-sec h3 { margin: var(--sp-4) 0 0; font-size: var(--fs-sm); font-weight: 600; color: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .how-sec > summary::before { transition: none; } }
 .how p { margin: var(--sp-2) 0 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--ink-2); }

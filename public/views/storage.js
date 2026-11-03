@@ -72,25 +72,25 @@ export async function render(main, tabs) {
   main.innerHTML = `
   <div class="rt h2 ac wh">
     ${tabs}
-    ${litCard('wh-lit')}
-    <section class="ktiles">
+    ${litCard('wh-lit', undefined, 'w-lit')}
+    <section class="ktiles" data-tour="w-tiles">
       ${tile({ still: true, lead: true, label: 'Boxes in storage', big: n0(T.boxes), sub: yoy != null ? `${chip(yoy)} billed, on a year ago` : '' })}
       ${tile({ still: true, d: 80, label: 'Eligible to shred est.', big: n0(T.eligible), sub: `${pc(T.eligible / T.boxes)} of the building` })}
       ${tile({ still: true, d: 160, label: 'Over ten years old', big: n0(T.ten), sub: `${pc(T.ten / T.boxes)} of the building` })}
       ${tile({ still: true, d: 240, label: 'Not on the bill', big: n0(SP.activeBoxes), sub: `at ${SP.active.length} current accounts` })}
     </section>
-    <section class="h2-card" data-in>
+    <section class="h2-card" data-tour="w-grid" data-in>
       <div class="h2-ch"><h2>The building by who fills it</h2><small>One square for every ${Fmt.grouped(G.per)} boxes, largest accounts first. Hover or tap a group.</small></div>
       <div class="gwrap"><div id="wh-grid"></div><div class="c-tip" hidden></div></div>
       <div class="wkey">${STATES.map(([k, l]) => `<span><i style="background:${k === 'inuse' ? 'color-mix(in srgb, var(--s-storage) 28%, var(--surface))' : k === 'old' ? 'var(--s-storage)' : k === 'eligible' ? 'var(--s-service)' : 'var(--ink-4)'}"></i>${l} ${k0(T[k])}</span>`).join('')}</div>
       <div class="src">VCK boxes in storage, all in Chicago. Eligible is review overdue less permanent and legal hold, at least est. Rack capacity is not in the data, so this shows what is held, not how full the building is.</div>
     </section>
-    <section class="h2-card" data-in>
+    <section class="h2-card" data-tour="w-elig" data-in>
       <div class="h2-ch"><h2>Shredding the eligible boxes would bill about ${moneyK(E.once)} once and end ${moneyK(E.lost)} a month of storage est.</h2><small>Destruction at the book's median fee, ${Fmt.money(E.perBox || 0, { dp: 2 })} a box; storage at each account's own rate per box.</small></div>
       ${phoneFold('the accounts', '<div id="wh-elig"></div>')}
       <div class="src"><a class="how-link chev" href="#customers?view=destruction">Overdue boxes by account</a></div>
     </section>
-    <section class="h2-card nb" data-in>
+    <section class="h2-card nb" data-tour="w-nb" data-in>
       <div class="h2-ch"><h2>${n0(SP.activeBoxes)} boxes at ${SP.active.length} current accounts are not on the ${NB.month ? mon(NB.month) : 'latest'} storage bill</h2><small>${nbTop ? `${esc(titleCase(nbTop.customer))} alone has ${n0(nbTop.gap)}. ` : ''}It may be timing or prepaid storage; Anne to confirm before anyone calls.</small></div>
       ${phoneFold('the accounts', '<div id="wh-nb"></div>')}
       <div class="src">Current means invoiced in the last twelve months. Another ${SP.dormant.length} dormant accounts hold ${n0(SP.dormantBoxes)} boxes, under the filter.${SP.internalBoxes ? ` R4's own and placeholder accounts (${n0(SP.internalBoxes)} boxes) are left out.` : ''}</div>

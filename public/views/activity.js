@@ -78,15 +78,15 @@ export async function render(main, A, params) {
         <div class="day" id="op-day" hidden><button id="rt-prev" aria-label="Previous day"></button><b id="rt-day"></b><button id="rt-next" aria-label="Next day"></button></div>
       </div>
     </div>
-    ${litCard('op-lit', 'Pulse summary for the period, from the figures below')}
-    <section class="ktiles" id="op-kpis"></section>
-    <section class="h2-card rt-mapcard" data-in>
+    ${litCard('op-lit', 'Pulse summary for the period, from the figures below', 'o-lit')}
+    <section class="ktiles" id="op-kpis" data-tour="o-tiles"></section>
+    <section class="h2-card rt-mapcard" data-tour="o-map" data-in>
       <div class="rt-maphead"><div class="h2-ch"><h2 id="rt-map-t"></h2><small id="rt-map-s"></small></div>
         <div class="seg" id="rt-layer" role="group" aria-label="Show on the map"><button data-l="routes">Routes</button><button data-l="add">Where to add customers</button><button data-l="cost">${costsVisible() ? 'Costly to serve' : 'Far areas'}</button></div></div>
       <div class="ops-mapgrid"><div class="ops-mapwrap"><div id="rt-map"></div><div class="c-tip" id="op-tip" hidden></div><div class="h2-key" id="rt-map-key"></div></div>${phoneFold('the list beside the map', '<div class="ops-side" id="op-side"></div>')}</div>
     </section>
     <div class="ops-view" id="op-period-view">
-      <section class="h2-card" data-in><div class="h2-ch"><h2 id="op-routes-h"></h2><small>Services per route day is the density measure: more work on the same drive. Tap a route to pick it out on the map.</small></div><div id="op-routes"></div></section>
+      <section class="h2-card" data-tour="o-routes" data-in><div class="h2-ch"><h2 id="op-routes-h"></h2><small>Services per route day is the density measure: more work on the same drive. Tap a route to pick it out on the map.</small></div><div id="op-routes"></div></section>
     </div>
     <div class="ops-view" id="op-day-view" hidden>
       <section class="h2-card" data-in><div class="h2-ch"><h2 id="rt-routes-h">By route</h2><small id="rt-routes-s"></small></div><div id="rt-routes"></div></section>
@@ -95,9 +95,9 @@ export async function render(main, A, params) {
         <section class="h2-card" data-in><div class="h2-ch"><h2 id="rt-ahead-h">Booked after the latest day</h2></div><div id="rt-ahead"></div></section>
       </div>`)}
     </div>
-    ${phoneFold('how dense the work is', '<section class="h2-card" data-in id="op-dense"></section>')}
-    <section class="h2-card" data-in id="op-costly"></section>
-    ${phoneFold('distance from the yard', '<section class="h2-card" data-in id="op-bands"></section>')}
+    ${phoneFold('how dense the work is', '<section class="h2-card" data-tour="o-dense" data-in id="op-dense"></section>')}
+    <section class="h2-card" data-tour="o-costly" data-in id="op-costly"></section>
+    ${phoneFold('distance from the yard', '<section class="h2-card" data-tour="o-bands" data-in id="op-bands"></section>')}
   </div>`;
   const $ = id => main.querySelector('#' + id), root = main.querySelector('.ops');
 

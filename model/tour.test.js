@@ -7,7 +7,7 @@ const path = require('path');
 const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => e.isDirectory() ? (e.name === 'data' ? [] : walk(path.join(d, e.name))) : /\.(js|html)$/.test(e.name) ? [path.join(d, e.name)] : []);
 
 test('every tour target is marked in the app, and no tour runs long', async () => {
-  const { TOURS, allTargets, stepsFor, TOUR_VERSION, WELCOME } = await import('../public/components/tourdata.js');
+  const { TOURS, GUIDES, allTargets, stepsFor, TOUR_VERSION, WELCOME } = await import('../public/components/tourdata.js');
   const src = walk('public').filter(f => !/tourdata\.js$/.test(f)).map(f => fs.readFileSync(f, 'utf8')).join('\n');
   for (const t of allTargets()) assert.ok(src.includes(`data-tour="${t}"`) || src.includes(`, '${t}')}`), `no element marked data-tour="${t}"`);   // a lit card takes its mark as an argument
   assert.ok(stepsFor('full', true).length <= 10);
@@ -15,6 +15,7 @@ test('every tour target is marked in the app, and no tour runs long', async () =
   assert.ok(!stepsFor('full', false).some(s => s.target === 'gear'), 'nobody else is pointed at Settings');
   for (const k of ['quote', 'account']) assert.ok(TOURS[k].length >= 3 && TOURS[k].length <= 5, k);
   for (const s of Object.values(TOURS).flat()) { assert.ok(s.tab.startsWith('#')); assert.ok(s.title && s.body); assert.ok(s.body.length < 220, s.title); }
+  for (const [k] of GUIDES) { assert.ok(TOURS[k] && TOURS[k].length >= 3 && TOURS[k].length <= 10, k); }
   assert.ok(Number.isInteger(TOUR_VERSION));
   assert.deepStrictEqual(WELCOME.choices.map(c => c[0]), ['full', 'quote', 'account']);
   assert.ok(!/Money|Six places/.test(JSON.stringify(TOURS)), 'Money came out on 3 November 2026');

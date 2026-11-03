@@ -32,7 +32,7 @@ function build() {
   d.className = 'ask pop';
   d.hidden = true;
   d.innerHTML = `<div class="ask-scrim"></div>
-    <section class="ask-panel" role="dialog" aria-label="Explain this figure">
+    <section class="ask-panel" data-tour="pop" role="dialog" aria-label="Explain this figure">
       <header><b class="pop-t"></b><small class="pop-s"></small><button class="ask-x" type="button" aria-label="Close">✕</button></header>
       <div class="pop-b"></div>
       <footer class="pop-f"><button class="pop-ask" type="button">Ask why ›</button><div class="pop-x"></div></footer>

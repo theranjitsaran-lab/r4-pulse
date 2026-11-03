@@ -44,7 +44,7 @@ export async function render(main, C, params, tabs) {
     { key: 'cross', tone: 'a', lead: `Cross-sell is worth up to ${moneyK(crossV)} a month`, rest: `if accounts bought like comparable ones.${topCross ? ` Start with ${titleCase(topCross.customer)}: ${lineWord(bestCell(topCross)[0])}.` : ''}` },
   ];
 
-  const kpis = `<section class="ktiles">
+  const kpis = `<section class="ktiles" data-tour="a-tiles">
     ${tile({ lead: true, label: `${LABELS.invoiced}, ${mon(last.month)}`, big: moneyK(last.core), sub: `${chip(mPct)} on ${esc(mon(prev.month))}${ly ? `, ${esc(changeOf(last.core / ly.core - 1))} on a year ago` : ''}`, spark: P.monthly.slice(-12).map(m => m.core) })}
     ${tile({ d: 80, label: LABELS.invoicedThisMonth, big: String(active), sub: `${chip(active / activePrev - 1)} on the month before` })}
     ${tile({ d: 160, href: '#customers?view=slipping', label: 'Slipping', big: String(slip.length), sub: `${chipText('−' + moneyK(slipV) + ' a month', 'down')} below their own run` })}
@@ -52,7 +52,7 @@ export async function render(main, C, params, tabs) {
   </section>`;
 
   // the book by line: one bar, greens and greys, two columns; a line opens its drawer
-  const lobCard = seg ? `<section class="h2-card" data-in><div class="h2-ch"><h2>${esc(mon(seg.month))} by line of business</h2><small>${moneyK(seg.total)}. Tap a line for its trend, top customers and what to do next.</small></div>
+  const lobCard = seg ? `<section class="h2-card" data-tour="a-lob" data-in><div class="h2-ch"><h2>${esc(mon(seg.month))} by line of business</h2><small>${moneyK(seg.total)}. Tap a line for its trend, top customers and what to do next.</small></div>
       <div class="lob-bar" aria-hidden="true">${seg.rows.map((s, i) => `<i class="l${i + 1}" style="flex:${Math.max(.2, s.lm / seg.total * 100).toFixed(2)} 0 0;--i:${i}"></i>`).join('')}</div>
       <div class="lob-list">${seg.rows.map((s, i) => `<button type="button" class="lob-row" data-line="${s.key}"><i class="l${i + 1}"></i><span>${esc(s.name)}</span><b>${moneyK(s.lm)}</b>${chip(s.lmPct) || '<span></span>'}<em class="chev"></em></button>`).join('')}</div></section>` : '';
 
@@ -67,7 +67,7 @@ export async function render(main, C, params, tabs) {
     ${kpis}
     ${lobCard ? phoneFold('the book by line', lobCard) : ''}
     ${phoneFold('who moved', moved)}
-    <section class="h2-card c2-tablecard" data-in>
+    <section class="h2-card c2-tablecard" data-tour="a-table" data-in>
       <div id="c2-dt"></div>
       <div class="src">Sales as invoiced, Citadel held apart from totals${costsVisible() ? '. Margin and cost a unit est. are modelled from GL pools over twelve months, provisional' : ''}. Tap an account for its lines, a month for its invoices.</div>
     </section>

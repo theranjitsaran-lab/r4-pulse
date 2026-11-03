@@ -4,6 +4,9 @@ import * as Fmt from '/components/format.js';
 import { esc } from '/components/data.js';
 import { LABELS } from '/components/metrics.js';
 import { isAdmin } from '/components/access.js';
+import { start } from '/components/tour.js';
+
+const GUIDE = { 'Getting around': 'full', Today: 'g-today', Accounts: 'g-accounts', 'Cross-sell': 'g-cross', Quote: 'g-quote', Operations: 'g-ops', Opportunities: 'g-opps', Ask: 'g-ask' };
 
 // a screen: its title, the question it answers, then groups of [heading, lines]
 const SCREENS = () => [
@@ -138,10 +141,12 @@ export async function render(main, S) {
   const codes = [...types.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
   main.innerHTML = `<div class="how">
     <h1>How Pulse works</h1>
-    <p class="how-lede">Refreshed daily from VCK (billing and pricing) and Veri-Shred (operations). Tap a screen for how to use it and where its figures come from.</p>
+    <p class="how-lede">Refreshed daily from VCK (billing and pricing) and Veri-Shred (operations). Tap a screen for how to use it and where its figures come from, or have Pulse show you on the screen.</p>
     ${SCREENS().map(s => `<section class="h2-card"><details class="how-sec"><summary><h2>${esc(s.title)}</h2><small>${esc(s.line)}</small></summary>
+      ${GUIDE[s.title] ? `<button type="button" class="pq-btn cd-go how-show" data-guide="${GUIDE[s.title]}">Show me on the screen</button>` : ''}
       ${s.groups.map(([h, ps]) => `<h3>${esc(h)}</h3>${ps.map(p => `<p>${esc(p)}</p>`).join('')}`).join('')}
     </details></section>`).join('')}
     ${codes.length ? `<section class="h2-card"><details class="how-sec"><summary><h2>Box types, as VCK holds them</h2><small>The share of boxes; R4 has still to name these codes.</small></summary><p>${codes.map(([k, v]) => `${esc(k || 'none')} ${Fmt.pct(v / total)}`).join(', ')}</p></details></section>` : ''}
   </div>`;
+  main.querySelector('.how').addEventListener('click', e => { const b = e.target.closest('[data-guide]'); if (b) start(b.dataset.guide); });
 }

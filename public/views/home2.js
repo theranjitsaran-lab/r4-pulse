@@ -51,7 +51,7 @@ export async function render(main, P) {
   const alertOf = Object.fromEntries((V.points || []).map(p => [p.key, !!p.alert]));
 
 
-  const kpis = `<section class="h2-kpis bills">
+  const kpis = `<section class="h2-kpis bills" data-tour="t-kpis">
       <div class="h2-kpi lead" data-in style="--d:150ms"><span>${m.next ? `${mon(m.workMonth)}'s work → ${mon(m.next.month)} bill (est.)` : 'Next bill'}</span><b data-count data-delay="400">${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b>
         <small>${m.next ? (m.next.jobCount ? `+ up to ${moneyK(m.next.jobs)}: ${jobWord(m.next.jobCount)}` : Math.round(m.next.lo / 1000) !== Math.round(m.next.hi / 1000) ? `${moneyK(m.next.lo)}–${moneyK(m.next.hi)}` : '') : ''}</small></div>
       <a class="h2-kpi" data-in style="--d:230ms" href="#customers?view=grid"><span>${esc(LABELS.invoiced)}, ${mon(billShown.month)}</span><b data-count data-delay="480">${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${monS(billShown.vs)}` : 'posted, core'}</small></a>
@@ -65,7 +65,7 @@ export async function render(main, P) {
 
   const LV = V.lines;
   let lineMonth = LV ? closedMonth(LV) : null;
-  const segCard = LV ? `<section class="h2-card" id="h2-lines" data-in data-grow>
+  const segCard = LV ? `<section class="h2-card" id="h2-lines" data-tour="t-lines" data-in data-grow>
       <div class="h2-ch h2-chi"><div><h2 id="h2-lines-t"></h2><small id="h2-lines-s"></small></div>${info("Storage by the month it bills, service by the month of the work, Citadel apart. Estimated months are hatched: work orders at each account's own prices, charges added at the run carried from the last priced month. A job to check is left out until someone has looked at it.")}</div>
       <div class="seg h2-months" id="h2-months">${LV.pick.slice(-4).map(x => `<button data-m="${x}">${esc(monS(x))}${LV.meta[x].est ? ' est.' : ''}</button>`).join('')}</div>
       <ul class="h2-rows" id="h2-tiles"></ul>
@@ -74,16 +74,16 @@ export async function render(main, P) {
 
   // yesterday, in a line, opening Routes
   const Y = V.yesterday;
-  const yesterday = Y ? `<a class="h2-card h2-yest" href="#activity" data-in><span class="h2-eyebrow">${esc(Y.label)}</span><span>${esc(Y.text)}</span><i class="h2-chev" aria-hidden="true"></i></a>` : '';
+  const yesterday = Y ? `<a class="h2-card h2-yest" data-tour="t-yest" href="#activity" data-in><span class="h2-eyebrow">${esc(Y.label)}</span><span>${esc(Y.text)}</span><i class="h2-chev" aria-hidden="true"></i></a>` : '';
 
   // three things to act on, each with its owner
   const OWNER = { trisha: 'Trisha', anne: 'Anne', mike: 'Mike' };
   const fbBtns = i => `<span class="fb" data-key="${esc(i.key)}" data-subject="${esc(i.subject)}">${fbIcon('useful', 'Useful')}${fbIcon('knew', 'I knew this')}${fbIcon('wrong', 'Not right')}</span>`;
-  const acts = V.actions && V.actions.length ? `<section class="h2-card h2-acts" data-in><div class="h2-ch"><h2>Three things to act on</h2></div><ul>${V.actions.map(i => `<li><a href="${esc(i.href)}"><b>${esc(OWNER[i.owner] || i.owner)}</b><span>${esc(i.text)}</span></a>${fbBtns(i)}${i.move ? (i.move.owner ? `<span class="h2-listed"><span class="h2-lg">With ${esc(OWNER[i.move.owner] || i.move.owner)} on Opportunities</span><span class="h2-sm">Listed</span></span>` : `<button type="button" class="linkbtn h2-send" data-key="${esc(i.move.key)}" aria-label="Send to Opportunities, with ${esc(OWNER[i.owner] || i.owner)}"><span class="h2-lg">Send to Opportunities, with ${esc(OWNER[i.owner] || i.owner)}</span><span class="h2-sm">To the list</span></button>`) : ''}</li>`).join('')}</ul></section>` : '';
+  const acts = V.actions && V.actions.length ? `<section class="h2-card h2-acts" data-tour="t-acts" data-in><div class="h2-ch"><h2>Three things to act on</h2></div><ul>${V.actions.map(i => `<li><a href="${esc(i.href)}"><b>${esc(OWNER[i.owner] || i.owner)}</b><span>${esc(i.text)}</span></a>${fbBtns(i)}${i.move ? (i.move.owner ? `<span class="h2-listed"><span class="h2-lg">With ${esc(OWNER[i.move.owner] || i.move.owner)} on Opportunities</span><span class="h2-sm">Listed</span></span>` : `<button type="button" class="linkbtn h2-send" data-key="${esc(i.move.key)}" aria-label="Send to Opportunities, with ${esc(OWNER[i.owner] || i.owner)}"><span class="h2-lg">Send to Opportunities, with ${esc(OWNER[i.owner] || i.owner)}</span><span class="h2-sm">To the list</span></button>`) : ''}</li>`).join('')}</ul></section>` : '';
 
-  const weeks = `<section class="h2-card" data-in data-grow><div class="h2-ch h2-chi"><div><h2>${w.lastFull ? `Last week ${moneyK(w.lastFull.value)} est., ${w.vsAvg >= 0 ? 'up' : 'down'} ${pctW(w.vsAvg)}` : 'Weeks'}</h2></div>${info(`${LABELS.veriShred} Work done each week, priced at that month's value a service, against the weeks before.`)}</div><div id="h2-weeks"></div></section>`;
+  const weeks = `<section class="h2-card" data-tour="t-weeks" data-in data-grow><div class="h2-ch h2-chi"><div><h2>${w.lastFull ? `Last week ${moneyK(w.lastFull.value)} est., ${w.vsAvg >= 0 ? 'up' : 'down'} ${pctW(w.vsAvg)}` : 'Weeks'}</h2></div>${info(`${LABELS.veriShred} Work done each week, priced at that month's value a service, against the weeks before.`)}</div><div id="h2-weeks"></div></section>`;
 
-  const mapCard = `<section class="h2-card h2-mapc" id="h2-map" data-in><h2 id="hm-title">Where the work is</h2><p class="hm-sum" id="hm-sum" aria-live="polite"></p>
+  const mapCard = `<section class="h2-card h2-mapc" id="h2-map" data-tour="t-map" data-in><h2 id="hm-title">Where the work is</h2><p class="hm-sum" id="hm-sum" aria-live="polite"></p>
       <div class="hm-days" id="hm-days" role="group" aria-label="Day"></div><div class="hm-routes" id="hm-chips" role="group" aria-label="Route"></div>
       <div class="hm-grid"><div class="hm-stage"><div id="hm-svg"><p class="sub">Loading the map…</p></div><div class="hm-tip" id="hm-tip" role="status"></div><div class="hm-key" id="hm-key"></div></div>
       <div class="hm-side"><p class="hm-say" id="hm-say"></p>${phoneFold('the busiest postcodes', '<ol class="hm-top" id="hm-top"></ol>')}</div></div>
