@@ -191,6 +191,7 @@ test('margin drill: one cost per job on its real route day; actions; density nev
   // action rules on known cases
   const act = (pc, revenue, cost, travel, review = false) => marginAction({ pc, revenue, cost, review }, travel).tag;
   assert.equal(act(0.6, 1e5, 4e4, 0), 'Hold');
+  assert.equal(act(0.4, 1e5, 6e4, 0), 'Hold', 'Healthy from 35%, the one definition');
   assert.equal(act(0.3, 1e5, 7e4, 0), 'Reprice');
   assert.equal(act(0.05, 3000, 2850, 0), 'Drop');
   assert.equal(act(0.05, 5e4, 47500, 3e4), 'Re-route');

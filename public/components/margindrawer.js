@@ -3,17 +3,19 @@
 // and every job in the period, uncapped → one job's cost build, with its route that day. What would improve it sits
 // at each level, in dollars a year, each on its own. Every figure comes from margin.js: accountJobs shares the
 // line's cost out to its jobs, so each level adds up to the one above.
-//   openDrawer({ level1, name, R, row, B, family, woid })
+//   openDrawer({ level1, name, R, row, B, family, woid, pill })   pill: the figures on what was tapped, so the head cannot disagree with it
 //   bridgeHtml, linesHtml, leversHtml: the same blocks on the customer page
 import * as Fmt from './format.js';
-import { accountJobs, marginLevers, marginAction, costParts, PARTS, FAMILY_NAMES } from './margin.js';
+import { accountJobs, marginLevers, marginHead, marginFixes, fixChange, drawerPoints, costConfidence, ASK_NAMES, POINT_NAMES, costParts, PARTS, FAMILY_NAMES } from './margin.js';
+import { drawPoints, ragLabel } from './lit.js';
+import { OWNERS, ownerName } from './opps.js';
 import { pricePosition } from './custbook.js';
 import { allocate, loadRoadnet } from './routemap.js';
 import { jobHtml, drawRouteBlock } from './jobview.js';
 import { openPop, closePop } from './pop.js';
 import { dataTable } from './datatable.js';
 import { getJson, titleCase, esc } from './data.js';
-import { costsVisible } from './access.js';
+import { costsVisible, whoAmI } from './access.js';
 import { money0, moneyK } from './chart.js';
 
 const CLS = { space: 'p-space', handling: 'p-hand', route: 'p-route', plant: 'p-plant', labour: 'p-lab' };
@@ -64,17 +66,19 @@ async function loadJobs(level1) {
 const zcta = () => fetch('/data/zcta.json', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
 const clearLink = () => { const [h, q] = location.hash.split('?'), u = new URLSearchParams(q || ''); for (const k of [...u.keys()]) if (k.startsWith(NS)) u.delete(k); history.replaceState(null, '', h + (u.toString() ? '?' + u : '')); };
 
-export async function openDrawer({ level1, name, R, row = null, B = null, family = null, woid = null }) {
-  const title = titleCase(name), costs = costsVisible();
+export async function openDrawer({ level1, name, R, row = null, B = null, family = null, woid = null, pill = null }) {
+  const title = titleCase(name), costs = costsVisible(), wrap = { wide: !costs, size: costs ? 'mid' : null }, subLine = costs ? 'Margin, last twelve months, est.' : 'Last twelve months';
   const position = B ? (r, k) => pricePosition(B, r, k) : null;
-  openPop({ title, sub: 'Last twelve months', wide: true, html: '<p class="sub">Reading its jobs…</p>', ask: `Why is ${title}'s margin what it is, and how do we improve it?`, onClose: clearLink });
+  const headOf = (revenue, cost) => { const h = marginHead(R, revenue, cost), conf = costConfidence(R), signed = h.pc == null ? '—' : `${h.pc < 0 ? '−' : ''}${Fmt.pct(Math.abs(h.pc))}`; return `<div class="mdh"><div class="mdh-row"><div class="mdh-v"><b class="${h.band.cls}">${signed}</b>${ragLabel(R, h.pc)}</div><div class="mdh-k"><span><small>Revenue</small><b>${moneyK(h.revenue)}</b></span><span><small>Cost</small><b>${moneyK(h.cost)}</b></span><span><small>${h.left < 0 ? 'Short' : 'Left'}</small><b>${moneyK(Math.abs(h.left))}</b></span></div></div><span class="cd-conf c${conf === 3 ? 3 : 1}"><span class="cd-dots" aria-hidden="true">${[1, 2, 3].map(i => `<i class="${i <= conf ? 'on' : ''}"></i>`).join('')}</span>${conf === 3 ? 'Costs modelled' : 'Costs modelled, provisional'}</span></div>`; };
+  openPop({ title, sub: subLine, ...wrap, html: `${costs && pill ? headOf(pill.revenue, pill.cost) : ''}<p class="sub">Reading its jobs…</p>`, ask: `Why is ${title}'s margin what it is, and how do we improve it?`, onClose: clearLink });
   let J;
   try { J = await loadJobs(level1); }
-  catch (e) { return openPop({ title, sub: 'Last twelve months', wide: true, html: `<div class="pending">${esc(e.message)}</div>`, onClose: clearLink }); }
+  catch (e) { return openPop({ title, sub: subLine, ...wrap, html: `${costs && pill ? headOf(pill.revenue, pill.cost) + (pill.parts ? bridgeParts(pill.revenue, pill.parts) : '') : ''}<div class="pending">${esc(e.message)}</div>`, onClose: clearLink }); }
   const F = accountJobs(R, J.acct, J.lines, J.orders, costs ? { daily: J.daily, moveDaily: J.moveDaily } : {});
   const svc = new Map(Object.entries(J.services || {}));
-  const revenue = (J.acct.storage_revenue || 0) + (J.acct.service_revenue || 0);
-  const cost = Object.values(F.fams).reduce((t, x) => t + x.cost, 0);
+  const revenue = pill && !family ? pill.revenue : (J.acct.storage_revenue || 0) + (J.acct.service_revenue || 0);
+  const cost = pill && !family ? pill.cost : Object.values(F.fams).reduce((t, x) => t + x.cost, 0);
+  const moves = costs ? await fetch(`/api/view/opportunities?level1=${level1}`, { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(j => (j && j.data && j.data.rows) || []).catch(() => []) : [];
   const body = () => document.querySelector('.pop .pop-b');
   const totals = (rev, c, label) => `<div class="md-tot"><span><small>${esc(label)}</small><b>${money0(rev)}</b></span>${costs ? `<span><small>Cost est.</small><b>${money0(c)}</b></span><span><small>${rev - c >= 0 ? 'Left est.' : 'Short est.'}</small><b class="${rev - c < 0 ? 'is-bad' : ''}">${money0(Math.abs(rev - c))}</b></span><span><small>Margin est.</small><b class="${rev - c < 0 ? 'is-bad' : ''}">${pc(rev, c)}</b></span>` : ''}</div>`;
   const crumb = (parts) => `<nav class="md-crumb" aria-label="Where you are">${parts.map((p, i) => i < parts.length - 1 ? `<button type="button" data-go="${esc(p.go)}">${esc(p.t)}</button><span aria-hidden="true">›</span>` : `<b>${esc(p.t)}</b>`).join('')}</nav>`;
@@ -82,16 +86,49 @@ export async function openDrawer({ level1, name, R, row = null, B = null, family
   const paint = (html, d) => { const b = body(); if (!b || b.closest('.pop').hidden) return null; b.innerHTML = `<div class="md-step ${d < depth ? 'back' : ''}">${html}</div>`; depth = d; b.scrollTop = 0; return b.firstElementChild; };
 
   // ── step 1: the account ──
+  // what it could do about its margin, and where each fix can be sent
+  const fixes = costs ? marginFixes(marginLevers(R, J.acct, J.lines, F, { row, position }), moves, F, J.lines) : { real: [], hard: [] };
+  const fixKey = f => f.key || (f.kind === 'ops' ? `route:${level1}:${f.family}` : `price:${level1}:fix-${f.family}`);
+  const sendFix = async (f, owner, btn) => {
+    btn.disabled = true;
+    const res = await fetch('/api/sales/opportunities', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: fixKey(f), level1, status: 'open', owner, value: Math.round(f.worth), note: `${f.title}: about ${moneyK(f.worth)} a year est.` }) }).catch(() => null);
+    if (!res || !res.ok) { btn.disabled = false; btn.textContent = 'That did not save. Try again'; return; }
+    const done = document.createElement('span'); done.className = 'cd-sent'; done.textContent = `With ${ownerName(owner)} on Opportunities.`; btn.replaceWith(done);
+  };
+  const fixRow = (f, i) => `<div class="md-fx${f.best ? ' best' : ''}${f.ask === 'no' ? ' hard' : ''}"><button type="button" class="md-fxh" aria-expanded="false" data-fx="${f.ask === 'no' ? 'h' : 'r'}${i}"><span class="md-fxt">${esc(f.title)}${f.best ? '<i>Best</i>' : ''}</span><span class="md-ask ${f.ask}">${ASK_NAMES[f.ask]}</span><span class="md-fxv"><b>+${moneyK(f.worth)}</b><small>${esc(fixChange(f))}</small></span></button><div class="md-fxb" hidden><p>${esc(f.say)}</p>${f.ask === 'no' ? '' : `<div class="md-fxa">${f.code ? `<a class="pq-btn cd-a" href="#pricing?level1=${level1}&code=${esc(f.code)}">Price it in Quote</a>` : ''}<button type="button" class="pq-btn" data-send="${i}">Send to Opportunities</button></div>`}</div></div>`;
   function account() {
     clearLink();
-    const lines = Object.values(F.fams).flatMap(x => x.working);
-    const travel = lines.filter(l => l[0] === 'Travel to site' || l[0] === 'Truck time').reduce((t, l) => t + l[1], 0);
-    const act = costs ? marginAction({ pc: revenue > 0 ? (revenue - cost) / revenue : 0, review: false, revenue, cost }, travel) : null;
-    const el = paint(`${crumb([{ t: title }])}${totals(revenue, cost, 'Revenue')}
-      ${act ? `<p class="md-say"><b>${esc(act.tag)}.</b> ${esc(act.why)}${F.flat ? ` Billed as a flat fee of ${money0(F.flat)}: read the line, not each job.` : ''}</p><h3>From revenue to what is left est.</h3>${bridgeHtml(revenue, lines)}` : ''}
-      <h3>Its lines, tap one for every job</h3>${linesHtml(F, costs, F.noLine)}
-      ${costs ? `<h3>What would improve it</h3>${leversHtml(marginLevers(R, J.acct, J.lines, F, { row, position }))}<p class="src">Modelled costs: GL pools over twelve months of volumes, provisional.</p>` : ''}`, 0);
-    if (el) el.querySelectorAll('button.md-line').forEach(b => b.addEventListener('click', () => line(b.dataset.f)));
+    if (!costs) { const el = paint(`${crumb([{ t: title }])}${totals(revenue, cost, 'Revenue')}<h3>Its lines, tap one for every job</h3>${linesHtml(F, costs, F.noLine)}`, 0); if (el) el.querySelectorAll('button.md-line').forEach(b => b.addEventListener('click', () => line(b.dataset.f))); return; }
+    const all = Object.values(F.fams), lines = all.flatMap(x => x.working), rows = linesOf(F).slice().sort((a, b) => (b.revenue - b.cost) - (a.revenue - a.cost));
+    const top = Math.max(1, ...rows.map(x => Math.max(x.revenue, x.cost)));
+    const lineRow = (x, i) => { const left = x.revenue - x.cost, none = x.family === 'other' || !x.cost, pct = x.revenue > 0 ? left / x.revenue : null; return `<button type="button" class="md-ln${left < 0 ? ' loss' : ''}" data-f="${esc(x.family)}" style="--i:${i}"><span class="md-nm">${esc(POINT_NAMES[x.family] || famName(x.family))}</span><span class="md-tr"><i class="rv" style="width:${(x.revenue / top * 100).toFixed(1)}%"></i>${x.cost ? `<i class="cs" style="width:${(x.cost / top * 100).toFixed(1)}%"></i>` : ''}</span><span class="md-lf"><b>${left < 0 ? '−' : ''}${moneyK(Math.abs(left))}</b>${none ? '<small>no cost</small>' : `<span class="rag static ${marginHead(R, x.revenue, x.cost).band.cls}"><i></i>${pct < 0 && Fmt.pct(Math.abs(pct)) !== '0%' ? '−' : ''}${Fmt.pct(Math.abs(pct))}</span>`}</span></button>`; };
+    const parts = costParts(lines), pools = PARTS.map(p => ({ k: p[0], name: p[1], v: parts[p[0]] || 0 })).filter(p => p.v >= .5).sort((a, b) => b.v - a.v), poolAll = pools.reduce((t, p) => t + p.v, 0);
+    const byLine = `<div class="md-lns">${rows.map(lineRow).join('')}</div><div class="md-lkey"><span><i class="rv"></i>billed</span><span><i class="cs"></i>cost to serve</span><span><i class="ls"></i>costs more than it bills</span><span>Tap a line for its jobs</span></div>${Math.abs(F.noLine) >= 1 ? `<p class="md-odd">${F.noLine < 0 ? 'Less' : 'Plus'} ${money0(Math.abs(F.noLine))} billed with no matching work this period, timing.</p>` : ''}`;
+    const byCost = pools.length ? `<div class="md-pools" aria-hidden="true">${pools.map((p, i) => `<i class="p${i + 1}" style="flex:${p.v.toFixed(0)} 0 0;--i:${i}"></i>`).join('')}</div><div class="md-pkey">${pools.map((p, i) => `<span><i class="p${i + 1}"></i>${esc(p.name)}<b>${moneyK(p.v)}</b></span>`).join('')}</div><p class="md-odd">${moneyK(poolAll)} to serve in all. ${esc(pools[0].name)} is ${Fmt.pct(pools[0].v / poolAll)}${pools[0].k === 'space' && J.acct.boxes ? `: the rent and racking for ${Fmt.grouped(Math.round(J.acct.boxes))} boxes` : ''}.</p>` : '<p class="sub">No costed lines in the period.</p>';
+    const el = paint(`${headOf(revenue, cost)}<div id="md-pts"></div>
+      <section class="md-sec"><div class="md-sh"><h3>Where the margin is made and lost</h3><span class="seg" role="group" aria-label="Break down by"><button type="button" data-v="lines" class="on" aria-pressed="true">By line</button><button type="button" data-v="cost" aria-pressed="false">By cost type</button></span></div><div id="md-view">${byLine}</div></section>
+      <section class="md-sec"><div class="md-sh"><h3>Ways to improve it, a year est.</h3><small>They overlap, so they do not add up</small></div>
+        ${fixes.real.length ? `<div class="md-fixes">${fixes.real.map(fixRow).join('')}</div>` : '<p class="sub">Nothing sized above what would matter.</p>'}
+        ${fixes.hard.length ? `<button type="button" class="linkbtn md-more" aria-expanded="false">Show ${fixes.hard.length} not realistic as a price</button><div class="md-fixes" id="md-hard" hidden>${fixes.hard.map(fixRow).join('')}</div>` : ''}
+        ${F.flat ? `<p class="md-odd">Billed as a flat fee of ${money0(F.flat)}: read the line, not each job.</p>` : ''}
+      </section>`, 0);
+    if (!el) return;
+    drawPoints(el.querySelector('#md-pts'), drawerPoints(F, fixes, moneyK));
+    const view = el.querySelector('#md-view');
+    el.addEventListener('click', ev => {
+      const seg = ev.target.closest('.seg button[data-v]');
+      if (seg) { seg.parentElement.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b === seg); b.setAttribute('aria-pressed', String(b === seg)); }); view.innerHTML = seg.dataset.v === 'cost' ? byCost : byLine; return; }
+      const ln = ev.target.closest('.md-ln'); if (ln) { line(ln.dataset.f); return; }
+      const more = ev.target.closest('.md-more'); if (more) { const box = el.querySelector('#md-hard'); box.hidden = !box.hidden; more.setAttribute('aria-expanded', String(!box.hidden)); more.textContent = box.hidden ? `Show ${fixes.hard.length} not realistic as a price` : 'Hide the unrealistic ones'; return; }
+      const send = ev.target.closest('[data-send]'); if (send) { const owner = (document.querySelector('.pop-x [data-md-owner]') || {}).value || OWNERS[0]; sendFix(fixes.real[+send.dataset.send], owner, send); return; }
+      const fx = ev.target.closest('.md-fxh'); if (fx) { const b = fx.nextElementSibling; b.hidden = !b.hidden; fx.setAttribute('aria-expanded', String(!b.hidden)); }
+    });
+    const foot = document.querySelector('.pop .pop-x');
+    if (foot) {
+      foot.innerHTML = fixes.real[0] ? `<label class="cd-owner">Owner <select data-md-owner>${OWNERS.map(o => `<option value="${o}"${o === whoAmI() ? ' selected' : ''}>${esc(ownerName(o))}</option>`).join('')}</select></label><button type="button" class="pq-btn cd-go" data-md-top>Send the top fix to Opportunities</button>` : '';
+      const go = foot.querySelector('[data-md-top]');
+      if (go) go.addEventListener('click', () => sendFix(fixes.real[0], foot.querySelector('[data-md-owner]').value, go));
+    }
   }
 
   // ── step 2: one line, every job ──

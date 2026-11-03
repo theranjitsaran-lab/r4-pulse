@@ -43,6 +43,7 @@ export function weakest(fam) {
 }
 
 export function openMargin({ R, name, revenue, cost, parts, weak = null, level1 = null, row = null, B = null, sub = 'Last twelve months, est.', family = null }) {
+  if (level1 != null) return openDrawer({ level1, name, R, row, B, family, pill: { revenue, cost, parts } });
   if (!el) build();
   const left = revenue - cost, pc = revenue > 0 ? left / revenue : null, b = marginBand(R, pc);
   el.querySelector('#mp-t').textContent = `${name}: margin`;

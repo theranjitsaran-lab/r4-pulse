@@ -171,7 +171,7 @@ export async function render(main, C, params) {
   if (tileM) tileM.addEventListener('click', () => openMargin({ R, name, revenue: m.revenue, cost: m.cost, parts: allParts, weak, level1: id, row, B }));
   main.querySelector('.cp-lines').addEventListener('click', ev => {
     const pill = ev.target.closest('[data-lm]'), ln = ev.target.closest('.cp-line');
-    if (pill) { const x = F.fams[pill.dataset.lm]; openMargin({ R, name: `${name}, ${FAMILY_NAMES[x.family] || x.family}`, revenue: x.revenue, cost: x.cost, parts: costParts(x.working), level1: id, row, B, family: x.family }); }
+    if (pill) drawer(F.fams[pill.dataset.lm].family);
     else if (ln) drawer(ln.dataset.f);
   });
 

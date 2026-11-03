@@ -185,6 +185,51 @@ export function marginBand(R, m) {
   return m < 0 ? { cls: 'r', word: 'Thin, losing money' } : m < S.marginThin ? { cls: 'r', word: 'Thin' } : m < S.marginHealthy ? { cls: 'a', word: 'Normal' } : { cls: 'g', word: 'Healthy' };
 }
 
+// The head of the margin drawer. The figures come in from the row that was tapped, so the pill and the drawer cannot disagree.
+export function marginHead(R, revenue, cost) {
+  const left = revenue - cost, pc = revenue > 0 ? left / revenue : null;
+  return { revenue, cost, left, pc, band: marginBand(R, pc) };
+}
+// How sure the costs are: GL pools marked provisional in the cost model are two of three; once Settings says final, three.
+export const costConfidence = R => (R.SETTINGS.costsFinal ? 3 : Object.values(R.RATES).some(r => r && r.c === 'provisional') ? 2 : 3);
+
+// Ways to improve a margin, ranked by how realistic they are. A price rise is an easy ask up to about a normal round, a conversation
+// up to two and a half times today, and not realistic as a price beyond that. These two cut-offs are a judgement for Anne to check.
+export const ASK_EASY = 0.15, ASK_MAX = 1.5;
+export const ASK_NAMES = { easy: 'Easy', mid: 'Conversation', no: 'Not realistic' };
+const askOf = pct => pct <= ASK_EASY ? 'easy' : pct <= ASK_MAX ? 'mid' : 'no';
+//   levers: marginLevers; moves: this account's price gaps from Opportunities; F: accountJobs; lines: its priced lines
+export function marginFixes(levers, moves, F, lines) {
+  const out = [];
+  for (const m of moves || []) {
+    if (m.kind !== 'price' || m.stale) continue;
+    const base = m.line === 'storage' ? (F.fams.storage || {}).revenue : (lines || []).filter(l => l.servcode === m.code).reduce((t, l) => t + l.revenue, 0), pct = base > 0 ? m.value / base : null;
+    out.push({ kind: 'price', key: m.key, code: m.code, family: m.line === 'storage' ? 'storage' : null, title: m.line === 'storage' ? 'Storage to the book median' : `${String(m.short).split(' at $')[0]} to the book median`, say: m.reason, worth: m.value, pct, ask: pct == null ? 'mid' : askOf(pct) });
+  }
+  for (const l of levers || []) {
+    const base = (F.fams[l.family] || {}).revenue, pct = l.kind === 'price' && base > 0 ? l.worth / base : null;
+    out.push({ ...l, key: null, pct, ask: l.kind === 'price' ? (pct == null ? 'mid' : askOf(pct)) : 'easy' });
+  }
+  const real = out.filter(f => f.ask !== 'no').sort((a, b) => b.worth - a.worth), hard = out.filter(f => f.ask === 'no').sort((a, b) => b.worth - a.worth);
+  if (real[0]) real[0].best = true;
+  return { real, hard };
+}
+export const fixChange = f => f.pct == null ? 'no price change' : f.pct > ASK_MAX ? `${(1 + f.pct).toFixed(1)}× today` : `+${Math.round(f.pct * 100)}%`;
+
+// Three lit points for the drawer, from computed fields only: what makes the money, what loses it, the best fix.
+export const POINT_NAMES = { storage: 'Storage', bin: 'Bins', shred: 'Shredding', handling: 'Retrieval', movement: 'Delivery', itad: 'ITAD', labour: 'Labour', other: 'Fees and other' };
+export function drawerPoints(F, fixes, fmt) {
+  const rows = Object.values(F.fams).filter(x => x.family !== 'other' && x.cost > 0).map(x => ({ name: POINT_NAMES[x.family] || x.family, left: x.revenue - x.cost, revenue: x.revenue, cost: x.cost }));
+  const make = rows.filter(x => x.left > 0).sort((a, b) => b.left - a.left).slice(0, 2), lose = rows.filter(x => x.left <= -100).sort((a, b) => a.left - b.left);   // a few dollars either way is not a line losing money
+  const low = n => n === 'ITAD' ? n : n.toLowerCase(), pts = [];
+  pts.push(make.length ? { key: 'make', tone: 'g', lead: `${make.map((x, i) => i ? low(x.name) : x.name).join(' and ')} ${make.length > 1 ? 'make' : 'makes'} the money:`, rest: `${make.map(x => fmt(x.left)).join(' and ')} left est.` } : { key: 'make', tone: 'r', lead: 'No line makes money', rest: 'once it is costed est.' });
+  if (lose.length) { const short = lose.reduce((t, x) => t - x.left, 0), rev = lose.reduce((t, x) => t + x.revenue, 0), cost = lose.reduce((t, x) => t + x.cost, 0), two = lose.slice(0, 2); pts.push({ key: 'lose', tone: 'r', lead: `${two.map((x, i) => i ? low(x.name) : x.name).join(' and ')}${lose.length > 2 ? ' and others' : ''} ${lose.length > 1 ? 'lose' : 'loses'} ${fmt(short)} a year`, rest: rev > 0 ? `est.: ${lose.length > 1 ? 'they cost' : 'it costs'} ${(cost / rev).toFixed(1)} times what ${lose.length > 1 ? 'they bill' : 'it bills'}.` : 'est.' }); }
+  else pts.push({ key: 'lose', tone: 'g', lead: 'No line costs more', rest: 'than it bills est.' });
+  const best = fixes.real[0];
+  pts.push(best ? { key: 'fix', tone: 'a', lead: `Best fix: ${(/[A-Z]/.test(best.title.slice(1)) ? best.title : best.title[0].toLowerCase() + best.title.slice(1)).replace(':', ',')},`, rest: `about ${fmt(best.worth)} a year est.` } : { key: 'fix', tone: 'g', lead: 'Nothing to fix', rest: 'is sized above what would matter.' });
+  return pts;
+}
+
 // The book's margin as Home and the Margin view show it, from one place so they always agree:
 // accounts over $1,000 a year (Citadel apart) with their margin %, a flag when route costs are over
 // half their cost (under review), the margin on the lines costed with confidence, and the accounts
@@ -321,15 +366,17 @@ export function costParts(lines) {
 // What to do about an account, from its own figures (v10's rules, in order). Accounts whose cost is
 // mostly route cost under review get "Check routes" rather than a verdict built on a provisional cost.
 //   m: a marginSummary account; travel: its travel cost a year
-export function marginAction(m, travel) {
-  const pc = m.pc ?? 0;
-  if (pc >= 0.5) return { tag: 'Hold', cls: 'good', why: 'Keeps half or more of what it pays.' };
+export function marginAction(m, travel, S = SETTINGS_NOW()) {
+  const pc = m.pc ?? 0, name = pct => `${Math.round(pct * 100)}%`;
+  if (pc >= S.marginHealthy) return { tag: 'Hold', cls: 'good', why: `Healthy: keeps ${name(S.marginHealthy)} or more of what it pays.` };
   if (m.review) return { tag: 'Check routes', cls: 'review', why: 'Most of its cost is route cost, still under review until delivery routes are in the data.' };
-  if (pc < 0.15 && m.revenue < 5000) return { tag: 'Drop', cls: 'bad', why: 'Too small to fix: under $5,000 a year and under 15% left.' };
-  if (pc < 0.15 && m.cost > 0 && travel / m.cost > 0.4) return { tag: 'Re-route', cls: 'bad', why: 'Under 15% left, and most of the cost is getting there.' };
-  if (pc < 0.15) return { tag: 'Renegotiate', cls: 'bad', why: 'Costs more to serve than its prices allow.' };
-  return { tag: 'Reprice', cls: 'warn', why: 'Thin: between 15% and 50% left.' };
+  if (pc < S.marginThin && m.revenue < 5000) return { tag: 'Drop', cls: 'bad', why: `Too small to fix: under $5,000 a year and Thin, under ${name(S.marginThin)}.` };
+  if (pc < S.marginThin && m.cost > 0 && travel / m.cost > 0.4) return { tag: 'Re-route', cls: 'bad', why: `Thin, under ${name(S.marginThin)}, and most of the cost is getting there.` };
+  if (pc < S.marginThin) return { tag: 'Renegotiate', cls: 'bad', why: 'Costs more to serve than its prices allow.' };
+  return { tag: 'Reprice', cls: 'warn', why: `Normal: ${name(S.marginThin)} to ${name(S.marginHealthy)}, with room to price up.` };
 }
+// the cut-offs when a caller has no rates to hand: the same two as Settings' defaults
+const SETTINGS_NOW = () => ({ marginHealthy: 0.35, marginThin: 0.15 });
 
 // Every account's cost lines, a year, flattened: for its travel share and its bar.
 export function accountLines(R, M) {

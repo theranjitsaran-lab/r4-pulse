@@ -3,7 +3,7 @@
 // caller has escaped. A question in `ask` adds a button that hands it to the Ask sheet (app.js).
 let el = null, closing = null;
 
-export function openPop({ title, sub = '', html, ask = null, wide = false, size = null, onClose = null }) {
+export function openPop({ title, sub = '', html, ask = null, wide = false, size = null, onClose = null, foot = '' }) {
   if (!el) el = build();
   el.classList.toggle('wide', wide); el.classList.toggle('mid', size === 'mid');
   closing = onClose;
@@ -12,6 +12,7 @@ export function openPop({ title, sub = '', html, ask = null, wide = false, size 
   el.querySelector('.pop-b').innerHTML = html;
   const a = el.querySelector('.pop-ask');
   a.hidden = !ask; a.dataset.q = ask || '';
+  el.querySelector('.pop-x').innerHTML = foot;
   el.hidden = false;
   document.documentElement.classList.add('ask-open');
   requestAnimationFrame(() => el.classList.add('is-on'));
@@ -34,7 +35,7 @@ function build() {
     <section class="ask-panel" role="dialog" aria-label="Explain this figure">
       <header><b class="pop-t"></b><small class="pop-s"></small><button class="ask-x" type="button" aria-label="Close">✕</button></header>
       <div class="pop-b"></div>
-      <footer class="pop-f"><button class="pop-ask" type="button">Ask why ›</button></footer>
+      <footer class="pop-f"><button class="pop-ask" type="button">Ask why ›</button><div class="pop-x"></div></footer>
     </section>`;
   document.body.appendChild(d);
   d.querySelector('.ask-x').addEventListener('click', closePop);

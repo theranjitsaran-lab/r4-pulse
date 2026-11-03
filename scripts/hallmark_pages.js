@@ -80,6 +80,7 @@ async function run(role, width, browser, base, pass, name) {
     }
     // the Cross-sell drill-down, open, so the checker reads it as a person sees it
     if (key === 'accounts-cross-sell') { await page.click('#ws-t tbody tr[data-i]'); await page.waitForTimeout(1000); }
+    if (key === 'accounts-grid') { await page.click('.dt-t tbody tr[data-i] button.rag'); await page.waitForSelector('.pop .md-ln', { timeout: 15000 }).catch(() => {}); await page.waitForTimeout(800); }
     if (key === 'opportunities') { await page.click('#op-t tbody tr[data-i] td:first-child small'); await page.waitForTimeout(1000); }
     await page.waitForTimeout(200);
     results[key] = await page.evaluate(facts);

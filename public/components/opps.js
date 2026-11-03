@@ -106,7 +106,8 @@ export function applyStatuses(base, statuses = {}, M = null) {
     if (have.has(key) || !KINDS[kind] || st.level1 === CITADEL || !names.has(st.level1) || !(st.value > 0)) continue;
     const name = titleCase(names.get(st.level1)), told = st.note || 'Sent to this list.';
     let extra = { stale: true, conf: 1, short: 'No longer sized', reason: `No longer sized by the data: ${told}` };
-    if (kind === 'route') extra = { conf: 2, short: told, reason: told, opener: `We have been looking at how we serve your site at ${third}. Could we talk through the visit schedule?` };
+    if (kind === 'route') extra = { conf: 2, short: told, reason: told, opener: /^\d{5}$/.test(third || '') ? `We have been looking at how we serve your site at ${third}. Could we talk through the visit schedule?` : 'We have been looking at how we serve you. Could we talk through the visit schedule?' };
+    if (kind === 'price' && String(third || '').startsWith('fix-')) extra = { conf: 2, short: told, reason: told, opener: 'We are reviewing what this work costs us to do. Could we talk through the rate?' };
     if (kind === 'cross') {
       wide = wide || buildWhitespace(M, { exclude: [CITADEL], top: 200 });
       const row = wide.rows.find(r => r.level1 === st.level1), c = row && row.cells[third];

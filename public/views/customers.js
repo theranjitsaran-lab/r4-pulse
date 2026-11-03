@@ -328,7 +328,7 @@ async function monthGrid(main, C, params) {
 }
 // ── Margin: every account, revenue less what it costs to serve, worst first ──────────────────
 // The top of the margin drill: account → line of business → its orders → one order's cost build.
-// Filters as in v10: thin is 15–50% left, below cost is under 15%. Route-heavy accounts carry
+// Filters: the app's one definition of a margin (margin.js marginBand). Route-heavy accounts carry
 // "under review" while delivery routes are missing from the route volumes.
 
 function marginReason(a, m) {
@@ -368,12 +368,12 @@ async function marginView(main, C, params) {
 
 // level 1: every account
 async function marginList(main, R, M, MS, params) {
-  const filter = ['thin', 'below'].includes(params.f) ? params.f : 'all';
+  const filter = params.f === 'normal' ? 'normal' : params.f === 'thin' || params.f === 'below' ? 'thin' : 'all';   // 'below' is an old link
   const [A, Z] = await Promise.all([getJson('activity').catch(() => null), zctaP(), loadRoadnet()]);
   const acct = new Map(M.accounts.map(a => [a.level1, a])), AL = accountLines(R, M);
   const travelOf = id => (AL.get(id) || []).filter(l => l[0] === 'Travel to site' || l[0] === 'Truck time').reduce((t, l) => t + l[1], 0);
-  const all = MS.accounts.map(m => ({ ...m, why: marginReason(acct.get(m.level1) || {}, m), act: marginAction(m, travelOf(m.level1)) }));
-  const rows = all.filter(r => filter === 'all' || (filter === 'thin' ? r.pc >= 0.15 && r.pc < 0.5 : r.pc < 0.15)).sort((a, b) => a.margin - b.margin);
+  const all = MS.accounts.map(m => ({ ...m, why: marginReason(acct.get(m.level1) || {}, m), act: marginAction(m, travelOf(m.level1), R.SETTINGS) }));
+  const rows = all.filter(r => filter === 'all' || marginBand(R, r.pc).word.startsWith(filter === 'thin' ? 'Thin' : 'Normal')).sort((a, b) => a.margin - b.margin);
   const count = t => all.filter(r => r.act.tag === t).length;
   const sum = k => rows.reduce((t, r) => t + r[k], 0);
   const shown = params.n === 'all' ? rows.length : 60;
@@ -383,7 +383,7 @@ async function marginList(main, R, M, MS, params) {
     <h1>Accounts</h1>
     ${tabsHtml('margin')}
     <p class="lede">What each account pays against what it costs to serve est., worst first. ${count('Renegotiate') + count('Re-route') + count('Drop')} accounts need a decision now (${count('Renegotiate')} renegotiate, ${count('Re-route')} re-route, ${count('Drop')} too small to keep), ${count('Reprice')} are thin enough to reprice, and ${count('Check routes')} look thin only on route costs still under review. Tap an account for its lines, then its jobs, then one job's cost.</p>
-    <div class="tools"><div class="seg">${[['all', 'All'], ['thin', 'Thin, 15–50%'], ['below', 'Below 15%']].map(([k, l]) => `<a href="${mlink({ f: k })}" class="${k === filter ? 'on' : ''}">${l}</a>`).join('')}</div></div>
+    <div class="tools"><div class="seg">${[['all', 'All'], ['normal', 'Normal'], ['thin', 'Thin']].map(([k, l]) => `<a href="${mlink({ f: k })}" class="${k === filter ? 'on' : ''}">${l}</a>`).join('')}</div></div>
     <div class="card">
       <div class="hd a"><span>Customer</span><span>Revenue</span><span>Cost est.</span><span>Left</span><span>Margin</span><span>Action</span><span></span></div>
       ${rows.slice(0, shown).map(r => `<a class="rw a" href="${mlink({ id: r.level1 })}">
@@ -401,7 +401,7 @@ async function marginList(main, R, M, MS, params) {
       ${D.rows.map(d => `<div class="rw"><span class="nm">${esc(d.postcode)}, ${Fmt.fixed(d.miles, 0)} miles out<small>${n0(d.visits)} route visits a year, ${d.perVisit < 1.5 ? 'one customer each' : `${Fmt.fixed(d.perVisit, 1)} customers each`}, ${esc(titleCase(String(d.names || '').split(',').slice(0, 2).join(', ')))}</small></span><span class="r lf">${money0(d.saving)} a year</span><span></span></div>`).join('')}
       <div class="src">Route visits from ${D.days > 120 ? 'six months of route days' : `the ${D.days} days of routes held offline, scaled to a year`}, customers a visit from the twelve-month postcode book</div>
     </div>` : ''}
-    <p class="foot">Twelve months. Cost to serve est. from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Actions: Drop under $5,000 and under 15%, Re-route under 15% with travel over 40% of cost, Renegotiate under 15%, Reprice 15–50%, Hold 50% and over, Check routes where most of the cost is route cost under review.</p>
+    <p class="foot">Twelve months. Cost to serve est. from the cost model: warehouse space, handling, route time and shred plant; sales, management and overhead sit above this line. Accounts over $1,000 a year. Citadel apart. Actions follow the one margin band: Thin is Drop under $5,000, Re-route with travel over 40% of cost, else Renegotiate; Normal is Reprice; Healthy is Hold; Check routes where most of the cost is route cost under review.</p>
   </div>`;
 }
 
@@ -412,7 +412,7 @@ async function marginAccount(main, R, M, MS, id) {
   const lines = M.lines.filter(l => l.level1 === id), AC = accountCosts(R, a, lines);
   const parts = costParts(Object.values(AC).flat().flatMap(r => r.lines)), left = m.margin;
   const total = Math.max(m.revenue, m.cost, 1), name = titleCase(m.customer);
-  const sm = MS.accounts.find(x => x.level1 === id), act = sm ? marginAction(sm, parts.route * R.SETTINGS.split) : null;
+  const sm = MS.accounts.find(x => x.level1 === id), act = sm ? marginAction(sm, parts.route * R.SETTINGS.split, R.SETTINGS) : null;
   const units = f => f === 'storage' ? `${n0(a.boxes)} boxes` : (() => { const ls = lines.filter(l => (l.family || 'other') === f); const u = ls.reduce((t, l) => t + (l.units || 0), 0); const un = (ls[0] || {}).unit || 'units'; return u ? `${n0(u)} ${un}${u === 1 || /s$/.test(un) ? '' : 's'}` : ''; })();
   const fams = Object.entries(m.fam).filter(([, v]) => v.revenue > 0 || v.cost > 0).sort((x, y) => y[1].revenue - x[1].revenue);
   const seg = (v, cls, label) => v > 0.5 ? `<i class="${cls}" style="width:${v / total * 100}%" title="${esc(label)} ${money0(v)}">${v / total > 0.1 ? moneyK(v) : ''}</i>` : '';
