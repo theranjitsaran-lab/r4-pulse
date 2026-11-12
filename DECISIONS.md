@@ -18,7 +18,7 @@ to reach. Newest section first.
 |---|---|
 | **Truncate, never drop** | The push scripts truncate and reload; they never drop, because the views depend on the tables. A column change in VCK or Veri-Shred needs a manual `ALTER TABLE` before the push |
 | **Blocked looks stale** | A table the push cannot load logs `DDL FAILED` in `push_log.txt` or `vs_push_log.txt` and keeps its old rows, so it looks stale rather than broken. `node scripts/freshness.js --logs <folder>` reads both logs on the R4 machine |
-| **Who runs it** | Tasks `R4_Daily_Push` (06:00), `R4_Verishred_Push` (06:30) and `R4_KPI_Rebuild` (07:00) run as `tsaran`, LogonType Interactive, until R4's IT grants "Log on as a batch job" or re-registers them. Until then: close the Remote Desktop with the X (disconnect), never sign out; a reboot stops them too. Ask IT: "Please set tasks R4_Daily_Push, R4_Verishred_Push and R4_KPI_Rebuild to run whether the user is logged on or not." |
+| **Who runs it** | Tasks `R4_Daily_Push` (06:00) and `R4_Verishred_Push` (06:30) run as `tsaran`, LogonType Interactive, until R4's IT grants "Log on as a batch job" or re-registers them. Until then: close the Remote Desktop with the X (disconnect), never sign out; a reboot stops them too. Ask IT: "Please set tasks R4_Daily_Push and R4_Verishred_Push to run whether the user is logged on or not." The pushes had not run on their own since 20 October 2026 (seen 11 November) |
 | **Watching it** | `/health/data` (dates only, no login) and a GitHub Action at 07:30 Central that fails, and emails Theran, when any date is more than two days old |
 
 ## Brand — settled 26 October 2026
@@ -45,7 +45,8 @@ to reach. Newest section first.
 | **Flag down two months** | Below the account's own trailing-six mean (six full prior months, gaps as $0) this month and last |
 | **Termination fees** | Permanent-withdrawal codes P1, P2, P3, P5, PC, pending Anne's confirmation |
 | **Revenue per stop** | Destruction revenue (servtype F and S, Citadel apart) by work month ÷ done stops (distinct `slocid` per route-day) |
-| **Rebuild** | `npm run kpi:rebuild` creates the six views in order, then the `kpi` tables, as one transaction |
+| **Rebuild** | `npm run kpi:rebuild` creates the six views in order, then the `kpi` tables, as one transaction. Needed once, and again only when `sql/views/*.sql` changes |
+| **Refresh** | Pulse refills `kpi.monthly` and `kpi.customer_monthly` itself when new data arrives (`server/kpi_refresh.js`): delete and insert from the views in one transaction, one instance at a time. The app login may insert and delete rows in those two tables only. Theran, 12 November 2026: the R4 machine's rebuild task was never installed, so the summary stopped at October |
 | **October range** | $598k–$699k, was $598k–$690k: storage $387,101 from `v_current_run` plus core service $211,133–$311,665, the last six posted months (Apr–Sep 2026) |
 | **City of Chicago down-since** | Below its own trailing-six mean every month since January 2026, flagged two-down since February 2026; was "every month since August 2025" |
 | **Service credit month** | November 2025 at −$60,759, the 23-month low; was "−$144k". The high is April 2026 at $781,944, was "$784k" |

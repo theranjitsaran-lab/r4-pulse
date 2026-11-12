@@ -4,7 +4,7 @@
 //
 // Run on the PC with the admin DATABASE_URL in .env. Safe to re-run: each run sets a new password.
 //
-//   r4_pulse_app   reads public, kpi and model; writes app.calls_log, app.feedback, app.quote and app.opportunity and nothing else.
+//   r4_pulse_app   reads public, kpi and model; refills the rows of kpi.monthly and kpi.customer_monthly; writes app.calls_log, app.feedback, app.quote and app.opportunity and nothing else.
 //
 // The password is never printed. The app's connection string goes into .env.render (gitignored)
 // as DATABASE_URL=..., for pasting into Render; delete the file once it is pasted.
@@ -30,6 +30,8 @@ GRANT USAGE ON SCHEMA public, kpi, model, app TO ${ROLE};
 GRANT SELECT ON ALL TABLES IN SCHEMA public, kpi, model TO ${ROLE};
 -- tables this admin login creates later (the nightly kpi rebuild drops and recreates kpi.*)
 ALTER DEFAULT PRIVILEGES IN SCHEMA public, kpi, model GRANT SELECT ON TABLES TO ${ROLE};
+-- Pulse refills the two summary tables' rows when new data arrives (server/kpi_refresh.js); sql/kpi_rebuild.sql re-grants it
+GRANT SELECT, INSERT, DELETE ON kpi.monthly, kpi.customer_monthly TO ${ROLE};
 GRANT SELECT, INSERT ON app.calls_log TO ${ROLE};
 GRANT USAGE ON SEQUENCE app.calls_log_id_seq TO ${ROLE};
 GRANT SELECT, INSERT ON app.feedback TO ${ROLE};
@@ -123,7 +125,14 @@ function writeEnv(key, value) {
     throw new Error('this was allowed and should not be');
   });
   await refused('delete from the calls log', 'DELETE FROM app.calls_log WHERE false');
-  await refused('write to kpi', 'DELETE FROM kpi.monthly WHERE false');
+  await step('kpi summary: refill (rolled back)', async () => {
+    await c.query('BEGIN');
+    await c.query('DELETE FROM kpi.monthly WHERE false');
+    await c.query('INSERT INTO kpi.monthly SELECT * FROM v_kpi_industry WHERE false');
+    await c.query('ROLLBACK');
+  });
+  await refused('update kpi', 'UPDATE kpi.monthly SET month = month WHERE false');
+  await refused('write to model', 'DELETE FROM model.gl_pool WHERE false');
   await refused('create in kpi', 'CREATE TABLE kpi.role_check (x int)');
   await c.end();
   process.exit(0);

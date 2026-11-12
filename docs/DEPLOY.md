@@ -13,9 +13,11 @@ in the Render dashboard only. `render.yaml` holds everything that isn't a secret
    changes. Without them the service fails at boot ("cost model did not load"), and Render
    keeps the previous version running.
 2. **`app.calls_log` exists:** `sql/app_schema.sql`.
-3. **The nightly rebuild runs after the daily push:** `npm run kpi:rebuild` with the admin
-   login, on the machine that already runs the push. It stays off Render, so the admin login
-   never leaves that machine. See "Scheduled tasks on the R4 machine" below.
+3. **The `kpi` views exist:** `npm run kpi:rebuild` with the admin login, once, and again only after a
+   change to `sql/views/*.sql`. It creates the views and the two summary tables and grants the app login
+   the right to refill their rows. From then on Pulse refills `kpi.monthly` and `kpi.customer_monthly`
+   itself whenever new data arrives (`server/kpi_refresh.js`, 12 November 2026), so no rebuild task runs
+   anywhere and the admin login never leaves the machine it is on.
 
 ## Steps (Theran, on the PC, in the repo folder)
 
@@ -30,7 +32,7 @@ node scripts/app_users.js
 
 - `app_role.js` creates `r4_pulse_app` (or gives it a new password if it already exists) and
   writes its connection string to `.env.render`. It then runs every screen as that login and
-  prints `ok` or `FAIL` per line. The last three lines must say "permission denied, as intended".
+  prints `ok` or `FAIL` per line. The last four lines must say "permission denied, as intended".
   It also lists any tables owned by a different login, such as the one the daily push uses. If
   that login recreates those tables, the read grant on them is lost. Re-run `app_role.js` after
   that happens, or paste the list to Claude.
@@ -82,19 +84,18 @@ It sleeps after 15 idle minutes, so the first load takes about 30 seconds.
 |---|---|---|
 | `R4_Daily_Push` | 06:00 | VCK → DigitalOcean; logs to `push_log.txt` |
 | `R4_Verishred_Push` | 06:30 | Veri-Shred → DigitalOcean; logs to `vs_push_log.txt` |
-| `R4_KPI_Rebuild` | 07:00 | `npm run kpi:rebuild`; logs to `logs\kpi_rebuild.txt` in this repo there |
 
-- All three run as `tsaran`, LogonType Interactive, so they fire only while that session exists.
+Pulse refills the summary tables itself within ten minutes of a push landing (`server/kpi_refresh.js`): look for `kpi refreshed` in the Render logs. `R4_KPI_Rebuild` is no longer needed; if it was installed, it does no harm.
+
+- Both run as `tsaran`, LogonType Interactive, so they fire only while that session exists.
   **Close the Remote Desktop with the X (disconnect). Never sign out.** A reboot stops them until
-  someone signs in again. The fix is R4's IT: "Please set tasks R4_Daily_Push, R4_Verishred_Push and
-  R4_KPI_Rebuild to run whether the user is logged on or not."
-- Install the rebuild task once, signed in as `tsaran`, in a checkout with the admin `.env`:
-  `powershell -ExecutionPolicy Bypass -File scripts\install_rebuild_task.ps1` (add `-DryRun` first to see it).
+  someone signs in again. The fix is R4's IT: "Please set tasks R4_Daily_Push and R4_Verishred_Push to run
+  whether the user is logged on or not."
 - Check on the machine: `node scripts/freshness.js --logs <push folder>` lists any `DDL FAILED`.
   A blocked table keeps its old rows and only looks stale.
 - Check from anywhere: `https://<service>.onrender.com/health/data` (dates only, no login) and the
   **Data freshness** GitHub Action (`.github/workflows/freshness.yml`), which fails, and emails Theran,
-  when done work is more than five days old or the rebuild missed the month. Set the repository
+  when done work is more than five days old or the summary has not reached the month. Set the repository
   variable `PULSE_URL` to the service address to turn it on.
 
 ## Morning emails (R4_Morning_Brief)

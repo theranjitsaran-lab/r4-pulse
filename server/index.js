@@ -68,21 +68,40 @@ async function warm() {
   for (const n of WARM) { if (!queries[n]) continue; const t = Date.now(); try { await cached(n, queries[n]); console.log(`warm ${n} ${Date.now() - t}ms`); } catch (e) { console.warn(`warm ${n}: ${e.message}`); } }
   try { await require('./screendata').data(); } catch (e) { console.warn('warm route costs:', e.message); }   // costs the route days once
 }
-let stamp = null;
+// New data: refill the summary tables first (server/kpi_refresh.js), then swap every screen to the new figures at once.
+const { refreshKpi } = require('./kpi_refresh');
+const swap = async () => { await replaceCache(WARM.filter(n => queries[n]).map(n => [n, queries[n]])); await warm(); };
+const kpiMonth = async () => (await query(`SELECT max(month)::text AS c FROM kpi.monthly`))[0].c;
+let stamp = null;   // { raw: the pushed tables' stamp, kpi: kpi.monthly's latest month }
 async function watch() {
   try {
     const [r] = await query(`SELECT (SELECT max(NULLIF(date, '')) FROM vs_service_orders) AS a, (SELECT max(invdate)::text FROM invoices) AS b,
       (SELECT max(month)::text FROM kpi.monthly) AS c, (SELECT count(*) FROM invoices_current)::text AS d, (SELECT max(wodate)::text FROM priced_lines_current) AS e`);
-    const now = JSON.stringify(r);
-    if (stamp && now !== stamp) { console.log('data moved: reading it, then swapping'); await replaceCache(WARM.filter(n => queries[n]).map(n => [n, queries[n]])); await warm(); }
+    const now = { raw: JSON.stringify([r.a, r.b, r.d, r.e]), kpi: r.c };
+    if (stamp && now.raw !== stamp.raw) {
+      console.log('data moved: refreshing the summary, reading it, then swapping');
+      await refreshKpi();
+      now.kpi = await kpiMonth();
+      await swap();
+    } else if (stamp && now.kpi !== stamp.kpi) {   // the summary was rebuilt by hand (npm run kpi:rebuild)
+      console.log('summary rebuilt: reading it, then swapping');
+      await swap();
+    }
     stamp = now;
   } catch (e) { console.warn('freshness stamp:', e.message); }
+}
+// After a deploy or restart: bring the summary up to date behind the warm screens, without holding up /health.
+async function refreshAtBoot() {
+  const r = await refreshKpi();
+  if (!r.counts) return;
+  if (stamp) stamp.kpi = await kpiMonth();
+  await swap();
 }
 
 (USE_FIXTURES ? Promise.resolve() : rates.loadFromDb(query)).then(() => require('./settings').load()).then(() => {
   if (!USE_FIXTURES) {
     const ready = () => { warmed = true; };
-    watch().then(warm).then(ready, ready);
+    watch().then(warm).then(ready, ready).then(refreshAtBoot).catch(e => console.warn('kpi refresh at boot:', e.message));
     setTimeout(ready, 5 * 60 * 1000);   // a slow database must not stop a deploy going live
     setInterval(watch, 10 * 60 * 1000);
   }

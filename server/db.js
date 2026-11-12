@@ -60,4 +60,11 @@ async function replaceCache(named) {
   for (const [key, value] of fresh) cache.set(key, { value, until: Date.now() + TTL_MS });
 }
 
-module.exports = { query, cached, replaceCache, USE_FIXTURES };
+// One connection for a transaction (server/kpi_refresh.js). The caller releases it.
+async function connect() {
+  const p = getPool();
+  if (!p) throw new Error('connect() called while USE_FIXTURES=1');
+  return p.connect();
+}
+
+module.exports = { query, connect, cached, replaceCache, USE_FIXTURES };
