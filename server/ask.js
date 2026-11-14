@@ -18,7 +18,7 @@ const router = express.Router();
 const MODEL = 'claude-opus-5-5';
 const ROOT = path.join(__dirname, '..');
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'levers', 'margin', 'chart', 'series', 'opps', 'quote', 'gl'].map(n => import('../public/components/' + n + '.js').then(m => [n, m])))
+const load = () => libs || (libs = Promise.all(['home2data', 'levers', 'margin', 'chart', 'series', 'opps', 'quote', 'gl', 'linework'].map(n => import('../public/components/' + n + '.js').then(m => [n, m])))
   .then(Object.fromEntries));
 
 // the data, as the screens read it (server/screendata.js)
@@ -40,14 +40,18 @@ function tools(L, D, X = {}) {
 
   const T = {
     overview: {
-      description: "Trisha's number: this month's bill, next month's building est., the gap to $1.0M a month, this month's work against last month's at the same working day, last week's work, and the levers to $1.0M.",
+      description: "Trisha's number: this month so far (Today's main figure: storage on its bill plus work done so far, est., against last month at the same point) and its largest customers and lines, this month's bill, next month's building est. (the forecast), the gap to $1.0M a month, this month's work against last month's at the same working day, last week's work, and the levers to $1.0M.",
       input: { type: 'object', properties: {}, required: [], additionalProperties: false },
       run: () => {
         const m = L.home2data.monthView(D), w = L.home2data.weekView(D), B = L.levers.bridge(D);
+        const S = D.LW ? L.linework.monthToDate(D) : null;
         return {
+          month_so_far: S ? `${mon(S.month)} so far, to ${S.latest} (working day ${S.day} of ${S.workdays}): ${moneyK(S.total)} est., storage ${moneyK(S.storage)} on the bill plus work ${moneyK(S.work)} est.${S.change != null ? `, ${pc(S.change)} on ${mon(S.prevMonth)} at the same point (${moneyK(S.prevAt)})` : ''}` : 'no month in progress',
+          month_so_far_largest_customers: S ? S.byCustomer.filter(r => r.level1 != null).slice(0, 10).map(r => `${r.customer}: ${moneyK(r.total)} (storage ${moneyK(r.storage)}, work ${moneyK(r.work)} est.)`) : [],
+          month_so_far_by_line: S ? S.byLine.map(l => `${l.name}: ${moneyK(l.v)}${l.key === 'storage' ? '' : ' est.'}, against ${moneyK(l.prevAt)} at the same point`) : [],
           latest_work_done: m.latestDone,
           last_posted_bill: `${mon(m.bill.lastMonth)}: ${moneyK(m.bill.lastCore)} core (storage plus service, Citadel apart)`,
-          next_bill_building: m.next ? `${mon(m.next.month)}: about ${moneyK(m.next.central)} est., likely ${moneyK(m.next.lo)} to ${moneyK(m.next.hi)}, day ${m.next.day} of ${m.next.workdays}${m.next.jobCount ? `, plus up to ${moneyK(m.next.jobs)} in ${m.next.jobCount} jobs to check` : ''}` : 'not yet priced',
+          forecast_next_bill: m.next ? `${mon(m.next.month)}: about ${moneyK(m.next.central)} est., likely ${moneyK(m.next.lo)} to ${moneyK(m.next.hi)}, day ${m.next.day} of ${m.next.workdays}${m.next.jobCount ? `, plus up to ${moneyK(m.next.jobs)} in ${m.next.jobCount} jobs to check` : ''}` : 'not yet priced',
           gap_to_target: `${moneyK(m.gap)} a month short of $1.0M`,
           work_this_month: m.vsLast != null ? `${mon(m.workMonth)}'s work at working day ${m.day}: ${moneyK(m.now)} est., ${pc(m.vsLast)} on ${mon(m.prevMonth)} at the same day` : 'not enough days yet',
           last_full_week: w.lastFull ? `week of ${w.lastFull.week}: ${moneyK(w.lastFull.value)} of work est. (${w.lastFull.done} services), ${pc(w.vsAvg)} on the average of the weeks before` : null,
@@ -280,7 +284,7 @@ async function claude(question, history, T) {
 function template(question, T) {
   const q = question.toLowerCase();
   const lines = o => Object.values(o).flat().filter(v => typeof v === 'string');
-  if (/track|month|target|1\.0m|gap/.test(q)) { const o = T.overview.run(); return [o.next_bill_building, o.gap_to_target, o.work_this_month, o.last_full_week].filter(Boolean).join('. ') + '.'; }
+  if (/track|month|target|1\.0m|gap/.test(q)) { const o = T.overview.run(); return [o.month_so_far, o.forecast_next_bill, o.gap_to_target, o.work_this_month, o.last_full_week].filter(Boolean).join('. ') + '.'; }
   if (/slip|losing|down|falling|call/.test(q)) { const o = T.customers_moving.run({ kind: 'slipping' }); return o.rows.slice(0, 3).map(r => `${r.customer}: ${r.against_own_run}`).join('. ') + `. ${o.slipping_accounts} accounts are slipping in all.`; }
   if (/cross|sell|upsell|buy/.test(q)) { const o = T.cross_sell.run(); return `Ceiling ${o.ceiling}. Most missed: ${o.by_line.slice(0, 2).join('; ')}. Largest: ${o.rows.slice(0, 3).map(r => `${r.customer} (${r.lines.join(', ')}, ${r.could_add})`).join('; ')}.`; }
   if (/shred|destr|retention|boxes/.test(q)) { const o = T.destruction.run(); return `${o.eligible} boxes (${o.share}) are eligible to shred: ${o.fee_once} once, then ${o.storage_lost} of storage lost. The fee covers ${o.fee_covers}.`; }

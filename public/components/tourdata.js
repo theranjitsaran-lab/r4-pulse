@@ -52,7 +52,7 @@ export const TOURS = {
   'g-today': [
     { tab: TODAY, target: 'hero', title: 'The month in a sentence', body: "What this month's work will bill. The bar shows what's priced, what's still to check and the gap to $1.0M." },
     { tab: TODAY, target: 'hero', within: '.h2-bul', title: 'Three things worth knowing', body: 'Green is on track, red needs attention. Tap a line to see behind it.' },
-    { tab: TODAY, target: 't-kpis', title: 'The bill and the gap', body: "Next month's bill as it builds, the last bill and the gap. Tap the last two for the list behind them." },
+    { tab: TODAY, target: 't-kpis', title: 'The month so far, the bill and the gap', body: "This month so far against last month at the same point, with the forecast faint beneath it. Tap it for every customer and service line behind it. Then the last bill and the gap: tap those for the list behind them." },
     { tab: TODAY, target: 't-yest', title: 'The last working day', body: 'Services and routes against a normal day. Tap it for Operations.' },
     { tab: TODAY, target: 't-acts', title: 'Three things to act on', body: "Say if it helped, if you knew, or if it isn't right. To the list puts it on Opportunities." },
     { tab: TODAY, target: 't-lines', title: 'The lines of business', body: 'What each line brought in. Switch the month at the top.' },

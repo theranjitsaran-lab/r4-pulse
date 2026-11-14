@@ -263,6 +263,52 @@ export function newestFall(D, skip = new Set()) {
   return { ...best, customer: names.get(best.level1) || `Account ${best.level1}` };
 }
 
+// The month so far (Theran, 14 November 2026): this month's storage, confirmed on its bill, plus the work done so
+// far priced at each account's own rates (est.), against the month before at the same share of its working days,
+// the rule the line tiles use (lineView). Storage is a whole month's charge, so it is compared whole. Every customer
+// row and every line adds to the total; jobs to check stay out of it and are listed apart. Citadel is not in the work
+// (the linework queries leave it out); its storage is core and stays in.
+//   monthToDate(D) → { month, prevMonth, latest, day, workdays, frac, storage, storageCarried, work, total,
+//                      prevAt, change, jobs, jobsValue, byLine, byCustomer } | null
+export function monthToDate(D) {
+  const { W, months, val } = lineSeries(D);
+  const month = W.est.length ? W.est[W.est.length - 1] : null, e = month && W.byMonth.get(month);
+  if (!e) return null;
+  const prevMonth = addMonths(month, -1), frac = e.frac;
+  const st = storageOf(D.P), storageCarried = !st.has(month);
+  const wd = weekdaysOf(month), day = wd.filter(d => d <= D.A.latestDone).length;
+  const lineOf = k => ({ key: k, name: LINE_NAMES[k], v: val(k, month), prevAt: val(k, prevMonth) * (k === 'storage' ? 1 : frac) });
+  const byLine = ['storage', ...SERVICE].map(lineOf).filter(l => l.v || l.prevAt);
+  const storage = val('storage', month), work = sum(SERVICE, k => val(k, month));
+  const total = storage + work, prevAt = sum(byLine, l => l.prevAt);
+
+  // each account: its storage on this month's bill and its work so far; the month before the same way
+  // the whole book (accountmonths), so every account's storage is there; the top-300 customers query if it is not
+  const ser = seriesOf(D.AM || D.C);
+  const storageIn = m => { const out = new Map(); for (const x of ser.values()) { const j = x.months.indexOf(m); if (j >= 0 && x.storage[j]) out.set(x.level1, x.storage[j]); } return out; };
+  const workIn = m => {
+    const out = new Map(), w = W.byMonth.get(m);
+    if (w) for (const [id, a] of w.byAcc) out.set(id, sum(Object.values(a)));
+    else for (const r of D.LW.priced) if (r.month === m) out.set(r.level1, (out.get(r.level1) || 0) + r.revenue);
+    return out;
+  };
+  const sNow = storageIn(month), wNow = workIn(month), sThen = storageIn(prevMonth), wThen = workIn(prevMonth);
+  const names = new Map([...(D.AM ? D.AM.accounts : []).map(a => [a.level1, a.customer]), ...D.M.accounts.map(a => [a.level1, a.customer]), ...D.C.accounts.map(a => [a.level1, a.customer])]);
+  const ids = new Set([...sNow.keys(), ...wNow.keys()]);
+  const rows = [...ids].map(id => {
+    const s = sNow.get(id) || 0, w = wNow.get(id) || 0, then = (sThen.get(id) || 0) + (wThen.get(id) || 0) * frac;
+    return { level1: id, customer: names.get(id) || `Account ${id}`, storage: s, work: w, total: s + w, prevAt: then, change: ch(s + w, then) };
+  }).filter(r => Math.abs(r.total) >= 0.5).sort((a, b) => b.total - a.total || a.level1 - b.level1);
+  // storage on the bill that no account row carries is shown as its own row, never spread
+  const unplaced = storageCarried ? 0 : storage - sum(rows, r => r.storage);
+  const byCustomer = Math.abs(unplaced) >= 1 ? [...rows, { level1: null, customer: 'Storage not on an account', storage: unplaced, work: 0, total: unplaced, prevAt: null, change: null }] : rows;
+  const jobs = e.jobs.map(j => ({ ...j, customer: names.get(j.level1) || `Account ${j.level1}` }));
+  return {
+    month, prevMonth, latest: D.A.latestDone, day, workdays: wd.length, frac, storage, storageCarried, work, total, prevAt,
+    change: ch(total, prevAt), jobs, jobsValue: e.jobsValue, byLine, byCustomer, how: e.how, priced: months.includes(prevMonth),
+  };
+}
+
 // The estimate of a month's work to date, for pricing the month's done services
 export function estimateToDate(D, month) {
   const W = workEstimate(D.LW, D.A, D.P), e = W.byMonth.get(month);

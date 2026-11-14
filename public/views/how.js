@@ -27,9 +27,9 @@ const SCREENS = () => [
   ] },
   { title: 'Today', line: 'How the month is going, and the gap to $1.0M.', groups: [
     ['How to read it', [
-      'The headline says what this month\'s work will bill. The bar shows what is priced, what is still to check and the gap to $1.0M a month.',
+      'The headline is the month so far: this month\'s storage, confirmed on its bill, plus the work done so far priced at each customer\'s own rates (est.), against last month at the same point. The bar shows that solid, where the month is heading if the pace holds faint, what is still to check, and $1.0M a month at the end.',
       'The three lines below it are the things most worth knowing. Tap one to see behind it.',
-      'The tiles give next month\'s bill as it builds, the last bill and the gap. Below are the last working day against normal, the last weeks, three things to act on, the lines of business and the map of where the work is.',
+      'The first tile is the month so far, with the forecast faint beneath it; tap it for every customer and service line behind it, each list adding to the figure. Then the last bill and the gap to $1.0M on the forecast. Below are the last working day against normal, the last weeks, three things to act on, the lines of business and the map of where the work is.',
     ]],
     ['What you can do', [
       'On each thing to act on, tell Pulse it was useful, you knew it already, or it isn\'t right. To the list puts it on Opportunities.',
@@ -37,6 +37,7 @@ const SCREENS = () => [
     ['Where the figures come from', [
       `${LABELS.invoiced} means posted invoices, dated by invoice date. The month reconciles to QuickBooks within about 0.4%.`,
       'Storage bills in advance and service in arrears, so a month\'s bill is that month\'s storage and the month before\'s work.',
+      'Last month at the same point: its storage whole, and its work scaled to the same share of its working days.',
       'Core is storage and service. Citadel is held apart from every total and can run negative, because credits are carried as they fall.',
       'Next month\'s bill is finished work from Veri-Shred, priced at each account\'s own latest price, or the median of R4\'s accounts if it has never bought that service. Jobs far larger than anything the account has bought are left out and named as jobs to check. Flat bin fees, deliveries and pound shredding only appear when the run posts.',
     ]],

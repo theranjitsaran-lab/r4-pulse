@@ -1,6 +1,7 @@
 // Server-side views: each screen's figures worked out here, by the same functions the browser used
 // (public/components), and sent as the few KB the screen draws instead of the megabytes it was
 // computed from. The full datasets stay at /api/<name> for drill-downs.
+//   GET /api/view/so-far  Today's month so far, by customer and by line (linework.js monthToDate)
 //   GET /api/view/home   Home: homeView (home2data.js) + yesterday (changes.js, lists.js) for the signed-in person
 'use strict';
 const fs = require('fs');
@@ -22,6 +23,14 @@ async function callsLog() {
   return query(`SELECT level1, kind, signal, verdict, who, logged_at::text FROM app.calls_log WHERE logged_at > now() - interval '30 days'`).catch(() => []);
 }
 
+// The month so far (linework.js monthToDate): Today's main figure. The head here; the rows at /so-far, when opened.
+const soFarHead = (D, L) => {
+  const T = D.LW ? L.linework.monthToDate(D) : null;
+  if (!T) return null;
+  const { byLine, byCustomer, jobs, how, ...head } = T;
+  return { ...head, jobCount: jobs.length };
+};
+
 // the part that is the same for everyone, kept until the data moves
 let homeBase = null;
 async function homeShared(D, L) {
@@ -30,7 +39,7 @@ async function homeShared(D, L) {
   const V = L.home2data.homeView(D);
   const v = {
     month: V.month, weeks: V.weeks, lines: V.lines, points: V.points, yesterday: L.metrics.yesterdayLine(D.P, D.A),
-    latestDone: D.A.latestDone, monthly: D.P.monthly.slice(-2), tie: L.metrics.tieOut(D.P),
+    latestDone: D.A.latestDone, monthly: D.P.monthly.slice(-2), tie: L.metrics.tieOut(D.P), soFar: soFarHead(D, L),
     changes: L.changes.changesFor(D.P, D.A), day: L.changes.daySentence(D.P, D.A),
   };
   homeBase = { stamp: s, v };
@@ -200,6 +209,16 @@ router.get('/line', async (req, res) => {
     const d = L.linework.lineDetail(D, String(req.query.key || ''), String(req.query.month || ''));
     if (!d) return res.status(404).json({ error: 'no such line or month' });
     send(req, res, d);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Today's main figure, opened: every customer and every line, each adding to the figure
+router.get('/so-far', async (req, res) => {
+  try {
+    const [D, L] = await Promise.all([data(), load()]);
+    const T = D.LW ? L.linework.monthToDate(D) : null;
+    if (!T) return res.status(404).json({ error: 'no month in progress in this snapshot' });
+    send(req, res, T);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

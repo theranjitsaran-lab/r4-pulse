@@ -40,11 +40,15 @@ export async function render(main, P) {
 
   const billShown = m.bill.core != null ? { month: m.bill.month, v: m.bill.core, d: m.bill.vsLast, vs: m.bill.lastMonth } : { month: m.bill.lastMonth, v: m.bill.lastCore, d: null };
   // a note on why the headline moved, for its first week
-  const changedNote = Date.now() < Date.UTC(2026, 10, 9) ? 'Changed 1 Nov: large jobs now use each customer\'s own price.' : '';
+  const changedNote = Date.now() < Date.UTC(2026, 10, 22) ? 'Changed 14 Nov: the main figure is now the month so far, against last month at the same point. The forecast is the fainter figure.' : '';
+  // the month so far: storage on its bill plus the work done so far, priced est. (linework.js monthToDate)
+  const S = V.soFar;
+  const soFarCh = S && S.change != null ? (Math.abs(S.change) < 0.005 ? 'level with' : `${S.change > 0 ? 'up' : 'down'} ${pctW(S.change)} on`) : null;
   const jobWord = n => `${n} job${n === 1 ? '' : 's'} to check`;
   const jobsNote = m.next && m.next.jobCount ? `, before ${jobWord(m.next.jobCount)}` : '';
   const sheet = [
-    m.next && { key: 'month', lead: true, href: '#pulse', line: `${mon(m.workMonth)}'s work bills about ${moneyK(m.next.central)} est. in ${mon(m.next.month)}${jobsNote}`, say: `${mon(m.workMonth)}'s work bills about ${moneyK(m.next.central)} est. in ${mon(m.next.month)}${jobsNote}.` },
+    S ? { key: 'month', lead: true, href: '#pulse', line: `${mon(S.month)} so far: ${moneyK(S.total)} est.${soFarCh ? `, ${soFarCh} ${mon(S.prevMonth)} at the same point` : ''}`, say: `${mon(S.month)} so far: ${moneyK(S.total)} est.${soFarCh ? `, ${soFarCh} ${mon(S.prevMonth)} at the same point` : ''}.` }
+      : m.next && { key: 'month', lead: true, href: '#pulse', line: `${mon(m.workMonth)}'s work bills about ${moneyK(m.next.central)} est. in ${mon(m.next.month)}${jobsNote}`, say: `${mon(m.workMonth)}'s work bills about ${moneyK(m.next.central)} est. in ${mon(m.next.month)}${jobsNote}.` },
     ...(V.points || []).map(p => ({ key: p.key, bullet: true, href: p.href, title: p.title, line: p.line, say: p.say })),
   ].filter(Boolean);
   const hrefOf = Object.fromEntries(sheet.map(f => [f.key, f.href])), titleOf = Object.fromEntries(sheet.map(f => [f.key, f.title]));
@@ -52,14 +56,17 @@ export async function render(main, P) {
 
 
   const kpis = `<section class="h2-kpis bills" data-tour="t-kpis">
-      <div class="h2-kpi lead" data-in style="--d:150ms"><span>${m.next ? `${mon(m.workMonth)}'s work → ${mon(m.next.month)} bill (est.)` : 'Next bill'}</span><b data-count data-delay="400">${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b>
-        <small>${m.next ? (m.next.jobCount ? `+ up to ${moneyK(m.next.jobs)}: ${jobWord(m.next.jobCount)}` : Math.round(m.next.lo / 1000) !== Math.round(m.next.hi / 1000) ? `${moneyK(m.next.lo)}–${moneyK(m.next.hi)}` : '') : ''}</small></div>
+      ${S ? `<button type="button" class="h2-kpi lead h2-sofar" id="h2-sofar" data-in style="--d:150ms" aria-label="${esc(`${mon(S.month)} so far, ${moneyK(S.total)} est.: open by customer and by service line`)}"><span>${mon(S.month)} so far, to ${dm(S.latest)} (day ${S.day} of ${S.workdays})</span><b data-count data-delay="400">${moneyK(S.total)}</b>
+        <small>${S.change != null ? `${chip(S.change)} on ${monS(S.prevMonth)} at day ${S.day}` : 'est.'}</small>
+        ${m.next ? `<small class="h2-fc">Heading for about ${moneyK(m.next.central)} est. in ${mon(m.next.month)}${m.next.jobCount ? `, + up to ${moneyK(m.next.jobs)} to check` : ''}</small>` : ''}<i class="h2-chev" aria-hidden="true"></i></button>`
+      : `<div class="h2-kpi lead" data-in style="--d:150ms"><span>${m.next ? `${mon(m.workMonth)}'s work → ${mon(m.next.month)} bill (est.)` : 'Next bill'}</span><b data-count data-delay="400">${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b>
+        <small>${m.next ? (m.next.jobCount ? `+ up to ${moneyK(m.next.jobs)}: ${jobWord(m.next.jobCount)}` : Math.round(m.next.lo / 1000) !== Math.round(m.next.hi / 1000) ? `${moneyK(m.next.lo)}–${moneyK(m.next.hi)}` : '') : ''}</small></div>`}
       <a class="h2-kpi" data-in style="--d:230ms" href="#customers?view=grid"><span>${esc(LABELS.invoiced)}, ${mon(billShown.month)}</span><b data-count data-delay="480">${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${monS(billShown.vs)}` : 'posted, core'}</small></a>
-      <a class="h2-kpi" data-in style="--d:310ms" href="#opportunities"><span>Gap to $1.0M</span><b data-count data-delay="560">${moneyK(m.gap)}</b><small>a month${m.next && m.next.jobCount ? ', before jobs to check' : ''}</small></a>
+      <a class="h2-kpi" data-in style="--d:310ms" href="#opportunities"><span>Gap to $1.0M</span><b data-count data-delay="560">${moneyK(m.gap)}</b><small>a month${S ? ', on the forecast' : ''}${m.next && m.next.jobCount ? ', before jobs to check' : ''}</small></a>
     </section>${tieLine(V.tie)}`;
 
   const sumCard = `<section class="h2-card h2-sum" data-tour="hero" data-in>
-      <h1 class="h2-head" id="h2-head"></h1>${tracking(m)}${changedNote ? `<p class="h2-by">${esc(changedNote)}</p>` : ''}
+      <h1 class="h2-head" id="h2-head"></h1>${tracking(m, S)}${changedNote ? `<p class="h2-by">${esc(changedNote)}</p>` : ''}
       <ul class="h2-bul" id="h2-bul"></ul>
     </section>`;
 
@@ -113,6 +120,10 @@ export async function render(main, P) {
     const a = ev.target.closest('a[href="#h2-lines"]'); if (!a) return;
     ev.preventDefault(); const t = main.querySelector('#h2-lines'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
+
+  // the month so far, opened: by customer and by service line, each adding to the figure
+  const sf = main.querySelector('#h2-sofar');
+  if (sf) sf.addEventListener('click', () => openSoFar(S, LV));
 
   // the lines: a month picked, its figures and comparisons; a tap opens the customers behind a line
   const drawLines = () => {
@@ -173,10 +184,16 @@ export async function render(main, P) {
   if (play) { root.classList.add('play'); whenIntroDone().then(() => playIn(root)); }
 }
 
-// how far the month's bill gets toward $1.0M: priced, then the jobs still to check. The same figures as the tiles.
-function tracking(m) {
+// how far the month gets toward $1.0M: so far, solid; where it is heading, faint and hatched; jobs to check after.
+// Without a month in progress, the forecast as before. The same figures as the tiles.
+function tracking(m, S) {
   if (!m.next) return '';
   const T = 1e6, w = v => Math.max(0, Math.min(100, v / T * 100)).toFixed(2) + '%', jobs = m.next.jobs || 0;
+  if (S) {
+    const rest = Math.max(0, m.next.central - S.total);
+    return `<div class="h2-tobar" role="img" aria-label="${esc(`${moneyK(S.total)} so far, heading for about ${moneyK(m.next.central)}, of $1.0M a month`)}"><i class="pr" style="width:${w(S.total)}"></i>${rest ? `<i class="fc" style="width:${w(rest)}"></i>` : ''}${jobs ? `<i class="ck" style="width:${w(jobs)}"></i>` : ''}</div>
+    <div class="h2-tokey"><span><i class="pr"></i><span data-count data-delay="250" data-dur="1100">${esc(moneyK(S.total))} so far est.</span></span>${rest ? `<span class="h2-fck"><i class="fc"></i>heading for ${esc(moneyK(m.next.central))} est.</span>` : ''}${jobs ? `<span><i class="ck"></i><span data-count data-delay="1250" data-dur="600">${esc(moneyK(jobs))} to check</span></span>` : ''}<span class="end">$1.0M a month</span></div>`;
+  }
   return `<div class="h2-tobar" role="img" aria-label="${esc(moneyK(m.next.central))} priced, ${esc(moneyK(jobs))} to check, of $1.0M a month"><i class="pr" style="width:${w(m.next.central)}"></i>${jobs ? `<i class="ck" style="width:${w(jobs)}"></i>` : ''}</div>
     <div class="h2-tokey"><span><i class="pr"></i><span data-count data-delay="250" data-dur="1100">${esc(moneyK(m.next.central))} est. priced</span></span>${jobs ? `<span><i class="ck"></i><span data-count data-delay="1250" data-dur="600">${esc(moneyK(jobs))} to check</span></span>` : ''}<span class="end">$1.0M a month</span></div>`;
 }
@@ -216,6 +233,41 @@ const whyHeld = j => {
   if (j.reason === 'check') return `${u} hours at its own ${at}, against ${Fmt.num(j.maxUnits)} at most before (last ${dm(j.lastDate)} ${j.lastDate.slice(0, 4)}). May be a keying error.`;
   return `${u} ${j.family === 'labour' ? 'hours' : 'units'}, never bought before. Priced at the book's ${at}, usually what a first-time buyer pays.`;
 };
+// ── the month so far, opened: every customer and every service line, each list adding to the figure ──
+// Customers: storage on the month's bill and work so far at their own prices; a row opens the customer. Lines: a tap
+// opens the customers behind the line (openLine). Against the month before at the same share of its working days.
+async function openSoFar(S, LV) {
+  const title = `${mon(S.month)} so far, to ${dm(S.latest)}`, sub = `${moneyK(S.total)} est.`;
+  openPop({ title, sub, wide: true, html: '<p class="hint">Reading the customers behind it…</p>' });
+  let T;
+  try { T = await getJson('view/so-far'); }
+  catch (e) { openPop({ title, sub, html: `<p>${esc(e.message)}</p>` }); return; }
+  const at = `${monS(T.prevMonth)} at day ${T.day}`;
+  const cv = (v, then) => then == null || !(then > 0) ? '<span class="h2-d flat">new</span>' : chip(v / then - 1);
+  const custRow = r => `<li>${r.level1 != null ? `<a href="#customer/${r.level1}">` : '<div class="h2-pl-r">'}<span>${nmL(r.customer)}<em>${r.storage ? `Storage ${moneyK(r.storage)}` : 'No storage'} · work so far ${moneyK(r.work)} est.</em></span>${r.level1 != null ? cv(r.total, r.prevAt) : ''}<b>${moneyK(r.total)}</b>${r.level1 != null ? '</a>' : '</div>'}</li>`;
+  const TOP = 25, rows = T.byCustomer, top = rows.slice(0, TOP), rest = rows.slice(TOP);
+  const restSum = f => rest.reduce((t, r) => t + f(r), 0);
+  const custList = `<ul class="h2-pl sf-c">${top.map(custRow).join('')}${rest.length ? `<li class="rest sf-rest"><span>All others, ${Fmt.grouped(rest.length)} accounts</span><b>${moneyK(restSum(r => r.total))}</b></li>` : ''}<li class="rest sf-tot"><span>Total</span><b>${moneyK(T.total)}</b></li></ul>
+    ${rest.length ? `<button type="button" class="linkbtn sf-all">Show all ${Fmt.grouped(rows.length)} accounts</button>` : ''}`;
+  const lineList = `<ul class="h2-pl sf-l">${T.byLine.map(l => `<li><button type="button" class="sf-line" data-k="${esc(l.key)}"><span>${esc(l.name)}<em>${l.key === 'storage' ? 'on the month\'s bill' : 'work so far, priced est.'}</em></span>${cv(l.v, l.prevAt)}<b>${moneyK(l.v)}</b></button></li>`).join('')}<li class="rest sf-tot"><span>Total</span><b>${moneyK(T.total)}</b></li></ul>`;
+  const jobs = T.jobs.length ? `<h3>To check, not in the figure</h3><ul class="h2-pl job">${T.jobs.map(j => `<li><a href="#customer/${j.level1}"><span>${nmL(j.customer)}<em>${esc(whyHeld(j))}</em></span><b>about ${moneyK(j.value)}</b></a></li>`).join('')}</ul>` : '';
+  const html = `<ul class="h2-stats"><li><span>Storage, on the bill</span><b>${moneyK(T.storage)}</b></li><li><span>Work so far, est.</span><b>${moneyK(T.work)}</b></li><li><span>On ${esc(at)}</span><b>${T.change != null ? chip(T.change) : '—'}</b></li></ul>
+    <div class="seg sf-tabs" role="tablist"><button type="button" role="tab" class="on" aria-selected="true" data-t="c">By customer</button><button type="button" role="tab" aria-selected="false" data-t="l">By service line</button></div>
+    <div class="sf-p" data-p="c">${custList}</div><div class="sf-p" data-p="l" hidden>${lineList}</div>${jobs}
+    <p class="src">Storage: each account's charge on ${esc(mon(T.month))}'s bill${T.storageCarried ? ', carried from the latest bill until it posts' : ''}. Work: Veri-Shred and VCK work orders done ${esc(dm(T.month))} to ${esc(dm(T.latest))}, priced at each account's own rates, est.; charges added at the run carried from the last priced month for ${Math.round(T.frac * 100)}% of the month. Against ${esc(mon(T.prevMonth))}: its storage, and its work scaled to the same share of its working days. Citadel's work held apart.</p>`;
+  openPop({ title, sub, wide: true, html, ask: `What is driving ${mon(T.month)} so far against ${mon(T.prevMonth)}?` });
+  const b = document.querySelector('.pop-b');
+  if (!b) return;
+  b.addEventListener('click', ev => {
+    const t = ev.target.closest('.sf-tabs button');
+    if (t) { b.querySelectorAll('.sf-tabs button').forEach(x => { const on = x === t; x.classList.toggle('on', on); x.setAttribute('aria-selected', String(on)); }); b.querySelectorAll('.sf-p').forEach(p => { p.hidden = p.dataset.p !== t.dataset.t; }); return; }
+    const all = ev.target.closest('.sf-all');
+    if (all) { b.querySelector('.sf-c').innerHTML = rows.map(custRow).join('') + `<li class="rest sf-tot"><span>Total</span><b>${moneyK(T.total)}</b></li>`; all.remove(); return; }
+    const l = ev.target.closest('.sf-line');
+    if (l && LV && LV.rows.some(r => r.key === l.dataset.k) && LV.rows.find(r => r.key === l.dataset.k).by[T.month]) openLine(l.dataset.k, T.month, LV);
+  });
+}
+
 async function openLine(key, month, LV) {
   const r = LV.rows.find(x => x.key === key), k = r.by[month], meta = LV.meta[month];
   const title = `${r.name} · ${mon(month)}${k.est ? ' est.' : ''}`;
