@@ -84,7 +84,7 @@ export function yesterdayLine(P, A, date = A.latestDone) {
 // Three things to act on: what changed first, then the calls most at stake; each with its owner and where it opens.
 const hrefOf = subject => { const s = String(subject || ''); return s.startsWith('account:') ? '#customer/' + s.slice(8) : s.startsWith('route:') || s === 'day' ? '#activity' : '#numbers'; };
 export function topActions({ lines = [], calls = [] }, n = 3) {
-  const short = t => String(t).replace(/ \(.*?\)/, '').replace(/ over the last three months.*$/, '').replace(/,? against its own run.*$/, '');
+  const short = t => String(t).replace(/ \(.*?\)/, '').replace(/ over the last three months.*$/, '').replace(/,? against its own (?:run|12-month average).*$/, '');
   const a = lines.map(i => ({ owner: i.owner, text: i.text, key: i.key, subject: i.subject, href: hrefOf(i.subject) }));
   const b = calls.map(c => ({ owner: 'anne', text: `${c.name}: ${short(c.ev)}`, key: 'call', subject: 'account:' + c.level1, href: '#customer/' + c.level1 }));
   return [...a, ...b].slice(0, n);

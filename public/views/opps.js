@@ -20,6 +20,9 @@ const when = r => { const m = r.kind === 'overdue' ? 'once' : r.modelled ? 'a ye
 const dots = n => `<span class="cd-dots op-sure" role="img" aria-label="Confidence ${n} of 3: ${esc(CONFIDENCE[n])}" title="${esc(CONFIDENCE[n])}">${[1, 2, 3].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
 const pill = k => `<span class="op-kind k-${k}">${esc(KINDS[k])}</span>`;
 
+// a next-step date as people read it ("Fri 21 Nov"), not the browser's mm/dd/yyyy; the picker sits behind it
+const nextWord = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+
 export async function render(main, params, C) {
   if (!main) return;
   // read fresh, not from the page's cache: someone else may have moved something
@@ -44,7 +47,7 @@ export async function render(main, params, C) {
     <section class="h2-card c2-tablecard" data-tour="p-table" data-in>
       <div id="op-t"></div>
       <p class="op-msg" id="op-msg" role="status"></p>
-      ${phoneFold('how these are worked out', `<div class="src">$ a year is each account's best move, once: moves on an account overlap, so they do not add up. Overdue-box destruction is a one-off that needs the client's sign-off, so it has its own column and never adds to the yearly figure. Cross-sell is est. at what comparable accounts spend, price gaps at the book's median, win-back at the drop on the account's own run, rate rounds at the typical 8%. Three marks: its own billing or the book median. Two: comparable accounts of its kind. One: the whole book or few comparable accounts.</div>`)}
+      ${phoneFold('how these are worked out', `<div class="src">$ a year is each account's best move, once: moves on an account overlap, so they do not add up. Overdue-box destruction is a one-off that needs the client's sign-off, so it has its own column and never adds to the yearly figure. Cross-sell is est. at what comparable accounts spend, price gaps at the book's median, win-back at the drop on the account's own 12-month average, rate rounds at the typical 8%. Three marks: its own billing or the book median. Two: comparable accounts of its kind. One: the whole book or few comparable accounts.</div>`)}
     </section>
   </div>`;
   const root = main.querySelector('.op'), $ = id => main.querySelector('#' + id), host = $('op-t');
@@ -117,7 +120,7 @@ export async function render(main, params, C) {
       { k: 'conf', l: 'How sure', fixed: true, get: a => stateOf(a).conf, csv: a => stateOf(a).conf, fmt: a => dots(stateOf(a).conf) },
       { k: 'owner', l: 'Owner', fixed: true, text: true, get: a => stateOf(a).owner || '', csv: a => ownerName(stateOf(a).owner), fmt: a => { const s = stateOf(a), own = s.owner; return `<select class="op-own${own ? '' : ' none'}" data-op-key="${esc(s.lead.key)}" aria-label="Owner for ${esc(a.name)}"><option value="">Assign</option>${allOwners.map(o => `<option value="${esc(o)}"${o === own ? ' selected' : ''}>${esc(ownerName(o))}</option>`).join('')}</select>`; } },
       { k: 'status', l: 'Status', fixed: true, text: true, get: a => stateOf(a).status, csv: a => STATUS_NAMES[stateOf(a).status], fmt: a => { const s = stateOf(a), by = s.lead.who && s.lead.at ? `Last changed by ${ownerName(s.lead.who)}, ${String(s.lead.at).slice(0, 10)}` : ''; return `<select class="op-stat s-${s.status}" data-op-key="${esc(s.lead.key)}" aria-label="Status for ${esc(a.name)}"${by ? ` title="${esc(by)}"` : ''}>${STATUSES.map(x => `<option value="${x}"${x === s.status ? ' selected' : ''}>${STATUS_NAMES[x]}</option>`).join('')}</select>`; } },
-      { k: 'next', l: 'Next step', fixed: true, text: true, get: a => stateOf(a).next || '', csv: a => stateOf(a).next || '', fmt: a => { const s = stateOf(a); return `<input type="date" class="op-next" data-op-key="${esc(s.lead.key)}" value="${esc(s.next || '')}" aria-label="Next step for ${esc(a.name)}">`; } },
+      { k: 'next', l: 'Next step', fixed: true, text: true, get: a => stateOf(a).next || '', csv: a => stateOf(a).next || '', fmt: a => { const s = stateOf(a); return `<label class="op-next-w${s.next ? ' set' : ''}"><span>${s.next ? esc(nextWord(s.next)) : 'Set a date'}</span><input type="date" class="op-next" data-op-key="${esc(s.lead.key)}" value="${esc(s.next || '')}" aria-label="Next step for ${esc(a.name)}"></label>`; } },
     ],
     detail,
     onDraw: () => {

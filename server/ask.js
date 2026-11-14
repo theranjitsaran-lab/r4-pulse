@@ -104,7 +104,7 @@ function tools(L, D, X = {}) {
       },
     },
     customer: {
-      description: "One account: its last 13 months, its movement against its own run, its margin by line est., what it doesn't buy yet and what comparable accounts spend on it est., and its prices against the book's median.",
+      description: "One account: its last 13 months, its movement against its own 12-month average, its margin by line est., what it doesn't buy yet and what comparable accounts spend on it est., and its prices against the book's median.",
       input: { type: 'object', properties: { level1: { type: 'integer' } }, required: ['level1'], additionalProperties: false },
       run: ({ level1 }) => {
         const s = ser.get(level1), m = marginOf.get(level1);
@@ -116,7 +116,7 @@ function tools(L, D, X = {}) {
         return {
           customer: title((s || m).customer), level1,
           months: s ? s.months.slice(-13).map((mm, i, a) => `${mm.slice(0, 7)}: ${moneyK(s.total[s.total.length - a.length + i])}`) : [],
-          movement: s && s.move ? `last three months ${moneyK(s.move.last3)} a month against its own run of ${moneyK(s.move.run)}: ${signed(s.move.d)} a month` : null,
+          movement: s && s.move ? `last three months ${moneyK(s.move.last3)} a month against its own 12-month average of ${moneyK(s.move.run)}: ${signed(s.move.d)} a month` : null,
           margin_last_12_months: costs && m ? { revenue: money0(m.revenue), cost: `${money0(m.cost)} est.`, margin: `${m.margin < 0 ? '−' : '+'}${money0(Math.abs(m.margin)).replace('−', '')} est.`,
             by_line: Object.entries(m.fam).map(([f, v]) => `${f}: revenue ${money0(v.revenue)}, cost ${money0(v.cost)} est.`) } : null,
           not_bought_yet: ws ? ws.lines.filter(l => !l.have && l.opp > 0).map(l => `${l.name}: about ${moneyK(l.opp)} a year est. at what comparable accounts spend`) : [],

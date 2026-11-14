@@ -34,7 +34,7 @@ const notHeld = (held, i) => !held.has(`${i.key}|${i.subject}`);
 export function conversationCandidates({ C, PR, CA, log = [] }) {
   const ser = seriesOf(C), cands = new Map();
   const add = (id, sig) => { if (id === CITADEL) return; const c = cands.get(id) || { level1: id, sigs: [] }; c.sigs.push(sig); cands.set(id, c); };
-  for (const d of slippingAccounts(C)) add(d.level1, { key: 'slipping', stake: -d.move.d * 12, ev: `${moveReason(d.move, moneyK)} over the last three months, against its own run`, name: d.customer });
+  for (const d of slippingAccounts(C)) add(d.level1, { key: 'slipping', stake: -d.move.d * 12, ev: `${moveReason(d.move, moneyK)} over the last three months, against its own 12-month average`, name: d.customer });
   const sg = serviceGaps(PR);
   for (const a of sg.values()) add(a.level1, { key: 'gap', stake: a.worth * 12, ev: `${title(a.top.service)}: ${Fmt.money(a.top.rate, { dp: 2 })} against a ${Fmt.money(a.top.med, { dp: 2 })} median · ${moneyK(a.worth * 12)} a year at the median`, service: title(a.top.service).toLowerCase(), name: a.customer });
   for (const r of storageGaps(PR).rows) add(r.level1, { key: 'gap', stake: r.worth * 12, ev: `storage at ${Fmt.money(r.rate, { dp: 3 })} a box against ${Fmt.money(r.med, { dp: 3 })} · ${moneyK(r.worth * 12)} a year at the median`, service: 'storage', name: r.customer });

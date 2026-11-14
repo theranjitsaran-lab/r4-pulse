@@ -18,8 +18,8 @@ const word = n => n === 'ITAD' ? n : n.toLowerCase();
 const CONF = { 3: 'High', 2: 'Medium', 1: 'Low' };
 export const confidence = gapConfidence;   // the app's one scale: a gap sized from other accounts is at most medium
 const trendPoint = t => {
-  if (!t || !t.move) return { key: 'trend', tone: 'a', lead: 'Too little history', rest: 'to say how it is moving on its own run.' };
-  const m = t.move, run = `its own ${moneyK(m.run)} run`;
+  if (!t || !t.move) return { key: 'trend', tone: 'a', lead: 'Too little history', rest: 'to say how it is moving on its own 12-month average.' };
+  const m = t.move, run = `its own ${moneyK(m.run)} 12-month average`;
   if (t.kind === 'slipping') return { key: 'trend', tone: 'r', lead: `Slipping: ${moneyK(Math.abs(m.d))} a month below ${run}.`, rest: 'Sell into it with care: lead with the relationship.' };
   if (t.kind === 'stopped') return { key: 'trend', tone: 'r', lead: `Nearly stopped: ${moneyK(m.last3)} a month, against ${run}.`, rest: 'Find out why before suggesting a sale.' };
   if (t.kind === 'rising') return { key: 'trend', tone: 'g', lead: `Rising: up ${moneyK(m.d)} a month on ${run}.`, rest: '' };

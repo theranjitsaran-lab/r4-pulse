@@ -41,7 +41,7 @@ export async function render(main, C, params, tabs) {
   const st = seg && seg.rows.find(x => x.key === 'storage');
   const mPct = last.core / prev.core - 1, biggest = slip.slice().sort((a, b) => a.move.d - b.move.d)[0];
   const pts = [
-    slip.length ? { key: 'slip', tone: 'r', lead: `${slip.length} accounts are slipping,`, rest: `${moneyK(slipV)} a month below their own run.${biggest ? ` The biggest is ${titleCase(biggest.customer)}, down ${moneyK(-biggest.move.d)} a month.` : ''}` } : { key: 'slip', tone: 'g', lead: 'No account is slipping', rest: 'against its own run.' },
+    slip.length ? { key: 'slip', tone: 'r', lead: `${slip.length} accounts are slipping,`, rest: `${moneyK(slipV)} a month below their own 12-month average.${biggest ? ` The biggest is ${titleCase(biggest.customer)}, down ${moneyK(-biggest.move.d)} a month.` : ''}` } : { key: 'slip', tone: 'g', lead: 'No account is slipping', rest: 'against its own 12-month average.' },
     { key: 'month', tone: mPct <= -.05 ? 'a' : 'g', lead: `Invoiced ${moneyK(last.core)} in ${mon(last.month)},`, rest: `${changeOf(mPct)} on ${mon(prev.month)}${ly ? ` and ${changeOf(last.core / ly.core - 1)} on a year ago` : ''}.${st ? ` Storage is ${moneyK(st.lm)} of the ${mon(seg.month)} lines.` : ''}` },
     { key: 'cross', tone: 'a', lead: `Cross-sell is worth up to ${moneyK(crossV)} a month`, rest: `if accounts bought like comparable ones.${topCross ? ` Start with ${titleCase(topCross.customer)}: ${lineWord(bestCell(topCross)[0])}.` : ''}` },
   ];
@@ -49,7 +49,7 @@ export async function render(main, C, params, tabs) {
   const kpis = `<section class="ktiles" data-tour="a-tiles">
     ${tile({ lead: true, label: `${LABELS.invoiced}, ${mon(last.month)}`, big: moneyK(last.core), sub: `${chip(mPct)} on ${esc(mon(prev.month))}${ly ? `, ${esc(changeOf(last.core / ly.core - 1))} on a year ago` : ''}`, spark: P.monthly.slice(-12).map(m => m.core) })}
     ${tile({ d: 80, label: LABELS.invoicedThisMonth, big: String(active), sub: `${chip(active / activePrev - 1)} on the month before` })}
-    ${tile({ d: 160, href: '#customers?view=slipping', label: 'Slipping', big: String(slip.length), sub: `${chipText('−' + moneyK(slipV) + ' a month', 'down')} below their own run` })}
+    ${tile({ d: 160, href: '#customers?view=slipping', label: 'Slipping', big: String(slip.length), sub: `${chipText('−' + moneyK(slipV) + ' a month', 'down')} below their own 12-month average` })}
     ${tile({ d: 240, href: '#customers?view=whitespace', label: 'Cross-sell est.', big: moneyK(crossV), sub: 'a month, if each bought like its peers' })}
   </section>`;
 
@@ -92,7 +92,7 @@ export async function render(main, C, params, tabs) {
 
   const cellBtn = (r, inner, x) => `<button class="c2-x" data-x="${x}" data-id="${r.level1}">${inner}</button>`;
   const extra = [
-    { k: 'd', l: 'Against its own run, a month', short: 'Own run', get: r => r.d, fmt: r => r.d == null ? '—' : cellBtn(r, `<span class="h2-cv ${r.movePct >= .2 ? 'up' : r.movePct <= -.2 ? 'down' : ''}">${signedK(r.d)}</span>`, 'sales') },
+    { k: 'd', l: 'Against its own 12-month average, a month', short: 'vs own average', get: r => r.d, fmt: r => r.d == null ? '—' : cellBtn(r, `<span class="h2-cv ${r.movePct >= .2 ? 'up' : r.movePct <= -.2 ? 'down' : ''}">${signedK(r.d)}</span>`, 'sales') },
     { k: 'opp', l: 'Cross-sell est., a month', short: 'Cross-sell est.', get: r => r.opp ? r.opp / 12 : 0, fmt: r => r.opp > 0 ? cellBtn(r, moneyK(r.opp / 12), 'opp') : '—' },
     { k: 'gap', l: 'Under the book, a year', short: 'Under book', get: r => r.gap, fmt: r => r.gap > 0 ? cellBtn(r, moneyK(r.gap), 'gap') : '—' },
     { k: 'spark', l: '13 months', csv: () => '', fmt: r => r.spark ? sparkline(r.spark, { w: 84, h: 22, cls: 'service' }) : '' },

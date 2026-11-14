@@ -11,6 +11,7 @@
 import * as Fmt from './format.js';
 import { roadPath, miles, YARD, allocate, cheaper, NEAR_DAYS } from './routemap.js';
 import { marginBand } from './margin.js';
+import { titleCase } from './data.js';
 
 export const HISTORY_FROM = '2025-01-01', FAR_MILES = 20, MIN_VISITS = 12;
 const WITHIN = 10;
@@ -213,7 +214,6 @@ export function costlyAreas({ rc, AR, M, Z, R }, { minVisits = MIN_VISITS, farMi
   return out.sort((x, y) => y.cost - x.cost);
 }
 
-const titleOf = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase());
 // What would improve an area, each sized on its own from the cost model, never added together: a route change (book
 // it on a passing route's days, or fewer, fuller visits), a trip fee a visit, or a reprice (Theran, 14 November 2026).
 function moves(area, a, { R, Z, history, bookPerVisit }) {
@@ -236,7 +236,7 @@ function moves(area, a, { R, Z, history, bookPerVisit }) {
   // a trip fee a visit: enough to stop it losing money, else what its drive costs above the book's average visit
   const toEven = area.left < 0 ? -area.left / area.visits : 0, over = area.travel / area.visits - bookPerVisit;
   const fee = toEven > 0 ? toEven : over;
-  const payers = area.who.slice(0, 4).map(w => `${titleOf(w.name)} (${Fmt.count(w.services)} services)`).join(', ');
+  const payers = area.who.slice(0, 4).map(w => `${titleCase(w.name)} (${Fmt.count(w.services)} services)`).join(', ');
   if (fee > 0) out.push({ key: 'charge', title: `A trip fee of ${Fmt.money(Math.ceil(fee))} a visit`, say: `${toEven > 0 ? 'Brings the area to break even' : `Covers what its drive costs above the book's ${Fmt.money(bookPerVisit)} a visit`}: ${Fmt.count(area.visits)} visits a year. Who pays it: ${payers}.`, saving: Math.ceil(fee) * area.visits });
   // reprice the work there: the share on its service revenue that brings it to break even
   if (area.left < 0 && area.revenue > 0) { const up = -area.left / area.revenue; out.push({ key: 'reprice', title: `Reprice the work there: +${Fmt.pct(up)}`, say: `Raising ${area.who.length === 1 ? 'its' : 'their'} service prices ${Fmt.pct(up)} covers the loss on ${Fmt.money(area.revenue, { short: true })} of revenue a year. Largest there: ${payers}.`, saving: -area.left }); }

@@ -31,9 +31,9 @@ export const VIEWS = {
   overview:      { label: 'All accounts', blurb: 'Last month, who moved, and every account: sort any column, filter to a line, tap a figure for why.' },
   conversations: { label: 'This week', hidden: true, blurb: 'Ten conversations worth having, ranked by what is at stake. Log what you did; the list learns.' },
   main:          { label: 'Up and down', hidden: true, blurb: 'Last month against the month before and a year ago, the year to date, and this month so far.' },
-  grid:          { label: 'Month grid', blurb: 'The 30 largest accounts, month by month, each against its own run.' },
+  grid:          { label: 'Month grid', blurb: 'The 30 largest accounts, month by month, each against its own 12-month average.' },
   whitespace:    { label: 'Cross-sell', blurb: 'What each large account buys, and what it doesn\'t buy yet, sized at what comparable accounts spend.' },
-  slipping:      { hidden: true, label: 'Slipping', blurb: 'Down 10% or more on their own run over the last three months. Still-billing accounts first; then those that have stopped or nearly, often one-off projects, which Home leaves out of the win-back.' },
+  slipping:      { hidden: true, label: 'Slipping', blurb: 'Down 10% or more on their own 12-month average over the last three months. Still-billing accounts first; then those that have stopped or nearly, often one-off projects, which Home leaves out of the win-back.' },
   gaps:          { hidden: true, label: 'Price gaps', blurb: 'Paying under the book\'s median for storage or a service, sized by their volume. Home counts half of each gap.' },
   rounds:        { hidden: true, label: 'Missed rate rounds', blurb: 'No rate has moved in two years.' },
   destruction:   { hidden: true, label: 'Overdue boxes', blurb: 'Boxes past their retention review, by account: what destruction bills once, and the storage it ends.' },
@@ -308,14 +308,14 @@ async function monthGrid(main, C, params) {
   const slip = slippingAccounts(C).filter(x => ids.has(x.level1)), rise = risingAccounts(C).filter(x => ids.has(x.level1));
   const top = slip.slice().sort((a, b) => a.move.d - b.move.d)[0], up = rise.slice().sort((a, b) => b.move.d - a.move.d)[0];
   const pts = [
-    slip.length ? { key: 'slip', tone: 'r', lead: `${slip.length} of the 30 largest are slipping,`, rest: `at least 10% below their own run.${top ? ` The biggest is ${titleCase(top.customer)}, down ${moneyK(-top.move.d)} a month.` : ''}` } : { key: 'slip', tone: 'g', lead: 'None of the 30 largest is slipping', rest: 'against its own run.' },
+    slip.length ? { key: 'slip', tone: 'r', lead: `${slip.length} of the 30 largest are slipping,`, rest: `at least 10% below their own 12-month average.${top ? ` The biggest is ${titleCase(top.customer)}, down ${moneyK(-top.move.d)} a month.` : ''}` } : { key: 'slip', tone: 'g', lead: 'None of the 30 largest is slipping', rest: 'against its own 12-month average.' },
   ];
   if (costsVisible()) {
     const thin = big.filter(r => r.pc != null && marginBand(R, r.pc).cls === 'r').sort((a, b) => a.pc - b.pc);
     const say = r => `${titleCase(r.customer)} ${(r.pc < 0 ? '−' : '') + Fmt.pct(Math.abs(r.pc))}`;
     pts.push(thin.length ? { key: 'thin', tone: 'r', lead: `${thin.length} of the 30 largest ${thin.length === 1 ? 'is' : 'are'} Thin:`, rest: `${thin.slice(0, 3).map(say).join(', ')} est.` } : { key: 'thin', tone: 'g', lead: 'None of the 30 largest is Thin', rest: 'on the cost model est.' });
   }
-  pts.push(rise.length ? { key: 'rise', tone: 'g', lead: `${rise.length} ${rise.length === 1 ? 'is' : 'are'} rising,`, rest: `led by ${titleCase(up.customer)}, up ${moneyK(up.move.d)} a month on its own run.` } : { key: 'rise', tone: 'a', lead: 'None of the 30 largest is rising', rest: 'on its own run.' });
+  pts.push(rise.length ? { key: 'rise', tone: 'g', lead: `${rise.length} ${rise.length === 1 ? 'is' : 'are'} rising,`, rest: `led by ${titleCase(up.customer)}, up ${moneyK(up.move.d)} a month on its own 12-month average.` } : { key: 'rise', tone: 'a', lead: 'None of the 30 largest is rising', rest: 'on its own 12-month average.' });
   main.innerHTML = `<div class="cust c2 h2 ac mg">
     <h1>Accounts</h1>
     ${tabsHtml('grid')}

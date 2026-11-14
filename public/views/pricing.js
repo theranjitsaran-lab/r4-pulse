@@ -149,7 +149,9 @@ export async function render(main, PR, params) {
   </div>`;
 
   const $ = id => main.querySelector('#' + id);
-  const stayPut = () => { const m = document.querySelector('.mast'); main.querySelector('.pq').style.setProperty('--pq-top', (m ? m.offsetHeight : 0) + 'px'); };
+  // the figures stay under the masthead; the handler goes with the screen (it threw on other tabs once Quote had been opened)
+  const pq = main.querySelector('.pq');
+  const stayPut = () => { if (!pq || !pq.isConnected) { removeEventListener('resize', stayPut); return; } const m = document.querySelector('.mast'); pq.style.setProperty('--pq-top', (m ? m.offsetHeight : 0) + 'px'); };
   stayPut(); addEventListener('resize', stayPut, { passive: true });
   $('p-cust').value = st.level1 ? (customers.find(x => x[0] === st.level1) || [0, ''])[1] : '';
   // a service reached from the book table may not be on the list: it joins it

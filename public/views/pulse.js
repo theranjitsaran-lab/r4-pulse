@@ -84,7 +84,7 @@ export async function render(main, P) {
       say: `The biggest levers: ${top2.map(x => `${x.t.charAt(0).toLowerCase() + x.t.slice(1)} (${x.modelled ? 'up to ' : ''}${moneyK(x.v)} a month)`).join(' and ')}.` },
     top && { key: 'slipping', line: `${mv.slipping} accounts are slipping; the largest is ${titleCase(top.customer)}, ${top.why}, ${moneyK(-top.d)} a month below its own run`,
       say: `${mv.slipping} accounts are slipping; the largest is ${titleCase(top.customer)}, ${top.why}.` },
-    gain && { key: 'rising', line: `Rising most: ${titleCase(gain.customer)}, ${moneyK(gain.d)} a month above its own run` },
+    gain && { key: 'rising', line: `Rising most: ${titleCase(gain.customer)}, ${moneyK(gain.d)} a month above its own 12-month average` },
     { key: 'margin', line: `${sure.length} accounts cost more to serve than they pay on costs R4 is sure of; ${unsure.length} more only while route costs are under review` },
   ].filter(Boolean);
 
@@ -107,7 +107,7 @@ export async function render(main, P) {
       <a href="#customers?view=main"><span class="lab">${mon(billMonth)}'s bill</span><b>${runCore != null ? moneyK(runCore) : 'posted'}</b><small>${dBill != null ? `${pct(dBill)} on ${mon(last.month)}` : BN.source === 'pending' ? 'total with the next rebuild' : 'run not started'}</small></a>
       <div><span class="lab">${mon(nb)}'s, building est.</span><b>${nextBill != null ? '≈ ' + moneyK(nextBill) : '—'}</b><small>${X.bill ? `${moneyK(X.bill.lo)} to ${moneyK(X.bill.hi)} · day ${X.elapsed} of ${X.workdays}` : 'no priced month yet'}</small></div>
       <div><span class="lab">Gap to $1.0M</span><b>${moneyK(TARGET - (nextBill || B.today))}</b><small>a month, ${nextBill != null ? `at ${mon(nb)}'s pace` : 'on the six-month average'}</small></div>
-      <a href="#customers?view=slipping"><span class="lab">Slipping ›</span><b>${mv.slipping}</b><small>accounts down 10% on their own run</small></a>
+      <a href="#customers?view=slipping"><span class="lab">Slipping ›</span><b>${mv.slipping}</b><small>accounts down 10% on their own 12-month average</small></a>
     </section>`;
   const fbBtns = i => `<span class="fb" data-key="${esc(i.key)}" data-subject="${esc(i.subject)}"><button data-v="useful" title="Useful">Useful</button><button data-v="knew" title="Already knew this">Knew</button><button data-v="wrong" title="Not right">Not right</button></span>`;
   const lineList = (ls, empty) => ls.length ? `<ul class="chg">${ls.map(i => `<li class="${i.level}"><span>${esc(i.text)}</span>${fbBtns(i)}</li>`).join('')}</ul>` : `<p class="quiet">${empty}</p>`;

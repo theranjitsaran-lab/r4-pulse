@@ -166,7 +166,7 @@ export function bridge({ P, PR, CA, M, C }) {
       s: `${new Set([...sg.keys(), ...st.rows.map(r => r.level1)]).size} accounts pay under the book's median for storage or a service`, note: 'halfway',
       brief: `${new Set([...sg.keys(), ...st.rows.map(r => r.level1)]).size} accounts under the book's median` },
     { key: 'slip', t: 'Win back half of what slipping accounts lost', v: slipV, href: '#customers?view=slipping', who: 'Anne and Trisha',
-      s: `${slip.length} accounts still billing but down 10% or more on their own run over the last three months`, note: 'halfway', brief: `${slip.length} accounts down 10% or more` },
+      s: `${slip.length} accounts still billing but down 10% or more on their own 12-month average over the last three months`, note: 'halfway', brief: `${slip.length} accounts down 10% or more` },
     { key: 'rounds', t: 'Raise the accounts that missed every rate round', v: roundsV, href: '#customers?view=rounds', who: 'Anne',
       s: `${rounds.length} accounts with no rate moved in two years, at the typical 8% rise`, brief: `${rounds.length} accounts, no rise in two years` },
   ].filter(x => x.v > 0).sort((a, b) => b.v - a.v);

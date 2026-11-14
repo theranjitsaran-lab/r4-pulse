@@ -88,7 +88,7 @@ export async function render(main, C, params) {
   const word = n => n === 'ITAD' ? n : n.toLowerCase();
   // the three points, from computed fields only
   const pts = [];
-  if (s && s.move) pts.push({ key: 'run', tone: moved != null && moved <= -.1 ? 'r' : moved != null && moved < -.02 ? 'a' : 'g', lead: moved == null ? 'About level on its own run:' : moved > 0 ? `Up ${Fmt.pct(moved, { abs: true })} on its own run:` : `Down ${Fmt.pct(moved, { abs: true })} on its own run:`, rest: `running at ${moneyK(s.move.last3)} a month against ${moneyK(s.move.run)}; ${share('storage')}% of ${moneyK(ltm)} is storage.` });
+  if (s && s.move) pts.push({ key: 'run', tone: moved != null && moved <= -.1 ? 'r' : moved != null && moved < -.02 ? 'a' : 'g', lead: moved == null ? 'About level on its own 12-month average:' : moved > 0 ? `Up ${Fmt.pct(moved, { abs: true })} on its own 12-month average:` : `Down ${Fmt.pct(moved, { abs: true })} on its own 12-month average:`, rest: `running at ${moneyK(s.move.last3)} a month against ${moneyK(s.move.run)}; ${share('storage')}% of ${moneyK(ltm)} is storage.` });
   else pts.push({ key: 'run', tone: 'a', lead: `${moneyK(ltm)} in twelve months,`, rest: 'too little history for a run.' });
   if (costs && weak) { const l = weak.revenue - weak.cost, wp = l / weak.revenue; pts.push({ key: 'weak', tone: marginBand(R, wp).cls === 'g' ? 'g' : marginBand(R, wp).cls, lead: `${FAMILY_NAMES[weak.family] || weak.family} earns least:`, rest: `${money0(weak.revenue)} of revenue on ${money0(weak.cost)} to serve, ${pcS(wp)} est.` }); }
   const lowCell = wsRow ? LINES.map(x => ({ x, c: wsRow.cells[x.key] })).find(o => o.c.low) : null, addCell = wsRow ? LINES.map(x => ({ x, c: wsRow.cells[x.key] })).filter(o => !o.c.have && o.c.opp > 0).sort((a, b) => b.c.opp - a.c.opp)[0] : null;
@@ -118,7 +118,7 @@ export async function render(main, C, params) {
       ${acct && (acct.boxes >= 1 || acct.bins) ? tile({ d: 240, label: acct.boxes >= 1 ? 'Boxes stored' : 'Bin services, a year', big: n0(acct.boxes >= 1 ? acct.boxes : acct.bins), sub: acct.bins ? `${n0(acct.bins)} bin services on ${n0(acct.visits)} visits` : 'on average, over the year' }) : ''}
     </section>
     <div class="cp-mid">
-      <section class="h2-card" data-in id="cp-chart">${s ? `<div class="h2-ch"><h2>${esc(chartTitle(s))}</h2><small>Invoiced a month, from VCK. Tap a month for its invoices.</small></div>${barsSvg(line12, { ref: s.move ? s.move.run : null, refLabel: s.move ? `own run ${moneyK(s.move.run)}` : '', label: chartTitle(s) })}` : ''}</section>
+      <section class="h2-card" data-in id="cp-chart">${s ? `<div class="h2-ch"><h2>${esc(chartTitle(s))}</h2><small>Invoiced a month, from VCK. Tap a month for its invoices.</small></div>${barsSvg(line12, { ref: s.move ? s.move.run : null, refLabel: s.move ? `own 12-month average ${moneyK(s.move.run)}` : '', label: chartTitle(s) })}` : ''}</section>
       ${costs ? `<section class="h2-card" data-in><div class="h2-ch"><h2>What would improve it</h2></div>${leversHtml(levers, 4)}</section>` : ''}
     </div>
     <section class="h2-card" data-in><div class="h2-ch cp-ch"><h2>Every line${costs ? ', est.' : ''}</h2>${rowsF.length ? '<small>Tap a line for its jobs' + (costs ? ', a margin for its breakdown' : '') + '</small>' : ''}</div>
@@ -264,7 +264,7 @@ function chartTitle(s) {
   const mix = !st ? ', all service' : !sv ? ', all storage' : `, ${Fmt.pct(st / (st + sv))} storage`;
   if (!m || m.pct == null) return `Billing by month${mix}`;
   const how = Math.abs(m.pct) < 0.05 ? 'about level' : `${m.pct > 0 ? 'up' : 'down'} ${Fmt.pct(m.pct, { abs: true })}`;
-  return `Running at ${moneyK(m.last3)} a month, ${how} on its own run${mix}`;
+  return `Running at ${moneyK(m.last3)} a month, ${how} on its own 12-month average${mix}`;
 }
 
 // Where the account is served: its own stops over six months (the drill's route lists), by postcode,

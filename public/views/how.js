@@ -115,7 +115,7 @@ const SCREENS = () => [
       'Open, Contacted, Agreed, Won and Lost show where the list has got to, counting each account once, at its move furthest along. Today, Cross-sell, Operations and the margin drawer all send to this same list.',
     ]],
     ['What each kind of move is', [
-      'Win back: still billing but down on its own run, sized at the drop. Cross-sell: a line it could buy, sized at what comparable accounts spend. Price gap: paying under the book\'s median, sized at the difference. Rate round: sized at the typical 8%. Overdue boxes: past retention, a one-off that needs the client\'s sign-off.',
+      'Win back: still billing but down on its own 12-month average, sized at the drop. Cross-sell: a line it could buy, sized at what comparable accounts spend. Price gap: paying under the book\'s median, sized at the difference. Rate round: sized at the typical 8%. Overdue boxes: past retention, a one-off that needs the client\'s sign-off.',
       '$ a year is each account\'s best move, once, because moves on one account overlap and do not add up. One-offs have their own column and never add to the yearly figure.',
     ]],
   ] },
