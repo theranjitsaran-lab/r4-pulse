@@ -104,6 +104,7 @@ export async function render(main, C, params) {
     <div class="crumb"><a href="#customers">Accounts</a><span>›</span><span style="color:var(--ink-2)">${esc(name)}</span></div>
     <div class="cp-head"><h1>${esc(name)}</h1>
     <div class="tags">
+      <button type="button" class="pq-btn cp-review" title="Everything for a customer review on one printable sheet: trend, what it buys, cross-sell, prices, open moves">Review sheet</button>
       ${id === CITADEL ? '<span class="chip">Held apart from core</span>' : ''}
       ${signals && signals.not_raised_2y ? '<span class="chip warn">Missed every rate round</span>' : ''}
     </div></div>
@@ -117,12 +118,21 @@ export async function render(main, C, params) {
       ${costs && m && m.cost > 0 ? tile({ d: 160, label: 'Margin est.', big: pc != null ? pcS(pc) : '—', sub: `${esc(marginBand(R, pc).word)}: ${m.margin >= 0 ? 'keeps' : 'short by'} ${moneyK(Math.abs(m.margin))} on ${moneyK(m.cost)} to serve`, margin: { cls: marginBand(R, pc).cls } }) : ''}
       ${acct && (acct.boxes >= 1 || acct.bins) ? tile({ d: 240, label: acct.boxes >= 1 ? 'Boxes stored' : 'Bin services, a year', big: n0(acct.boxes >= 1 ? acct.boxes : acct.bins), sub: acct.bins ? `${n0(acct.bins)} bin services on ${n0(acct.visits)} visits` : 'on average, over the year' }) : ''}
     </section>
+    ${binStrip(R, id, acct, costs)}
     <div class="cp-mid">
       <section class="h2-card" data-in id="cp-chart">${s ? `<div class="h2-ch"><h2>${esc(chartTitle(s))}</h2><small>Invoiced a month, from VCK. Tap a month for its invoices.</small></div>${barsSvg(line12, { ref: s.move ? s.move.run : null, refLabel: s.move ? `own 12-month average ${moneyK(s.move.run)}` : '', label: chartTitle(s) })}` : ''}</section>
       ${costs ? `<section class="h2-card" data-in><div class="h2-ch"><h2>What would improve it</h2></div>${leversHtml(levers, 4)}</section>` : ''}
     </div>
     <section class="h2-card" data-in><div class="h2-ch cp-ch"><h2>Every line${costs ? ', est.' : ''}</h2>${rowsF.length ? '<small>Tap a line for its jobs' + (costs ? ', a margin for its breakdown' : '') + '</small>' : ''}</div>
-      <div class="cp-lines"><table><thead><tr><th>Line</th><th>Revenue</th>${costs ? '<th>Cost est.</th><th>Left est.</th><th>Margin</th>' : ''}</tr></thead><tbody>${rowsF.map((x, i) => { const l = x.revenue - x.cost, p = x.revenue > 0 && x.cost > 0 ? l / x.revenue : null; return `<tr><td><button type="button" class="linkbtn cp-line" data-f="${esc(x.family)}">${esc(FAMILY_NAMES[x.family] || x.family)}</button></td><td>${money0(x.revenue)}</td>${costs ? `<td>${x.cost ? money0(x.cost) : 'not costed'}</td><td>${x.cost ? (l < 0 ? '−' : '') + moneyK(Math.abs(l)) : ''}</td><td>${p != null ? ragPill(R, p, pcS(p), `data-lm="${esc(x.family)}"`, i) : ''}</td>` : ''}</tr>`; }).join('') || `<tr><td colspan="5">No priced lines in the last twelve months.</td></tr>`}</tbody></table></div>
+      <div class="cp-lines"><table><thead><tr><th>Line</th><th>Revenue</th>${costs ? '<th>Cost est.</th><th>Left est.</th><th>Margin</th>' : ''}</tr></thead><tbody>${rowsF.map((x, i) => { const l = x.revenue - x.cost, p = x.revenue > 0 && x.cost > 0 ? l / x.revenue : null; return `<tr><td><button type="button" class="linkbtn cp-line" data-f="${esc(x.family)}">${esc(FAMILY_NAMES[x.family] || x.family)}</button></td><td>${money0(x.revenue)}</td>${costs ? `<td>${x.cost ? money0(x.cost) : 'not costed'}</td><td>${x.cost ? (l < 0 ? '−' : '') + moneyK(Math.abs(l)) : ''}</td><td>${p != null ? ragPill(R, p, pcS(p), `data-lm="${esc(x.family)}"`, i) : ''}</td>` : ''}</tr>`;
+  // the review sheet (Theran, 14 November 2026): every fold opened, then the browser's print, so it can go into the
+  // meeting as a PDF or on paper; print styles in customer.css keep it to the figures and leave out the controls
+  const rv = main.querySelector('.cp-review');
+  if (rv) rv.addEventListener('click', () => {
+    main.querySelectorAll('details.cp-fold, details.fold').forEach(d => { d.open = true; d.dispatchEvent(new Event('toggle')); });
+    document.documentElement.classList.add('cp-print');
+    setTimeout(() => { window.print(); document.documentElement.classList.remove('cp-print'); }, 900);
+  }); }).join('') || `<tr><td colspan="5">No priced lines in the last twelve months.</td></tr>`}</tbody></table></div>
       ${F && Math.abs(F.noLine) >= 1 ? `<p class="src">${money0(Math.abs(F.noLine))} invoiced with no line in this period: work and its invoice fall in different months, or a charge with no cost behind it.</p>` : ''}
       ${served ? `<p class="cp-served">${esc(served)}</p>` : ''}
     </section>
@@ -294,4 +304,30 @@ function drawWhere(el, d, Z, A) {
   const draw = () => { const w = card.querySelector('.rm-wrap'); if (w && w.isConnected) { w.innerHTML = placesSvg(placed, { width: Math.max(280, Math.min(900, w.clientWidth || 560)), base: basemapNow(), label: title, shading: bookShading(A, Z) }); playMap(w.querySelector('svg'), { vans: 5 }); } };
   draw();
   if (!basemapNow()) loadBasemap().then(b => { if (b) draw(); });   // redrawn once the outline arrives
+}
+
+// Shred bins, for Trisha (14 November 2026): how many, how many a visit, what a bin costs and why, against the book.
+// From the account's own route days (routecost.js, R.routeFor): its share of each day by minutes, the drive and the
+// time on site, and the plant per pound. The book: every account with a dozen or more bin services on route days.
+function binStrip(R, id, acct, costs) {
+  const own = R.routeFor && R.routeFor(id), all = R.routeCostsNow ? Object.values(R.routeCostsNow().accounts || {}) : [];
+  if (!own || !(own.services > 0) || !acct || !acct.bins) return '';
+  const med = a => { const v = a.filter(x => Number.isFinite(x)).sort((x, y) => x - y); return v.length ? v[v.length >> 1] : null; };
+  const book = all.filter(a => a.services >= 12 && a.days > 0);
+  const perVisit = own.services / own.days, bookPerVisit = med(book.map(a => a.services / a.days));
+  const plant = R.RATES.shredPlant ? (own.pounds || 0) * R.RATES.shredPlant.v : 0;
+  const perBin = (own.cost + plant) / own.services, bookPerBin = med(book.map(a => (a.cost + (a.pounds || 0) * (R.RATES.shredPlant ? R.RATES.shredPlant.v : 0)) / a.services));
+  const drive = own.cost > 0 ? own.travel / own.cost : null, detour = own.stops ? own.detour / own.stops : null, bookDetour = med(book.map(a => a.stops ? a.detour / a.stops : NaN));
+  // why, from the parts: fewer bins a visit spreads a stop over fewer bins; a longer detour adds drive
+  const why = [];
+  if (bookPerVisit && perVisit < bookPerVisit * 0.8) why.push(`${Fmt.fixed(perVisit, 1)} bins a visit against the book's ${Fmt.fixed(bookPerVisit, 1)}, so each stop is shared by fewer bins`);
+  if (bookPerVisit && perVisit > bookPerVisit * 1.2) why.push(`${Fmt.fixed(perVisit, 1)} bins a visit, more than the book's ${Fmt.fixed(bookPerVisit, 1)}, so each stop goes further`);
+  if (detour != null && bookDetour && detour > bookDetour * 1.25) why.push(`its stops sit ${Fmt.fixed(detour, 1)} road miles off the route against the book's ${Fmt.fixed(bookDetour, 1)}: location`);
+  if (drive != null && drive >= 0.6) why.push(`${Fmt.pct(drive)} of its route time is driving`);
+  const word = !bookPerBin ? '' : perBin > bookPerBin * 1.15 ? 'above' : perBin < bookPerBin * 0.85 ? 'below' : 'about level with';
+  const fig = (l, v, sub) => `<li><span>${esc(l)}</span><b>${v}</b>${sub ? `<small>${sub}</small>` : ''}</li>`;
+  return `<section class="h2-card cp-bins" data-in><div class="h2-ch"><h2>Shred bins: ${Fmt.grouped(own.services)} services on ${Fmt.grouped(own.days)} route days</h2><small>twelve months, on its own route days</small></div>
+    <ul class="h2-stats">${fig('Bins a visit', Fmt.fixed(perVisit, 1), bookPerVisit ? `book ${Fmt.fixed(bookPerVisit, 1)}` : '')}${costs ? fig('Cost a bin, est.', Fmt.money(perBin, { dp: 2 }), bookPerBin ? `book ${Fmt.money(bookPerBin, { dp: 2 })}` : '') : ''}${drive != null ? fig('Driving share', Fmt.pct(drive), '') : ''}${detour != null ? fig('Off the route', `${Fmt.fixed(detour, 1)} mi`, bookDetour ? `book ${Fmt.fixed(bookDetour, 1)} mi` : '') : ''}</ul>
+    ${costs && bookPerBin ? `<p class="p2-lede">A bin costs about ${Fmt.money(perBin, { dp: 2 })} est., ${word} the book's ${Fmt.money(bookPerBin, { dp: 2 })}${why.length ? `: ${esc(why.join('; '))}.` : '.'}${perVisit < (bookPerVisit || 0) ? ' Fewer, fuller visits or a passing route would bring it down: see its area in <a href="#activity?lens=cost">Operations ›</a>' : ''}</p>` : ''}
+  </section>`;
 }

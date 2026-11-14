@@ -154,7 +154,7 @@ export function density(months) {
 // A year of each far area's stops as its route days share them out (routecost.js), and what the work there billed: each
 // sub-account's lines at this postcode (arearevenue query), plus any with no postcode shared by the account's services here.
 // Plant pounds from S5 where the account has it (data rule 6), else what Veri-Shred recorded at the stops.
-export function costlyAreas({ rc, AR, M, Z, R }, { minVisits = MIN_VISITS, farMiles = FAR_MILES, signed = false } = {}) {
+export function costlyAreas({ rc, AR, M, Z, R }, { minVisits = MIN_VISITS, farMiles = FAR_MILES, signed = false, room = null, fuel = null } = {}) {
   const list = (rc && rc.dayList) || [];
   const areas = new Map(), acct = new Map();
   let bookTravel = 0, bookVisits = 0;
@@ -207,7 +207,7 @@ export function costlyAreas({ rc, AR, M, Z, R }, { minVisits = MIN_VISITS, farMi
     area.losing = left < 0;
     area.signed = signed;
     area.range = signed ? null : { lo: revenue - a.cost * 1.2 - plant, hi: revenue - a.cost * 0.8 - plant };
-    area.options = moves(area, a, { R, Z, history, bookPerVisit });
+    area.options = moves(area, a, { R, Z, history, bookPerVisit, room, fuel });
     area.best = area.band.cls === 'g' || !area.options.length ? null : area.options[0];
     out.push(area);
   }
@@ -216,7 +216,7 @@ export function costlyAreas({ rc, AR, M, Z, R }, { minVisits = MIN_VISITS, farMi
 
 // What would improve an area, each sized on its own from the cost model, never added together: a route change (book
 // it on a passing route's days, or fewer, fuller visits), a trip fee a visit, or a reprice (Theran, 14 November 2026).
-function moves(area, a, { R, Z, history, bookPerVisit }) {
+function moves(area, a, { R, Z, history, bookPerVisit, room = null, fuel = null }) {
   const stopMin = R.SETTINGS.stopMin, perMinute = (area.driveMin + area.dropMin) > 0 ? area.cost / (area.driveMin + area.dropMin) : 0;
   const out = [];
   // ride: on each of its days, another route within reach and days of it takes the stop for the extra miles
@@ -230,7 +230,8 @@ function moves(area, a, { R, Z, history, bookPerVisit }) {
     if (best && best.saving > 0) { ride += best.saving; carried++; riders.set(best.route, (riders.get(best.route) || 0) + 1); }
   }
   const rider = [...riders].sort((x, y) => y[1] - x[1])[0];
-  if (rider && ride > 0) out.push({ key: 'ride', title: `Book it on ${routeWord(rider[0])}'s days`, say: `On ${carried} of its ${a.days.length} days another route passed within two miles within ${NEAR_DAYS} days, ${routeWord(rider[0])} most often.`, saving: ride, route: rider[0] });
+  const roomy = r => !room || !room.has(r) || room.get(r) > 0;
+  if (rider && ride > 0 && roomy(rider[0])) out.push({ key: 'ride', title: `Book it on ${routeWord(rider[0])}'s days`, say: `On ${carried} of its ${a.days.length} days another route passed within two miles within ${NEAR_DAYS} days, ${routeWord(rider[0])} most often.`, saving: ride, route: rider[0] });
   const fewer = area.travel / 2 + area.stops / 2 * stopMin * perMinute;
   if (fewer > 0) out.push({ key: 'fewer', title: 'Fewer, fuller visits', say: `${Fmt.count(area.visits)} visits a year become ${Fmt.count(Math.ceil(area.visits / 2))}; the same services, more on each.`, saving: fewer });
   // a trip fee a visit: enough to stop it losing money, else what its drive costs above the book's average visit
@@ -240,7 +241,54 @@ function moves(area, a, { R, Z, history, bookPerVisit }) {
   if (fee > 0) out.push({ key: 'charge', title: `A trip fee of ${Fmt.money(Math.ceil(fee))} a visit`, say: `${toEven > 0 ? 'Brings the area to break even' : `Covers what its drive costs above the book's ${Fmt.money(bookPerVisit)} a visit`}: ${Fmt.count(area.visits)} visits a year. Who pays it: ${payers}.`, saving: Math.ceil(fee) * area.visits });
   // reprice the work there: the share on its service revenue that brings it to break even
   if (area.left < 0 && area.revenue > 0) { const up = -area.left / area.revenue; out.push({ key: 'reprice', title: `Reprice the work there: +${Fmt.pct(up)}`, say: `Raising ${area.who.length === 1 ? 'its' : 'their'} service prices ${Fmt.pct(up)} covers the loss on ${Fmt.money(area.revenue, { short: true })} of revenue a year. Largest there: ${payers}.`, saving: -area.left }); }
+  // a fuel surcharge at the book's rate on the area's service: what the trucks' running cost would ask of it
+  if (fuel && fuel.pct > 0 && area.revenue > 0) out.push({ key: 'fuel', title: `A fuel surcharge of ${Fmt.pct(fuel.pct)}`, say: `On service invoices here, the share that covers the trucks' running cost across the book (${Fmt.money(fuel.vehicles, { short: true })} a year on ${Fmt.money(fuel.service, { short: true })} of service). Best charged book-wide, not only here.`, saving: fuel.pct * area.revenue });
   return out.filter(o => o.saving > 0).sort((x, y) => y.saving - x.saving);
+}
+
+// ── room on the routes (Theran, 14 November 2026: trucks are limited) ──
+// From the route history: the fleet is the most routes that ran on one day in the last twelve months. Each route's
+// typical day is its median stops, its busiest the 90th percentile; the room on a typical day is the gap between them.
+// The weekday with most room is the one whose average is furthest below that busiest day. Where it goes most: the
+// postcodes it visits most, so "sell here" points at areas a route with room already passes.
+//   routeRoom(RH, { months = 12 }) → { fleet, fleetDays, routes: [{ route, days, typical, busiest, room, roomDay, areas }] }
+export function routeRoom(RH, { months = 12 } = {}) {
+  if (!RH || !RH.length) return null;
+  const last = RH.reduce((m, r) => r.date > m ? r.date : m, ''), from = new Date(Date.parse(last + 'T00:00:00Z') - months * 30.44 * 864e5).toISOString().slice(0, 10);
+  const day = new Map(), byRoute = new Map(), areas = new Map();
+  for (const r of RH) {
+    if (r.date < from || !r.route) continue;
+    const k = r.date + '|' + r.route, d = day.get(k) || day.set(k, { date: r.date, route: r.route, stops: new Set() }).get(k);
+    d.stops.add(r.stop);
+    if (r.postcode) { const a = areas.get(r.route) || areas.set(r.route, new Map()).get(r.route); a.set(r.postcode, (a.get(r.postcode) || 0) + 1); }
+  }
+  const perDate = new Map();
+  for (const d of day.values()) {
+    perDate.set(d.date, (perDate.get(d.date) || 0) + 1);
+    (byRoute.get(d.route) || byRoute.set(d.route, []).get(d.route)).push({ date: d.date, n: d.stops.size });
+  }
+  const q = (a, p) => { const v = a.slice().sort((x, y) => x - y); return v.length ? v[Math.min(v.length - 1, Math.floor(p * (v.length - 1) + 0.5))] : 0; };
+  const fleet = Math.max(0, ...perDate.values()), fleetDays = [...perDate.values()].filter(n => n === fleet).length;
+  const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const routes = [...byRoute].filter(([, ds]) => ds.length >= 10).map(([route, ds]) => {
+    const ns = ds.map(d => d.n), typical = q(ns, 0.5), busiest = q(ns, 0.9);
+    const wd = new Map();
+    for (const d of ds) { const w = new Date(d.date + 'T00:00:00Z').getUTCDay(), x = wd.get(w) || wd.set(w, []).get(w); x.push(d.n); }
+    const roomBy = [...wd].filter(([, a]) => a.length >= 4).map(([w, a]) => ({ day: WD[w], room: busiest - a.reduce((t, v) => t + v, 0) / a.length }));
+    roomBy.sort((x, y) => y.room - x.room);
+    const top = [...(areas.get(route) || new Map())].sort((x, y) => y[1] - x[1]).slice(0, 4).map(([pc]) => pc);
+    return { route, days: ds.length, typical, busiest, room: Math.max(0, busiest - typical), roomDay: roomBy[0] && roomBy[0].room >= 1 ? roomBy[0].day : null, areas: top };
+  }).sort((a, b) => b.room - a.room || b.days - a.days);
+  return { fleet, fleetDays, from, to: last, routes };
+}
+
+// ── a fuel surcharge (Theran, 14 November 2026: the 4th fix) ──
+// Sized to cover the trucks' running cost: the vehicle pool (7011 Auto: fuel, repairs, and whatever else the ledger
+// books there; the Settings upload can narrow it to fuel) as a share of the service revenue the trucks earn. est.
+//   fuelCover({ vehicles, service }) → { pct, vehicles, service } | null
+export function fuelCover({ vehicles, service }) {
+  if (!(vehicles > 0) || !(service > 0)) return null;
+  return { pct: vehicles / service, vehicles, service };
 }
 
 // ── the three points ──

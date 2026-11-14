@@ -104,15 +104,22 @@ const NO_COST = ({ costPerService, ...rest }) => rest;
 router.get('/operations', async (req, res) => {
   try {
     const [D, L] = await Promise.all([data(), load()]), O = L.opsdata, st = stamp(D), RH = D.RH || [];
-    if (opsBase.stamp !== st + require('./settings').routeSigned()) opsBase = { stamp: st + require('./settings').routeSigned(), periods: new Map(), costly: O.costlyAreas({ rc: D.RC, AR: D.AR, M: D.M, Z: D.Z, R: D.R }, { signed: require('./settings').routeSigned() }), months: O.density(O.opsMonths(RH, D.R)) };
+    if (opsBase.stamp !== st + require('./settings').routeSigned()) {
+      // room on the routes and the fuel cover, read once with the rest (Theran, 14 November 2026)
+      const room = O.routeRoom(RH), roomMap = room ? new Map(room.routes.map(r => [r.route, r.room])) : null;
+      const am = D.R.activeModel(), veh = am.model.pools.vehicles ? am.model.pools.vehicles.amount * 12 / am.model.gl.months : 0;
+      const svc = (D.P.monthly || []).slice(-12).reduce((t, m) => t + (m.service || 0) - (m.citadel || 0), 0);
+      const fuel = O.fuelCover({ vehicles: veh, service: svc });
+      opsBase = { stamp: st + require('./settings').routeSigned(), periods: new Map(), room, fuel, costly: O.costlyAreas({ rc: D.RC, AR: D.AR, M: D.M, Z: D.Z, R: D.R }, { signed: require('./settings').routeSigned(), room: roomMap, fuel }), months: O.density(O.opsMonths(RH, D.R)) };
+    }
     const date = /^\d{4}-\d{2}-\d{2}$/.test(req.query.date || '') ? req.query.date : null, P = O.periods(D.A.latestDone, date), key = P[req.query.p] ? req.query.p : 'q', ck = key + '|' + (key === 'day' || key === 'week' ? date : '');
     if (!opsBase.periods.has(ck)) opsBase.periods.set(ck, O.opsPeriod(RH, D.Z, D.R, P[key]));
     const V = opsBase.periods.get(ck), costs = seesCosts(req);
     const tabs = Object.values(P).map(p => ({ key: p.key, label: p.label, compare: p.compare, why: p.why || null }));
-    if (costs) return send(req, res, { ...V, tabs, costly: opsBase.costly, density: opsBase.months, points: O.opsPoints(V, opsBase.costly), costs: true });
+    if (costs) return send(req, res, { ...V, tabs, costly: opsBase.costly, density: opsBase.months, room: opsBase.room, fuel: opsBase.fuel, points: O.opsPoints(V, opsBase.costly), costs: true });
     const costly = opsBase.costly.map(a => ({ postcode: a.postcode, miles: a.miles, visits: a.visits, services: a.services, who: a.who }));
     const density = { ...opsBase.months, rows: opsBase.months.rows.map(({ cost, before, ...r }) => ({ ...r, before: before ? { perDay: before.perDay } : null })) };
-    send(req, res, { ...V, tabs, now: NO_COST(V.now), prev: V.prev && NO_COST(V.prev), year: V.year && NO_COST(V.year), costly, density, points: O.opsPoints(V, null), costs: false });
+    send(req, res, { ...V, tabs, room: opsBase.room, now: NO_COST(V.now), prev: V.prev && NO_COST(V.prev), year: V.year && NO_COST(V.year), costly, density, points: O.opsPoints(V, null), costs: false });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

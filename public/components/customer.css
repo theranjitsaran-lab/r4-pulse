@@ -102,3 +102,18 @@
 .cp .cp-opps { margin-bottom: 0; }
 .cp details.cp-fold { margin: 0; background: var(--surface); border-color: var(--card-ring); box-shadow: var(--shadow-card); }
 @media (min-width: 1000px) { .cp-two { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); } }
+.cp-bins .h2-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.cp-bins .h2-stats small { display: block; font-size: var(--fs-tiny); color: var(--ink-4); }
+.cp-bins .p2-lede { font-size: var(--fs-sm); margin-top: var(--sp-2); }
+@media (max-width: 700px) { .cp-bins .h2-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.cp-review { margin-left: auto; }
+/* The review sheet: the customer page printed for a meeting. Controls, navigation and the map stay off the paper. */
+@media print {
+  .mast, nav, #nav, .stamp, .ask, .pop, .cp-review, .crumb, .tags button, .h2-chev, .lit-by, .sf-tabs, footer, .tour, .cp-map, #cp-map, svg.hm-svg { display: none !important; }
+  body, .cp, .h2 { background: #fff !important; }
+  .h2-card { box-shadow: none !important; border: 1px solid #ccc !important; break-inside: avoid; margin-bottom: 8px !important; }
+  [data-in] { opacity: 1 !important; transform: none !important; }
+  details > summary { list-style: none; }
+  .cp { font-size: 11px; }
+  a { color: inherit !important; text-decoration: none !important; }
+}

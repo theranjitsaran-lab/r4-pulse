@@ -325,7 +325,8 @@ export function monthBilled(D, month) {
     return { level1: a.level1, customer: a.customer, storage: st, work: sv, total: st + sv, prevAt: then, change: ch(st + sv, then) };
   }).filter(r => Math.abs(r.total) >= 0.5).sort((x, y) => y.total - x.total || x.level1 - y.level1);
   const storage = sum(rows, r => r.storage), work = sum(rows, r => r.work), total = storage + work;
-  const prevAt = sum(rows, r => r.prevAt || 0);
+  // the month before over every account, those that billed then and not now included
+  const prevAt = j >= 0 ? sum(AM.accounts, a => (a.storage[j] || 0) + (a.level1 === CIT ? 0 : a.service[j] || 0)) : null;
   const fam = (mm, k) => sum((AL && AL.rows || []).filter(r => r.month === mm && r.family === k && r.level1 !== CIT), r => r.revenue);
   const byLine = [{ key: 'storage', name: LINE_NAMES.storage, v: storage, prevAt: j >= 0 ? sum(AM.accounts, a => a.storage[j] || 0) : null }]
     .concat(SERVICE.map(k => ({ key: k, name: LINE_NAMES[k], v: fam(m, k), prevAt: prevMonth ? fam(prevMonth, k) : null })));

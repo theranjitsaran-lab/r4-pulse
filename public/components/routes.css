@@ -201,3 +201,6 @@
 .ops-pick input { margin-top: 4px; }
 .ops-note { display: grid; gap: var(--sp-1); width: 100%; font-size: var(--fs-label); color: var(--ink-3); }
 .ops-note textarea { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); resize: vertical; }
+.op-room-t { width: 100%; }
+.op-room-t td small { display: block; color: var(--ink-4); font-size: var(--fs-tiny); }
+@media (max-width: 700px) { .op-room-t th:nth-child(6), .op-room-t td:nth-child(6), .op-room-t th:nth-child(3), .op-room-t td:nth-child(3) { display: none; } }

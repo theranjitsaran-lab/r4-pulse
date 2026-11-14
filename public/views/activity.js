@@ -97,6 +97,7 @@ export async function render(main, A, params) {
     </div>
     ${phoneFold('how dense the work is', '<section class="h2-card" data-tour="o-dense" data-in id="op-dense"></section>')}
     <section class="h2-card" data-tour="o-costly" data-in id="op-costly"></section>
+    <section class="h2-card" data-in id="op-room"></section>
     ${phoneFold('distance from the yard', '<section class="h2-card" data-tour="o-bands" data-in id="op-bands"></section>')}
   </div>`;
   const $ = id => main.querySelector('#' + id), root = main.querySelector('.ops');
@@ -378,6 +379,20 @@ export async function render(main, A, params) {
   }
 
   // ── far areas ──
+  // Room on the routes (Theran, 14 November 2026: trucks are limited). Where a route has room, and the areas it already
+  // passes: where to sell so the work rides a truck that is going anyway.
+  function drawRoom() {
+    const el = $('op-room'), R0 = V.room;
+    if (!el) return;
+    if (!R0 || !R0.routes.length) { el.innerHTML = ''; return; }
+    const rows = R0.routes.slice(0, 10);
+    el.innerHTML = `<div class="h2-ch"><h2>Room on the routes: up to ${R0.fleet} trucks a day</h2><small>Stops a route day, twelve months. Room is how far a typical day sits below its busiest. Sell where a route with room already goes.</small></div>
+      <table class="p2-t op-room-t"><thead><tr><th class="tl">Route</th><th>Typical day</th><th>Busiest</th><th>Room</th><th class="tl">Most room on</th><th class="tl">Areas it passes most</th></tr></thead>
+      <tbody>${rows.map(x => `<tr><td class="tl"><b>${esc(titleCase(x.route))}</b><small>${Fmt.grouped(x.days)} days</small></td><td>${x.typical}</td><td>${x.busiest}</td><td><b>${x.room ? '+' + x.room : '—'}</b></td><td class="tl">${esc(x.roomDay || '—')}</td><td class="tl">${x.areas.map(a => esc(a)).join(' · ')}</td></tr>`).join('')}</tbody></table>
+      ${V.fuel ? `<p class="src">Fuel: the trucks' running cost (7011 Auto, ${moneyK(V.fuel.vehicles)} a year est.) is ${Fmt.pct(V.fuel.pct)} of service revenue. A fuel surcharge at that rate on service invoices would cover it; each costly area below shows what it would bring there.</p>` : ''}
+      <p class="src">The fleet is the most routes that ran on one day in the year (${R0.fleetDays} day${R0.fleetDays === 1 ? '' : 's'}). From Veri-Shred done orders, ${esc(R0.from)} to ${esc(R0.to)}.</p>`;
+  }
+
   function drawCostly() {
     const el = $('op-costly'), list = V.costly, costs = V.costs;
     el.innerHTML = `<div class="h2-ch"><h2>${costs ? `Costly to serve: ${list.filter(a => a.band.cls === 'r').length} of ${list.length} far areas are thin` : `${list.length} far areas visited most`}</h2><small>${costs ? 'Highest route cost first. Tap one for the options.' : 'Twelve months, most visits first.'}</small></div><div id="op-costly-t"></div>
@@ -446,7 +461,7 @@ export async function render(main, A, params) {
   function drawAll(animate) {
     drawControls(); drawKpis();
     if (st.p === 'day') drawDay(); else drawRoutes();
-    drawMap(animate); drawDense(); drawCostly(); drawBands();
+    drawMap(animate); drawDense(); drawCostly(); drawRoom(); drawBands();
     keepLink();
   }
   async function load(animate = true) {
