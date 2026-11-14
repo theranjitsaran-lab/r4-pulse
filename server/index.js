@@ -29,9 +29,9 @@ app.get('/health/data', async (req, res) => {
       (SELECT max(invdate)::date FROM invoices)::text AS posted_invoice,
       (SELECT max(NULLIF(tsaupdate, '')) FROM vs_service_orders) AS updated,
       (SELECT max(month)::date FROM v_monthly_storage_service)::text AS kpi_month`));
-    const age = Math.round((Date.parse(d.today) - Date.parse(d.done_work)) / 864e5);
     const reasons = [];
-    if (!(age <= STALE_DAYS)) reasons.push(`done work last on ${d.done_work}, ${age} days ago`);
+    if (!d.done_work) reasons.push('no Veri-Shred service orders: a push is loading, or the last one failed');
+    else { const age = Math.round((Date.parse(d.today) - Date.parse(d.done_work)) / 864e5); if (!(age <= STALE_DAYS)) reasons.push(`done work last on ${d.done_work}, ${age} days ago`); }
     if (d.kpi_month < d.today.slice(0, 8) + '01') reasons.push(`latest posted month is ${d.kpi_month}`);
     res.json({ ...d, stale: reasons.length > 0, reasons });
   } catch (e) { res.status(503).json({ stale: true, reasons: [e.message] }); }
@@ -69,21 +69,34 @@ async function warm() {
   try { await require('./screendata').data(); } catch (e) { console.warn('warm route costs:', e.message); }   // costs the route days once
 }
 // The monthly figures read the views live (14 November 2026), so new data needs no rebuild: read everything, then swap.
-let stamp = null;
+// Never while a push is half-way: the screens keep their last figures and the check comes back in two minutes
+// (server/pushstate.js). Returns true when the tables are whole.
+const { STATE_SQL, midPush, stampOf } = require('./pushstate');
+let stamp = null, retry = null;
 async function watch() {
   try {
-    const [r] = await query(`SELECT (SELECT max(NULLIF(date, '')) FROM vs_service_orders) AS a, (SELECT max(invdate)::text FROM invoices) AS b,
-      (SELECT count(*) FROM invoices_current)::text AS d, (SELECT max(wodate)::text FROM priced_lines_current) AS e`);
-    const now = JSON.stringify(r);
+    const [r] = await query(STATE_SQL);
+    const why = midPush(r);
+    if (why) {
+      console.log(`data mid-push (${why}): keeping the last figures, checking again in two minutes`);
+      if (!retry) retry = setTimeout(() => { retry = null; watch(); }, 2 * 60 * 1000);
+      return false;
+    }
+    const now = stampOf(r);
     if (stamp && now !== stamp) { console.log('data moved: reading it, then swapping'); await replaceCache(WARM.filter(n => queries[n]).map(n => [n, queries[n]])); await warm(); }
     stamp = now;
-  } catch (e) { console.warn('freshness stamp:', e.message); }
+    return true;
+  } catch (e) { console.warn('freshness stamp:', e.message); return true; }
+}
+// at boot: wait for whole tables before the first read, up to the five minutes /health allows
+async function whole() {
+  for (let i = 0; i < 9; i++) { if (await watch()) return; await new Promise(ok => setTimeout(ok, 30 * 1000)); }
 }
 
 (USE_FIXTURES ? Promise.resolve() : rates.loadFromDb(query)).then(() => require('./settings').load()).then(() => {
   if (!USE_FIXTURES) {
     const ready = () => { warmed = true; };
-    watch().then(warm).then(ready, ready);
+    whole().then(warm).then(ready, ready);
     setTimeout(ready, 5 * 60 * 1000);   // a slow database must not stop a deploy going live
     setInterval(watch, 10 * 60 * 1000);
   }
