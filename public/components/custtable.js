@@ -1,6 +1,6 @@
 // The customer table: each account's last posted month against the month before and the same month
 // last year, its year to date against last year's, and this month so far.
-//   Posted months are exact (kpi.customer_monthly, invoice date, Citadel apart).
+//   Posted months are exact (v_customer_monthly, invoice date, Citadel apart).
 //   This month so far is modelled est.: VCK prices work only at the month-end run, so it is the
 //   account's done services this month (Veri-Shred) × its own value per done service in the weeks
 //   before (priced work ÷ done services, same days), against its done services at the same working

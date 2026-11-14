@@ -13,11 +13,9 @@ in the Render dashboard only. `render.yaml` holds everything that isn't a secret
    changes. Without them the service fails at boot ("cost model did not load"), and Render
    keeps the previous version running.
 2. **`app.calls_log` exists:** `sql/app_schema.sql`.
-3. **The `kpi` views exist:** `npm run kpi:rebuild` with the admin login, once, and again only after a
-   change to `sql/views/*.sql`. It creates the views and the two summary tables and grants the app login
-   the right to refill their rows. From then on Pulse refills `kpi.monthly` and `kpi.customer_monthly`
-   itself whenever new data arrives (`server/kpi_refresh.js`, 12 November 2026), so no rebuild task runs
-   anywhere and the admin login never leaves the machine it is on.
+3. **The views exist:** `npm run kpi:rebuild` with the admin login creates `sql/views/*.sql`. It is needed
+   only when one of those files changes. The screens read the views live (14 November 2026), so new data
+   shows as soon as it is pushed: nothing is rebuilt or refreshed after a push, and no rebuild task runs anywhere.
 
 ## Steps (Theran, on the PC, in the repo folder)
 
@@ -85,7 +83,7 @@ It sleeps after 15 idle minutes, so the first load takes about 30 seconds.
 | `R4_Daily_Push` | 06:00 | VCK → DigitalOcean; logs to `push_log.txt` |
 | `R4_Verishred_Push` | 06:30 | Veri-Shred → DigitalOcean; logs to `vs_push_log.txt` |
 
-Pulse refills the summary tables itself within ten minutes of a push landing (`server/kpi_refresh.js`): look for `kpi refreshed` in the Render logs. `R4_KPI_Rebuild` is no longer needed; if it was installed, it does no harm.
+Pulse picks up a push within ten minutes by itself: the screens read the views live. `R4_KPI_Rebuild` is not needed; if it was installed, it does no harm.
 
 - Both run as `tsaran`, LogonType Interactive, so they fire only while that session exists.
   **Close the Remote Desktop with the X (disconnect). Never sign out.** A reboot stops them until

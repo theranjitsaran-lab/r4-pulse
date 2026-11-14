@@ -138,7 +138,7 @@ router.get('/opportunities', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Numbers: core against $1.0M by month (kpi.monthly), the EBITDA bridge from QuickBooks (model.gl_month,
+// Numbers: core against $1.0M by month (v_kpi_industry), the EBITDA bridge from QuickBooks (model.gl_month,
 // components/gl.js) when it has been loaded, and margin by line of business (components/margin.js).
 let numBase = null;
 router.get('/numbers', async (req, res) => {

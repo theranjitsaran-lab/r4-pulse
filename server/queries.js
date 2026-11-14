@@ -2,18 +2,18 @@
 // rates as invoiced, never a cost. Costs are built from these volumes by model/rates.js, in the
 // page, so Pricing and Margin cannot disagree and no cost number lives here.
 //
-// "Last twelve months" is the twelve posted months to the latest month in kpi.monthly, so the
-// screens roll forward as runs post. Activity reads Veri-Shred up to the latest push.
+// "Last twelve months" is the twelve posted months to the latest posted month, read live from the
+// views (never a copy that needs refreshing, 14 November 2026), so the screens roll forward as runs post. Activity reads Veri-Shred up to the latest push.
 // Every numeric column is cast in SQL: pg returns numeric as text, and custno-like text must
 // never be coerced. Every ORDER BY ends on a unique key, so a refresh with unchanged data writes
 // identical fixtures and a diff shows only real changes.
 'use strict';
 const { query } = require('./db');
 
-// The twelve posted months to the latest one in kpi.monthly.
+// The twelve posted months to the latest posted one.
 const BOUNDS = `b AS (SELECT (max(month) - interval '11 months')::date AS f,
                              (max(month) + interval '1 month')::date AS t,
-                             max(month) AS latest FROM kpi.monthly)`;
+                             max(month) AS latest FROM v_monthly_storage_service)`;
 
 // An account's name is its level-1 customer row. col must be table-qualified (r.level1): a bare
 // level1 resolves to the customer table's own column and names every account the same.
@@ -47,32 +47,31 @@ async function pulse() {
            revenue_per_sqft::float, utilisation_pct::float, perm_withdrawal_fees::float, route_days::float,
            stops_per_route_day::float, revenue_per_stop::float, revenue_per_route_hour::float, route_day_margin::float,
            pounds_per_route_day::float, pounds_exec_default_pct::float
-    FROM kpi.monthly ORDER BY month`);
-  // months posted since kpi.monthly was last rebuilt, straight from the invoices view
-  const posted = await query(`
-    SELECT month::text, storage::float, service::float, citadel::float, core::float
-    FROM v_monthly_storage_service WHERE month > (SELECT max(month) FROM kpi.monthly) ORDER BY month`);
+    FROM v_kpi_industry ORDER BY month`);
+  // read live from the views (14 November 2026), so no posted month is ever missing from monthly;
+  // billNow (components/levers.js) still accepts P.posted, always empty now
+  const posted = [];
   const currentRun = await query(`
     SELECT part, storage::float, service::float, citadel::float, invoices::int,
            earliest_work_date::text, latest_work_date::text, earliest_invdate::text, latest_invdate::text
     FROM v_current_run ORDER BY part`);
   const [customers] = await query(`
-    WITH ${BOUNDS}
-    SELECT (SELECT count(DISTINCT level1) FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t AND storage > 0)::int AS storage_ltm,
-           (SELECT count(DISTINCT level1) FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t AND service > 0)::int AS service_ltm,
-           (SELECT count(DISTINCT level1) FROM kpi.customer_monthly, b WHERE month >= b.f - interval '12 months' AND month < b.f AND storage > 0)::int AS storage_prior,
-           (SELECT count(DISTINCT level1) FROM kpi.customer_monthly, b WHERE month >= b.f - interval '12 months' AND month < b.f AND service > 0)::int AS service_prior,
+    WITH ${BOUNDS}, cmv AS MATERIALIZED (SELECT level1, month, storage, service FROM v_customer_monthly)
+    SELECT (SELECT count(DISTINCT level1) FROM cmv, b WHERE month >= b.f AND month < b.t AND storage > 0)::int AS storage_ltm,
+           (SELECT count(DISTINCT level1) FROM cmv, b WHERE month >= b.f AND month < b.t AND service > 0)::int AS service_ltm,
+           (SELECT count(DISTINCT level1) FROM cmv, b WHERE month >= b.f - interval '12 months' AND month < b.f AND storage > 0)::int AS storage_prior,
+           (SELECT count(DISTINCT level1) FROM cmv, b WHERE month >= b.f - interval '12 months' AND month < b.f AND service > 0)::int AS service_prior,
            (SELECT f::text FROM b) AS ltm_from, (SELECT latest::text FROM b) AS ltm_to`);
   const downTwoMonths = await query(`
     WITH ${BOUNDS}
     SELECT cm.level1, ${NAME('cm.level1')} AS customer, cm.month::text, cm.storage::float, cm.service::float,
            cm.revenue::float, cm.trailing6_mean::float, cm.deviation_pct::float
-    FROM kpi.customer_monthly cm, b
+    FROM v_customer_monthly cm, b
     WHERE cm.month = b.latest AND cm.flag_down_2m
     ORDER BY cm.revenue - cm.trailing6_mean, cm.level1 LIMIT 25`);
   const concentration = await query(`
     WITH ${BOUNDS},
-    r AS (SELECT level1, sum(revenue) AS ltm FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t GROUP BY level1)
+    r AS (SELECT level1, sum(revenue) AS ltm FROM v_customer_monthly, b WHERE month >= b.f AND month < b.t GROUP BY level1)
     SELECT r.level1, ${NAME('r.level1')} AS customer, r.ltm::float, (r.ltm / sum(r.ltm) OVER ())::float AS share
     FROM r WHERE r.ltm > 0 ORDER BY r.ltm DESC, r.level1 LIMIT 50`);
   // Pace: the value of work done each day, by work date, over the last three calendar months to
@@ -92,13 +91,13 @@ async function pulse() {
     WHERE date > (SELECT max(date) FROM v_route_day WHERE services_done > 0) - interval '15 months'
       AND date <= (SELECT max(date) FROM v_route_day WHERE services_done > 0)
     GROUP BY 1 ORDER BY 1`);
-  // the tie-out: straight from VCK's invoices, not kpi.monthly, so a month that moves after it was built shows
+  // the tie-out: straight from VCK's invoices, so a month that moves after the figures were read shows
   const tieout = await query(`
     SELECT date_trunc('month', COALESCE(invdate, billdate))::date::text AS month, count(*)::int AS invoices,
            sum(ret_tot)::float AS storage, sum(ser_tot)::float AS service,
            coalesce(sum(ser_tot) FILTER (WHERE custno = '00870'), 0)::float AS citadel,
            max(COALESCE(invdate, billdate))::date::text AS latest
-    FROM invoices WHERE COALESCE(invdate, billdate) >= (SELECT max(month) FROM kpi.monthly) - interval '3 months'
+    FROM invoices WHERE COALESCE(invdate, billdate) >= (SELECT max(month) FROM v_monthly_storage_service) - interval '3 months'
     GROUP BY 1 ORDER BY 1`);
   return { monthly, posted, currentRun, customers, downTwoMonths, concentration, pace, dailyDone, tieout };
 }
@@ -110,14 +109,15 @@ async function pulse() {
 async function customers() {
   const rows = await query(`
     WITH ${BOUNDS},
-    ltm AS (SELECT level1, sum(revenue) AS ltm FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t GROUP BY level1),
+    cmv AS MATERIALIZED (SELECT * FROM v_customer_monthly),   -- the view, read once
+    ltm AS (SELECT level1, sum(revenue) AS ltm FROM cmv, b WHERE month >= b.f AND month < b.t GROUP BY level1),
     pick AS (SELECT level1 FROM (SELECT level1 FROM ltm WHERE ltm > 0 ORDER BY ltm DESC, level1 LIMIT 300) top
-             UNION SELECT cm.level1 FROM kpi.customer_monthly cm, b WHERE cm.month = b.latest AND cm.flag_down_2m)
+             UNION SELECT cm.level1 FROM cmv cm, b WHERE cm.month = b.latest AND cm.flag_down_2m)
     SELECT cm.level1, cm.month::text, cm.storage::float, cm.service::float
-    FROM kpi.customer_monthly cm JOIN pick USING (level1), b
+    FROM cmv cm JOIN pick USING (level1), b
     WHERE cm.month > b.latest - interval '24 months' AND cm.month <= b.latest
     ORDER BY cm.level1, cm.month`);
-  const [{ latest }] = await query(`SELECT max(month)::text AS latest FROM kpi.monthly`);
+  const [{ latest }] = await query(`SELECT max(month)::text AS latest FROM v_monthly_storage_service`);
   const months = [];
   for (let i = 23; i >= 0; i--) {
     const d = new Date(latest + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() - i);
@@ -231,10 +231,11 @@ async function pricing() {
 async function calls() {
   return query(`
     WITH ${BOUNDS}, ${PL},
+    cmv AS MATERIALIZED (SELECT * FROM v_customer_monthly),   -- the view, read once
     latest AS (SELECT cm.level1, cm.revenue, cm.trailing6_mean, cm.deviation_pct, cm.flag_down_2m
-               FROM kpi.customer_monthly cm, b WHERE cm.month = b.latest),
+               FROM cmv cm, b WHERE cm.month = b.latest),
     ltm AS (SELECT level1, sum(storage) AS storage, sum(service) AS service, sum(revenue) AS revenue
-            FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t GROUP BY level1),
+            FROM cmv, b WHERE month >= b.f AND month < b.t GROUP BY level1),
     destruction AS (SELECT level1, sum(totamt) AS revenue FROM l WHERE servcode IN (SELECT servcode FROM servcode WHERE servtype IN ('F','S')) GROUP BY level1),
     rc AS (SELECT level1, max(last_changed) AS last_changed, min(month) AS first_month, max(month) AS last_month,
                   count(DISTINCT servcodeid) AS codes
@@ -340,12 +341,12 @@ async function margin() {
 // snapshot keeps the 50 largest accounts in fixtures/drill.json.
 async function customerDrill(level1) {
   const orders = await query(`
-    WITH b AS (SELECT (max(month) - interval '5 months')::date AS f, (max(month) + interval '1 month')::date AS t FROM kpi.monthly), ${PL}
+    WITH b AS (SELECT (max(month) - interval '5 months')::date AS f, (max(month) + interval '1 month')::date AS t FROM v_monthly_storage_service), ${PL}
     SELECT l.woid, min(l.d)::text AS date, count(*)::int AS lines, sum(l.totamt)::float AS revenue,
            json_agg(json_build_object('code', l.servcode, 'units', l.units::float, 'revenue', l.totamt::float) ORDER BY l.totamt DESC) AS items
     FROM l WHERE l.level1 = $1 GROUP BY l.woid ORDER BY min(l.d) DESC, l.woid DESC LIMIT 200`, [level1]);
   const visits = await query(`
-    WITH b AS (SELECT (max(month) - interval '5 months')::date AS f, (max(month) + interval '1 month')::date AS t FROM kpi.monthly)
+    WITH b AS (SELECT (max(month) - interval '5 months')::date AS f, (max(month) + interval '1 month')::date AS t FROM v_monthly_storage_service)
     SELECT NULLIF(date, '')::date::text AS date, NULLIF(route, '') AS route, string_agg(DISTINCT NULLIF(driver, ''), ' ') AS driver,
            count(*)::int AS services, count(DISTINCT NULLIF(slocid, ''))::int AS stops,
            sum(CASE WHEN weight ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN weight::numeric ELSE 0 END)::float AS pounds,
@@ -482,7 +483,7 @@ async function customerJobs(level1) {
 
 // Offline: the jobs of the accounts the drill keeps.
 async function jobs() {
-  const top = await query(`SELECT level1 FROM invoices, (SELECT (max(month) - interval '11 months')::date AS f FROM kpi.monthly) b
+  const top = await query(`SELECT level1 FROM invoices, (SELECT (max(month) - interval '11 months')::date AS f FROM v_monthly_storage_service) b
     WHERE COALESCE(invdate, billdate) >= b.f GROUP BY level1 ORDER BY sum(ret_tot + ser_tot) DESC, level1 LIMIT 50`);
   const accounts = [];
   for (const t of top) accounts.push({ level1: t.level1, orders: await customerJobs(t.level1) });
@@ -492,7 +493,7 @@ async function jobs() {
 async function drill() {
   const top = await query(`
     WITH ${BOUNDS}
-    SELECT level1 FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t
+    SELECT level1 FROM v_customer_monthly, b WHERE month >= b.f AND month < b.t
     GROUP BY level1 ORDER BY sum(revenue) DESC, level1 LIMIT 50`);
   const accounts = [];
   for (const t of top) accounts.push(await customerDrill(t.level1));
@@ -579,14 +580,14 @@ async function linework() {
 }
 
 // ── Every account by month billed, and by line ──────────────────────────────────────────────
-// The whole book, so the Accounts table adds to invoiced core. kpi.customer_monthly less Citadel is
-// kpi.monthly's core to the cent. Its lines are the priced lines of the invoices in each month.
+// The whole book, so the Accounts table adds to invoiced core. v_customer_monthly less Citadel is
+// v_monthly_storage_service's core to the cent. Its lines are the priced lines of the invoices in each month.
 async function accountmonths() {
   const rows = await query(`
     WITH ${BOUNDS}
-    SELECT cm.level1, cm.month::text, cm.storage::float, cm.service::float FROM kpi.customer_monthly cm, b
+    SELECT cm.level1, cm.month::text, cm.storage::float, cm.service::float FROM v_customer_monthly cm, b
     WHERE cm.month > b.latest - interval '13 months' AND cm.month <= b.latest ORDER BY cm.level1, cm.month`);
-  const [{ latest }] = await query(`SELECT max(month)::text AS latest FROM kpi.monthly`);
+  const [{ latest }] = await query(`SELECT max(month)::text AS latest FROM v_monthly_storage_service`);
   const months = [];
   for (let i = 12; i >= 0; i--) { const d = new Date(latest + 'T00:00:00Z'); d.setUTCMonth(d.getUTCMonth() - i); months.push(d.toISOString().slice(0, 10)); }
   const ids = [...new Set(rows.map(r => r.level1))];
@@ -629,9 +630,9 @@ async function customerInvoices(level1, month) {
 async function invoices() {
   const top = await query(`
     WITH ${BOUNDS}
-    SELECT level1 FROM kpi.customer_monthly, b WHERE month >= b.f AND month < b.t
+    SELECT level1 FROM v_customer_monthly, b WHERE month >= b.f AND month < b.t
     GROUP BY level1 ORDER BY sum(revenue) DESC, level1 LIMIT 12`);
-  const [{ latest }] = await query(`SELECT max(month)::text AS latest FROM kpi.monthly`);
+  const [{ latest }] = await query(`SELECT max(month)::text AS latest FROM v_monthly_storage_service`);
   const months = [0, 1, 2].map(n => new Date(Date.UTC(+latest.slice(0, 4), +latest.slice(5, 7) - 1 - n, 1)).toISOString().slice(0, 10));
   const rows = [];
   for (const t of top) for (const m of months) rows.push(await customerInvoices(t.level1, m));

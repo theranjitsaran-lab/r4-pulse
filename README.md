@@ -28,7 +28,7 @@ Then open http://localhost:3000 and sign in.
 | `npm run dev` | fixtures mode, auto-reload |
 | `npm run dev:live` | against the database |
 | `npm run snapshot` | run every query, write `fixtures/*.json` |
-| `npm run kpi:rebuild` | create the `kpi` views and tables (once, and after a change to `sql/views/`; Pulse refills the rows itself) |
+| `npm run kpi:rebuild` | create the views (only after a change to `sql/views/`; the screens read them live) |
 | `npm test` | the cost model; uses the database when `DATABASE_URL` is set |
 | `npm run test:offline` | the cost model on the seed in `rates.js`, no database |
 

@@ -49,7 +49,7 @@ If a task seems to need a library, it doesn't — write the SVG.
 ## Repo layout
 
 ```
-/server      db.js, api.js, auth.js, log.js, queries.js, snapshot.js, kpi_rebuild.js, kpi_refresh.js (Pulse refills kpi.* itself)
+/server      db.js, api.js, auth.js, log.js, queries.js, snapshot.js, kpi_rebuild.js (creates the views; the screens read them live)
 /sql         views/*.sql, kpi_rebuild.sql, model_schema.sql, app_schema.sql
 /model       rates.js, rates.test.js, levers.test.js   ← the cost model and the agreement tests
 /scripts     PC-side scripts: freshness, app_role, app_users, apply_sql, measurements

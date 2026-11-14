@@ -45,8 +45,8 @@ to reach. Newest section first.
 | **Flag down two months** | Below the account's own trailing-six mean (six full prior months, gaps as $0) this month and last |
 | **Termination fees** | Permanent-withdrawal codes P1, P2, P3, P5, PC, pending Anne's confirmation |
 | **Revenue per stop** | Destruction revenue (servtype F and S, Citadel apart) by work month ÷ done stops (distinct `slocid` per route-day) |
-| **Rebuild** | `npm run kpi:rebuild` creates the six views in order, then the `kpi` tables, as one transaction. Needed once, and again only when `sql/views/*.sql` changes |
-| **Refresh** | Pulse refills `kpi.monthly` and `kpi.customer_monthly` itself when new data arrives (`server/kpi_refresh.js`): delete and insert from the views in one transaction, one instance at a time. The app login may insert and delete rows in those two tables only. Theran, 12 November 2026: the R4 machine's rebuild task was never installed, so the summary stopped at October |
+| **Rebuild** | `npm run kpi:rebuild` creates the six views in order, then the `kpi` tables, as one transaction. Needed only when `sql/views/*.sql` changes |
+| **Read live** | The screens read `v_kpi_industry` and `v_customer_monthly` directly, not the `kpi.*` copies, so new data needs no rebuild or refresh (Theran, 14 November 2026). The copies were stuck at October: the R4 machine's rebuild task was never installed, and the 12 November self-refill needed a grant that could only be applied from a machine the database admits. `kpi.*` tables stay for the PC-side scripts |
 | **October range** | $598k–$699k, was $598k–$690k: storage $387,101 from `v_current_run` plus core service $211,133–$311,665, the last six posted months (Apr–Sep 2026) |
 | **City of Chicago down-since** | Below its own trailing-six mean every month since January 2026, flagged two-down since February 2026; was "every month since August 2025" |
 | **Service credit month** | November 2025 at −$60,759, the 23-month low; was "−$144k". The high is April 2026 at $781,944, was "$784k" |

@@ -73,8 +73,8 @@ export function overdueBoxes(CA, PR) {
 // This month's bill, already known: this month's storage and last month's work, Citadel apart. It is
 // in one of three places, depending on where the month is:
 //   run      the billing run is in VCK but not posted (v_current_run, undated rows)
-//   posted   the run has posted, but kpi.monthly has not been rebuilt since (P.posted, straight
-//            from v_monthly_storage_service)
+//   posted   the run has posted but is not yet in P.monthly (P.posted; always empty since the
+//            screens read the views live, 14 November 2026)
 //   pending  posted, and not yet in this snapshot either: the total is not shown; storage carries
 //            from the latest month known
 // perService prices this month's work est.: the bill's work (core service) ÷ the services done in its
