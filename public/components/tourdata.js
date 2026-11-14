@@ -63,8 +63,8 @@ export const TOURS = {
     { tab: ACCOUNTS, target: 'accounts-lit', title: 'What matters first', body: 'Who is slipping, how the month went and the cross-sell, in plain words.' },
     { tab: ACCOUNTS, target: 'a-tiles', title: 'The tiles', body: 'Tap Slipping or Cross-sell to open that list.' },
     { tab: ACCOUNTS, target: 'a-lob', title: 'The book by line', body: 'Each line of business this month. Tap one for its accounts.' },
-    { tab: ACCOUNTS, target: 'moved', title: 'Who moved', body: "The last three months against each account's own year before: largest, rising and slipping." },
-    { tab: ACCOUNTS, target: 'a-table', within: '.dt-tools', title: 'Find and filter', body: 'Search by name, or filter by line, size or trend. On a phone the filters are under More.' },
+    { tab: ACCOUNTS, target: 'moved', title: 'Who moved', body: "The last three months against each account's own 12-month average, or switch to the 3 months before or the same months last year. Tap a name for why it moved and what to do." },
+    { tab: ACCOUNTS, target: 'a-table', within: '.dt-tools', title: 'Find and filter', body: 'Search by name, or filter by line, size or trend. Choose a line and every figure is that line only; Units shows its boxes, bin services, trips or hours. On a phone the filters are under More.' },
     { tab: ACCOUNTS, target: 'a-table', within: '.dt-t', title: 'Every account, by month', body: "In $K, adding to the total at the foot. A month is shaded when it's more than 25% and $5K from that row's average." },
     { tab: ACCOUNTS, target: 'a-table', within: 'tr.dt-child', open: '[data-tour="a-table"] tbody tr[data-i] td:first-child', title: 'Open a row', body: 'Tap a row for its lines of business, month by month. Tap again to close it.' },
     { tab: ACCOUNTS, target: 'account-link', title: 'Open the account', body: 'Tap a name for its page: three points, its chart, what would improve it and every job.' },
@@ -101,7 +101,7 @@ export const TOURS = {
     { tab: OPS, target: 'o-map', tap: '#rt-layer [data-l="cost"]', title: 'Costly to serve', body: 'Areas costing most to reach for what they bill.' },
     { tab: OPS, target: 'o-routes', tap: '#rt-layer [data-l="routes"]', title: 'Route by route', body: 'Services per route day is the measure: more work on the same trucks is better. Tap a route to see it on the map.' },
     { tab: OPS, target: 'o-dense', title: 'Is the work getting denser?', body: 'Two years of services per route day.' },
-    { tab: OPS, target: 'o-costly', title: 'The costly areas', body: 'Tap a row for its moves, and send one to Opportunities.' },
+    { tab: OPS, target: 'o-costly', title: 'The costly areas', body: 'Each says plainly whether it loses money. Tap a row for who is served there and the fixes: a trip fee, a reprice or a route change. Send one to Opportunities with a note.' },
     { tab: OPS, target: 'o-bands', title: 'Distance from the yard', body: 'How far the work is from 35th Street, in bands.' },
   ],
   'g-warehouse': [
@@ -117,7 +117,7 @@ export const TOURS = {
     { tab: OPPS, target: 'opp-pipe', title: 'Where the list has got to', body: 'Open, Contacted, Agreed, Won and Lost, each account once.' },
     { tab: OPPS, target: 'p-kinds', title: 'What kind of money it is', body: 'Win back, cross-sell, price gaps, rate rounds and overdue boxes. Tap one to filter the list.' },
     { tab: OPPS, target: 'p-table', within: 'tbody tr[data-i]', title: 'One row per account', body: 'Its best move, what it is worth and how sure. Give it an owner, a status and a date for the next step.' },
-    { tab: OPPS, target: 'p-table', within: 'tr.dt-detail', open: '[data-tour="p-table"] tbody tr[data-i] td:first-child', title: 'Its other moves', body: 'Tap a row for every move, best first, each with one action.' },
+    { tab: OPPS, target: 'p-table', within: 'tr.dt-detail', open: '[data-tour="p-table"] tbody tr[data-i] td:first-child', title: 'Its other moves', body: 'Tap a row for every move, best first, each with one action and its notes. Add a note as you go: who you spoke to, what was said.' },
   ],
   'g-ask': [
     { tab: TODAY, target: 'ask', tap: '.ask .ask-x', title: 'Ask is always here', body: 'Top of every screen, and in the drawers.' },
@@ -127,7 +127,7 @@ export const TOURS = {
     { tab: TODAY, target: 'ask-form', title: 'Or type your own', body: 'Name one account or one line for the best answer: "What else could Metra buy?"' },
   ],
   account: [
-    { tab: ACCOUNTS, target: 'moved', title: 'Who moved', body: 'Largest, rising and slipping, each against its own run. Every account is in the table below.' },
+    { tab: ACCOUNTS, target: 'moved', title: 'Who moved', body: 'Largest, rising and slipping, each against its own 12-month average unless you switch it. Tap a name for why: one-off work or regular, volume or price.' },
     { tab: ACCOUNTS, target: 'margin', title: 'Read the margin', body: 'Tap it for where the margin is made and lost, and the fixes ranked by how realistic they are.' },
     { tab: ACCOUNTS, target: 'account-link', title: 'Open the account', body: 'Tap a name: three points, what it buys and its twelve months.' },
   ],

@@ -195,3 +195,9 @@
 .ops-plain small { grid-column: 1 / -1; font-size: var(--fs-tiny); color: var(--ink-3); }
 #rt-prev::before { content: "‹"; }
 #rt-next::before { content: "›"; }
+
+/* far-area drawer: pick the fix to send, with a note (14 November 2026) */
+.ops-pick { display: inline-flex; gap: var(--sp-2); align-items: flex-start; cursor: pointer; }
+.ops-pick input { margin-top: 4px; }
+.ops-note { display: grid; gap: var(--sp-1); width: 100%; font-size: var(--fs-label); color: var(--ink-3); }
+.ops-note textarea { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); resize: vertical; }

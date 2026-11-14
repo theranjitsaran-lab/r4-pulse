@@ -598,15 +598,38 @@ async function accountmonths() {
   return { months, accounts: [...by.values()] };
 }
 async function accountlines() {
+  // Each line's revenue and its units (Theran, 14 November 2026: Accounts filters by line and shows units), 25 months
+  // so a drill can compare the last three months with the twelve before, or the same three a year ago. One unit a
+  // line, from model.service_family: bin services (B1-B6, purges), boxes moved (the warehouse movements), delivery
+  // trips (code 01 on a line of one unit or less, data rule on 01), ITAD devices, shred boxes, labour hours.
   const FAM = `CASE WHEN sf.family IN ('bin', 'shred', 'handling', 'movement', 'itad', 'labour') THEN sf.family ELSE 'other' END`;
+  const UNITS = `CASE
+      WHEN sf.family = 'movement' THEN CASE WHEN s.servcode = '01' AND p.units <= 1 THEN 1 ELSE 0 END
+      WHEN (sf.family = 'bin' AND sf.unit = 'service') OR (sf.family = 'handling' AND sf.volume = 'movements')
+        OR (sf.family = 'itad' AND sf.unit = 'device') OR (sf.family = 'shred' AND sf.unit IN ('box', 'cubic foot'))
+        OR (sf.family = 'labour' AND sf.unit = 'hour') THEN p.units ELSE 0 END`;
   const rows = await query(`
     WITH ${BOUNDS}
-    SELECT p.level1, date_trunc('month', COALESCE(i.invdate, i.billdate))::date::text AS month, ${FAM} AS family, sum(p.totamt)::float AS revenue
+    SELECT p.level1, date_trunc('month', COALESCE(i.invdate, i.billdate))::date::text AS month, ${FAM} AS family,
+           sum(p.totamt)::float AS revenue, sum(${UNITS})::float AS units
     FROM priced_lines p JOIN invoices i USING (invoice_no) JOIN servcode s USING (servcodeid)
     LEFT JOIN model.service_family sf ON sf.servcode = s.servcode, b
-    WHERE i.level1 <> 6714 AND COALESCE(i.invdate, i.billdate) > b.latest - interval '13 months' AND COALESCE(i.invdate, i.billdate) < b.t
+    WHERE i.level1 <> 6714 AND COALESCE(i.invdate, i.billdate) > b.latest - interval '25 months' AND COALESCE(i.invdate, i.billdate) < b.t
     GROUP BY 1, 2, 3 ORDER BY 1, 2, 3`);
-  return { rows };
+  // storage boxes on each month's bill
+  const boxes = await query(`
+    WITH ${BOUNDS}
+    SELECT h.level1, to_date(h.mth, 'YYYY-MM')::text AS month, sum(h.boxes)::float AS boxes
+    FROM storage_rate_hist h, b WHERE h.level1 <> 6714 AND to_date(h.mth, 'YYYY-MM') > b.latest - interval '25 months'
+    GROUP BY 1, 2 ORDER BY 1, 2`).catch(() => []);
+  // bins serviced: Veri-Shred done bin services by the month of the work (data rules 2 and 3)
+  const bins = await query(`
+    SELECT NULLIF(level1, '')::int AS level1, date_trunc('month', NULLIF(date, '')::date)::date::text AS month, count(*)::int AS bins
+    FROM vs_service_orders
+    WHERE billable = 'true' AND cbtcode ~ '^B[1-6]$' AND NULLIF(date, '')::date <= current_date
+      AND NULLIF(date, '')::date > current_date - interval '25 months' AND NULLIF(level1, '')::int <> 6714
+    GROUP BY 1, 2 ORDER BY 1, 2`).catch(() => []);
+  return { rows, boxes, bins };
 }
 
 // ── One account's invoices in a month ──────────────────────────────────────────────────────────

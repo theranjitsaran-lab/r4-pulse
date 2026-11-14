@@ -437,3 +437,31 @@ html.js .h2.play .on .h2-tobar .fc { transform: scaleX(1); transition: transform
 .pop-b .sf-all { margin-top: var(--sp-2); }
 /* on a phone the lead tile is a grid (figure beside its line); the month so far has two lines, so each takes the row */
 .h2-kpis.bills .h2-kpi.lead.h2-sofar > small { grid-column: 1 / -1; }
+
+/* The one drawer: what happened, why, what to do (components/explain-drawer.js, 14 November 2026) */
+.xd-crumbs { font-size: var(--fs-label); color: var(--ink-3); margin: 0 0 var(--sp-2); display: flex; gap: var(--sp-1); align-items: center; flex-wrap: wrap; }
+.xd-crumbs b { color: var(--ink); font-weight: 600; }
+.pop-b .xd-base { margin: var(--sp-1) 0 var(--sp-3); }
+.pop-b .h2-stats { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+.xd-fig { margin: var(--sp-3) 0; }
+.xd-fig figcaption { font-size: var(--fs-sm); font-weight: 600; color: var(--ink); margin-bottom: var(--sp-1); }
+.xd-fig svg { width: 100%; height: auto; display: block; }
+.xd-b { fill: var(--rule-3); }
+.xd-b.ref { fill: var(--ink-5); }
+.xd-b.now { fill: var(--ink); }
+.xd-h { fill: var(--warn); }
+.xd-key { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); font-size: var(--fs-tiny); color: var(--ink-3); margin-top: var(--sp-1); }
+.xd-key span { display: inline-flex; align-items: center; gap: var(--sp-1); }
+.xd-key i { width: 10px; height: 10px; border-radius: 2px; background: var(--rule-3); }
+.xd-key i.now { background: var(--ink); } .xd-key i.ref { background: var(--ink-5); }
+.xd-key i.off { background: repeating-linear-gradient(135deg, var(--warn) 0 2px, var(--warn-bg) 2px 4px); }
+.h2-pl li > .xd-l { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--sp-3); align-items: baseline; width: 100%; padding: var(--sp-2) 0; border: 0; border-top: var(--hair) solid var(--rule); background: none; font: inherit; font-size: var(--fs-sm); color: var(--ink); text-align: left; cursor: pointer; }
+.xd-l small { font-size: var(--fs-tiny); color: var(--ink-4); font-variant-numeric: tabular-nums; }
+.xd-detail { margin: var(--sp-3) 0; padding: var(--sp-3); background: var(--well); border-radius: var(--r-sm); }
+.xd-act { display: grid; gap: var(--sp-2); padding: var(--sp-3); border: var(--hair) solid var(--rule-3); border-radius: var(--r); }
+.xd-act label { display: grid; gap: var(--sp-1); font-size: var(--fs-label); color: var(--ink-3); }
+.xd-act textarea { font: inherit; font-size: var(--fs-sm); padding: var(--sp-2); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); resize: vertical; }
+.xd-row { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-3); align-items: center; justify-content: space-between; }
+.xd-row .cd-owner { display: inline-flex; flex-direction: row; align-items: center; gap: var(--sp-2); }
+.mv-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--sp-2) var(--sp-4); }
+.xd-fig .c-axis { font-size: 12px; fill: var(--ink-4); }

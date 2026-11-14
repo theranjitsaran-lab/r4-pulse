@@ -26,7 +26,30 @@ const trendPoint = t => {
   return { key: 'trend', tone: 'g', lead: `Level at ${moneyK(m.last3)} a month`, rest: `against ${run}, so a fair time to add a line.` };
 };
 
-export function drillData(r, trend = null) {
+// What a gap is in units, so the team can picture it (Theran, 14 November 2026): bin services, boxes shredded,
+// devices, boxes moved, delivery trips, hours. Priced at the account's own rate where it buys the line, else the
+// median rate across the book (a first-time buyer pays about list, data rule 12). From the margin lines (12 months).
+const UNIT = { bin: ['service', 'bin services'], shred: ['box', 'boxes shredded'], itad: ['device', 'devices'], handling: ['box', 'boxes moved'], movement: ['trip', 'delivery trips'], labour: ['hour', 'hours'], storage: null };
+export function unitRates(M) {
+  if (!M || !M.lines) return null;
+  const own = new Map(), book = {};
+  for (const l of M.lines) {
+    const u = UNIT[l.family]; if (!u || l.unit !== u[0] || !(l.units > 0) || !(l.revenue > 0)) continue;
+    const k = l.level1 + '|' + l.family, x = own.get(k) || { rev: 0, units: 0 }; x.rev += l.revenue; x.units += l.units; own.set(k, x);
+  }
+  for (const [k, x] of own) { const fam = k.split('|')[1]; (book[fam] || (book[fam] = [])).push(x.rev / x.units); }
+  const med = a => { const v = a.slice().sort((p, q) => p - q); return v[v.length >> 1]; };
+  return { own, book: Object.fromEntries(Object.entries(book).map(([k, v]) => [k, med(v)])) };
+}
+export function gapUnits(U, level1, key, gap) {
+  const u = UNIT[key]; if (!U || !u || !(gap > 0)) return null;
+  const o = U.own.get(level1 + '|' + key), price = o && o.units > 0 ? o.rev / o.units : U.book[key];
+  if (!(price > 0)) return null;
+  const n = gap / price;
+  return { units: n, word: u[1], price, own: !!o, perWeek: key === 'bin' ? n / 52 : null, perMonth: n / 12 };
+}
+
+export function drillData(r, trend = null, U = null) {
   const lines = LINES.filter(x => x.key !== 'storage').map(x => {
     const c = r.cells[x.key], kind = c.have ? (c.low ? 'low' : 'buys') : c.opp > 0 ? 'not' : 'none';
     const now = c.have ? c.spend : 0, compare = kind === 'low' ? c.expected : kind === 'not' ? c.opp : null;
@@ -35,6 +58,7 @@ export function drillData(r, trend = null) {
   // storage can be a gap too: it is on the row and in the sums, though the chart leaves it out to keep its scale
   const st = r.cells.storage, stGap = !st.have && st.opp > 0 ? { key: 'storage', name: 'Storage', short: 'Storage', kind: 'not', now: 0, compare: st.opp, gap: st.opp, cell: st } : st.have && st.low ? { key: 'storage', name: 'Storage', short: 'Storage', kind: 'low', now: st.spend, compare: st.expected, gap: st.expected - st.spend, cell: st } : null;
   const gaps = [...lines.filter(l => l.gap > 0), ...(stGap ? [stGap] : [])].sort((a, b) => b.gap - a.gap);
+  for (const g of gaps) g.units = gapUnits(U, r.level1, g.key, g.gap);
   const nb = gaps.filter(g => g.kind === 'not'), low = gaps.filter(g => g.kind === 'low');
   const notBought = nb.reduce((t, g) => t + g.gap, 0), lowFor = low.reduce((t, g) => t + g.gap, 0), room = notBought + lowFor;
   const top = gaps[0] || null, conf = top ? confidence(top.cell) : null;
@@ -55,11 +79,17 @@ export function drillData(r, trend = null) {
 }
 
 // the method, in the words the sizing already wrote
+export function unitWords(u) {
+  if (!u) return '';
+  const n = u.units >= 100 ? Fmt.grouped(Math.round(u.units / 10) * 10) : Fmt.grouped(Math.max(1, Math.round(u.units)));
+  return `That is about ${n} ${u.word} a year${u.perWeek != null && u.perWeek >= 1 ? ` (about ${Math.round(u.perWeek)} a week)` : u.perMonth >= 1 && u.units < 1000 ? ` (about ${Math.round(u.perMonth)} a month)` : ''}, at ${Fmt.money(u.price, { dp: 2 })} each, ${u.own ? 'its own price' : 'the book\'s median price, about what a first-time buyer pays'}.`;
+}
 export function gapHow(g) {
   const c = g.cell;
-  if (c.have) return c.note;
+  const units = g.units ? ' ' + unitWords(g.units) : '';
+  if (c.have) return c.note + units;
   const b = String(c.basis || '');
-  return c.basisLevel === 'book' ? `Sized from the whole book: ${b}.` : `${b[0].toUpperCase()}${b.slice(1)}.`;
+  return (c.basisLevel === 'book' ? `Sized from the whole book: ${b}.` : `${b[0].toUpperCase()}${b.slice(1)}.`) + units;
 }
 
 export function drillHtml(d, { fresh = false, quote = {} } = {}) {
@@ -110,7 +140,7 @@ export function wireDrill(root, d, said) {
     const owner = acts.querySelector('[data-cd-owner]').value;
     go.disabled = true;
     try {
-      const r = await fetch('/api/sales/opportunities', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: k, level1: d.level1, status: 'open', owner, value: Math.round(d.top.gap), note: `${d.top.kind === 'low' ? `Low for its size on ${word(d.top.name)}` : `Does not buy ${word(d.top.name)} yet`}: about ${moneyK(d.top.gap)} a year est.` }) });
+      const r = await fetch('/api/sales/opportunities', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: k, level1: d.level1, status: 'open', owner, value: Math.round(d.top.gap), note: `${d.top.kind === 'low' ? `Low for its size on ${word(d.top.name)}` : `Does not buy ${word(d.top.name)} yet`}: about ${moneyK(d.top.gap)} a year est.${d.top.units ? ' ' + unitWords(d.top.units) : ''} ${gapHow({ ...d.top, units: null })}`.slice(0, 500) }) });
       if (!r.ok) throw new Error(String(r.status));
       if (said) said[k] = { owner };
       mark(owner);

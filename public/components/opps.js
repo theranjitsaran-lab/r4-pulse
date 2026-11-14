@@ -98,7 +98,7 @@ export function opportunities({ C, PR, CA, M }, statuses = {}) {
 // the data no longer supports, which stays at its saved value, says so, and adds to no total. Ranked by dollars a year; a one-off
 // (destruction of overdue boxes) at a quarter of its value.
 export function applyStatuses(base, statuses = {}, M = null) {
-  const rows = base.map(r => { const s = statuses[r.key]; return { ...r, status: s ? s.status : 'open', owner: s ? s.owner || null : null, at: s ? s.at : null, who: s ? s.who : null, note: s ? s.note : null, next: s ? s.next_step || null : null, ...(s && s.value != null && (s.status === 'won' || s.status === 'lost') ? { closedValue: s.value } : {}) }; });
+  const rows = base.map(r => { const s = statuses[r.key]; return { ...r, status: s ? s.status : 'open', owner: s ? s.owner || null : null, at: s ? s.at : null, who: s ? s.who : null, note: s ? s.note : null, notes: s && s.notes ? s.notes : [], next: s ? s.next_step || null : null, ...(s && s.value != null && (s.status === 'won' || s.status === 'lost') ? { closedValue: s.value } : {}) }; });
   const have = new Set(base.map(r => r.key)), names = new Map(((M && M.accounts) || []).map(a => [a.level1, a.customer]));
   let wide = null;
   for (const [key, st] of Object.entries(statuses)) {
@@ -113,7 +113,7 @@ export function applyStatuses(base, statuses = {}, M = null) {
       const row = wide.rows.find(r => r.level1 === st.level1), c = row && row.cells[third];
       if (c && (c.low || (!c.have && c.opp > 0))) extra = { conf: gapConfidence(c), code: lineCodes(M, PRICED)[third] || null, short: told, reason: c.note || told };
     }
-    rows.push({ key, kind, level1: st.level1, name, line: kind === 'cross' ? third : null, value: st.value, modelled: true, opener: `We look after some of your work already. Could we talk about ${lc(lineName[third] || 'how we serve you')}?`, ...extra, status: st.status, owner: st.owner || null, at: st.at, who: st.who, note: st.note, next: st.next_step || null });
+    rows.push({ key, kind, level1: st.level1, name, line: kind === 'cross' ? third : null, value: st.value, modelled: true, opener: `We look after some of your work already. Could we talk about ${lc(lineName[third] || 'how we serve you')}?`, ...extra, status: st.status, owner: st.owner || null, at: st.at, who: st.who, note: st.note, notes: st.notes || [], next: st.next_step || null });
   }
   for (const r of rows) r.rank = r.stale ? 0 : r.once ? r.value / 4 : r.value;
   return rows.sort((a, b) => b.rank - a.rank);

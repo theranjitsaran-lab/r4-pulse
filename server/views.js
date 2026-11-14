@@ -16,7 +16,7 @@ const { seesCosts } = require('./settings');
 
 const router = express.Router();
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework', 'linegrid', 'metrics', 'opsdata'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
+const load = () => libs || (libs = Promise.all(['movebridge', 'home2data', 'changes', 'lists', 'custbook', 'opps', 'gl', 'margin', 'linework', 'linegrid', 'metrics', 'opsdata'].map(n => import('../public/components/' + n + '.js').then(m => [n, m]))).then(Object.fromEntries));
 
 async function callsLog() {
   if (USE_FIXTURES) { try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'calls_log.json'), 'utf8')); } catch { return []; } }
@@ -30,6 +30,19 @@ const soFarHead = (D, L) => {
   const { byLine, byCustomer, jobs, how, ...head } = T;
   return { ...head, jobCount: jobs.length };
 };
+
+// Accounts' rows: each account's months billed, and its months by line in $ and units (linegrid.js lineMonths), so the
+// line filter changes the figures, not only which accounts show
+function amRows(D, L) {
+  const LM = D.AL ? L.linegrid.lineMonths(D.AM, D.AL) : new Map();
+  const round = a => a ? a.map(v => Math.round(v * 100) / 100) : a;
+  return { months: D.AM.months, units: !!(D.AL && D.AL.rows && D.AL.rows.some(r => r.units != null)), bins: !!(D.AL && D.AL.bins && D.AL.bins.length),
+    rows: D.AM.accounts.map(a => {
+      const lm = LM.get(a.level1) || {}, f = {};
+      for (const [k, v] of Object.entries(lm)) f[k] = k === 'binsDone' ? v : { r: round(v.r), u: v.u };
+      return { level1: a.level1, customer: a.customer, m: a.storage.map((s, i) => s + a.service[i]), s: a.storage, f };
+    }) };
+}
 
 // the part that is the same for everyone, kept until the data moves
 let homeBase = null;
@@ -71,7 +84,7 @@ router.get('/customers', async (req, res) => {
       // the same rows with every cost taken out, for people who do not see costs yet
       const plain = rows.map(({ cost, margin, pc, review, routeCost, parts, ...r }) => ({ ...r, fam: Object.fromEntries(Object.entries(r.fam).map(([k, { cost: c, costPer, lines, ...f }]) => [k, f])), mfam: Object.fromEntries(Object.entries(r.mfam).map(([k, v]) => [k, { revenue: v.revenue }])) }));
       custBase = { stamp: st, plain, v: { rows, book: B.book, months: B.months, ws: { total: B.ws.total }, seg: L.home2data.segmentView({ P: D.P, A: D.A, SG: D.SG }),
-        am: D.AM ? { months: D.AM.months, rows: D.AM.accounts.map(a => ({ level1: a.level1, customer: a.customer, m: a.storage.map((s, i) => s + a.service[i]), s: a.storage })) } : null } };
+        am: D.AM ? amRows(D, L) : null } };
     }
     send(req, res, seesCosts(req) ? custBase.v : { ...custBase.v, rows: custBase.plain, book: Object.fromEntries(Object.entries(custBase.v.book).map(([k, u]) => [k, Object.fromEntries(Object.entries(u).map(([n, b]) => [n, { price: b.price }]))])) });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -91,7 +104,7 @@ const NO_COST = ({ costPerService, ...rest }) => rest;
 router.get('/operations', async (req, res) => {
   try {
     const [D, L] = await Promise.all([data(), load()]), O = L.opsdata, st = stamp(D), RH = D.RH || [];
-    if (opsBase.stamp !== st) opsBase = { stamp: st, periods: new Map(), costly: O.costlyAreas({ rc: D.RC, AR: D.AR, M: D.M, Z: D.Z, R: D.R }), months: O.density(O.opsMonths(RH, D.R)) };
+    if (opsBase.stamp !== st + require('./settings').routeSigned()) opsBase = { stamp: st + require('./settings').routeSigned(), periods: new Map(), costly: O.costlyAreas({ rc: D.RC, AR: D.AR, M: D.M, Z: D.Z, R: D.R }, { signed: require('./settings').routeSigned() }), months: O.density(O.opsMonths(RH, D.R)) };
     const date = /^\d{4}-\d{2}-\d{2}$/.test(req.query.date || '') ? req.query.date : null, P = O.periods(D.A.latestDone, date), key = P[req.query.p] ? req.query.p : 'q', ck = key + '|' + (key === 'day' || key === 'week' ? date : '');
     if (!opsBase.periods.has(ck)) opsBase.periods.set(ck, O.opsPeriod(RH, D.Z, D.R, P[key]));
     const V = opsBase.periods.get(ck), costs = seesCosts(req);
@@ -172,6 +185,24 @@ router.get('/numbers', async (req, res) => {
       } };
     }
     send(req, res, seesCosts(req) ? numBase.v : { ...numBase.v, margin: null, lineCosts: null });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Why one account moved: its lines over the months the data holds, split into one-off and regular, volume and price,
+// against the comparison asked for (movebridge.js). Falls back to the 3 months before when the months are too few.
+router.get('/explain', async (req, res) => {
+  try {
+    const level1 = Number(req.query.level1), want = String(req.query.base || 'avg12');
+    if (!Number.isInteger(level1)) return res.status(400).json({ error: 'level1' });
+    const [D, L] = await Promise.all([data(), load()]);
+    const H = D.AL ? L.linegrid.accountHistory({ C: D.C, AM: D.AM, AL: D.AL }, level1) : null;
+    if (!H) return res.status(404).json({ error: 'no line history for this account' });
+    const T = { regular: D.R.SETTINGS.oneOffRegular || 6, oneOff: D.R.SETTINGS.oneOffMonths || 3, spike: D.R.SETTINGS.oneOffSpike || 3 };
+    const bases = Object.keys(L.movebridge.BASES).filter(b => L.movebridge.windows(H.months.length, b));
+    const base = bases.includes(want) ? want : bases.includes('prev3') ? 'prev3' : null;
+    if (!base) return res.status(404).json({ error: 'too few months to compare' });
+    const x = L.movebridge.explainMove({ months: H.months, lines: H.lines, base, T });
+    send(req, res, { level1, customer: H.customer, asked: want, bases, months: H.months.length, ...x });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

@@ -17,6 +17,8 @@ import { accountTable } from '/components/accttable.js';
 import { litCard, drawPoints, tile, chip, chipText } from '/components/lit.js';
 import { phoneFold } from '/components/phonekit.js';
 import { openLine } from '/components/linedrawer.js';
+import { openExplain } from '/components/explain-drawer.js';
+import { BASES } from '/components/movebridge.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const pct = v => `${Fmt.pct(v, { abs: true })}`;
@@ -56,9 +58,14 @@ export async function render(main, C, params, tabs) {
       <div class="lob-bar" aria-hidden="true">${seg.rows.map((s, i) => `<i class="l${i + 1}" style="flex:${Math.max(.2, s.lm / seg.total * 100).toFixed(2)} 0 0;--i:${i}"></i>`).join('')}</div>
       <div class="lob-list">${seg.rows.map((s, i) => `<button type="button" class="lob-row" data-line="${s.key}"><i class="l${i + 1}"></i><span>${esc(s.name)}</span><b>${moneyK(s.lm)}</b>${chip(s.lmPct) || '<span></span>'}<em class="chev"></em></button>`).join('')}</div></section>` : '';
 
-  const movedCol = (title, tone, kind, list, val, more = '') => { const mx = Math.max(1, ...list.map(r => Math.abs(val(r)))); return `<div class="mv-col"><h3><span><span class="light ${tone}"></span>${title}</span>${more}</h3>${list.map((r, i) => { const v = val(r); return `<a class="mv-row" href="#customer/${r.level1}"><span>${esc(titleCase(r.customer))}</span><b class="${kind}">${kind === 'lgst' ? moneyK(v) : signedK(v)}</b><i class="${kind}" style="--s:${(Math.abs(v) / mx).toFixed(3)};--i:${i}"></i></a>`; }).join('')}<small>${kind === 'lgst' ? 'a month' : kind === 'up' ? 'a month on its own run' : 'a month below its own run'}</small></div>`; };
-  const moved = `<section class="h2-card" data-tour="moved" data-in><div class="h2-ch"><h2>Who moved</h2><small>Last three months against each account's own year before</small></div><div class="mv-grid">
-    ${movedCol('Largest', 'g', 'lgst', cust.top, r => r.last3)}${movedCol('Rising', 'g', 'up', cust.rising, r => r.d)}${movedCol('Slipping', 'r', 'down', cust.falling, r => r.d, `<a class="chev" href="#customers?view=slipping">All ${cust.slipping}</a>`)}</div></section>`;
+  // Who moved: each row opens the one drawer (why it moved, what to do). The comparison is named and can be switched:
+  // the account's own 12-month average (the default), the 3 months before, or the same 3 months last year.
+  let base = BASES[params.base] ? params.base : 'avg12';
+  const baseWord = b => b === 'avg12' ? 'its own 12-month average' : b === 'prev3' ? 'its 3 months before' : 'the same 3 months last year';
+  const movedCol = (title, tone, kind, list, val, more = '', b = base) => { const mx = Math.max(1, ...list.map(r => Math.abs(val(r)))); return `<div class="mv-col"><h3><span><span class="light ${tone}"></span>${title}</span>${more}</h3>${list.map((r, i) => { const v = val(r); return `<a class="mv-row" href="#customer/${r.level1}" data-xp="${r.level1}" data-nm="${esc(r.customer)}"><span>${esc(titleCase(r.customer))}</span><b class="${kind}">${kind === 'lgst' ? moneyK(v) : signedK(v)}</b><i class="${kind}" style="--s:${(Math.abs(v) / mx).toFixed(3)};--i:${i}"></i></a>`; }).join('')}<small>${kind === 'lgst' ? 'a month, last 3 months' : `a month, last 3 months against ${baseWord(b)}`}</small></div>`; };
+  const movedInner = b => { const cv = customerView({ C }, b); return `<div class="mv-grid">${movedCol('Largest', 'g', 'lgst', cv.top, r => r.last3, '', b)}${movedCol('Rising', 'g', 'up', cv.rising, r => r.d, '', b)}${movedCol('Slipping', 'r', 'down', cv.falling, r => r.d, `<a class="chev" href="#customers?view=slipping">All ${cv.slipping}</a>`, b)}</div>`; };
+  const moved = `<section class="h2-card" data-tour="moved" data-in><div class="h2-ch mv-head"><div><h2>Who moved</h2><small>Last 3 months, a month, against ${esc(baseWord(base))}. Tap a name for why, and what to do.</small></div>
+      <div class="seg mv-base" role="group" aria-label="Compare with">${Object.values(BASES).map(x => `<button type="button" data-b="${x.key}" class="${x.key === base ? 'on' : ''}" aria-pressed="${x.key === base}">${esc(x.short)}</button>`).join('')}</div></div><div id="mv-body">${movedInner(base)}</div></section>`;
 
   main.innerHTML = `<div class="cust c2 h2 ac">
     <h1>Accounts</h1>
@@ -73,6 +80,14 @@ export async function render(main, C, params, tabs) {
     </section>
   </div>`;
   drawPoints(main.querySelector('#ac-lit'), pts);
+  // Who moved: the switch redraws the lists; a name opens the drawer at the same comparison
+  const mv = main.querySelector('[data-tour="moved"]');
+  if (mv) mv.addEventListener('click', ev => {
+    const sw = ev.target.closest('.mv-base button');
+    if (sw) { base = sw.dataset.b; mv.querySelectorAll('.mv-base button').forEach(x => { const on = x === sw; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); }); mv.querySelector('small').textContent = `Last 3 months, a month, against ${baseWord(base)}. Tap a name for why, and what to do.`; mv.querySelector('#mv-body').innerHTML = movedInner(base); return; }
+    const a = ev.target.closest('.mv-row[data-xp]');
+    if (a) { ev.preventDefault(); openExplain({ level1: +a.dataset.xp, name: a.dataset.nm, base }); }
+  });
   main.querySelectorAll('.lob-row').forEach(b => b.addEventListener('click', () => openLine(seg.rows.find(s => s.key === b.dataset.line), { VW, seg })));
 
   const cellBtn = (r, inner, x) => `<button class="c2-x" data-x="${x}" data-id="${r.level1}">${inner}</button>`;
@@ -84,7 +99,7 @@ export async function render(main, C, params, tabs) {
   ];
   if (params.line) history.replaceState(null, '', location.hash.replace(/([?&])line=/, '$1f_line='));   // links saved before the filter bar
   VW.lines = async r => { const v = await getJson('view/account-lines?level1=' + r.level1); return v.rows.map(l => ({ name: l.name, values: Object.fromEntries(v.months.map((m, i) => [m, l.values[i]])) })); };
-  VW.explain = (b, r) => explain(b.dataset.x, r, { B, PR, line: null, R });
+  VW.explain = (b, r) => b.dataset.x === 'sales' ? openExplain({ level1: r.level1, name: r.customer }) : explain(b.dataset.x, r, { B, PR, line: null, R });
   accountTable(main.querySelector('#c2-dt'), { key: 'accounts', VW, C, R, B, P, extra });
   document.documentElement.classList.add('js');
   const root = main.querySelector('.c2');

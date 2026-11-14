@@ -8,6 +8,7 @@ import * as Fmt from '/components/format.js';
 import { esc } from '/components/data.js';
 import { money0 } from '/components/chart.js';
 import { reveal } from '/components/motion.js';
+import { drawRouteCost, drawContext } from '/components/routecostadmin.js';
 
 const GROUPS = [
   { title: 'A route day, shared by minutes', sub: 'how each stop\'s share of its route day is worked out, from the real route days', keys: [
@@ -23,6 +24,11 @@ const GROUPS = [
     ['dedicatedMinHours', 'hours', 'When a truck goes out for one job, what is the least time it really takes?'],
     ['marginHealthy', 'share', 'At what margin would you call an account healthy?'],
     ['marginThin', 'share', 'Below what margin is an account too thin?'],
+  ] },
+  { title: 'One-off work', sub: 'how the drawer tells a project or purge from regular work, per customer and line', keys: [
+    ['oneOffRegular', 'months', 'In how many months of a year does a regular customer buy a service?'],
+    ['oneOffMonths', 'months', 'Bought in this few months of a year or fewer, is it a project rather than regular work?'],
+    ['oneOffSpike', 'times', 'How many times its usual month makes a month a one-off on top?'],
   ] },
   { title: 'Box deliveries', sub: 'they ride the shred trucks; VCK has the date and customer but not the route', keys: [
     ['deliveryMatch', 'on/off', 'Are there days a delivery goes out on its own, not on a shred route?'],
@@ -64,7 +70,7 @@ function draw(main, S) {
     <section class="h2-card" data-rv><div class="h2-ch"><h2>Costs and margins</h2><small>everyone sees them; this says how sure they are</small></div>
       <ul class="st-list"><li class="st-row"><div class="st-what"><b>Costs are final</b><span>Off: margins read &quot;Costs modelled, provisional&quot;. On: the cost model is signed off, and they read &quot;Costs modelled&quot;.</span></div>
       <div class="st-val"><select data-k="costsFinal" ${S.canEdit ? '' : 'disabled'}><option value="0" ${S.values.costsFinal ? '' : 'selected'}>Off: provisional</option><option value="1" ${S.values.costsFinal ? 'selected' : ''}>On: signed off</option></select>${S.canEdit ? '<button type="button" class="st-save" data-k="costsFinal">Save</button>' : ''}<span class="st-msg hint" data-for="costsFinal"></span></div></li></ul></section>
-    ${S.canEdit ? '<section class="h2-card" data-rv id="st-users"></section>' : ''}
+    ${S.canEdit ? '<section class="h2-card" data-rv id="st-route"></section><section class="h2-card" data-rv id="st-ctx"></section><section class="h2-card" data-rv id="st-users"></section>' : ''}
     ${refHtml}
     ${GROUPS.map(g => phoneFold(g.title, `<section class="h2-card" data-rv><div class="h2-ch"><h2>${esc(g.title)}</h2><small>${esc(g.sub)}</small></div>
       <ul class="st-list">${g.keys.map(([k, u, q]) => row(k, u, q)).join('')}</ul>
@@ -76,6 +82,8 @@ function draw(main, S) {
       <ul class="st-rates">${S.rates.map(r => `<li><b>${esc(r.key)}</b><span class="v">${typeof r.value === 'number' ? esc(+Fmt.fixed(r.value, 4) + '') : esc(Object.entries(r.value).map(([k, v]) => `${k} ${v}`).join(', '))} <small>${esc(r.unit || '')}</small></span><span class="fl">${esc(r.flag || '')}</span><span class="d">${esc(r.derivation || '')}</span></li>`).join('')}</ul></details></section>
   </div>`;
   drawUsers(main.querySelector('#st-users'));
+  drawRouteCost(main.querySelector('#st-route'));
+  drawContext(main.querySelector('#st-ctx'));
 
   // a postcode for a delivery account with none in the data
   main.querySelectorAll('.st-pc-save').forEach(b => b.addEventListener('click', async () => {

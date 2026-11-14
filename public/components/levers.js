@@ -114,17 +114,17 @@ export function billNow(P, A) {
 // The one definition used by the bridge, the Slipping list, This week, Home's movers and the
 // customer page (components/series.js holds the measure).
 export const SLIP = { pct: -0.10, dollars: 250, run: 500, stopped: 0.25 };
-export function accountMoves(C) {
-  return [...seriesOf(C).values()].filter(s => s.level1 !== CITADEL && s.move && s.move.run > 0);
+export function accountMoves(C, base) {
+  return [...seriesOf(C, base).values()].filter(s => s.level1 !== CITADEL && s.move && s.move.run > 0);
 }
-function downAccounts(C) {
-  return accountMoves(C).filter(s => s.move.pct <= SLIP.pct && -s.move.d >= SLIP.dollars && s.move.run >= SLIP.run)
+function downAccounts(C, base) {
+  return accountMoves(C, base).filter(s => s.move.pct <= SLIP.pct && -s.move.d >= SLIP.dollars && s.move.run >= SLIP.run)
     .sort((a, b) => a.move.d - b.move.d);
 }
-export function slippingAccounts(C) { return downAccounts(C).filter(s => s.move.last3 >= SLIP.stopped * s.move.run); }
-export function stoppedAccounts(C) { return downAccounts(C).filter(s => s.move.last3 < SLIP.stopped * s.move.run); }
-export function risingAccounts(C) {
-  return accountMoves(C).filter(s => s.move.pct >= -SLIP.pct && s.move.d >= SLIP.dollars && s.move.last3 >= SLIP.run)
+export function slippingAccounts(C, base) { return downAccounts(C, base).filter(s => s.move.last3 >= SLIP.stopped * s.move.run); }
+export function stoppedAccounts(C, base) { return downAccounts(C, base).filter(s => s.move.last3 < SLIP.stopped * s.move.run); }
+export function risingAccounts(C, base) {
+  return accountMoves(C, base).filter(s => s.move.pct >= -SLIP.pct && s.move.d >= SLIP.dollars && s.move.last3 >= SLIP.run)
     .sort((a, b) => b.move.d - a.move.d);
 }
 

@@ -139,13 +139,13 @@ export function segmentView(D) {
 
 // ── customers: the largest five, and the five rising and five slipping most (one definition of
 // movement everywhere: the last three months against the account's own twelve before them) ──
-export function customerView(D) {
-  const ser = seriesOf(D.C);
+export function customerView(D, base) {
+  const ser = seriesOf(D.C, base);
   const row = s => ({ level1: s.level1, customer: s.customer, last3: s.move ? s.move.last3 : null, d: s.move ? s.move.d : null, pct: s.move ? s.move.pct : null,
     storageMove: s.move ? s.move.dStorage : null, serviceMove: s.move ? s.move.dService : null, spark: s.total.slice(-13) });
   const top = [...ser.values()].filter(s => s.level1 !== CITADEL && s.move).sort((a, b) => b.move.last3 - a.move.last3).slice(0, 5).map(row);
-  const slip = slippingAccounts(D.C);
-  return { top, rising: risingAccounts(D.C).slice(0, 5).map(row), falling: slip.slice(0, 5).map(row), slipping: slip.length };
+  const slip = slippingAccounts(D.C, base);
+  return { top, rising: risingAccounts(D.C, base).slice(0, 5).map(row), falling: slip.slice(0, 5).map(row), slipping: slip.length, rises: risingAccounts(D.C, base).length };
 }
 
 // ── cross-sell: the accounts with most to buy, and which lines they don't buy yet est. ──
@@ -223,9 +223,9 @@ export function pointsView(D, { month: m, cust, cross, dens, lines }) {
   if (fall) {
     const drv = D.LW ? driverOf(D, fall.level1) : null;
     const fresh = D.LW ? newestFall(D, new Set([...slippingAccounts(D.C), ...risingAccounts(D.C)].map(s => s.level1))) : null;
-    const say = `${title(fall.customer)} is down ${money(fall.d)} a month in total on its own run${drv ? `, driven by ${drv.name.toLowerCase()}` : ''}.` +
+    const say = `${title(fall.customer)} is down ${money(fall.d)} a month (last 3 months against its own 12-month average)${drv ? `, driven by ${drv.name.toLowerCase()}` : ''}.` +
       (fresh ? ` New in ${mon(fresh.month)}: ${title(fresh.customer)} fell ${money(fresh.d)}${fresh.est ? ' est.' : ''}${fresh.driver ? `, driven by ${fresh.driver.toLowerCase()}` : ''}.` : '');
-    out.push({ key: 'customer', title: 'Customer', href: `#customer/${fall.level1}`, bullet: true, alert: fall.d <= -ALERT_CUSTOMER, line: say, say });
+    out.push({ key: 'customer', title: 'Customer', href: `#customer/${fall.level1}`, name: fall.customer, bullet: true, alert: fall.d <= -ALERT_CUSTOMER, line: say, say });
   }
   const c0 = cross.rows[0];
   if (c0) {

@@ -44,7 +44,9 @@ const SCREENS = () => [
   ] },
   { title: 'Accounts', line: 'Who is growing or slipping, and what each one earns.', groups: [
     ['All accounts', [
-      'The summary and tiles come first, then the book by line and who moved: the largest, those rising and those slipping, each against its own run.',
+      'The summary and tiles come first, then the book by line and who moved: the largest, those rising and those slipping, each the last three months against its own 12-month average, or, with the switch, the 3 months before or the same 3 months last year.',
+      'Tap a name and the drawer says why it moved: each line\'s part, whether it was one-off work (bought in 3 or fewer of the last 12 months, or a month over 3× usual) or regular work, and for regular work how much was volume and how much price. Then one move to send to Opportunities with a note.',
+      'In the table, choosing a line of business makes every figure that line only. Units shows boxes stored, bin services done (from Veri-Shred, by the month of the work), boxes moved, delivery trips, devices or hours.',
       'The table has every account by the month it was billed, in $K, largest first, and adds to the invoiced total at its foot. The switch changes how many months show.',
       'Tap the arrow on a row for its lines, a name for the account page, a month for its invoices. Find an account by name, filter by line of business, size or trend, save a view, choose columns or download the table.',
     ]],

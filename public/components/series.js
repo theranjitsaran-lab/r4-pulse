@@ -7,10 +7,20 @@
 // months before them, in dollars a month and as a share, split into storage and service so a row can
 // say which moved.
 import * as Fmt from './format.js';
+import { windows } from './movebridge.js';
 const sum = a => a.reduce((t, v) => t + v, 0);
 const avg = a => a.length ? sum(a) / a.length : 0;
 
-export function seriesOf(C) {
+// base: what the last three months are compared with (movebridge.js BASES): 'avg12' (default, the twelve months
+// before them), 'prev3' (the three before), 'ly3' (the same three a year ago).
+const memo = new WeakMap();
+export function seriesOf(C, base = 'avg12') {
+  const hit = memo.get(C); if (hit && hit[base]) return hit[base];
+  const out = build(C, base);
+  memo.set(C, { ...(memo.get(C) || {}), [base]: out });
+  return out;
+}
+function build(C, base) {
   let start = 0;
   while (start < C.months.length - 1 && C.accounts.every(a => !a.storage[start] && !a.service[start])) start++;
   const months = C.months.slice(start);
@@ -20,11 +30,11 @@ export function seriesOf(C) {
     const total = storage.map((v, i) => v + service[i]);
     const ltm = sum(total.slice(-12));
     let move = null;
-    if (total.length >= 15) {
-      const last3 = avg(total.slice(-3)), run = avg(total.slice(-15, -3));
-      const dSt = avg(storage.slice(-3)) - avg(storage.slice(-15, -3));
-      const dSv = avg(service.slice(-3)) - avg(service.slice(-15, -3));
-      move = { last3, run, d: last3 - run, pct: run > 0 ? last3 / run - 1 : null, dStorage: dSt, dService: dSv };
+    const W = windows(total.length, base);
+    if (W) {
+      const pick = (a, idx) => avg(idx.map(i => a[i]));
+      const last3 = pick(total, W.now), run = pick(total, W.ref);
+      move = { last3, run, d: last3 - run, pct: run > 0 ? last3 / run - 1 : null, dStorage: pick(storage, W.now) - pick(storage, W.ref), dService: pick(service, W.now) - pick(service, W.ref), base };
     }
     map.set(a.level1, { ...a, months, storage, service, total, ltm, move });
   }

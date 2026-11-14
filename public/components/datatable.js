@@ -1,7 +1,7 @@
 // One table and one filter bar for every list. Search and up to six filters, each a removable chip with a
 // count ("42 of 376"), all kept in the link; three or four columns by default and the rest behind Columns; sort
 // by header; a total row worked out on the filtered rows; saved views; Download CSV of what is showing. 13px
-// figures on 30px rows, with the header, name column and total row staying put. 50 rows, then Show all.
+// figures on 28px rows, with the header, name column and total row staying put. 50 rows, then Show all.
 // With months, the columns are months, latest on the right, then YTD and 12 months past a rule; a 3 / 12 month
 // switch, phones opening on 3; a month in progress is hatched and says est.
 //
@@ -127,8 +127,7 @@ export function dataTable(el, o) {
       ${(o.filters || []).filter(f => !f.hidden && !f.chips && !f.seg).map(f => `<select class="dt-f" data-k="${f.k}" aria-label="${esc(f.l)}"><option value="">${esc(f.l)}</option>${f.options.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>`).join('')}
       ${o.months ? '<span class="seg dt-span" role="group" aria-label="Months shown"><button type="button" data-span="3">3 months</button><button type="button" data-span="12">12 months</button></span>' : ''}
       <details class="dt-cols"><summary>Columns</summary><div class="dt-colbox"></div></details>
-      <select class="dt-views" aria-label="Saved views"></select>
-      <button type="button" class="dt-csv">Download CSV</button>
+      <details class="dt-menu"><summary aria-label="Saved views and download">⋯</summary><div class="dt-menubox"><select class="dt-views" aria-label="Saved views"></select><button type="button" class="dt-csv">Download CSV</button></div></details>
     </div>
     <div class="dt-chips"></div>
     <div class="dt-scroll"><table class="dt-t"></table></div>

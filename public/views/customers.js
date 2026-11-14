@@ -13,7 +13,7 @@ import { loadRoadnet } from '/components/routemap.js';
 import { getJson, loadRates, titleCase, esc, getLog, postLog } from '/components/data.js';
 import { billNow, serviceGaps, storageGaps, overdueBoxes, crossSellPace, slippingAccounts, stoppedAccounts, risingAccounts, CROSS_SELL_DEPTH, PRICED } from '/components/levers.js';
 import { buildWhitespace, LINES, lineCodes } from '/components/whitespace.js';
-import { drillData, drillHtml, wireDrill } from '/components/crossdrill.js';
+import { drillData, drillHtml, wireDrill, unitRates } from '/components/crossdrill.js';
 import { phoneFold, isPhone } from '/components/phonekit.js';
 import { openExplainer } from '/components/explain.js';
 import { conversationCandidates } from '/components/lists.js';
@@ -240,7 +240,8 @@ async function whitespace(main, C, params) {
   for (const [list, kind] of [[slippingAccounts(C), 'slipping'], [stoppedAccounts(C), 'stopped'], [risingAccounts(C), 'rising']]) for (const a of list) kinds.set(a.level1, kind);
   const quote = lineCodes(M, PRICED);
   const said = await fetch('/api/sales/opportunities', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(j => (j && j.data) || {}).catch(() => ({}));
-  const drill = r => { const s = SR.get(r.level1); return drillData(r, s ? { move: s.move, kind: kinds.get(r.level1) || 'level' } : null); };
+  const U = unitRates(M);
+  const drill = r => { const s = SR.get(r.level1); return drillData(r, s ? { move: s.move, kind: kinds.get(r.level1) || 'level' } : null, U); };
   const why = r => drillHtml(drill(r), { fresh: !seen.has(r.level1), quote });
   // kept to the width of the table's window, so it stays on screen however far the table has scrolled
   const fit = () => { const box = main.querySelector('#ws-t .dt-scroll'); if (box) box.style.setProperty('--cd-w', box.clientWidth + 'px'); };

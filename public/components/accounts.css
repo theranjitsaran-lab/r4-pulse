@@ -400,3 +400,27 @@ html.js .mpop-wrap.on .mpop { opacity: 1; transform: translate(-50%, -50%) scale
 .pop-f:has(.pop-x:not(:empty)) .pop-ask, .pop-x .cd-go { width: auto; min-height: calc(var(--u) * 10); padding: 0 var(--sp-4); font-size: var(--fs-label); font-weight: 600; line-height: 1.2; }
 .pop-f:has(.pop-x:not(:empty)) .pop-ask { background: var(--surface); color: var(--brand); border: var(--hair) solid var(--rule-4); }
 .pop-x .cd-go { color: var(--on-brand); }
+
+/* in the one table the margin is a dot and a figure, not a pill, so the rows stay tight (14 November 2026) */
+.dt-t td.dt-rag .rag { min-width: 0; padding: 0 var(--sp-1); background: none; font-size: var(--fs-sm); font-weight: 600; }
+.dt-t td.dt-rag .rag:hover { transform: none; text-decoration: underline; }
+
+/* Settings › Route cost and Context for Ask (admin, 14 November 2026) */
+.rc-t { margin: var(--sp-2) 0 var(--sp-3); width: 100%; }
+.rc-t td small { display: block; color: var(--ink-4); font-size: var(--fs-tiny); }
+.rc-t .rc-sum td { border-top: var(--hair) solid var(--rule-ink); font-weight: 600; }
+.rc-t .rc-res td { font-weight: 700; color: var(--ink); }
+.rc-up { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-3); align-items: center; margin: var(--sp-2) 0; }
+.rc-ok { color: var(--ok, var(--brand)); font-size: var(--fs-label); font-weight: 600; }
+.rc-no { color: var(--warn-on-canvas, var(--warn)); font-size: var(--fs-label); font-weight: 600; }
+.ctx-t { width: 100%; font: inherit; font-size: var(--fs-sm); padding: var(--sp-2); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); resize: vertical; box-sizing: border-box; }
+.rc-prev .p2-t td small { display: block; color: var(--ink-4); font-size: var(--fs-tiny); }
+
+/* Opportunities: each move's notes log and a box to add one (14 November 2026) */
+.op-notes { grid-column: 1 / -1; display: grid; gap: var(--sp-1); margin-top: var(--sp-1); }
+.op-log { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-1); }
+.op-log li { padding: var(--sp-1) var(--sp-2); background: var(--well); border-radius: var(--r-sm); }
+.op-log p { margin: 0; font-size: var(--fs-sm); }
+.op-log small { color: var(--ink-4); font-size: var(--fs-tiny); }
+.op-addnote { display: flex; gap: var(--sp-2); align-items: center; }
+.op-addnote input { flex: 1; min-width: 0; font: inherit; font-size: var(--fs-sm); padding: var(--sp-1) var(--sp-2); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); }

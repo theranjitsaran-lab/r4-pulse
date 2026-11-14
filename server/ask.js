@@ -18,7 +18,7 @@ const router = express.Router();
 const MODEL = 'claude-opus-5-5';
 const ROOT = path.join(__dirname, '..');
 let libs;
-const load = () => libs || (libs = Promise.all(['home2data', 'levers', 'margin', 'chart', 'series', 'opps', 'quote', 'gl', 'linework'].map(n => import('../public/components/' + n + '.js').then(m => [n, m])))
+const load = () => libs || (libs = Promise.all(['home2data', 'levers', 'margin', 'chart', 'series', 'opps', 'quote', 'gl', 'linework', 'linegrid', 'movebridge'].map(n => import('../public/components/' + n + '.js').then(m => [n, m])))
   .then(Object.fromEntries));
 
 // the data, as the screens read it (server/screendata.js)
@@ -86,6 +86,21 @@ function tools(L, D, X = {}) {
         const q = String(name || '').toUpperCase().replace(/[^A-Z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 1);
         const hits = [...names].filter(([, n]) => q.every(w => n.toUpperCase().includes(w))).slice(0, 8);
         return { matches: hits.map(([level1, n]) => ({ level1, customer: title(n), last_12_months: ser.has(level1) ? moneyK(ser.get(level1).ltm) : 'not in the customer list' })) };
+      },
+    },
+    why_moved: {
+      description: "Why one account moved, as the drawer on Who moved shows it: the last three months against its own 12-month average (or the 3 months before, or the same 3 months last year), split by line into one-off work (a project or purge not repeated) and regular work, and regular work into volume and price where the line has units.",
+      input: { type: 'object', properties: { level1: { type: 'integer' }, base: { type: 'string', enum: ['avg12', 'prev3', 'ly3'] } }, required: ['level1', 'base'], additionalProperties: false },
+      run: ({ level1, base }) => {
+        const H = D.AL ? L.linegrid.accountHistory({ C: D.C, AM: D.AM, AL: D.AL }, level1) : null;
+        if (!H) return { error: `no line history for ${level1}` };
+        const T = { regular: D.R.SETTINGS.oneOffRegular || 6, oneOff: D.R.SETTINGS.oneOffMonths || 3, spike: D.R.SETTINGS.oneOffSpike || 3 };
+        const b = L.movebridge.windows(H.months.length, base) ? base : 'prev3';
+        const x = L.movebridge.explainMove({ months: H.months, lines: H.lines, base: b, T });
+        if (!x) return { error: 'too few months to compare' };
+        return { customer: title(H.customer), compared_with: x.label, summary: L.movebridge.moveSentence(x, moneyK), last_3_months_a_month: moneyK(x.nowAvg), compared_a_month: moneyK(x.refAvg), move_a_month: signed(x.d),
+          one_off_part: signed(x.parts.oneOff), regular_part: signed(x.parts.regular),
+          by_line: x.byLine.filter(l => Math.abs(l.d) >= 50).map(l => `${l.name} (${l.kind}): ${moneyK(l.nowAvg)} against ${moneyK(l.refAvg)}, ${signed(l.d)}${l.oneOff ? `, one-off ${signed(l.oneOff)}` : ''}${l.volume != null ? `, volume ${signed(l.volume)}, price ${signed(l.price)}` : ''}`) };
       },
     },
     customer: {
@@ -242,7 +257,7 @@ function unchecked(text, facts) {
     .filter(n => !allowed.has(n) && !allowed.has(n.replace(/^[−+]/, '')));
 }
 
-async function claude(question, history, T) {
+async function claude(question, history, T, context = []) {
   const Anthropic = require('@anthropic-ai/sdk');
   const client = new (Anthropic.default || Anthropic)();
   const toolDefs = Object.entries(T).map(([name, t]) => ({ name, description: t.description, input_schema: t.input, strict: true }));
@@ -253,7 +268,7 @@ async function claude(question, history, T) {
     const res = await client.beta.messages.create({
       model: MODEL, max_tokens: 4000, output_config: { effort: 'low' },
       betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default',
-      system: SYSTEM, tools: toolDefs, messages,
+      system: context.length ? `${SYSTEM}\n\nContext from R4 about the business, written by Theran. Use it to explain and to judge what matters; it is not a source of figures, so quote no number from it:\n${context.map(c => `- ${c.note}`).join('\n')}` : SYSTEM, tools: toolDefs, messages,
     });
     if (res.stop_reason === 'refusal') return { answer: 'I can’t answer that one.', source: 'claude', tools: used };
     messages.push({ role: 'assistant', content: res.content });
@@ -304,7 +319,8 @@ router.post('/', async (req, res) => {
     // modelled costs are for admins until they are final: no tool, so Ask says the app does not hold them
     if (!seesCosts(req)) for (const k of ['quote', 'margin_by_line', 'route_density']) delete T[k];
     if (!process.env.ANTHROPIC_API_KEY) return res.json({ answer: template(question, T), source: 'template', tools: [] });
-    res.json(await claude(question, history, T));
+    const context = await sales.contextNotes().catch(() => []);
+    res.json(await claude(question, history, T, context));
   } catch (e) {
     console.warn('ask:', e.message);
     res.status(500).json({ error: e.message });

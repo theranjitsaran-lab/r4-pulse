@@ -397,13 +397,18 @@ export async function render(main, A, params) {
   }
   function openArea(a) {
     const drive = a.travel, site = a.onsite, all = drive + site || 1, lead = a.who[0], best = a.best || a.options[0];
-    const opt = a.options.map((o, i) => `<li class="${a.best && i === 0 ? 'best' : ''}"><span><small>${a.best && i === 0 ? 'Best move' : 'Option'}</small><b>${esc(o.title)}</b></span><em>${money0(o.saving)}</em><p>${esc(o.say)}</p></li>`).join('');
+    // each fix can be the one sent (Theran, 14 November 2026); the largest is ticked
+    const opt = a.options.map((o, i) => `<li class="${a.best && i === 0 ? 'best' : ''}"><label class="ops-pick"><input type="radio" name="op-fix" value="${i}" ${i === 0 ? 'checked' : ''}><span><small>${a.best && i === 0 ? 'Best move' : 'Option'}</small><b>${esc(o.title)}</b></span></label><em>${money0(o.saving)}</em><p>${esc(o.say)}</p></li>`).join('');
+    const verdict = a.losing ? `Losing about ${money0(-a.left)} a year est.${a.range ? ` (between ${money0(Math.max(0, -a.range.hi))} and ${money0(-a.range.lo)} while the route-cost assumptions are not signed off)` : ''}.` : a.band.cls === 'r' ? `Not losing money, but thin: it leaves ${money0(a.left)} a year est. after route time and the plant.` : `It pays its way: ${money0(a.left)} a year est. after route time and the plant.`;
+    const custs = `<ul class="h2-pl">${a.who.slice(0, 8).map(w => `<li><a href="#customer/${w.level1}"><span>${esc(titleCase(w.name))}</span><small>${Fmt.grouped(w.services)} services</small><b></b></a></li>`).join('')}</ul>`;
     openPop({ title: `${a.postcode}: ${titleCase(lead.name)}`, sub: `${Fmt.fixed(a.miles, 0)} miles from the yard, ${pl(a.visits, 'visit')} in twelve months`, size: 'mid', html: `
+      <p class="p2-lede"><b>${esc(verdict)}</b></p>
       <div id="op-d-pts"></div>
       <div class="md-tot"><div><small>Cost a visit, est.</small><b>${money0(a.perVisit)}</b></div><div><small>Revenue a visit, est.</small><b>${money0(a.revenuePerVisit)}</b></div><div><small>Route time a year, est.</small><b>${money0(a.cost)}</b></div><div><small>Margin, est.</small><b>${a.margin == null ? '—' : signedPc(a.margin)}</b></div></div>
       <div class="ops-dsec"><h3>Where a visit's route cost goes, est.</h3><div class="ops-split" role="img" aria-label="Driving ${esc(money0(drive / a.visits))} a visit, on site ${esc(money0(site / a.visits))} a visit"><i class="drive" style="flex:${(drive / all).toFixed(3)} 0 0"></i><i class="site" style="flex:${(site / all).toFixed(3)} 0 0"></i></div><div class="ops-splitkey"><span>Driving ${money0(drive / a.visits)}</span><span>On site ${money0(site / a.visits)}</span></div></div>
+      <div class="ops-dsec"><h3>Who is served there, twelve months</h3>${custs}</div>
       <div class="ops-dsec"><h3>${a.best ? 'Ways to improve it, a year est.' : `It is ${esc(a.band.word.toLowerCase())}: nothing needs to change. If it did, a year est.`}</h3><ul class="ops-opts">${opt}</ul></div>
-      <div class="ops-dsec"><h3>Next step</h3><div class="ops-send" id="op-send"><label>Owner <select id="op-owner">${OWNERS.map(o => `<option value="${o}"${o === whoAmI() ? ' selected' : ''}>${esc(ownerName(o))}</option>`).join('')}</select></label><button type="button" class="pq-btn" id="op-go">Send to Opportunities</button></div></div>` });
+      <div class="ops-dsec"><h3>Next step</h3><div class="ops-send" id="op-send"><label class="ops-note">Note <textarea id="op-note" rows="2" maxlength="400">${esc(verdict)}</textarea></label><label>Owner <select id="op-owner">${OWNERS.map(o => `<option value="${o}"${o === whoAmI() ? ' selected' : ''}>${esc(ownerName(o))}</option>`).join('')}</select></label><button type="button" class="pq-btn" id="op-go">Send to Opportunities</button></div></div>` });
     const body = document.querySelector('.pop .pop-b');
     drawPoints(body.querySelector('#op-d-pts'), [
       { key: 'cost', tone: a.band.cls, lead: `Costs ${money0(a.perVisit)} a visit est.,`, rest: `${Fmt.pct(drive / all)} of it the drive: ${money0(a.cost)} of route time a year.` },
@@ -415,10 +420,10 @@ export async function render(main, A, params) {
     fetch('/api/sales/opportunities', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(j => { const s = j && j.data && j.data[k]; if (s && send.isConnected) sent(s.owner || 'no owner'); }).catch(() => {});
     if (!best) { send.innerHTML = ''; return; }
     body.querySelector('#op-go').addEventListener('click', async ev => {
-      const owner = body.querySelector('#op-owner').value;
+      const owner = body.querySelector('#op-owner').value, pick = a.options[Number((body.querySelector('input[name="op-fix"]:checked') || {}).value) || 0] || best, note = (body.querySelector('#op-note') || {}).value || '';
       ev.target.disabled = true;
       try {
-        const r = await fetch('/api/sales/opportunities', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: k, level1: lead.level1, status: 'open', owner, value: Math.round(best.saving), note: `${best.title} at ${a.postcode}: about ${money0(best.saving)} a year est., ${pl(a.visits, 'visit')} a year at ${money0(a.perVisit)} of route cost.` }) });
+        const r = await fetch('/api/sales/opportunities', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: k, level1: lead.level1, status: 'open', owner, value: Math.round(pick.saving), note: `${pick.title} at ${a.postcode}: about ${money0(pick.saving)} a year est. ${note}`.slice(0, 500) }) });
         if (!r.ok) throw new Error(String(r.status));
         sent(owner);
       } catch (e) { ev.target.disabled = false; const m = document.createElement('span'); m.className = 'ops-sent'; m.textContent = 'That did not save. Try again in a moment.'; send.appendChild(m); }

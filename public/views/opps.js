@@ -86,6 +86,8 @@ export async function render(main, params, C) {
         <p>${esc(m.reason)}</p>
         ${m.opener ? `<details class="op-open"><summary>A way to open</summary><p>“${esc(m.opener)}”</p></details>` : ''}
         <div class="op-cf"><small>${m === t.best ? 'Best move' : ''}${m.owner ? `${m === t.best ? ', ' : ''}with ${esc(ownerName(m.owner))}` : ''}</small>${act(m)}</div>
+        <div class="op-notes">${(m.notes || []).length ? `<ol class="op-log">${m.notes.map(n => `<li><p>${esc(n.note)}</p><small>${esc(n.who || '')}, ${esc(new Date(n.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }))}${n.status ? ` · ${esc(n.status)}` : ''}</small></li>`).join('')}</ol>` : ''}
+          <div class="op-addnote"><input type="text" class="op-note-in" maxlength="400" placeholder="Add a note: who you spoke to, what was said" aria-label="Add a note to this move"><button type="button" class="linkbtn op-note-go" data-op-key="${esc(m.key)}">Add note</button></div></div>
       </article>`).join('')}</div>
       ${over && gap ? `<p class="op-over">These overlap: if the overdue boxes are destroyed, storage falls by ${moneyK(over.ends)} a year, which shrinks the storage price gap.</p>` : ''}
     </div>`;
@@ -128,6 +130,19 @@ export async function render(main, params, C) {
 
   // ── saving: what the row shows moves at once; the top follows ──
   const msg = $('op-msg');
+  // a note on a move: the notes log keeps every one, with who wrote it and when (Theran, 14 November 2026)
+  host.addEventListener('click', async e => {
+    const b = e.target.closest('.op-note-go'); if (!b) return;
+    const inp = b.parentNode.querySelector('.op-note-in'), text = inp.value.trim(); if (!text) { inp.focus(); return; }
+    const r = rows.find(x => x.key === b.dataset.opKey); if (!r) return;
+    b.disabled = true; msg.textContent = 'Saving the note…';
+    const res = await fetch('/api/sales/opportunities', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: r.key, level1: r.level1, status: r.status || 'open', owner: r.owner || null, value: r.value, note: text, next_step: r.next || null }) }).catch(() => null);
+    if (!res || !res.ok) { msg.textContent = 'That note did not save. Try again in a moment.'; b.disabled = false; return; }
+    r.note = text; r.notes = [...(r.notes || []), { note: text, who: me, at: new Date().toISOString(), status: r.status }];
+    msg.textContent = `Note saved: ${r.name}.`;
+    T.draw();
+  });
   async function save(el, patch) {
     const r = rows.find(x => x.key === el.dataset.opKey); if (!r) return;
     const next = { status: r.status, owner: r.owner, next: r.next, ...patch };

@@ -82,6 +82,68 @@ export function accountLines(AM, AL, level1) {
   return { months: AM.months, rows };
 }
 
+// Every account's months by line, in dollars and in units, for Accounts' line filter and its $ / Units switch
+// (Theran, 14 November 2026). Aligned to AM's months (month billed). Storage is the account's storage on each bill and
+// its boxes; a service line is its priced lines and their units (accountlines). Bins serviced are Veri-Shred's done bin
+// services, by the month the work was done, so they sit a month ahead of the bill that charges them.
+//   lineMonths(AM, AL) → Map(level1 → { [line]: { r: [..], u: [..] | null }, binsDone: [..] | null })
+export function lineMonths(AM, AL) {
+  const at = new Map(AM.months.map((m, i) => [m, i])), n = AM.months.length, out = new Map();
+  const get = id => out.get(id) || out.set(id, {}).get(id);
+  const arr = () => new Array(n).fill(0);
+  for (const a of AM.accounts) if (a.storage.some(Boolean)) get(a.level1).storage = { r: a.storage.slice(), u: null };
+  const hasUnits = !!(AL && AL.rows && AL.rows.some(r => r.units != null));
+  for (const r of (AL && AL.rows) || []) {
+    if (!at.has(r.month)) continue;
+    const o = get(r.level1), x = o[r.family] || (o[r.family] = { r: arr(), u: hasUnits ? arr() : null }), i = at.get(r.month);
+    x.r[i] += r.revenue; if (x.u && r.units != null) x.u[i] += r.units;
+  }
+  for (const b of (AL && AL.boxes) || []) {
+    if (!at.has(b.month)) continue;
+    const o = get(b.level1), x = o.storage || (o.storage = { r: arr(), u: null });
+    (x.u || (x.u = arr()))[at.get(b.month)] += b.boxes;
+  }
+  for (const b of (AL && AL.bins) || []) {
+    if (!at.has(b.month)) continue;
+    const o = get(b.level1); (o.binsDone || (o.binsDone = arr()))[at.get(b.month)] += b.bins;
+  }
+  return out;
+}
+// One account's months by line over as many months as the line data holds (25 live), for the move drawer
+// (movebridge.js). Storage from the customer series (C, 24 months) where it has the account, else AM. What the bill
+// carries beyond its itemised lines (tax and the like) is its own line, so the lines add to the account's total.
+//   accountHistory({ C, AM, AL }, level1) → { months, lines: { key: { name, r, u } }, customer } | null
+export function accountHistory({ C, AM, AL }, level1) {
+  const months = [...new Set((AL && AL.rows || []).map(r => r.month))].sort();
+  if (!months.length) return null;
+  const at = new Map(months.map((m, i) => [m, i])), z = () => months.map(() => 0);
+  const src = (C && C.accounts.find(a => a.level1 === level1)) ? C : AM;
+  const acc = src && src.accounts.find(a => a.level1 === level1);
+  if (!acc) return null;
+  const storage = z(), service = z(), known = months.map(() => false);
+  src.months.forEach((m, i) => { if (at.has(m)) { const j = at.get(m); storage[j] = acc.storage[i] || 0; service[j] = acc.service[i] || 0; known[j] = true; } });
+  const hasU = AL.rows.some(r => r.units != null);
+  const lines = {};
+  if (storage.some(Boolean)) lines.storage = { name: LINE_NAMES.storage, r: storage, u: null };
+  for (const r of AL.rows) {
+    if (r.level1 !== level1 || !at.has(r.month)) continue;
+    const x = lines[r.family] || (lines[r.family] = { name: LINE_NAMES[r.family] || r.family, r: z(), u: hasU ? z() : null });
+    x.r[at.get(r.month)] += r.revenue; if (x.u && r.units != null) x.u[at.get(r.month)] += r.units;
+  }
+  for (const b of AL.boxes || []) if (b.level1 === level1 && at.has(b.month) && lines.storage) (lines.storage.u || (lines.storage.u = z()))[at.get(b.month)] += b.boxes;
+  const rest = months.map((_, i) => known[i] ? service[i] - Object.entries(lines).filter(([k]) => k !== 'storage').reduce((t, [, l]) => t + l.r[i], 0) : 0);
+  if (rest.some(v => Math.abs(v) >= 1)) lines.rest = { name: 'Tax and other, not itemised', r: rest, u: null };
+  // only the months the account's own series covers
+  const first = known.indexOf(true);
+  if (first < 0) return null;
+  const cut = a => a ? a.slice(first) : a;
+  for (const l of Object.values(lines)) { l.r = cut(l.r); l.u = cut(l.u); }
+  return { months: months.slice(first), lines, customer: acc.customer };
+}
+
+// What each line's units are, for labels
+export const LINE_UNITS = { storage: 'boxes stored', bin: 'bin services', shred: 'boxes shredded', itad: 'devices', handling: 'boxes moved', labour: 'hours', movement: 'delivery trips', other: null };
+
 // ── what the table reads ──
 export const STORAGE_KEY = 'storage';
 export function gridRows(grid, C, group) {

@@ -153,7 +153,7 @@ export function density(months) {
 // A year of each far area's stops as its route days share them out (routecost.js), and what the work there billed: each
 // sub-account's lines at this postcode (arearevenue query), plus any with no postcode shared by the account's services here.
 // Plant pounds from S5 where the account has it (data rule 6), else what Veri-Shred recorded at the stops.
-export function costlyAreas({ rc, AR, M, Z, R }, { minVisits = MIN_VISITS, farMiles = FAR_MILES } = {}) {
+export function costlyAreas({ rc, AR, M, Z, R }, { minVisits = MIN_VISITS, farMiles = FAR_MILES, signed = false } = {}) {
   const list = (rc && rc.dayList) || [];
   const areas = new Map(), acct = new Map();
   let bookTravel = 0, bookVisits = 0;
@@ -201,6 +201,11 @@ export function costlyAreas({ rc, AR, M, Z, R }, { minVisits = MIN_VISITS, farMi
       revenue, plant, pounds, poundsFrom: usedS5 ? 'S5' : 'stops', left, margin: pc, band: { cls: band.cls, word: band.word },
       perVisit: a.cost / visits, revenuePerVisit: revenue / visits, who, routes: [...a.routes].sort((x, y) => y[1] - x[1]).map(([route, stops]) => ({ route, stops })),
     };
+    // Losing money or thin, said plainly (Theran, 14 November 2026). Until the route-cost assumptions are signed off on
+    // Settings, the route cost carries a range of a fifth either way, and so does what is left.
+    area.losing = left < 0;
+    area.signed = signed;
+    area.range = signed ? null : { lo: revenue - a.cost * 1.2 - plant, hi: revenue - a.cost * 0.8 - plant };
     area.options = moves(area, a, { R, Z, history, bookPerVisit });
     area.best = area.band.cls === 'g' || !area.options.length ? null : area.options[0];
     out.push(area);
@@ -208,7 +213,9 @@ export function costlyAreas({ rc, AR, M, Z, R }, { minVisits = MIN_VISITS, farMi
   return out.sort((x, y) => y.cost - x.cost);
 }
 
-// What would improve an area, each sized on its own from the cost model, never added together.
+const titleOf = s => String(s || '').toLowerCase().replace(/\b([a-z])/g, c => c.toUpperCase());
+// What would improve an area, each sized on its own from the cost model, never added together: a route change (book
+// it on a passing route's days, or fewer, fuller visits), a trip fee a visit, or a reprice (Theran, 14 November 2026).
 function moves(area, a, { R, Z, history, bookPerVisit }) {
   const stopMin = R.SETTINGS.stopMin, perMinute = (area.driveMin + area.dropMin) > 0 ? area.cost / (area.driveMin + area.dropMin) : 0;
   const out = [];
@@ -226,9 +233,13 @@ function moves(area, a, { R, Z, history, bookPerVisit }) {
   if (rider && ride > 0) out.push({ key: 'ride', title: `Book it on ${routeWord(rider[0])}'s days`, say: `On ${carried} of its ${a.days.length} days another route passed within two miles within ${NEAR_DAYS} days, ${routeWord(rider[0])} most often.`, saving: ride, route: rider[0] });
   const fewer = area.travel / 2 + area.stops / 2 * stopMin * perMinute;
   if (fewer > 0) out.push({ key: 'fewer', title: 'Fewer, fuller visits', say: `${Fmt.count(area.visits)} visits a year become ${Fmt.count(Math.ceil(area.visits / 2))}; the same services, more on each.`, saving: fewer });
-  const over = area.travel / area.visits - bookPerVisit;
-  if (over > 0) out.push({ key: 'charge', title: 'A distance charge', say: `${Fmt.money(over)} a visit covers what its drive costs above the book's ${Fmt.money(bookPerVisit)}.`, saving: over * area.visits });
-  out.push({ key: 'neighbour', title: 'Add a neighbour', say: `A second customer in ${area.postcode} on the same visits takes half the drive, before anything it bills.`, saving: area.travel / 2 });
+  // a trip fee a visit: enough to stop it losing money, else what its drive costs above the book's average visit
+  const toEven = area.left < 0 ? -area.left / area.visits : 0, over = area.travel / area.visits - bookPerVisit;
+  const fee = toEven > 0 ? toEven : over;
+  const payers = area.who.slice(0, 4).map(w => `${titleOf(w.name)} (${Fmt.count(w.services)} services)`).join(', ');
+  if (fee > 0) out.push({ key: 'charge', title: `A trip fee of ${Fmt.money(Math.ceil(fee))} a visit`, say: `${toEven > 0 ? 'Brings the area to break even' : `Covers what its drive costs above the book's ${Fmt.money(bookPerVisit)} a visit`}: ${Fmt.count(area.visits)} visits a year. Who pays it: ${payers}.`, saving: Math.ceil(fee) * area.visits });
+  // reprice the work there: the share on its service revenue that brings it to break even
+  if (area.left < 0 && area.revenue > 0) { const up = -area.left / area.revenue; out.push({ key: 'reprice', title: `Reprice the work there: +${Fmt.pct(up)}`, say: `Raising ${area.who.length === 1 ? 'its' : 'their'} service prices ${Fmt.pct(up)} covers the loss on ${Fmt.money(area.revenue, { short: true })} of revenue a year. Largest there: ${payers}.`, saving: -area.left }); }
   return out.filter(o => o.saving > 0).sort((x, y) => y.saving - x.saving);
 }
 
@@ -244,8 +255,11 @@ export function opsPoints(V, costly = null) {
   const c = V.changes[0];
   if (c) pts.push({ key: 'route', tone: c.d < 0 ? 'a' : 'g', lead: `${routeWord(c.route)} moved most:`, rest: `${Fmt.count(c.now)} route days against ${Fmt.count(c.before)} in ${p.prevName}.` });
   else { const top = V.routes[0]; pts.push({ key: 'route', tone: 'g', lead: `${routeWord(top.route)} carried most:`, rest: `${Fmt.count(top.services)} services on ${Fmt.count(top.routeDays)} route days.` }); }
-  const thin = (costly || []).filter(a => a.band && a.band.cls === 'r');
-  if (costly && costly.length) pts.push({ key: 'far', tone: thin.length ? 'r' : 'g', lead: `${Fmt.count(thin.length)} of ${Fmt.count(costly.length)} far areas are thin,`, rest: `over twelve months est.${thin[0] ? ` The largest route cost among them is ${thin[0].postcode}, ${Fmt.money(thin[0].cost, { short: true })} a year.` : ''}` });
+  const losing = (costly || []).filter(a => a.losing), thin = (costly || []).filter(a => !a.losing && a.band && a.band.cls === 'r');
+  const lost = losing.reduce((t, a) => t - a.left, 0), worst = losing.slice().sort((x, y) => x.left - y.left)[0];
+  if (costly && costly.length) pts.push({ key: 'far', tone: losing.length ? 'r' : thin.length ? 'a' : 'g',
+    lead: losing.length ? `${Fmt.count(losing.length)} of ${Fmt.count(costly.length)} far areas lose money,` : `No far area loses money;`,
+    rest: `${losing.length ? `about ${Fmt.money(lost, { short: true })} a year est. in all` : ''}${thin.length ? `${losing.length ? ', and ' : ''}${Fmt.count(thin.length)} more are thin` : ''}.${worst ? ` Largest: ${worst.postcode}, losing ${Fmt.money(-worst.left, { short: true })} a year; tap it for the fixes.` : ''}${costly[0] && !costly[0].signed ? ' Route costs not yet signed off.' : ''}` });
   else pts.push({ key: 'near', tone: 'g', lead: `${Fmt.pct(now.within10)} of the work is within ten miles of the yard`, rest: `in ${p.inName}.` });
   return pts;
 }

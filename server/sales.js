@@ -48,8 +48,30 @@ async function opportunities() {
   const rows = USE_FIXTURES ? read('opportunities.json')
     : await query(`SELECT key, level1, owner, status, value::float, note, next_step::text, who, at::text FROM app.opportunity ORDER BY at`).catch(() => []);   // before sql/app_schema.sql is applied: nothing said yet
   const by = {};
-  for (const r of rows) by[r.key] = { ...(by[r.key] || {}), ...r, status: r.status === 'quoted' ? 'agreed' : r.status, first: (by[r.key] || {}).first || r.at };
+  for (const r of rows) {
+    if (String(r.key).startsWith('ctx:')) continue;   // Context for Ask is kept in the same table, never an opportunity
+    const was = by[r.key] || {}, notes = was.notes ? was.notes.slice() : [];
+    // the notes log: every note written on it, oldest first, a repeat of the one before left out
+    if (r.note && (!notes.length || notes[notes.length - 1].note !== r.note)) notes.push({ note: r.note, who: r.who, at: r.at, status: r.status === 'quoted' ? 'agreed' : r.status });
+    by[r.key] = { ...was, ...r, status: r.status === 'quoted' ? 'agreed' : r.status, first: was.first || r.at, notes };
+  }
   return by;
+}
+
+// ── Context for Ask (Settings, admin only, 14 November 2026): plain-English notes about the business that Ask reads
+// with every question, as context and never as figures. Kept as rows of app.opportunity with the key ctx:<id> and no
+// account (level1 0), so no new table is needed; the latest row of each key wins, and an empty note removes it.
+async function contextNotes() {
+  const rows = USE_FIXTURES ? read('opportunities.json')
+    : await query(`SELECT key, note, who, at::text FROM app.opportunity WHERE key LIKE 'ctx:%' ORDER BY at`).catch(() => []);
+  const by = {};
+  for (const r of rows) if (String(r.key).startsWith('ctx:')) by[r.key] = { id: r.key.slice(4), note: r.note || '', who: r.who, at: r.at };
+  return Object.values(by).filter(n => n.note.trim()).sort((a, b) => String(a.at).localeCompare(String(b.at)));
+}
+async function saveContext({ id, note, who }) {
+  const key = 'ctx:' + (/^[a-z0-9]{4,20}$/.test(id || '') ? id : Date.now().toString(36));
+  await saveOpp({ key, level1: 0, owner: null, status: 'open', value: null, note: String(note || '').slice(0, 500), who, next_step: null });
+  return key.slice(4);
 }
 async function saveOpp(o) {
   if (USE_FIXTURES) { const rows = read('opportunities.json'); const row = { ...o, at: new Date().toISOString() }; rows.push(row); write('opportunities.json', rows); return row; }
@@ -68,10 +90,19 @@ api.post('/quotes', async (req, res) => {
   try { res.json({ data: await saveQuote(q) }); } catch (e) { res.status(500).json({ error: e.message }); }
 });
 api.get('/opportunities', wrap(() => opportunities()));
+api.get('/context', async (req, res) => {
+  if (!(req.session.user && req.session.user.role === 'admin')) return res.status(403).json({ error: 'Only an admin can see the context notes.' });
+  res.json({ data: await contextNotes() });
+});
+api.post('/context', async (req, res) => {
+  if (!(req.session.user && req.session.user.role === 'admin')) return res.status(403).json({ error: 'Only an admin can edit the context notes.' });
+  try { const id = await saveContext({ id: req.body && req.body.id, note: req.body && req.body.note, who: req.session.user.name }); res.json({ data: { id, notes: await contextNotes() } }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
 api.post('/opportunities', async (req, res) => {
   const o = cleanOpp(req.body || {}, who(req));
   if (!o) return res.status(400).json({ error: `key, level1 and a status (${STATUSES.join(', ')}) are required` });
   try { res.json({ data: await saveOpp(o) }); } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-module.exports = { api, quotes, opportunities, STATUSES };
+module.exports = { api, quotes, opportunities, contextNotes, STATUSES };

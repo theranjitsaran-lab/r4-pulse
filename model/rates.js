@@ -154,6 +154,8 @@ async function loadFromDb(query) {
     volumes: Object.fromEntries(vols.map(v => [v.driver, Number(v.value)])),
   };
   derive(model);
+  BASE = ACTIVE = model;
+  if (CORRECTED) applyCorrections(CORRECTED);
   return model;
 }
 
@@ -164,7 +166,7 @@ async function loadFromDb(query) {
 // its day is by time instead: its drive minutes (its detour in road miles at mph) plus its drop
 // minutes (stopMin at each stop and serviceMin a service), scaled so a day's stops add up to the
 // route day. Three assumptions, all `assumed`, for Mike to check (31 October 2026).
-const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliveryMatch: 1, costsFinal: 0, routeHours: 8.5, dedicatedMinHours: 2, marginHealthy: 0.35, marginThin: 0.15, postcodes: {} };
+const SETTINGS = { split: 0.40, mph: 20, stopMin: 8, serviceMin: 3, deliveryMatch: 1, costsFinal: 0, routeHours: 8.5, dedicatedMinHours: 2, marginHealthy: 0.35, marginThin: 0.15, oneOffRegular: 6, oneOffMonths: 3, oneOffSpike: 3, postcodes: {} };
 const TIME_NOTES = {
   mph: ['Average city speed between stops', 'assumed', 'Chicago streets with a box truck; the main roads give the miles, this turns them into minutes.'],
   stopMin: ['Minutes at each stop before any service', 'assumed', 'Park, walk in, sign, walk out.'],
@@ -173,11 +175,14 @@ const TIME_NOTES = {
   routeHours: ['Hours in a route day', 'assumed', 'Turns the route day\'s cost into a route-hour rate, for what one more stop adds to a route that runs anyway. Hours were never captured, so this is the eight to nine hours a route day is said to run.'],
   dedicatedMinHours: ['Least hours a dedicated vehicle is costed at', 'assumed', 'A truck and driver pulled out for one job cost at least this, however close the job is.'],
   marginHealthy: ['Margin that reads Healthy', 'assumed', 'At or above this a margin reads Healthy, on every screen.'],
+  oneOffRegular: ['Months in twelve that make work regular', 'assumed', 'A customer\'s line bought in at least this many of the last twelve months is regular work; a fall in it is a real fall (movebridge.js).'],
+  oneOffMonths: ['Months in twelve or fewer that make work one-off', 'assumed', 'Bought in this many of the last twelve months or fewer, a customer\'s line is one-off work (a project, a purge): when it stops, the drawer says so rather than calling it slipping.'],
+  oneOffSpike: ['A month this many times usual is a one-off on top', 'assumed', 'A month of regular work more than this multiple of its usual month: the part above usual counts as one-off.'],
   marginThin: ['Margin below which it reads Thin', 'assumed', 'At or above this and below Healthy a margin reads Normal; below this Thin; below zero Thin, losing money.'],
   deliveryMatch: ['Box deliveries ride the shred routes, placed by location', 'observed', 'Deliveries go on the shred trucks (Theran, 1 November 2026). VCK does not say which route, so each is placed on the route that passed closest to it that day, and shares that day by minutes.'],
 };
 // Settings anyone can change on the Settings screen (server/settings.js): the bounds a value must sit in.
-const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], split: [0.1, 0.8], deliveryMatch: [0, 1], costsFinal: [0, 1], routeHours: [4, 14], dedicatedMinHours: [0, 8], marginHealthy: [0.05, 0.9], marginThin: [0.01, 0.8] };
+const SETTING_BOUNDS = { mph: [8, 45], stopMin: [2, 30], serviceMin: [0.5, 15], split: [0.1, 0.8], deliveryMatch: [0, 1], costsFinal: [0, 1], routeHours: [4, 14], dedicatedMinHours: [0, 8], marginHealthy: [0.05, 0.9], oneOffRegular: [4, 12], oneOffMonths: [1, 6], oneOffSpike: [1.5, 10], marginThin: [0.01, 0.8] };
 
 // The account's real route-day cost, set once the route days are costed (server: server/routecost.js;
 // browser: loadRates in components/data.js). { accounts: { level1: { cost, travel, onsite, services,
@@ -200,6 +205,25 @@ const FAMILIES = ['storage', 'handling', 'movement', 'bin', 'itad', 'shred', 'la
 const UNITS_PER_VISIT = { bin: 0, movement: 0, itad: 4000, storage: 0, handling: 0, shred: 0, labour: 0 };
 
 derive(MODEL);
+// The model the rates were last derived from (the seed, the database's model.* tables, or either corrected by Theran
+// on Settings › Route cost), and its corrections. applyCorrections takes { pools: { pool: annual $ over 12 months },
+// shares: { 'pool|rate': share }, from, to } and re-derives; with nothing in it, the base model stands.
+let BASE = MODEL, ACTIVE = MODEL, CORRECTED = null;
+function applyCorrections(c) {
+  const has = c && (Object.keys(c.pools || {}).length || Object.keys(c.shares || {}).length);
+  if (!has) { CORRECTED = null; ACTIVE = BASE; derive(BASE); return ACTIVE; }
+  const k = 12 / BASE.gl.months, pools = {};
+  // amounts as twelve months: a corrected pool as given, the rest annualised from the base period
+  for (const [p, x] of Object.entries(BASE.pools)) pools[p] = { ...x, amount: c.pools && c.pools[p] != null ? c.pools[p] : x.amount * k };
+  for (const [p, v] of Object.entries(c.pools || {})) if (!pools[p]) pools[p] = { amount: v, accounts: p };
+  const splits = BASE.splits.map(([p, rate, share]) => [p, rate, c.shares && c.shares[p + '|' + rate] != null ? c.shares[p + '|' + rate] : share]);
+  const anyPools = Object.keys(c.pools || {}).length;
+  ACTIVE = { ...BASE, gl: anyPools && c.from ? { months: 12, from: c.from, to: c.to } : { ...BASE.gl, months: 12, from: BASE.gl.from + ' (annualised)', to: BASE.gl.to }, pools, splits };
+  CORRECTED = c;
+  derive(ACTIVE);
+  return ACTIVE;
+}
+const activeModel = () => ({ model: ACTIVE, base: BASE, corrected: CORRECTED, names: POOL_NAMES });
 
 function travelPerVisit(miles) {
   const mi = miles || RATES.avgMiles.v;
@@ -330,7 +354,7 @@ function isModelled(family) {
   return family === 'bin' || family === 'itad' || family === 'movement' || family === 'shred';
 }
 
-const api = { RATES, MODEL, SETTINGS, TIME_NOTES, SETTING_BOUNDS, setRouteCosts, routeFor, routeCostsNow, movementFor, routeDayNow, routeHourRate, poolBreakdown, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
+const api = { RATES, MODEL, SETTINGS, applyCorrections, activeModel, TIME_NOTES, SETTING_BOUNDS, setRouteCosts, routeFor, routeCostsNow, movementFor, routeDayNow, routeHourRate, poolBreakdown, FAMILIES, UNITS_PER_VISIT, costToServe, familyOf, isModelled, travelPerVisit, onSitePerVisit, derive, loadFromDb };
 
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 if (typeof window !== 'undefined') window.R4RATES = api;

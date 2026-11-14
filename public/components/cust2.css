@@ -272,3 +272,11 @@ button.md-line > :first-child { font-weight: 600; color: var(--brand); }
 .dt-t td small { color: var(--ink-4); font-size: var(--fs-tiny); }
 .c-ax { stroke: var(--baseline); stroke-width: 1; }
 @media (prefers-reduced-motion: reduce) { .md-step, .md-track i { animation: none; } }
+
+/* Saved views and the CSV behind one ⋯, so the toolbar is one line (14 November 2026) */
+.dt-menu { position: relative; }
+.dt-menu summary { list-style: none; font: inherit; font-size: var(--fs-label); padding: var(--sp-1) var(--sp-3); border: var(--hair) solid var(--rule-4); border-radius: var(--r-sm); background: var(--surface); color: var(--ink-2); font-weight: 600; cursor: pointer; line-height: 1.4; }
+.dt-menu summary::-webkit-details-marker { display: none; }
+.dt-menu summary:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.dt-menubox { position: absolute; right: 0; top: calc(100% + var(--sp-1)); z-index: 6; display: grid; gap: var(--sp-2); min-width: 220px; padding: var(--sp-3); background: var(--surface); border: var(--hair) solid var(--rule-3); border-radius: var(--r); box-shadow: var(--shadow-card); }
+.dt-menubox .dt-views, .dt-menubox .dt-csv { width: 100%; }

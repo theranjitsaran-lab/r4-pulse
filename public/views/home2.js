@@ -9,6 +9,7 @@ import { getJson, titleCase, esc } from '/components/data.js';
 import { whenIntroDone, firstPlay, playIn } from '/components/motion.js';
 import { parseHome2, checkNumbers } from '/components/summary.js';
 import { openPop } from '/components/pop.js';
+import { openExplain } from '/components/explain-drawer.js';
 
 import { LABELS, changeWord, isLumpy } from '/components/metrics.js';
 import { closedMonth } from '/components/linework.js';
@@ -115,8 +116,10 @@ export async function render(main, P) {
     .then(j => { if (j && j.source === 'claude' && checkNumbers(j.text, sheet).ok && main.isConnected) draw(j.text, ''); })
     .catch(() => {});
 
-  // Activity scrolls to the lines rather than leaving the page
+  // Activity scrolls to the lines rather than leaving the page; a customer call-out opens the one drawer (why, what to do)
   main.querySelector('#h2-bul').addEventListener('click', ev => {
+    const c = ev.target.closest('a[href^="#customer/"]');
+    if (c) { ev.preventDefault(); const p = (V.points || []).find(x => x.href === c.getAttribute('href')); openExplain({ level1: +c.getAttribute('href').split('/')[1], name: p && p.name ? p.name : '' }); return; }
     const a = ev.target.closest('a[href="#h2-lines"]'); if (!a) return;
     ev.preventDefault(); const t = main.querySelector('#h2-lines'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
@@ -258,14 +261,14 @@ async function openSoFar(S, LV) {
   openPop({ title, sub, wide: true, html, ask: `What is driving ${mon(T.month)} so far against ${mon(T.prevMonth)}?` });
   const b = document.querySelector('.pop-b');
   if (!b) return;
-  b.addEventListener('click', ev => {
+  b.onclick = ev => {
     const t = ev.target.closest('.sf-tabs button');
     if (t) { b.querySelectorAll('.sf-tabs button').forEach(x => { const on = x === t; x.classList.toggle('on', on); x.setAttribute('aria-selected', String(on)); }); b.querySelectorAll('.sf-p').forEach(p => { p.hidden = p.dataset.p !== t.dataset.t; }); return; }
     const all = ev.target.closest('.sf-all');
     if (all) { b.querySelector('.sf-c').innerHTML = rows.map(custRow).join('') + `<li class="rest sf-tot"><span>Total</span><b>${moneyK(T.total)}</b></li>`; all.remove(); return; }
     const l = ev.target.closest('.sf-line');
     if (l && LV && LV.rows.some(r => r.key === l.dataset.k) && LV.rows.find(r => r.key === l.dataset.k).by[T.month]) openLine(l.dataset.k, T.month, LV);
-  });
+  };
 }
 
 async function openLine(key, month, LV) {
