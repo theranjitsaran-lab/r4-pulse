@@ -309,6 +309,31 @@ export function monthToDate(D) {
   };
 }
 
+// A posted month, opened the same way as the month so far (Theran, 14 November 2026: headline figures drill down):
+// each account's storage and service on that month's bills, and each line, against the month before. Core: Citadel's
+// service held apart, its storage kept. From accountmonths and accountlines, so it adds to the invoiced figure.
+//   monthBilled(D, month?) → { month, prevMonth, storage, work, total, prevAt, change, byCustomer, byLine, posted: true } | null
+export function monthBilled(D, month) {
+  const AM = D.AM, AL = D.AL;
+  if (!AM || !AM.months.length) return null;
+  const m = month && AM.months.includes(month) ? month : AM.months[AM.months.length - 1];
+  const i = AM.months.indexOf(m), j = i - 1, prevMonth = j >= 0 ? AM.months[j] : null;
+  const CIT = 6714;
+  const rows = AM.accounts.map(a => {
+    const st = a.storage[i] || 0, sv = a.level1 === CIT ? 0 : a.service[i] || 0;
+    const then = j >= 0 ? (a.storage[j] || 0) + (a.level1 === CIT ? 0 : a.service[j] || 0) : null;
+    return { level1: a.level1, customer: a.customer, storage: st, work: sv, total: st + sv, prevAt: then, change: ch(st + sv, then) };
+  }).filter(r => Math.abs(r.total) >= 0.5).sort((x, y) => y.total - x.total || x.level1 - y.level1);
+  const storage = sum(rows, r => r.storage), work = sum(rows, r => r.work), total = storage + work;
+  const prevAt = sum(rows, r => r.prevAt || 0);
+  const fam = (mm, k) => sum((AL && AL.rows || []).filter(r => r.month === mm && r.family === k && r.level1 !== CIT), r => r.revenue);
+  const byLine = [{ key: 'storage', name: LINE_NAMES.storage, v: storage, prevAt: j >= 0 ? sum(AM.accounts, a => a.storage[j] || 0) : null }]
+    .concat(SERVICE.map(k => ({ key: k, name: LINE_NAMES[k], v: fam(m, k), prevAt: prevMonth ? fam(prevMonth, k) : null })));
+  const itemised = sum(byLine, l => l.v), restNow = total - itemised;
+  if (Math.abs(restNow) >= 1) byLine.push({ key: 'rest', name: 'Tax and other, not itemised', v: restNow, prevAt: null });
+  return { month: m, prevMonth, storage, work, total, prevAt, change: ch(total, prevAt), byCustomer: rows, byLine: byLine.filter(l => l.v || l.prevAt), jobs: [], posted: true };
+}
+
 // The estimate of a month's work to date, for pricing the month's done services
 export function estimateToDate(D, month) {
   const W = workEstimate(D.LW, D.A, D.P), e = W.byMonth.get(month);

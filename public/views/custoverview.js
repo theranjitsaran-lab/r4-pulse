@@ -19,6 +19,7 @@ import { phoneFold } from '/components/phonekit.js';
 import { openLine } from '/components/linedrawer.js';
 import { openExplain } from '/components/explain-drawer.js';
 import { BASES } from '/components/movebridge.js';
+import { openSoFar } from '/views/home2.js';
 
 const mon = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const pct = v => `${Fmt.pct(v, { abs: true })}`;
@@ -80,6 +81,9 @@ export async function render(main, C, params, tabs) {
     </section>
   </div>`;
   drawPoints(main.querySelector('#ac-lit'), pts);
+  // the invoiced tile opens the month's bills by account and by line, as on Today
+  const inv = main.querySelector('.ktiles .kt.lead');
+  if (inv) { inv.classList.add('kt-open'); inv.setAttribute('role', 'button'); inv.tabIndex = 0; const go = () => openSoFar(null, null, { month: last.month, v: last.core }); inv.addEventListener('click', go); inv.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }); }
   // Who moved: the switch redraws the lists; a name opens the drawer at the same comparison
   const mv = main.querySelector('[data-tour="moved"]');
   if (mv) mv.addEventListener('click', ev => {

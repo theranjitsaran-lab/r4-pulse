@@ -62,8 +62,8 @@ export async function render(main, P) {
         ${m.next ? `<small class="h2-fc">Heading for about ${moneyK(m.next.central)} est. in ${mon(m.next.month)}${m.next.jobCount ? `, + up to ${moneyK(m.next.jobs)} to check` : ''}</small>` : ''}<i class="h2-chev" aria-hidden="true"></i></button>`
       : `<div class="h2-kpi lead" data-in style="--d:150ms"><span>${m.next ? `${mon(m.workMonth)}'s work → ${mon(m.next.month)} bill (est.)` : 'Next bill'}</span><b data-count data-delay="400">${m.next ? '≈ ' + moneyK(m.next.central) : '—'}</b>
         <small>${m.next ? (m.next.jobCount ? `+ up to ${moneyK(m.next.jobs)}: ${jobWord(m.next.jobCount)}` : Math.round(m.next.lo / 1000) !== Math.round(m.next.hi / 1000) ? `${moneyK(m.next.lo)}–${moneyK(m.next.hi)}` : '') : ''}</small></div>`}
-      <a class="h2-kpi" data-in style="--d:230ms" href="#customers?view=grid"><span>${esc(LABELS.invoiced)}, ${mon(billShown.month)}</span><b data-count data-delay="480">${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${monS(billShown.vs)}` : 'posted, core'}</small></a>
-      <a class="h2-kpi" data-in style="--d:310ms" href="#opportunities"><span>Gap to $1.0M</span><b data-count data-delay="560">${moneyK(m.gap)}</b><small>a month${S ? ', on the forecast' : ''}${m.next && m.next.jobCount ? ', before jobs to check' : ''}</small></a>
+      <button type="button" class="h2-kpi h2-open" id="h2-billed" data-in style="--d:230ms" aria-label="${esc(`${LABELS.invoiced}, ${mon(billShown.month)}: open by customer and by line`)}"><span>${esc(LABELS.invoiced)}, ${mon(billShown.month)}</span><b data-count data-delay="480">${moneyK(billShown.v)}</b><small>${billShown.d != null ? `${chip(billShown.d)} on ${monS(billShown.vs)}` : 'posted, core'}</small><i class="h2-chev" aria-hidden="true"></i></button>
+      <a class="h2-kpi h2-open" data-in style="--d:310ms" href="#opportunities"><i class="h2-chev" aria-hidden="true"></i><span>Gap to $1.0M</span><b data-count data-delay="560">${moneyK(m.gap)}</b><small>a month${S ? ', on the forecast' : ''}${m.next && m.next.jobCount ? ', before jobs to check' : ''}</small></a>
     </section>${tieLine(V.tie)}`;
 
   const sumCard = `<section class="h2-card h2-sum" data-tour="hero" data-in>
@@ -127,6 +127,8 @@ export async function render(main, P) {
   // the month so far, opened: by customer and by service line, each adding to the figure
   const sf = main.querySelector('#h2-sofar');
   if (sf) sf.addEventListener('click', () => openSoFar(S, LV));
+  const bl = main.querySelector('#h2-billed');
+  if (bl) bl.addEventListener('click', () => openSoFar(null, LV, { month: billShown.month, v: billShown.v }));
 
   // the lines: a month picked, its figures and comparisons; a tap opens the customers behind a line
   const drawLines = () => {
@@ -239,25 +241,26 @@ const whyHeld = j => {
 // ── the month so far, opened: every customer and every service line, each list adding to the figure ──
 // Customers: storage on the month's bill and work so far at their own prices; a row opens the customer. Lines: a tap
 // opens the customers behind the line (openLine). Against the month before at the same share of its working days.
-async function openSoFar(S, LV) {
-  const title = `${mon(S.month)} so far, to ${dm(S.latest)}`, sub = `${moneyK(S.total)} est.`;
+// posted: a posted month's bills (view/billed) instead of the month so far, the same drawer (Theran, 14 November 2026)
+export async function openSoFar(S, LV, posted = null) {
+  const title = posted ? `Invoiced in VCK, ${mon(posted.month)}` : `${mon(S.month)} so far, to ${dm(S.latest)}`, sub = posted ? moneyK(posted.v) : `${moneyK(S.total)} est.`;
   openPop({ title, sub, wide: true, html: '<p class="hint">Reading the customers behind it…</p>' });
   let T;
-  try { T = await getJson('view/so-far'); }
+  try { T = await getJson(posted ? `view/billed?month=${encodeURIComponent(posted.month)}` : 'view/so-far'); }
   catch (e) { openPop({ title, sub, html: `<p>${esc(e.message)}</p>` }); return; }
-  const at = `${monS(T.prevMonth)} at day ${T.day}`;
+  const at = T.posted ? `on ${monS(T.prevMonth)}` : `${monS(T.prevMonth)} at day ${T.day}`;
   const cv = (v, then) => then == null || !(then > 0) ? '<span class="h2-d flat">new</span>' : chip(v / then - 1);
-  const custRow = r => `<li>${r.level1 != null ? `<a href="#customer/${r.level1}">` : '<div class="h2-pl-r">'}<span>${nmL(r.customer)}<em>${r.storage ? `Storage ${moneyK(r.storage)}` : 'No storage'} · work so far ${moneyK(r.work)} est.</em></span>${r.level1 != null ? cv(r.total, r.prevAt) : ''}<b>${moneyK(r.total)}</b>${r.level1 != null ? '</a>' : '</div>'}</li>`;
+  const custRow = r => `<li>${r.level1 != null ? `<a href="#customer/${r.level1}">` : '<div class="h2-pl-r">'}<span>${nmL(r.customer)}<em>${r.storage ? `Storage ${moneyK(r.storage)}` : 'No storage'} · ${T.posted ? `service ${moneyK(r.work)}` : `work so far ${moneyK(r.work)} est.`}</em></span>${r.level1 != null ? cv(r.total, r.prevAt) : ''}<b>${moneyK(r.total)}</b>${r.level1 != null ? '</a>' : '</div>'}</li>`;
   const TOP = 25, rows = T.byCustomer, top = rows.slice(0, TOP), rest = rows.slice(TOP);
   const restSum = f => rest.reduce((t, r) => t + f(r), 0);
   const custList = `<ul class="h2-pl sf-c">${top.map(custRow).join('')}${rest.length ? `<li class="rest sf-rest"><span>All others, ${Fmt.grouped(rest.length)} accounts</span><b>${moneyK(restSum(r => r.total))}</b></li>` : ''}<li class="rest sf-tot"><span>Total</span><b>${moneyK(T.total)}</b></li></ul>
     ${rest.length ? `<button type="button" class="linkbtn sf-all">Show all ${Fmt.grouped(rows.length)} accounts</button>` : ''}`;
-  const lineList = `<ul class="h2-pl sf-l">${T.byLine.map(l => `<li><button type="button" class="sf-line" data-k="${esc(l.key)}"><span>${esc(l.name)}<em>${l.key === 'storage' ? 'on the month\'s bill' : 'work so far, priced est.'}</em></span>${cv(l.v, l.prevAt)}<b>${moneyK(l.v)}</b></button></li>`).join('')}<li class="rest sf-tot"><span>Total</span><b>${moneyK(T.total)}</b></li></ul>`;
+  const lineList = `<ul class="h2-pl sf-l">${T.byLine.map(l => `<li><button type="button" class="sf-line" data-k="${esc(l.key)}"><span>${esc(l.name)}<em>${l.key === 'storage' ? 'on the month\'s bill' : T.posted ? 'invoiced' : 'work so far, priced est.'}</em></span>${cv(l.v, l.prevAt)}<b>${moneyK(l.v)}</b></button></li>`).join('')}<li class="rest sf-tot"><span>Total</span><b>${moneyK(T.total)}</b></li></ul>`;
   const jobs = T.jobs.length ? `<h3>To check, not in the figure</h3><ul class="h2-pl job">${T.jobs.map(j => `<li><a href="#customer/${j.level1}"><span>${nmL(j.customer)}<em>${esc(whyHeld(j))}</em></span><b>about ${moneyK(j.value)}</b></a></li>`).join('')}</ul>` : '';
-  const html = `<ul class="h2-stats"><li><span>Storage, on the bill</span><b>${moneyK(T.storage)}</b></li><li><span>Work so far, est.</span><b>${moneyK(T.work)}</b></li><li><span>On ${esc(at)}</span><b>${T.change != null ? chip(T.change) : '—'}</b></li></ul>
+  const html = `<ul class="h2-stats"><li><span>Storage, on the bill</span><b>${moneyK(T.storage)}</b></li><li><span>${T.posted ? 'Service, invoiced' : 'Work so far, est.'}</span><b>${moneyK(T.work)}</b></li><li><span>${T.posted ? `On ${esc(monS(T.prevMonth))}` : `On ${esc(at)}`}</span><b>${T.change != null ? chip(T.change) : '—'}</b></li></ul>
     <div class="seg sf-tabs" role="tablist"><button type="button" role="tab" class="on" aria-selected="true" data-t="c">By customer</button><button type="button" role="tab" aria-selected="false" data-t="l">By service line</button></div>
     <div class="sf-p" data-p="c">${custList}</div><div class="sf-p" data-p="l" hidden>${lineList}</div>${jobs}
-    <p class="src">Storage: each account's charge on ${esc(mon(T.month))}'s bill${T.storageCarried ? ', carried from the latest bill until it posts' : ''}. Work: Veri-Shred and VCK work orders done ${esc(dm(T.month))} to ${esc(dm(T.latest))}, priced at each account's own rates, est.; charges added at the run carried from the last priced month for ${Math.round(T.frac * 100)}% of the month. Against ${esc(mon(T.prevMonth))}: its storage, and its work scaled to the same share of its working days. Citadel's work held apart.</p>`;
+    ${T.posted ? `<p class="src">Posted invoices dated in ${esc(mon(T.month))}, from VCK: each account's storage and service, Citadel's service held apart, against ${esc(mon(T.prevMonth))}'s bills. Lines are the invoices' priced lines; what they do not itemise (tax and the like) is its own line.</p>` : ''}<p class="src"${T.posted ? ' hidden' : ''}>Storage: each account's charge on ${esc(mon(T.month))}'s bill${T.storageCarried ? ', carried from the latest bill until it posts' : ''}. Work: Veri-Shred and VCK work orders done ${esc(dm(T.month))} to ${esc(dm(T.latest))}, priced at each account's own rates, est.; charges added at the run carried from the last priced month for ${Math.round(T.frac * 100)}% of the month. Against ${esc(mon(T.prevMonth))}: its storage, and its work scaled to the same share of its working days. Citadel's work held apart.</p>`;
   openPop({ title, sub, wide: true, html, ask: `What is driving ${mon(T.month)} so far against ${mon(T.prevMonth)}?` });
   const b = document.querySelector('.pop-b');
   if (!b) return;

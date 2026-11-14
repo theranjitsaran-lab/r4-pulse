@@ -89,9 +89,9 @@ export async function render(main, params, C) {
         <p>${esc(m.reason)}</p>
         ${m.opener ? `<details class="op-open"><summary>A way to open</summary><p>“${esc(m.opener)}”</p></details>` : ''}
         <div class="op-cf"><small>${m === t.best ? 'Best move' : ''}${m.owner ? `${m === t.best ? ', ' : ''}with ${esc(ownerName(m.owner))}` : ''}</small>${act(m)}</div>
-        <div class="op-notes">${(m.notes || []).length ? `<ol class="op-log">${m.notes.map(n => `<li><p>${esc(n.note)}</p><small>${esc(n.who || '')}, ${esc(new Date(n.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }))}${n.status ? ` · ${esc(n.status)}` : ''}</small></li>`).join('')}</ol>` : ''}
-          <div class="op-addnote"><input type="text" class="op-note-in" maxlength="400" placeholder="Add a note: who you spoke to, what was said" aria-label="Add a note to this move"><button type="button" class="linkbtn op-note-go" data-op-key="${esc(m.key)}">Add note</button></div></div>
+        <div class="op-notes">${(m.notes || []).length ? `<ol class="op-log">${m.notes.map(n => `<li><p>${esc(n.note)}</p><small>${esc(n.who || '')}, ${esc(new Date(n.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }))}${n.status ? ` · ${esc(n.status)}` : ''}</small></li>`).join('')}</ol>` : ''}</div>
       </article>`).join('')}</div>
+      <div class="op-addnote op-acc-note"><input type="text" class="op-note-in" maxlength="400" placeholder="Add a note on ${esc(a.name)}: who you spoke to, what was said" aria-label="Add a note to ${esc(a.name)}"><button type="button" class="linkbtn op-note-go" data-op-key="${esc(t.best.key)}">Add note</button></div>
       ${over && gap ? `<p class="op-over">These overlap: if the overdue boxes are destroyed, storage falls by ${moneyK(over.ends)} a year, which shrinks the storage price gap.</p>` : ''}
     </div>`;
   };

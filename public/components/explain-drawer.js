@@ -69,7 +69,7 @@ export async function openExplain({ level1, name, base = 'avg12' }) {
     <div class="xd-detail" hidden></div>
     <h3>What to do</h3>
     ${P ? `<div class="xd-act"><p><b>${esc(P.what)}</b>, about ${moneyK(P.value)} a year. ${esc(P.why)}</p>
-      <label>Note <textarea class="xd-note" rows="2">${esc(`${sentence}`.slice(0, 480))}</textarea></label>
+      <details class="xd-notebox"><summary>Add a note</summary><textarea class="xd-note ctx-t" rows="2">${esc(`${sentence}`.slice(0, 480))}</textarea></details>
       <div class="xd-row"><label class="cd-owner">Owner <select class="xd-owner">${OWNERS.map(o => `<option value="${o}"${o === (P.owner || whoAmI()) ? ' selected' : ''}>${esc(ownerName(o))}</option>`).join('')}</select></label><button type="button" class="pq-btn cd-go xd-send">Send to Opportunities</button></div></div>`
       : `<p>It is growing: nothing to fix. <a href="#customers?view=whitespace">See what else it could buy ›</a></p>`}
     <p class="src">Lines from VCK's priced lines and the account's storage by month billed${x.months < 15 ? `, ${x.months} months held` : ''}. One-off: bought in ${3} or fewer of the last twelve months, or a month over 3× its usual (thresholds on Settings). Volume and price split only where the line has units.</p>

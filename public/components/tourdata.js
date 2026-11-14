@@ -80,9 +80,9 @@ export const TOURS = {
     { tab: CROSS, target: 'xs-lit', title: 'Where the money is', body: 'The total, and the first account worth a conversation. Always est.' },
     { tab: CROSS, target: 'xs-key', title: 'What the figures mean', body: 'Plain: it buys that line. A + is what comparable accounts spend. Highlighted: it buys, but low for its size.' },
     { tab: CROSS, target: 'xs-table', title: 'One row per account', body: 'One column per service line, with the most room to grow first.' },
-    { tab: CROSS, target: 'xs-table', within: '.cd-tiles', open: '[data-tour="xs-table"] tbody tr[data-i] td:first-child', title: 'Open a row for its room to grow', body: 'What it has not bought yet, plus what is low for its size. Pulse has opened the first row for you.' },
-    { tab: CROSS, target: 'xs-table', within: '.cd-lines', title: 'Line by line', body: 'What it buys against comparable accounts. It is the median, never the best: a ceiling, not a forecast.' },
-    { tab: CROSS, target: 'xs-table', within: '.cd-acts', title: 'Take it further', body: 'Ask why, price it in Quote, or send it to Opportunities with an owner.' },
+    { tab: CROSS, target: 'pop', within: '.cd-tiles', open: '[data-tour="xs-table"] tbody tr[data-i] td:nth-child(2)', title: 'Open a row for its room to grow', body: 'What it has not bought yet, plus what is low for its size. Pulse has opened the first row for you.' },
+    { tab: CROSS, target: 'pop', within: '.cd-lines', title: 'Line by line', body: 'What it buys against comparable accounts. It is the median, never the best: a ceiling, not a forecast.' },
+    { tab: CROSS, target: 'pop', within: '.cd-acts', title: 'Take it further', body: 'Ask why, price it in Quote, or send it to Opportunities with an owner.' },
   ],
   'g-quote': [
     { tab: QUOTE, target: 'q-figures', title: 'The answer stays in view', body: 'Price, revenue, and margin in $ and %. They update as you change anything below.' },

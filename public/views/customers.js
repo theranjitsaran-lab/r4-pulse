@@ -7,6 +7,7 @@ import { dataTable, kOnly } from '/components/datatable.js';
 import { accountFilters, carryHash } from '/components/acctfilters.js';
 import { dailyFrom, addMonths } from '/components/projection.js';
 import { sparkline, money0, moneyK } from '/components/chart.js';
+import { openPop } from '/components/pop.js';
 import { buildMargins, marginBand, marginSummary, marginAction, accountLines, accountCosts, flatFeeYear, costParts, PARTS, FAMILY_NAMES } from '/components/margin.js';
 import { costOrders, jobHtml, drawRouteBlock, jobPlace, densityByPostcode } from '/components/jobview.js';
 import { loadRoadnet } from '/components/routemap.js';
@@ -253,7 +254,14 @@ async function whitespace(main, C, params) {
       seen.add(id); drawPoints(el.querySelector('[data-cd-pts]'), d.points); wireDrill(el, d, said);
     });
   };
-  dataTable(main.querySelector('#ws-t'), { key: 'crosssell', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows, noun: 'accounts', placeholder: 'Find an account', search: r => r.customer, totalLabel: 'Total', detail: why, onDraw,
+  // a row opens the one drawer, as every other account list does (14 November 2026), not an inline panel
+  const openRow = r => {
+    const d = drill(r);
+    openPop({ title: d.name, sub: d.room > 0 ? `Room to grow +${moneyK(d.room)} a year est.` : 'Buys every line about as comparable accounts do', wide: true, html: `<div class="cd cd-in-pop" data-cd="${r.level1}">${drillHtml(d, { fresh: false, quote })}</div>`, ask: d.top ? `Why is ${d.name}'s biggest cross-sell gap ${d.top.name.toLowerCase()}, and how sure are we?` : null });
+    const b = document.querySelector('.pop-b .cd'); if (!b) return;
+    drawPoints(b.querySelector('[data-cd-pts]'), d.points); wireDrill(b, d, said);
+  };
+  dataTable(main.querySelector('#ws-t'), { key: 'crosssell', who: whoAmI(), filters: accountFilters(await getJson('view/customers'), C), rows, noun: 'accounts', placeholder: 'Find an account', search: r => r.customer, totalLabel: 'Total', opens: true, onRow: (r, e) => { if (e.target.closest('a')) return; openRow(r); }, onDraw,
     cols: (c => isPhone() ? [c[0], c[c.length - 1], ...c.slice(1, -1)] : c)([
       { k: 'customer', l: 'Account', name: true, text: true, get: r => titleCase(r.customer), fmt: r => `<a href="#customer/${r.level1}">${esc(titleCase(r.customer))}</a><span class="peer">${esc(r.kind)}</span>` },
       ...LINES.map(x => ({ k: x.key, l: x.short || x.name, fixed: true, get: r => opp(r, x), fmt: r => tile1(r, x), total: 'sum', totalFmt: v => '+' + moneyK(v) })),

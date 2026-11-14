@@ -253,6 +253,16 @@ router.get('/so-far', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// a posted month, opened: every account and every line on its bills (linework.js monthBilled)
+router.get('/billed', async (req, res) => {
+  try {
+    const [D, L] = await Promise.all([data(), load()]);
+    const T = L.linework.monthBilled(D, String(req.query.month || ''));
+    if (!T) return res.status(404).json({ error: 'no posted months in this snapshot' });
+    send(req, res, T);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 router.get('/home', async (req, res) => {
   try {
     const [D, L] = await Promise.all([data(), load()]);

@@ -465,3 +465,13 @@ html.js .h2.play .on .h2-tobar .fc { transform: scaleX(1); transition: transform
 .xd-row .cd-owner { display: inline-flex; flex-direction: row; align-items: center; gap: var(--sp-2); }
 .mv-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--sp-2) var(--sp-4); }
 .xd-fig .c-axis { font-size: 12px; fill: var(--ink-4); }
+/* every headline figure that opens something says so the same way: a chevron, and the border on hover */
+.h2-kpi.h2-open { font: inherit; text-align: left; cursor: pointer; position: relative; padding-right: var(--sp-6); color: var(--ink); }
+.h2-kpi.h2-open:hover, .h2-kpi.h2-sofar:hover { border-color: var(--brand); }
+.h2-kpi.h2-open > .h2-chev { position: absolute; right: var(--sp-3); top: 50%; transform: translateY(-50%); color: var(--ink-4); font-style: normal; }
+.h2-kpi.h2-open:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+a.kt, button.kt { position: relative; }
+a.kt::after { content: "›"; position: absolute; right: var(--sp-3); top: var(--sp-3); color: var(--ink-4); }
+.kt.kt-open { cursor: pointer; }
+.kt.kt-open::after { content: "›"; position: absolute; right: var(--sp-3); bottom: var(--sp-3); color: var(--ink-4); }
+.kt.kt-open:hover { border-color: var(--brand); }
