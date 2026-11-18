@@ -80,17 +80,35 @@ It sleeps after 15 idle minutes, so the first load takes about 30 seconds.
 
 | Task | When | What |
 |---|---|---|
-| `R4_Daily_Push` | 06:00 | VCK → DigitalOcean; logs to `push_log.txt` |
-| `R4_Verishred_Push` | 06:30 | Veri-Shred → DigitalOcean; logs to `vs_push_log.txt` |
+| `R4_Daily_Push` | 00:00, 06:00, 12:00, 18:00 | VCK → DigitalOcean (`r4_push.ps1`); logs to `push_log.txt` |
+| `R4_Verishred_Push` | 00:30, 06:30, 12:30, 18:30 | Veri-Shred → DigitalOcean (`vs_push.ps1`); logs to `vs_push_log.txt` |
 
 Pulse picks up a push within ten minutes by itself: the screens read the views live. `R4_KPI_Rebuild` is not needed; if it was installed, it does no harm.
 
-- Both run as `tsaran`, LogonType Interactive, so they fire only while that session exists.
-  **Close the Remote Desktop with the X (disconnect). Never sign out.** A reboot stops them until
-  someone signs in again. The fix is R4's IT: "Please set tasks R4_Daily_Push and R4_Verishred_Push to run
-  whether the user is logged on or not."
-- Check on the machine: `node scripts/freshness.js --logs <push folder>` lists any `DDL FAILED`.
-  A blocked table keeps its old rows and only looks stale.
+- Both run as `tsaran` with a saved password (registered 17 November 2026), so they run while nobody is
+  signed in and after a reboot; a run missed while the machine was off starts when it is back. The machine
+  must stay on.
+- **When `tsaran`'s Windows password changes, the tasks stop silently.** Register them again in PowerShell
+  on the R4 machine; it asks for the new password:
+  ```powershell
+  $user = (Get-ScheduledTask R4_Daily_Push).Principal.UserId
+  $cred = Get-Credential -UserName $user -Message "The Windows password for $user"
+  $set = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Hours 2)
+  foreach ($t in @(@{ Name = 'R4_Daily_Push'; File = 'r4_push.ps1'; Min = 0 }, @{ Name = 'R4_Verishred_Push'; File = 'vs_push.ps1'; Min = 30 })) {
+    $act = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy Bypass -File C:\Users\tsaran\r4tools\$($t.File)" -WorkingDirectory 'C:\Users\tsaran\r4tools'
+    $trg = 0, 6, 12, 18 | ForEach-Object { New-ScheduledTaskTrigger -Daily -At ([datetime]::Today.AddHours($_).AddMinutes($t.Min)) }
+    Register-ScheduledTask -TaskName $t.Name -Action $act -Trigger $trg -Settings $set -User $cred.UserName -Password $cred.GetNetworkCredential().Password -Force | Out-Null
+  }
+  ```
+  Test with `Start-ScheduledTask R4_Daily_Push`, then `Get-ScheduledTaskInfo R4_Daily_Push`: `LastRunTime` today,
+  `LastTaskResult` 267009 while running and 0 when done.
+- `vs_push.ps1` reads Veri-Shred from `\\R4app01\ASI\SQL_05601\ACDM\data`. Never a mapped drive such as `V:`:
+  it does not exist in an unattended run, and the log says "Empty path name is not legal" for every table.
+- `PGOPTIONS` is `-c client_min_messages=warning` on `tsaran`'s account. Without it, psql's "already exists"
+  notice makes the Veri-Shred push log `DDL FAILED` after emptying a table and before loading it, and the table
+  is left empty (31 October 2026).
+- Check on the machine: `Get-Content C:\Users\tsaran\r4tools\vs_push_log.txt -Tail 30` (and `push_log.txt`):
+  every table ends `loaded -> COPY <rows>`. `node scripts/freshness.js --logs <push folder>` lists any `DDL FAILED`.
 - Check from anywhere: `https://<service>.onrender.com/health/data` (dates only, no login) and the
   **Data freshness** GitHub Action (`.github/workflows/freshness.yml`), which fails, and emails Theran,
   when done work is more than five days old or the summary has not reached the month. Set the repository

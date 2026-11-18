@@ -20,15 +20,19 @@ app.use(express.json());
 // Not ready until the screens' data is warm: Render keeps the old version serving until this says ok, so nobody waits after a deploy
 let warmed = USE_FIXTURES;
 app.get('/health', (req, res) => res.status(warmed ? 200 : 503).json({ ok: warmed, fixtures: USE_FIXTURES, preview: PREVIEW, version: (process.env.RENDER_GIT_COMMIT || '').slice(0, 7) }));
+// Its own one-minute cache, not cached(): that holds for twelve hours and new data never clears it, so the stamp on
+// every screen still said Monday's update on Wednesday (18 November 2026).
+let healthData = null;
 app.get('/health/data', async (req, res) => {
   if (USE_FIXTURES) { try { return res.json({ fixtures: true, done_work: require('../fixtures/activity.json').data.latestDone, today: new Date().toISOString().slice(0, 10) }); } catch { return res.json({ fixtures: true }); } }
   try {
-    const [d] = await cached('health:data', () => query(`SELECT current_date::text AS today,
+    if (!(healthData && healthData.until > Date.now())) healthData = { until: Date.now() + 60 * 1000, rows: query(`SELECT current_date::text AS today,
       (SELECT max(NULLIF(date, '')::date) FROM vs_service_orders WHERE billable = 'true' AND NULLIF(date, '')::date <= current_date)::text AS done_work,
       (SELECT max(wodate)::date FROM priced_lines_current)::text AS run_work,
       (SELECT max(invdate)::date FROM invoices)::text AS posted_invoice,
       (SELECT max(NULLIF(tsaupdate, '')) FROM vs_service_orders) AS updated,
-      (SELECT max(month)::date FROM v_monthly_storage_service)::text AS kpi_month`));
+      (SELECT max(month)::date FROM v_monthly_storage_service)::text AS kpi_month`) };
+    const [d] = await healthData.rows.catch(e => { healthData = null; throw e; });
     const reasons = [];
     if (!d.done_work) reasons.push('no Veri-Shred service orders: a push is loading, or the last one failed');
     else { const age = Math.round((Date.parse(d.today) - Date.parse(d.done_work)) / 864e5); if (!(age <= STALE_DAYS)) reasons.push(`done work last on ${d.done_work}, ${age} days ago`); }

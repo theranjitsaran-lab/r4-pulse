@@ -10,6 +10,11 @@ test('whole tables: not mid-push, and the stamp moves with the data only', () =>
   assert.equal(stampOf(whole), stampOf({ ...whole, vs: true }));
   assert.notEqual(stampOf(whole), stampOf({ ...whole, a: '2026-11-14' }));
 });
+test('a Veri-Shred push that only brings finished work still moves the stamp', () => {
+  const vs = { ...whole, u: '2026-11-16 11:33:19', n: '90508' };
+  assert.notEqual(stampOf(vs), stampOf({ ...vs, u: '2026-11-17 16:02:41' }));
+  assert.notEqual(stampOf(vs), stampOf({ ...vs, n: '90611' }));
+});
 test('an emptied table or a missing date is a push in progress', () => {
   assert.match(midPush({ ...whole, vs: false, a: null }), /vs_service_orders/);
   assert.match(midPush({ ...whole, pl: false }), /priced_lines/);

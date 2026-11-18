@@ -3,9 +3,12 @@
 // while vs_service_orders was empty, the screens swapped to it and Today failed until the next check).
 //   STATE_SQL   one cheap query: the freshness stamp, and whether each core table holds rows
 //   midPush(r)  → the reason it looks half-loaded, or null when every table is whole
-//   stampOf(r)  → the part of the row that says the data has moved
+//   stampOf(r)  → the part of the row that says the data has moved. It carries Veri-Shred's own last edit (u) and
+//                 row count (n): a push that brings only newly finished work moves neither a nor any VCK figure,
+//                 and the screens missed it for up to twelve hours (18 November 2026).
 'use strict';
 const STATE_SQL = `SELECT (SELECT max(NULLIF(date, '')) FROM vs_service_orders) AS a, (SELECT max(invdate)::text FROM invoices) AS b,
+  (SELECT max(NULLIF(tsaupdate, '')) FROM vs_service_orders) AS u, (SELECT count(*) FROM vs_service_orders)::text AS n,
   (SELECT count(*) FROM invoices_current)::text AS d, (SELECT max(wodate)::text FROM priced_lines_current) AS e,
   EXISTS (SELECT 1 FROM vs_service_orders WHERE billable = 'true') AS vs, EXISTS (SELECT 1 FROM invoices) AS inv,
   EXISTS (SELECT 1 FROM priced_lines) AS pl, EXISTS (SELECT 1 FROM customer) AS cu, EXISTS (SELECT 1 FROM servcode) AS sc`;
@@ -18,5 +21,5 @@ function midPush(r) {
   if (r.b == null) return 'no posted invoices';
   return null;
 }
-const stampOf = r => JSON.stringify({ a: r.a, b: r.b, d: r.d, e: r.e });
+const stampOf = r => JSON.stringify({ a: r.a, u: r.u, n: r.n, b: r.b, d: r.d, e: r.e });
 module.exports = { STATE_SQL, midPush, stampOf };
