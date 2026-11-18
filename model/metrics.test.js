@@ -211,12 +211,14 @@ test('#37 a postcode\'s visits are the twelve-month count on every screen', asyn
   for (const r of v.save) assert.equal(r.visits, book.get(r.postcode), r.postcode);
 });
 
-test('#10 the stamp turns amber when the feed is held back a working day, and not over a weekend', async () => {
+test('#10 the stamp turns amber when the feed is two working days behind, not one, and not over a weekend', async () => {
   const { freshStamp } = await import('../public/components/metrics.js');
   assert.equal(freshStamp({ done_work: '2026-10-30' }, '2026-11-01').late, false, 'Sunday: Friday is the last working day');
   assert.equal(freshStamp({ done_work: '2026-10-30' }, '2026-11-02').late, false, 'Monday: Friday is the last working day');
-  const held = freshStamp({ done_work: '2026-10-30' }, '2026-11-03');
-  assert.equal(held.late, true, 'Tuesday: Monday is missing');
+  assert.equal(freshStamp({ done_work: '2026-10-30' }, '2026-11-03').late, false, 'Tuesday: Monday not yet marked done is normal');
+  assert.equal(freshStamp({ done_work: '2026-11-16' }, '2026-11-18').late, false, 'Wednesday morning: Tuesday not yet marked done');
+  const held = freshStamp({ done_work: '2026-10-30' }, '2026-11-04');
+  assert.equal(held.late, true, 'Wednesday: Monday and Tuesday are missing');
   assert.match(held.text, /Veri-Shred/);
 });
 

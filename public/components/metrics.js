@@ -46,7 +46,8 @@ export function routeNorms(A, date) {
 }
 
 // The stamp at the top of every screen: how far the data runs and when it last moved. Amber when done
-// work is older than the last working day, naming the feed that is late.
+// work is older than the working day before the last one, naming the feed that is late: the office marks
+// yesterday's work done during the morning, so one day behind is normal (18 November 2026).
 const dayShort = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
 export function lastWorkingDay(today) {
   for (let i = 1; i <= 7; i++) { const d = daysBack(today, i), w = weekday(d); if (w > 0 && w < 6) return d; }
@@ -54,7 +55,7 @@ export function lastWorkingDay(today) {
 }
 export function freshStamp(h, today) {
   if (!h || !h.done_work) return null;
-  const late = h.done_work < lastWorkingDay(today);
+  const late = h.done_work < lastWorkingDay(lastWorkingDay(today));
   const at = h.updated ? ` · last update ${dayShort(h.updated.slice(0, 10))} ${h.updated.slice(11, 16)}` : '';
   return { late, text: `Data to ${dayShort(h.done_work)}${at}${late ? ` · late: Veri-Shred has sent no finished work since then` : ''}` };
 }

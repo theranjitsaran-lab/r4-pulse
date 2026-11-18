@@ -80,8 +80,8 @@ It sleeps after 15 idle minutes, so the first load takes about 30 seconds.
 
 | Task | When | What |
 |---|---|---|
-| `R4_Daily_Push` | 00:00, 06:00, 12:00, 18:00 | VCK → DigitalOcean (`r4_push.ps1`); logs to `push_log.txt` |
-| `R4_Verishred_Push` | 00:30, 06:30, 12:30, 18:30 | Veri-Shred → DigitalOcean (`vs_push.ps1`); logs to `vs_push_log.txt` |
+| `R4_Daily_Push` | 00:00, then every two hours 08:00 to 18:00 (Chicago) | VCK → DigitalOcean (`r4_push.ps1`); logs to `push_log.txt` |
+| `R4_Verishred_Push` | half an hour after each VCK push | Veri-Shred → DigitalOcean (`vs_push.ps1`); logs to `vs_push_log.txt` |
 
 Pulse picks up a push within ten minutes by itself: the screens read the views live. `R4_KPI_Rebuild` is not needed; if it was installed, it does no harm.
 
@@ -96,7 +96,7 @@ Pulse picks up a push within ten minutes by itself: the screens read the views l
   $set = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Hours 2)
   foreach ($t in @(@{ Name = 'R4_Daily_Push'; File = 'r4_push.ps1'; Min = 0 }, @{ Name = 'R4_Verishred_Push'; File = 'vs_push.ps1'; Min = 30 })) {
     $act = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy Bypass -File C:\Users\tsaran\r4tools\$($t.File)" -WorkingDirectory 'C:\Users\tsaran\r4tools'
-    $trg = 0, 6, 12, 18 | ForEach-Object { New-ScheduledTaskTrigger -Daily -At ([datetime]::Today.AddHours($_).AddMinutes($t.Min)) }
+    $trg = 0, 8, 10, 12, 14, 16, 18 | ForEach-Object { New-ScheduledTaskTrigger -Daily -At ([datetime]::Today.AddHours($_).AddMinutes($t.Min)) }
     Register-ScheduledTask -TaskName $t.Name -Action $act -Trigger $trg -Settings $set -User $cred.UserName -Password $cred.GetNetworkCredential().Password -Force | Out-Null
   }
   ```
